@@ -643,6 +643,35 @@ namespace aspect
     auto &phase_field_fault =
       Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(
         *material_model);
+    if(publish_history && timestep_number>0 && phase_field_fault.material_variable_viscosity
+        && !phase_field_fault.material_reaction_solving)
+      {
+        // The local Maxwell tangent preconditions the projected constitutive
+        // residual. Freeze only the projection defect inside each native solve;
+        // resolve that defect to arithmetic precision before terminal staging.
+        phase_field_fault.material_reaction_solving=true;
+        ReconstructedFaultVector rates(1,reconstructed_fault_manager->get_slip_rate(0));
+        try
+          {
+            bool converged=false;
+            for(unsigned outer=0;outer<24;++outer)
+              {
+                solve_reconstructed_fault_stokes(false,&rates,false);
+                const double error=phase_field_fault.refresh_material_reaction(solution,rates.at(0));
+                pcout<<std::setprecision(17)<<"   Material projected reaction: outer="<<outer
+                     <<" correction relative change="<<error<<std::endl;
+                if(error<=128*std::numeric_limits<double>::epsilon())
+                  {converged=true;break;}
+              }
+            AssertThrow(converged,ExcMessage("Coupled projected material reaction did not converge; no history published."));
+            // Re-enter the unchanged final residual/KKT gate with the converged
+            // frozen correction. This call only stages outer publication.
+            solve_reconstructed_fault_stokes(true,nullptr,false);
+            phase_field_fault.material_reaction_solving=false;
+            return;
+          }
+        catch(...){phase_field_fault.material_reaction_solving=false;throw;}
+      }
     AssertThrow(!reuse_endpoint_bulk_preconditioner
                 || (!publish_history && phase_field_fault.uses_consistent_endpoint_phase()
                     && Amg_preconditioner != nullptr && Mp_preconditioner != nullptr),
@@ -1128,12 +1157,13 @@ namespace aspect
                     return;
                   }
 
-                // Fixed-profile mature DG uses the same outer acceptance gate
-                // as native endpoint history. A completed mechanical trial must
+                // Mature DG and the opt-in rotated particle history use the
+                // existing outer acceptance gate. A completed mechanical trial must
                 // not become the accepted anchor when the timestep manager
                 // subsequently requests rejection/cutback.
                 if (timestep_number>0 && phase_field_fault.is_mature_frictional_fault()
-                    && phase_field_fault.uses_dg_trial_stress_history())
+                    && (phase_field_fault.uses_dg_trial_stress_history()
+                        || phase_field_fault.uses_jaumann_particle_stress()))
                   {
                     AssertThrow(!pending_dg_endpoint_publication,ExcInternalError());
                     fault_manager.rollback_slip_rate_nonlinear_solve();
@@ -1350,6 +1380,17 @@ namespace aspect
                       const double action_precision =
                         internal::reconstructed_fault_bulk_precision_scale(
                           audit_matrix, dx, mpi_communicator);
+                      // A near-equilibrium correction can be tiny while each
+                      // fresh residual subtracts large A*x and frozen loads.
+                      // Bound that assembly roundoff from the absolute matrix
+                      // operands at the base, as well as at the direction.
+                      LinearAlgebra::BlockVector base_operand(bulk_direction);
+                      base_operand.block(0)=working_x.block(introspection.block_indices.velocities);
+                      base_operand.block(1)=working_x.block(introspection.block_indices.pressure);
+                      base_operand.block(1)/=pressure_scaling;
+                      const double base_precision =
+                        internal::reconstructed_fault_bulk_precision_scale(
+                          audit_matrix, base_operand, mpi_communicator);
                       for (unsigned int block = 0; block < 2; ++block)
                         {
                           // system_rhs=-R: affine prediction is rhs-A dx+B dV.
@@ -1369,13 +1410,17 @@ namespace aspect
                           const double accuracy = 1e-10*std::max({
                             audit_rhs.block(block).l2_norm(), action.block(block).l2_norm(),
                             b_action.block(block).l2_norm()})
-                            + 32.0*action_precision
+                            + 32.0*(action_precision+base_precision)
                             + 32.0*std::numeric_limits<double>::epsilon()
                               * audit_frozen.block(block).l2_norm();
                           AssertThrow(error.l2_norm() <= accuracy
                                       && frozen_error.l2_norm() == 0.0,
                                       ExcMessage("The represented coupled increment failed "
-                                                 "the affine residual consistency regression."));
+                                                 "the affine residual consistency regression: block="
+                                                 +std::to_string(block)+", error="
+                                                 +Utilities::to_string(error.l2_norm(),17)+", bound="
+                                                 +Utilities::to_string(accuracy,17)+", frozen change="
+                                                 +Utilities::to_string(frozen_error.l2_norm(),17)));
                           std::ostringstream report;
                           report << std::setprecision(17)
                             << "      Affine audit alpha=" << step_length << " block=" << block
@@ -1423,12 +1468,20 @@ namespace aspect
                           auto frozen_change = probe_frozen.block(block);
                           frozen_change -= fresh_frozen.block(block);
                           const double accuracy = 1e-10*b_action.block(block).l2_norm()
+                            // Both fresh residuals contain the full A*x.
+                            // Their subtraction loses its assembly roundoff
+                            // even when the probe and frozen load are tiny.
+                            + 32.0*(action_precision+base_precision)
                             + 32.0*std::numeric_limits<double>::epsilon()
                               * fresh_frozen.block(block).l2_norm();
                           AssertThrow(error.l2_norm() <= accuracy
                                       && frozen_change.l2_norm() == 0.0,
                                       ExcMessage("The nonzero-V probe changed the frozen load "
-                                                 "or disagreed with B."));
+                                                 "or disagreed with B: block="
+                                                 +std::to_string(block)+", error="
+                                                 +Utilities::to_string(error.l2_norm(),17)+", bound="
+                                                 +Utilities::to_string(accuracy,17)+", frozen change="
+                                                 +Utilities::to_string(frozen_change.l2_norm(),17)));
                           std::ostringstream report;
                           report << std::setprecision(17)
                             << "      Affine nonzero-V probe: block=" << block

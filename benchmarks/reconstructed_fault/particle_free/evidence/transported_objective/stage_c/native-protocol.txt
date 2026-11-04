@@ -1,0 +1,74 @@
+Stage C bounded native qualification, declared before remaining runs.
+Matched fixed profile/geometry, G=32038120320Pa, eta=1e26Pa s, 200000s steps,
+three physical steps, two MPI ranks except explicit 1/4-rank comparisons.
+Full3D tensor moments: max monomial Galerkin error <2e-11 * max(1Pa, absolute
+T/B/strain-source operands); retain native stress/work acceptance unchanged.
+Restart/repartition/control: same physical CellIds and coefficient infinity
+error <2e-11 * max(1Pa, final tensor/residual operands), relative slip/state
+error reported separately. Rejection: one completed step2 rejected, actual dt
+halved; exact accepted pointers/coefficients/scalars unchanged before retry;
+compare against uninterrupted 200000,100000,200000 schedule, same final time.
+AMR: one uniform refinement then coarsening at accepted step3, T/R nonzero;
+original CellIds/count restored, coefficient error <2e-11 * operand scale,
+surface Z/I and publication count exact; no lossy phase obstacle coarsening.
+DG transport: nonuniform 1MPa full tensor Gaussian, c=+-200m/s, t=2s,
+distance400m across hanging-cell mesh. Widths180/160m; exact inflow and
+analytical translated field. SSPRK3 CFL<=.1, Gauss8 operator/projection,
+Gauss10 error integration. Three refinement levels3/4/5, final full3D relative
+L2 error <.005, each measured pair order>1.8 using effective h~cellcount^-1/2.
+These are numerical operator/reaction/lifecycle controls. They do not qualify
+coupled transported geometry/profile, heterogeneous reaction, cohesive growth,
+or production readiness; additional gates remain in the Stage C plan.
+
+Cohesive component fixture: G=1e6Pa, eta=1e8Pa s, independent physical tensor
+about300Pa, retained non-affine FE remainder. Rotate complete physical tensor
+by lagged total W for dt=.2s; base W=.37rad/s plus nonuniform native/lifting
+terms. On affine Cartesian cells also include real oblique analytic lifting
+memory amplitude1e-4m, support.125m, 8surface cells. Non-affine fixture isolates
+native remainder, with zero lifting. Projection uses cut Gauss8 on affine,
+Gauss8 on warped cells; independent component rotation and monomial moments
+use Gauss12. Moment error<2e-11*nonzero full-tensor operand scale. Measure full
+L2, energy defect and error relative to the rotation increment. Refine each
+4x4 macrogrid through levels0/1/2. Capacity target at finest: increment-relative
+L2<1e-3; failing it blocks a cohesive production-readiness claim.
+Cohesive native fresh-seed control: 256cells, 3steps, dt1.25e-4s, no old
+checkpoint/import, prescribed parameters and closed-contact/KKT/BE gates
+unchanged. Report actual phase/tip changes and physical energy remainder;
+no claim that this tiny duration repairs inherited fracture/spatial failures.
+
+Cut-space capacity comparison (before running): retain the uncut-DG failure.
+Fit independent Q2 tensor modes on each active lifting piece and side plus
+one exterior region, using the same Gauss12 physical reference. Weighted SVD
+fits require sigma_min/sigma_max>1e-10; no rank regularization is allowed.
+Capacity target remains increment-relative L2<1e-3. Report actual coefficient
+count. This snapshot projection is not native cut-state evolution/transfer.
+Fresh phase fixture: add1700Pa prescribed initial shear (total~2000Pa) to the
+physical seed, above its sliding resistance, G=1e6Pa, eta=1e8Pa s, Gc=1J/m2,
+peak3000Pa, confinement10000Pa. Eight1.25e-4s steps, no imported checkpoint.
+Expect measurable phase/slip response; preserve all original KKT/contact/work
+gates and report whether persistent extension occurred. This is a separate
+forcing fixture; the prior quiescent seed and failed space screen are unchanged.
+Layered transport control: same1MPa tensor pulse, vertical c=+-200m/s over2s,
+r(y)=.5+.3tanh((y-637.25m)/120m) per second, constantG. Exact characteristic
+relaxation is computed by log(cosh) differences. Explicit SSPRK3 operator CFL
+includes max r; same3uniform meshes and relativeL2<.005, pair order>1.8.
+Native coupled/surface heterogeneous coefficients remain disabled.
+
+Native cut-space integration: preserve the uncut failures and capacity source.
+Fit actual independent T on formed lifting pieces/sides; retain the native FE
+remainder, include full physical A+H in finite rotation, then apply BE source.
+Use cut-Gauss8 fitting versus independent cut-Gauss12 component reference,
+with the same1e-3 increment-relative target. Exact restore/zero-spin/retry and
+full BE point recurrence use original retained limits. Partitions, bounds and
+all new coefficients must checkpoint; no candidate tail defines history.
+Coupled native phase refinement: total.001s at8/16/32steps, dt1.25e-4/6.25e-5/
+3.125e-5s, same1700Pa added initial shear, unchanged physical constants and
+existing KKT/contact/energy gates. Measure physical remainder relative to
+fracture work; do not turn the retained1% screen into a numerical-ledger test.
+Localized tip fixture: an analytically specified Airy stress, amplitude3500Pa,
+width.4m centered(6,0)m, is added to the2000Pa background shear. The initial
+tip shear~5500Pa exceeds intact strength+friction~4000Pa locally, whereas the
+load decays below that bound away from the tip. All three deviatoric stress
+components are prescribed from the Airy tensor, not inferred from scalar
+traction. Eight1.25e-4s steps, candidate completion bounds unchanged. Expect
+localized admission; record failure/no-admission honestly if it occurs.

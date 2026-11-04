@@ -155,3 +155,35 @@ Inspect callers, headers, and tests before changing interfaces.
   consistent. Distinguish implemented, locally verified, physically compared,
   and production-ready. Retain failed evidence and cleanup availability losses.
   Do not recreate deleted historical campaigns; keep only necessary new output.
+
+## Transported objective state contract (Stage A, 2026-11-02)
+
+- For the user-selected transported extension, use
+  `particle_free/TRANSPORTED_OBJECTIVE_SPEC.md` and the state table in
+  `IMPLEMENTATION_MAPS.md`; task-state/report distinguish design from enabled code.
+- Bulk material transport, physical interface-label motion and tangential node
+  redistribution are distinct. Remap complete physical state and its obstacle;
+  never infer age/slip transport from relative slip or rotate normals by stress spin.
+- A transported selector requires complete tensor/native-remainder/lifting state,
+  matching work adjoints, and one geometry/history acceptance transaction.
+  Checkpoint metadata must identify representation, law/integrator and material
+  identities; no automatic old-to-new conversion. Keep legacy controls.
+- Qualification must include independent moving-profile/variable-eta references
+  and geometry/flux work where applicable. Stage A algebra alone enables no
+  configuration; the current user instruction determines which later stage runs.
+
+
+## Native objective controls (Stage C, 2026-11-03)
+
+- Distinguish stationary reaction controls from a complete transported native
+  step. The mature T/R owner and schema6, and cohesive formed-piece/side tensor
+  owner with retained native/lifting memory, have local evidence only within
+  their stated restrictions. Defaults and legacy checkpoint laws stay intact.
+- Cut history partitions belong to formed material, not temporary candidate
+  tails. Persist partition/basis/native state and select the same material side
+  for tensor and lifting observations. Rebuild matching checker DSOs after
+  history-layout changes; do not infer binary identity from HEAD.
+- Keep failed uncut-space, physical-energy and tip-admission evidence visible.
+  A transport-operator pass does not authorize moving curve/profile/surface
+  publication or deformed cohesive shape work. Use the active Stage C report
+  and task state for the current implementation/qualification boundary.

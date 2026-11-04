@@ -1,0 +1,8 @@
+{
+  "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+  "branch": "pf-rsf-particle-free",
+  "preserved_control": "build-particle-free/transported-objective/stage-c/controls/cohesive-dg-prototype",
+  "sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+  "protected_files_checked": 16,
+  "temporary_logs": "Earlier /tmp build/unit logs are no longer available after the interruption; retained run logs, inputs and JSON are present. No lost temporary log is represented as retained evidence."
+}

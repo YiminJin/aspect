@@ -1,0 +1,66 @@
+{
+  "scope": "Best independently projected T/R histories only; not a P1 transported solve",
+  "rows": [
+    {
+      "n": 8,
+      "residual_degree": 1,
+      "best_R_projection_scaled": 0.0013393183022501268,
+      "full_tensor_projection_scaled": 0.0013455180941600582,
+      "normal_scaled": 0.00047526962818372043,
+      "shear_scaled": 0.0008220016423599959,
+      "energy_relative_error": 0.00011850098122188072,
+      "scalar_coefficients": 2496
+    },
+    {
+      "n": 8,
+      "residual_degree": 2,
+      "best_R_projection_scaled": 0.00042446147991653425,
+      "full_tensor_projection_scaled": 0.00044363608386029134,
+      "normal_scaled": 0.00015028154076762934,
+      "shear_scaled": 0.0002686640925325161,
+      "energy_relative_error": 1.1066639148573721e-05,
+      "scalar_coefficients": 3456
+    },
+    {
+      "n": 16,
+      "residual_degree": 1,
+      "best_R_projection_scaled": 0.000395665421876443,
+      "full_tensor_projection_scaled": 0.0003960494701221868,
+      "normal_scaled": 0.00013357814355408065,
+      "shear_scaled": 0.0002460310171967113,
+      "energy_relative_error": 1.0209610524696924e-05,
+      "scalar_coefficients": 9984
+    },
+    {
+      "n": 16,
+      "residual_degree": 2,
+      "best_R_projection_scaled": 6.229155703739735e-05,
+      "full_tensor_projection_scaled": 6.468612520120318e-05,
+      "normal_scaled": 2.2081325276132446e-05,
+      "shear_scaled": 3.9387217939238644e-05,
+      "energy_relative_error": 2.3133170221687993e-07,
+      "scalar_coefficients": 13824
+    },
+    {
+      "n": 32,
+      "residual_degree": 1,
+      "best_R_projection_scaled": 0.00010284616483488402,
+      "full_tensor_projection_scaled": 0.00010286984962936684,
+      "normal_scaled": 3.4507792680369064e-05,
+      "shear_scaled": 6.402706257495485e-05,
+      "energy_relative_error": 6.860649228674805e-07,
+      "scalar_coefficients": 39936
+    },
+    {
+      "n": 32,
+      "residual_degree": 2,
+      "best_R_projection_scaled": 8.109719466607035e-06,
+      "full_tensor_projection_scaled": 8.404754092268626e-06,
+      "normal_scaled": 2.8526156905696525e-06,
+      "shear_scaled": 5.131475973044875e-06,
+      "energy_relative_error": 3.8875933381774e-09,
+      "scalar_coefficients": 55296
+    }
+  ],
+  "script_sha256": "18a56f105aef2c577a576740b8df1ba2c20e89e8e49cb5764049fd79117cf896"
+}

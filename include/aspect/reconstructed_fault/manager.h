@@ -124,6 +124,22 @@ namespace aspect
        * archive schema. Only inactive, uncompleted normal strips are admitted.
        * Simulator attachment is retained by the live owner, never copied. */
       std::shared_ptr<ReconstructedFaultManager<dim>> clone_prescribed_geometry() const;
+      /** Stage physical motion of existing material labels, without remeshing
+       * or birth. Every fault/vertex keeps its index, generic properties and
+       * committed/prescribed rates. The caller supplies current coordinates
+       * and normal support widths; neither is inferred from relative slip or
+       * stress spin. This operation alone transports no bulk/profile history
+       * and must join its owner's complete acceptance transaction.
+       * Boundary completion is unsupported and is rejected before staging.
+       * The live owner is unchanged, including on failure. */
+      std::shared_ptr<ReconstructedFaultManager<dim>> stage_material_motion(
+        const std::vector<std::vector<Point<dim>>> &vertices,
+        const std::vector<std::vector<double>> &projection_half_widths) const;
+      const std::vector<std::vector<double>> &get_projection_half_widths() const
+      { return projection_half_widths; }
+      /** Initial normal-coverage policy; moving widths remain accepted history. */
+      bool uses_full_normal_cross_section() const
+      { return full_normal_cross_section; }
       /** Nonthrowing publication/rollback of a validated staged geometry.
        * Derived associations are invalidated on both sides. */
       void swap_prescribed_geometry(ReconstructedFaultManager<dim> &) noexcept;

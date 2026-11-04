@@ -1,4 +1,32 @@
+> **3 November coupled Stage C update:** the experimental mature material
+> transaction and heterogeneous projected reaction now have bounded local
+> translation/rejection/MPI-restart evidence. See
+> [the coupled report](particle_free/TRANSPORTED_OBJECTIVE_STAGE_C_COUPLED_REPORT.md)
+> and [energy/tip diagnosis](particle_free/STAGE_C_COHESIVE_DIAGNOSIS.md).
+> Broader Stage C and production readiness remain incomplete; historical
+> failures, protected trajectories and cleanup losses stay preserved.
+
+# Stage C native objective controls — 3 November 2026
+
+[The active Stage C report](particle_free/TRANSPORTED_OBJECTIVE_STAGE_C_REPORT.md)
+records native mature T/R and cohesive cut/native/lifting reaction integration,
+distributed transport operators, local lifecycle/AMR evidence and a passing
+full unit suite. Stage C is incomplete: full material geometry/profile/surface
+transport remains to integrate, and physical-energy/tip-admission screens still
+fail. Legacy defaults, protected production histories and prior failures remain.
+No server job, production conversion or long event replay was launched.
+
+---
+
 # Research-review entry after cleanup — 30 October 2026
+
+The selected review now has [BP3 findings](particle_free/BP3_REVIEW.md),
+[implementation maps](particle_free/IMPLEMENTATION_MAPS.md) and a scoped
+[objective-stress report](particle_free/OBJECTIVE_STRESS_REPORT.md). New exports
+show accepted4237 and an operational wall stop, with no completed first event.
+The opt-in stationary physical-particle Jaumann branch passes bounded local
+qualification; production DG/cohesive spin remains explicitly disabled pending
+the complete residual/history derivation. The older entry below is historical.
 
 Use [RESEARCH_HANDOFF](particle_free/RESEARCH_HANDOFF.md),
 [particle-free STATUS](particle_free/STATUS.md) and the authoritative design/specification.

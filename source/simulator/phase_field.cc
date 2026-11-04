@@ -1708,6 +1708,20 @@ namespace aspect
     const unsigned int block_index = this->introspection().variable("phase_field").block_index;
 
     const auto *history_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+    if (history_material && history_material->uses_transported_mature_history())
+      {
+        // Growth is disabled. The physical obstacle and profile are one
+        // material field, staged with the tensor and surface histories.
+        if (this->get_timestep_number()==0 && !history_material->has_fe_strain_history())
+          history_material->initialize_fe_shared_phase(solution);
+        else
+          {
+            AssertThrow(history_material->has_fe_strain_history(),
+                        ExcMessage("Missing transported mature phase anchor."));
+            solution.block(block_index)=history_material->accepted_fe_strain_state().block(block_index);
+          }
+        return;
+      }
     if (history_material && history_material->uses_homogeneous_mesh_data()
         && history_material->is_mature_frictional_fault())
       {

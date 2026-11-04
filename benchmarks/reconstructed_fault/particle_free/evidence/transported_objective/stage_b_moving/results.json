@@ -1,0 +1,638 @@
+{
+  "scope": "Rest of Stage B only: prescribed moving-interface complete particle-free history comparison; no native integration",
+  "command": [
+    "benchmarks/reconstructed_fault/particle_free/transported_objective/stage_b_moving.py"
+  ],
+  "parameters": {
+    "G_Pa": 3000000.0,
+    "ell_initial_m": 0.06,
+    "ell_final_m": 0.05174161540444826,
+    "duration_s": 0.8,
+    "velocity_cx_m_s": [
+      0.24,
+      -0.24
+    ],
+    "cy_m_s": 0.12,
+    "rate_range_per_s": [
+      0.2,
+      0.8
+    ],
+    "eta_range_Pa_s": [
+      3750000.0,
+      15000000.0
+    ],
+    "spin_rad": 0.16000000000000003,
+    "symmetric_strain_norm": 0.22627416997969527,
+    "centre_displacement_m": [
+      0.20736000000000002,
+      0.096
+    ],
+    "displacement_fine_cells": [
+      8.2944,
+      3.84
+    ],
+    "displacement_over_initial_ell": [
+      3.4560000000000004,
+      1.6
+    ],
+    "max_reference_stress_over_G": 0.4585010408525421
+  },
+  "reference": {
+    "gauss_differences_scaled": [
+      2.7881678859703075e-16,
+      3.864105144099339e-16
+    ],
+    "direct_RK4_error_scaled": 1.0590844403108414e-15,
+    "continuous_closure_scaled": 2.743935449927997e-16,
+    "alpha_derivative_error": 1.9626019559515484e-11,
+    "profile_derivative_scaled_error": 3.905298084916353e-11,
+    "normal_derivative_error": 4.692458841789422e-11,
+    "surface_projection_96_128_defect": 4.274358644806853e-15,
+    "profiles": [
+      {
+        "time_s": 0.0,
+        "g": 1.0,
+        "width_m": 0.06,
+        "normalization": 1.0000000000000033
+      },
+      {
+        "time_s": 0.4,
+        "g": 1.0784589529489166,
+        "width_m": 0.055634940797642043,
+        "normalization": 1.0000000000000036
+      },
+      {
+        "time_s": 0.8,
+        "g": 1.1596081709277628,
+        "width_m": 0.05174161540444826,
+        "normalization": 1.0000000000000036
+      }
+    ]
+  },
+  "negative_controls": {
+    "negative_source_errors_scaled": {
+      "omit_geometry_profile": 0.006601845741660478,
+      "omit_extension_gradient": 0.00021425290289127326,
+      "omit_rate_mismatch": 0.004366080751400873
+    },
+    "relaxation_energy_relative_defect": 2.5517223336929006e-16,
+    "homogeneous_eta_error_scaled": 0.012799712414083706,
+    "path_y_start_m": [
+      -0.06,
+      -0.04,
+      -0.02
+    ],
+    "path_y_end_m": [
+      0.036000000000000004,
+      0.056,
+      0.076
+    ]
+  },
+  "temporal": [
+    {
+      "steps": 80,
+      "dt_s": 0.01,
+      "direct": 0.0007039855549286589,
+      "separated": 0.0008775193116897899,
+      "closure": 0.0003168587659516274
+    },
+    {
+      "steps": 160,
+      "dt_s": 0.005,
+      "direct": 0.00035220599173557573,
+      "separated": 0.0004389826085866565,
+      "closure": 0.00015840026775822412
+    },
+    {
+      "steps": 320,
+      "dt_s": 0.0025,
+      "direct": 0.00017615632544208814,
+      "separated": 0.00021954702740285253,
+      "closure": 7.919275697995203e-05
+    }
+  ],
+  "spatial": [
+    {
+      "n": 8,
+      "order": 8,
+      "cx": 0.24,
+      "kind": "direct",
+      "steps": 84,
+      "tensor_scaled": 0.0043698593669629915,
+      "tensor_max_scaled": 0.03944567680539002,
+      "normal_scaled": 0.0002121770017104568,
+      "shear_scaled": 0.0030816377662829897,
+      "zz_scaled": 4.9797760732439334e-05,
+      "energy_J_m": 79073.87811131087,
+      "reference_energy_J_m": 79100.602818367,
+      "energy_relative_error": 0.0003378571857093677,
+      "best_R_projection_scaled": 0.0004244614799165341,
+      "best_tau_projection_scaled": 0.0032413708779018657,
+      "metric_elapsed_s": 0.04988308099927963
+    },
+    {
+      "n": 8,
+      "order": 8,
+      "cx": 0.24,
+      "kind": "separated",
+      "steps": 84,
+      "tensor_scaled": 0.0005683355594598466,
+      "tensor_max_scaled": 0.006603408161434614,
+      "normal_scaled": 0.00018853294120019806,
+      "shear_scaled": 0.00034591186774129187,
+      "zz_scaled": 4.979776073243928e-05,
+      "energy_J_m": 79103.17532279492,
+      "reference_energy_J_m": 79100.602818367,
+      "energy_relative_error": 3.252193202410028e-05,
+      "best_R_projection_scaled": 0.0004244614799165341,
+      "best_tau_projection_scaled": 0.0032413708779018657,
+      "metric_elapsed_s": 0.050421047999407165
+    },
+    {
+      "n": 16,
+      "order": 8,
+      "cx": 0.24,
+      "kind": "direct",
+      "steps": 167,
+      "tensor_scaled": 0.000698609164093564,
+      "tensor_max_scaled": 0.009388186524676236,
+      "normal_scaled": 3.3447858924781045e-05,
+      "shear_scaled": 0.0004927360972379517,
+      "zz_scaled": 6.27792451074928e-06,
+      "energy_J_m": 79099.10859531417,
+      "reference_energy_J_m": 79100.602818367,
+      "energy_relative_error": 1.8890160119968242e-05,
+      "best_R_projection_scaled": 6.22915570373973e-05,
+      "best_tau_projection_scaled": 0.0004771877375776139,
+      "metric_elapsed_s": 0.20516022199808504
+    },
+    {
+      "n": 16,
+      "order": 8,
+      "cx": 0.24,
+      "kind": "separated",
+      "steps": 167,
+      "tensor_scaled": 9.21046103794328e-05,
+      "tensor_max_scaled": 0.0014382692701995832,
+      "normal_scaled": 3.124281232130888e-05,
+      "shear_scaled": 5.6088401814029236e-05,
+      "zz_scaled": 6.277924510749378e-06,
+      "energy_J_m": 79100.71538773306,
+      "reference_energy_J_m": 79100.602818367,
+      "energy_relative_error": 1.4231164118477573e-06,
+      "best_R_projection_scaled": 6.22915570373973e-05,
+      "best_tau_projection_scaled": 0.0004771877375776139,
+      "metric_elapsed_s": 0.2070981449978717
+    },
+    {
+      "n": 32,
+      "order": 8,
+      "cx": 0.24,
+      "kind": "direct",
+      "steps": 333,
+      "tensor_scaled": 9.36990714778385e-05,
+      "tensor_max_scaled": 0.0013425235196718622,
+      "normal_scaled": 4.386639873239145e-06,
+      "shear_scaled": 6.609489938641027e-05,
+      "zz_scaled": 8.005124249666066e-07,
+      "energy_J_m": 79100.54453644298,
+      "reference_energy_J_m": 79100.602818367,
+      "energy_relative_error": 7.368075835834405e-07,
+      "best_R_projection_scaled": 8.109719466607028e-06,
+      "best_tau_projection_scaled": 6.191467138825944e-05,
+      "metric_elapsed_s": 1.0068705959965882
+    },
+    {
+      "n": 32,
+      "order": 8,
+      "cx": 0.24,
+      "kind": "separated",
+      "steps": 333,
+      "tensor_scaled": 1.2540826177876719e-05,
+      "tensor_max_scaled": 0.0002070633611981757,
+      "normal_scaled": 4.240941753314126e-06,
+      "shear_scaled": 7.659767123676894e-06,
+      "zz_scaled": 8.005124249665783e-07,
+      "energy_J_m": 79100.60670260417,
+      "reference_energy_J_m": 79100.602818367,
+      "energy_relative_error": 4.910502618082432e-08,
+      "best_R_projection_scaled": 8.109719466607028e-06,
+      "best_tau_projection_scaled": 6.191467138825944e-05,
+      "metric_elapsed_s": 1.0178504579998844
+    }
+  ],
+  "time_isolation": {
+    "direct": 2.588894460223079e-10,
+    "separated": 2.4960912375209187e-10
+  },
+  "quadrature": [
+    {
+      "order": 4,
+      "direct": 1.0385921399507597e-05,
+      "separated": 2.2659226692032936e-06
+    },
+    {
+      "order": 6,
+      "direct": 1.2177743953402561e-08,
+      "separated": 3.2791243234407834e-09
+    },
+    {
+      "order": 8,
+      "direct": 6.979577642920649e-12,
+      "separated": 3.0200892494920807e-12
+    }
+  ],
+  "reverse": [
+    {
+      "n": 16,
+      "order": 8,
+      "cx": -0.24,
+      "kind": "direct",
+      "steps": 167,
+      "tensor_scaled": 0.0007798749884042524,
+      "tensor_max_scaled": 0.011515334236863272,
+      "normal_scaled": 3.502193911390327e-05,
+      "shear_scaled": 0.0005502156201367056,
+      "zz_scaled": 7.262844303898532e-06,
+      "energy_J_m": 81638.39340311779,
+      "reference_energy_J_m": 81640.48297549976,
+      "energy_relative_error": 2.559480671614149e-05,
+      "best_R_projection_scaled": 7.945041216460608e-05,
+      "best_tau_projection_scaled": 0.0005311450631046947,
+      "metric_elapsed_s": 0.19972757199866464
+    },
+    {
+      "n": 16,
+      "order": 8,
+      "cx": -0.24,
+      "kind": "separated",
+      "steps": 167,
+      "tensor_scaled": 0.00011589660998742399,
+      "tensor_max_scaled": 0.0016538255451760148,
+      "normal_scaled": 3.234491786027036e-05,
+      "shear_scaled": 7.437081564890571e-05,
+      "zz_scaled": 7.262844303898579e-06,
+      "energy_J_m": 81640.71857927674,
+      "reference_energy_J_m": 81640.48297549976,
+      "energy_relative_error": 2.8858694656348684e-06,
+      "best_R_projection_scaled": 7.945041216460608e-05,
+      "best_tau_projection_scaled": 0.0005311450631046947,
+      "metric_elapsed_s": 0.20165728600113653
+    }
+  ],
+  "cost": [
+    {
+      "n": 8,
+      "order": 8,
+      "cx": 0.24,
+      "steps": 84,
+      "dt_s": 0.009523809523809525,
+      "solve_elapsed_s": 1.1085159530011879,
+      "operator_audit": {
+        "polynomial_advection_defect": 5.863947681930924e-14,
+        "mass_defect": 5.551115123125783e-15
+      },
+      "direct_coefficients": 1728,
+      "separated_generic_coefficients": 3456
+    },
+    {
+      "n": 16,
+      "order": 8,
+      "cx": 0.24,
+      "steps": 167,
+      "dt_s": 0.004790419161676647,
+      "solve_elapsed_s": 3.068766010001127,
+      "operator_audit": {
+        "polynomial_advection_defect": 1.1017352628101747e-13,
+        "mass_defect": 5.551115123125783e-15
+      },
+      "direct_coefficients": 6912,
+      "separated_generic_coefficients": 13824
+    },
+    {
+      "n": 32,
+      "order": 8,
+      "cx": 0.24,
+      "steps": 333,
+      "dt_s": 0.0024024024024024027,
+      "solve_elapsed_s": 13.837424682998972,
+      "operator_audit": {
+        "polynomial_advection_defect": 2.4166333463483797e-13,
+        "mass_defect": 5.551115123125783e-15
+      },
+      "direct_coefficients": 27648,
+      "separated_generic_coefficients": 55296
+    }
+  ],
+  "acceptance": [
+    {
+      "name": "independent_reference",
+      "passed": true,
+      "value": {
+        "gauss_differences_scaled": [
+          2.7881678859703075e-16,
+          3.864105144099339e-16
+        ],
+        "direct_RK4_error_scaled": 1.0590844403108414e-15,
+        "continuous_closure_scaled": 2.743935449927997e-16,
+        "alpha_derivative_error": 1.9626019559515484e-11,
+        "profile_derivative_scaled_error": 3.905298084916353e-11,
+        "normal_derivative_error": 4.692458841789422e-11,
+        "surface_projection_96_128_defect": 4.274358644806853e-15,
+        "profiles": [
+          {
+            "time_s": 0.0,
+            "g": 1.0,
+            "width_m": 0.06,
+            "normalization": 1.0000000000000033
+          },
+          {
+            "time_s": 0.4,
+            "g": 1.0784589529489166,
+            "width_m": 0.055634940797642043,
+            "normalization": 1.0000000000000036
+          },
+          {
+            "time_s": 0.8,
+            "g": 1.1596081709277628,
+            "width_m": 0.05174161540444826,
+            "normalization": 1.0000000000000036
+          }
+        ]
+      },
+      "criterion": "All independent tensor/reference differences <1e-10G"
+    },
+    {
+      "name": "geometry_and_profile",
+      "passed": true,
+      "value": [
+        {
+          "time_s": 0.0,
+          "g": 1.0,
+          "width_m": 0.06,
+          "normalization": 1.0000000000000033
+        },
+        {
+          "time_s": 0.4,
+          "g": 1.0784589529489166,
+          "width_m": 0.055634940797642043,
+          "normalization": 1.0000000000000036
+        },
+        {
+          "time_s": 0.8,
+          "g": 1.1596081709277628,
+          "width_m": 0.05174161540444826,
+          "normalization": 1.0000000000000036
+        }
+      ],
+      "criterion": "Geometric derivative <2e-9; normalized profile <1e-10"
+    },
+    {
+      "name": "surface_projection",
+      "passed": true,
+      "value": 4.274358644806853e-15,
+      "criterion": "Rate-projection q96/q128 difference <1e-12/s"
+    },
+    {
+      "name": "operator_8",
+      "passed": true,
+      "value": {
+        "polynomial_advection_defect": 5.863947681930924e-14,
+        "mass_defect": 5.551115123125783e-15
+      },
+      "criterion": "Constant/linear advection <1e-11; mass <1e-12"
+    },
+    {
+      "name": "operator_16",
+      "passed": true,
+      "value": {
+        "polynomial_advection_defect": 1.1017352628101747e-13,
+        "mass_defect": 5.551115123125783e-15
+      },
+      "criterion": "Constant/linear advection <1e-11; mass <1e-12"
+    },
+    {
+      "name": "operator_32",
+      "passed": true,
+      "value": {
+        "polynomial_advection_defect": 2.4166333463483797e-13,
+        "mass_defect": 5.551115123125783e-15
+      },
+      "criterion": "Constant/linear advection <1e-11; mass <1e-12"
+    },
+    {
+      "name": "spatial_direct",
+      "passed": true,
+      "value": {
+        "orders": [
+          2.645029378224125,
+          2.898378911081743
+        ],
+        "finest": {
+          "n": 32,
+          "order": 8,
+          "cx": 0.24,
+          "kind": "direct",
+          "steps": 333,
+          "tensor_scaled": 9.36990714778385e-05,
+          "tensor_max_scaled": 0.0013425235196718622,
+          "normal_scaled": 4.386639873239145e-06,
+          "shear_scaled": 6.609489938641027e-05,
+          "zz_scaled": 8.005124249666066e-07,
+          "energy_J_m": 79100.54453644298,
+          "reference_energy_J_m": 79100.602818367,
+          "energy_relative_error": 7.368075835834405e-07,
+          "best_R_projection_scaled": 8.109719466607028e-06,
+          "best_tau_projection_scaled": 6.191467138825944e-05,
+          "metric_elapsed_s": 1.0068705959965882
+        }
+      },
+      "criterion": "Both orders >2, finest tensor/normal/shear/storage <1e-3"
+    },
+    {
+      "name": "Lie_direct",
+      "passed": true,
+      "value": {
+        "ratios": [
+          1.9987892638044251,
+          1.9993945199053575
+        ],
+        "finest": 0.00017615632544208814
+      },
+      "criterion": "Ratios1.8\u20132.2, finest <.01G"
+    },
+    {
+      "name": "spatial_time_isolation_direct",
+      "passed": true,
+      "value": 2.588894460223079e-10,
+      "criterion": "Half dt solution change <10% of N16 spatial error"
+    },
+    {
+      "name": "quadrature_direct",
+      "passed": true,
+      "value": [
+        1.0385921399507597e-05,
+        1.2177743953402561e-08,
+        6.979577642920649e-12
+      ],
+      "criterion": "q4>q6>q8 errors vsq12, finest <1e-8G"
+    },
+    {
+      "name": "spatial_separated",
+      "passed": true,
+      "value": {
+        "orders": [
+          2.625397705712248,
+          2.876640978858807
+        ],
+        "finest": {
+          "n": 32,
+          "order": 8,
+          "cx": 0.24,
+          "kind": "separated",
+          "steps": 333,
+          "tensor_scaled": 1.2540826177876719e-05,
+          "tensor_max_scaled": 0.0002070633611981757,
+          "normal_scaled": 4.240941753314126e-06,
+          "shear_scaled": 7.659767123676894e-06,
+          "zz_scaled": 8.005124249665783e-07,
+          "energy_J_m": 79100.60670260417,
+          "reference_energy_J_m": 79100.602818367,
+          "energy_relative_error": 4.910502618082432e-08,
+          "best_R_projection_scaled": 8.109719466607028e-06,
+          "best_tau_projection_scaled": 6.191467138825944e-05,
+          "metric_elapsed_s": 1.0178504579998844
+        }
+      },
+      "criterion": "Both orders >2, finest tensor/normal/shear/storage <1e-3"
+    },
+    {
+      "name": "Lie_separated",
+      "passed": true,
+      "value": {
+        "ratios": [
+          1.998984229728465,
+          1.9994923811068321
+        ],
+        "finest": 0.00021954702740285253
+      },
+      "criterion": "Ratios1.8\u20132.2, finest <.01G"
+    },
+    {
+      "name": "spatial_time_isolation_separated",
+      "passed": true,
+      "value": 2.4960912375209187e-10,
+      "criterion": "Half dt solution change <10% of N16 spatial error"
+    },
+    {
+      "name": "quadrature_separated",
+      "passed": true,
+      "value": [
+        2.2659226692032936e-06,
+        3.2791243234407834e-09,
+        3.0200892494920807e-12
+      ],
+      "criterion": "q4>q6>q8 errors vsq12, finest <1e-8G"
+    },
+    {
+      "name": "reverse_translation",
+      "passed": true,
+      "value": [
+        {
+          "n": 16,
+          "order": 8,
+          "cx": -0.24,
+          "kind": "direct",
+          "steps": 167,
+          "tensor_scaled": 0.0007798749884042524,
+          "tensor_max_scaled": 0.011515334236863272,
+          "normal_scaled": 3.502193911390327e-05,
+          "shear_scaled": 0.0005502156201367056,
+          "zz_scaled": 7.262844303898532e-06,
+          "energy_J_m": 81638.39340311779,
+          "reference_energy_J_m": 81640.48297549976,
+          "energy_relative_error": 2.559480671614149e-05,
+          "best_R_projection_scaled": 7.945041216460608e-05,
+          "best_tau_projection_scaled": 0.0005311450631046947,
+          "metric_elapsed_s": 0.19972757199866464
+        },
+        {
+          "n": 16,
+          "order": 8,
+          "cx": -0.24,
+          "kind": "separated",
+          "steps": 167,
+          "tensor_scaled": 0.00011589660998742399,
+          "tensor_max_scaled": 0.0016538255451760148,
+          "normal_scaled": 3.234491786027036e-05,
+          "shear_scaled": 7.437081564890571e-05,
+          "zz_scaled": 7.262844303898579e-06,
+          "energy_J_m": 81640.71857927674,
+          "reference_energy_J_m": 81640.48297549976,
+          "energy_relative_error": 2.8858694656348684e-06,
+          "best_R_projection_scaled": 7.945041216460608e-05,
+          "best_tau_projection_scaled": 0.0005311450631046947,
+          "metric_elapsed_s": 0.20165728600113653
+        }
+      ],
+      "criterion": "N16 reversed horizontal motion tensor RMS <.01G"
+    },
+    {
+      "name": "omit_geometry_profile",
+      "passed": true,
+      "value": 0.006601845741660478,
+      "criterion": "Omitted source leaves continuous tensor RMS >1e-5G"
+    },
+    {
+      "name": "omit_extension_gradient",
+      "passed": true,
+      "value": 0.00021425290289127326,
+      "criterion": "Omitted source leaves continuous tensor RMS >1e-5G"
+    },
+    {
+      "name": "omit_rate_mismatch",
+      "passed": true,
+      "value": 0.004366080751400873,
+      "criterion": "Omitted source leaves continuous tensor RMS >1e-5G"
+    },
+    {
+      "name": "changing_eta_relaxation",
+      "passed": true,
+      "value": {
+        "negative_source_errors_scaled": {
+          "omit_geometry_profile": 0.006601845741660478,
+          "omit_extension_gradient": 0.00021425290289127326,
+          "omit_rate_mismatch": 0.004366080751400873
+        },
+        "relaxation_energy_relative_defect": 2.5517223336929006e-16,
+        "homogeneous_eta_error_scaled": 0.012799712414083706,
+        "path_y_start_m": [
+          -0.06,
+          -0.04,
+          -0.02
+        ],
+        "path_y_end_m": [
+          0.036000000000000004,
+          0.056,
+          0.076
+        ]
+      },
+      "criterion": "Relaxation storage+loss closes <1e-10; wrong homogeneous eta defect >1e-4G"
+    },
+    {
+      "name": "positive_surface_rate_and_label_domain",
+      "passed": true,
+      "value": {
+        "min_rate": 0.2923106315918035,
+        "max_abs_label": 0.6691013597978368
+      },
+      "criterion": "All sampled r_Gamma>0 and |alpha|<1.2m"
+    }
+  ],
+  "status": "passed",
+  "elapsed_s": 32.91987891100143,
+  "source_hashes": {
+    "stage_b_moving.py": "0d080bfd1f036e33f31df5ade6e755ddc84e28444db845adfcbec6952df57002",
+    "moving_model.py": "2d551d1c7a0fca198c6b06b046413548e0832a76b612f13779254f2648482ed3"
+  }
+}

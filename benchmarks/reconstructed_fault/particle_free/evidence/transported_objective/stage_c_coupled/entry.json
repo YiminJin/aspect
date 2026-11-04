@@ -1,0 +1,13 @@
+{
+  "root": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "branch": "pf-rsf-particle-free",
+  "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+  "utc": "2026-11-03T21:00:13.015476+00:00",
+  "saved_controls": {
+    "build-particle-free/transported-objective/stage-c/controls/coupled-entry-aspect-release": "97d5563831731391d7123aae6563870409dff5810bb9dcb2dd7d5970ed2aa02c",
+    "build-particle-free/transported-objective/stage-c/controls/coupled-entry-libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db",
+    "build-particle-free/transported-objective/stage-c/controls/coupled-entry-libtransported_objective_native.release.so": "4ddbc13dc96c12797dfab37839fc8059bfd0113089a6ef258f9b8c3d901f9174",
+    "build-particle-free/transported-objective/stage-c/controls/coupled-entry-libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53"
+  },
+  "scope": "Selected coupled moving/heterogeneous mature transaction and cohesive energy/tip diagnosis; preserve endpoint scheme and physical inputs"
+}

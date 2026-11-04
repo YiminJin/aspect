@@ -1,0 +1,17 @@
+{
+  "old-support-mismatch": {
+    "exit_code": 1,
+    "required_diagnostic": "version/material/quadrature mismatch",
+    "command": "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-old-support-mismatch/command.json"
+  },
+  "profile-mismatch": {
+    "exit_code": 1,
+    "required_diagnostic": "version/material/quadrature mismatch",
+    "command": "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-profile-mismatch/command.json"
+  },
+  "coverage-rejection": {
+    "exit_code": 1,
+    "required_diagnostic": "requires Association support",
+    "command": "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-coverage-rejection/command.json"
+  }
+}

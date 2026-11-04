@@ -78,6 +78,12 @@ namespace aspect
       // shared, and the independent DG tensor below owns bulk history.
       LinearAlgebra::BlockVector displacement_history;
       std::shared_ptr<DGHistory> dg_history;
+      // Derived per-attempt rotated/projected anchor; never checkpointed or
+      // published as a second accepted state. Retry keys include actual dt.
+      std::shared_ptr<DGHistory> objective_anchor;
+      std::weak_ptr<DGHistory> objective_parent;
+      double objective_dt = -1.;
+      unsigned int objective_step = numbers::invalid_unsigned_int;
       // Z is slip memory in mature mode, independently of zero cohesive
       // traction. In the cohesive P2 option Z = I_h * tau_coh.
       std::vector<double> Z,I;
@@ -125,6 +131,24 @@ namespace aspect
       std::vector<std::vector<double>> normalization,surface_temperatures;
       std::string parent_surface;
       bool published=false,identity=false;
+    };
+
+    template<int dim> struct PhaseFieldFault<dim>::DGMaterialReaction
+    {
+      LinearAlgebra::BlockVector bulk;
+      std::vector<double> rates;
+      std::shared_ptr<FEStrainUpdate> candidate;
+    };
+
+    template<int dim> struct PhaseFieldFault<dim>::DGMaterialTrial
+    {
+      std::shared_ptr<FEStrainState> incoming;
+      std::shared_ptr<ReconstructedFaultManager<dim>> manager;
+      std::vector<std::vector<double>> normalization,temperatures;
+      std::map<types::particle_index,std::vector<double>> particle_properties;
+      unsigned int step=0;
+      double dt=0.;
+      bool bound=false;
     };
 
   }

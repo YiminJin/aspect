@@ -1,0 +1,6 @@
+{
+  "core_copy": "build-particle-free/transported-objective/stage-c/controls/profile-support-admission-aspect-release",
+  "core_sha256": "80642c4c4e7859e3a893f8a8be18317340b1a83cae3ef34e60aa737d11485ffd",
+  "source_basis": "pre-support-source.tar.xz with source/reconstructed_fault/manager.cc replaced by support-admission-manager.cc",
+  "manager_sha256": "b7b81edae12169f0202f23e04c85675be3fcf197e92006d7f0bb112c4bc163eb"
+}

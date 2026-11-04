@@ -1,5 +1,6 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/reconstructed_fault/cohesive_bulk_history.h>
+#include <aspect/reconstructed_fault/objective_stress.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/lac/full_matrix.h>
 #include <fstream>
@@ -53,6 +54,8 @@ namespace aspect
                    ExcMessage ("Incomplete native Maxwell history."));
       for (const auto &entry : cells)
         {
+          AssertThrow(!cut_geometry || cut_tensor.count(entry.first),
+                      ExcMessage("Incomplete piece/side Maxwell tensor history."));
           AssertThrow (entry.second->is_locally_owned (),
                        ExcMessage ("Native history ownership changed without a transfer."));
           for (const auto v : entry.second->vertex_indices ())
@@ -173,6 +176,13 @@ namespace aspect
     std::vector<typename BulkHistory<dim>::Tensor>
     BulkHistory<dim>::evaluate (const Cell &cell, const Quadrature<dim> &rule) const
     {
+      return evaluate_sided(cell,rule,0);
+    }
+
+    template <int dim>
+    std::vector<typename BulkHistory<dim>::Tensor>
+    BulkHistory<dim>::evaluate_sided(const Cell &cell,const Quadrature<dim> &rule,const int side) const
+    {
       const auto &dg = tensor.at (cell->id ()), &pi = projection.at (cell->id ());
       FEValues<dim> fe (this->get_mapping (), this->get_fe (), rule, update_gradients);
       fe.reinit (cell);
@@ -186,11 +196,67 @@ namespace aspect
           for (unsigned int c = 0; c < 3; ++c)
             for (unsigned int i = 0; i < 9; ++i)
               t[c] += (dg[9 * c + i] - pi[9 * c + i]) * element.shape_value (i, rule.point (q));
+          if(cut_geometry)
+            {
+              const auto x=this->get_mapping().transform_unit_to_real_cell(cell,rule.point(q));
+              const auto value=cut_value(cell->id(),rule.point(q),x,side);
+              t[0]=value[0][0];t[1]=value[1][1];t[2]=value[0][1];
+              for(unsigned int c=0;c<3;++c)for(unsigned int i=0;i<9;++i)
+                t[c]-=pi[9*c+i]*element.shape_value(i,rule.point(q));
+            }
           result[q] = 2 * G * dev3 (strain[q]);
           result[q][0][0] += t[0];
           result[q][1][1] += t[1];
           result[q][0][1] += t[2];
           result[q][2][2] -= t[0] + t[1];
+        }
+      return result;
+    }
+
+    template <int dim>
+    std::shared_ptr<BulkHistory<dim>>
+    BulkHistory<dim>::rotated_anchor(const PhysicalField &physical,const GradientField &gradient,
+                                    const double dt,const unsigned int order,
+                                    const std::function<Quadrature<dim>(const Cell &)> &quadrature) const
+    {
+      AssertThrow(dim==2 && dt>0. && std::isfinite(dt) && order>=8,
+                  ExcMessage("Projected complete cohesive rotation requires plane strain, positive dt and Gauss8."));
+      check_layout();
+      auto result=std::make_shared<BulkHistory>(this->get_simulator(),G,eta);
+      result->tensor=tensor;result->native=native;result->projection=projection;
+      for(const auto &entry:cells)
+        {
+          const Quadrature<dim> rule=quadrature ? quadrature(entry.second) : QGauss<dim>(order);
+          FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_JxW_values);
+          fe.reinit(entry.second);
+          const auto tau=physical(entry.second,rule);
+          const auto L=gradient(entry.second,rule);
+          AssertDimension(tau.size(),rule.size());AssertDimension(L.size(),rule.size());
+          FullMatrix<double> mass(9,9);
+          std::array<Vector<double>,3> rhs;
+          for(auto &v:rhs)v.reinit(9);
+          for(unsigned int q=0;q<rule.size();++q)
+            {
+              SymmetricTensor<2,2> in_plane;
+              in_plane[0][0]=tau[q][0][0];in_plane[1][1]=tau[q][1][1];in_plane[0][1]=tau[q][0][1];
+              SymmetricTensor<2,2> change;
+              if constexpr(dim==2)
+                change=ReconstructedFaultUtilities::rotate_plane_strain_stress_increment(in_plane,L[q],dt);
+              const double components[3]={change[0][0],change[1][1],change[0][1]};
+              AssertThrow(std::isfinite(change.norm()),ExcMessage("Nonfinite complete cohesive stress rotation."));
+              for(unsigned int i=0;i<9;++i)
+                {
+                  const double weight=fe.JxW(q)*element.shape_value(i,rule.point(q));
+                  for(unsigned int j=0;j<9;++j)mass(i,j)+=weight*element.shape_value(j,rule.point(q));
+                  for(unsigned int c=0;c<3;++c)rhs[c][i]+=weight*components[c];
+                }
+            }
+          mass.gauss_jordan();
+          for(unsigned int c=0;c<3;++c)
+            {
+              Vector<double> correction(9);mass.vmult(correction,rhs[c]);
+              for(unsigned int i=0;i<9;++i)result->tensor.at(entry.first)[9*c+i]+=correction[i];
+            }
         }
       return result;
     }
@@ -205,10 +271,19 @@ namespace aspect
       auto trial = std::make_shared<BulkHistory> (this->get_simulator (), G, eta);
       const double beta = 1 / (1 + dt * G / eta);
       trial->tensor = tensor;
+      trial->cut_geometry=cut_geometry;
+      trial->cut_tensor=cut_tensor;
       const auto source = project_native (du);
       for (auto &entry : trial->tensor)
         for (unsigned int i = 0; i < 27; ++i)
           entry.second[i] = beta * (entry.second[i] + source.at (entry.first)[i]);
+      for(auto &entry:trial->cut_tensor)
+        for(auto &region:entry.second)
+          {
+            const auto increment=restrict_polynomial(source.at(entry.first),region.second.bounds);
+            for(unsigned int i=0;i<27;++i)
+              region.second.coefficients[i]=beta*(region.second.coefficients[i]+increment[i]);
+          }
       LinearAlgebra::BlockVector owned (this->introspection ().index_sets.system_partitioning,
                                         this->get_mpi_communicator ());
       owned = 0.;
@@ -316,6 +391,7 @@ namespace aspect
                        ExcMessage ("Duplicate Maxwell checkpoint CellId owner."));
       AssertThrow (global.size () == this->get_triangulation ().n_global_active_cells (),
                    ExcMessage ("Incomplete native Maxwell checkpoint coverage."));
+      if(cut_geometry)pack_cut(global);
       return global;
     }
 
@@ -324,7 +400,8 @@ namespace aspect
     BulkHistory<dim>::restore (const CellRecords &record)
     {
       AssertThrow (
-          tensor.empty () && record.size () == this->get_triangulation ().n_global_active_cells (),
+          tensor.empty () && record.size () == this->get_triangulation ().n_global_active_cells()
+            +record.count("@objective_cut_geometry_v1"),
           ExcMessage ("Native Maxwell restore requires a fresh owner and matching cell coverage."));
       LinearAlgebra::BlockVector owned (this->introspection ().index_sets.system_partitioning,
                                         this->get_mpi_communicator ());
@@ -354,11 +431,13 @@ namespace aspect
                 if (owned.locally_owned_elements ().is_element (ids[j]))
                   owned[ids[j]] = value;
               }
-          AssertDimension (at, row.size ());
+          AssertThrow(at==row.size() || record.count("@objective_cut_geometry_v1"),
+                      ExcMessage("Unexpected Maxwell checkpoint extension without cut-space metadata."));
         }
       owned.compress (VectorOperation::insert);
       native = owned;
       projection = project_native (native);
+      if(record.count("@objective_cut_geometry_v1"))restore_cut(record);
       check_layout ();
     }
 

@@ -1,0 +1,22 @@
+{
+  "protected": {
+    "checked": 16,
+    "unchanged": true
+  },
+  "server": {
+    "checked": 220,
+    "unchanged": true
+  },
+  "cleanup": {
+    "checked": 328,
+    "unchanged": true
+  },
+  "coupled_entry_controls": {
+    "checked": 4,
+    "unchanged": true
+  },
+  "pre_C_controls": {
+    "checked": 2,
+    "unchanged": true
+  }
+}

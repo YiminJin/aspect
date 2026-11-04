@@ -113,7 +113,8 @@ namespace aspect
                               const double phi,const double temp,const double pressure,
                               const SymmetricTensor<2,dim> &eps,const std::vector<double> &all,
                               const SymmetricTensor<2,dim> &published_fe_stress,
-                              const SymmetricTensor<2,dim> &S,const SymmetricTensor<2,dim> &N)
+                              const SymmetricTensor<2,dim> &S,const SymmetricTensor<2,dim> &N,
+                              const Tensor<2,dim> &history_gradient)
       {
         std::vector<double> chemical;
         for (const auto c:intro.chemical_composition_field_indices()) chemical.push_back(all[c]);
@@ -139,7 +140,7 @@ namespace aspect
         // This observer runs after terminal publication. FE samples already
         // contain this Maxwell interval; never advance that state a second time.
         result.tau=model.uses_independent_bulk_history() && step>0 ? published_fe_stress
-                   : 2*r.eta_ve*(strain-result.chi*result.rate*S)+model.evaluate_frozen_maxwell_stress(temp,all,old);
+                   : 2*r.eta_ve*(strain-result.chi*result.rate*S)+model.evaluate_frozen_maxwell_stress(temp,all,old,&history_gradient);
         const auto bg=model.reconstructed_fault_background_tractions(0,segment,xi);
         result.bg=bg.first;
         result.bg_normal=bg.second;
@@ -157,6 +158,7 @@ namespace aspect
       const unsigned int nq=quad.size();
       std::vector<double> phi(nq),temp(nq),pressure(nq);
       std::vector<SymmetricTensor<2,dim>> eps(nq);
+      std::vector<Tensor<2,dim>> history_gradients(nq);
       std::vector<std::vector<double>> composition(intro.n_compositional_fields,std::vector<double>(nq));
       std::vector<double> native(6*n),common(write_files ? 6*n : 0);
       // The authoritative native array now uses the mechanical QP frames.
@@ -186,6 +188,8 @@ namespace aspect
             fe[intro.extractors.temperature].get_function_values(working,temp);
             fe[intro.extractors.pressure].get_function_values(working,pressure);
             fe[intro.extractors.velocities].get_function_symmetric_gradients(working,eps);
+            if (model.uses_jaumann_particle_stress())
+              fe[intro.extractors.velocities].get_function_gradients(sim.get_old_solution(),history_gradients);
             for (unsigned int c=0; c<composition.size(); ++c) fe[intro.extractors.compositional_fields[c]].get_function_values(working,composition[c]);
             for (unsigned int q=0; q<nq; ++q)
               {
@@ -203,7 +207,7 @@ namespace aspect
                 const auto S=a[q].active ? manager.get_shear_sense(a[q].fault_index)
                                           *symmetrize(outer_product(a[q].tangent,a[q].normal)) : first_frame.first;
                 const auto N=a[q].active ? symmetrize(outer_product(a[q].normal,a[q].normal)) : first_frame.second;
-                const auto s=evaluate(j,xi,a[q].active,phi[q],temp[q],pressure[q],eps[q],all,published,S,N);
+                const auto s=evaluate(j,xi,a[q].active,phi[q],temp[q],pressure[q],eps[q],all,published,S,N,history_gradients[q]);
                 if (a[q].active && s.chi>0.)
                   {
                     accumulate(native,j,a[q].shape_1,fe.JxW(q)*s.chi,pressure[q],s,s.tau*N);
@@ -243,6 +247,9 @@ namespace aspect
           Utilities::MPI::RemotePointEvaluation<dim> cache;
           cache.reinit(sim.get_phase_field_handler().get_grid_cache(),points);
           const auto gradients=VectorTools::point_gradients<dim>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.component_indices.velocities[0]);
+          std::vector<Tensor<2,dim>> point_history_gradients(points.size());
+          if (model.uses_jaumann_particle_stress())
+            point_history_gradients=VectorTools::point_gradients<dim>(cache,sim.get_dof_handler(),sim.get_old_solution(),VectorTools::EvaluationFlags::avg,intro.component_indices.velocities[0]);
           const auto ph=VectorTools::point_values<1>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.variable("phase_field").first_component_index);
           const auto T=VectorTools::point_values<1>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.component_indices.temperature);
           const auto p=VectorTools::point_values<1>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.component_indices.pressure);
@@ -264,7 +271,7 @@ namespace aspect
                                          : SymmetricTensor<2,dim>();
                     const auto frame=segment_frame(q.segment_index);
                     const auto s=evaluate(q.segment_index,q.xi,true,ph[k],T[k],p[k],symmetrize(gradients[k]),all,published,
-                                          frame.first,frame.second);
+                                          frame.first,frame.second,point_history_gradients[k]);
                     accumulate(common,q.segment_index,q.xi,q.weight,p[k],s,s.tau*frame.second);
                   }
               if (step==1)
@@ -272,7 +279,7 @@ namespace aspect
                   const auto a=manager.project_to_bulk_source(particle.get_location());
                   const auto frame=segment_frame(a.active ? a.segment_index : 0u);
                   const auto s=evaluate(a.active ? a.segment_index : 0u,a.active ? a.xi : 0.,a.active,
-                                        ph[k],T[k],p[k],symmetrize(gradients[k]),all, {},frame.first,frame.second);
+                                        ph[k],T[k],p[k],symmetrize(gradients[k]),all, {},frame.first,frame.second,point_history_gradients[k]);
                   // Timestep zero retained zero particle stress. This independent
                   // first finite-step formula must match the newly committed array.
                   const auto strain=model.uses_deviatoric_strain_rate()

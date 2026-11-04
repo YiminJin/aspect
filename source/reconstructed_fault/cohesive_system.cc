@@ -52,6 +52,9 @@ namespace aspect
             "Explicit checked initialization, never a trajectory or native restart.");
         prm.declare_entry ("Shear modulus", "1e6", Patterns::Double (0));
         prm.declare_entry ("Maxwell viscosity", "1e8", Patterns::Double (0));
+        prm.declare_entry("Stress rotation","legacy",
+          Patterns::Selection("legacy|Jaumann projected lagged Lie BE|Jaumann cut DGQ2 lagged Lie BE"),
+          "Opt-in fixed-geometry complete physical-tensor rotation, including native remainder and lifting, before backward Euler. Material transport and deformed geometry remain unsupported.");
         prm.declare_entry ("Fracture energy", "1", Patterns::Double (0));
         prm.declare_entry ("Intact strength", "3000", Patterns::Double (0));
         prm.declare_entry ("Background confinement", "10000", Patterns::Double (0));
@@ -101,6 +104,11 @@ namespace aspect
         d.initial_file = prm.get ("Initial state file");
         d.law.G = prm.get_double ("Shear modulus");
         d.law.eta = prm.get_double ("Maxwell viscosity");
+        AssertThrow(prm.get("Stress rotation")!="Jaumann projected lagged Lie BE",
+          ExcMessage("Uncut cohesive DGQ2 objective evolution is disabled: the regular lifting gradient has jumps within cells and fails its measured history-space target. Select the experimental cut DGQ2 option for bounded qualification; old-to-new checkpoint conversion is forbidden."));
+        d.jaumann_stress=prm.get("Stress rotation")=="Jaumann cut DGQ2 lagged Lie BE";
+        AssertThrow(!d.jaumann_stress || d.initial_mode!="checked prototype snapshot",
+          ExcMessage("Cut objective evolution does not admit old prototype trajectory import. Start from explicit fresh physical fields or resume a matching native cut-law checkpoint; no old-to-new conversion is qualified."));
         d.law.Gc = prm.get_double ("Fracture energy");
         d.law.peak = prm.get_double ("Intact strength");
         d.law.p0 = prm.get_double ("Background confinement");
@@ -179,6 +187,7 @@ namespace aspect
     {
       std::ostringstream out;
       out << std::setprecision (17) << "native exact jump cohesive RSF v2;";
+      if(jaumann_stress)out<<"cut piece/side DGQ2 total-spin Jaumann;accepted-gradient Lie BE v1;full native/lifting anchor;";
       for (const double x :
            { law.G, law.eta, law.Gc, law.peak, law.p0, law.direct, law.evolution, law.mu0, law.V0,
              law.Dc, law.radiation, R, support, spacing, candidate_extent, cadence, max_length })
@@ -432,7 +441,7 @@ namespace aspect
       auto result = s.bulk->evaluate (cell, rule);
       for (unsigned int q = 0; q < rule.size (); ++q)
         {
-          const auto p = system.get_mapping ().transform_unit_to_real_cell (cell, rule.point (q));
+          const auto p = s.bulk->trace_point(cell,rule.point(q));
           for (const auto &mode : s.geometry.lifting (p))
             result[q] += 2 * law.G * s.memory.at (mode.index) * dev3 (mode.gradient);
         }

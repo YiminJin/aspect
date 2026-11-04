@@ -1,0 +1,38 @@
+{
+  "entry_controls": {
+    "checked": 5,
+    "mismatches": []
+  },
+  "protected": {
+    "checked": 16,
+    "mismatches": []
+  },
+  "server": {
+    "checked": 220,
+    "mismatches": []
+  },
+  "cleanup": {
+    "checked": 328,
+    "mismatches": []
+  },
+  "pre_C_controls": {
+    "checked": 2,
+    "mismatches": []
+  },
+  "coupled_controls": {
+    "checked": 4,
+    "mismatches": []
+  },
+  "pre-support": {
+    "checked": 1,
+    "mismatches": []
+  },
+  "support-admission": {
+    "checked": 1,
+    "mismatches": []
+  },
+  "pre_support_checkers": {
+    "checked": 2,
+    "mismatches": []
+  }
+}

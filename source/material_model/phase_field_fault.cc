@@ -112,7 +112,7 @@ namespace aspect
               // The ordinary Stokes assembler uses eta_ve for the current strain
               // rate; the reconstructed-fault assembler supplies the frozen stress.
               const double G = compute_elastic_shear_modulus(volume_fractions);
-              const double eta = compute_creep_viscosity(volume_fractions, in.temperature[i]);
+              const double eta = material_viscosity(in.position[i],compute_creep_viscosity(volume_fractions, in.temperature[i]));
               const double time_step = (this->get_timestep_number() > 0
                                         ? this->get_timestep()
                                         : initial_time_step);
@@ -474,6 +474,33 @@ namespace aspect
                             "fault tangents. The legacy particle default is unchanged. The new "
                             "selection currently requires fresh frozen mature 2-D runs; restart "
                             "conversion is not supported. Accepted FE strain always uses the deviator.");
+          prm.declare_entry("Stress rotation", "legacy", Patterns::Selection("legacy|Jaumann lagged Lie|Jaumann DG Lie|Jaumann DG material Lie"),
+                            "Experimental total-material Jaumann spin from the accepted velocity gradient. "
+                            "Finite rotation precedes the existing exponential Maxwell/source substep; "
+                            "the complete method is first order. Restricted to fixed-mesh frozen mature "
+                            "particle stress with matched constant G/eta, the 3D deviator and stationary BP3 samples. "
+                            "Jaumann DG Lie selects complete trial/residual DGQ2 history on the "
+                            "matched-constant-material fixed-profile mature path with accepted history. "
+                            "Jaumann DG material Lie additionally transports complete mature histories, "
+                            "curve and phase with accepted FE velocity. Growth and boundary completion remain disabled.");
+          prm.declare_entry("Material profile transport", "Q1 remap",
+                            Patterns::Selection("Q1 remap|bounded MacCormack"),
+                            "Material Q1 profile and obstacle transport. The optional MacCormack "
+                            "correction is limited to accepted donor-cell extrema; growth remains disabled.");
+          prm.declare_entry("Material tensor inflow", "zero",
+                            Patterns::Selection("zero|accepted trace"),
+                            "Exterior T and R+B during the split advection stage: zero history or "
+                            "constant-normal continuation of their accepted boundary traces. "
+                            "The latter freezes the exterior history during advection, before reaction.");
+          prm.enter_subsection("Material viscosity multiplier");
+          Functions::ParsedFunction<dim>::declare_parameters(prm,1);
+          prm.declare_entry("Function expression","1",Patterns::Anything(),
+                            "Positive spatial multiplier of the reference viscosity, for the experimental material DG path. "
+                            "Sampled at the endpoint position/time; constant G. Legacy paths require one.");
+          prm.leave_subsection();
+          prm.enter_subsection("Material initial phase");
+          Functions::ParsedFunction<dim>::declare_parameters(prm,1);
+          prm.leave_subsection();
           prm.declare_entry("FE bulk normal quadrature points", "3",
                             Patterns::Integer(3),
                             "Gauss points per coordinate in stationary mature independent history, "
@@ -608,6 +635,28 @@ namespace aspect
           dg_trial_stress_history = prm.get("Bulk history representation") == "DG trial stress";
           dg_accepted_history = prm.get_bool("Enable prescribed DG accepted history");
           consistent_particle_strain = prm.get("Particle stress strain convention") == "three dimensional deviator";
+          jaumann_particle_stress = prm.get("Stress rotation") == "Jaumann lagged Lie";
+          dg_material_transport = prm.get("Stress rotation") == "Jaumann DG material Lie";
+          material_bounded_profile=prm.get("Material profile transport")=="bounded MacCormack";
+          material_trace_inflow=prm.get("Material tensor inflow")=="accepted trace";
+          AssertThrow(dg_material_transport || (!material_bounded_profile && !material_trace_inflow),
+                      ExcMessage("Material profile/inflow selections require Jaumann DG material Lie."));
+          jaumann_dg_stress = dg_material_transport || prm.get("Stress rotation") == "Jaumann DG Lie";
+          prm.enter_subsection("Material viscosity multiplier");
+          material_viscosity_multiplier.parse_parameters(prm);
+          material_variable_viscosity=dg_material_transport && prm.get("Function expression")!="1";
+          material_viscosity_identity=prm.get("Function expression")+"|"+prm.get("Function constants")+"|"+prm.get("Variable names");
+          AssertThrow(dg_material_transport || prm.get("Function expression")=="1",
+                      ExcMessage("Spatial viscosity multiplier requires Jaumann DG material Lie."));
+          prm.leave_subsection();
+          prm.enter_subsection("Material initial phase");
+          material_initial_phase.parse_parameters(prm);
+          material_viscosity_identity+="|initial phase:"+prm.get("Function expression")+"|"+prm.get("Function constants")+"|"+prm.get("Variable names");
+          prm.leave_subsection();
+          // Preserve the existing schema7 identity for the retained default.
+          if(material_bounded_profile || material_trace_inflow)
+            material_viscosity_identity+="|profile transport:"+prm.get("Material profile transport")
+                                      +"|tensor inflow:"+prm.get("Material tensor inflow");
           fe_bulk_normal_quadrature_points = prm.get_integer("FE bulk normal quadrature points");
           consistent_endpoint_phase = prm.get_bool("Consistent endpoint phase solve");
           fe_initial_phase_profile = prm.get("FE initial phase profile file");
@@ -617,6 +666,8 @@ namespace aspect
           unloaded_cohesive_initialization = prm.get("Initial cohesive state") == "unloaded";
           surface_cohesive_history = prm.get("Cohesive history representation") == "surface elastic slip";
           mature_frictional_fault = prm.get("Fault constitutive mode") == "mature frictional";
+          AssertThrow(!jaumann_particle_stress || mature_frictional_fault,
+                      ExcMessage("Jaumann lagged Lie is confined to the mature physical particle-stress branch; cohesive histories are unsupported."));
           AssertThrow(!(recoverable_phase_history || unloaded_cohesive_initialization || surface_cohesive_history)
                       || (this->get_parameters().reconstruct_faults && !mature_frictional_fault),
                       ExcMessage("Recoverable history and unloaded initialization require reconstructed cohesive faults."));
@@ -710,10 +761,25 @@ namespace aspect
                                      [&](double value) { return value == thermal_conductivities[0]; }),
                           ExcMessage("Homogeneous mesh data requires homogeneous thermal conductivities."));
             }
+          if(dg_material_transport)
+            for(const auto *name:{"Reference viscosities","Elastic shear moduli","Cohesions",
+                  "Critical energy release rates","Thermal viscosity exponents","Friction law",
+                  "Reference friction coefficients","Direct effect parameters","Evolution effect parameters",
+                  "Characteristic slip distance","Reference slip rate","Minimum slip rate",
+                  "Radiation damping coefficients","Use regularized formulation",
+                  "Use adiabatic pressure in fault friction"})
+              material_viscosity_identity+="|"+std::string(name)+"="+prm.get(name);
         }
         prm.leave_subsection();
       }
       prm.leave_subsection();
+      if(dg_material_transport)
+        {
+          prm.enter_subsection("Phase field model");
+          for(const auto *name:{"Length scale","Geometric function type","Degradation curvature parameter"})
+            material_viscosity_identity+="|"+std::string(name)+"="+prm.get(name);
+          prm.leave_subsection();
+        }
       if(bulk_cohesive_phase)
         {
           // Tensor histories use the same unique CellId ownership and native
@@ -771,8 +837,40 @@ namespace aspect
           prm.leave_subsection();
           return;
         }
+      AssertThrow(!jaumann_dg_stress || (dim==2 && mature_frictional_fault
+                  && dg_trial_stress_history && dg_accepted_history && !consistent_endpoint_phase
+                  && !evolve_phase_field && fe_bulk_normal_quadrature_points>=8
+                  && !this->get_parameters().cohesive_rsf_propagation
+                  && this->get_parameters().initial_adaptive_refinement==0),
+                  ExcMessage("Jaumann DG Lie requires mature accepted DGQ2 history, fixed geometry and at least Gauss8; changing-profile/cohesive combinations remain unsupported."));
+      AssertThrow(!dg_material_transport || (homogeneous_mesh_data
+                  && this->get_parameters().adaptive_refinement_interval==0
+                  && this->get_parameters().additional_refinement_times.empty()
+                  && !this->get_parameters().mesh_deformation_enabled),
+                  ExcMessage("Material DG currently requires a fixed Cartesian bulk mesh, homogeneous reference coefficients and growth disabled; moving AMR is unqualified."));
+      AssertThrow(!jaumann_particle_stress || (dim==2 && mature_frictional_fault && consistent_particle_strain
+                  && !evolve_phase_field && !uses_independent_bulk_history() && !homogeneous_mesh_data
+                  && !this->get_parameters().cohesive_rsf_propagation
+                  && this->get_parameters().initial_adaptive_refinement==0
+                  && this->get_parameters().adaptive_refinement_interval==0
+                  && this->get_parameters().additional_refinement_times.empty()),
+                  ExcMessage("Jaumann lagged Lie requires fixed-mesh frozen mature particle stress and the 3D deviator. "
+                             "DG/FE histories require the missing localized residual-spin representation; "
+                             "cohesive routes require a separate complete history/energy derivation."));
+      if (jaumann_particle_stress)
+        {
+          for (unsigned int j=0;j<elastic_shear_moduli.size();++j)
+            AssertThrow(elastic_shear_moduli[j]==elastic_shear_moduli[0]
+                        && reference_viscosities[j]==reference_viscosities[0]
+                        && thermal_viscosity_exponents[j]==0.,
+                        ExcMessage("Jaumann lagged Lie currently requires matched constant G and temperature-independent eta. Variable-coefficient energy terms are unqualified."));
+          prm.enter_subsection("Particles");
+          AssertThrow(prm.get("Integration scheme")=="BP3 stationary samples" && prm.get("Load balancing strategy")=="none",
+                      ExcMessage("Jaumann lagged Lie currently requires stationary BP3 samples without replenishment. Transport is unqualified."));
+          prm.leave_subsection();
+        }
       AssertThrow(!consistent_particle_strain || (dim == 2 && mature_frictional_fault && !evolve_phase_field
-                                                  && (!this->get_parameters().resume_computation || (dg_trial_stress_history && dg_accepted_history))),
+                                                  && (!this->get_parameters().resume_computation || jaumann_particle_stress || (dg_trial_stress_history && dg_accepted_history))),
                   ExcMessage("Deviatoric particle stress requires frozen mature 2-D mechanics; restart is restricted to accepted DG samples."));
       if (uses_independent_bulk_history())
         {
@@ -785,8 +883,8 @@ namespace aspect
                                  "consistent-normalization configuration; restart is unsupported."));
           AssertThrow(mature_frictional_fault
                       ? (!evolve_phase_field && !consistent_endpoint_phase
-                         && this->get_parameters().adaptive_refinement_interval==0
-                         && this->get_parameters().additional_refinement_times.empty())
+                         && (jaumann_dg_stress || (this->get_parameters().adaptive_refinement_interval==0
+                         && this->get_parameters().additional_refinement_times.empty())))
                       : (surface_cohesive_history && cohesive_work_measure
                          && unloaded_cohesive_initialization && recoverable_phase_history
                          && !fault_friction.has_state_variable()),
@@ -839,8 +937,8 @@ namespace aspect
                            || (evolve_phase_field && consistent_endpoint_phase && dg_accepted_history))
                           && (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
                               || (consistent_endpoint_phase && dg_accepted_history))))
-                      && this->get_parameters().adaptive_refinement_interval==0
-                      && this->get_parameters().additional_refinement_times.empty()),
+                      && (jaumann_dg_stress || (this->get_parameters().adaptive_refinement_interval==0
+                      && this->get_parameters().additional_refinement_times.empty()))),
                   ExcMessage("DG trial stress requires fixed-reference cohesive history or homogeneous frozen mature history; MPI/restart require accepted DG; phase evolution "
                              "requires consistent endpoint and accepted-history publication."));
       AssertThrow(!consistent_endpoint_phase || (uses_independent_bulk_history() && evolve_phase_field

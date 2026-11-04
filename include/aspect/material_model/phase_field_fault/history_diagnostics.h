@@ -42,9 +42,9 @@ namespace aspect
     {
       public:
         void open_stress_cycle(const std::string &output_directory,
-                               unsigned int step, MPI_Comm communicator);
+                               unsigned int step, MPI_Comm communicator, bool spin = false);
         void open_source_history(const std::string &output_directory,
-                                 unsigned int step, MPI_Comm communicator);
+                                 unsigned int step, MPI_Comm communicator, bool spin = false);
 
         bool selects_stress_cycle(const Particles::ParticleAccessor<dim> &particle) const;
         bool source_history_is_open() const;
@@ -57,16 +57,19 @@ namespace aspect
                                  const Tensor<2,dim> &gradient,
                                  const SymmetricTensor<2,dim> &old_stress,
                                  const SymmetricTensor<2,dim> &effective_strain_rate,
-                                 const SymmetricTensor<2,dim> &candidate_stress);
+                                 const SymmetricTensor<2,dim> &candidate_stress,
+                                 double spin_angle = 0., const SymmetricTensor<2,dim> *rotated_history = nullptr);
         void record_source_history(const Particles::ParticleAccessor<dim> &particle,
                                    double phase_field, double continued_chi,
                                    double continued_V, double eta_ve, double beta,
                                    const Tensor<2,dim> &gradient,
                                    const SymmetricTensor<2,dim> &continued_crack,
                                    const SymmetricTensor<2,dim> &old_stress,
-                                   const SymmetricTensor<2,dim> &candidate_stress);
+                                   const SymmetricTensor<2,dim> &candidate_stress,
+                                   double spin_angle = 0., const SymmetricTensor<2,dim> *rotated_history = nullptr);
 
       private:
+        bool spin_enabled = false;
         std::ofstream source_history_audit;
         std::set<std::string> trace_cells;
         std::ofstream stress_cycle_audit;

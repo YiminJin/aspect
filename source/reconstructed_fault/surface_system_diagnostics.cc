@@ -128,12 +128,15 @@ namespace aspect
         std::vector<double> phi(n),temp(n),p(n);
         std::vector<SymmetricTensor<2,dim>> eps(n);
         std::vector<Tensor<2,dim>> gradients(n);
+        std::vector<Tensor<2,dim>> history_gradients(n);
         std::vector<std::vector<double>> fields(intro.n_compositional_fields,std::vector<double>(n));
         line_fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(bulk_state,phi);
         line_fe[intro.extractors.temperature].get_function_values(bulk_state,temp);
         line_fe[intro.extractors.pressure].get_function_values(bulk_state,p);
         line_fe[intro.extractors.velocities].get_function_symmetric_gradients(bulk_state,eps);
         line_fe[intro.extractors.velocities].get_function_gradients(bulk_state,gradients);
+        if (phase_field_fault.uses_jaumann_particle_stress())
+          line_fe[intro.extractors.velocities].get_function_gradients(this->get_old_solution(),history_gradients);
         for (unsigned int c=0; c<fields.size(); ++c)
           line_fe[intro.extractors.compositional_fields[c]].get_function_values(bulk_state,fields[c]);
         const auto &pm=this->get_particle_manager(0);
@@ -161,6 +164,11 @@ namespace aspect
             input.temperature=temp[q];
             input.dynamic_pressure=p[q];
             input.strain_rate=eps[q];
+            if (phase_field_fault.uses_jaumann_particle_stress())
+              {
+                input.history_velocity_gradient=history_gradients[q];
+                input.has_history_velocity_gradient=true;
+              }
             input.capture_stress_components=true;
             input.slip_tensor=manager.get_shear_sense(a.fault_index)
                               *symmetrize(outer_product(tangent,normal));

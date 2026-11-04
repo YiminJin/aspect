@@ -1,0 +1,297 @@
+{
+  "captured_utc": "2026-11-04T00:25:23.978564+00:00",
+  "root": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "branch": "pf-rsf-particle-free",
+  "revision": "27178813cebd471b93a7a9308f41215b71b4a20b",
+  "selected_experiments_complete": true,
+  "production_ready": false,
+  "full_coupled_energy_qualified": false,
+  "unchanged_native_source_files": 928,
+  "unchanged_existing_artifacts": {
+    "build-particle-free/native/aspect-release": {
+      "sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "bytes": 49168648,
+      "runtime_resolves": true
+    },
+    "build-particle-free/transported-objective/stage-c/checks/libtransported_material_native.release.so": {
+      "sha256": "c86534ff4dd082fbd78eefe09eb032a8fb06f00b8660516e6a406badd10700cd",
+      "bytes": 472248,
+      "runtime_resolves": true
+    },
+    "build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": {
+      "sha256": "e99d9422de0a975f29d437a0f8de21db9a25af619a2a17ce7e620a0bc2133f18",
+      "bytes": 1051224,
+      "runtime_resolves": true
+    },
+    "build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": {
+      "sha256": "b1375b799407809da445e604af751ace4762b545b4402f9fbba998e64d3a0da8",
+      "bytes": 3197760,
+      "runtime_resolves": true
+    },
+    "build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": {
+      "sha256": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db",
+      "bytes": 569216,
+      "runtime_resolves": true
+    }
+  },
+  "new_checker": {
+    "path": "build-particle-free/transported-objective/stage-c/checks/libtransported_isolation_native.release.so",
+    "sha256": "d992d86435d00954d8502ff1122a534ccded2f06b5e32e408afef6e11d4a0e93",
+    "runtime_resolves": true
+  },
+  "cases": {
+    "boundary-profile-n8": {
+      "arguments": {
+        "label": "boundary-profile-n8",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.0,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 3,
+        "eta": "1",
+        "reject": false,
+        "audit": false,
+        "isolation": true,
+        "phase": ".35*exp(-((y-.3*x)/.22)^2)*(1+.2*cos(2*x))",
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/boundary-profile-n8/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "d992d86435d00954d8502ff1122a534ccded2f06b5e32e408afef6e11d4a0e93",
+      "input_sha256": "4b2f82be9c6410df00fd496d64f8fee96e7c74c29147fdd9b86531ef421add56",
+      "runner_sha256": "aedfb4dc2acb79c497779869cffecc94f9483a27f2568a70530421ca01c8d824",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 10.93930707400068
+    },
+    "boundary-profile-n16": {
+      "arguments": {
+        "label": "boundary-profile-n16",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.0,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1",
+        "reject": false,
+        "audit": false,
+        "isolation": true,
+        "phase": ".35*exp(-((y-.3*x)/.22)^2)*(1+.2*cos(2*x))",
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/boundary-profile-n16/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "d992d86435d00954d8502ff1122a534ccded2f06b5e32e408afef6e11d4a0e93",
+      "input_sha256": "a029c78b420c134bcb9b44e6965da3de24447185bc054ce6c52b06ef1f5760d9",
+      "runner_sha256": "aedfb4dc2acb79c497779869cffecc94f9483a27f2568a70530421ca01c8d824",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 23.218154357997264
+    },
+    "boundary-profile-n32": {
+      "arguments": {
+        "label": "boundary-profile-n32",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.0,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 5,
+        "eta": "1",
+        "reject": false,
+        "audit": false,
+        "isolation": true,
+        "phase": ".35*exp(-((y-.3*x)/.22)^2)*(1+.2*cos(2*x))",
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/boundary-profile-n32/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "d992d86435d00954d8502ff1122a534ccded2f06b5e32e408afef6e11d4a0e93",
+      "input_sha256": "158033a4bf8e30f47d593fc65bb6202dd0f6b8db456200b67054dcab274dec01",
+      "runner_sha256": "aedfb4dc2acb79c497779869cffecc94f9483a27f2568a70530421ca01c8d824",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 44.009003576000396
+    },
+    "compact-profile-full": {
+      "arguments": {
+        "label": "compact-profile-full",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1",
+        "reject": false,
+        "audit": false,
+        "isolation": false,
+        "phase": ".35*max(0,1-(x/1.4)^2)^4*max(0,1-((y-.3*x)/.6)^2)^4",
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/compact-profile-full/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "c86534ff4dd082fbd78eefe09eb032a8fb06f00b8660516e6a406badd10700cd",
+      "input_sha256": "22ab0b99aaf632c6b7c85228fb169c929b84c36e63789af67dc4911264c4d768",
+      "runner_sha256": "aedfb4dc2acb79c497779869cffecc94f9483a27f2568a70530421ca01c8d824",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 18.704304793998745
+    },
+    "compact-profile-half": {
+      "arguments": {
+        "label": "compact-profile-half",
+        "speed": 0.4,
+        "dt": 0.05,
+        "end": 0.39999999999999997,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1",
+        "reject": false,
+        "audit": false,
+        "isolation": false,
+        "phase": ".35*max(0,1-(x/1.4)^2)^4*max(0,1-((y-.3*x)/.6)^2)^4",
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/compact-profile-half/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "c86534ff4dd082fbd78eefe09eb032a8fb06f00b8660516e6a406badd10700cd",
+      "input_sha256": "18c0f55290de40d6b0a83062177dcd106734cfee760dda2002677294a5bec832",
+      "runner_sha256": "aedfb4dc2acb79c497779869cffecc94f9483a27f2568a70530421ca01c8d824",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 24.96651607900276
+    }
+  },
+  "nonpublishing_transport_rows": 30,
+  "source_input_files": 59,
+  "source_archive_sha256": "3b84d249070a147d24467dbbbe7178f1f63030857cde299b267811af44d0a404",
+  "input_field_files": 147,
+  "earlier_complete_native_source_archive_sha256": "67709e38a46398ba22514a084f9c64b88adfa86e2d01c3d4815a640fae3da3c5",
+  "preservation": {
+    "protected": {
+      "checked": 16,
+      "unchanged": true
+    },
+    "server": {
+      "checked": 220,
+      "unchanged": true
+    },
+    "cleanup": {
+      "checked": 328,
+      "unchanged": true
+    },
+    "coupled_entry_controls": {
+      "checked": 4,
+      "unchanged": true
+    },
+    "pre_C_controls": {
+      "checked": 2,
+      "unchanged": true
+    }
+  },
+  "logs": {
+    "build-particle-free/transported-objective/stage-c/boundary-profile-build.log": "cc350e09c1c414d06cf6072bfb4d92cfd19c7570bfde5358a4c7445c0b866d52",
+    "build-particle-free/transported-objective/stage-c/boundary-profile-build-2.log": "476709ebcacddaa55cd649a03f014bdd1b807e395236ef7c6c42b0754cc78540",
+    "build-particle-free/transported-objective/stage-c/boundary-profile-configure.log": "27ed1a3a04a8b00552a673e6672a9e2d38e85429651ad719e49460b4edfedfe3",
+    "build-particle-free/transported-objective/stage-c/material-runs/boundary-profile-n8/run.log": "83832cdbdefcd003a04dbb09ad578521a0f855686a699db28e3d073e3465aeed",
+    "build-particle-free/transported-objective/stage-c/material-runs/boundary-profile-n16/run.log": "0d41acfee82b655a380e4b394128b3179cd73f8a4b5ce701947306e75f487498",
+    "build-particle-free/transported-objective/stage-c/material-runs/boundary-profile-n32/run.log": "8f6d8778bfcdb26dd29caf133d5a0ffea8afe9e9796a2d637ffaf282f3384f87",
+    "build-particle-free/transported-objective/stage-c/material-runs/compact-profile-full/run.log": "6770afd4c363dbf00859cbc572d52fb6bbfed4c8dcdea1aa1ccb5283fc588cdc",
+    "build-particle-free/transported-objective/stage-c/material-runs/compact-profile-half/run.log": "b14df3b2097c95c335e154c4c770c8b16d8e69cb0620accbcf5c2b2334756cb4"
+  },
+  "results_sha256": {
+    "boundary-transport.json": "810202dcefdc0c821a15e0a895cd8b25a295cf7877c9d36d6067ecc7eaa457e0",
+    "entry.json": "75f5205a0d9d32ebb8dfd5691bc8502754a3010a274cbe9354dbda7fa14fc899",
+    "input-fields-sha256.json": "cbafa481cfd235a83569f32b62b01dd5b5f6fb85da7592228f5df2e78ad0230f",
+    "preservation.json": "f4066d1ff2be70e83f626a0441a2eb14252b5b5ff47afd8d9fbe7aaf8b3bcff0",
+    "profile-projection.json": "b519fce05135d97bb41c64716618e00142251cd4e6119cea1e487f4049cdcf92",
+    "source-input-manifest.json": "23312414c529d35c6f0b3c1bf5127e2e603befb7dce54dcfd9c531225c59cd36",
+    "tensor-defect.json": "ea9bf2c50f9f49c85b20bdc33e56a0f13b9aacb9717874d8345f8835ec116dd9"
+  },
+  "retained_diagnostic_failures": [
+    "Build before CMake regeneration: new target absent; initial log retained.",
+    "Strict mathematical Q1 replay initially differs by9.11e-8 near a cell face; native lookup tolerance/averaging is separately modeled, not a relaxed screen."
+  ],
+  "verification": "Native identity/reference/snapshot checks, independent Q1 variance/replay, syntax and diff checks; no unchanged-core full suite rerun.",
+  "limits": [
+    "No production/event continuation.",
+    "No full coupled work/energy qualification.",
+    "No change of zero-inflow/Q1 scheme.",
+    "Prior cohesive energy and tip failures remain.",
+    "39/45 historical frame loss and old temporary-log loss remain."
+  ]
+}

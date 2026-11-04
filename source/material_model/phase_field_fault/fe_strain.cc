@@ -43,22 +43,22 @@ namespace aspect
   {
     template<int dim> bool PhaseFieldFault<dim>::initialize_fe_shared_phase(LinearAlgebra::BlockVector &trial) const
     {
-      if (fe_initial_phase_profile.empty() && !uses_prescribed_dg_geometry())
+      if (fe_initial_phase_profile.empty() && !uses_prescribed_dg_geometry() && !dg_material_transport)
         return false;
-      AssertThrow(consistent_endpoint_phase && this->get_timestep_number()==0
+      AssertThrow((consistent_endpoint_phase || dg_material_transport) && this->get_timestep_number()==0
                   && !this->get_parameters().resume_computation && !fe_strain_state,
                   ExcMessage("Shared profile is fresh pre-existing damage; history conversion is prohibited."));
       std::ifstream input(fe_initial_phase_profile);
-      AssertThrow(uses_prescribed_dg_geometry() || bool(input),ExcMessage("Cannot open FE initial phase profile."));
+      AssertThrow(dg_material_transport || uses_prescribed_dg_geometry() || bool(input),ExcMessage("Cannot open FE initial phase profile."));
       std::vector<std::pair<double,double>> data;
       double y,value;
-      while (!uses_prescribed_dg_geometry() && input>>y>>value)
+      while (!dg_material_transport && !uses_prescribed_dg_geometry() && input>>y>>value)
         {
           AssertThrow(std::isfinite(y) && value>=0. && value<1.
                       && (data.empty() || y>data.back().first),ExcMessage("Invalid shared phase data."));
           data.emplace_back(y,value);
         }
-      AssertThrow(uses_prescribed_dg_geometry() || (input.eof() && data.size()>=2),ExcMessage("Malformed shared phase data."));
+      AssertThrow(dg_material_transport || uses_prescribed_dg_geometry() || (input.eof() && data.size()>=2),ExcMessage("Malformed shared phase data."));
       LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
       owned=trial;
       const auto component=this->introspection().variable("phase_field").first_component_index;
@@ -72,9 +72,9 @@ namespace aspect
                 const auto i=indices[this->get_fe().component_to_system_index(component,v)];
                 if (!owned.locally_owned_elements().is_element(i))
                   continue;
-                if(uses_prescribed_dg_geometry())
+                if(uses_prescribed_dg_geometry() || dg_material_transport)
                   {
-                    const double phi=prescribed_geometry_phase(cell->vertex(v));
+                    const double phi=dg_material_transport ? material_initial_phase.value(cell->vertex(v)) : prescribed_geometry_phase(cell->vertex(v));
                     AssertThrow(std::isfinite(phi) && phi>=0. && phi<1.,ExcMessage("Inadmissible prescribed physical phase."));
                     owned[i]=phi;
                     continue;
@@ -247,7 +247,7 @@ namespace aspect
         }
       AssertThrow(((this->get_timestep_number()==0 && !this->get_parameters().resume_computation)
                    || (restoring && dg_accepted_history && this->get_parameters().resume_computation)
-                   || (transferring && dg_accepted_history && consistent_endpoint_phase))
+                   || (transferring && dg_accepted_history && (consistent_endpoint_phase || jaumann_dg_stress)))
                   && Plugins::plugin_type_matches<GeometryModel::Box<dim>>(this->get_geometry_model())
                   && !benchmark_retained_stress
                   && (mature_frictional_fault || normalization_surface_subdivisions==1),
@@ -312,7 +312,7 @@ namespace aspect
           for (const auto &vertex:state->vertices)
             {
               const auto offset=vertex-fault.vertex(0);
-              AssertThrow((offset-(offset*tangent)*tangent).norm()<=1.e-10*length,
+              AssertThrow(dg_material_transport || (offset-(offset*tangent)*tangent).norm()<=1.e-10*length,
                           ExcMessage("Mature FE history requires straight fixed geometry."));
             }
           for (const auto &cell:this->get_dof_handler().active_cell_iterators())
@@ -493,9 +493,19 @@ namespace aspect
       if (cached!=s.stress_samples.end())
         return cached->second;
       aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::history_cache_misses);
-      const auto stress=dg_trial_stress_history
-                        ? evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,id,x)
+      const bool incoming_objective=jaumann_dg_stress && s.committed_step!=this->get_timestep_number();
+      const auto history=incoming_objective ? s.objective_anchor : s.dg_history;
+      AssertThrow(!jaumann_dg_stress || history,ExcMessage("Objective DG mechanics requires its immutable per-attempt anchor."));
+      auto stress=dg_trial_stress_history
+                        ? evaluate_dg_history_stress(*history,s.Z,s.I,id,x)
                         : evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,id,x);
+      if(incoming_objective && dg_material_reaction)
+        {
+          const double dt=this->get_timestep_number()>0 ? this->get_timestep() : initial_time_step;
+          const double beta=compute_maxwell_coefficients(material_viscosity(x,s.eta),s.G,dt).beta;
+          AssertThrow(beta>0.,ExcMessage("Material outer correction requires a resolved relaxation interval; reduce dt."));
+          stress+=material_reaction_correction(id,x)/beta;
+        }
       s.stress_samples.emplace(key,stress);
       return stress;
     }
@@ -597,6 +607,11 @@ namespace aspect
       validate_fe_strain_restrictions();
       const auto &s=*fe_strain_state;
       AssertThrow(s.committed_step!=this->get_timestep_number(),ExcMessage("FE strain cannot commit twice in a physical step."));
+      if(material_variable_viscosity)
+        {
+          AssertThrow(dg_material_reaction && !transported,ExcMessage("Missing converged coupled material reaction."));
+          return make_material_reaction(bulk,this->get_reconstructed_fault_manager().get_slip_rate(0));
+        }
       const auto c=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
       auto update=std::make_shared<FEStrainUpdate>();
       if (dg_trial_stress_history)
@@ -608,7 +623,9 @@ namespace aspect
             update->displacement_history.block(this->introspection().variable("phase_field").block_index)=bulk.block(this->introspection().variable("phase_field").block_index);
           AssertThrow(!transported || (dg_accepted_history && transported->space==s.dg_history->space),
                       ExcMessage("Only PF5 may supply an independently transported native candidate."));
-          update->dg_history=transported ? transported : make_dg_history_trial(*s.dg_history,bulk,c,true);
+          const auto incoming=jaumann_dg_stress ? s.objective_anchor : s.dg_history;
+          AssertThrow(incoming,ExcMessage("Missing independent DG publication anchor."));
+          update->dg_history=transported ? transported : make_dg_history_trial(*incoming,bulk,c,true);
         }
       else
         update_fe_strain_trial(bulk,c,update->displacement_history);
@@ -654,7 +671,7 @@ namespace aspect
             evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,id,x,&old_scale);
           else
             evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,id,x,&old_scale);
-          const auto c=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
+          const auto c=compute_maxwell_coefficients(material_viscosity(x,s.eta),s.G,this->get_timestep());
           // History/localization evaluation only. A small resulting strain
           // does not bound differentiation of cancelling velocity terms; DG
           // source projection/differentiation has a separate operand bound.
@@ -678,6 +695,8 @@ namespace aspect
       fe_strain_state->Z.swap(update->Z);
       fe_strain_state->I.swap(update->I);
       fe_strain_state->stress_samples.clear();
+      fe_strain_state->objective_anchor.reset();
+      fe_strain_state->objective_parent.reset();
       fe_strain_state->committed_step=this->get_timestep_number();
       if (dg_accepted_history || (dg_trial_stress_history && mature_frictional_fault))
         ++fe_strain_state->accepted_publications;

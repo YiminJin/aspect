@@ -119,6 +119,16 @@ namespace aspect
                            this->get_mpi_communicator());
           component=0.;
         }
+      if (jaumann_dg_stress)
+        {
+          history->residual=std::make_shared<DGHistory>();
+          history->residual->space=history->space;
+          for (auto &component:history->residual->trial_stress)
+            {
+              component.reinit(history->space->dofs.locally_owned_dofs(),history->space->relevant,this->get_mpi_communicator());
+              component=0.;
+            }
+        }
       state.dg_history=std::move(history);
       this->get_pcout()<<"   Accepted DGQ2 trial stress: independent native source; "
                        <<(consistent_endpoint_phase ? "cohesive endpoint phase trials; fixed geometry; " : "fixed phase/geometry; ")
@@ -335,6 +345,22 @@ namespace aspect
                                         this->get_mpi_communicator());
           trial->trial_stress[c]=owned[c];
         }
+      if (incoming.residual)
+        {
+          trial->residual=std::make_shared<DGHistory>();
+          trial->residual->space=incoming.space;
+          for (unsigned int c=0;c<owned.size();++c)
+            {
+              LinearAlgebra::Vector scaled;
+              scaled.reinit(incoming.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
+              for (const auto i:scaled.locally_owned_elements())
+                scaled[i]=coefficients.beta*incoming.residual->trial_stress[c][i];
+              scaled.compress(VectorOperation::insert);
+              auto &r=trial->residual->trial_stress[c];
+              r.reinit(incoming.residual->trial_stress[c]);
+              r=scaled;
+            }
+        }
       return trial;
     }
 
@@ -495,27 +521,16 @@ namespace aspect
         {
           // General oblique map, including the retained constant endpoint
           // continuation. Z is auxiliary Maxwell/slip memory, not I*C.
-          const auto &manager=this->get_reconstructed_fault_manager();
-          const auto source=sample ? sample->source : manager.project_to_bulk_source(point);
-          SymmetricTensor<2,dim> correction;
-          if (source.active)
+          const auto correction=evaluate_mature_dg_memory(point,phi[0],Z,I,sample ? &sample->source : nullptr);
+          if (history.residual)
             {
-              const auto &fault=manager.get_fault(source.fault_index);
-              const auto j=source.segment_index;
-              const double t=source.xi;
-              const double z=(1-t)*Z.at(j)+t*Z.at(j+1);
-              const double normalization=(1-t)*I.at(j)+t*I.at(j+1);
-              AssertThrow(std::isfinite(z) && std::isfinite(normalization) && normalization>0.,
-                          ExcMessage("Mature DG stress requires finite memory and positive native normalization."));
-              auto tangent=fault.vertex(j+1)-fault.vertex(j);
-              tangent/=tangent.norm();
-              Tensor<1,dim> normal;
-              normal[0]=-tangent[1];
-              normal[1]=tangent[0];
-              const auto S=manager.get_shear_sense(source.fault_index)*symmetrize(outer_product(tangent,normal));
-              const auto localization=evaluate_reconstructed_fault_localization(
-                                        source.fault_index,j,t,phi[0],phi[0],"mature DG stress");
-              correction=(2*z*localization.current_h/normalization)*S;
+              const auto unit=this->get_mapping().transform_real_to_unit_cell(cell,point);
+              const auto r=evaluate_dg_trial_tensor(*history.residual,id,Quadrature<dim>({unit}))[0];
+              trial-=r;
+              // Include the independent residual operands in publication bounds.
+              for (const auto &component:history.residual->trial_stress)
+                for (unsigned int i=0;i<indices.size();++i)
+                  scale+=std::abs(component[indices[i]]*history.space->element.shape_value(i,unit));
             }
           if (evaluation_scale)
             *evaluation_scale=scale+correction.norm();
@@ -560,6 +575,9 @@ namespace aspect
       for (const auto &component : history.trial_stress)
         for (const auto i : component.locally_owned_elements())
           values.push_back(component[i]);
+      if (history.residual)
+        for (const auto &component:history.residual->trial_stress)
+          for (const auto i:component.locally_owned_elements()) values.push_back(component[i]);
       return values;
     }
 

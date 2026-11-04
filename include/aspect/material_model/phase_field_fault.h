@@ -31,6 +31,7 @@
 #include <deal.II/base/mpi_remote_point_evaluation.h>
 #include <deal.II/base/timer.h>
 #include <deal.II/lac/full_matrix.h>
+#include <deal.II/base/parsed_function.h>
 
 #include <functional>
 #include <array>
@@ -116,6 +117,9 @@ namespace aspect
           std::vector<double> bulk_material_fractions;
           SymmetricTensor<2,dim> strain_rate;
           SymmetricTensor<2,dim> old_maxwell_stress;
+          /** Accepted velocity gradient for the explicitly lagged spin only. */
+          Tensor<2,dim> history_velocity_gradient;
+          bool has_history_velocity_gradient = false;
           SymmetricTensor<2,dim> slip_tensor;
           SymmetricTensor<2,dim> normal_tensor;
           /** Output only; never changes the constitutive evaluation. */
@@ -152,6 +156,7 @@ namespace aspect
         /** Inputs required by the reconstructed-fault bulk weak form. */
         struct ReconstructedFaultBulkPointInputs
         {
+          Point<dim> position;
           unsigned int fault_index = numbers::invalid_unsigned_int;
           unsigned int segment_index = numbers::invalid_unsigned_int;
           double xi = numbers::signaling_nan<double>();
@@ -222,7 +227,21 @@ namespace aspect
         SymmetricTensor<2,dim>
         evaluate_frozen_maxwell_stress(const double temperature,
                                        const std::vector<double> &composition,
-                                       const SymmetricTensor<2,dim> &old_stress) const;
+                                      const SymmetricTensor<2,dim> &old_stress) const;
+        SymmetricTensor<2,dim>
+        evaluate_frozen_maxwell_stress(const double temperature,
+                                      const std::vector<double> &composition,
+                                      const SymmetricTensor<2,dim> &old_stress,
+                                      const Tensor<2,dim> *history_gradient,
+                                      const Point<dim> *position = nullptr) const;
+
+        bool uses_jaumann_particle_stress() const { return jaumann_particle_stress; }
+        bool uses_jaumann_dg_stress() const { return jaumann_dg_stress; }
+        bool uses_transported_mature_history() const { return dg_material_transport; }
+        /** Lie substep from immutable physical history; the subsequent Maxwell
+         * source uses the existing exponential coefficients and endpoint rate. */
+        SymmetricTensor<2,dim> rotate_maxwell_history(
+          const SymmetricTensor<2,dim> &,const Tensor<2,dim> &,double dt) const;
 
         /** Default-off, fixed-mesh benchmark hook. Returns unrelaxed retained
          * stress in the specified cell trace, never an additional RHS force.
@@ -335,7 +354,7 @@ namespace aspect
          * The reference switch changes algorithms only in this qualified scope. */
         bool uses_stationary_mature_dg_optimizations() const
         {
-          return dim==2 && stationary_mature_dg_optimizations && dg_accepted_history
+          return dim==2 && !jaumann_dg_stress && stationary_mature_dg_optimizations && dg_accepted_history
                  && dg_trial_stress_history && homogeneous_mesh_data
                  && mature_frictional_fault && !consistent_endpoint_phase
                  && !use_adiabatic_pressure_in_fault_friction;
@@ -458,6 +477,33 @@ namespace aspect
         void validate_dg_geometry_commit(const std::shared_ptr<DGGeometryUpdate<dim>> &) const;
         void publish_dg_geometry_commit(const std::shared_ptr<DGGeometryUpdate<dim>> &) noexcept;
         bool consistent_particle_strain = false;
+        bool jaumann_particle_stress = false;
+        bool jaumann_dg_stress = false;
+        bool dg_material_transport = false;
+        bool material_variable_viscosity = false;
+        bool material_reaction_solving = false;
+        bool material_bounded_profile = false;
+        bool material_trace_inflow = false;
+        Functions::ParsedFunction<dim> material_viscosity_multiplier;
+        Functions::ParsedFunction<dim> material_initial_phase;
+        std::string material_viscosity_identity;
+        struct DGMaterialTrial;
+        std::shared_ptr<DGMaterialTrial> dg_material_trial;
+        void begin_dg_material_step(LinearAlgebra::BlockVector &,LinearAlgebra::BlockVector &);
+        void finish_dg_material_step(bool) noexcept;
+        LinearAlgebra::BlockVector transport_material_profile() const;
+        double material_viscosity(const Point<dim> &,double) const;
+        double material_surface_viscosity(unsigned int,unsigned int,double,double) const;
+        struct DGMaterialReaction;
+        std::shared_ptr<DGMaterialReaction> dg_material_reaction;
+        std::shared_ptr<FEStrainUpdate> make_material_reaction(
+          const LinearAlgebra::BlockVector &,const std::vector<double> &) const;
+        double refresh_material_reaction(const LinearAlgebra::BlockVector &,const std::vector<double> &);
+        SymmetricTensor<2,dim> material_reaction_correction(const CellId &,const Point<dim> &) const;
+        void prepare_objective_dg_anchor();
+        SymmetricTensor<2,dim> evaluate_mature_dg_memory(
+          const Point<dim> &,double,const std::vector<double> &,const std::vector<double> &,
+          const ReconstructedFaultUtilities::NormalProfileProjection * = nullptr) const;
         bool consistent_endpoint_phase = false;
         std::string fe_initial_phase_profile;
         unsigned int fe_bulk_normal_quadrature_points = 3;
@@ -494,6 +540,11 @@ namespace aspect
         std::shared_ptr<DGTransport> make_dg_transport(
           const LinearAlgebra::BlockVector &,unsigned int quadrature_order,
           bool include_relaxation) const;
+        std::shared_ptr<DGTransport> make_objective_dg_transport(
+          const LinearAlgebra::BlockVector &,unsigned int,bool) const;
+        std::shared_ptr<DGHistory> advance_objective_dg_transport(
+          const DGTransport &,const DGHistory &,const DGField &,const DGField &,
+          double,double) const;
         std::shared_ptr<DGHistory> project_dg_transport_field(
           const DGTransport &,const DGField &,double time,unsigned int quadrature_order) const;
         std::shared_ptr<DGHistory> advance_dg_transport(

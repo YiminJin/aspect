@@ -19,7 +19,8 @@ namespace aspect
       double clock_time=0.,clock_dt=0.;
       std::uint64_t publications=0,geometry=0,geometry_publications=0;
       double G=0.,eta=0.,m=0.,sense=0.;
-      std::vector<double> Z,I,phase,coefficients;
+      std::string material_law;
+      std::vector<double> Z,I,phase,coefficients,residual_coefficients;
       std::vector<std::string> cells;
       std::vector<Point<dim>> mesh,fault;
     };
@@ -94,7 +95,10 @@ namespace aspect
             }
           dg_checkpoint=std::make_shared<DGCheckpoint>();
           auto &p=*dg_checkpoint;
-          p.version=uses_prescribed_dg_geometry() ? 5 : (mature_frictional_fault ? 4 : (consistent_endpoint_phase ? 3 : 1));
+          p.version=dg_material_transport ? 7 : (jaumann_dg_stress ? 6 : (uses_prescribed_dg_geometry() ? 5 : (mature_frictional_fault ? 4 : (consistent_endpoint_phase ? 3 : 1))));
+          p.material_law=material_viscosity_identity;
+          if(dg_material_transport && this->get_reconstructed_fault_manager().uses_full_normal_cross_section())
+            p.material_law+="|association support:full normal cross-section";
           p.geometry_publications=s.geometry_publications;
           p.step=s.committed_step;
           p.clock_step=this->get_timestep_number();
@@ -130,6 +134,12 @@ namespace aspect
                   s.dg_history->space->cells.at(entry.first)->get_dof_indices(indices);
                   for(const auto &component:s.dg_history->trial_stress)
                     for(const auto i:indices)values.push_back(component[i]);
+                  if (jaumann_dg_stress)
+                    {
+                      AssertThrow(s.dg_history->residual,ExcMessage("Objective checkpoint lacks residual history."));
+                      for (const auto &component:s.dg_history->residual->trial_stress)
+                        for (const auto i:indices) values.push_back(component[i]);
+                    }
                 }
               for(const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local))
                 for(const auto &entry:part)
@@ -146,7 +156,10 @@ namespace aspect
                       p.mesh.push_back(x);
                       p.phase.push_back(entry.second[offset++]);
                     }
-                  p.coefficients.insert(p.coefficients.end(),entry.second.begin()+offset,entry.second.end());
+                  AssertThrow(entry.second.size()==offset+(jaumann_dg_stress ? 54 : 27),ExcMessage("Malformed complete DG checkpoint record."));
+                  p.coefficients.insert(p.coefficients.end(),entry.second.begin()+offset,entry.second.begin()+offset+27);
+                  if (jaumann_dg_stress)
+                    p.residual_coefficients.insert(p.residual_coefficients.end(),entry.second.begin()+offset+27,entry.second.end());
                 }
             }
           else
@@ -168,8 +181,13 @@ namespace aspect
       archive &p.version &p.step &p.publications &p.geometry &p.G &p.eta &p.m &p.sense
       &p.quadrature &p.Z &p.I &p.phase &p.mesh &p.fault &p.cells &p.coefficients;
       if (p.version>=2) archive &p.clock_step &p.clock_time &p.clock_dt;
-      if(p.version==5) archive &p.geometry_publications;
-      AssertThrow((uses_prescribed_dg_geometry() ? p.version==5 : (mature_frictional_fault ? p.version==4 : (consistent_endpoint_phase ? (p.version==2 || p.version==3) : p.version==1))) && p.G==elastic_shear_moduli[0] && p.eta==reference_viscosities[0]
+      if(p.version==5 || p.version==7) archive &p.geometry_publications;
+      if(p.version>=6) archive &p.residual_coefficients;
+      if(p.version==7) archive &p.material_law;
+      const auto material_identity=material_viscosity_identity
+        +((dg_material_transport && this->get_reconstructed_fault_manager().uses_full_normal_cross_section())
+          ? "|association support:full normal cross-section" : "");
+      AssertThrow((dg_material_transport ? (p.version==7 && p.material_law==material_identity) : (jaumann_dg_stress ? p.version==6 : (uses_prescribed_dg_geometry() ? p.version==5 : (mature_frictional_fault ? p.version==4 : (consistent_endpoint_phase ? (p.version==2 || p.version==3) : p.version==1))))) && p.G==elastic_shear_moduli[0] && p.eta==reference_viscosities[0]
                   && p.quadrature==fe_bulk_normal_quadrature_points,
                   ExcMessage("PF5 checkpoint version/material/quadrature mismatch."));
     }
@@ -192,7 +210,8 @@ namespace aspect
                       ? (p.step+1==this->get_timestep_number() && p.clock_step==this->get_timestep_number()
                          && p.clock_time==this->get_time() && p.clock_dt==this->get_timestep())
                       : p.step==this->get_timestep_number())
-                  && p.coefficients.size()==27*p.cells.size(),
+                  && p.coefficients.size()==27*p.cells.size()
+                  && (!jaumann_dg_stress || p.residual_coefficients.size()==p.coefficients.size()),
                   ExcMessage("PF5 restore rejects changed fixed mesh or malformed DG history."));
       current_normalization_integrals= {p.I};
       prepare_fe_strain_history(true);
@@ -214,6 +233,9 @@ namespace aspect
         }
       std::array<LinearAlgebra::Vector,SymmetricTensor<2,dim>::n_independent_components> owned;
       for(auto &component:owned)component.reinit(s.dg_history->space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
+      std::array<LinearAlgebra::Vector,SymmetricTensor<2,dim>::n_independent_components> residual_owned;
+      if (jaumann_dg_stress)
+        for (auto &component:residual_owned) component.reinit(s.dg_history->space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
       std::vector<types::global_dof_index> indices(9);
       unsigned int offset=0,cell_number=0,matching_cells=0;
       unsigned int matching_phase=1;
@@ -239,6 +261,17 @@ namespace aspect
                 AssertThrow(std::isfinite(value),ExcMessage("Nonfinite checkpoint DG history."));
                 if(local)component[indices[i]]=value;
               }
+          if (jaumann_dg_stress)
+            {
+              unsigned int r=27*cell_number;
+              for (auto &component:residual_owned)
+                for (unsigned int i=0;i<9;++i)
+                  {
+                    const double value=p.residual_coefficients[r++];
+                    AssertThrow(std::isfinite(value),ExcMessage("Nonfinite complete DG residual checkpoint."));
+                    if (local) component[indices[i]]=value;
+                  }
+            }
           ++cell_number;
         }
       AssertThrow(Utilities::MPI::min(matching_phase,this->get_mpi_communicator())==1
@@ -246,6 +279,13 @@ namespace aspect
                   ExcMessage("DG checkpoint physical mesh/phase anchor or CellId ownership mismatch."));
       for(unsigned int c=0;c<owned.size();++c)
         {owned[c].compress(VectorOperation::insert);s.dg_history->trial_stress[c]=owned[c];}
+      if (jaumann_dg_stress)
+        {
+          AssertThrow(s.dg_history->residual,ExcMessage("Missing restored DG residual owner."));
+          for (unsigned int c=0;c<residual_owned.size();++c)
+            {residual_owned[c].compress(VectorOperation::insert);s.dg_history->residual->trial_stress[c]=residual_owned[c];}
+          s.objective_anchor.reset();s.objective_parent.reset();
+        }
       for (unsigned int j=0; j<p.I.size(); ++j)
         AssertThrow(std::isfinite(p.I[j]) && p.I[j]>0. && std::isfinite(p.Z[j]) && p.Z[j]>=0.,
                     ExcMessage("Invalid PF5 checkpoint surface history."));

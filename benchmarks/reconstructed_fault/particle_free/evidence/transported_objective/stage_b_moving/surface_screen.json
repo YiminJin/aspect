@@ -1,0 +1,29 @@
+{
+  "scope": "Snapshot Q1 surface-memory representation; no numerical ALE/evolution claim",
+  "rows": [
+    {
+      "material_intervals": 16,
+      "stored_scalars": 17,
+      "scalar_max_error_m": 0.0006779688061750461,
+      "B_extension_scaled": 0.0015077649801950941
+    },
+    {
+      "material_intervals": 32,
+      "stored_scalars": 33,
+      "scalar_max_error_m": 0.000175875274144921,
+      "B_extension_scaled": 0.00039578056329848553
+    },
+    {
+      "material_intervals": 64,
+      "stored_scalars": 65,
+      "scalar_max_error_m": 4.3850253388776766e-05,
+      "B_extension_scaled": 9.890083824055805e-05
+    }
+  ],
+  "orders": [
+    1.929638900187663,
+    2.0006461098648254
+  ],
+  "status": "passed",
+  "script_sha256": "fdb388d7960c6a64320fea91dbbd4bf5af9c6bc9209d8f3fea8dfa8c83e79c88"
+}

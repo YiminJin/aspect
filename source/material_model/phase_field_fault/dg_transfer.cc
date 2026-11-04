@@ -22,7 +22,7 @@ namespace aspect
     {
       if (!dg_accepted_history || !fe_strain_state) return;
       validate_fe_strain_restrictions();
-      AssertThrow(consistent_endpoint_phase && !dg_transfer,
+      AssertThrow((consistent_endpoint_phase || jaumann_dg_stress) && !dg_transfer,
                   ExcMessage("DG transfer requires an accepted fixed-reference endpoint."));
       const auto &s=*fe_strain_state;
       const auto &comm=this->get_mpi_communicator();
@@ -109,6 +109,8 @@ namespace aspect
       transfer->tensor=std::make_unique<parallel::distributed::SolutionTransfer<dim,LinearAlgebra::Vector>>(s.dg_history->space->dofs);
       std::vector<const LinearAlgebra::Vector *> fields;
       for (const auto &component:s.dg_history->trial_stress) fields.push_back(&component);
+      if (s.dg_history->residual)
+        for (const auto &component:s.dg_history->residual->trial_stress) fields.push_back(&component);
       transfer->tensor->prepare_for_coarsening_and_refinement(fields);
       dg_transfer=std::move(transfer);
     }
@@ -129,9 +131,13 @@ namespace aspect
       space.dofs.distribute_dofs(space.element);
       space.relevant=DoFTools::extract_locally_relevant_dofs(space.dofs);
       space.cells.clear();
+      space.point_samples.clear();
+      space.point_geometry_generation=numbers::invalid_unsigned_int;
+      space.source_geometry.clear();
       for (const auto &cell:space.dofs.active_cell_iterators())
         if (!cell->is_artificial()) space.cells.emplace(cell->id(),cell);
-      std::array<LinearAlgebra::Vector,SymmetricTensor<2,dim>::n_independent_components> owned;
+      constexpr unsigned int components=SymmetricTensor<2,dim>::n_independent_components;
+      std::vector<LinearAlgebra::Vector> owned(components*(old->dg_history->residual ? 2 : 1));
       std::vector<LinearAlgebra::Vector *> fields;
       for (auto &component:owned)
         {
@@ -139,10 +145,14 @@ namespace aspect
           fields.push_back(&component);
         }
       transfer->tensor->interpolate(fields);
+      if (old->dg_history->residual)
+        {history->residual=std::make_shared<DGHistory>();history->residual->space=history->space;}
       for (unsigned int c=0; c<owned.size(); ++c)
         {
-          history->trial_stress[c].reinit(space.dofs.locally_owned_dofs(),space.relevant,comm);
-          history->trial_stress[c]=owned[c];
+          auto &target=c<components ? history->trial_stress[c]
+                                  : history->residual->trial_stress[c-components];
+          target.reinit(space.dofs.locally_owned_dofs(),space.relevant,comm);
+          target=owned[c];
         }
       // Rebuild quadrature, normalization rays, cell lookup and fixed-particle
       // ownership from native infrastructure. Only physical accepted fields and
@@ -161,6 +171,9 @@ namespace aspect
       s.committed_step=old->committed_step;
       s.accepted_publications=old->accepted_publications;
       invalidate_normalization_cache();
+      // Invalidate mesh-dependent rays/samples, then restore the authoritative
+      // accepted normalization. Mature fixed-profile validation reads it too.
+      current_normalization_integrals={old->I};
       dg_transfer.reset();
       validate_fe_strain_restrictions();
       this->get_reconstructed_fault_manager().get_locally_owned_particle_fault_associations();

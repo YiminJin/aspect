@@ -1,0 +1,882 @@
+{
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/log.txt": {
+    "bytes": 1558124,
+    "sha256": "ca835d40ec2af33785c7f8098e12f4c9f59077b6b3bf87d90a1e884b63317fe8"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/original.prm": {
+    "bytes": 8787,
+    "sha256": "2b23fadbd3dc5a49c8fda75f1f1ac0a59d79966654662eb81aab65000e1c78c9"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_0.csv": {
+    "bytes": 827544,
+    "sha256": "4f7569558bd0ca049b57f67325ccb419f5268a554ca3f02b1b512d7aa47a2ed2"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_101.csv": {
+    "bytes": 1045865,
+    "sha256": "432c2298fb4b7ae47324f88edc9661281139035182c78444f1710c96284f86ee"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_103.csv": {
+    "bytes": 1045817,
+    "sha256": "437963a39d58f8ca306d54e1ca6d4874ecc65c051213433063b93047a0aa31fa"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_105.csv": {
+    "bytes": 1045657,
+    "sha256": "1e38cd98caed0eb5624f6bac5a79fab056e727d033fc96f5898e8ff47fee829f"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_107.csv": {
+    "bytes": 1045685,
+    "sha256": "a71f2a8cb7ed2cb623e0db10fc2c00c88a05f109b7c0031b867f7f1d1e981abb"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_109.csv": {
+    "bytes": 1045539,
+    "sha256": "f424009472c0f15d420c4ee228220dbd82f5dfc9126eebb36369b23e2dc5ea6e"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_111.csv": {
+    "bytes": 1045416,
+    "sha256": "bbec2a2d63beb87afe34349152e712c1500c11ff0d352d0e81251c601d14a3de"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_113.csv": {
+    "bytes": 1039666,
+    "sha256": "f3dd93b00d13f48fd36f59cf726620d3c7b6e957111f7487b01268815cca9342"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_115.csv": {
+    "bytes": 1045286,
+    "sha256": "111640ed4e32a8175385535a84e83a6037305d27a0306d91b5b6cf12f2d7f1f1"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_117.csv": {
+    "bytes": 1045338,
+    "sha256": "2f20890ee4017f51247a079bf1c95d5e95cf0e0ac0b4e629ac6079715e7224d1"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_120.csv": {
+    "bytes": 1045208,
+    "sha256": "fe4573e9c8d6a55d0d1b9c9893ce012ca1c86aa39160bda6db5356ee29dc45c2"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_123.csv": {
+    "bytes": 1045179,
+    "sha256": "40dc1ce6953a699b8ae38320b5158c4ae2279a260bafbc31b0185f5abb79ad07"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_126.csv": {
+    "bytes": 1044943,
+    "sha256": "3a457911cf37339bf2c4f57d21f19a5a6b2ede3b23a7414de3d54a84951d5f7a"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_129.csv": {
+    "bytes": 1045112,
+    "sha256": "2933597793ff4cb0c80a6b3500ed93264152362278abb9c9e8d28d20f8e091af"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_132.csv": {
+    "bytes": 1044957,
+    "sha256": "963307edf2e158d0cd90bc7ae9e25d65831f5ea88bb0b85ec34a1dbafd97fc03"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_135.csv": {
+    "bytes": 1039208,
+    "sha256": "09246e96c56888b82784da45350e57a3503b49b85c61aea33deda276f09d165c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_138.csv": {
+    "bytes": 1044854,
+    "sha256": "546d85d9021de7acaf1fa5b33784aae2530406282428cf545d7b4ef12acf7753"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_141.csv": {
+    "bytes": 1044858,
+    "sha256": "02d2bb9d9ea0472fa7b4b3ee76ad9978f154ec8f849cfa31d9915aff9440e766"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_142.csv": {
+    "bytes": 1038945,
+    "sha256": "8273a7d0b99da8a27696c364087c3b76bac5459cd577678eacc2a959503fbbe0"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_145.csv": {
+    "bytes": 1044893,
+    "sha256": "3a48d85fc502c9f4dbd34cf66a525d9cb19c9126bc522fbe1ff0124813f69abc"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_149.csv": {
+    "bytes": 1044765,
+    "sha256": "44e9760e01e3d962664d848f42e1aebbd56d7fddde46abe7c2265affb5f89b19"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_153.csv": {
+    "bytes": 1044681,
+    "sha256": "f131ce86ba918d61b6e3d1e2702f5d39469a6980d786109ec066d0c76637b05d"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_157.csv": {
+    "bytes": 1044638,
+    "sha256": "81b671d8552d257e256ea3ea3dbf9111d85a0e3934eb31d166ccd67b8f175dd2"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_161.csv": {
+    "bytes": 1044714,
+    "sha256": "45218005fa2be8850eefe884865ab9bfeba391a290e1a6a28e0983a405b1c9c6"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_165.csv": {
+    "bytes": 1044650,
+    "sha256": "47c63304d9a60687021a35ca73512f92c45e734e3d2431b12666b62e680d164b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_169.csv": {
+    "bytes": 1038783,
+    "sha256": "ceac040b2e2e90d4dcca4886c5fa176a850bf0cdb6c6df498a3e781fa248a14c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_173.csv": {
+    "bytes": 1044570,
+    "sha256": "254f3b848bc0666930144fb3a7575b40fc6a1da6e5ac0ca3e1db2c33fe816e8a"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_177.csv": {
+    "bytes": 1044485,
+    "sha256": "892517e25432a06d4f53794e9d8f56881c2871432783a56bc8bda0bd4d46e571"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_181.csv": {
+    "bytes": 1044451,
+    "sha256": "571c6796d230ef94306d91121dbfb9a6148b2829eba1e6d6c5bc4da6eb577445"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_185.csv": {
+    "bytes": 1044506,
+    "sha256": "028d8fa2f791efb27731cc3e1401339cb178eb0c6958d8ace7c2e47169e75f53"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_189.csv": {
+    "bytes": 1044346,
+    "sha256": "b7a11fc9d07a437ddc3a849306cabd9293d9dc952df7a853fdc71981377c29e3"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_193.csv": {
+    "bytes": 1044342,
+    "sha256": "a72f4beb66cbf451bbf276aeac090d5fd0374e0a25474c391644369cb2032fb4"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_197.csv": {
+    "bytes": 1044260,
+    "sha256": "e819ff7034e64120191de372abb48ca0a4c92a0e7626f15ebea9fcb284dd8884"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_201.csv": {
+    "bytes": 1044364,
+    "sha256": "fd1fc197d74e7af6a8a4ef5856d50ee434e07de84c436d172679d026a1a01b87"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_206.csv": {
+    "bytes": 1044249,
+    "sha256": "d6c3c5c9a8af9fad59b5e25855ad74491e60f3639f51d39f9e0958d841f8be2c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_211.csv": {
+    "bytes": 1044353,
+    "sha256": "e0626a0b090ff21b9c8d9991938704fa529bf1cf9ff4bc9a09f0db94b1c0b4b5"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_216.csv": {
+    "bytes": 1044172,
+    "sha256": "292da832970add9d786614a111ff10c67a57564ab5ab650c258ee8af3e6d21ec"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_221.csv": {
+    "bytes": 1044115,
+    "sha256": "7285962e396e4cf766d0cf67377835ceda6546998c0004e3e1646b98a03f9db7"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_226.csv": {
+    "bytes": 1044054,
+    "sha256": "f782dbdd6012c587d6b16bb9de8583dce3aae2f7422041a7a55e51a8c7dc5b5d"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_231.csv": {
+    "bytes": 1044184,
+    "sha256": "e03059d195cc01acb81d795d9e0f158458355a022493f5558f2614b1d2b9da3c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_236.csv": {
+    "bytes": 1043985,
+    "sha256": "d10992c0ca99503441fe2d21766eff71c1f96cb6a47d74a033fcde6774414b5d"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_241.csv": {
+    "bytes": 1038255,
+    "sha256": "ed469b048a5afcea903b01791bfc964b9f6a88e8c904817b4fea9a7642549193"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_246.csv": {
+    "bytes": 1044002,
+    "sha256": "c815e218fe8254269c30643db3c030887739472357e5508a4bd806ebb0988b5d"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_251.csv": {
+    "bytes": 1043858,
+    "sha256": "a88f1415b1a1675a62ba7e580a3688d8d5cd50070788f22b390604e24d498159"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_256.csv": {
+    "bytes": 1044028,
+    "sha256": "e8dd72a84da5dd766911da230f8f6c1a4f1c03441ec95c005e036ccd0d3e5cc0"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_261.csv": {
+    "bytes": 1043851,
+    "sha256": "3529beff37551dec2b588abefa405f3b08c6c139003b84bd4615babef651594b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_266.csv": {
+    "bytes": 1043810,
+    "sha256": "3340d02613525ab2866928fdcb627a20df80ca3573ee7c2a6d8061d7345c47c4"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_267.csv": {
+    "bytes": 1043875,
+    "sha256": "bb99faa16a15a225ec129e9b19396e1852501ff0ef33befdecdfc588f7faddac"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_272.csv": {
+    "bytes": 1038042,
+    "sha256": "7c95622c228392c599c663a1054683c171f20ad55687d5d41f8b2d694f75bf92"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_278.csv": {
+    "bytes": 1043782,
+    "sha256": "83e0d22bcf684853544b1337954c524d7042c965c5dc65566c7759192516d007"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_284.csv": {
+    "bytes": 1043782,
+    "sha256": "37274ac6678295edf0de7424c3d3186fd658827fec2f209a1aa831632773a08b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_290.csv": {
+    "bytes": 1043637,
+    "sha256": "de51e0668dd51d63e624447e9490725a26bac72bb165682bc7d5d1aa8e49dde2"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_296.csv": {
+    "bytes": 1043748,
+    "sha256": "dbf04dd4b58676722b85d78f5d21b18cfa6d55eb59da4da4adf66c342d2986a7"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_302.csv": {
+    "bytes": 1043533,
+    "sha256": "909028a799025b97b4e0e818281046cab72fdadfade560a0ebf4ead2a7808ac6"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_308.csv": {
+    "bytes": 1043576,
+    "sha256": "a9d0a1ba87a3fdb5e3eca2e15175a3f05d3b0c460a3a916c9ae77ffa1e5f7d98"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_314.csv": {
+    "bytes": 1043596,
+    "sha256": "59d4b4091ba4221da5bbad41ed2192148701d543beb29b05b82346c606737425"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_320.csv": {
+    "bytes": 1043590,
+    "sha256": "03e2d75e62b4b25ebeeaf4f29754e1fceb68929c7df0db70b54edfdd82dc795c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_326.csv": {
+    "bytes": 1043445,
+    "sha256": "1ba9b5723d75c15ae2dd0d3c0f5794a0ebfd5e145656a4cd68c29e73ff0df8fc"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_332.csv": {
+    "bytes": 1043525,
+    "sha256": "967c19fba9f5552b2f64ddd555df059bedfd1f1af5028766d654de9d2beb9a33"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_338.csv": {
+    "bytes": 1043387,
+    "sha256": "8e67ca29cb51910f99c7e136e1273ed6d79463366000679fb4894540e7f4e775"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_344.csv": {
+    "bytes": 1037638,
+    "sha256": "ad51ba43d0844f12299d825548e9c5201ff96ef874999f7523811e9f78548870"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_350.csv": {
+    "bytes": 1043305,
+    "sha256": "cd836331a1db7b63bfc3d68ab30b67485b50cf68e7d1f5f9e16349450338cbf8"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_356.csv": {
+    "bytes": 1043344,
+    "sha256": "0c9cf036421aa2ae4dd9bf10c5869ed3f6f98449f0ac813a7748c97cc2057f4d"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_362.csv": {
+    "bytes": 1043301,
+    "sha256": "9d41e2bfc54781ed606fd0959151eab31d4d54bf65ffd536ed3cb00d5f99683c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_368.csv": {
+    "bytes": 1043268,
+    "sha256": "98944200b85b1b9bc7a0ac15339e5c6ad41fe27302502544cd381b7e33cd8469"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_375.csv": {
+    "bytes": 1043303,
+    "sha256": "e7e74d7344ef82f2cb2753abf81f9cf186ba7f1042213ee29881eea060b6be7f"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_382.csv": {
+    "bytes": 1043161,
+    "sha256": "bcdf531cee54dbb1d4e0ee03ee3880374a8a03165a58a0181e319ee267b66c0b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_389.csv": {
+    "bytes": 1043061,
+    "sha256": "407cfb0c746dab551a2eab84f5540366d305a4b69eb58a43f9b778f76bdf5553"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_396.csv": {
+    "bytes": 1043067,
+    "sha256": "7e6a75b478902917fee96308c9c9776e0f5c84eec706ac6120c78452e4aace54"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_403.csv": {
+    "bytes": 1043140,
+    "sha256": "debbed72ef08d337539c06032fb98604f1294d89920747bc985f0cd1af0b9f10"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_410.csv": {
+    "bytes": 1043153,
+    "sha256": "0d2e0b6a68c7a9b8aca92d8a4bf5aeb694fa4e33a4bcddd451fa27d2cddf8470"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_417.csv": {
+    "bytes": 1043146,
+    "sha256": "9586704b7cda328b1b11314315460489792ba30cbe871d3887ccb3464ac21cfc"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_424.csv": {
+    "bytes": 1043030,
+    "sha256": "6a5f943d67df5e626ca2dcd3bdd411342637026f98f5e026f25b952a2c44a059"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_431.csv": {
+    "bytes": 1037264,
+    "sha256": "5a2baacd5935f5e719ad119d1b3a56fd0da3c2c09c3095428afa84838ca3b17e"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_438.csv": {
+    "bytes": 1042914,
+    "sha256": "2078d2e9e4af8b4a57349d6b88f63802fc24d08b9ee6eb3e0b8ad538b85a61f9"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_445.csv": {
+    "bytes": 1042695,
+    "sha256": "a2fc676ca1b739386373b0950aaa4bac4e4e76f7ba1497b31b318f5c49c347bf"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_450.csv": {
+    "bytes": 1042839,
+    "sha256": "44e1976666177de26a29a08431a5bef7ec0d3e3cfa15d3a8b20b2a5fd17f5697"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_457.csv": {
+    "bytes": 1042856,
+    "sha256": "bc3f04043a71ee0cb7ae850390515501fde3d7296d98e0b02d434beef3495ca1"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_464.csv": {
+    "bytes": 1042872,
+    "sha256": "3606aa42b816b42e7f77978050a7ced6b69aa001821e61252e435c8792d6111b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_471.csv": {
+    "bytes": 1042772,
+    "sha256": "d59a1c1bcb20dee94bd64441ca7682d71be86d3a96c6f8801a6462b0149952e7"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_478.csv": {
+    "bytes": 1036914,
+    "sha256": "5bff21a55791c75f0e9d93cff1c4d923a75353df35193135281c25dd9b7d0d73"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_485.csv": {
+    "bytes": 1042751,
+    "sha256": "a4fdd9b522a53a70a3f47d6c68d5c988bf994d3a633fe2d0fb95ccb44652ea75"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_49.csv": {
+    "bytes": 1047249,
+    "sha256": "6ffb30c3d612c9d55a5d0704f7a21f8206f8e057bd445fb0e4fff729ec809a67"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_492.csv": {
+    "bytes": 1042576,
+    "sha256": "cdfc10725a52aa24bb52b65299fa8c6ca237d2f304f2a200836ac4c4e234d4f9"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_499.csv": {
+    "bytes": 1036940,
+    "sha256": "a7b2db775639c853ecbd8af9020804ca44681e5b9dae3ce160227a8d763ce384"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_506.csv": {
+    "bytes": 1036891,
+    "sha256": "4c9e71a5f9790ea99ac21566da5a46cfe994e23d21e5c1bc485d6d6ed8c12aa7"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_513.csv": {
+    "bytes": 1042674,
+    "sha256": "f3859fe0ae60f2124e15dc61299cc6f3b76314c8d1364250c332e1bd4a38aa9e"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_520.csv": {
+    "bytes": 1042504,
+    "sha256": "e41f9d1fba6c7635f447aafcbc82c13be15a7fba87dae2865fa7d317c134035a"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_527.csv": {
+    "bytes": 1042520,
+    "sha256": "f1db15c7cdf7967b944d83fa9108a0515be9520b6a8e0fa324a7868054e63981"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_53.csv": {
+    "bytes": 1047374,
+    "sha256": "267db4d3353b525f45f07e110fd98aa53a04655d0c56d8a64c29d17f08c5e05c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_534.csv": {
+    "bytes": 1042519,
+    "sha256": "5027228d541d69184aea55b8753c5f4bb5e7be9d55e58a271194dd74674be940"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_541.csv": {
+    "bytes": 1042395,
+    "sha256": "f92d2010ff945b5cd57334400ce4eb7f3fbb3b821eac8ed057468da5c1339f86"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_548.csv": {
+    "bytes": 1042417,
+    "sha256": "91e360175435e7d960686f0241cf6478d52e842011d6351b7aab47faa7a582e5"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_555.csv": {
+    "bytes": 1042396,
+    "sha256": "ddcc9e246a15fd54b9b92f9a7b8fc5acae3740ed7da60d92bfecba8995360572"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_56.csv": {
+    "bytes": 1043754,
+    "sha256": "5bdf11005e4915b068b8b8a3de442d057b925655a2977c7e47e0886f4ea3786a"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_562.csv": {
+    "bytes": 1042320,
+    "sha256": "eaa35232b8b0adc4f809e356d9899f31bc3f4a01bb5501fa6b6ee12d43b257ea"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_570.csv": {
+    "bytes": 1042190,
+    "sha256": "2bc62529eb73fb3ba31ff372e802f84f373ff135ae1f46699773a12a72614152"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_578.csv": {
+    "bytes": 1042246,
+    "sha256": "6fae8a2d66fd3cf8dec209758433380a5779a0c1d955f2a0675f31894dd0f430"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_58.csv": {
+    "bytes": 1043420,
+    "sha256": "6cdc49f5e34f13f4ac42211cc7c4ad58c006c6fa0ad4cb3c2b1929ba1784477a"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_587.csv": {
+    "bytes": 1042208,
+    "sha256": "c1d0d5bc0a0759bc1851cf7ce6b222331d27ac6d3f53192e6773d7b221b1f67b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_598.csv": {
+    "bytes": 1042150,
+    "sha256": "41e3e4f6b6ea5ff74753a324997bee1a89ed37069859c7e2dfa82d3ea87fc13f"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_60.csv": {
+    "bytes": 1037531,
+    "sha256": "681adf2e0074f514ad03a4f26071169bb79574c2bc3eab471a14401857f79472"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_61.csv": {
+    "bytes": 1043140,
+    "sha256": "d19b1f424199bbc90c12c06f11e380950e60837d578012b78e5473552c42aaf0"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_610.csv": {
+    "bytes": 1042117,
+    "sha256": "7af222a4054b6d31ebe11d12c75de07c3f3acfc606df7a961583b9b54d4aaf86"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_62.csv": {
+    "bytes": 1043260,
+    "sha256": "dd1cfb431c74a6e9cc30c47a5917c96435925014d01659153d2542add20317a2"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_621.csv": {
+    "bytes": 1042049,
+    "sha256": "c223d8459802c80d0e5b5c55908acce1b39efd4710cd81b8fc5f4798cc0440d1"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_63.csv": {
+    "bytes": 1043213,
+    "sha256": "f29a805ecbe40d8f925eaa183bf14427b951745f2b115a96eca8da74d9140b14"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_631.csv": {
+    "bytes": 1041981,
+    "sha256": "9d8e4e1be00e076ad6bc5d6208212081f6c3822534101b25144df3d31391e0e6"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_639.csv": {
+    "bytes": 1041894,
+    "sha256": "fff665434475d34965a5442bf3bd57fca68512ce31bd6c347d60be41eb3a6c4c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_64.csv": {
+    "bytes": 1043242,
+    "sha256": "294b55998aef808239c77621fd52a3f0f08e58629159524181c57bfca2f51ebe"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_645.csv": {
+    "bytes": 1041991,
+    "sha256": "84c83f1728dfbe6a72b3e14c45a368859d45979dd8a159439601ca48040db8af"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_65.csv": {
+    "bytes": 1043235,
+    "sha256": "f4bc5c2c1bc425d0538a3e0d200b74f5e94be67a6e6b724b94488d38c910d865"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_650.csv": {
+    "bytes": 1041885,
+    "sha256": "a7b11079b550d3d881e4c0d2c51b9ac3e03125d5f014223c46c5d78ec566084a"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_654.csv": {
+    "bytes": 1041901,
+    "sha256": "7ae71942033c25b7fbf66e3a0ab0fa44c6cc1c9b4c2469b5ad3a8f486b7246dc"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_658.csv": {
+    "bytes": 1041848,
+    "sha256": "19410980c1297299e8c3bedf1e604913160419dd3011644e76de5b656be96491"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_66.csv": {
+    "bytes": 1043061,
+    "sha256": "e4eaba12e1129550315e81301cf0d22a6ec556e90fbde35918750d0974307220"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_662.csv": {
+    "bytes": 1041846,
+    "sha256": "5aac3d0ec13e6d4ba9622c511c42c40cf6b3dac05924f49e37d485acc413535e"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_666.csv": {
+    "bytes": 1041870,
+    "sha256": "7333fae61a5c2730ecdc852e6ac8cb5041ed2dbf28d590a3a922d8bfbb99b464"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_67.csv": {
+    "bytes": 1043104,
+    "sha256": "fe92fe2ff2008cc70153e682b7ce516604e4f871423ab8848236a9a6c52392b1"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_671.csv": {
+    "bytes": 1041819,
+    "sha256": "71c93da1291aa652e78c6fe6761efc55cc74f9f059cd48fbd674f0754daa75a2"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_676.csv": {
+    "bytes": 1041841,
+    "sha256": "aeebb24942d1d130911084cf010b6299a7ee339989de09bc83156e2ca42965da"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_68.csv": {
+    "bytes": 1043006,
+    "sha256": "0f9fc46565ca7f4b52015bb4eff4389f86f969d0dd0dc7018dc697dd5ba24c9b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_682.csv": {
+    "bytes": 1041749,
+    "sha256": "f1594911d7557670e36d13ea7812f77319f0708f91c797272e3d9261a9bfdbdb"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_69.csv": {
+    "bytes": 1043080,
+    "sha256": "376eefb5da153d07f5019bf80c62dd3614a09d260c66ebeb714872ee7a72498e"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_691.csv": {
+    "bytes": 1041733,
+    "sha256": "5b6676e1866e47b4fe4d15dcbdc2a29ef06d06a7188ae32dd89fa96d1193087e"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_70.csv": {
+    "bytes": 1043091,
+    "sha256": "ee57975e6fefcf92dba0b2eced412f793e0afd70d6cffbf3cc00475b99fdf53d"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_71.csv": {
+    "bytes": 1043085,
+    "sha256": "258344d33b2767f20b3946d54df198319c2e79a2799430f3ecc1e1678b80b464"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_72.csv": {
+    "bytes": 1042940,
+    "sha256": "de7ec2f86d537ccb4495fbda703e0034fdd30285fcd64416e01fcab629e920f2"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_73.csv": {
+    "bytes": 1043025,
+    "sha256": "c425c345278567013b3411f7faccdc1dcd4b23d53d4aa9e52367f2045289e43b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_74.csv": {
+    "bytes": 1037147,
+    "sha256": "04cc353b09dc8c8e1a56e42e7c299666cd0e628add63562d2adb60e25f4a5903"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_740.csv": {
+    "bytes": 1041824,
+    "sha256": "e5f207ef0e620394ec74c508e420b5e032d219b0aff0f3302a0f6f6466d7c39d"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_75.csv": {
+    "bytes": 1042994,
+    "sha256": "b63eb288fda22f67be7852fed4a4fa51b454af156131dc72d5d9cb83c3a2a16c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_76.csv": {
+    "bytes": 1043019,
+    "sha256": "02a9eb3687ee36c5930734156bc39c3a5c6e9015fabfa2feae47a03adb61fbd1"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_769.csv": {
+    "bytes": 1041727,
+    "sha256": "af46416195d84ca249b2eda665e0e51d61493dc983a98526d6f0ce91619bacf0"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_774.csv": {
+    "bytes": 1041699,
+    "sha256": "1353662189d0c7aad199dc7abb3f0b33341743de83c26c3df48a8ff5614c4700"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_78.csv": {
+    "bytes": 1043090,
+    "sha256": "b0787d08fc7440ecec558ecc310fc2121bf3020537537d29173c4763b20f82d2"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_798.csv": {
+    "bytes": 1035273,
+    "sha256": "e7325bbba2f9d41df823397b66bedea344982a17f9a4627e8d862906ddbee078"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_80.csv": {
+    "bytes": 1042955,
+    "sha256": "bdee411e02ef9fd25c0773e6b579dc1d0b62371248b356aea20f40120171d4fa"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_81.csv": {
+    "bytes": 1043059,
+    "sha256": "a62abab5411a4c901cb03f70733fbe5610af35a5335a43a3c7ff55f6db70d437"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_83.csv": {
+    "bytes": 1031062,
+    "sha256": "aa37905183d09f0c61dfdac5a7b4271f2beace2478084a52f0f9d0e52bd67fb7"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_85.csv": {
+    "bytes": 1041972,
+    "sha256": "20008387401a526455aa4c8c8800992ce7eff7ddcd94ad388b384a54b2bd1fc6"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_87.csv": {
+    "bytes": 1041369,
+    "sha256": "ae503d947c544d81a68e7c2174d475727a65b74a9ac5855903623016409aafb1"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_89.csv": {
+    "bytes": 1041167,
+    "sha256": "dbd17165238c5766d3fa4fd83da53ede8b910db8f0d4d15679d6ab5db214ccdb"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_91.csv": {
+    "bytes": 1035138,
+    "sha256": "1e5cae656bf283d6675bda94bbded4c0212306f3d0bf7fc49752050adea45ac4"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_93.csv": {
+    "bytes": 1040602,
+    "sha256": "e5e9529d46a5130f106e83414f69d6c8ddc14ebf41e1fa0d09ef7eaf5136753c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_95.csv": {
+    "bytes": 1040568,
+    "sha256": "9b4b670a5cd1c72219d2bbdd36e54186151b8142e35460b0570d974e2b783734"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_97.csv": {
+    "bytes": 1040250,
+    "sha256": "f22647ca1f0bdbb5d672c9cc67da61e589926be6749f171e2ce400ba87888566"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles/fault_99.csv": {
+    "bytes": 1034472,
+    "sha256": "5a0955ba6319d1808e1acc7cf18f259cd5ec1784aa9bb1181663c93d9474efb2"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/profiles.csv": {
+    "bytes": 9807,
+    "sha256": "e4f51dde335c2b3f36b6374baf7cc6774bd2790ee4a3e2f2a77f1eb96219ee53"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/reconstructed_faults/reconstructed_faults-00000.vtu": {
+    "bytes": 946851,
+    "sha256": "c2078d1de1ae5fad2ac51d14f1ecf962f9f31869cae3897548a9c01d11e5faac"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/reconstructed_faults/reconstructed_faults-00081.vtu": {
+    "bytes": 1058405,
+    "sha256": "6e651e38257f24d4e9207e6ebf964c6dc226cfb953907194ed21969ae734d3af"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/reconstructed_faults/reconstructed_faults-00142.vtu": {
+    "bytes": 1054371,
+    "sha256": "608808ed8ba7341a005f96dac652170db5dfb7919ec48520d0f6b3110b0af2ca"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/reconstructed_faults/reconstructed_faults-00267.vtu": {
+    "bytes": 1053460,
+    "sha256": "43c26b5100835222595a613caf2219c63d791f200e7605aae5682109058baee6"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/reconstructed_faults/reconstructed_faults-00450.vtu": {
+    "bytes": 1052472,
+    "sha256": "ad804081d248c589e08c9e6ae788ee3aba40557ac75912e48f1862a97473f0e6"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/reconstructed_faults/reconstructed_faults-00666.vtu": {
+    "bytes": 1051424,
+    "sha256": "7f61e24a9aa86349ffa179be8b2ca2ee7261bc67ae180cfbda6cceff47e74497"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_start/reconstructed_faults.pvd": {
+    "bytes": 904,
+    "sha256": "528e7abb260bcd6068b208b554e5c2f8b424f287e9358135e7834f956a72811c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/BP3.e3616642": {
+    "bytes": 393,
+    "sha256": "0b7b6d34e5075c01d689facbaf8720c7481c5ddf96477b27ce854eab5b2a6c97"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/BP3.o3616642": {
+    "bytes": 8052729,
+    "sha256": "e064c08b03595a96a50198aa856b20d0d80dfde9d2f0e712875919c7f2962020"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/log.txt": {
+    "bytes": 8052366,
+    "sha256": "b1148021f6e3d53253bfcc82633f47a4e2018c135518a83fd72152013cc17c6b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/original.prm": {
+    "bytes": 103041,
+    "sha256": "1c8c078ba8e949787cb5985b35ae1c286516b456bf018cfdbefe9477053c4660"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1063.csv": {
+    "bytes": 1046272,
+    "sha256": "41cd9ee2f54c8f1398abfd55683256e32778e8b05b55d4ffcc98c11d2f9a15c1"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1128.csv": {
+    "bytes": 1046382,
+    "sha256": "43b155bf43111ced88c882dde153ff5687a3a51d080886c59c4a130235530296"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1193.csv": {
+    "bytes": 1046177,
+    "sha256": "3cf32c697ea2b5ddc3024f8a0c494fae6eacc604e6e63045e0eef1802a62ce5b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1258.csv": {
+    "bytes": 1046206,
+    "sha256": "14a0a229e34028cc4c1a33d642b23613f9a646e9b91f4d8f7961df7a6361b99d"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1323.csv": {
+    "bytes": 1046181,
+    "sha256": "745bd12997a6379a92b606ba3d0ac1c0fa61548b4381c017793907f286a41df6"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1388.csv": {
+    "bytes": 1046037,
+    "sha256": "8c4193710df971f8724338280ab982fe795b796056352193f6b3d8201ca93a57"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1452.csv": {
+    "bytes": 1045938,
+    "sha256": "e36727e43211cd8e8f319fb41f27ffcd8ac54490909d3c4a3b525b813b8b199a"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1516.csv": {
+    "bytes": 1045809,
+    "sha256": "412ff392078ff4d0fa0785a12f6402ce5861b90926de65228ea1ecb8467c15a5"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1580.csv": {
+    "bytes": 1045713,
+    "sha256": "f6bba66894102f9628e32554d9879b58ba9d8db537c2957f6ccd74360d153e46"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1644.csv": {
+    "bytes": 1045610,
+    "sha256": "4b6446f599bccec980f99d7b264bf102ec8b38decdd4d31d0cd9dd5e8c03c5fb"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1708.csv": {
+    "bytes": 1045594,
+    "sha256": "bde5fdcec7886025a7e4902fe6459c6b75a9ff150ef56071cf844768b47ddd04"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1772.csv": {
+    "bytes": 1045490,
+    "sha256": "d1fc10740dd77ddeed1f6605f827f9ca4eb5ac88536d61fd388cd7a83fdb498c"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1836.csv": {
+    "bytes": 1045422,
+    "sha256": "4fb9b6cc737793457b73ea0b69c3c7f55ce0b77e5dea6503e67ff6319066df49"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1900.csv": {
+    "bytes": 1045315,
+    "sha256": "d264e8d3338bbbf8a02d10c23b984b932cd21fb0370e9ff3836d3b6c80eebb62"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_1964.csv": {
+    "bytes": 1045159,
+    "sha256": "3f282e22b042544c6e34d1f5aa23b7a861f522d90248077c77737e6be275b43d"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2028.csv": {
+    "bytes": 1045136,
+    "sha256": "54a39f08843db14cfc7fc94d075049ff477559e466484b668d14d302a0835f45"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2092.csv": {
+    "bytes": 1045123,
+    "sha256": "986a61231b8f74d05fb72d6c94c9c457035a5a81105388ce3ff56364c44585a0"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2156.csv": {
+    "bytes": 1044890,
+    "sha256": "3f46643f0e8d8b1fdc4bf86d1a3b9e3331e4c4bdae6c4ffd96c3ee92049ff78a"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2220.csv": {
+    "bytes": 1044939,
+    "sha256": "fe2b2f13d21e4853d87eb375fe36890897604c86b87b2ac9fd28e8cc4681aee3"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2284.csv": {
+    "bytes": 1044840,
+    "sha256": "7e0f085224de93f16266b1984907226d4f218e25b2614eab9ad24ca925339dd0"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2348.csv": {
+    "bytes": 1039187,
+    "sha256": "d43b1729850fb85ed1467db387f4051c01dc37d09a836831a8eecfecb3d289a3"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2412.csv": {
+    "bytes": 1044783,
+    "sha256": "5c31f77d06bd30ae4db15ef3ab99f98d523f154d79416136af9e5649050d95fc"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2437.csv": {
+    "bytes": 1044821,
+    "sha256": "e781062e2d5f2b9bab97aa4297aa2fc27deeafc52a68a121294bd1fb2670ccc2"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2501.csv": {
+    "bytes": 1038978,
+    "sha256": "8aa00cf6e91e2d6d4108c43060e089ea28bd01cbe8754c176c839ea368db78f2"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2565.csv": {
+    "bytes": 1044697,
+    "sha256": "9bef659a8c543a637494d1aa51bdf321912fa3678a2f34738e883b97f2566a3d"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2629.csv": {
+    "bytes": 1044718,
+    "sha256": "f10bd680c3e573c9f969c514cc394d6804dc1aa1fb7198d4b9f210196e932fb9"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2693.csv": {
+    "bytes": 1044581,
+    "sha256": "9526bdf19a7a7a465bd636722bb5b19d838d745b771213273ec167e43eaecf97"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2757.csv": {
+    "bytes": 1044409,
+    "sha256": "5984bca5791e927e383bf5ff282d3b7e17f0b57c231c26c9a5e36751c39ead06"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2821.csv": {
+    "bytes": 1038597,
+    "sha256": "40acfe02823baee59e70e3d432a6ddb7cb24b29b5265b10653d9bd9db850456b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2885.csv": {
+    "bytes": 1044339,
+    "sha256": "50c4adaae11378af9ae3162c56eb29d955333ccc7f01f0afd233c72f3641eb0e"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_2949.csv": {
+    "bytes": 1044107,
+    "sha256": "72d3683f0650b58193dad213d9a215e4b468fb4e9ff321be7fbd4371297f3af4"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3013.csv": {
+    "bytes": 1044128,
+    "sha256": "6c06bdf69657fc6da16c0313ba94d77044094805404103949cc18f785860c237"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3077.csv": {
+    "bytes": 1044018,
+    "sha256": "06a41c8fc6751ceca3760f2fa3abc53a1798387e600e44b99ae6543c85933fda"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3141.csv": {
+    "bytes": 1043858,
+    "sha256": "32028323716edab0b05be29bccb70353ae01e9998f1eb0cdbe9dc93cb9ec2cec"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3205.csv": {
+    "bytes": 1043807,
+    "sha256": "8ef18030a272748ccf9db2bfb9e4e553cab0a1045928f1923a85573f37bbeb8d"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3269.csv": {
+    "bytes": 1043933,
+    "sha256": "ddb12a6d6333febd93eb136a74262c40b13c331f7752af04965b2df1dfab603a"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3333.csv": {
+    "bytes": 1043663,
+    "sha256": "0c047cbc9a35c0fdbfd5056d7650bdbdabeb20c13e1966a044c49587a4fde2ac"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3397.csv": {
+    "bytes": 1043687,
+    "sha256": "0b88f46da1501fe4dc663448c60f0291d6415ed79ffe6c6ab8441d1ac8b0224b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3461.csv": {
+    "bytes": 1043620,
+    "sha256": "f66caecf86f6be13998d6c867159e97aa6605a552c8bd92bfac39873e16b6764"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3525.csv": {
+    "bytes": 1037796,
+    "sha256": "6101a6e379887b35b6ede9035962e9fad05c91bd062a4c89a9e9922ce029fc56"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3589.csv": {
+    "bytes": 1043474,
+    "sha256": "ed1a0e065793616163f197272217b390b209daa5ebb9dc50dae45a814202c62a"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3653.csv": {
+    "bytes": 1043402,
+    "sha256": "9479a60603cea08cb68490cf7db2f296c3be2f27f13b2394ae309b305ef56dd9"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3717.csv": {
+    "bytes": 1043302,
+    "sha256": "e5a88bcda33b48cbc90054ce6e9eed68d22655ac1fffed751a224a03e3f8ee7a"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3781.csv": {
+    "bytes": 1037470,
+    "sha256": "414a1216b9eab620a40c41b52b752483323b4f1a7eed65a49efd1be9c2f94246"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3845.csv": {
+    "bytes": 1043161,
+    "sha256": "82abccf29210fd3d56e109a8848984dde15881e3cde520f8dff95903be148a6b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3909.csv": {
+    "bytes": 1043010,
+    "sha256": "ca8931f6cd20593dc7a04e0772d060ffa49c175680b07654d3a2ebc715ca1bd3"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3926.csv": {
+    "bytes": 1043084,
+    "sha256": "894a1253c45ce092dfc0e04e29a81cce8fcd5ef38eec15542b7237319b64c99e"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_3990.csv": {
+    "bytes": 1043038,
+    "sha256": "8951e1cf690bfa74b32746137b0fb2bbabc7e638878298740b58c7d11f53cd90"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_4054.csv": {
+    "bytes": 1042851,
+    "sha256": "28b72a8645f248fcbca51eca9bd2e6b91cb52ce1abe99fc2df33c28d06c2fa1b"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_4118.csv": {
+    "bytes": 1042849,
+    "sha256": "4a0cc82a19b5621cb313002a304080e53d15c3db83487362be1191ffead2e99e"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_4182.csv": {
+    "bytes": 1042793,
+    "sha256": "0c855ba9ae36101f8b679e11d20f731c8bfd2246c04e22aa1681715bc3870306"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_868.csv": {
+    "bytes": 1041062,
+    "sha256": "6251bafb4f0c10e35a6e82ba1c094d877bc54b24f763b1d464d9fb8615ef9a83"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_933.csv": {
+    "bytes": 1040768,
+    "sha256": "afad8515e8a9000c45943a3a65a29816f0a413b3eec6c676fdf022f310ed7780"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles/fault_998.csv": {
+    "bytes": 1040798,
+    "sha256": "aadc23c2b8f13dedf8c783bd44b56f36b70a9495c4796086cc4a20d3a6c16e22"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/profiles.csv": {
+    "bytes": 3691,
+    "sha256": "10425862d6aea4e5f0796a93d72841abbc87a577a7c8376a36ca731afcf90897"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/reconstructed_faults/reconstructed_faults-02437.vtu": {
+    "bytes": 1048590,
+    "sha256": "4d42f0a3aa27600a7c3aa38163a807f39c216f6af20d00b57347ad0163225284"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/reconstructed_faults/reconstructed_faults-03926.vtu": {
+    "bytes": 1046856,
+    "sha256": "ec9c524697b723fd3685fe349c45b8cfa74159c8fe56c73dda97ff22b87dffee"
+  },
+  "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/output_resumed/reconstructed_faults.pvd": {
+    "bytes": 1138,
+    "sha256": "be090c8cbf5ae2855cd9f7dd55bbd8175b06a6522320f3d24274bc3dfc0d921b"
+  }
+}

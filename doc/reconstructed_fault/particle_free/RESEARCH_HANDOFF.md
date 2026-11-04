@@ -1,4 +1,221 @@
+# Bounded profile implementation and coupled comparison — 3 November 2026
+
+**Implemented and locally verified:** native donor-bounded MacCormack on the
+existing Q1 field, selected accepted-trace tensor inflow, full-normal coverage
+admission/guard and checkpoint identity, all within the existing mature
+material acceptance transaction. Legacy Q1/zero defaults, physical bounds,
+transported obstacle, total Jaumann spin, variable-viscosity reaction and
+endpoint convention remain. See [report](BOUNDED_PROFILE_TRANSPORT_REPORT.md),
+[protocol](BOUNDED_PROFILE_PROTOCOL.md) and
+[evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/bounded_profile/README.md).
+
+**Coupled accuracy comparison:** 28 corrected full-support runs cover constant
+and layered viscosity, both directions, separate space/time refinement and
+finer numerical references. Eight lifecycle runs and two surface-resolution
+runs complete the selected checks. Rejection/restart agree within 8.89e-15;
+all 183,170 unit assertions pass. The original truncated-support matrix is
+retained separately after correcting its support/I mismatch. This is numerical
+comparison of physical fields, not an exact continuum or production benchmark.
+
+**Adoption:** retain the bounded method as an opt-in improvement for this
+restricted smooth mature-fault problem. It reduces profile diffusion; coarse
+point traction is not uniformly improved. Nonconservative mass drift, the
+approximately first-order endpoint energy remainder and surface-grid error
+remain measured limitations. Raw DG face-traction work is not equilibrated
+weak reaction work. Neither a smaller trapezoidal diagnostic nor the large
+cancelling friction/background scale qualifies the endpoint scheme.
+
+**Remaining Stage C:** surface/bulk/time convergence with coupled work/flux,
+physical exterior-boundary qualification, birth/resampling, moving AMR and
+deformed cohesive shape/pressure work. Cohesive energy and tip failures remain
+as diagnosed; production BP3 is distinct and its first event is incomplete.
+The old missing mature-transaction/heterogeneous-reaction statements below are
+historical, superseded by the coupled continuation and this implementation.
+
+**Next justified experiment:** two bounded positive-translation constant-eta
+runs at 64² cells and initial label spacing .05 m, dt=.025 and .0125 s, with
+identical endpoint physics and finite-domain data. Compare with the existing
+64²/.1 m/.025 reference to separate surface resolution from temporal energy
+error. This is a recommendation, not authorization for an automatic campaign.
+No server or production restart, long replay, crust or propagation campaign
+was launched. The three-example roadmap remains; no subduction example is
+planned. The inherited 39/45-frame and temporary-log losses remain recorded.
+
+---
+
+# Boundary/profile isolation complete — 3 November 2026
+
+[Measured report](BOUNDARY_PROFILE_ISOLATION_REPORT.md) ·
+[Evidence and figures](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/boundary_profile/README.md).
+The user-selected follow-up ran five bounded two-rank cases plus independent
+profile/tensor reductions. Native source, core and existing checker binaries
+are unchanged; a separately named checker exercises native DG scratch operators.
+
+- Exact polynomial inflow translates to <=6.69e-15 relative error; compact tensor
+  errors converge at spatial orders2.84/3.03 in both directions. Independent
+  volume/face material-energy identity closes to4.68e-15 W/m. Boundary flux,
+  numerical upwind loss and time-quadrature remainder are reported separately.
+- Repeated Q1 interpolation has fixed-h diffusion proportional to1-CFL; smaller
+  dt alone can increase accumulated profile error. The independent variance
+  identity agrees to3.47e-17m². Native profile replay agrees to4.45e-16 after
+  explicitly retaining deal.II's point-lookup tolerance/averaging convention.
+- About99% of the retained squared tensor defect is in the inflow strip. At
+  halfdt, about97% of the nominal interior defect is in its upstream edge.
+  Compacting the coupled profile leaves that bulk-history boundary/front effect.
+  Localization projection is separately quantified and is not its dominant cause.
+- Next: a coupled test with physically specified compatible tensor inflow or a
+  buffered domain, joint h/dt refinement at fixed CFL, deeper-interior errors and
+  full coupled energy/flux accounting. No longer trajectory or dt-only remedy.
+
+These experiments qualify the prescribed transport components, not production
+BP3 or the full moving-fault energy balance. Cohesive energy/tip failures,
+birth/resampling/moving-AMR/shape-work limits, incomplete BP3 event and recorded
+39/45-frame and temporary-log losses remain. All protected data verify unchanged.
+The sections below retain historical task boundaries and evidence.
+
+---
+
+# Current Stage C handoff — 3 November 2026
+
+[Coupled material report](TRANSPORTED_OBJECTIVE_STAGE_C_COUPLED_REPORT.md) ·
+[Cohesive energy/tip diagnosis](STAGE_C_COHESIVE_DIAGNOSIS.md) ·
+[Task state](TRANSPORTED_OBJECTIVE_TASK_STATE.md).
+
+The selected narrower deliverable now has a complete experimental mature
+material transaction: DGQ2 T/R, labelled curve, physical phase/obstacle, age,
+auxiliary slip memory and rebuilt normalization/work maps use one accepted
+state and publish or roll back together. Both translation directions, completed
+trial rejection and two-to-four-rank restart through cell crossing pass.
+Spatial heterogeneous viscosity is included in bulk and surface reaction with
+a converged projection-correction outer iteration; both directions pass.
+Legacy/default, stationary controls and production inputs remain preserved.
+The final full suite passes183170assertions/152cases and the legacy accepted
+steps are byte-identical to the preserved pre-C control. Heterogeneous
+two-to-four-rank restart passes to roundoff.
+
+Independent characteristic comparison exposes finite discretization error:
+matched whole-domain error is 2.76% at 256 cells and 1.62% at 1024; the interior
+error decreases from 0.0186% to 0.00842%. This is a synthetic physical comparison,
+not production qualification. The general Stage C task remains **incomplete**:
+birth/resampling, boundary completion, moving AMR and deformed cohesive
+shape/pressure work are outside the admitted material configuration.
+
+Existing cohesive outputs identify first-order bulk BE and surface endpoint
+remainders; projection/quadrature defects are around roundoff. Signed and
+absolute cumulative errors coincide, and the 1% fracture-relative target still
+fails at 149.6/74.8/37.4%. The original endpoint scheme is retained. Tip traces
+identify force-residual line-search merit failure before admission, with passing
+contact/complementarity and linear solves. Legacy and objective traces coincide;
+no load, physical tolerance or solver behavior was changed to conceal failure.
+
+Next: isolate inflow/profile projection in a compact interior manufactured
+moving-state reference; separately replay the stalled tip residual in higher
+precision. No production campaign follows from these checks. Original BP3
+accepted4237/latest spatial4182, protected RSF marker2/step748, old failures,
+39/45-frame cleanup loss and earlier lost temporary logs remain explicit.
+All work stays in the verified current worktree; no server, protected checkpoint
+conversion, long replay, crust or propagation campaign was launched.
+
+---
+
+# Historical pre-coupling handoff
+
+# Stage C active handoff — 3 November 2026
+
+Continue from [the Stage C report](TRANSPORTED_OBJECTIVE_STAGE_C_REPORT.md),
+[task state](TRANSPORTED_OBJECTIVE_TASK_STATE.md) and retained assessment.
+The native reaction/history and transport-operator work is implemented and
+locally verified, including full unit suite, mature T/R AMR/restart and cohesive
+cut tensor/native/lifting restart and rejection. Cut history was necessary:
+uncut increment errors remain8.1% at the finest screen; native piece/side Q2
+passes at1.26e-10. The uncut selector is disabled and its evidence is retained.
+Same-label material geometry staging now preserves histories/rates and rebuilds
+associations through native archive/swap rollback; independent translation and
+shear checks pass in serial and four ranks. Full suite183170assertions/152cases
+passes. This owner is still separate from the missing complete material step.
+
+Do not treat Stage C as complete or enable native transported production inputs.
+Native curve/profile/surface scalar motion and complete geometry transaction,
+projected heterogeneous reaction/outer convergence, resampling/boundary/moving
+AMR and deformed cohesive shape work are still missing or unqualified.
+Cumulative phase physical error is149.6/74.8/37.4% of new fracture work at
+8/16/32steps; all fail1%. The localized Airy tip fixture fails the same signed
+line search under legacy, objective and half-dt controls. No new extension is
+qualified. Next useful work is the complete matched moving-mature transaction,
+followed by independent translation/rollback/restart checks; retain the
+independent cohesive numerical/shape gates.
+
+The current worktree/branch/HEAD is unchanged, with a large retained dirty delta.
+Protected binaries, RSF step748 slots and original server data are preserved.
+Earlier temporary /tmp build logs did not survive interruption; durable final
+unit/build/run evidence is now in the worktree. Preserve the cleanup record's
+39/45 historical-frame loss. No server submission, old-trajectory conversion,
+long replay, crust or new propagation campaign was launched.
+
+---
+
 # Research handoff — BP3 review, controlled crust, propagation
+
+**2 November Stage B completion:** the [moving/layered report](TRANSPORTED_OBJECTIVE_STAGE_B_MOVING_REPORT.md)
+and [task state](TRANSPORTED_OBJECTIVE_TASK_STATE.md) supersede the next-B2 action
+below. Independent Eulerian direct/separated histories now cover prescribed
+material shear/translation, changing profile and layered local relaxation with
+all extension/coefficient terms. Twenty numerical +8 consolidation/profile/
+selection checks pass. Select complete R DGQ2 beside existing T DGQ2 and surface
+memory for the first native mature extension; retain direct stress for regression.
+A P1 residual misses the coarse target even in its best projection. Native
+integration, solved geometry/RSF/phase, lifecycle/MPI/AMR and cohesive shape work
+remain unqualified; no source build, native timestep or production conversion.
+Next is Stage C, not a server event. All prior failed screens, q6 rejection,
+production evidence/checkpoints and cleanup losses are preserved.
+
+**2 November Stage B first-part handoff:** [fixed-profile report](TRANSPORTED_OBJECTIVE_STAGE_B_FIXED_REPORT.md)
+and [task state](TRANSPORTED_OBJECTIVE_TASK_STATE.md) supersede Stage A's “next
+comparison” entry below. Independent direct and complete separated Cartesian
+DGQ2 histories now converge under time/space/quadrature refinement. Q8 meets
+14 selected criteria; the initial q6 coarse-grid quadrature failure is retained.
+Both representations remain candidates; the complete separated form uses twice
+the tensor coefficients. Next is the remaining manufactured moving-profile/
+heterogeneous-eta comparison, before native integration or representation
+adoption. No native build/timestep, production checkpoint conversion, server
+job or new physical campaign; all previous failed screens/losses remain.
+
+**2 November Stage A handoff:** the current selection is Stage A of
+[CODEX_TRANSPORTED_OBJECTIVE_TASK.md](CODEX_TRANSPORTED_OBJECTIVE_TASK.md),
+completed as a design/algebra audit. Read [task state](TRANSPORTED_OBJECTIVE_TASK_STATE.md),
+[spec](TRANSPORTED_OBJECTIVE_SPEC.md), [acceptance report](TRANSPORTED_OBJECTIVE_REPORT.md)
+and the consolidated maps before later implementation. Existing dirty native
+source is retained; no binary rebuild, native timestep or checkpoint conversion.
+The full residual adds profile/transport/local-versus-surface-rate terms.
+Single-state interface labels and ALE node motion are explicit. Deforming
+cohesive geometry additionally requires shape/pressure/measure work; that
+missing coupling blocks its admission, not the mature Stage B comparison.
+No transported DG/cohesive path is enabled. Next is the bounded oblique-profile
+representation experiment when selected. Old RSF step748 and BP3 evidence,
+packages and cleanup availability losses below remain unchanged.
+
+**30 October review update:** the user subsequently supplied `output_start/` and
+`output_resumed/`. [BP3_REVIEW.md](BP3_REVIEW.md) supersedes the older local-data
+availability statement below: accepted4237 is observed, with a wall-time stop
+during4238 and continued acceleration in the latest saved4182 profile. A complete
+first event, any later remote job and the terminal restart label remain unknown.
+The selected spin work and its explicit formulation restrictions are tracked in
+[REVIEW_PLAN.md](REVIEW_PLAN.md) and [OBJECTIVE_STRESS_REPORT.md](OBJECTIVE_STRESS_REPORT.md).
+The original handoff and cleanup losses below remain historical evidence.
+
+**Binary preservation update:** both configured core paths below were rebuilt
+during the selected local spin task. Their old qualified contents are now
+protected under `build-particle-free/objective-stress/baseline/` as
+`0-aspect-release` (old BP3), `1-aspect-release` (old cohesive) and
+`2-libcohesive_rsf_native_checks.release.so`. The original hashes below describe
+those copies, not the rebuilt live executables. The matching old BP3 runtime
+plugin remains at its original optimization-build path; it was used successfully
+with copy0. All copied binaries' runtime libraries resolve. See
+[verification identity](../../../benchmarks/reconstructed_fault/particle_free/evidence/objective_stress/verification.json)
+for the final BP3 build and
+[entry/preservation evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/objective_stress/README.md)
+for exact old identities. Neither live build nor old copy is assumed to match
+HEAD solely from an embedded Git label.
 
 Prepared 30 October 2026 after [cleanup](CLEANUP_REPORT.md). This is a research-review handoff, not authorization for another run. No server job or physical timestep was launched during cleanup.
 

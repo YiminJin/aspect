@@ -208,7 +208,8 @@ namespace aspect
     // Automatic completion has separately qualified each terminal neighborhood
     // and its common source association. The assembly below is already per fault
     // and uses each segment's frame; retain the legacy admission restriction.
-    if (this->get_reconstructed_fault_manager().uses_automatic_boundary_completion())
+    if (this->get_reconstructed_fault_manager().uses_automatic_boundary_completion()
+        || phase_field_fault.uses_transported_mature_history())
       {
         if (!bulk_work_measure) surface_linearization.reset();
         bulk_work_measure=true;
@@ -883,6 +884,12 @@ namespace aspect
     return linearization_generation;
   }
 
+
+  template<int dim> void ReconstructedFaultSurfaceSystem<dim>::invalidate_material_geometry()
+  {
+    surface_linearization.reset();stationary_coupling_cache.reset();
+    normal_diagnostic.reset();normal_filter_cache.clear();++linearization_generation;
+  }
 
 #define INSTANTIATE(dim) template class ReconstructedFaultSurfaceSystem<dim>;
   ASPECT_INSTANTIATE(INSTANTIATE)

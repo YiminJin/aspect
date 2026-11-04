@@ -1,0 +1,1796 @@
+{
+  "cases": [
+    {
+      "case": "matched-positive",
+      "steps": [
+        {
+          "step": 1,
+          "time": 0.1,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 3.8464863102233334e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 3.8464863102233334e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "interior": {
+              "defect_L2": 2.4449495124898912e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 2.4449495124898912e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "core": {
+              "defect_L2": 1.5261941549873454e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.5261941549873454e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "upstream_inner": {
+              "defect_L2": 1.012881570647447e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.012881570647447e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "inflow_band": {
+              "defect_L2": 1.6232393580032132e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.6232393580032132e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 2.4865182088093126e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 2.4865182088093126e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -0.7218245836551854,
+            0.4718245836551854
+          ],
+          "inflow_fraction_squared_error": 0.17808885693720455,
+          "interior_fraction_squared_error": 0.40402794891656496
+        },
+        {
+          "step": 2,
+          "time": 0.2,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.0023445672854849964,
+              "localization_projection_L2": 6.462510500121715e-06,
+              "remaining_transport_rotation_L2": 0.0023445610468989858,
+              "signed_cross_term": -1.251051155241833e-11,
+              "squared_identity_error": 3.9585697566005475e-21
+            },
+            "interior": {
+              "defect_L2": 9.817744760300952e-06,
+              "localization_projection_L2": 6.462510500121715e-06,
+              "remaining_transport_rotation_L2": 8.193569537549052e-06,
+              "signed_cross_term": -1.251051155241833e-11,
+              "squared_identity_error": -7.754818242684634e-26
+            },
+            "core": {
+              "defect_L2": 6.849478979461373e-06,
+              "localization_projection_L2": 5.631432864312154e-06,
+              "remaining_transport_rotation_L2": 4.764143549478421e-06,
+              "signed_cross_term": -7.494737575208639e-12,
+              "squared_identity_error": 1.6155871338926322e-27
+            },
+            "upstream_inner": {
+              "defect_L2": 6.278386478196026e-06,
+              "localization_projection_L2": 2.1422034539816686e-06,
+              "remaining_transport_rotation_L2": 5.9307863487411835e-06,
+              "signed_cross_term": -3.451255830710763e-13,
+              "squared_identity_error": -1.666074231826777e-27
+            },
+            "inflow_band": {
+              "defect_L2": 0.0023184589736710993,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0023184589736710993,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.000348779809418868,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.000348779809418868,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -0.7218245836551854,
+            -0.22182458365518543
+          ],
+          "inflow_fraction_squared_error": 0.9778526764489737,
+          "interior_fraction_squared_error": 1.7534689210972997e-05
+        },
+        {
+          "step": 3,
+          "time": 0.30000000000000004,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.003676544918390802,
+              "localization_projection_L2": 1.1715239108670018e-05,
+              "remaining_transport_rotation_L2": 0.0036765315303989633,
+              "signed_cross_term": -3.8803899885791903e-11,
+              "squared_identity_error": -1.420275574102084e-21
+            },
+            "interior": {
+              "defect_L2": 1.5714327176152485e-05,
+              "localization_projection_L2": 1.1715239108670018e-05,
+              "remaining_transport_rotation_L2": 1.2185940715088227e-05,
+              "signed_cross_term": -3.8803899885791903e-11,
+              "squared_identity_error": 4.52364397489937e-26
+            },
+            "core": {
+              "defect_L2": 1.0042502262553044e-05,
+              "localization_projection_L2": 9.107510240680673e-06,
+              "remaining_transport_rotation_L2": 7.355969877939334e-06,
+              "signed_cross_term": -3.620518393587114e-11,
+              "squared_identity_error": -3.2311742677852644e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 9.144321941204345e-06,
+              "localization_projection_L2": 1.370916361379482e-06,
+              "remaining_transport_rotation_L2": 9.041434617943187e-06,
+              "signed_cross_term": -8.327856048251044e-15,
+              "squared_identity_error": -8.977237101415114e-28
+            },
+            "inflow_band": {
+              "defect_L2": 0.0036541962437321306,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0036541962437321306,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.00040445693115662704,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00040445693115662704,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            1.0281754163448147,
+            0.2781754163448146
+          ],
+          "inflow_fraction_squared_error": 0.9878795175778748,
+          "interior_fraction_squared_error": 1.826887605456445e-05
+        },
+        {
+          "step": 4,
+          "time": 0.4,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.004745725610232371,
+              "localization_projection_L2": 1.7643163870491267e-05,
+              "remaining_transport_rotation_L2": 0.0047456992341909105,
+              "signed_cross_term": -6.09350161812e-11,
+              "squared_identity_error": 2.6939540641444578e-20
+            },
+            "interior": {
+              "defect_L2": 2.1225623571307682e-05,
+              "localization_projection_L2": 1.7643163870491267e-05,
+              "remaining_transport_rotation_L2": 1.4148529280849087e-05,
+              "signed_cross_term": -6.09350161812e-11,
+              "squared_identity_error": 2.5849394142282115e-26
+            },
+            "core": {
+              "defect_L2": 1.5375447674380755e-05,
+              "localization_projection_L2": 1.3952992543640868e-05,
+              "remaining_transport_rotation_L2": 9.16232574734886e-06,
+              "signed_cross_term": -4.22298228358088e-11,
+              "squared_identity_error": -1.4217166778255163e-25
+            },
+            "upstream_inner": {
+              "defect_L2": 9.779902827842033e-06,
+              "localization_projection_L2": 1.8747295319578745e-07,
+              "remaining_transport_rotation_L2": 9.777829212824732e-06,
+              "signed_cross_term": 5.4090986839613255e-15,
+              "squared_identity_error": 5.1843938691124896e-27
+            },
+            "inflow_band": {
+              "defect_L2": 0.00472581713954019,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00472581713954019,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.00043372042164002537,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00043372042164002537,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            0.9718245836551854,
+            0.2781754163448146
+          ],
+          "inflow_fraction_squared_error": 0.9916275343379504,
+          "interior_fraction_squared_error": 2.0003945696983906e-05
+        }
+      ]
+    },
+    {
+      "case": "matched-negative",
+      "steps": [
+        {
+          "step": 1,
+          "time": 0.1,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 3.7423272713616835e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 3.7423272713616835e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "interior": {
+              "defect_L2": 2.296692816554762e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 2.296692816554762e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "core": {
+              "defect_L2": 1.3689111551019662e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.3689111551019662e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "upstream_inner": {
+              "defect_L2": 1.0717484625390551e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.0717484625390551e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "inflow_band": {
+              "defect_L2": 1.5942170649513638e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.5942170649513638e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 2.487707270194991e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 2.487707270194991e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            0.028175416344814578,
+            0.9718245836551854
+          ],
+          "inflow_fraction_squared_error": 0.18147273240719705,
+          "interior_fraction_squared_error": 0.37663640445805974
+        },
+        {
+          "step": 2,
+          "time": 0.2,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.002375898560890274,
+              "localization_projection_L2": 5.99298797678163e-06,
+              "remaining_transport_rotation_L2": 0.0023758941225796703,
+              "signed_cross_term": -1.48259730407438e-11,
+              "squared_identity_error": 4.137221381866395e-21
+            },
+            "interior": {
+              "defect_L2": 9.597230014114792e-06,
+              "localization_projection_L2": 5.99298797678163e-06,
+              "remaining_transport_rotation_L2": 8.427152074972922e-06,
+              "signed_cross_term": -1.48259730407438e-11,
+              "squared_identity_error": -6.462348535570529e-27
+            },
+            "core": {
+              "defect_L2": 6.102739665821127e-06,
+              "localization_projection_L2": 4.936198707832497e-06,
+              "remaining_transport_rotation_L2": 4.50244328855423e-06,
+              "signed_cross_term": -7.39462182106771e-12,
+              "squared_identity_error": 2.261821987449685e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 6.351884698776378e-06,
+              "localization_projection_L2": 1.7119746016839088e-06,
+              "remaining_transport_rotation_L2": 6.119193570879018e-06,
+              "signed_cross_term": -2.894776814840133e-14,
+              "squared_identity_error": -6.4434158738452244e-27
+            },
+            "inflow_band": {
+              "defect_L2": 0.0023457555664183473,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0023457555664183473,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0003771374914190745,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0003771374914190745,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            0.7218245836551854,
+            0.22182458365518543
+          ],
+          "inflow_fraction_squared_error": 0.9747869853760155,
+          "interior_fraction_squared_error": 1.6316838616732854e-05
+        },
+        {
+          "step": 3,
+          "time": 0.30000000000000004,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.0037582440712947973,
+              "localization_projection_L2": 1.202826302278426e-05,
+              "remaining_transport_rotation_L2": 0.0037582286976878742,
+              "signed_cross_term": -2.9123813547202014e-11,
+              "squared_identity_error": -7.090294942771917e-22
+            },
+            "interior": {
+              "defect_L2": 1.646220714198952e-05,
+              "localization_projection_L2": 1.202826302278426e-05,
+              "remaining_transport_rotation_L2": 1.2467917475973822e-05,
+              "signed_cross_term": -2.9123813547202014e-11,
+              "squared_identity_error": 2.261821987449685e-25
+            },
+            "core": {
+              "defect_L2": 9.29812128043331e-06,
+              "localization_projection_L2": 7.909226103679452e-06,
+              "remaining_transport_rotation_L2": 7.041196503514511e-06,
+              "signed_cross_term": -2.5679246414582648e-11,
+              "squared_identity_error": 4.8467614016778965e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 9.510635760194781e-06,
+              "localization_projection_L2": 1.1027464729806586e-06,
+              "remaining_transport_rotation_L2": 9.440171350335426e-06,
+              "signed_cross_term": 1.193076557307061e-13,
+              "squared_identity_error": 2.473867798773093e-27
+            },
+            "inflow_band": {
+              "defect_L2": 0.0037314950280702124,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0037314950280702124,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0004472944786667853,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0004472944786667853,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.0281754163448147,
+            -0.2781754163448146
+          ],
+          "inflow_fraction_squared_error": 0.9858157956306621,
+          "interior_fraction_squared_error": 1.918695964269568e-05
+        },
+        {
+          "step": 4,
+          "time": 0.4,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.004892003429046151,
+              "localization_projection_L2": 1.824884309048541e-05,
+              "remaining_transport_rotation_L2": 0.004891974764748786,
+              "signed_cross_term": -5.2569413778570455e-11,
+              "squared_identity_error": -5.923550226417336e-21
+            },
+            "interior": {
+              "defect_L2": 2.2001922185223056e-05,
+              "localization_projection_L2": 1.824884309048541e-05,
+              "remaining_transport_rotation_L2": 1.4270028713426758e-05,
+              "signed_cross_term": -5.2569413778570455e-11,
+              "squared_identity_error": -2.3910689581610956e-25
+            },
+            "core": {
+              "defect_L2": 1.427200581087044e-05,
+              "localization_projection_L2": 1.2433321033960127e-05,
+              "remaining_transport_rotation_L2": 8.749830080803288e-06,
+              "signed_cross_term": -2.74568485109255e-11,
+              "squared_identity_error": -2.7788098702953273e-25
+            },
+            "upstream_inner": {
+              "defect_L2": 1.0074225281635444e-05,
+              "localization_projection_L2": 1.5161100932008525e-07,
+              "remaining_transport_rotation_L2": 1.0072602827433582e-05,
+              "signed_cross_term": 9.701407772697686e-15,
+              "squared_identity_error": 5.76184005173427e-27
+            },
+            "inflow_band": {
+              "defect_L2": 0.004868821420483239,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.004868821420483239,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0004751751683990072,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0004751751683990072,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -0.9718245836551854,
+            -0.2781754163448146
+          ],
+          "inflow_fraction_squared_error": 0.9905449446378796,
+          "interior_fraction_squared_error": 2.0227757719120522e-05
+        }
+      ]
+    },
+    {
+      "case": "matched-half-dt",
+      "steps": [
+        {
+          "step": 1,
+          "time": 0.05,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 1.961107346612022e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.961107346612022e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "interior": {
+              "defect_L2": 1.1844885241044239e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.1844885241044239e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "core": {
+              "defect_L2": 6.768151033621092e-16,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 6.768151033621092e-16,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "upstream_inner": {
+              "defect_L2": 5.535399088480929e-16,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 5.535399088480929e-16,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "inflow_band": {
+              "defect_L2": 8.066674548681149e-16,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 8.066674548681149e-16,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 1.33873693400054e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.33873693400054e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            1.0281754163448147,
+            0.7218245836551854
+          ],
+          "inflow_fraction_squared_error": 0.16919453765148493,
+          "interior_fraction_squared_error": 0.3648034875820972
+        },
+        {
+          "step": 2,
+          "time": 0.1,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.001332269686991324,
+              "localization_projection_L2": 3.0952083978306076e-06,
+              "remaining_transport_rotation_L2": 0.00133226893587791,
+              "signed_cross_term": -7.578944324644652e-12,
+              "squared_identity_error": 5.0191445488642404e-23
+            },
+            "interior": {
+              "defect_L2": 3.8813782929455745e-06,
+              "localization_projection_L2": 3.0952083978306076e-06,
+              "remaining_transport_rotation_L2": 3.6143777820798758e-06,
+              "signed_cross_term": -7.578944324644652e-12,
+              "squared_identity_error": -4.8467614016778965e-27
+            },
+            "core": {
+              "defect_L2": 2.7216808598782794e-06,
+              "localization_projection_L2": 1.7877035842473388e-06,
+              "remaining_transport_rotation_L2": 2.3849104127867533e-06,
+              "signed_cross_term": -1.4761350791216968e-12,
+              "squared_identity_error": 2.6253290925755273e-27
+            },
+            "upstream_inner": {
+              "defect_L2": 1.7891003708594392e-06,
+              "localization_projection_L2": 1.9818151406244654e-06,
+              "remaining_transport_rotation_L2": 1.5996673896156721e-06,
+              "signed_cross_term": -3.2856468719988062e-12,
+              "squared_identity_error": 8.077935669463161e-28
+            },
+            "inflow_band": {
+              "defect_L2": 0.001313336395382892,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.001313336395382892,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.00022377436479895595,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00022377436479895595,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -0.7781754163448146,
+            -0.22182458365518543
+          ],
+          "inflow_fraction_squared_error": 0.971779350088276,
+          "interior_fraction_squared_error": 8.487653708633652e-06
+        },
+        {
+          "step": 3,
+          "time": 0.15000000000000002,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.0021712115491990974,
+              "localization_projection_L2": 6.415744088740459e-06,
+              "remaining_transport_rotation_L2": 0.002171206577386712,
+              "signed_cross_term": -1.9572083986564106e-11,
+              "squared_identity_error": -1.2578347501377155e-21
+            },
+            "interior": {
+              "defect_L2": 9.193912003486133e-06,
+              "localization_projection_L2": 6.415744088740459e-06,
+              "remaining_transport_rotation_L2": 7.933368118409872e-06,
+              "signed_cross_term": -1.9572083986564106e-11,
+              "squared_identity_error": 1.5186519058590742e-25
+            },
+            "core": {
+              "defect_L2": 6.006066479168728e-06,
+              "localization_projection_L2": 5.274086290882777e-06,
+              "remaining_transport_rotation_L2": 3.846164562147083e-06,
+              "signed_cross_term": -6.5361334905994356e-12,
+              "squared_identity_error": -3.6350710512584224e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 6.035011451930304e-06,
+              "localization_projection_L2": 2.1782355844371034e-06,
+              "remaining_transport_rotation_L2": 6.016081551563159e-06,
+              "signed_cross_term": -4.5165842714367105e-12,
+              "squared_identity_error": -3.2311742677852644e-27
+            },
+            "inflow_band": {
+              "defect_L2": 0.002147599242156306,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.002147599242156306,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0003192061378596664,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0003192061378596664,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -0.7218245836551854,
+            -0.2781754163448146
+          ],
+          "inflow_fraction_squared_error": 0.9783679180798694,
+          "interior_fraction_squared_error": 1.793066532632638e-05
+        },
+        {
+          "step": 4,
+          "time": 0.2,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.0027411780985955726,
+              "localization_projection_L2": 7.97761591017895e-06,
+              "remaining_transport_rotation_L2": 0.002741170809438389,
+              "signed_cross_term": -2.3680652686037457e-11,
+              "squared_identity_error": 3.6041939499554664e-21
+            },
+            "interior": {
+              "defect_L2": 1.7683489646671496e-05,
+              "localization_projection_L2": 7.97761591017895e-06,
+              "remaining_transport_rotation_L2": 1.6514966035679122e-05,
+              "signed_cross_term": -2.3680652686037457e-11,
+              "squared_identity_error": 2.714186384939622e-25
+            },
+            "core": {
+              "defect_L2": 6.936854230500591e-06,
+              "localization_projection_L2": 5.785822770325763e-06,
+              "remaining_transport_rotation_L2": 4.92689814473687e-06,
+              "signed_cross_term": -9.630123843017746e-12,
+              "squared_identity_error": -4.8467614016778965e-27
+            },
+            "upstream_inner": {
+              "defect_L2": 1.5444149361369193e-05,
+              "localization_projection_L2": 3.052098276450988e-06,
+              "remaining_transport_rotation_L2": 1.5222449537655884e-05,
+              "signed_cross_term": -2.516524319314416e-12,
+              "squared_identity_error": -6.54312789226516e-26
+            },
+            "inflow_band": {
+              "defect_L2": 0.002716009087081612,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.002716009087081612,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0003701881971431198,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0003701881971431198,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2218245836551853,
+            -0.625
+          ],
+          "inflow_fraction_squared_error": 0.9817206603064992,
+          "interior_fraction_squared_error": 4.161610575486104e-05
+        },
+        {
+          "step": 5,
+          "time": 0.25,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.003158294113437458,
+              "localization_projection_L2": 1.2162621454669936e-05,
+              "remaining_transport_rotation_L2": 0.0031582765866393775,
+              "signed_cross_term": -3.722010143607211e-11,
+              "squared_identity_error": 1.1586409312909757e-20
+            },
+            "interior": {
+              "defect_L2": 3.400458673561571e-05,
+              "localization_projection_L2": 1.2162621454669936e-05,
+              "remaining_transport_rotation_L2": 3.233577987070184e-05,
+              "signed_cross_term": -3.722010143607211e-11,
+              "squared_identity_error": 2.972680326362443e-25
+            },
+            "core": {
+              "defect_L2": 9.992034022872166e-06,
+              "localization_projection_L2": 9.401183003515867e-06,
+              "remaining_transport_rotation_L2": 6.037436734571594e-06,
+              "signed_cross_term": -2.49921402753151e-11,
+              "squared_identity_error": -1.0662875083691372e-25
+            },
+            "upstream_inner": {
+              "defect_L2": 3.153222241672312e-05,
+              "localization_projection_L2": 1.8159443343919708e-06,
+              "remaining_transport_rotation_L2": 3.145803610773831e-05,
+              "signed_cross_term": 1.375360956318615e-12,
+              "squared_identity_error": 4.806371723330581e-26
+            },
+            "inflow_band": {
+              "defect_L2": 0.003131077890393418,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.003131077890393418,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.00041233074023668795,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00041233074023668795,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2218245836551853,
+            -1.0281754163448147
+          ],
+          "inflow_fraction_squared_error": 0.9828394976580356,
+          "interior_fraction_squared_error": 0.00011592306639943241
+        },
+        {
+          "step": 6,
+          "time": 0.3,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.0034856528266524454,
+              "localization_projection_L2": 1.4766589522648973e-05,
+              "remaining_transport_rotation_L2": 0.003485629277449489,
+              "signed_cross_term": -5.388402899454603e-11,
+              "squared_identity_error": 1.2324991127040112e-21
+            },
+            "interior": {
+              "defect_L2": 5.7223580429211385e-05,
+              "localization_projection_L2": 1.4766589522648973e-05,
+              "remaining_transport_rotation_L2": 5.5770691406890104e-05,
+              "signed_cross_term": -5.388402899454603e-11,
+              "squared_identity_error": -2.481541837659083e-24
+            },
+            "core": {
+              "defect_L2": 1.1775615986717534e-05,
+              "localization_projection_L2": 1.1318141566195025e-05,
+              "remaining_transport_rotation_L2": 7.248126578472677e-06,
+              "signed_cross_term": -4.197053554335589e-11,
+              "squared_identity_error": -1.2278462217584005e-25
+            },
+            "upstream_inner": {
+              "defect_L2": 5.512328479301748e-05,
+              "localization_projection_L2": 9.233838755272589e-07,
+              "remaining_transport_rotation_L2": 5.509923131507948e-05,
+              "signed_cross_term": 1.7985970778934903e-12,
+              "squared_identity_error": 1.1187940902206478e-25
+            },
+            "inflow_band": {
+              "defect_L2": 0.0034553194202169672,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0034553194202169672,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0004552678267399799,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0004552678267399799,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2218245836551853,
+            -1.0281754163448147
+          ],
+          "inflow_fraction_squared_error": 0.9826710106697513,
+          "interior_fraction_squared_error": 0.00026951429042075894
+        },
+        {
+          "step": 7,
+          "time": 0.35,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.0037589974761041553,
+              "localization_projection_L2": 1.545919087785457e-05,
+              "remaining_transport_rotation_L2": 0.0037589776924540678,
+              "signed_cross_term": -9.025359249118664e-11,
+              "squared_identity_error": -7.844528565055425e-21
+            },
+            "interior": {
+              "defect_L2": 8.585015739170252e-05,
+              "localization_projection_L2": 1.545919087785457e-05,
+              "remaining_transport_rotation_L2": 8.497950655348227e-05,
+              "signed_cross_term": -9.025359249118664e-11,
+              "squared_identity_error": 6.242628685361131e-24
+            },
+            "core": {
+              "defect_L2": 1.3372727337524436e-05,
+              "localization_projection_L2": 1.3616296811081472e-05,
+              "remaining_transport_rotation_L2": 8.77864722201449e-06,
+              "signed_cross_term": -8.363834945227692e-11,
+              "squared_identity_error": 1.1632227364026952e-25
+            },
+            "upstream_inner": {
+              "defect_L2": 8.43635397067521e-05,
+              "localization_projection_L2": 3.4190475224306467e-07,
+              "remaining_transport_rotation_L2": 8.435707361518653e-05,
+              "signed_cross_term": 9.740640751307613e-13,
+              "squared_identity_error": 1.1404025681364617e-24
+            },
+            "inflow_band": {
+              "defect_L2": 0.0037247678813895043,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0037247678813895043,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0004987945524987177,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0004987945524987177,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2218245836551853,
+            -1.125
+          ],
+          "inflow_fraction_squared_error": 0.9818708329328742,
+          "interior_fraction_squared_error": 0.000521600649095075
+        },
+        {
+          "step": 8,
+          "time": 0.39999999999999997,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.003999208865223636,
+              "localization_projection_L2": 1.9172617355771944e-05,
+              "remaining_transport_rotation_L2": 0.003999179510286288,
+              "signed_cross_term": -1.327970666379105e-10,
+              "squared_identity_error": 1.4034334013486802e-20
+            },
+            "interior": {
+              "defect_L2": 0.0001182049131604478,
+              "localization_projection_L2": 1.9172617355771944e-05,
+              "remaining_transport_rotation_L2": 0.00011720754798918065,
+              "signed_cross_term": -1.327970666379105e-10,
+              "squared_identity_error": -1.2847148888714211e-23
+            },
+            "core": {
+              "defect_L2": 1.76928177207566e-05,
+              "localization_projection_L2": 1.7666642873003126e-05,
+              "remaining_transport_rotation_L2": 1.0827414245533056e-05,
+              "signed_cross_term": -1.1630737074668585e-10,
+              "squared_identity_error": 1.9387045606711586e-25
+            },
+            "upstream_inner": {
+              "defect_L2": 0.00011651276857735878,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00011651276857735878,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "inflow_band": {
+              "defect_L2": 0.003960657001108872,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.003960657001108872,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0005411979912706001,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0005411979912706001,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2218245836551853,
+            -1.125
+          ],
+          "inflow_fraction_squared_error": 0.9808131818678587,
+          "interior_fraction_squared_error": 0.0008736206351125737
+        }
+      ]
+    },
+    {
+      "case": "matched-fine-final",
+      "steps": [
+        {
+          "step": 1,
+          "time": 0.1,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 7.485888004658117e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 7.485888004658117e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "interior": {
+              "defect_L2": 4.620549277399203e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 4.620549277399203e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "core": {
+              "defect_L2": 2.7051792154310135e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 2.7051792154310135e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "upstream_inner": {
+              "defect_L2": 2.1962714705791496e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 2.1962714705791496e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "inflow_band": {
+              "defect_L2": 3.2850110598228494e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 3.2850110598228494e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 4.888532083381645e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 4.888532083381645e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2359122918275927,
+            -0.014087708172407287
+          ],
+          "inflow_fraction_squared_error": 0.19256928651386365,
+          "interior_fraction_squared_error": 0.3809785826372867
+        },
+        {
+          "step": 2,
+          "time": 0.2,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.001307730267332309,
+              "localization_projection_L2": 3.0956435899405705e-06,
+              "remaining_transport_rotation_L2": 0.0013077263537896522,
+              "signed_cross_term": 6.526918213719988e-13,
+              "squared_identity_error": -3.153137067327828e-21
+            },
+            "interior": {
+              "defect_L2": 4.268691237651933e-06,
+              "localization_projection_L2": 3.0956435899405705e-06,
+              "remaining_transport_rotation_L2": 2.8259553827147093e-06,
+              "signed_cross_term": 6.526918213719988e-13,
+              "squared_identity_error": 1.241982609179961e-26
+            },
+            "core": {
+              "defect_L2": 2.428918960074219e-06,
+              "localization_projection_L2": 2.044851129586039e-06,
+              "remaining_transport_rotation_L2": 1.7097430049622598e-06,
+              "signed_cross_term": -1.2049899705786355e-12,
+              "squared_identity_error": -1.676171651413606e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 2.061793526720491e-06,
+              "localization_projection_L2": 8.919569157445429e-07,
+              "remaining_transport_rotation_L2": 1.5088664823940216e-06,
+              "signed_cross_term": 1.1787273455898957e-12,
+              "squared_identity_error": -2.4233807008389483e-27
+            },
+            "inflow_band": {
+              "defect_L2": 0.0012878217526285274,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0012878217526285274,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.00022727816399499936,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00022727816399499936,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            0.8890877081724073,
+            0.2640877081724073
+          ],
+          "inflow_fraction_squared_error": 0.9697843287617839,
+          "interior_fraction_squared_error": 1.0654992150032956e-05
+        },
+        {
+          "step": 3,
+          "time": 0.30000000000000004,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.0020956028732943294,
+              "localization_projection_L2": 4.798875010263904e-06,
+              "remaining_transport_rotation_L2": 0.002095597525490297,
+              "signed_cross_term": -6.154829701306833e-13,
+              "squared_identity_error": -6.51749963161183e-22
+            },
+            "interior": {
+              "defect_L2": 5.769377847405681e-06,
+              "localization_projection_L2": 4.798875010263904e-06,
+              "remaining_transport_rotation_L2": 3.2972719560464946e-06,
+              "signed_cross_term": -6.154829701306833e-13,
+              "squared_identity_error": 3.766337505887199e-26
+            },
+            "core": {
+              "defect_L2": 4.488264764005306e-06,
+              "localization_projection_L2": 3.7910413504080027e-06,
+              "remaining_transport_rotation_L2": 2.521403803436219e-06,
+              "signed_cross_term": -5.849510686743224e-13,
+              "squared_identity_error": -2.9989336172881985e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 1.190748979558575e-06,
+              "localization_projection_L2": 5.469477287443722e-07,
+              "remaining_transport_rotation_L2": 8.624820716703992e-07,
+              "signed_cross_term": 3.748559903882969e-13,
+              "squared_identity_error": -2.0194839173657902e-28
+            },
+            "inflow_band": {
+              "defect_L2": 0.002082395101086665,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.002082395101086665,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.000234837730803545,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.000234837730803545,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -0.6390877081724073,
+            -0.3125
+          ],
+          "inflow_fraction_squared_error": 0.9874344985470177,
+          "interior_fraction_squared_error": 7.579490183522865e-06
+        },
+        {
+          "step": 4,
+          "time": 0.4,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.0027982934587524283,
+              "localization_projection_L2": 8.776714369291794e-06,
+              "remaining_transport_rotation_L2": 0.002798278814550983,
+              "signed_cross_term": 4.9266166585607445e-12,
+              "squared_identity_error": -4.7295158199906074e-21
+            },
+            "interior": {
+              "defect_L2": 9.612510873794886e-06,
+              "localization_projection_L2": 8.776714369291794e-06,
+              "remaining_transport_rotation_L2": 3.2315682756412572e-06,
+              "signed_cross_term": 4.9266166585607445e-12,
+              "squared_identity_error": 1.058209572699674e-25
+            },
+            "core": {
+              "defect_L2": 7.950910709034002e-06,
+              "localization_projection_L2": 7.433318492428993e-06,
+              "remaining_transport_rotation_L2": 2.4522362483935783e-06,
+              "signed_cross_term": 1.9492946752093033e-12,
+              "squared_identity_error": 2.1406529524077376e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 6.617216756634355e-07,
+              "localization_projection_L2": 6.614341254734489e-08,
+              "remaining_transport_rotation_L2": 6.582578326162243e-07,
+              "signed_cross_term": 1.9725081880743405e-16,
+              "squared_identity_error": -3.9048614808440084e-29
+            },
+            "inflow_band": {
+              "defect_L2": 0.0027865179238562494,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0027865179238562494,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.00025626498192139063,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00025626498192139063,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -0.6109122918275927,
+            -0.2640877081724073
+          ],
+          "inflow_fraction_squared_error": 0.9916014823469813,
+          "interior_fraction_squared_error": 1.1800140372526064e-05
+        }
+      ]
+    },
+    {
+      "case": "compact-profile-full",
+      "steps": [
+        {
+          "step": 1,
+          "time": 0.1,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 3.760933054852678e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 3.760933054852678e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "interior": {
+              "defect_L2": 2.3289167386030545e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 2.3289167386030545e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "core": {
+              "defect_L2": 1.4307761269367335e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.4307761269367335e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "upstream_inner": {
+              "defect_L2": 1.1062719561161196e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.1062719561161196e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "inflow_band": {
+              "defect_L2": 1.6606796849136912e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.6606796849136912e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 2.4419064789325924e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 2.4419064789325924e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2218245836551853,
+            -0.2781754163448146
+          ],
+          "inflow_fraction_squared_error": 0.1949757232376466,
+          "interior_fraction_squared_error": 0.38345704273519743
+        },
+        {
+          "step": 2,
+          "time": 0.2,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.0023445912138936337,
+              "localization_projection_L2": 6.272948074829261e-06,
+              "remaining_transport_rotation_L2": 0.002344585632932909,
+              "signed_cross_term": -1.3179765735187062e-11,
+              "squared_identity_error": -8.637219623474112e-22
+            },
+            "interior": {
+              "defect_L2": 9.490296892818485e-06,
+              "localization_projection_L2": 6.272948074829261e-06,
+              "remaining_transport_rotation_L2": 7.993473794260115e-06,
+              "signed_cross_term": -1.3179765735187062e-11,
+              "squared_identity_error": -9.370405376577267e-26
+            },
+            "core": {
+              "defect_L2": 6.731966312783781e-06,
+              "localization_projection_L2": 5.6709752058128934e-06,
+              "remaining_transport_rotation_L2": 4.730964575766882e-06,
+              "signed_cross_term": -9.222615165650135e-12,
+              "squared_identity_error": 8.401053096241687e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 6.094669543195465e-06,
+              "localization_projection_L2": 1.623569042661964e-06,
+              "remaining_transport_rotation_L2": 5.895331123071569e-06,
+              "signed_cross_term": -2.4590864619216017e-13,
+              "squared_identity_error": 7.623551788055858e-27
+            },
+            "inflow_band": {
+              "defect_L2": 0.0023184817462891943,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0023184817462891943,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0003487983466932303,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0003487983466932303,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -0.7218245836551854,
+            -0.22182458365518543
+          ],
+          "inflow_fraction_squared_error": 0.9778519262726809,
+          "interior_fraction_squared_error": 1.6384203432937845e-05
+        },
+        {
+          "step": 3,
+          "time": 0.30000000000000004,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.003676589958081546,
+              "localization_projection_L2": 1.1570873155126975e-05,
+              "remaining_transport_rotation_L2": 0.003676577061230614,
+              "signed_cross_term": -3.9052406653150035e-11,
+              "squared_identity_error": 3.0135869925926047e-21
+            },
+            "interior": {
+              "defect_L2": 1.5519997913212247e-05,
+              "localization_projection_L2": 1.1570873155126975e-05,
+              "remaining_transport_rotation_L2": 1.2084603274713845e-05,
+              "signed_cross_term": -3.9052406653150035e-11,
+              "squared_identity_error": -9.04728794979874e-26
+            },
+            "core": {
+              "defect_L2": 1.0995646151125854e-05,
+              "localization_projection_L2": 1.0086771736169696e-05,
+              "remaining_transport_rotation_L2": 7.235615835325811e-06,
+              "signed_cross_term": -3.3192866293240675e-11,
+              "squared_identity_error": 3.877409121342317e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 9.194844109583457e-06,
+              "localization_projection_L2": 1.7125866740162335e-06,
+              "remaining_transport_rotation_L2": 9.035769977563095e-06,
+              "signed_cross_term": -3.29340039069594e-14,
+              "squared_identity_error": -2.0851171446801784e-26
+            },
+            "inflow_band": {
+              "defect_L2": 0.003654239725401999,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.003654239725401999,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.00040448099933710084,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00040448099933710084,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            0.028175416344814578,
+            0.2781754163448146
+          ],
+          "inflow_fraction_squared_error": 0.9878788232221623,
+          "interior_fraction_squared_error": 1.7819393721114227e-05
+        },
+        {
+          "step": 4,
+          "time": 0.4,
+          "dt": 0.1,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.004745801706839464,
+              "localization_projection_L2": 2.001661050666315e-05,
+              "remaining_transport_rotation_L2": 0.0047457652367210576,
+              "signed_cross_term": -5.450612589605756e-11,
+              "squared_identity_error": 2.247902088704066e-21
+            },
+            "interior": {
+              "defect_L2": 2.318817469977958e-05,
+              "localization_projection_L2": 2.001661050666315e-05,
+              "remaining_transport_rotation_L2": 1.3839540296848634e-05,
+              "signed_cross_term": -5.450612589605756e-11,
+              "squared_identity_error": 6.591595506281939e-25
+            },
+            "core": {
+              "defect_L2": 1.8829340354407454e-05,
+              "localization_projection_L2": 1.7916089371899335e-05,
+              "remaining_transport_rotation_L2": 8.86049262760955e-06,
+              "signed_cross_term": -4.495052980369089e-11,
+              "squared_identity_error": 4.006656092053728e-25
+            },
+            "upstream_inner": {
+              "defect_L2": 9.772023360388211e-06,
+              "localization_projection_L2": 3.011114223712867e-07,
+              "remaining_transport_rotation_L2": 9.767140761894264e-06,
+              "signed_cross_term": 4.733804633992737e-15,
+              "squared_identity_error": 1.3860286104733177e-27
+            },
+            "inflow_band": {
+              "defect_L2": 0.004725881716433548,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.004725881716433548,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0004337489498241542,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0004337489498241542,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            0.125,
+            -0.2781754163448146
+          ],
+          "inflow_fraction_squared_error": 0.9916228339787234,
+          "interior_fraction_squared_error": 2.387338220351808e-05
+        }
+      ]
+    },
+    {
+      "case": "compact-profile-half",
+      "steps": [
+        {
+          "step": 1,
+          "time": 0.05,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 1.9392805987770843e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.9392805987770843e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "interior": {
+              "defect_L2": 1.23434701386633e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.23434701386633e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "core": {
+              "defect_L2": 7.850711194556097e-16,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 7.850711194556097e-16,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "upstream_inner": {
+              "defect_L2": 5.462145864456001e-16,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 5.462145864456001e-16,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "inflow_band": {
+              "defect_L2": 8.089419073944534e-16,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 8.089419073944534e-16,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 1.258097643513217e-15,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 1.258097643513217e-15,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -0.7218245836551854,
+            0.7781754163448146
+          ],
+          "inflow_fraction_squared_error": 0.1740016490176878,
+          "interior_fraction_squared_error": 0.40512891058504596
+        },
+        {
+          "step": 2,
+          "time": 0.1,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.0013322993241188163,
+              "localization_projection_L2": 3.0180951426454826e-06,
+              "remaining_transport_rotation_L2": 0.0013322977179361674,
+              "signed_cross_term": -4.829068755067001e-12,
+              "squared_identity_error": 8.501057939829641e-23
+            },
+            "interior": {
+              "defect_L2": 3.917394401204599e-06,
+              "localization_projection_L2": 3.0180951426454826e-06,
+              "remaining_transport_rotation_L2": 3.3265822340047254e-06,
+              "signed_cross_term": -4.829068755067001e-12,
+              "squared_identity_error": 1.454028420503369e-26
+            },
+            "core": {
+              "defect_L2": 3.097448418211741e-06,
+              "localization_projection_L2": 2.3873545456629024e-06,
+              "remaining_transport_rotation_L2": 2.438615110937019e-06,
+              "signed_cross_term": -2.05211868250527e-12,
+              "squared_identity_error": -2.4233807008389483e-27
+            },
+            "upstream_inner": {
+              "defect_L2": 1.3890488629350576e-06,
+              "localization_projection_L2": 1.3656623854202814e-06,
+              "remaining_transport_rotation_L2": 1.2506641716715016e-06,
+              "signed_cross_term": -1.4997378776334002e-12,
+              "squared_identity_error": 2.0194839173657902e-28
+            },
+            "inflow_band": {
+              "defect_L2": 0.001313364508721171,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.001313364508721171,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0002237851878479828,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0002237851878479828,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -0.7781754163448146,
+            -0.22182458365518543
+          ],
+          "inflow_fraction_squared_error": 0.9717777184174063,
+          "interior_fraction_squared_error": 8.64551724544157e-06
+        },
+        {
+          "step": 3,
+          "time": 0.15000000000000002,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.002171265872649631,
+              "localization_projection_L2": 6.488807831938406e-06,
+              "remaining_transport_rotation_L2": 0.002171258506875037,
+              "signed_cross_term": -1.0118571328517256e-11,
+              "squared_identity_error": -2.4742539240980934e-21
+            },
+            "interior": {
+              "defect_L2": 9.492149641563546e-06,
+              "localization_projection_L2": 6.488807831938406e-06,
+              "remaining_transport_rotation_L2": 7.623309587477538e-06,
+              "signed_cross_term": -1.0118571328517256e-11,
+              "squared_identity_error": 6.947024675738318e-26
+            },
+            "core": {
+              "defect_L2": 6.6667864093811195e-06,
+              "localization_projection_L2": 5.936210877730295e-06,
+              "remaining_transport_rotation_L2": 3.7033805085744734e-06,
+              "signed_cross_term": -4.5075857478639545e-12,
+              "squared_identity_error": -5.977672395402739e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 5.924549200345059e-06,
+              "localization_projection_L2": 1.509879267781004e-06,
+              "remaining_transport_rotation_L2": 5.931978624477115e-06,
+              "signed_cross_term": -2.3678225772190156e-12,
+              "squared_identity_error": -7.674038885990003e-27
+            },
+            "inflow_band": {
+              "defect_L2": 0.0021476504411913687,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0021476504411913687,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.00031922244795544084,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00031922244795544084,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -0.7218245836551854,
+            -0.2781754163448146
+          ],
+          "inflow_fraction_squared_error": 0.9783656096724164,
+          "interior_fraction_squared_error": 1.911186810993206e-05
+        },
+        {
+          "step": 4,
+          "time": 0.2,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.002741254019086149,
+              "localization_projection_L2": 8.304666036006675e-06,
+              "remaining_transport_rotation_L2": 0.0027412445363492544,
+              "signed_cross_term": -1.697838664492827e-11,
+              "squared_identity_error": 1.950478959702968e-21
+            },
+            "interior": {
+              "defect_L2": 1.7907356155440816e-05,
+              "localization_projection_L2": 8.304666036006675e-06,
+              "remaining_transport_rotation_L2": 1.6391592758274864e-05,
+              "signed_cross_term": -1.697838664492827e-11,
+              "squared_identity_error": 4.52364397489937e-25
+            },
+            "core": {
+              "defect_L2": 7.96416338839527e-06,
+              "localization_projection_L2": 7.058924980719708e-06,
+              "remaining_transport_rotation_L2": 4.8050430321737036e-06,
+              "signed_cross_term": -9.488961947414259e-12,
+              "squared_identity_error": 8.56261180963095e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 1.538184674110904e-05,
+              "localization_projection_L2": 2.6000135518956296e-06,
+              "remaining_transport_rotation_L2": 1.5213263379754553e-05,
+              "signed_cross_term": -1.6022439648551865e-12,
+              "squared_identity_error": 1.2359241574278636e-25
+            },
+            "inflow_band": {
+              "defect_L2": 0.0027160815448020697,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0027160815448020697,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.00037020800334013586,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00037020800334013586,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2218245836551853,
+            -0.625
+          ],
+          "inflow_fraction_squared_error": 0.9817186610125876,
+          "interior_fraction_squared_error": 4.267410089765578e-05
+        },
+        {
+          "step": 5,
+          "time": 0.25,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.003158392536510262,
+              "localization_projection_L2": 1.2973821988572183e-05,
+              "remaining_transport_rotation_L2": 0.0031583729765249833,
+              "signed_cross_term": -4.4764216552427576e-11,
+              "squared_identity_error": 4.8921594001402795e-21
+            },
+            "interior": {
+              "defect_L2": 3.416609027016515e-05,
+              "localization_projection_L2": 1.2973821988572183e-05,
+              "remaining_transport_rotation_L2": 3.2307365784141895e-05,
+              "signed_cross_term": -4.4764216552427576e-11,
+              "squared_identity_error": -4.071279577409433e-25
+            },
+            "core": {
+              "defect_L2": 1.1427038493107947e-05,
+              "localization_projection_L2": 1.1503771171237093e-05,
+              "remaining_transport_rotation_L2": 6.0131139325402344e-06,
+              "signed_cross_term": -3.791708160292443e-11,
+              "squared_identity_error": 4.52364397489937e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 3.1550209753671905e-05,
+              "localization_projection_L2": 2.062212619793695e-06,
+              "remaining_transport_rotation_L2": 3.1458586795177156e-05,
+              "signed_cross_term": 1.5203314617628014e-12,
+              "squared_identity_error": 2.0517956600436429e-25
+            },
+            "inflow_band": {
+              "defect_L2": 0.003131172354373981,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.003131172354373981,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0004123539501004989,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0004123539501004989,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2218245836551853,
+            -1.0281754163448147
+          ],
+          "inflow_fraction_squared_error": 0.9828375446813905,
+          "interior_fraction_squared_error": 0.00011701953244813066
+        },
+        {
+          "step": 6,
+          "time": 0.3,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.003485774982491315,
+              "localization_projection_L2": 1.5457275087190397e-05,
+              "remaining_transport_rotation_L2": 0.003485748631452489,
+              "signed_cross_term": -5.522046368846515e-11,
+              "squared_identity_error": -4.462141803886345e-21
+            },
+            "interior": {
+              "defect_L2": 5.736640265448342e-05,
+              "localization_projection_L2": 1.5457275087190397e-05,
+              "remaining_transport_rotation_L2": 5.574223949648701e-05,
+              "signed_cross_term": -5.522046368846515e-11,
+              "squared_identity_error": -5.706253756908777e-24
+            },
+            "core": {
+              "defect_L2": 1.3867882290001068e-05,
+              "localization_projection_L2": 1.3690991226136408e-05,
+              "remaining_transport_rotation_L2": 7.094068482104093e-06,
+              "signed_cross_term": -4.5450889173601434e-11,
+              "squared_identity_error": -7.108583389127582e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 5.513498646399199e-05,
+              "localization_projection_L2": 1.3625807671301725e-06,
+              "remaining_transport_rotation_L2": 5.509544290738939e-05,
+              "signed_cross_term": 2.5022768762238407e-12,
+              "squared_identity_error": -5.299125799167834e-25
+            },
+            "inflow_band": {
+              "defect_L2": 0.003455436738710743,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.003455436738710743,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.00045529470585200355,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00045529470585200355,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2218245836551853,
+            -1.0281754163448147
+          ],
+          "inflow_fraction_squared_error": 0.9826688639714519,
+          "interior_fraction_squared_error": 0.0002708423270348081
+        },
+        {
+          "step": 7,
+          "time": 0.35,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.003759147205867554,
+              "localization_projection_L2": 1.6601822720819178e-05,
+              "remaining_transport_rotation_L2": 0.003759120448668994,
+              "signed_cross_term": -7.445273719112035e-11,
+              "squared_identity_error": -2.2766078408990704e-21
+            },
+            "interior": {
+              "defect_L2": 8.610615075253683e-05,
+              "localization_projection_L2": 1.6601822720819178e-05,
+              "remaining_transport_rotation_L2": 8.49299794946179e-05,
+              "signed_cross_term": -7.445273719112035e-11,
+              "squared_identity_error": -5.997059441009451e-24
+            },
+            "core": {
+              "defect_L2": 1.559070167293128e-05,
+              "localization_projection_L2": 1.54397512458087e-05,
+              "remaining_transport_rotation_L2": 8.361995576350632e-06,
+              "signed_cross_term": -6.523890989701659e-11,
+              "squared_identity_error": -2.5849394142282115e-26
+            },
+            "upstream_inner": {
+              "defect_L2": 8.436096807500335e-05,
+              "localization_projection_L2": 5.480441858005298e-07,
+              "remaining_transport_rotation_L2": 8.435014948511257e-05,
+              "signed_cross_term": 1.5248639613080155e-12,
+              "squared_identity_error": 7.421603396319279e-25
+            },
+            "inflow_band": {
+              "defect_L2": 0.0037249089669463584,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0037249089669463584,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.000498825254119163,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.000498825254119163,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2218245836551853,
+            -1.125
+          ],
+          "inflow_fraction_squared_error": 0.981866994586341,
+          "interior_fraction_squared_error": 0.0005246741708305343
+        },
+        {
+          "step": 8,
+          "time": 0.39999999999999997,
+          "dt": 0.05,
+          "regions": {
+            "whole": {
+              "defect_L2": 0.003999383937046566,
+              "localization_projection_L2": 1.970396820355415e-05,
+              "remaining_transport_rotation_L2": 0.003999346899817447,
+              "signed_cross_term": -9.199553627965683e-11,
+              "squared_identity_error": -2.1033975131001735e-20
+            },
+            "interior": {
+              "defect_L2": 0.00011840184535856626,
+              "localization_projection_L2": 1.970396820355415e-05,
+              "remaining_transport_rotation_L2": 0.00011714412557882195,
+              "signed_cross_term": -9.199553627965683e-11,
+              "squared_identity_error": 1.4462736022606843e-23
+            },
+            "core": {
+              "defect_L2": 1.9191222990996426e-05,
+              "localization_projection_L2": 1.840193071138566e-05,
+              "remaining_transport_rotation_L2": 1.0264243515364622e-05,
+              "signed_cross_term": -7.568270895919315e-11,
+              "squared_identity_error": -3.4896682092080855e-25
+            },
+            "upstream_inner": {
+              "defect_L2": 0.00011650366683355167,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.00011650366683355167,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "inflow_band": {
+              "defect_L2": 0.003960823160274198,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.003960823160274198,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            },
+            "other_boundary": {
+              "defect_L2": 0.0005412326412526379,
+              "localization_projection_L2": 0.0,
+              "remaining_transport_rotation_L2": 0.0005412326412526379,
+              "signed_cross_term": 0.0,
+              "squared_identity_error": 0.0
+            }
+          },
+          "interior_max_error_location": [
+            -1.2218245836551853,
+            -1.125
+          ],
+          "inflow_fraction_squared_error": 0.9808096036502358,
+          "interior_fraction_squared_error": 0.0008764572671555871
+        }
+      ]
+    }
+  ],
+  "decomposition": "beta*(native physical anchor-Q tau_old(foot)) = beta*(delta_B_mapped-Q delta_B_old(foot)) + remaining projected transport/rotation mismatch; delta_B=P8 B-B, mapped B uses incoming Z.",
+  "limitation": "The remainder combines DG transport, characteristic-reference error and finite-rotation projection. It is not a new constitutive source or an independent physical energy. Cross terms prevent assigning additive squared-error percentages to the two terms."
+}

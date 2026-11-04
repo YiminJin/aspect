@@ -1,0 +1,1593 @@
+{
+  "stage_c_complete": false,
+  "production_ready": false,
+  "inventory": [
+    {
+      "case": "cohesive-cut-built-0",
+      "exit_code": 0,
+      "elapsed_s": 3.67009124699689,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "fb25605d3578e2e403702b42d39a97028d932725760def38494999a93ad82071"
+      },
+      "input_sha256": "675b672bad55c6f5598269d638bd05089fff5f87ca07cb051e845fd1257706ca",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-cut-built-0/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-cut-built-1",
+      "exit_code": 0,
+      "elapsed_s": 1.7672994820022723,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "fb25605d3578e2e403702b42d39a97028d932725760def38494999a93ad82071"
+      },
+      "input_sha256": "fe8d0c1f7a441756c199ddfe6a9e30a4b20cb83662e6e5f91ba6bbbb841828d2",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-cut-built-1/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-cut-built-2",
+      "exit_code": 0,
+      "elapsed_s": 1.9678937019998557,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "fb25605d3578e2e403702b42d39a97028d932725760def38494999a93ad82071"
+      },
+      "input_sha256": "40f73b5c05ceddc2ffb450a5b808d1d1d753ae2f79c26f5244f3ff17349e2a4d",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-cut-built-2/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-cut-capacity-0",
+      "exit_code": 0,
+      "elapsed_s": 3.6709699310013093,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "9c1ede2bee4216c62f924ccb7f5cc36cdefae28604eee54deada28d602a0acc8"
+      },
+      "input_sha256": "c73c854d87bb95fef829ca9f20fff4cb60b3f36a9c48b7d8177180a28dca97d4",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-cut-capacity-0/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-cut-capacity-1",
+      "exit_code": 0,
+      "elapsed_s": 1.7170781050008372,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "9c1ede2bee4216c62f924ccb7f5cc36cdefae28604eee54deada28d602a0acc8"
+      },
+      "input_sha256": "68d2f69217a54f20c5bec0ca7fb1d8b98bbd95b474e6d902724fd40901c0646c",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-cut-capacity-1/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-cut-capacity-2",
+      "exit_code": 0,
+      "elapsed_s": 1.86784721899312,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "9c1ede2bee4216c62f924ccb7f5cc36cdefae28604eee54deada28d602a0acc8"
+      },
+      "input_sha256": "5da348750637d163c0d38e57257f28feba5d6a62c26cf65d1e0ada32252df3d9",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-cut-capacity-2/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-history-affine-0",
+      "exit_code": 0,
+      "elapsed_s": 1.7675013499974739,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "9c1ede2bee4216c62f924ccb7f5cc36cdefae28604eee54deada28d602a0acc8"
+      },
+      "input_sha256": "820eabec72b7c73b65bd67d7d4d2a363f0c4fdac51869a5bef9b2028ee6ea978",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-history-affine-0/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-history-affine-1",
+      "exit_code": 0,
+      "elapsed_s": 3.670464416994946,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "9c1ede2bee4216c62f924ccb7f5cc36cdefae28604eee54deada28d602a0acc8"
+      },
+      "input_sha256": "cb7761ceafaef429881b4059fab8da7d4d34f1ab50f0211afe2c1e931058060c",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-history-affine-1/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-history-affine-2",
+      "exit_code": 0,
+      "elapsed_s": 1.8679282629964291,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "9c1ede2bee4216c62f924ccb7f5cc36cdefae28604eee54deada28d602a0acc8"
+      },
+      "input_sha256": "68f5072a07c8c68f41b4fc5ee81312ca93972eb6d8d63955eed8b9d48aba1171",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-history-affine-2/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-history-warped-0",
+      "exit_code": 0,
+      "elapsed_s": 1.767627213994274,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "9c1ede2bee4216c62f924ccb7f5cc36cdefae28604eee54deada28d602a0acc8"
+      },
+      "input_sha256": "92ac3d8d85c56a1299f85dda6a6cef25e5d578c6f3a115cf8000dd3b197191c9",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-history-warped-0/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-history-warped-1",
+      "exit_code": 0,
+      "elapsed_s": 1.717337192996638,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "9c1ede2bee4216c62f924ccb7f5cc36cdefae28604eee54deada28d602a0acc8"
+      },
+      "input_sha256": "89c3fc00242115738aab888c8b1f5a0a6a431b9483bbac55a1f36b4c815be0d0",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-history-warped-1/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-history-warped-2",
+      "exit_code": 0,
+      "elapsed_s": 1.8677550409993273,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "9c1ede2bee4216c62f924ccb7f5cc36cdefae28604eee54deada28d602a0acc8"
+      },
+      "input_sha256": "78ce5374c30c8877bae41285ab29592335e7ddc7b2d2f20ce4aff1db86fd216c",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-history-warped-2/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-native-fresh",
+      "exit_code": 0,
+      "elapsed_s": 6.426264305002405,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "9c1ede2bee4216c62f924ccb7f5cc36cdefae28604eee54deada28d602a0acc8"
+      },
+      "input_sha256": "e9d1b00e465f95efbe3bff920605d93aeaca282e1227c1bbcca5ac4ab97bb245",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-native-fresh/input.prm"
+      ]
+    },
+    {
+      "case": "cohesive-phase-prototype",
+      "exit_code": 0,
+      "elapsed_s": 6.675030862003041,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "fb25605d3578e2e403702b42d39a97028d932725760def38494999a93ad82071"
+      },
+      "input_sha256": "ea7a148b02be4a98c00f1ba988ebbdd94365c218b3c03e546ddab58d34a83dbe",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cohesive-phase-prototype/input.prm"
+      ]
+    },
+    {
+      "case": "cut-native-final",
+      "exit_code": 0,
+      "elapsed_s": 1.9678223500000058,
+      "core_sha256": "11a493b309c97ac60a4d2025c5cc04576b47cec4c3feb51fad873cfa6f6a02c7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "63e516bee27758ee3931210fdb76e359d7f9cd1099b65f9711241ae4f657ee55",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-native-final/input.prm"
+      ]
+    },
+    {
+      "case": "cut-native-history-0",
+      "exit_code": 0,
+      "elapsed_s": 5.031100649000109,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "304a836f371bda6d15112b674215c2a5881c2374332a98125f0c3e7b4af01058",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-native-history-0/input.prm"
+      ]
+    },
+    {
+      "case": "cut-native-history-1",
+      "exit_code": 0,
+      "elapsed_s": 4.224862081999618,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "0b7755dbd2d0c75b2e667f4af2c9d3aa3e10347838f8968c44aafb06b615f1ad",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-native-history-1/input.prm"
+      ]
+    },
+    {
+      "case": "cut-native-history-2",
+      "exit_code": 0,
+      "elapsed_s": 2.3750886490001903,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "ce94434c63185eca38bf1018264901813bc15667bf6d6780ae69bfb2e86b5aec",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-native-history-2/input.prm"
+      ]
+    },
+    {
+      "case": "cut-native-phase8",
+      "exit_code": 0,
+      "elapsed_s": 7.936006735999854,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "0e0b89b19a9d8380b558a06256ec82752de8157148645e658dc88984e7c59a60",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-native-phase8/input.prm"
+      ]
+    },
+    {
+      "case": "cut-phase-restart4",
+      "exit_code": 0,
+      "elapsed_s": 7.342075939999631,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "b19c58b7ae247b4e3da44e1550f613676f667b89b9cdd980244e2140fdcb21b0",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "4",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-phase-restart4/input.prm"
+      ]
+    },
+    {
+      "case": "cut-phase-uninterrupted10",
+      "exit_code": 0,
+      "elapsed_s": 8.888382715999796,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "24ff6ca7e1e5a3e3d6e7c2988d29fd8aa00ea2f5b3d5b024dcb7d1f44b865dfd",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-phase-uninterrupted10/input.prm"
+      ]
+    },
+    {
+      "case": "cut-phase16",
+      "exit_code": 0,
+      "elapsed_s": 13.545040602999507,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "dd43d24959381578e2f486da73273b7ddd08c80f56956db4b488620873b6d44b",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-phase16/input.prm"
+      ]
+    },
+    {
+      "case": "cut-phase32",
+      "exit_code": 0,
+      "elapsed_s": 18.762154227999417,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "540dd4f13477ff3d8f36b3425f87670bc25426a313f1ef2a093a7ddfbe189609",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-phase32/input.prm"
+      ]
+    },
+    {
+      "case": "cut-reject-control",
+      "exit_code": 0,
+      "elapsed_s": 8.737129493999419,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "54e17bde06cc7f79397abdef147f2714d95082c56ee67e2de85fc8c7576cbfbd",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-reject-control/input.prm"
+      ]
+    },
+    {
+      "case": "cut-reject-old-objective-checkpoint",
+      "exit_code": 1,
+      "elapsed_s": 3.8755070219995105,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "36b0d2590b1739582cc34ef6e5853f1ac183ee553265350ec8f2a875f8128c2f",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-reject-old-objective-checkpoint/input.prm"
+      ]
+    },
+    {
+      "case": "cut-rejected-phase",
+      "exit_code": 0,
+      "elapsed_s": 11.23808552600076,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "a626c8a744fd4bd1d5374b04e7f61cd072c1e6e4caa49179d263ea4a1d2957ee",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-rejected-phase/input.prm"
+      ]
+    },
+    {
+      "case": "cut-tip-airy",
+      "exit_code": 1,
+      "elapsed_s": 4.527350411000043,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "30fd4d90537454728090c9f2284efb7211a911a465741062656e5f74655a09ba",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/cut-tip-airy/input.prm"
+      ]
+    },
+    {
+      "case": "fixed-native-audit",
+      "exit_code": 213,
+      "elapsed_s": 2.068933532005758,
+      "core_sha256": "6d5e433c3cec175fb04fe8f0e4f20550164bdf4925b5628fb686e88e1fdda40a",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "b012bb8d6328d8cc68f42a813de8b622976b54940c57cfc0c0b7be67d19cd2e4"
+      },
+      "input_sha256": "bbd7c61ef245322f6551d83e430cdfdb2b18ffc539db6bf86e5a48bdb6eb148f",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/fixed-native-audit/input.prm"
+      ]
+    },
+    {
+      "case": "fixed-native-audit-diagnostic",
+      "exit_code": 1,
+      "elapsed_s": 9.835116012000071,
+      "core_sha256": "7313c437fa252c49759c27c4589140fc0a5cc44bdabc2edb678ea5be788c9a93",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "b012bb8d6328d8cc68f42a813de8b622976b54940c57cfc0c0b7be67d19cd2e4"
+      },
+      "input_sha256": "6fea4947c31e21a57251e655fb0eb5b3a28eef3c478dc75e365d5cb47571de20",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/fixed-native-audit-diagnostic/input.prm"
+      ]
+    },
+    {
+      "case": "fixed-native-audit-input2",
+      "exit_code": 1,
+      "elapsed_s": 3.4706347410028684,
+      "core_sha256": "6d5e433c3cec175fb04fe8f0e4f20550164bdf4925b5628fb686e88e1fdda40a",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "b012bb8d6328d8cc68f42a813de8b622976b54940c57cfc0c0b7be67d19cd2e4"
+      },
+      "input_sha256": "14b20816585722bf40e3c712bb7c5d7b0555832fdf0e1d121281691b4373862c",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/fixed-native-audit-input2/input.prm"
+      ]
+    },
+    {
+      "case": "fixed-native-audit-input3",
+      "exit_code": 1,
+      "elapsed_s": 23.911783762996492,
+      "core_sha256": "6d5e433c3cec175fb04fe8f0e4f20550164bdf4925b5628fb686e88e1fdda40a",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "b012bb8d6328d8cc68f42a813de8b622976b54940c57cfc0c0b7be67d19cd2e4"
+      },
+      "input_sha256": "c261b3b2f28ac57d29980f33a699731fe6d489e04aa35a3ff816c72692d954ec",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/fixed-native-audit-input3/input.prm"
+      ]
+    },
+    {
+      "case": "fixed-native-audit-open",
+      "exit_code": 1,
+      "elapsed_s": 3.6208121300005587,
+      "core_sha256": "6d5e433c3cec175fb04fe8f0e4f20550164bdf4925b5628fb686e88e1fdda40a",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "b012bb8d6328d8cc68f42a813de8b622976b54940c57cfc0c0b7be67d19cd2e4"
+      },
+      "input_sha256": "1b547ff6a097d53f851753c948be9b046306bc63069a66c4153637016ec320a7",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/fixed-native-audit-open/input.prm"
+      ]
+    },
+    {
+      "case": "fixed-native-moments",
+      "exit_code": 0,
+      "elapsed_s": 18.15706507199502,
+      "core_sha256": "6d5e433c3cec175fb04fe8f0e4f20550164bdf4925b5628fb686e88e1fdda40a",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "b012bb8d6328d8cc68f42a813de8b622976b54940c57cfc0c0b7be67d19cd2e4"
+      },
+      "input_sha256": "e794b115343fd5466320335cc266e11a55daa93b923abf8c2675df7f043fa61a",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/fixed-native-moments/input.prm"
+      ]
+    },
+    {
+      "case": "layered-native-r3",
+      "exit_code": 0,
+      "elapsed_s": 8.291640295999969,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "53bd699f6547a88d2612f502e85706662772c4e6b8a4f0ca868f82220fc3b719"
+      },
+      "input_sha256": "4e375a4899269523177493c517feffc495fb75e2c821f36dafadf69fd4f76b6a",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/layered-native-r3/input.prm"
+      ]
+    },
+    {
+      "case": "layered-native-r4",
+      "exit_code": 0,
+      "elapsed_s": 31.046954838000147,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "53bd699f6547a88d2612f502e85706662772c4e6b8a4f0ca868f82220fc3b719"
+      },
+      "input_sha256": "520b5138e10fc49b1a650f43ce5910cb2a733f6352b78cbe665761c56d367e44",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/layered-native-r4/input.prm"
+      ]
+    },
+    {
+      "case": "layered-native-r5",
+      "exit_code": 0,
+      "elapsed_s": 121.27712750200044,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "53bd699f6547a88d2612f502e85706662772c4e6b8a4f0ca868f82220fc3b719"
+      },
+      "input_sha256": "0f81a772a106c567bbcc4bbd6d89efcc0e7c8355fa8b27d719d58049089811a3",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "4",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/layered-native-r5/input.prm"
+      ]
+    },
+    {
+      "case": "legacy-pre-c-control",
+      "exit_code": 0,
+      "elapsed_s": 8.533833086999948,
+      "core_sha256": "25d905a6057972826dbda6d8c052aa5aabf3b5f43b928d00a8f33f1e943a0379",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/bp3-plugin/libbp3_restore_150x50.release.so": "7f91ea4cb6316d07e298e1a62e3cd0535c879928f3ff73f0684df2e4d6df061e"
+      },
+      "input_sha256": "d574c6ef7f8120a40f181f68bcff5a715bf2e8bcc15f976bbab9f0b015262d85",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/controls/bp3-spin-control",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/legacy-pre-c-control/input.prm"
+      ]
+    },
+    {
+      "case": "legacy-stage-c-control",
+      "exit_code": 0,
+      "elapsed_s": 8.431607462996908,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53"
+      },
+      "input_sha256": "6d4a3167c109a9881ccbeac4f563ab1ff3cddb99836f6f29908cf3347a1ba342",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/legacy-stage-c-control/input.prm"
+      ]
+    },
+    {
+      "case": "material-owner-cut-final",
+      "exit_code": 0,
+      "elapsed_s": 3.772087021000061,
+      "core_sha256": "97d5563831731391d7123aae6563870409dff5810bb9dcb2dd7d5970ed2aa02c",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "1d6eaa728c9e5d23c9643c6eaeb3bc106ad9abda887d06233674df5e05f00e67",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/material-owner-cut-final/input.prm"
+      ]
+    },
+    {
+      "case": "material-owner-native-final",
+      "exit_code": 0,
+      "elapsed_s": 18.951946807999775,
+      "core_sha256": "97d5563831731391d7123aae6563870409dff5810bb9dcb2dd7d5970ed2aa02c",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "4ddbc13dc96c12797dfab37839fc8059bfd0113089a6ef258f9b8c3d901f9174"
+      },
+      "input_sha256": "837287d06b31ee9e4c87072ef08a7e33fe416639e91e0e5faeec96833e6e2489",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/material-owner-native-final/input.prm"
+      ]
+    },
+    {
+      "case": "native-amr-restart4",
+      "exit_code": 0,
+      "elapsed_s": 4.674004016999959,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "53bd699f6547a88d2612f502e85706662772c4e6b8a4f0ca868f82220fc3b719"
+      },
+      "input_sha256": "a1ab646b43f1477977bbc9851663687feb01f96e6704932430e798bff5e1f4f0",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "4",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-amr-restart4/input.prm"
+      ]
+    },
+    {
+      "case": "native-amr-uninterrupted5",
+      "exit_code": 0,
+      "elapsed_s": 23.172840897000015,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "53bd699f6547a88d2612f502e85706662772c4e6b8a4f0ca868f82220fc3b719"
+      },
+      "input_sha256": "3c7e125bbae698a39207453d9c837bd37c3991d7574e21e097f6bc627d8b8c8e",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-amr-uninterrupted5/input.prm"
+      ]
+    },
+    {
+      "case": "native-cutback-control",
+      "exit_code": 1,
+      "elapsed_s": 5.676154161003069,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "11b8764eb9e066ce9ff8315c110b325a80140ca454f6872b2a32f7a36c9f76b6",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-cutback-control/input.prm"
+      ]
+    },
+    {
+      "case": "native-cutback-control-time",
+      "exit_code": 0,
+      "elapsed_s": 17.751496556003985,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "59511b6793e29d95836f0e7601cb090be3bd7d1c0f52d8453742fe1295aab8fe",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-cutback-control-time/input.prm"
+      ]
+    },
+    {
+      "case": "native-cutback-control-x",
+      "exit_code": 1,
+      "elapsed_s": 7.027625882998109,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "21a4aa47f726483aba88aa8e1b416bf9f90dc10b5e34fc30df87157090e10dd5",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-cutback-control-x/input.prm"
+      ]
+    },
+    {
+      "case": "native-qualified-fixed",
+      "exit_code": 0,
+      "elapsed_s": 19.85445292700024,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "9f30c0070430728267f9f106eae59c8e9f4a4ed5855b28efb4f7b35c30759f97",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-qualified-fixed/input.prm"
+      ]
+    },
+    {
+      "case": "native-reject",
+      "exit_code": 0,
+      "elapsed_s": 20.954404695999983,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "d1dc8a48ebd2f2877df64cc89500f6749798da175be988ba9ecc91ceb7e0f8e7",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-reject/input.prm"
+      ]
+    },
+    {
+      "case": "native-restart-four",
+      "exit_code": 0,
+      "elapsed_s": 9.634207190996676,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "a9ac6afafb96b6aea274fff430bac9cb064d2c02d9c27b2f6658f620c2df959a",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "4",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-restart-four/input.prm"
+      ]
+    },
+    {
+      "case": "native-strong-spin",
+      "exit_code": 1,
+      "elapsed_s": 2.1186111310016713,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "9f56ba8224a571c639c981a2b408ed309099f6f0d26d6a61d0e52a4735251e60",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-strong-spin/input.prm"
+      ]
+    },
+    {
+      "case": "native-transfer",
+      "exit_code": 1,
+      "elapsed_s": 17.55260024600284,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "394933145be88fd0f4dea20219ae031c23df4f943e26062e0eaf02a37b055dfb",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-transfer/input.prm"
+      ]
+    },
+    {
+      "case": "native-transfer-cache-final",
+      "exit_code": 0,
+      "elapsed_s": 16.79510891699988,
+      "core_sha256": "11a493b309c97ac60a4d2025c5cc04576b47cec4c3feb51fad873cfa6f6a02c7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "4ddbc13dc96c12797dfab37839fc8059bfd0113089a6ef258f9b8c3d901f9174"
+      },
+      "input_sha256": "8f1ae56a68708a4fbc9744321cc9efce9bd98bba322b2525cbdc5df42f9925e7",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-transfer-cache-final/input.prm"
+      ]
+    },
+    {
+      "case": "native-transfer-field",
+      "exit_code": 0,
+      "elapsed_s": 18.251960398993106,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "36005fc0df53ea20e61e740cb67bb50c2af8fb042ce5f32bfb5a88307ece3a58"
+      },
+      "input_sha256": "0a7b503778d8e8cce379fde5cbfb0f08c864c1b09c0aa2d52e13813a52c01b9f",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-transfer-field/input.prm"
+      ]
+    },
+    {
+      "case": "native-transfer-fixed-cache",
+      "exit_code": 1,
+      "elapsed_s": 16.096779856998182,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "afd4294f1e7f4813700ab0dad44973768157f1bf63350aba6c20b2dae40ee84b",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-transfer-fixed-cache/input.prm"
+      ]
+    },
+    {
+      "case": "native-uninterrupted-five",
+      "exit_code": 0,
+      "elapsed_s": 23.20999173400196,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "6bfa5b2afd02a9249e1ecbcb49607e1aa2d8e1bc8bae8ceddf0bcb2843be907c",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/native-uninterrupted-five/input.prm"
+      ]
+    },
+    {
+      "case": "pre-c-tangent-control",
+      "exit_code": 1,
+      "elapsed_s": 9.03620576600224,
+      "core_sha256": "25d905a6057972826dbda6d8c052aa5aabf3b5f43b928d00a8f33f1e943a0379",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/bp3-plugin/libbp3_restore_150x50.release.so": "7f91ea4cb6316d07e298e1a62e3cd0535c879928f3ff73f0684df2e4d6df061e"
+      },
+      "input_sha256": "554e6e1caff36e2cee29fbb5fa0c87ce4b29a955e83b0847a7f5dc13be2307b2",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/controls/bp3-spin-control",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/pre-c-tangent-control/input.prm"
+      ]
+    },
+    {
+      "case": "reject-legacy-to-new-dg",
+      "exit_code": 1,
+      "elapsed_s": 2.0218139210001027,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "53bd699f6547a88d2612f502e85706662772c4e6b8a4f0ca868f82220fc3b719"
+      },
+      "input_sha256": "e1aba081aabdfefba447e5672e0a04807902ef0bb6131c697d46822f953badd8",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/reject-legacy-to-new-dg/input.prm"
+      ]
+    },
+    {
+      "case": "reject-new-dg-to-legacy",
+      "exit_code": 1,
+      "elapsed_s": 2.121142053000767,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53"
+      },
+      "input_sha256": "5a1c2e69433e42ff8522512e859372eeb772631b4662a931ce9e67407d2580cb",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/reject-new-dg-to-legacy/input.prm"
+      ]
+    },
+    {
+      "case": "reject-old-cohesive-import",
+      "exit_code": 1,
+      "elapsed_s": 1.6173290029998952,
+      "core_sha256": "11a493b309c97ac60a4d2025c5cc04576b47cec4c3feb51fad873cfa6f6a02c7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "b5b1e20116d43a123a56b677bc72a6e4414454b4be865bd409309a7820975143",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/reject-old-cohesive-import/input.prm"
+      ]
+    },
+    {
+      "case": "tip-airy-half-dt",
+      "exit_code": 1,
+      "elapsed_s": 5.8806125430000975,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "c630a246eb31d0c53c074ba92e6d981bf549282cda1ca889e5c6419d64ba5493",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/tip-airy-half-dt/input.prm"
+      ]
+    },
+    {
+      "case": "tip-airy-legacy",
+      "exit_code": 1,
+      "elapsed_s": 4.326928394999413,
+      "core_sha256": "db76f3e63ab88705620237736bc6aa28632d57019aa7c3adad8f6d37650b3da0",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "85d304dd36f81cb283248cecf88f3902941912c804f8487b9b51a98dfec721b4",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/tip-airy-legacy/input.prm"
+      ]
+    },
+    {
+      "case": "transport-r3",
+      "exit_code": 0,
+      "elapsed_s": 8.180555593004101,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "0f377bbe0db93d62540fec2f96b089fd17ba8662ffdb9db7463e2464121e1468",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/transport-r3/input.prm"
+      ]
+    },
+    {
+      "case": "transport-r4",
+      "exit_code": 0,
+      "elapsed_s": 16.195423108001705,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "441de97f73db6a3b3f5262ec7a125105d106293cbfcfec42a6607081830e8bb0",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/transport-r4/input.prm"
+      ]
+    },
+    {
+      "case": "transport-r5",
+      "exit_code": 0,
+      "elapsed_s": 53.42355412500183,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "bc748dc92bbb563c74cc5929bc7728735d336a98534598da11c45fe46008024e",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/transport-r5/input.prm"
+      ]
+    },
+    {
+      "case": "transport-uniform-r3",
+      "exit_code": 0,
+      "elapsed_s": 12.743897550004476,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "56a5d725981373f93ae73257701058a9b15412f295c92f43018327c03772ada8",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/transport-uniform-r3/input.prm"
+      ]
+    },
+    {
+      "case": "transport-uniform-r3-four",
+      "exit_code": 0,
+      "elapsed_s": 6.176320366001164,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "36005fc0df53ea20e61e740cb67bb50c2af8fb042ce5f32bfb5a88307ece3a58"
+      },
+      "input_sha256": "f4d56a1b0ec848fafcad64483dbb001dae1f415d078adaa34e87b42e85273026",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "4",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/transport-uniform-r3-four/input.prm"
+      ]
+    },
+    {
+      "case": "transport-uniform-r3-one",
+      "exit_code": 0,
+      "elapsed_s": 8.631013115002133,
+      "core_sha256": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "36005fc0df53ea20e61e740cb67bb50c2af8fb042ce5f32bfb5a88307ece3a58"
+      },
+      "input_sha256": "7d7eac49a0dc4ea9856da064fec9e7a25242f8e4dae084cd18325661e732d3ed",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/transport-uniform-r3-one/input.prm"
+      ]
+    },
+    {
+      "case": "transport-uniform-r4",
+      "exit_code": 0,
+      "elapsed_s": 34.5851928100019,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "6c82dfab12acd00786332c017ee7658f11fc8063969b573d240f831d213856ed",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/transport-uniform-r4/input.prm"
+      ]
+    },
+    {
+      "case": "transport-uniform-r5",
+      "exit_code": 0,
+      "elapsed_s": 186.4274971729974,
+      "core_sha256": "6b69e00e058a705baaedd193c8df2150eec52cb289544dc7f4839e29711dc5b7",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "9af429e64fdb41db3a435e34b6719e1096d4d2b06231f486679105767ae5f593"
+      },
+      "input_sha256": "55280f0bd47dfbe00093ae186da389d15c89bcb3cca3992045458af58e7f7fbd",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/transport-uniform-r5/input.prm"
+      ]
+    }
+  ],
+  "mature_rejection": {
+    "coefficients": 17550,
+    "T_error_Pa": 0.0,
+    "R_error_Pa": 0.0,
+    "T_scale_Pa": 809119.9348436536,
+    "R_scale_Pa": 5.908979020260254,
+    "passed": true
+  },
+  "mature_restart_2_to_4": {
+    "coefficients": 17550,
+    "T_error_Pa": 1.3285671229823492e-08,
+    "R_error_Pa": 2.2026824808563106e-13,
+    "T_scale_Pa": 1648515.9851582749,
+    "R_scale_Pa": 30.756836983065725,
+    "passed": true
+  },
+  "mature_amr": {
+    "cells_before": "650",
+    "cells_after": "674",
+    "field_error_Pa": "3.8356547824012986e-09",
+    "scale_Pa": "1539918.7536631951",
+    "publications": "3"
+  },
+  "final_cache_validation": {
+    "transfer": {
+      "cells_before": "650",
+      "cells_after": "674",
+      "field_error_Pa": "3.8356547824012986e-09",
+      "scale_Pa": "1539918.7536631951",
+      "publications": "3"
+    },
+    "cut_history": {
+      "cells": "64",
+      "moment_error_Pa": "6.9203817854236382e-14",
+      "scale_Pa": "718.52211780221353",
+      "relative_L2": "0.015794248188616158",
+      "rotation_increment_relative_L2": "0.11408859689295921",
+      "projection_J_m": "4.6530334880955536e-09",
+      "native_remainder_Pa": "3.280830577698224e-13",
+      "cut_Q2_increment_relative_L2": "4.0442320272903404e-10",
+      "cut_Q2_tensor_coefficients": "2916",
+      "native_cut_increment_relative_L2": "4.0442317234741604e-10"
+    }
+  },
+  "final_binary_regression": {
+    "coefficients": 18198,
+    "T_error_Pa": 0.0,
+    "R_error_Pa": 0.0,
+    "T_scale_Pa": 1318630.1769005458,
+    "R_scale_Pa": 18.414458657684005,
+    "passed": true
+  },
+  "final_cut_history": {
+    "cells": "64",
+    "moment_error_Pa": "6.9203817854236382e-14",
+    "scale_Pa": "718.52211780221353",
+    "relative_L2": "0.015794248188616158",
+    "rotation_increment_relative_L2": "0.11408859689295921",
+    "projection_J_m": "4.6530334880955536e-09",
+    "native_remainder_Pa": "3.280830577698224e-13",
+    "cut_Q2_increment_relative_L2": "4.0442320272903404e-10",
+    "cut_Q2_tensor_coefficients": "2916",
+    "native_cut_increment_relative_L2": "4.0442317234741604e-10"
+  },
+  "mature_amr_restart_2_to_4": {
+    "coefficients": 18198,
+    "T_error_Pa": 4.289859134587459e-09,
+    "R_error_Pa": 0.0,
+    "T_scale_Pa": 1648515.9852559105,
+    "R_scale_Pa": 30.756836926287782,
+    "passed": true
+  },
+  "cohesive_restart_2_to_4": {
+    "tensor_error_Pa": 6.778458220071948e-12,
+    "tensor_scale_Pa": 2061.794980845694,
+    "native_displacement_error_m": 5.709002064493984e-19,
+    "native_scale_m": 1.0,
+    "partitions_and_vertices_exact": true,
+    "passed": true
+  },
+  "cohesive_rejection": {
+    "tensor_error_Pa": 0.0,
+    "tensor_scale_Pa": 2050.986201961872,
+    "native_displacement_error_m": 0.0,
+    "native_scale_m": 1.0,
+    "partitions_and_vertices_exact": true,
+    "passed": true
+  },
+  "legacy_accepted_steps_identical": true,
+  "mature_moments": {
+    "moment_error_Pa": 1.8934391871880777e-10,
+    "scale_Pa": 1175554.19757735,
+    "residual_norm_Pa": 13.893065103977403,
+    "max_angle_rad": 5.9211497813802416e-06
+  },
+  "transport": {
+    "uniform": {
+      "series": [
+        [
+          {
+            "direction": -1.0,
+            "cells": 512.0,
+            "steps": 65.0,
+            "dt_s": 0.03076923076923077,
+            "distance_m": 400.0,
+            "relative_L2": 0.00039021797419857055,
+            "max_error_Pa": 1736.1792500925221
+          },
+          {
+            "direction": 1.0,
+            "cells": 512.0,
+            "steps": 65.0,
+            "dt_s": 0.03076923076923077,
+            "distance_m": 400.0,
+            "relative_L2": 0.0003900863963437285,
+            "max_error_Pa": 1709.838051769138
+          }
+        ],
+        [
+          {
+            "direction": -1.0,
+            "cells": 2048.0,
+            "steps": 129.0,
+            "dt_s": 0.015503875968992248,
+            "distance_m": 400.0,
+            "relative_L2": 4.88365185229422e-05,
+            "max_error_Pa": 215.96581978642516
+          },
+          {
+            "direction": 1.0,
+            "cells": 2048.0,
+            "steps": 129.0,
+            "dt_s": 0.015503875968992248,
+            "distance_m": 400.0,
+            "relative_L2": 4.881795584147712e-05,
+            "max_error_Pa": 219.5635004137988
+          }
+        ],
+        [
+          {
+            "direction": -1.0,
+            "cells": 8192.0,
+            "steps": 257.0,
+            "dt_s": 0.007782101167315175,
+            "distance_m": 400.0,
+            "relative_L2": 6.10717073838925e-06,
+            "max_error_Pa": 26.60637181835792
+          },
+          {
+            "direction": 1.0,
+            "cells": 8192.0,
+            "steps": 257.0,
+            "dt_s": 0.007782101167315175,
+            "distance_m": 400.0,
+            "relative_L2": 6.104733981956451e-06,
+            "max_error_Pa": 27.040227404971866
+          }
+        ]
+      ],
+      "orders": [
+        [
+          2.998247971127284,
+          2.9993842722419695
+        ],
+        [
+          2.9983098960931995,
+          2.9994115510367436
+        ]
+      ],
+      "passed": true
+    },
+    "layered": {
+      "series": [
+        [
+          {
+            "direction": -1.0,
+            "cells": 512.0,
+            "steps": 80.0,
+            "dt_s": 0.025,
+            "distance_m": 400.0,
+            "relative_L2": 0.0006076148094163303,
+            "max_error_Pa": 1521.4495528693742,
+            "layered": 1.0,
+            "max_rate_per_s": 0.7998528005301503
+          },
+          {
+            "direction": 1.0,
+            "cells": 512.0,
+            "steps": 80.0,
+            "dt_s": 0.025,
+            "distance_m": 400.0,
+            "relative_L2": 0.00030012749247188724,
+            "max_error_Pa": 280.56787641449813,
+            "layered": 1.0,
+            "max_rate_per_s": 0.7998528005301503
+          }
+        ],
+        [
+          {
+            "direction": -1.0,
+            "cells": 2048.0,
+            "steps": 144.0,
+            "dt_s": 0.013888888888888888,
+            "distance_m": 400.0,
+            "relative_L2": 7.448823679978504e-05,
+            "max_error_Pa": 201.58199817234473,
+            "layered": 1.0,
+            "max_rate_per_s": 0.7998543145354322
+          },
+          {
+            "direction": 1.0,
+            "cells": 2048.0,
+            "steps": 144.0,
+            "dt_s": 0.013888888888888888,
+            "distance_m": 400.0,
+            "relative_L2": 3.700696739723964e-05,
+            "max_error_Pa": 37.94055557586772,
+            "layered": 1.0,
+            "max_rate_per_s": 0.7998543145354322
+          }
+        ],
+        [
+          {
+            "direction": -1.0,
+            "cells": 8192.0,
+            "steps": 272.0,
+            "dt_s": 0.007352941176470588,
+            "distance_m": 400.0,
+            "relative_L2": 9.264186845997111e-06,
+            "max_error_Pa": 26.18422876499564,
+            "layered": 1.0,
+            "max_rate_per_s": 0.7998550656898815
+          },
+          {
+            "direction": 1.0,
+            "cells": 8192.0,
+            "steps": 272.0,
+            "dt_s": 0.007352941176470588,
+            "distance_m": 400.0,
+            "relative_L2": 4.6136229399634285e-06,
+            "max_error_Pa": 4.928740724180151,
+            "layered": 1.0,
+            "max_rate_per_s": 0.7998550656898815
+          }
+        ]
+      ],
+      "orders": [
+        [
+          3.028072515195289,
+          3.0072763568937018
+        ],
+        [
+          3.019706658325243,
+          3.003824910191948
+        ]
+      ],
+      "passed": true
+    }
+  },
+  "cohesive_spaces": [
+    {
+      "cells": 16.0,
+      "moment_error_Pa": 5.1069827636519334e-14,
+      "scale_Pa": 718.5221178022133,
+      "relative_L2": 0.02435911711068356,
+      "rotation_increment_relative_L2": 0.17595630127632242,
+      "projection_J_m": 1.3270074278142766e-08,
+      "native_remainder_Pa": 2.5101374110158326e-13,
+      "cut_Q2_increment_relative_L2": 1.9284161696938596e-09,
+      "cut_Q2_tensor_coefficients": 1242.0,
+      "native_cut_increment_relative_L2": 1.9284161339022677e-09,
+      "uncut_space_passed": false,
+      "native_cut_space_passed": true
+    },
+    {
+      "cells": 64.0,
+      "moment_error_Pa": 6.920381785423638e-14,
+      "scale_Pa": 718.5221178022135,
+      "relative_L2": 0.015794248188616158,
+      "rotation_increment_relative_L2": 0.11408859689295921,
+      "projection_J_m": 4.6530334880955536e-09,
+      "native_remainder_Pa": 3.280830577698224e-13,
+      "cut_Q2_increment_relative_L2": 4.0442320272903404e-10,
+      "cut_Q2_tensor_coefficients": 2916.0,
+      "native_cut_increment_relative_L2": 4.0442317234741604e-10,
+      "uncut_space_passed": false,
+      "native_cut_space_passed": true
+    },
+    {
+      "cells": 256.0,
+      "moment_error_Pa": 1.0837932015157336e-13,
+      "scale_Pa": 720.3829656405449,
+      "relative_L2": 0.011195964299880672,
+      "rotation_increment_relative_L2": 0.08087322945562501,
+      "projection_J_m": 2.658223619880418e-09,
+      "native_remainder_Pa": 8.349406255984139e-13,
+      "cut_Q2_increment_relative_L2": 1.2613811108130306e-10,
+      "cut_Q2_tensor_coefficients": 9018.0,
+      "native_cut_increment_relative_L2": 1.2613812063500744e-10,
+      "uncut_space_passed": false,
+      "native_cut_space_passed": true
+    }
+  ],
+  "phase_energy": [
+    {
+      "case": "cut-native-phase8",
+      "dt_s": 0.000125,
+      "fracture_increment_J_m": 0.00022888168288194184,
+      "physical_remainder_with_objective_J_m": 0.00034248613363741567,
+      "objective_projection_J_m": 6.893314996599163e-13,
+      "ledger_error_J_m": -3.681499549657019e-13,
+      "fracture_relative_error": 1.4963457508920515,
+      "physical_screen_passed": false,
+      "accepted_steps": 8
+    },
+    {
+      "case": "cut-phase16",
+      "dt_s": 6.25e-05,
+      "fracture_increment_J_m": 0.00023284050046438478,
+      "physical_remainder_with_objective_J_m": 0.00017411168482377463,
+      "objective_projection_J_m": 1.663846690814223e-12,
+      "ledger_error_J_m": 2.415428967950106e-13,
+      "fracture_relative_error": 0.74777233546793,
+      "physical_screen_passed": false,
+      "accepted_steps": 16
+    },
+    {
+      "case": "cut-phase32",
+      "dt_s": 3.125e-05,
+      "fracture_increment_J_m": 0.00023470592239680096,
+      "physical_remainder_with_objective_J_m": 8.78601722738571e-05,
+      "objective_projection_J_m": 3.1443735401028998e-12,
+      "ledger_error_J_m": 1.0416875695362648e-12,
+      "fracture_relative_error": 0.3743415222617094,
+      "physical_screen_passed": false,
+      "accepted_steps": 32
+    }
+  ],
+  "tip_admission": [
+    {
+      "case": "cut-tip-airy",
+      "passed": false,
+      "reason": "Native signed line search failed"
+    },
+    {
+      "case": "tip-airy-legacy",
+      "passed": false,
+      "reason": "Native signed line search failed"
+    },
+    {
+      "case": "tip-airy-half-dt",
+      "passed": false,
+      "reason": "Native signed line search failed"
+    }
+  ],
+  "conversion_rejections": [
+    {
+      "case": "reject-new-dg-to-legacy",
+      "rejected": true,
+      "first_guard": "BP3 model identity"
+    },
+    {
+      "case": "reject-legacy-to-new-dg",
+      "rejected": true,
+      "first_guard": "BP3 model identity"
+    },
+    {
+      "case": "cut-reject-old-objective-checkpoint",
+      "rejected": true,
+      "first_guard": "cohesive law/representation configuration"
+    },
+    {
+      "case": "reject-old-cohesive-import",
+      "rejected": true,
+      "first_guard": "fresh cut-law initialization rejects old prototype trajectory import"
+    }
+  ],
+  "unit_suite": {
+    "assertions": 183170,
+    "test_cases": 152,
+    "passed": true
+  },
+  "material_geometry_container": {
+    "ranks": 4,
+    "cases_per_rank": 3,
+    "assertions_per_rank": 93,
+    "normal_error": 4.493007171629789e-17,
+    "passed": true,
+    "scope": "replicated label/geometry container, not complete bulk/profile transport"
+  },
+  "remaining_stage_c_requirements": [
+    "native material motion/profile and surface transport transaction",
+    "native coupled heterogeneous bulk/surface reaction and its converged tangent",
+    "moving-state resampling, computational-boundary inflow and moving AMR",
+    "deformed cohesive current-measure shape/pressure work",
+    "successful persistent tip extension with the updated history"
+  ],
+  "numerical_controls_passed": true
+}

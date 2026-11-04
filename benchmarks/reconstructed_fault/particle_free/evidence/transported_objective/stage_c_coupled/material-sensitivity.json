@@ -1,0 +1,155 @@
+{
+  "cases": {
+    "matched-positive": {
+      "last_substantive_step": {
+        "step": 4,
+        "time_s": 0.4,
+        "dt_s": 0.1,
+        "reconstruction_Linf_Pa": 4.030535830495287e-16,
+        "curve_reference_Linf_m": 5.55253045551988e-17,
+        "age_reaction_Linf_s": 0.0,
+        "memory_reaction_Linf_Pa_m": 2.710505431213761e-20,
+        "crossed_surface_labels": 2,
+        "direct_characteristic_L2_Pa": 0.0047457256102323726,
+        "direct_characteristic_relative_L2": 0.02757087256044578,
+        "interior_characteristic_relative_L2": 0.0001859267411606913,
+        "fault_center_characteristic_relative_L2": 0.00027157541698850094,
+        "omitted_R_relative_L2": 0.027571155153984395,
+        "direct_characteristic_Linf_Pa": 0.02612316685714316,
+        "profile_remap_L2": 0.005696119056827331,
+        "maximum_Eulerian_phase_decrease": 0.026631807853621875,
+        "history_publications": 4,
+        "geometry_publications": 4,
+        "retries": 0
+      },
+      "wall_s": 16.64707341400026,
+      "requested_dt": 0.1,
+      "cells": 256
+    },
+    "matched-half-dt": {
+      "last_substantive_step": {
+        "step": 8,
+        "time_s": 0.39999999999999997,
+        "dt_s": 0.05,
+        "reconstruction_Linf_Pa": 4.583824200755743e-16,
+        "curve_reference_Linf_m": 5.916926751161119e-17,
+        "age_reaction_Linf_s": 0.0,
+        "memory_reaction_Linf_Pa_m": 1.0842021724855044e-19,
+        "crossed_surface_labels": 1,
+        "direct_characteristic_L2_Pa": 0.0039992088652236355,
+        "direct_characteristic_relative_L2": 0.023139133242683296,
+        "interior_characteristic_relative_L2": 0.001036553775066928,
+        "fault_center_characteristic_relative_L2": 0.000260038734733066,
+        "omitted_R_relative_L2": 0.023139869100915977,
+        "direct_characteristic_Linf_Pa": 0.029709453043850035,
+        "profile_remap_L2": 0.0031396463985587596,
+        "maximum_Eulerian_phase_decrease": 0.011711205928144314,
+        "history_publications": 8,
+        "geometry_publications": 8,
+        "retries": 0
+      },
+      "wall_s": 23.61460150700077,
+      "requested_dt": 0.05,
+      "cells": 256
+    },
+    "matched-fine-final": {
+      "last_substantive_step": {
+        "step": 4,
+        "time_s": 0.4,
+        "dt_s": 0.1,
+        "reconstruction_Linf_Pa": 4.277421474636178e-17,
+        "curve_reference_Linf_m": 5.572277739020878e-17,
+        "age_reaction_Linf_s": 0.0,
+        "memory_reaction_Linf_Pa_m": 1.0842021724855044e-19,
+        "crossed_surface_labels": 4,
+        "direct_characteristic_L2_Pa": 0.0027982934587524257,
+        "direct_characteristic_relative_L2": 0.016194390224654454,
+        "interior_characteristic_relative_L2": 8.424593325515424e-05,
+        "fault_center_characteristic_relative_L2": 6.965744952467839e-05,
+        "omitted_R_relative_L2": 0.016194571465089555,
+        "direct_characteristic_Linf_Pa": 0.024949804235416758,
+        "profile_remap_L2": 0.004119896220564335,
+        "maximum_Eulerian_phase_decrease": 0.04016593339191346,
+        "history_publications": 4,
+        "geometry_publications": 4,
+        "retries": 0
+      },
+      "wall_s": 34.08515396000075,
+      "requested_dt": 0.1,
+      "cells": 1024
+    },
+    "heterogeneous-positive": {
+      "last_substantive_step": {
+        "step": 4,
+        "time_s": 0.4,
+        "dt_s": 0.1,
+        "reconstruction_Linf_Pa": 3.316000041651971e-16,
+        "curve_reference_Linf_m": 5.586087385252627e-17,
+        "age_reaction_Linf_s": 0.0,
+        "memory_reaction_Linf_Pa_m": 1.0842021724855044e-19,
+        "crossed_surface_labels": 2,
+        "direct_characteristic_L2_Pa": 0.003698385702490819,
+        "direct_characteristic_relative_L2": 0.022288543349419012,
+        "interior_characteristic_relative_L2": 0.00033292870168784907,
+        "fault_center_characteristic_relative_L2": 0.0004949747556648823,
+        "omitted_R_relative_L2": 0.02228902836630548,
+        "direct_characteristic_Linf_Pa": 0.020835493994485907,
+        "profile_remap_L2": 0.005696738554090822,
+        "maximum_Eulerian_phase_decrease": 0.026632395226589917,
+        "history_publications": 4,
+        "geometry_publications": 4,
+        "retries": 0
+      },
+      "wall_s": 37.80646592099947,
+      "requested_dt": 0.1,
+      "cells": 256
+    },
+    "heterogeneous-half-dt-final": {
+      "last_substantive_step": {
+        "step": 8,
+        "time_s": 0.39999999999999997,
+        "dt_s": 0.05,
+        "reconstruction_Linf_Pa": 3.637132291450206e-16,
+        "curve_reference_Linf_m": 6.958003924421497e-17,
+        "age_reaction_Linf_s": 0.0,
+        "memory_reaction_Linf_Pa_m": 1.0842021724855044e-19,
+        "crossed_surface_labels": 1,
+        "direct_characteristic_L2_Pa": 0.0032890082501707218,
+        "direct_characteristic_relative_L2": 0.01977885138639968,
+        "interior_characteristic_relative_L2": 0.0008443680732275167,
+        "fault_center_characteristic_relative_L2": 0.0004255118060183026,
+        "omitted_R_relative_L2": 0.019780037002437346,
+        "direct_characteristic_Linf_Pa": 0.02468153981539587,
+        "profile_remap_L2": 0.0031402800729455923,
+        "maximum_Eulerian_phase_decrease": 0.011713854293101539,
+        "history_publications": 8,
+        "geometry_publications": 8,
+        "retries": 0
+      },
+      "wall_s": 71.76405353299924,
+      "requested_dt": 0.05,
+      "cells": 256
+    }
+  },
+  "endpoint_comparisons": {
+    "matched-positive vs matched-half-dt": {
+      "final_physical_stress_relative_L2": 0.02196986229131207,
+      "interior_final_physical_stress_relative_L2": 0.003692174793560953,
+      "final_age_max_difference_s": 0.001384810624134758,
+      "final_memory_max_difference_Pa_m": 8.70658508709979e-06
+    },
+    "matched-positive vs matched-fine-final": {
+      "final_physical_stress_relative_L2": 0.0468200988118529,
+      "interior_final_physical_stress_relative_L2": 0.002423191656237949,
+      "final_age_max_difference_s": 7.645300486913698e-05,
+      "final_memory_max_difference_Pa_m": 5.173027404010077e-07
+    },
+    "heterogeneous-positive vs heterogeneous-half-dt-final": {
+      "final_physical_stress_relative_L2": 0.018181665929803158,
+      "interior_final_physical_stress_relative_L2": 0.0034822384403830754,
+      "final_age_max_difference_s": 0.0015601103798825733,
+      "final_memory_max_difference_Pa_m": 1.2203533389393761e-05
+    }
+  },
+  "interpretation": "Two resolutions do not establish asymptotic order. One-step characteristic error and final-state difference are distinct. Interior one-step error is not monotone under time halving. Open-boundary/profile-projection effects remain unresolved; no production accuracy claim."
+}

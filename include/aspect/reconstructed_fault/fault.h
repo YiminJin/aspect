@@ -33,8 +33,9 @@ namespace aspect
    *
    * In two dimensions, the fault is an ordered polyline. Consecutive
    * vertices define the fault cells implicitly: cell @p i connects vertices
-   * @p i and @p i+1. Committed vertices are append-only and can only be
-   * accessed through const interfaces.
+   * @p i and @p i+1. Public vertex access is const; ordinary growth is
+   * append-only. The manager may stage explicitly selected material motion
+   * with unchanged label indices and properties for a joint history transaction.
    *
    * The container is independent of the bulk mesh, particles, phase-field
    * reconstruction, and particular constitutive models. Runtime-defined

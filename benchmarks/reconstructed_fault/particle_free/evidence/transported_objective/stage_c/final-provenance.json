@@ -1,0 +1,145 @@
+{
+  "captured_utc": "2026-11-03T20:09:07.094130+00:00",
+  "root": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "branch": "pf-rsf-particle-free",
+  "revision": "27178813cebd471b93a7a9308f41215b71b4a20b",
+  "stage_c_complete": false,
+  "production_ready": false,
+  "entry_native_files": 921,
+  "entry_native_files_present": 921,
+  "unchanged_entry_native_files": 898,
+  "authorized_changed_entry_native_files": [
+    "include/aspect/material_model/phase_field_fault.h",
+    "include/aspect/material_model/phase_field_fault/dg_history_internal.h",
+    "include/aspect/material_model/phase_field_fault/fe_strain_internal.h",
+    "include/aspect/reconstructed_fault/cohesive_bulk_history.h",
+    "include/aspect/reconstructed_fault/cohesive_system_internal.h",
+    "include/aspect/reconstructed_fault/fault.h",
+    "include/aspect/reconstructed_fault/manager.h",
+    "include/aspect/reconstructed_fault/objective_stress.h",
+    "source/material_model/phase_field_fault.cc",
+    "source/material_model/phase_field_fault/dg_accepted.cc",
+    "source/material_model/phase_field_fault/dg_history.cc",
+    "source/material_model/phase_field_fault/dg_transfer.cc",
+    "source/material_model/phase_field_fault/dg_transport.cc",
+    "source/material_model/phase_field_fault/fe_strain.cc",
+    "source/material_model/phase_field_fault/history.cc",
+    "source/reconstructed_fault/cohesive_advance.cc",
+    "source/reconstructed_fault/cohesive_bulk_history.cc",
+    "source/reconstructed_fault/cohesive_output.cc",
+    "source/reconstructed_fault/cohesive_system.cc",
+    "source/reconstructed_fault/manager.cc",
+    "source/simulator/core.cc",
+    "source/simulator/solver/reconstructed_fault_stokes.cc",
+    "unit_tests/phase_field_fault_maxwell.cc"
+  ],
+  "new_native_source_files": [
+    "source/material_model/phase_field_fault/dg_objective.cc",
+    "source/material_model/phase_field_fault/dg_objective_transport.cc",
+    "source/reconstructed_fault/cohesive_cut_history.cc",
+    "source/reconstructed_fault/cohesive_objective.cc",
+    "unit_tests/reconstructed_fault_material_motion.cc"
+  ],
+  "native_source_manifest_sha256": "4a419500aadbb08b77526b966de7a0da3c6a89d983c8ea2b235e4951d2af9824",
+  "source_recovery_files": 241,
+  "source_recovery_sha256": "307bdeb9b1fc24560ab0077169df1c888e7f5084f299cd3645f1ea8f6ae8136b",
+  "artifacts": {
+    "build-particle-free/native/aspect-release": {
+      "bytes": 48959216,
+      "sha256": "97d5563831731391d7123aae6563870409dff5810bb9dcb2dd7d5970ed2aa02c"
+    },
+    "build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": {
+      "bytes": 569216,
+      "sha256": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+    },
+    "build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": {
+      "bytes": 1051224,
+      "sha256": "4ddbc13dc96c12797dfab37839fc8059bfd0113089a6ef258f9b8c3d901f9174"
+    },
+    "build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": {
+      "bytes": 3197720,
+      "sha256": "b5f1beae061620090365e17d9326a72583aaf9833f920c944d26484ded812b53"
+    }
+  },
+  "retained_build_unit_logs": {
+    "build-particle-free/transported-objective/stage-c/build-final-native-checks.log": "39c37ecbdefe485b0be071f5b4667cda4f03dcb3908947ab0151fa4fd2e0cb9b",
+    "build-particle-free/transported-objective/stage-c/build-cut-core.log": "65368fcd53c0b318fcc88cba14c1cfcb7a3e81299f3ecf16daa86e8e0b976245",
+    "build-particle-free/transported-objective/stage-c/build-final-cohesive-checks.log": "687207006af9941894ede0c9bc7a3965bb12d7704e7c9f5eefe1c484bbf9440b",
+    "build-particle-free/transported-objective/stage-c/build-final.log": "c1c9ff550976f25f36c49ea4a3ecbd3bdbecc70ed6ba3ccf0798218497dfdfa9",
+    "build-particle-free/transported-objective/stage-c/build-cut-traces.log": "8c2c7c9f6a5eb108823f98eb36bb4a9f17ec2acbb4171f990fbe127b60ea66ef",
+    "build-particle-free/transported-objective/stage-c/build-cut-checks.log": "20513fa67af026c673ae31a795a14ada47a477b99729e36e8ae638cbabfde1f2",
+    "build-particle-free/transported-objective/stage-c/build-final-admission.log": "5d41578476ffb2829d2bc9467274d56f4bd6c7cdb6b970cf968359d8989ca735",
+    "build-particle-free/transported-objective/stage-c/build-material-cohesive-checks.log": "1b3230346b0566ae0616f11017bb7a80d279ba61f0f8000947a425465b096287",
+    "build-particle-free/transported-objective/stage-c/build-cut-checks-final.log": "687207006af9941894ede0c9bc7a3965bb12d7704e7c9f5eefe1c484bbf9440b",
+    "build-particle-free/transported-objective/stage-c/build-material-motion.log": "4f3c0fd0d5b81bc62d57f21e29be6f8d1ed48942b1844f562457fab9c2bc6d2e",
+    "build-particle-free/transported-objective/stage-c/unit-material-mpi4.log": "0de461884e5937cc60b1f5f67217a00586b47e457d629750c8a32aa8befdf48c",
+    "build-particle-free/transported-objective/stage-c/unit-material-all.log": "026ecbdac296a7511a2e21ef7686d6e64c94029ff74b14feee461a2eef15e955",
+    "build-particle-free/transported-objective/stage-c/build-transfer-cache.log": "0a7103a163b9bdf4c8936a0657a167ac5bd0cb23ad7de2a232701afd4440ac3f",
+    "build-particle-free/transported-objective/stage-c/build-cut-core-final.log": "9d391521d418477b8d015aaa89053157da0e3bfc6143c16f11d13f2e71cc070b",
+    "build-particle-free/transported-objective/stage-c/build-material-native-checks.log": "8d85ada03e5e8f26f9d00a5b007f838429f5d82b5c57faa43c94b67240a243a8",
+    "build-particle-free/transported-objective/stage-c/build-material-bp3-plugin.log": "1dd93d311027e87f092ab5753515aef759e9dfa1e5d993df6d8b602986cfdd3f",
+    "build-particle-free/transported-objective/stage-c/build-layered-checks.log": "6bb4b63e0734a5e500077bdeb5440a60469f089af15510b42dd429d1e1e03dd9",
+    "build-particle-free/transported-objective/stage-c/unit-all.log": "026ecbdac296a7511a2e21ef7686d6e64c94029ff74b14feee461a2eef15e955"
+  },
+  "configured_native_build": {
+    "ASPECT_UNITY_BUILD:BOOL": "ON",
+    "CMAKE_BUILD_TYPE:STRING": "Release",
+    "CMAKE_CXX_COMPILER:STRING": "/opt/gcc/12.4.0/bin/g++",
+    "CMAKE_CXX_FLAGS_RELEASE:STRING": "-O3 -DNDEBUG",
+    "DEAL_II_DIR:UNINITIALIZED": "/opt/dealii/9.6-local"
+  },
+  "preservation": {
+    "protected_binaries_and_checkpoint_files": 16,
+    "original_server_exports": 220,
+    "cleanup_critical_files": 328,
+    "pre_C_live_control_copies": 2,
+    "RSF_checkpoint_marker": "2",
+    "prior_fixed_evidence_files": 17
+  },
+  "runtime_path": "/opt/openmpi/5.0.6/lib",
+  "runtime_libraries_resolve": true,
+  "temporary_logs": "Earlier /tmp build/unit logs lost across interruption; not counted as retained.",
+  "unit_serial": {
+    "assertions": 183170,
+    "cases": 152,
+    "exit_code": 0
+  },
+  "material_motion_mpi": {
+    "ranks": 4,
+    "cases_per_rank": 3,
+    "assertions_per_rank": 93,
+    "exit_code": 0
+  },
+  "latest_native_cases": [
+    "material-owner-native-final",
+    "material-owner-cut-final"
+  ],
+  "source_identity": "HEAD plus exact dirty/new source manifest and recovery payload; binaries are not assumed to match HEAD",
+  "simulation_policy": "No server, protected continuation or long replay. Earlier scheduling breach retained in report; resumed jobs sequential and at most four workers.",
+  "verification": {
+    "current_native_manifest_files": 926,
+    "source_archive_members_verified": 241,
+    "latest_cases_match_final_core": true,
+    "local_links_checked": 391,
+    "preexisting_missing_historical_links": [
+      [
+        "doc/reconstructed_fault/particle_free/STATUS.md",
+        "../../../benchmarks/reconstructed_fault/particle_free/evidence/bulk_continuation.zip"
+      ]
+    ],
+    "new_missing_links": [],
+    "git_diff_check": "passed",
+    "python_compile": "passed",
+    "tex_document_end_count": 1
+  },
+  "rejected_prototype_control_preserved": "2dcd3cb9fb6427de34e6ec9f49a9065d6ba2f5e9f29455e9a4a22ef5aee6571d",
+  "protected_runtime_files_resolve": [
+    "build-particle-free/objective-stress/baseline/2-libcohesive_rsf_native_checks.release.so",
+    "build-particle-free/objective-stress/baseline/0-aspect-release",
+    "build-particle-free/objective-stress/baseline/1-aspect-release",
+    "build-particle-free/transported-objective/stage-c/controls/bp3-spin-control",
+    "build-particle-free/transported-objective/stage-c/controls/cohesive-control",
+    "build-particle-free/transported-objective/stage-c/controls/cohesive-dg-prototype",
+    "build-particle-free/objective-stress/bp3-plugin/libbp3_restore_150x50.release.so"
+  ]
+}

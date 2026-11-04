@@ -1768,7 +1768,8 @@ namespace aspect
                 ExcMessage("Native cohesive RSF pilot uses a fixed mesh; history transfer is not selected."));
     const auto *dg_model=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get());
     const bool transfer_older=dg_model && dg_model->uses_dg_trial_stress_history() && dg_model->has_fe_strain_history();
-    const bool native_dg_transfer=transfer_older && dg_model->uses_consistent_endpoint_phase();
+    const bool native_dg_transfer=transfer_older && (dg_model->uses_consistent_endpoint_phase()
+                                                   || dg_model->uses_jaumann_dg_stress());
     AssertThrow(!transfer_older || !pending_dg_endpoint_publication,
                 ExcMessage("DG transfer rejects an unpublished endpoint."));
 
@@ -2040,11 +2041,12 @@ namespace aspect
     // Restricted accepted histories publish only after complete outer acceptance.
     // Restore outer-step scratch/bookkeeping too if an exception escapes after
     // advection or predictor setup. Legacy failure policies are unchanged.
-    const auto *endpoint_model=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get());
+    auto *endpoint_model=dynamic_cast<MaterialModel::PhaseFieldFault<dim> *>(material_model.get());
     const bool endpoint_step=timestep_number>0 && (parameters.cohesive_rsf_propagation || (endpoint_model
       && (endpoint_model->uses_bulk_cohesive_phase()
           || (parameters.reconstruct_faults && (endpoint_model->uses_consistent_endpoint_phase()
-              || (endpoint_model->is_mature_frictional_fault() && endpoint_model->uses_dg_trial_stress_history()))))));
+              || (endpoint_model->is_mature_frictional_fault()
+                  && (endpoint_model->uses_dg_trial_stress_history() || endpoint_model->uses_jaumann_particle_stress())))))));
     std::unique_ptr<LinearAlgebra::BlockVector> entry_solution,entry_linearization;
     std::unique_ptr<TableHandler> entry_statistics;
     const double entry_pressure=last_pressure_normalization_adjustment;
@@ -2061,6 +2063,13 @@ namespace aspect
     // start any scheme with an extrapolated value from the previous
     // two time steps if those are available
     initialize_current_linearization_point();
+    if(endpoint_model && endpoint_model->uses_transported_mature_history() && timestep_number>0)
+      {
+        endpoint_model->begin_dg_material_step(solution,current_linearization_point);
+        reconstructed_fault_surface_system->invalidate_material_geometry();
+        reconstructed_fault_stokes_coupling->invalidate_material_geometry();
+        rebuild_stokes_matrix=rebuild_stokes_preconditioner=true;
+      }
 
     // The mesh deformation scheme is currently not built to work inside a nonlinear solver.
     // We do the mesh deformation execution at the beginning of the timestep for a specific reason.
@@ -2248,6 +2257,7 @@ namespace aspect
       {
         if(endpoint_step)
           {
+            if(endpoint_model)endpoint_model->finish_dg_material_step(false);
             pending_dg_endpoint_publication={};
             solution=*entry_solution;current_linearization_point=*entry_linearization;
             statistics=*entry_statistics;
@@ -2262,6 +2272,20 @@ namespace aspect
           }
         throw;
       }
+    if (endpoint_step && endpoint_model && endpoint_model->uses_transported_mature_history()
+        && !pending_dg_endpoint_publication)
+      {
+        // A recoverable nonlinear failure returns normally to the timestep
+        // controller, without producing a candidate publication.
+        endpoint_model->finish_dg_material_step(false);
+        reconstructed_fault_surface_system->invalidate_material_geometry();
+        reconstructed_fault_stokes_coupling->invalidate_material_geometry();
+        solution=*entry_solution;current_linearization_point=*entry_linearization;
+        statistics=*entry_statistics;
+        last_pressure_normalization_adjustment=entry_pressure;
+        nonlinear_iteration=entry_iteration;
+        rebuild_stokes_matrix=rebuild_stokes_preconditioner=true;
+      }
     if (pending_dg_endpoint_publication)
       {
         AssertThrow(endpoint_step,ExcInternalError());
@@ -2271,6 +2295,14 @@ namespace aspect
         {
           auto restore_entry=[&]()
             {
+              if(auto *model=dynamic_cast<MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
+                model->finish_dg_material_step(false);
+              if(auto *model=dynamic_cast<MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
+                if(model->uses_transported_mature_history())
+                  {
+                    reconstructed_fault_surface_system->invalidate_material_geometry();
+                    reconstructed_fault_stokes_coupling->invalidate_material_geometry();
+                  }
               solution=bulk;current_linearization_point=linear;statistics=stats;
               last_pressure_normalization_adjustment=entry_pressure;
               nonlinear_iteration=entry_iteration;
@@ -2282,7 +2314,12 @@ namespace aspect
                 }
             };
           if(!accept){restore_entry();return;}
-          try {candidate(true);}
+          try
+            {
+              candidate(true);
+              if(auto *model=dynamic_cast<MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
+                model->finish_dg_material_step(true);
+            }
           catch(...){restore_entry();throw;}
         };
       }

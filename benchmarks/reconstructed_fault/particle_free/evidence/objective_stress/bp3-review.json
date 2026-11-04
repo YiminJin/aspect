@@ -1,0 +1,138 @@
+{
+  "logs": {
+    "output_start": {
+      "timestep_entries": 817,
+      "accepted_count": 816,
+      "first_accepted": 0,
+      "last_accepted": 815,
+      "last_accepted_time_s": 5172072493.898271,
+      "last_begun": 816,
+      "last_begun_clock": [
+        5172072493.905725,
+        0.0074540672088498705
+      ],
+      "accepted_dt_range_s": [
+        0.0,
+        40000000.0
+      ],
+      "matching_work_max_Pa": null,
+      "max_nonlinear_iteration": 4,
+      "publication_ratio_max": 0.008824675826216386,
+      "line_search_rejections": {
+        "total": 0,
+        "solves": 2527
+      },
+      "cutback_lines": [
+        "        \"List of model names\": \"convection time step, reconstructed fault time step, repeat on nonlinear solver failure\",",
+        "        \"Repeat on cutback\": {",
+        "            \"Cut back amount\": \"0.5\",",
+        "            \"Relative repeat threshold\": \"0.2\"",
+        "        \"Repeat on nonlinear solver failure\": {",
+        "            \"Cut back factor\": \"0.5\""
+      ],
+      "profiles": 148,
+      "saved_profile_last_step": 798
+    },
+    "output_resumed": {
+      "timestep_entries": 3423,
+      "accepted_count": 3422,
+      "first_accepted": 816,
+      "last_accepted": 4237,
+      "last_accepted_time_s": 5172072500.679687,
+      "last_begun": 4238,
+      "last_begun_clock": [
+        5172072500.680754,
+        0.0010673889083512567
+      ],
+      "accepted_dt_range_s": [
+        0.0010692609738414793,
+        0.00745407
+      ],
+      "matching_work_max_Pa": [
+        6.558505929787992e-07,
+        2.8618968944191316e-07
+      ],
+      "max_nonlinear_iteration": 4,
+      "publication_ratio_max": 0.00872611758657077,
+      "line_search_rejections": {
+        "total": 0,
+        "solves": 10365
+      },
+      "cutback_lines": [
+        "        \"List of model names\": \"convection time step, reconstructed fault time step, repeat on nonlinear solver failure\",",
+        "        \"Repeat on cutback\": {",
+        "            \"Cut back amount\": \"0.5\",",
+        "            \"Relative repeat threshold\": \"0.2\"",
+        "        \"Repeat on nonlinear solver failure\": {",
+        "            \"Cut back factor\": \"0.5\""
+      ],
+      "profiles": 54,
+      "saved_profile_last_step": 4182
+    }
+  },
+  "saved_profiles": 202,
+  "onset_threshold_m_per_s": 0.001,
+  "onset_bracket": [
+    {
+      "segment": "output_start",
+      "step": 769,
+      "time_s": 5172072368.423655,
+      "max_V": 8.881981968592545e-05,
+      "peak_xd_m": 10910.0,
+      "max_slip": 5.184601336797577,
+      "min_theta": 165.44133406767304,
+      "min_q": 26176686.162112072,
+      "max_q": 38594457.132590294,
+      "min_sigma": 49457877.443634935,
+      "max_sigma": 72687260.6710553,
+      "nodes": 5776
+    },
+    {
+      "segment": "output_start",
+      "step": 774,
+      "time_s": 5172072483.057341,
+      "max_V": 0.0010363774856085276,
+      "peak_xd_m": 10849.999999999998,
+      "max_slip": 5.184601452081804,
+      "min_theta": 14.070903172382227,
+      "min_q": 26178013.167337835,
+      "max_q": 38594574.97797927,
+      "min_sigma": 49458436.541397005,
+      "max_sigma": 72686102.90449099,
+      "nodes": 5776
+    }
+  ],
+  "sampled_peak": {
+    "segment": "output_resumed",
+    "step": 4182,
+    "time_s": 5172072500.61804,
+    "max_V": 1.3755329787499908,
+    "peak_xd_m": 470.0000000000016,
+    "max_slip": 5.184601469955071,
+    "min_theta": 0.007222026679733692,
+    "min_q": 26312125.67195996,
+    "max_q": 60564982.25090454,
+    "min_sigma": 49524606.96369226,
+    "max_sigma": 87216820.45031805,
+    "nodes": 5776
+  },
+  "last_saved_profile": {
+    "segment": "output_resumed",
+    "step": 4182,
+    "time_s": 5172072500.61804,
+    "max_V": 1.3755329787499908,
+    "peak_xd_m": 470.0000000000016,
+    "max_slip": 5.184601469955071,
+    "min_theta": 0.007222026679733692,
+    "min_q": 26312125.67195996,
+    "max_q": 60564982.25090454,
+    "min_sigma": 49524606.96369226,
+    "max_sigma": 87216820.45031805,
+    "nodes": 5776
+  },
+  "last_to_sampled_peak_ratio": 1.0,
+  "event_window_max_added_slip_m": 1.42972731930838,
+  "first_event_complete": false,
+  "completion_reason": "No post-peak arrest criterion met or terminal event export; scheduler time limit during step 4238.",
+  "source_identity": "Exported runtime labels/inputs only; exact remote source and binary hash are absent."
+}

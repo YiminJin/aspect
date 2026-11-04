@@ -1,0 +1,681 @@
+{
+  "default_path": {
+    "0": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.1999147206083011e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 0.0,
+          "bound": 1.951246674769019e-11
+        },
+        "V_m_s": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "1": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 5.421010862427522e-19,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 1.1275702593849246e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 5.644356509959536e-16,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 6.547496919639961e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 1.1275702593849246e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 5.644356509959536e-16,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 6.547496919639961e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 8.881784197001252e-16,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 6.879804885506768e-16,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 3.821812658011403e-18,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 3.469446951953614e-18,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2094516591918822e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 1.0842021724855044e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 7.105427357601002e-15,
+          "bound": 1.943001045373066e-11
+        },
+        "V_m_s": {
+          "max_abs": 1.0842021724855044e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "2": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 1.5829351718288365e-17,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 2.4260107811535647e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 1.2091022627558345e-15,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 8.500145032286355e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 4.2351647362715017e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 4.2605757246891307e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 4.472333961502706e-19,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 2.4260107811535647e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 1.2091022627558345e-15,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 8.500145032286355e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 1.5762131183594263e-15,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 8.881784197001252e-16,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 1.240327285323417e-16,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 1.2197274440461925e-16,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2189647231820215e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 2.168404344971009e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 1.4210854715202004e-14,
+          "bound": 1.8882405636448133e-11
+        },
+        "V_m_s": {
+          "max_abs": 1.8973538018496328e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "3": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 1.7997756063259374e-17,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 2.688821387764051e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 1.3426759704060487e-15,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 1.3600232051658168e-15,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 7.161663569035109e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 6.378158092824882e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 1.2349740370967699e-18,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 2.688821387764051e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 1.3426759704060487e-15,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 1.3600232051658168e-15,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 1.5759962779249292e-15,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 1.5751289161869408e-15,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 1.8789223649173792e-16,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 1.6067876196235176e-16,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2284538352146619e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 2.168404344971009e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 1.9539925233402755e-14,
+          "bound": 1.80951700760548e-11
+        },
+        "V_m_s": {
+          "max_abs": 2.439454888092385e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "4": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 8.326672684688674e-17,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 2.3635607360183997e-17,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 4.720182578132892e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 2.36876490644633e-15,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 1.7034984534092246e-15,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 6.352747104407253e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 7.123547086408666e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 1.3162892000331827e-18,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 4.720182578132892e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 2.36876490644633e-15,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 1.7034984534092246e-15,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 1.576158908250802e-15,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 1.5751289161869408e-15,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 3.0964814046186007e-16,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 2.5095214534892607e-16,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2379202309497121e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 4.336808689942018e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 1.4210854715202004e-14,
+          "bound": 1.8002988491486834e-11
+        },
+        "V_m_s": {
+          "max_abs": 3.7947076036992655e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    }
+  },
+  "default_byte_identity": {
+    "material-3-rank0.csv": false,
+    "material-2-rank0.csv": false,
+    "material-1-rank0.csv": false,
+    "material-4-rank0.csv": false,
+    "material-3-surface.csv": false,
+    "material-1-surface.csv": false,
+    "material-4-surface.csv": false,
+    "material-model.csv": true,
+    "material-0-rank0.csv": true,
+    "material-4-rank1.csv": false,
+    "material-summary.csv": true,
+    "material-0-rank1.csv": true,
+    "material-0-surface.csv": true,
+    "material-3-rank1.csv": false,
+    "material-2-rank1.csv": false,
+    "material-2-surface.csv": false,
+    "material-1-rank1.csv": false
+  },
+  "bound": "Each numeric column <=1e-12*max(1,max(abs(control))); exact labels and point keys.",
+  "input_sha256": {
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-3-rank0.csv": "7b9162ca3b71fbcfac51885dd3bf89baca3a3dfe5398bb13a78a8adec9ade772",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-2-rank0.csv": "2ee45910980a3cf6ef0f57288094420c6d2b98bf6540f7aff1a3036b6946a926",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-1-rank0.csv": "48f03e5e86c70d28fae2b2c526b9cc0df178c48355ef43eec0daa4dd641f664d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-3-surface.csv": "b3d05398e5cdf2935c900d601a92b27f271d31fb90d375ff2351f07b3d40d67e",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-1-surface.csv": "8d21be3d178140bccbb2c0ddee80811e0848cedbcd4e21f9496c2e640c1311d0",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-0-rank0.csv": "2b01cfd8d63f14e153e6b6db44e63bfd3bf68a47927e7a9e980e5b1518ab3ed6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-summary.csv": "5762c9b0164f3718f47567efac3ce269272b4e0b855fb5bc11322cc113fb1685",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-0-rank1.csv": "c888d2f08e2f6d6d0152ab9f35458a966bcc3873e4fed87fccefc36cf180581d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-0-surface.csv": "55143a429a38b8035f96ec6ea56f5b7fcfc84e88c25aa2d8fec8f986ebf3a1b7",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-3-rank1.csv": "f2a6b1e1b31dee4ebdc6e6a85bbca55b500a02a16d856b4990cccf28e0f9b68b",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-2-rank1.csv": "24c5853e826edb092e8788bbef8be665b730ff82ff9400b946e1a7f9d2b650c6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-2-surface.csv": "fa92989d34dbe680f864c9ea23fd7940ed53836cb7c4e8ed975e9a9bd57eadad",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-1-rank1.csv": "1ca86472e8c990933bc3dfe1bd025d84104ee0f252e6883fe498bee726bdf78d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-3-rank0.csv": "0bb37f379a16a9bb05e99a10b83eb8d4e655b8df13ca65b541d4e90a044d59a7",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-2-rank0.csv": "2ee45910980a3cf6ef0f57288094420c6d2b98bf6540f7aff1a3036b6946a926",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-1-rank0.csv": "48f03e5e86c70d28fae2b2c526b9cc0df178c48355ef43eec0daa4dd641f664d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-3-surface.csv": "fe0a236085246d9f92154d46c40d64e62714cc2ed67755fb9cfbcc5bb2b3c98f",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-1-surface.csv": "8d21be3d178140bccbb2c0ddee80811e0848cedbcd4e21f9496c2e640c1311d0",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-0-rank0.csv": "2b01cfd8d63f14e153e6b6db44e63bfd3bf68a47927e7a9e980e5b1518ab3ed6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-summary.csv": "bc628a7ff0a8b380f2eda88174d19c246c5998c0e31c0111e4ecadfe367d64af",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-0-rank1.csv": "c888d2f08e2f6d6d0152ab9f35458a966bcc3873e4fed87fccefc36cf180581d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-0-surface.csv": "55143a429a38b8035f96ec6ea56f5b7fcfc84e88c25aa2d8fec8f986ebf3a1b7",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-3-rank1.csv": "ac4408ac567f9924d5d5b08061c98139088361409714227f890ffed061df29f6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-2-rank1.csv": "24c5853e826edb092e8788bbef8be665b730ff82ff9400b946e1a7f9d2b650c6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-2-surface.csv": "fa92989d34dbe680f864c9ea23fd7940ed53836cb7c4e8ed975e9a9bd57eadad",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-1-rank1.csv": "1ca86472e8c990933bc3dfe1bd025d84104ee0f252e6883fe498bee726bdf78d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-3-rank0.csv": "2b827346caf61c56177012c22fca213318e6d14d8a5241a82c8dc0336496ac1c",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-2-rank0.csv": "5f37b9e247a18afdddef4d3c817bffaadd47cc5276967f8ca1b0cb68bd8596ae",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-1-rank0.csv": "58baaf4c33dcfdc9e8c85e3f225b4f47becbad7c75ad3922e15cc7d6ae06c372",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-4-rank0.csv": "630b642e1048dc4daa7d5d49089825f8a479e910d0e3eb2faac2e0a0a3238c21",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-3-surface.csv": "201dbb6607315cd87d03e87a62c2a292749810d92f889a7120f88af191c10251",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-1-surface.csv": "a428e91500e29bf0b759c6606e08fdf1644912290da99dc722dbafcfbfc661fc",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-4-surface.csv": "1d8bb85874dded3c4fc0b57b96264bda8ab3d15d6e4a1354631eb395b6eebb92",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-0-rank0.csv": "423e2a479e255a7627a5d4279750868cf2fbe88739a65e9a9e2d12cffb442ef6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-4-rank1.csv": "cc48c634325392ba5572c83436dc0934a56ad6fb5089a34517d754a0cf4926f7",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-summary.csv": "9c81708c0cfc710b12c40cac04309dfa618548c5870bdd7bdf0bd96e0e73382b",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-0-rank1.csv": "511dcaaf7813c3c55ac8846909061f383168635f155d4b0799c40e7ce5647ccf",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-0-surface.csv": "03cc18061b99096f6062030b7a0b54f2d15ae8c6142b992dc5f331511a06bcdd",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-3-rank1.csv": "cbf9d04daa9f0785fbb9d092ea4f556c65921312363f6cb06cfd6dad6bfabf75",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-2-rank1.csv": "6c5b9e409c66a035519a8fdf1de36419d6ca47e7d3a07ea907c2f135ddb41265",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-2-surface.csv": "bcc0c194af3600a1036615ee0ae40955b40d3f828ffddedea1c906fbfacf2cfc",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-1-rank1.csv": "3828ec9f4dab6feca87d0095e372d658163011560eb1f9fac9e50291c7fd9731"
+  }
+}

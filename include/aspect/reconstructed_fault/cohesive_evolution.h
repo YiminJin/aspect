@@ -5,6 +5,8 @@
 // The native mixed solve may supply independent force/normal offsets from
 // general tensor history. Those offsets are loads, never physical histories.
 #include <aspect/reconstructed_fault/cohesive_interface.h>
+#include <aspect/utilities.h>
+#include <deal.II/base/mpi.h>
 #include <deal.II/lac/full_matrix.h>
 #include <deal.II/lac/lapack_full_matrix.h>
 #include <deal.II/lac/vector.h>
@@ -452,6 +454,19 @@ namespace aspect
           const double norm = R.l2_norm ();
           double scale = 1.;
           bool found = false;
+          std::ofstream trace;
+          if(const char *path=std::getenv("ASPECT_COHESIVE_SIGNED_TRACE"))
+            if(Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)==0)
+              {
+                trace.open(path,std::ios::app);
+                if(trace.tellp()==0)trace<<"dt_s,n,n_virgin,iteration,backtrack,alpha,residual_L2,residual_Linf,force_Linf,complementarity_Linf,minimum_contact_Pa,linear_step_defect_L2,directional_merit_derivative\n";
+                trace<<std::setprecision(17);
+              }
+          Vector predicted(R.size());A.vmult(predicted,step);
+          const double merit_slope=-(R*predicted);
+          predicted-=R;
+          const double step_defect=predicted.l2_norm();
+          double last_norm=norm,last_force=0.,last_constraint=0.;
           for (unsigned ls = 0; ls < 35; ++ls)
             {
               Vector xx (x), yy (y), r;
@@ -460,6 +475,10 @@ namespace aspect
               for (unsigned k = 0; k < nv; ++k)
                 yy[k] += scale * step[n + k];
               residual (xx, yy, r, nullptr);
+              last_norm=r.l2_norm();last_force=last_constraint=0.;
+              for(unsigned i=0;i<n;++i)last_force=std::max(last_force,std::abs(r[i]));
+              for(unsigned k=0;k<nv;++k)last_constraint=std::max(last_constraint,std::abs(r[n+k]));
+              if(trace)trace<<dt<<','<<n<<','<<nv<<','<<it<<','<<ls<<','<<scale<<','<<last_norm<<','<<r.linfty_norm()<<','<<last_force<<','<<last_constraint<<','<<out.contact<<','<<step_defect<<','<<merit_slope<<'\n';
               if (r.l2_norm () < norm || r.linfty_norm () < 1e-13)
                 {
                   x = xx;
@@ -469,7 +488,11 @@ namespace aspect
                 }
               scale *= .5;
             }
-          AssertThrow (found, ExcStepFailure ("Native signed line search failed"));
+          AssertThrow (found, ExcStepFailure ("Native signed line search failed; iteration="+std::to_string(it)
+            +", entry L2="+Utilities::to_string(norm,17)+", last L2="+Utilities::to_string(last_norm,17)
+            +", force Linf="+Utilities::to_string(last_force,17)+", complementarity Linf="+Utilities::to_string(last_constraint,17)
+            +", contact Pa="+Utilities::to_string(out.contact,17)+", linear defect="+Utilities::to_string(step_defect,17)
+            +", merit derivative="+Utilities::to_string(merit_slope,17)));
         }
       if (!supplied_root)
         {

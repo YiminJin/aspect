@@ -37,7 +37,7 @@ namespace aspect
                 for (unsigned a = 0; a < 2; ++a)
                   unit[a] = std::clamp (unit[a], 0., 1.);
                 const Quadrature<2> rule (std::vector<dealii::Point<2>>{ unit });
-                auto tau = s.bulk->evaluate (cell, rule)[0];
+                auto tau = s.bulk->evaluate_sided(cell,rule,side)[0];
                 for (const auto &m : s.geometry.lifting (point.position, side))
                   tau += 2 * law.G * s.memory[m.index] * dev3 (m.gradient);
                 FEValues<2> v (system.get_mapping (), system.get_fe (), rule, update_values);

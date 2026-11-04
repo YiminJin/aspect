@@ -1,0 +1,43 @@
+{
+  "revision": "27178813cebd471b93a7a9308f41215b71b4a20b",
+  "dirty_source": true,
+  "binary_sha256": "25d905a6057972826dbda6d8c052aa5aabf3b5f43b928d00a8f33f1e943a0379",
+  "commands": [
+    "cmake --build build-particle-free/cohesive-rsf-native/native -j 4",
+    "cmake --build build-particle-free/native -j 4",
+    "cmake -S benchmarks/reconstructed_fault/bp3_native/server/plugin -B build-particle-free/objective-stress/bp3-plugin -DAspect_DIR=$PWD/build-particle-free/native -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++",
+    "cmake --build build-particle-free/objective-stress/bp3-plugin -j 2",
+    "cmake -S benchmarks/reconstructed_fault/particle_free/objective_stress -B build-particle-free/objective-stress/checks -DAspect_DIR=$PWD/build-particle-free/native -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++",
+    "cmake --build build-particle-free/objective-stress/checks -j 1",
+    "build-particle-free/native/aspect-release --test",
+    "python3 benchmarks/reconstructed_fault/particle_free/review_bp3_results.py",
+    "OPENBLAS_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/particle_free/objective_stress/analyze_native.py"
+  ],
+  "configured_builds": {
+    "build-particle-free/native/CMakeCache.txt": [
+      "ASPECT_UNITY_BUILD:BOOL=ON",
+      "ASPECT_WITH_VORO:BOOL=ON",
+      "CMAKE_BUILD_TYPE:STRING=Release",
+      "CMAKE_CXX_COMPILER:STRING=/opt/gcc/12.4.0/bin/g++",
+      "DEAL_II_DIR:UNINITIALIZED=/opt/dealii/9.6-local",
+      "VORO_DIR:PATH=/home/ein/local/voro++/0.4.6"
+    ],
+    "build-particle-free/cohesive-rsf-native/native/CMakeCache.txt": [
+      "ASPECT_UNITY_BUILD:BOOL=ON",
+      "ASPECT_WITH_VORO:BOOL=OFF",
+      "CMAKE_BUILD_TYPE:STRING=Release",
+      "CMAKE_CXX_COMPILER:STRING=/opt/gcc/12.4.0/bin/g++",
+      "DEAL_II_DIR:UNINITIALIZED=/opt/dealii/9.6-local",
+      "VORO_DIR:PATH="
+    ]
+  },
+  "environment_overrides": {
+    "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_PROC_BIND": "false"
+  },
+  "final_units": "183073 assertions in 148 cases",
+  "source_manifest": "source-manifest.json"
+}

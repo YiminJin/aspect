@@ -315,6 +315,13 @@ namespace aspect
           = trap - (bulk_increment + bnew - bold + fracture + friction + radiation + maxwell);
       d["physical_remainder_with_quadrature_J_m"]
           = d["physical_remainder_J_m"] - integration_change;
+      if(jaumann_stress)
+        {
+          for(const auto &name:{"objective_projection_J_m","objective_max_angle_rad","objective_max_change_Pa"})
+            d[name]=old.diagnostics.at(name);
+          d["physical_remainder_with_objective_J_m"]
+            =d["physical_remainder_with_quadrature_J_m"]-d["objective_projection_J_m"];
+        }
       d["weak_error_Pa"] = r.weak;
       d["bulk_residual_linf_N_m"] = residual->linfty_norm ();
       d["incompressibility_L2_m"] = std::sqrt (div2);
@@ -437,11 +444,12 @@ namespace aspect
       ++d.clock_attempts;
       try
         {
-          const auto &s = *d.accepted;
-          d.validate (s);
+          const auto &parent = *d.accepted;
+          d.validate (parent);
+          const auto s=d.objective_anchor(parent);
           AssertThrow (s.step + 1 == get_timestep_number (),
                        ExcMessage ("Native cohesive publication clock differs from Simulator."));
-          const auto sampled = d.sample (s);
+          const auto sampled = d.sample (parent);
           const double direction = sampled.second;
           const int epoch = static_cast<int> (std::floor ((s.time - d.epoch_origin + 1e-12) / d.cadence));
           bool refresh = s.candidate_epoch != epoch || s.candidate_anchor != s.formed;

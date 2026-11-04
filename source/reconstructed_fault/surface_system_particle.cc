@@ -87,6 +87,11 @@ namespace aspect
     const auto velocity_gradients = VectorTools::point_gradients<dim>(
                                       point_cache, this->get_dof_handler(), bulk_state,
                                       VectorTools::EvaluationFlags::avg, velocity_component);
+    std::vector<Tensor<2,dim>> history_gradients;
+    if (phase_field_fault.uses_jaumann_particle_stress())
+      history_gradients = VectorTools::point_gradients<dim>(
+        point_cache,this->get_dof_handler(),this->get_old_solution(),
+        VectorTools::EvaluationFlags::avg,velocity_component);
     const std::vector<double> pressures = VectorTools::point_values<1>(
                                             point_cache, this->get_dof_handler(), bulk_state,
                                             VectorTools::EvaluationFlags::avg, pressure_component);
@@ -231,6 +236,11 @@ namespace aspect
         inputs.temperature = temperatures[point_index];
         inputs.dynamic_pressure = pressures[point_index];
         inputs.strain_rate = symmetrize(velocity_gradients[point_index]);
+        if (phase_field_fault.uses_jaumann_particle_stress())
+          {
+            inputs.history_velocity_gradient=history_gradients.at(point_index);
+            inputs.has_history_velocity_gradient=true;
+          }
 
         const ArrayView<const double> properties = particle.get_properties();
         for (unsigned int component = 0;

@@ -1,0 +1,10 @@
+## Surface-memory representability screen
+
+The transported comparison prescribes analytic s, so its analytic B accuracy
+must not be counted as free native information. Before freezing the decision,
+measure Q1 interpolation of s on16/32/64 material intervals over[-1.2,1.2]m.
+Report scalar error and the induced full3D B-extension RMS/G on the independent
+volume rule. Require second-order ratios1.8–2.2 and finest extension error<1e−3,
+then count the65 scalar coefficients separately. This is a snapshot capacity
+check; native scalar evolution, actual projected source/derivative and ALE
+transfer still need Stage C qualification. Do not infer their accuracy from it.

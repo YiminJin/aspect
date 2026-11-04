@@ -96,6 +96,8 @@ namespace aspect
        * mature fault. Reattach before mechanics; generic projections are unchanged.
        */
       void enable_bulk_work_measure();
+      /** Invalidate derived maps/factors after a staged material geometry swap. */
+      void invalidate_material_geometry();
 
       /** Experimental normal input: raw (default/bypass), projected, helmholtz.
        * Length is physical metres; zero length still projects. Configure outside

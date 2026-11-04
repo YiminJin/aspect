@@ -1,0 +1,140 @@
+[
+  {
+    "cases": [
+      "bpf-c-p-m-joint",
+      "bpf-c-p-m-surface"
+    ],
+    "initial_spacing": [
+      0.1,
+      0.05
+    ],
+    "stress_relative_L2": 0.005368427787442208,
+    "profile_relative_L2": 7.556623494375977e-08,
+    "age_relative_L2": 0.0004278092295134267,
+    "memory_relative_L2": 0.006695151903164599,
+    "normalization_relative_L2": 0.00412107201668353,
+    "slip_rate_relative_L2": 0.006695404286926511,
+    "work_traction_relative_L2": 0.014139986037645267,
+    "input_sha256": {
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-3-rank0.csv": "c25218446b9ca8ca96eb1705a738061ab063ad3134745be1b13804cfab90dbed",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-2-rank0.csv": "4e764d32874f9006bcc7b1ce5b2eb662b83fad249330df0152b4e8b1478e7e8b",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-1-rank0.csv": "21396d6cea0e2b9ebb14908a016d22cc73b24fa12b34066e4b4d1c5840bd9b3e",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-4-rank0.csv": "87d02ed47263088c395d903f994053ad3df67b26794a8e3a22e2b314e1897a2d",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-3-surface.csv": "ac191f32cc8b9dcdcb353cfd4d8c39e3f892542d720499c7a32762f1623b1314",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-1-surface.csv": "d24c742b0ba1d4b9aae9e9e41dce4a1708a943bc1791e45cc530fd20bd3183de",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-4-surface.csv": "a4c41e2255ca6ba62bd9dc3aaa0b8cda0aea5dc5acda2b521aca5ffab83bd54c",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-0-rank0.csv": "9d3cd4ffe4d48c419b356fdadccbe6f6d1e5f8ea0268b9590f1e7144fe3a67e0",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-4-rank1.csv": "83df0e7f8ce9cbfc410e5f31b3f176231db922bb419bf9bad0b96c778a73afc4",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-summary.csv": "a0a063fdd94ea724031fa6959bc51528d53e1f2daa1c769bc8a39129e57525df",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-0-rank1.csv": "5ebf8766edceff34a97ee4eb8109eadd751dfb2c002ae4be5de7f57afcfad245",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-0-surface.csv": "4df4617677205dbe5c2080f538c6b716d598613968bca6c54e7809902f3b2969",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-3-rank1.csv": "655bb52b12bf5b1ca8961a1145ec80c09516ab841366437783f0b9730f923730",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-2-rank1.csv": "6f70343842566645ef0de0359b27b638415d3c0a3e941944760e2eacd674d478",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-2-surface.csv": "475e69ca2a0ac00223ce1a0fd282999591a6fc97a79ffac88842b360cca8386a",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-joint/output/material-1-rank1.csv": "8cc161755e9e563c143849fe83c086678df63a1369650186af35f5596ff134ae",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-3-rank0.csv": "1808a34077bc5ef6ebbc7f09797b22b2bd785fb25d92fee1ea437db42c2d9e29",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-2-rank0.csv": "02120205c419365d7820b843ea21257bcdb4c15e9c2556c2bc9c6cdd85b36167",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-1-rank0.csv": "382ae10dafa6a224c5f3a8c72233a5033af0c52c7dca66f625cd56eb0a0e5abe",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-4-rank0.csv": "71a63c92f0af039abd7279412b9df4de2054dc450c66972a9987a232d5f392bf",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-3-surface.csv": "2acff5cd336bb5e7cab05fad89a16832174eeb1cc9fc6ff85253e1155c79a482",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-1-surface.csv": "577a7ac334423868e391e23d926dfb942c48ed4f353e32daf6a9ab0f91848461",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-4-surface.csv": "78f22fd288d1edcee4d63f4515bac16e42f6e365e0ee1a42a5279cb5ec1e9ecc",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-0-rank0.csv": "d122ad869f70c4af3bc7d8132df899e05dfe7b326e490ee5e2a11ae22a2bf7d0",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-4-rank1.csv": "2ec945031f86307dfaccaa8cfdcabc4dc2e70c00424af351c41e41f7631c14ae",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-summary.csv": "a0a063fdd94ea724031fa6959bc51528d53e1f2daa1c769bc8a39129e57525df",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-0-rank1.csv": "81b9fdcc1ad2d270211302c348feeb9305b5c50a3c875c4a80c748c7e49845c6",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-0-surface.csv": "b07ace417bae370121effab1f88aa1c451435e5f8ee393a369a0b4b366fda96d",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-3-rank1.csv": "2f75136d6b507d8fb708817b5a81052ae5441f319c2b81a7577a774853819452",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-2-rank1.csv": "fc8915fe703995d283f39827436da056ea9f68b13521e2f70ee66a6cfab375ad",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-2-surface.csv": "5a533a4bc1db22e917164f38bf04174ebe63aa137c9f4c240636e4eca77aeb70",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-c-p-m-surface/output/material-1-rank1.csv": "af5dad2e7c42fb66122742d5248170b71fb65b22e42546a0c8dba65e2ecbe904"
+    },
+    "normalization": [
+      {
+        "localization_measure": 1.671183643812081,
+        "unclipped_localization_measure": 1.671183643812081,
+        "curve_length": 1.6704487338060603,
+        "normalization_integral_relative_error": 0.0004399476566672167,
+        "normal_support_fraction_lost": 0.0
+      },
+      {
+        "localization_measure": 1.671141582283678,
+        "unclipped_localization_measure": 1.671141582283678,
+        "curve_length": 1.6704487343314451,
+        "normalization_integral_relative_error": 0.0004147675639445403,
+        "normal_support_fraction_lost": 0.0
+      }
+    ]
+  },
+  {
+    "cases": [
+      "bpf-l-p-m-joint",
+      "bpf-l-p-m-surface"
+    ],
+    "initial_spacing": [
+      0.1,
+      0.05
+    ],
+    "stress_relative_L2": 0.005426733107921544,
+    "profile_relative_L2": 8.652318818809607e-08,
+    "age_relative_L2": 0.0004278091335228825,
+    "memory_relative_L2": 0.006946266268287833,
+    "normalization_relative_L2": 0.004121075133373447,
+    "slip_rate_relative_L2": 0.006695261444154874,
+    "work_traction_relative_L2": 0.013759898738557323,
+    "input_sha256": {
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-3-rank0.csv": "ed2e66b0ca38d1bb9a81c7e7df22bd2641385064233f3a8986407feaad2408ab",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-2-rank0.csv": "16168c7af464d888153ef0d951b60f2c3226089d900c7c0825e69a3a534a694e",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-1-rank0.csv": "349bb8efb24a2f404f341c24d0a89be16f53e0670f11277fb7e0f07724e56370",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-4-rank0.csv": "3530eee7f811b298fafd3a214505b2be9402303167b2ae88add5c5a0883bc2a6",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-3-surface.csv": "fdc73a491f321f57a597435428e11bd30f5db0c23ea2807d5bd85cc2fe6e868b",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-1-surface.csv": "d8db2c94e1ef6e5dca7335bb44bdd9cfb734fbaaf8a1b7ada0d0728a0a2bded4",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-4-surface.csv": "e2a9b52e1bc176f866bde9ba0a88eeafa386411976f738cc5d40a76be79e51f6",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-0-rank0.csv": "230e0fdb077c198dafd514055f6c3bbab0da7550fe2e1fddcc4020c1d05561bf",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-4-rank1.csv": "61d3ef9f4937c9e3033eb7ed35d424f473dc4d2d852a7be60cc08cc7b296e213",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-summary.csv": "a0a063fdd94ea724031fa6959bc51528d53e1f2daa1c769bc8a39129e57525df",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-0-rank1.csv": "9cbb60b32656bf473e51ae4529589cc07ba753592e2dec5c5029ec1f596470bf",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-0-surface.csv": "c4476456c45c0db6074da06f44f829396b2cde94ed740b72ae4fb7ab21b1f802",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-3-rank1.csv": "97098e98927bc9e4cf72dd7fd8586fbe026bcd23b1e85d03f8e0934bdfe2a1cb",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-2-rank1.csv": "9b63d91f39508fbce2fb8d470730193a34984924b47900271305e7f9c72167b5",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-2-surface.csv": "e87af134d4f978f2285f069165a461e70d554fa95b96124907fedd350dd48cfc",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-joint/output/material-1-rank1.csv": "3872a75c9a1be4d4c40c9e4a4b1da5d115a85dc02768ebf8395b6d3bfd110324",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-3-rank0.csv": "cea77baf42de95e0b68b7652f0f2bc6a9d21b32fdf669cc6ecd3ab1359281c01",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-2-rank0.csv": "697cb9da8084955cbcb0244b7fc0a8d44bb3e3dceacbf8209ae9686d92aae955",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-1-rank0.csv": "67b3805f75f503b4fcd36ede3d7557cd309a09c410b517464a18a570fb327855",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-4-rank0.csv": "29190e5603dd11e3cf45fe025753855ac26f36eda7c8c7c5807e122eaf2c58f8",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-3-surface.csv": "097b13507c862ed452a928233696deeb91ce2c0d61dc1da5b4622eada3a09abf",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-1-surface.csv": "f80c2a7622a7788eeb654f236e783e40d632bf77dfaa59b1969330c3c6c713ea",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-4-surface.csv": "c906195dba97022ef241388aedc3ef5558fbc1fdb2cc4e1323344c8d155141ce",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-0-rank0.csv": "2878783cacd57ab7072f2e6652989d5834284a7e5ff7554a249ba296bf586457",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-4-rank1.csv": "896edb3b02901d76fac4617b55b1c0e7ed169b6f7b96a2162342ee3819f8f36e",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-summary.csv": "a0a063fdd94ea724031fa6959bc51528d53e1f2daa1c769bc8a39129e57525df",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-0-rank1.csv": "54034438dfe58ce29483731b0f75d14567c9b023e25904b0c236e7999de9fa22",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-0-surface.csv": "758b587741015d0b1bafcf5af34d8bf131155e6a61a3e1fd69165477695e336b",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-3-rank1.csv": "9147dc5cb2e9ad4b215f1988e8f25fb6ab3a9db50ff122661023cbdfbec1c509",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-2-rank1.csv": "942aa271c015db991d3deb85b19d234f1ddc0c1fb85a5947225379423b639797",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-2-surface.csv": "c33139f675e10408c24d195a7c95b0e92695dc6259d3db8a673d4309f066cce6",
+      "build-particle-free/transported-objective/stage-c/material-runs/bpf-l-p-m-surface/output/material-1-rank1.csv": "2e953967ff197cf64b06c5fc5fad2680d8d964f9b0715c029030dca408c0a38b"
+    },
+    "normalization": [
+      {
+        "localization_measure": 1.6711836409717984,
+        "unclipped_localization_measure": 1.6711836409717984,
+        "curve_length": 1.6704487354412905,
+        "normalization_integral_relative_error": 0.0004399449770087216,
+        "normal_support_fraction_lost": 0.0
+      },
+      {
+        "localization_measure": 1.6711415795521767,
+        "unclipped_localization_measure": 1.6711415795521767,
+        "curve_length": 1.6704487359727413,
+        "normalization_integral_relative_error": 0.00041476494579884005,
+        "normal_support_fraction_lost": 0.0
+      }
+    ]
+  }
+]

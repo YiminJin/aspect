@@ -199,7 +199,9 @@ namespace aspect
       prm.declare_entry("Association support", "stationary profile",
                         Patterns::Selection("stationary profile|full normal cross-section"),
                         "Stationary profile retains the native support widths. Full normal cross-section "
-                        "is a fixed verification policy for one straight prescribed fault spanning a 2D Box. "
+                        "is a verification policy for one initially straight prescribed fault in a 2D Box. "
+                        "Finite endpoints are admitted only for prescribed DG sampling or the restricted "
+                        "moving mature history branch; other paths must span the Box tangentially. "
                         "It derives a constant normal half-width from the domain vertices, including roundoff, "
                         "before cohesive initialization. It does not extend sharp endpoints or change H.");
       prm.declare_entry("Ridge coefficient", "1",
@@ -506,7 +508,12 @@ namespace aspect
                 local_max = std::max(local_max, offset * tangent);
               }
         const auto comm = this->get_mpi_communicator();
-        AssertThrow((material && material->uses_prescribed_dg_geometry())
+        // The restricted moving mature branch also needs the complete normal
+        // profile: its independently supplied/transported Q1 field need not
+        // fit the stationary seed's support. This widens only normal coverage;
+        // the finite material endpoints and tangential admission are unchanged.
+        AssertThrow((material && (material->uses_prescribed_dg_geometry()
+                                  || material->uses_transported_mature_history()))
                     || (std::abs(Utilities::MPI::min(local_min, comm)) <= tolerance
                     && std::abs(Utilities::MPI::max(local_max, comm) - length) <= tolerance),
                     ExcMessage("The prescribed fault must span the full tangential extent of the Box; "
@@ -874,6 +881,52 @@ namespace aspect
     candidate->current_newton_slip_rates=current_newton_slip_rates;
     candidate->trial_slip_rates=trial_slip_rates;
     candidate->prescribed_slip_rates=prescribed_slip_rates;
+    return candidate;
+  }
+
+  template<int dim>
+  std::shared_ptr<ReconstructedFaultManager<dim>>
+  ReconstructedFaultManager<dim>::stage_material_motion(
+    const std::vector<std::vector<Point<dim>>> &vertices,
+    const std::vector<std::vector<double>> &widths) const
+  {
+    AssertThrow(vertices.size()==reconstructed_faults.size()
+                && widths.size()==vertices.size(),
+                ExcMessage("Material motion requires all existing faults and supports."));
+    // Cloning validates that no nonlinear trial or boundary completion owns
+    // geometry-dependent data. All subsequent mutation is private staging.
+    auto candidate=clone_prescribed_geometry();
+    bool changed=false;
+    for(unsigned int f=0;f<vertices.size();++f)
+      {
+        const auto &old=reconstructed_faults[f];
+        AssertThrow(vertices[f].size()==old.n_vertices()
+                    && widths[f].size()==old.n_vertices(),
+                    ExcMessage("Material motion preserves vertex labels; resampling needs a separate history pullback."));
+        for(const double width:widths[f])
+          AssertThrow(std::isfinite(width) && width>0.,
+                      ExcMessage("Material motion requires finite positive normal support widths."));
+        if(vertices[f]==old.vertices && widths[f]==projection_half_widths[f])continue;
+        AssertThrow(vertices[f].front()!=vertices[f].back(),
+                    ExcMessage("Material motion cannot close a fault."));
+        // Reuse native finite-coordinate/nondegenerate-segment validation.
+        ReconstructedFault<dim> moved(vertices[f]);
+        moved.n_property_components=old.n_property_components;
+        moved.property_values=old.property_values;
+        AssertThrow(old.current_geometry_version<std::numeric_limits<std::uint64_t>::max(),
+                    ExcMessage("Material geometry generation exhausted."));
+        moved.current_geometry_version=old.current_geometry_version+1;
+        using std::swap;
+        swap(candidate->reconstructed_faults[f],moved);
+        candidate->projection_half_widths[f]=widths[f];
+        changed=true;
+      }
+    if(changed)
+      {
+        ++candidate->projection_metadata_version;
+        candidate->invalidate_particle_projection_cache();
+        candidate->invalidate_stokes_qp_projection_cache();
+      }
     return candidate;
   }
 
@@ -1423,6 +1476,7 @@ namespace aspect
     const unsigned int, const std::vector<Point<dim>> &, const std::vector<double> &, \
     const std::vector<std::vector<double>> &, const std::vector<double> &); \
   template std::shared_ptr<ReconstructedFaultManager<dim>> ReconstructedFaultManager<dim>::clone_prescribed_geometry() const; \
+  template std::shared_ptr<ReconstructedFaultManager<dim>> ReconstructedFaultManager<dim>::stage_material_motion(const std::vector<std::vector<Point<dim>>> &, const std::vector<std::vector<double>> &) const; \
   template void ReconstructedFaultManager<dim>::swap_prescribed_geometry(ReconstructedFaultManager<dim> &) noexcept; \
   template unsigned int ReconstructedFaultManager<dim>::register_property(const std::string &, const unsigned int); \
   template bool ReconstructedFaultManager<dim>::has_property(const std::string &) const; \

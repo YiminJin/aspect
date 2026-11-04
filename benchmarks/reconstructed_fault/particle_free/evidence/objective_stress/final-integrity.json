@@ -1,0 +1,22 @@
+{
+  "protected": [
+    {
+      "path": "build-particle-free/objective-stress/baseline/0-aspect-release",
+      "sha256": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a",
+      "runtime_resolved": true
+    },
+    {
+      "path": "build-particle-free/objective-stress/baseline/1-aspect-release",
+      "sha256": "7277eebc663659e64830780553adbaaf7288de3894f89952579e5f06e4c83b1d",
+      "runtime_resolved": true
+    },
+    {
+      "path": "build-particle-free/objective-stress/baseline/2-libcohesive_rsf_native_checks.release.so",
+      "sha256": "7bfbeaa35e7a6feb75ecaa6b1609a0e2d1b3d48bef866ad02f07c2df77922f5d",
+      "runtime_resolved": true
+    }
+  ],
+  "new_document_links_pass": true,
+  "historical_missing_links": 1,
+  "final_binary_sha256": "25d905a6057972826dbda6d8c052aa5aabf3b5f43b928d00a8f33f1e943a0379"
+}

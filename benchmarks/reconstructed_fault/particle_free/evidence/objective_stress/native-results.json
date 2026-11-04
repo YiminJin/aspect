@@ -1,0 +1,579 @@
+{
+  "legacy_retained_vs_current": {
+    "particles": 25568,
+    "stress": {
+      "max_abs": 2.954038791358471e-09,
+      "rms": 4.487023191157293e-10,
+      "relative_l2": 1.991733597459148e-14,
+      "exact": false
+    },
+    "V_m_per_s": {
+      "max_abs": 1.2407709188295415e-23,
+      "rms": 4.2117051017883704e-24,
+      "relative_l2": 4.219362421548326e-15,
+      "exact": false
+    },
+    "Theta_s": {
+      "max_abs": 5.8673322200775146e-08,
+      "rms": 1.8124022205589274e-08,
+      "relative_l2": 2.265227856107395e-15,
+      "exact": false
+    },
+    "q_weak_Pa": {
+      "max_abs": 1.4901161193847656e-08,
+      "rms": 5.779340571012996e-09,
+      "relative_l2": 2.1772088380174785e-16,
+      "exact": false
+    },
+    "sigma_n_weak_Pa": {
+      "max_abs": 3.725290298461914e-08,
+      "rms": 1.3440478348782578e-08,
+      "relative_l2": 2.6880125800828746e-16,
+      "exact": false
+    },
+    "slip_m": {
+      "max_abs": 5.637851296924623e-18,
+      "rms": 1.630096605066802e-18,
+      "relative_l2": 2.7213865590500506e-15,
+      "exact": false
+    }
+  },
+  "spin_off_vs_on": {
+    "particles": 25568,
+    "stress": {
+      "max_abs": 0.9788694733797456,
+      "rms": 0.12382773067269985,
+      "relative_l2": 5.496558430185595e-06,
+      "exact": false
+    },
+    "V_m_per_s": {
+      "max_abs": 2.11577975546536e-17,
+      "rms": 3.890391187819037e-18,
+      "relative_l2": 3.897464325324274e-09,
+      "exact": false
+    },
+    "Theta_s": {
+      "max_abs": 0.006223796866834164,
+      "rms": 0.0010983442785354803,
+      "relative_l2": 1.3727637425689513e-10,
+      "exact": false
+    },
+    "q_weak_Pa": {
+      "max_abs": 0.05995235964655876,
+      "rms": 0.00861117159022371,
+      "relative_l2": 3.244023891921964e-10,
+      "exact": false
+    },
+    "sigma_n_weak_Pa": {
+      "max_abs": 0.06395094096660614,
+      "rms": 0.010573318467059471,
+      "relative_l2": 2.1145983286564192e-10,
+      "exact": false
+    },
+    "slip_m": {
+      "max_abs": 6.357807075946242e-12,
+      "rms": 1.1209520072496572e-12,
+      "relative_l2": 1.8713883069183992e-09,
+      "exact": false
+    }
+  },
+  "same_rank_restart": {
+    "particles": 25568,
+    "stress": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "V_m_per_s": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "Theta_s": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "q_weak_Pa": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "sigma_n_weak_Pa": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "slip_m": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    }
+  },
+  "repartition_2_to_4": {
+    "particles": 25568,
+    "stress": {
+      "max_abs": 1.7462298274040222e-09,
+      "rms": 2.9828117061897136e-10,
+      "relative_l2": 9.924669008165793e-15,
+      "exact": false
+    },
+    "V_m_per_s": {
+      "max_abs": 1.468245587281624e-23,
+      "rms": 5.617571221317505e-24,
+      "relative_l2": 5.6286083123483065e-15,
+      "exact": false
+    },
+    "Theta_s": {
+      "max_abs": 2.7939677238464355e-09,
+      "rms": 1.1566309796123668e-09,
+      "relative_l2": 1.4455473738109143e-16,
+      "exact": false
+    },
+    "q_weak_Pa": {
+      "max_abs": 1.862645149230957e-08,
+      "rms": 5.999013385825661e-09,
+      "relative_l2": 2.259957874480876e-16,
+      "exact": false
+    },
+    "sigma_n_weak_Pa": {
+      "max_abs": 7.450580596923828e-08,
+      "rms": 1.6772573566282974e-08,
+      "relative_l2": 3.3543813776625167e-16,
+      "exact": false
+    },
+    "slip_m": {
+      "max_abs": 2.927345865710862e-18,
+      "rms": 1.1254974856742243e-18,
+      "relative_l2": 1.4093337722513014e-15,
+      "exact": false
+    }
+  },
+  "rejection_vs_matching_schedule": {
+    "particles": 25568,
+    "stress": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "V_m_per_s": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "Theta_s": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "q_weak_Pa": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "sigma_n_weak_Pa": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "slip_m": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    }
+  },
+  "final_admission_vs_qualified": {
+    "particles": 25568,
+    "stress": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "V_m_per_s": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "Theta_s": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "q_weak_Pa": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "sigma_n_weak_Pa": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    },
+    "slip_m": {
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0,
+      "exact": true
+    }
+  },
+  "cases": {
+    "legacy-retained": {
+      "seconds": 17.15047452699946,
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/baseline/0-aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/runs/legacy-retained/input.prm"
+      ],
+      "binary_sha256": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-optimization/plugins/native/libbp3_restore_150x50.release.so": "c131b621c36c51157f8d95ba570756b06423adc6e2451d3fdb3db34edf4e7f0a"
+      },
+      "input_sha256": "da9b6a3d79a3b4d645176d8dfad1862e2056d8d13d15d06ddbbd04226f7442bc"
+    },
+    "legacy-current": {
+      "seconds": 16.595227969002735,
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/runs/legacy-current/input.prm"
+      ],
+      "binary_sha256": "6300be9b3c24a98458d2143a580069a20648be99264b2b9103311468bf5f7742",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/bp3-plugin/libbp3_restore_150x50.release.so": "7f91ea4cb6316d07e298e1a62e3cd0535c879928f3ff73f0684df2e4d6df061e",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/checks/libobjective_stress_checks.release.so": "eb6995a7b404ebf72ae15635bf9ad41f2ad499e2966628330cf96ca1e7b66cae"
+      },
+      "input_sha256": "46695b96716ea49cc0bed411c43f7924ac1af010beae71d50e595622fc60020c",
+      "recurrence_error_Pa": 2.7973431313930086e-10,
+      "recurrence_relative": 1.3289708538397077e-14,
+      "maximum_angle_rad": 0.0,
+      "publications": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "retries": 0,
+      "energy_max_closure_J_m": 5.684341886080802e-14,
+      "energy_max_error_fraction": 0.0011066344611125852,
+      "energy_last": {
+        "old_J_m": 112.83515046782296,
+        "rotated_J_m": 112.83515046782296,
+        "new_J_m": 485.9930654057006,
+        "exact_source_work_J_m": 373.1579149713706,
+        "viscous_J_m": 3.349301647342736e-08,
+        "endpoint_total_work_J_m": 242.47762880047952,
+        "endpoint_slip_work_J_m": -359.0478218118678,
+        "closure_J_m": -5.684341886080802e-14,
+        "bound_J_m": 1.1050202952883264e-10
+      }
+    },
+    "spin-on-qualified": {
+      "seconds": 19.454405659002077,
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/runs/spin-on-qualified/input.prm"
+      ],
+      "binary_sha256": "6300be9b3c24a98458d2143a580069a20648be99264b2b9103311468bf5f7742",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/bp3-plugin/libbp3_restore_150x50.release.so": "7f91ea4cb6316d07e298e1a62e3cd0535c879928f3ff73f0684df2e4d6df061e",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/checks/libobjective_stress_checks.release.so": "eb6995a7b404ebf72ae15635bf9ad41f2ad499e2966628330cf96ca1e7b66cae"
+      },
+      "input_sha256": "be8eb27fa171943c8edd5c161aace7ef89f8432c84afa212b362494ea86d0de1",
+      "recurrence_error_Pa": 2.831086233832134e-10,
+      "recurrence_relative": 1.3289708538397077e-14,
+      "maximum_angle_rad": 5.203633074985064e-06,
+      "publications": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "retries": 0,
+      "energy_max_closure_J_m": 5.684341886080802e-14,
+      "energy_max_error_fraction": 0.0011066344611125852,
+      "energy_last": {
+        "old_J_m": 112.83515085517925,
+        "rotated_J_m": 112.83515085517925,
+        "new_J_m": 485.9931215714585,
+        "exact_source_work_J_m": 373.1579707497722,
+        "viscous_J_m": 3.3493019361760225e-08,
+        "endpoint_total_work_J_m": 242.47813481714456,
+        "endpoint_slip_work_J_m": -359.0474060034378,
+        "closure_J_m": -5.684341886080802e-14,
+        "bound_J_m": 1.1050204229944746e-10
+      }
+    },
+    "spin-four": {
+      "seconds": 19.704632620007033,
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/runs/spin-four/input.prm"
+      ],
+      "binary_sha256": "6300be9b3c24a98458d2143a580069a20648be99264b2b9103311468bf5f7742",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/bp3-plugin/libbp3_restore_150x50.release.so": "7f91ea4cb6316d07e298e1a62e3cd0535c879928f3ff73f0684df2e4d6df061e",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/checks/libobjective_stress_checks.release.so": "eb6995a7b404ebf72ae15635bf9ad41f2ad499e2966628330cf96ca1e7b66cae"
+      },
+      "input_sha256": "e38db983060e2f48872078750c6a758c0e5bfb79b21115789e4edb27e76742c3",
+      "recurrence_error_Pa": 2.831086233832134e-10,
+      "recurrence_relative": 1.3289708538397077e-14,
+      "maximum_angle_rad": 5.2172056813306905e-06,
+      "publications": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "retries": 0,
+      "energy_max_closure_J_m": 1.7053025658242404e-13,
+      "energy_max_error_fraction": 0.0011066344611125852,
+      "energy_last": {
+        "old_J_m": 248.73654472766958,
+        "rotated_J_m": 248.73654472766958,
+        "new_J_m": 693.1785474445484,
+        "exact_source_work_J_m": 444.442002772333,
+        "viscous_J_m": 5.545437674165424e-08,
+        "endpoint_total_work_J_m": 324.9692893144631,
+        "endpoint_slip_work_J_m": -348.88698550792094,
+        "closure_J_m": -1.7053025658242404e-13,
+        "bound_J_m": 1.5761055408347665e-10
+      }
+    },
+    "spin-restart": {
+      "seconds": 7.880381948001741,
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/runs/spin-restart/input.prm"
+      ],
+      "binary_sha256": "6300be9b3c24a98458d2143a580069a20648be99264b2b9103311468bf5f7742",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/bp3-plugin/libbp3_restore_150x50.release.so": "7f91ea4cb6316d07e298e1a62e3cd0535c879928f3ff73f0684df2e4d6df061e",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/checks/libobjective_stress_checks.release.so": "eb6995a7b404ebf72ae15635bf9ad41f2ad499e2966628330cf96ca1e7b66cae"
+      },
+      "input_sha256": "bdd945edfc751c0041ccaec53526f3bd6cb281a03f49e0f01f579e3ae006c9ef",
+      "recurrence_error_Pa": 2.6031257322754127e-10,
+      "recurrence_relative": 3.653759197105205e-15,
+      "maximum_angle_rad": 5.2172056813306905e-06,
+      "publications": [
+        1
+      ],
+      "retries": 0,
+      "energy_max_closure_J_m": 1.7053025658242404e-13,
+      "energy_max_error_fraction": 0.0010819723182503669,
+      "energy_last": {
+        "old_J_m": 248.73654472766958,
+        "rotated_J_m": 248.73654472766958,
+        "new_J_m": 693.1785474445484,
+        "exact_source_work_J_m": 444.442002772333,
+        "viscous_J_m": 5.545437674165424e-08,
+        "endpoint_total_work_J_m": 324.9692893144631,
+        "endpoint_slip_work_J_m": -348.88698550792094,
+        "closure_J_m": -1.7053025658242404e-13,
+        "bound_J_m": 1.5761055408347665e-10
+      }
+    },
+    "spin-repartition": {
+      "seconds": 5.375413314999605,
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "4",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/runs/spin-repartition/input.prm"
+      ],
+      "binary_sha256": "6300be9b3c24a98458d2143a580069a20648be99264b2b9103311468bf5f7742",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/bp3-plugin/libbp3_restore_150x50.release.so": "7f91ea4cb6316d07e298e1a62e3cd0535c879928f3ff73f0684df2e4d6df061e",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/checks/libobjective_stress_checks.release.so": "eb6995a7b404ebf72ae15635bf9ad41f2ad499e2966628330cf96ca1e7b66cae"
+      },
+      "input_sha256": "533e7be93874f1bd39ec76e4f85e2bead9bdcf33c99cb13b1a1d0ebe5f637c25",
+      "recurrence_error_Pa": 3.134578470568233e-10,
+      "recurrence_relative": 3.653759197105202e-15,
+      "maximum_angle_rad": 5.2172056813306905e-06,
+      "publications": [
+        1
+      ],
+      "retries": 0,
+      "energy_max_closure_J_m": 1.1368683772161603e-13,
+      "energy_max_error_fraction": 0.0007213148788335805,
+      "energy_last": {
+        "old_J_m": 248.73654472766958,
+        "rotated_J_m": 248.73654472766958,
+        "new_J_m": 693.178547444546,
+        "exact_source_work_J_m": 444.4420027723307,
+        "viscous_J_m": 5.545437674165411e-08,
+        "endpoint_total_work_J_m": 324.9692893144583,
+        "endpoint_slip_work_J_m": -348.88698550792213,
+        "closure_J_m": -1.1368683772161603e-13,
+        "bound_J_m": 1.5761055408347608e-10
+      }
+    },
+    "spin-rejection": {
+      "seconds": 18.14967767000053,
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/runs/spin-rejection/input.prm"
+      ],
+      "binary_sha256": "6300be9b3c24a98458d2143a580069a20648be99264b2b9103311468bf5f7742",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/bp3-plugin/libbp3_restore_150x50.release.so": "7f91ea4cb6316d07e298e1a62e3cd0535c879928f3ff73f0684df2e4d6df061e",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/checks/libobjective_stress_checks.release.so": "eb6995a7b404ebf72ae15635bf9ad41f2ad499e2966628330cf96ca1e7b66cae"
+      },
+      "input_sha256": "12222b69089a6b8ee6aa5d9a06ef1eefa23842f0af5e7904471d5b3d6535d709",
+      "recurrence_error_Pa": 2.858997716159283e-10,
+      "recurrence_relative": 1.3289708538397077e-14,
+      "maximum_angle_rad": 5.166468172830565e-06,
+      "publications": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "retries": 1,
+      "energy_max_closure_J_m": 5.684341886080802e-14,
+      "energy_max_error_fraction": 0.0011066344611125852,
+      "energy_last": {
+        "old_J_m": 62.93113598467642,
+        "rotated_J_m": 62.93113598467642,
+        "new_J_m": 375.0523162156826,
+        "exact_source_work_J_m": 312.1211802535859,
+        "viscous_J_m": 2.2579694623025568e-08,
+        "endpoint_total_work_J_m": 186.833341970043,
+        "endpoint_slip_work_J_m": -332.26036404085664,
+        "closure_J_m": 5.684341886080802e-14,
+        "bound_J_m": 8.527702362659109e-11
+      }
+    },
+    "spin-retry-control": {
+      "seconds": 15.096835979005846,
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/runs/spin-retry-control/input.prm"
+      ],
+      "binary_sha256": "6300be9b3c24a98458d2143a580069a20648be99264b2b9103311468bf5f7742",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/bp3-plugin/libbp3_restore_150x50.release.so": "7f91ea4cb6316d07e298e1a62e3cd0535c879928f3ff73f0684df2e4d6df061e",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/checks/libobjective_stress_checks.release.so": "eb6995a7b404ebf72ae15635bf9ad41f2ad499e2966628330cf96ca1e7b66cae"
+      },
+      "input_sha256": "4c46bc53d2d78766da31acf9973d9fb32abbf339c8b4368c25b65ada464cdd21",
+      "recurrence_error_Pa": 2.858997716159283e-10,
+      "recurrence_relative": 1.3289708538397077e-14,
+      "maximum_angle_rad": 5.166468172830565e-06,
+      "publications": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "retries": 0,
+      "energy_max_closure_J_m": 5.684341886080802e-14,
+      "energy_max_error_fraction": 0.0011066344611125852,
+      "energy_last": {
+        "old_J_m": 62.93113598467642,
+        "rotated_J_m": 62.93113598467642,
+        "new_J_m": 375.0523162156826,
+        "exact_source_work_J_m": 312.1211802535859,
+        "viscous_J_m": 2.2579694623025568e-08,
+        "endpoint_total_work_J_m": 186.833341970043,
+        "endpoint_slip_work_J_m": -332.26036404085664,
+        "closure_J_m": 5.684341886080802e-14,
+        "bound_J_m": 8.527702362659109e-11
+      }
+    },
+    "spin-final-admission": {
+      "seconds": 15.495351680998283,
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/runs/spin-final-admission/input.prm"
+      ],
+      "binary_sha256": "25d905a6057972826dbda6d8c052aa5aabf3b5f43b928d00a8f33f1e943a0379",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/bp3-plugin/libbp3_restore_150x50.release.so": "7f91ea4cb6316d07e298e1a62e3cd0535c879928f3ff73f0684df2e4d6df061e",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/objective-stress/checks/libobjective_stress_checks.release.so": "eb6995a7b404ebf72ae15635bf9ad41f2ad499e2966628330cf96ca1e7b66cae"
+      },
+      "input_sha256": "4a42eedd9e9906b7ba556bec0c98fd12bad34ee3677bd4723cdfda84315f94c8",
+      "recurrence_error_Pa": 2.831086233832134e-10,
+      "recurrence_relative": 1.3289708538397077e-14,
+      "maximum_angle_rad": 5.203633074985064e-06,
+      "publications": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "retries": 0,
+      "energy_max_closure_J_m": 5.684341886080802e-14,
+      "energy_max_error_fraction": 0.0011066344611125852,
+      "energy_last": {
+        "old_J_m": 112.83515085517925,
+        "rotated_J_m": 112.83515085517925,
+        "new_J_m": 485.9931215714585,
+        "exact_source_work_J_m": 373.1579707497722,
+        "viscous_J_m": 3.3493019361760225e-08,
+        "endpoint_total_work_J_m": 242.47813481714456,
+        "endpoint_slip_work_J_m": -359.0474060034378,
+        "closure_J_m": -5.684341886080802e-14,
+        "bound_J_m": 1.1050204229944746e-10
+      }
+    }
+  },
+  "residual_audit": {
+    "frozen_load_change": 0.0,
+    "affine_error_max": 4.909702718786563e-07,
+    "represented_action_error_max": 5.528144581786624e-08
+  },
+  "branch_scales": {
+    "maximum_tau_over_G": 6.910479679171247e-06,
+    "maximum_spin_times_Maxwell_time": 81210.02454280476,
+    "summed_maximum_rotation_upper_bound_rad": 1.5536569420646192e-05,
+    "maximum_branch_rate_norm_bounds_per_s": [
+      5.855842467052157e-12,
+      2.869655592991107e-11
+    ],
+    "maximum_branch_rate_times_Maxwell_time_bounds": [
+      18277.734175923582,
+      89570.0360797917
+    ],
+    "integrated_branch_rate_norm_upper_bound": 1.0267147270759256e-05
+  }
+}

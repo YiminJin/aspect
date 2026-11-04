@@ -1,3 +1,327 @@
+# Bounded profile source audit — 3 November 2026
+
+[Implementation/comparison report](BOUNDED_PROFILE_TRANSPORT_REPORT.md). The
+worktree and incoming dirty source are preserved; the entry manifest records
+actual source and core/checker identities before any rebuild.
+
+- `dg_material_profile.cc`: extracts the existing Q1 pullback into its own
+  material-state helper and adds the opt-in donor-bounded MacCormack correction.
+  Native remote lookup, donor-cell bounds and return-coverage fallback operate
+  on accepted phase; the result remains the transported physical obstacle.
+- `dg_material.cc`: calls that helper in the existing transaction and adds
+  explicit frozen accepted T and R+P B inflow. No source/rotation/reaction,
+  physical bound, map ownership or publication ordering changes.
+- `phase_field_fault.cc` and header: two restricted nondefault selectors and
+  restart identity suffix. Original Q1/zero defaults and identity remain.
+- `manager.cc`/header: expose existing full-normal coverage policy and admit it
+  for finite interior endpoints on the transported mature route. No tangential
+  extension, changed material width map or cohesive admission. `dg_material.cc`
+  requires this coverage for either new nondefault option; `dg_accepted.cc`
+  identifies it in schema7. Default identity is unchanged.
+- `run_material_native.py`, `run_bounded_profile_matrix.py`,
+  `run_full_support_profile.py`: pure-translation
+  mechanical data, method/inflow controls, exact per-run provenance, bounded
+  space/time and lifecycle fixtures. A shared lock serializes all MPI runs.
+- `compare_bounded_profile.py`, `check_bounded_prescribed.py`,
+  `check_bounded_lifecycle.py`: independent profile replay/bounds, physical
+  localization, complete coupled fields, work/flux, cost and lifecycle checks.
+- The separate `transported_material_energy` checker adds pressure exports
+  only; its independent `diagnose_bounded_energy.py` accounts for background,
+  friction, radiation, pressure and face work. Default checker exports retain
+  their original columns. No diagnostic modifies the accepted solve.
+- The first build's unsupported Point ordering was fixed with a lexicographic
+  comparator. Its failed log is retained. A sandbox-blocked MPI launch is
+  retained separately; the live rerun uses the authorized local MPI interface.
+- The initial truncated-support matrix is retained, including its source/core
+  pair. The corrected `bpf-*` matrix uses full normal support; its first old-guard
+  rejection is retained. Final inputs reject clipped support or incompatible
+  checkpoint identities. Early full-support checkpoints lacking this identity
+  are not imported. A representable end-clock adjustment in the runner avoids
+  a roundoff-only terminal interval; one already emitted tiny step is retained
+  and explicitly excluded from physical error reduction.
+
+Final qualification: 28 corrected full-support accuracy runs, eight lifecycle
+runs and two surface-spacing controls pass their native checks. The final unit
+suite passes 183,170 assertions/152 cases. Independent replay and coupled
+reductions are in the evidence index; full-normal loss is zero, profile error
+falls 4.70% to 2.88% at 32² in all four coefficient/direction cases, and rejection/
+restart agree within 8.89e-15. The raw face-work defect does not converge in the
+tested matrix; it is not substituted for weak mechanical work. Endpoint energy
+and surface resolution remain accuracy limits. The bounded option is retained
+for the declared experiment, with no change to defaults or production claim.
+The final provenance manifest records exact source recovery, all binary
+versions, and protected-data preservation. The reduction-only CLI shadowing
+bug was corrected; its failed log remains, and no native run was repeated for it.
+
+Historical audit entries below refer to their own recorded binaries/source.
+They do not assert that the current implementation is still hash-identical to
+the isolation-only entry.
+
+---
+
+# Boundary/profile isolation source audit — 3 November 2026
+
+[Report](BOUNDARY_PROFILE_ISOLATION_REPORT.md). All928 incoming native source
+files, the core and four existing checker libraries are hash-identical to entry.
+No production constitutive, boundary, remapping or solver algorithm changed.
+
+- `transported_objective/native/boundary_profile_checks.h`: alternative friend
+  diagnostic calls the actual native DG transport/projector with prescribed
+  translation and independently specified polynomial/compact inflow. Independent
+  volume energy and face flux/jump integration checks the native algebraic RHS.
+  Complete accepted snapshots must remain unchanged after every scratch matrix.
+- `native/CMakeLists.txt`, `material_checks.cc`: a separate
+  `transported_isolation_native` target enables the checker only through its
+  private compile definition. Existing checker binaries remain preserved.
+- `run_material_native.py`: optional fixture-only initial profile and isolation
+  checker selection; defaults unchanged. Unique outputs, hashes and sequential
+  two-rank runs remain. No old checkpoint is imported by the experiment.
+- `isolate_profile_projection.py`: independent exact-translation Q1 controls,
+  signed representation/remap cross term, analytic variance check and replay of
+  actual native velocity/profile exports. Point-lookup tolerance is explicit.
+- `isolate_tensor_defect.py`: spatial error partition and independent Gauss8
+  localization projections; retains signed cross terms and labels the combined
+  transport/reference/rotation remainder without inventing a physical source.
+- `assess_boundary_transport.py`: both actual-boundary and extended references,
+  energy flux versus numerical dissipation, spatial orders and signed temporal
+  remainders. Five native runs, not another full unit-suite or production run.
+
+---
+
+# Coupled Stage C source audit — 3 November 2026
+
+[Measured report](TRANSPORTED_OBJECTIVE_STAGE_C_COUPLED_REPORT.md) and
+[diagnosis](STAGE_C_COHESIVE_DIAGNOSIS.md) describe the current selected scope.
+HEAD remains27178813cebd471b93a7a9308f41215b71b4a20b plus retained dirty source.
+
+- New `dg_material.cc`: accepted-state DG transport of T and R+P B, same accepted
+  FE velocity for labelled geometry and Q1 physical profile/obstacle, geometric
+  support map, rebuilt normalization, complete finite rotation and transactional
+  manager/FE/particle-property rollback. Restart normalization validates the
+  loaded accepted profile before any transport.
+- New `dg_material_reaction.cc`: endpoint spatial bulk/surface coefficients,
+  complete projected reaction products and constitutive correction. Native
+  mechanics uses a frozen correction inside each solve; the outer iteration
+  resolves it before the unchanged final residual/KKT/publication gate.
+- `phase_field_fault.cc`, its header and `fe_strain_internal.h`: separate opt-in
+  material selector and parsed initial profile/positive viscosity multiplier;
+  restricted growth-disabled configuration; complete transaction owners.
+- `constitutive.cc`, `fe_strain.cc`, `history.cc`: current-position bulk/surface
+  eta, mapped phase/normalization, correction in physical stress, full projected
+  candidate and strict point publication check. Constant/default paths remain.
+- `dg_accepted.cc`: schema7 complete T/R/phase/geometry/publication state and
+  law/material/friction/phase identity; no old-to-new conversion. Legacy schema4
+  and stationary schema6 keep their meanings.
+- Simulator `core.cc`, `phase_field.cc`: stage before mechanics, physical mapped
+  obstacle with growth off, publish once only after outer acceptance; restore
+  on exception, completed-step rejection or recoverable nonlinear failure.
+- Surface system and reconstructed-fault assembler: explicit derived-cache
+  invalidation preserves persistent work-measure settings; B/work/residual use
+  the same moved geometry and coefficient conventions.
+- Native solver: converged heterogeneous outer correction; the tiny nonzero-V
+  diagnostic now accounts for subtraction of full A*x residuals using the
+  existing absolute-row precision bound. Physical solver tolerances unchanged.
+- `cohesive_evolution.h`: optional signed/backtrack trace only; exact Newton
+  direction/residual/acceptance unchanged. Diagnoses force-merit failure before
+  contact/admission in the existing localized tip fixture.
+- `transported_objective/native/material_checks.cc` and Python runners/reducers:
+  independent export reconstruction/characteristic/source tests, complete-state
+  retry comparison, MPI restart and durable inputs/binary identities. Diagnostic
+  samples remain stationary; this does not remove all particle dependencies.
+
+No deformed cohesive shape law, production trajectory or general material
+resampling/AMR is implemented by this delta. Historical source audits below
+retain their original scope and are superseded where the new branch is explicit.
+
+---
+
+# Stage C native source audit — 3 November 2026
+
+Entry HEAD27178813cebd471b93a7a9308f41215b71b4a20b plus retained dirty work.
+[Report](TRANSPORTED_OBJECTIVE_STAGE_C_REPORT.md) and
+[assessment](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/stage_c/assessment.json)
+record enabled scope, commands/hashes, pass/fail criteria and remaining work.
+
+- `manager.h`, `manager.cc`, `fault.h`: `stage_material_motion` validates a
+  private same-label geometry/support candidate, retains all generic histories
+  and rates, advances geometry generations and invalidates association caches.
+  Native archive and nonthrowing swap provide container publication/rollback.
+  Boundary-completed owners, nonlinear trials, birth and resampling are rejected.
+  This is a component of the pending complete material transaction; no mature
+  fixed-geometry admission guard is bypassed. Independent translation/shear,
+  history persistence, invalid-trial and archive tests are in
+  `reconstructed_fault_material_motion.cc`.
+
+- `dg_history_internal.h`, `dg_history.cc`: optional complete R attached to T,
+  shared DGQ2 space, reconstructed tau=T-R-B; native source and publication
+  allowance include R. Default owner/layout/math stays on its legacy branch.
+- `dg_objective.cc`, `fe_strain_internal.h`, `fe_strain.cc`, `history.cc`:
+  parent/step/actual-dt finite-rotation anchors and post-commit observer selection;
+  accepted T/R stays immutable until the existing outer publication gate.
+- `dg_accepted.cc`: version6 CellId T/R records and restored clocks/scalars;
+  legacy version4 and old-law registry checks retained. No R=0 conversion.
+- `dg_objective_transport.cc`, `dg_transport.cc`, internal `DGTransport`:
+  owned-row/ghost DGQ2 SSPRK3, Cartesian hanging-face patches, explicit inflow,
+  optional spatial relaxation and global CFL. Scratch-only: no transported
+  native geometry or accepted surface/profile is implied by this operator.
+- `dg_transfer.cc`, `core.cc`: transfer T and R together; reset derived anchors
+  and mesh caches, restore accepted normalization after invalidation. Physical
+  sampling verifies650->2600->674cell transfer and a subsequent4rank restart.
+- `reconstructed_fault_stokes.cc` solver: only the optional affine diagnostic
+  now includes base A*x roundoff as well as direction roundoff. The inherited
+  failure reproduces in the protected pre-C core. Solver tolerances unchanged.
+- `cohesive_bulk_history.cc`, new `cohesive_cut_history.cc` and its header:
+  formed-piece/side independent Q2 tensor state, stable complete physical
+  rotation, exact native remainder and BE source restriction. Cut partition,
+  local basis and coefficients checkpoint with the physical cell records.
+- `cohesive_objective.cc`, `cohesive_system.cc`, `cohesive_advance.cc`:
+  accepted regular total gradient includes lifting, complete A+H rotates before
+  BE, numerical projection energy is measured independently, and legacy law
+  signature/default stays unchanged. Failed uncut runtime option is rejected.
+- `cohesive_output.cc`: sided tensor evaluation matches the existing explicit
+  sided lifting. Temporary candidate tails do not own cut history partitions.
+- Native fixtures/checker DSOs and reducer under `transported_objective/`, plus
+  extended `cohesive_rsf_native/checks.cc`, verify actual owners/operators and
+  independent component references. Matching DSOs must be rebuilt after layout
+  changes; protected old binary/plugin pairs remain available.
+
+Mature material motion/profile/ALE and coupled variable-coefficient reaction
+remain unfinished implementation work. Deformed cohesive shape work is a
+separate governing-energy gate. Tip-admission line search and fracture-relative
+physical accuracy still fail. No source label qualifies full transported physics.
+
+---
+
+# Stage B transported history-space closure — 2 November 2026
+
+`moving_model.py` defines exact material maps, prescribed curve/profile/surface
+memory, declared auxiliary-rate projection and independent characteristic tensor
+references. `stage_b_moving.py` adds Cartesian DGQ2 volume/upwind transport,
+local-rate multiplication and independent tau/T/R evolution. The weak form is
+cross-checked on constant/linear fields against −v·grad, following PF4's
+existing volume/face structure. No ASPECT owner, parameter or guard is changed.
+`screen_moving_spaces.py` checks exact P1/Q2 residual capacity; it is not a P1
+transport implementation. `qualify_stage_b.py` consolidates measured criteria,
+material-profile pullback and the selected DGQ2 residual. The [report](TRANSPORTED_OBJECTIVE_STAGE_B_MOVING_REPORT.md)
+records all20 numerical +8 selection/profile checks, representation costs and
+native limitations. RK4 is only the spatial-reference fixture's integrator;
+the selected native finite-rotation lagged Lie convention remains unchanged.
+Source/header/unit files and prior B1 evidence verify unchanged. Stage C must
+integrate the complete history/source/tangent/acceptance/restart path.
+
+---
+
+# Stage B fixed-profile history-space fixture — 2 November 2026
+
+`transported_objective/stage_b_fixed.py` adds a standalone Cartesian nine-mode
+Q2 reaction fixture, without changing ASPECT source or selectors. It evolves
+T/R and an independent physical DG tensor, using the complete analytic B in
+the projected commutator source. A closed direct component solution is checked
+against separately coded real-component RK4; independent R-source integrals
+close the continuous transformation to5.99e−16G. Exact semidiscrete time isolates
+spatial projection; actual finite-rotation Lie steps isolate first-order time
+error. Reports include zz, tractions, storage, residual/strain projection and
+coefficient costs. [Measured report](TRANSPORTED_OBJECTIVE_STAGE_B_FIXED_REPORT.md)
+retains the failed q6 candidate and selected q8 qualification. No native history
+owner/schema or current guard changed. Transport, heterogeneous eta and coupled
+mechanics/lifecycle remain unqualified by this fixture.
+
+---
+
+# Transported objective Stage A — 2 November 2026
+
+Source audited at HEAD27178813cebd471b93a7a9308f41215b71b4a20b with the
+retained objective-spin dirty delta. Mature constitutive/DG/transport/normalization
+and cohesive native-remainder/lifting/point/geometry/acceptance/restart owners
+were inspected. The [existing maps](IMPLEMENTATION_MAPS.md#transported-extension-state-contract-stage-a)
+now distinguish actual owners from proposed new residual/geometry schema state.
+[Spec](TRANSPORTED_OBJECTIVE_SPEC.md) derives full material and surface ALE laws,
+local/projected-rate mismatch, gradient/projection and geometric-work terms.
+The new standalone Stage A checker verifies equations and counterexamples;
+640 exact rational tensor identities pass. It is not a native transport test.
+No C++/header/unit source was changed or rebuilt. All current admission guards
+remain. [Report and preservation](TRANSPORTED_OBJECTIVE_REPORT.md) state the
+cohesive shape-force gate and exact scope of each result.
+
+---
+
+# BP3 log-statistics plotting — 31 October 2026
+
+Visualization revised to one four-panel figure with unified histories and
+combined wall-time-weighted timer bars (61.1% condensed solves,13.6% checkpoint
+writing). Per-log accounting remains in the report and data sidecars only.
+
+`plot_bp3_computing_statistics.py` reads only the two supplied invocation logs.
+It keeps attempts separate, selects explicit acceptance, uses each last cumulative
+timer table for section fractions, and differences integer wall clocks only
+within an invocation. Independent timer bars avoid an unjustified pie partition.
+Raw reductions and input hashes accompany PNG/vector-PDF figures. Three focused
+parser checks pass. Solver source and retained histories are unchanged; local
+residual-printing source was inspected for interpretation, not asserted to
+identify the remote executable. See [report](BP3_COMPUTING_STATISTICS_REPORT.md).
+
+---
+
+# Server cumulative-slip plotting — 31 October 2026
+
+`plot_bp3_cumulative_slip.py` reuses the existing BP3 scheduled-profile reader
+and adds chronological restart-segment merging, explicit overlap/geometry
+checks, and time-target selection without interpolation. Colour uses full-fault
+saved instantaneous V; cropping to0–40 km does not alter regime classification.
+Near-target recorded states require a same-regime gap no wider than the chosen
+interval. Unsupported times are omitted, and additional regime/end states are
+marked dashed. Original signed cumulative slip is retained, not reintegrated.
+
+Figure PNG/PDF, sampling plot and exact-time/hash CSV/JSON sidecars are under
+`build-particle-free/bp3-cumulative-slip/`. Five targeted data tests pass;
+all220 original server-export hashes match the prior review. No existing plot
+reader, C++ source, solver binary, checkpoint or production input was modified.
+The prior VTU count is corrected to8 in the BP3 review. See
+[the report](BP3_CUMULATIVE_SLIP_REPORT.md) for cadence, timing errors and limits.
+
+---
+
+# Objective-stress and BP3 research review — 30 October 2026
+
+Source entry `27178813cebd471b93a7a9308f41215b71b4a20b`, no tracked edits at
+entry; current selected delta and binary hashes are indexed in
+[objective-stress evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/objective_stress/README.md).
+[Maps](IMPLEMENTATION_MAPS.md) are the current formulation/owner/energy table;
+[report](OBJECTIVE_STRESS_REPORT.md) contains derivation and numerical results.
+
+- The manuscript explicitly chooses Jaumann total material spin. Source uses
+  Lij=partial_j v_i. Neither slip spin subtraction nor another objective rate
+  is implied. BP3 background traction scalars do not determine a full prestress.
+- One default-off option rotates **physical particle branch stress**, at fixed
+  mesh/phase/fault with constant matched G/eta and stationary samples. New
+  `objective_stress.h` integrates the frozen spin with finite congruence.
+  `constitutive.cc` then retains beta/eta_ve and endpoint forcing. This is a
+  first-order Lie split with explicit accepted-velocity spin lag.
+- The assembler, surface bulk-work/particle/line diagnostics and maintained BP3
+  observer receive the same accepted gradient. Current v/V/p derivatives remain
+  those of the declared frozen-spin residual. Trial/publication diagnostics
+  retain actual old tensors and add rotated operands only in enabled mode.
+- `solver/reconstructed_fault_stokes.cc` and `core.cc` extend the existing
+  deferred endpoint gate to rotated particles. Completed rejected trials do
+  not commit stress/age/slip or emit accepted publications. Retries and restart
+  are checked against direct uninterrupted physical fields. Versioned registry
+  provenance and the existing BP3 fingerprint reject law changes on restart.
+- Mature DG's T−2chi Z S reconstruction would acquire Qgeo=[W,2chi Z S] if T
+  alone rotated. The missing residual's objective equation is stated explicitly;
+  DG/FE selectors reject the spin option. New cohesive native remainder/lifting
+  histories and BE energy/pressure work are separately audited and not enabled.
+- Two configured cores build, with original executable/plugin copies protected.
+  Final Voro++ unit suite183073 assertions/148 cases passes. Analytic and native
+  evidence covers scoped rotation/forcing/energy, pressure residual, rejection,
+  restart and 2→4 transfer. Small paired sensitivity does not qualify production
+  DG, a complete energy budget, transport or finite-strain physical validity.
+- Supplied remote outputs now establish accepted4237 and a scheduler stop,
+  not a completed event. All original accuracy failures and the cleanup's stated
+  field-data losses remain. No production input, checkpoint, runtime library,
+  solver tolerance, friction coefficient or localization rule was changed.
+
+---
+
 # Cleanup and research handoff — 30 October 2026
 
 [Cleanup report](CLEANUP_REPORT.md) · [Research handoff](RESEARCH_HANDOFF.md).

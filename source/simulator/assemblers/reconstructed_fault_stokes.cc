@@ -103,6 +103,7 @@ namespace aspect
 
             typename MaterialModel::PhaseFieldFault<dim>::
               ReconstructedFaultBulkPointInputs inputs;
+            inputs.position=fe_values.quadrature_point(q);
             inputs.fault_index = associations[q].fault_index;
             inputs.segment_index = associations[q].segment_index;
             inputs.xi = associations[q].xi;
@@ -541,6 +542,10 @@ namespace aspect
       const FiniteElement<dim> &fe = this->get_fe();
       const auto *history=phase_field_fault.uses_stationary_mature_dg_optimizations()
         ? &phase_field_fault.retained_dg_qp_stress(scratch.cell->id(),quadrature,scratch.finite_element_values.get_quadrature_points()) : nullptr;
+      std::vector<Tensor<2,dim>> history_gradients(quadrature.size());
+      if (phase_field_fault.uses_jaumann_particle_stress())
+        scratch.finite_element_values[intro.extractors.velocities].get_function_gradients(
+          this->get_old_solution(),history_gradients);
       for (unsigned int q = 0; q < quadrature.size(); ++q)
         {
           SymmetricTensor<2,dim> old_stress;
@@ -556,7 +561,7 @@ namespace aspect
           for (unsigned int c=0; c<composition.size(); ++c)
             composition[c] = compositions[c][q];
           SymmetricTensor<2,dim> frozen_stress = -phase_field_fault.evaluate_frozen_maxwell_stress(
-            temperatures[q], composition, old_stress);
+            temperatures[q], composition, old_stress, &history_gradients[q],&scratch.finite_element_values.quadrature_point(q));
           SymmetricTensor<2,dim> slip_stress;
           if (associations[q].active)
             {
@@ -599,6 +604,9 @@ namespace aspect
       return B_linearization_rebuild_count;
     }
 
+
+    template<int dim> void ReconstructedFaultStokes<dim>::invalidate_material_geometry()
+    { B_linearization.reset();++B_linearization_rebuild_count; }
 
 #define INSTANTIATE(dim) template class ReconstructedFaultStokes<dim>;
     ASPECT_INSTANTIATE(INSTANTIATE)

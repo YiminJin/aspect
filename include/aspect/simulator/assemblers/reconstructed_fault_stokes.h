@@ -46,6 +46,7 @@ namespace aspect
 
         /** Freeze 2 eta_ve chi S at every associated Stokes quadrature point. */
         void linearize_B(const LinearAlgebra::BlockVector &bulk_linearization_point);
+        void invalidate_material_geometry();
 
         /** Overwrite @p result with the complete fault-induced bulk residual. */
         void evaluate_slip_dependent_bulk_residual(

@@ -53,6 +53,9 @@ namespace aspect
       std::shared_ptr<Space> space;
       // In 2D these are xx, yy, xy in Pa. zz=-(xx+yy), never zero.
       std::array<LinearAlgebra::Vector,SymmetricTensor<2,dim>::n_independent_components> trial_stress;
+      // Complete independent localized residual, present only for the opt-in
+      // objective DG law. It shares the tensor space; no recursive history.
+      std::shared_ptr<DGHistory> residual;
       /** Scratch forward-error bounds for the native source in a trial only.
        * Not constitutive uncertainty, persistent history, or a limiter. */
       struct SourceRoundoff
@@ -64,8 +67,9 @@ namespace aspect
     };
 
 
-    /** Fixed serial spatial operator; no accepted state or caller velocity is
-     * mutated. Quadrature loads already include the local inverse mass. */
+    /** Scratch DG transport: retained serial diagnostic and owned-row variant.
+     * No accepted state or caller velocity is mutated. Quadrature loads already
+     * include the local inverse mass. */
     template <int dim> struct PhaseFieldFault<dim>::DGTransport
     {
       struct Cell
@@ -79,15 +83,55 @@ namespace aspect
         Point<dim> point;
         std::vector<types::global_dof_index> indices;
         Vector<double> weights;
+        std::vector<double> trial_shape;
       };
       std::shared_ptr<typename DGHistory::Space> space;
       std::vector<Cell> cells;
+      struct Block
+      {
+        std::vector<types::global_dof_index> rows,columns;
+        FullMatrix<double> values;
+      };
+      // Locally owned rows and readable neighbor ghosts. Unlike the retained
+      // serial diagnostic matrix this never allocates a global dense vector.
+      bool distributed=false;
+      std::vector<Block> blocks;
       SparsityPattern sparsity;
       SparseMatrix<double> matrix,divergence_correction;
       std::vector<Load> source,inflow;
       std::vector<Point<dim>> mesh_vertices;
       unsigned int quadrature_order;
       double inverse_advection_time=0.,relaxation_rate=0.;
+      bool heterogeneous_relaxation=false;
+      /** Add a frozen spatial Maxwell rate to the distributed volume operator.
+       * This is scratch discretization data, never accepted constitutive state.
+       * Sampling is physical, and the CFL includes the global maximum rate. */
+      void add_relaxation(const std::function<double(const Point<dim> &)> &rate,const MPI_Comm comm)
+      {
+        AssertThrow(distributed && relaxation_rate==0. && !heterogeneous_relaxation,
+                    ExcMessage("Spatial relaxation may be attached once to an unrelaxed distributed DG operator."));
+        double maximum=0.;
+        std::map<types::global_dof_index,std::vector<const Load *>> samples;
+        for(const auto &load:source)samples[load.indices.front()].push_back(&load);
+        for(const auto &cell:cells)
+          {
+            FullMatrix<double> values(cell.indices.size(),cell.indices.size());
+            for(const auto p:samples.at(cell.indices.front()))
+                {
+                  const auto &load=*p;
+                  const double r=rate(load.point);
+                  AssertThrow(std::isfinite(r) && r>=0. && load.trial_shape.size()==cell.indices.size(),
+                              ExcMessage("Spatial Maxwell rate requires finite nonnegative values and complete volume samples."));
+                  maximum=std::max(maximum,r);
+                  for(unsigned int i=0;i<cell.indices.size();++i)
+                    for(unsigned int j=0;j<cell.indices.size();++j)
+                      values(i,j)-=r*load.weights[i]*load.trial_shape[j];
+                }
+            blocks.push_back({cell.indices,cell.indices,std::move(values)});
+          }
+        relaxation_rate=Utilities::MPI::max(maximum,comm);
+        heterogeneous_relaxation=true;
+      }
     };
 
     /** Fixed affine Cartesian stencil for the optional nonpublishing experiment.

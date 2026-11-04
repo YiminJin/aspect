@@ -1,0 +1,1175 @@
+{
+  "captured_utc": "2026-11-03T23:00:37.329695+00:00",
+  "root": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "branch": "pf-rsf-particle-free",
+  "revision": "27178813cebd471b93a7a9308f41215b71b4a20b",
+  "scope": "Narrowed Stage C mature material transaction and heterogeneous coupling; cohesive energy/tip diagnosis.",
+  "stage_c_complete": false,
+  "production_ready": false,
+  "source_identity": "HEAD plus retained dirty source and exact recovery archive; not HEAD alone.",
+  "native_source_count": 928,
+  "incoming_source_count": 926,
+  "changed_incoming_source": [
+    "source/material_model/phase_field_fault.cc",
+    "source/simulator/core.cc",
+    "source/simulator/phase_field.cc",
+    "source/reconstructed_fault/surface_system.cc",
+    "source/simulator/assemblers/reconstructed_fault_stokes.cc",
+    "source/simulator/solver/reconstructed_fault_stokes.cc",
+    "source/particle/property/interface.cc",
+    "source/material_model/phase_field_fault/constitutive.cc",
+    "source/material_model/phase_field_fault/history.cc",
+    "source/material_model/phase_field_fault/fe_strain.cc",
+    "source/material_model/phase_field_fault/dg_accepted.cc",
+    "include/aspect/material_model/phase_field_fault.h",
+    "include/aspect/reconstructed_fault/manager.h",
+    "include/aspect/reconstructed_fault/surface_system.h",
+    "include/aspect/reconstructed_fault/cohesive_evolution.h",
+    "include/aspect/simulator/assemblers/reconstructed_fault_stokes.h",
+    "include/aspect/material_model/phase_field_fault/fe_strain_internal.h"
+  ],
+  "new_native_source": [
+    "source/material_model/phase_field_fault/dg_material.cc",
+    "source/material_model/phase_field_fault/dg_material_reaction.cc"
+  ],
+  "source_manifest_sha256": "fa5110711b97a26187e5e16e9b7ed224fbdd0f70d0612a7c209d36142bb85759",
+  "source_recovery_files": 1142,
+  "source_recovery_sha256": "67709e38a46398ba22514a084f9c64b88adfa86e2d01c3d4815a640fae3da3c5",
+  "artifacts": {
+    "build-particle-free/native/aspect-release": {
+      "sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "bytes": 49168648,
+      "runtime_resolves": true
+    },
+    "build-particle-free/transported-objective/stage-c/checks/libtransported_material_native.release.so": {
+      "sha256": "c86534ff4dd082fbd78eefe09eb032a8fb06f00b8660516e6a406badd10700cd",
+      "bytes": 472248,
+      "runtime_resolves": true
+    },
+    "build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": {
+      "sha256": "e99d9422de0a975f29d437a0f8de21db9a25af619a2a17ce7e620a0bc2133f18",
+      "bytes": 1051224,
+      "runtime_resolves": true
+    },
+    "build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": {
+      "sha256": "b1375b799407809da445e604af751ace4762b545b4402f9fbba998e64d3a0da8",
+      "bytes": 3197760,
+      "runtime_resolves": true
+    },
+    "build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": {
+      "sha256": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db",
+      "bytes": 569216,
+      "runtime_resolves": true
+    }
+  },
+  "cases": {
+    "connected-smoke": {
+      "arguments": {
+        "label": "connected-smoke",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.1,
+        "schedule": null,
+        "level": 3,
+        "eta": "1",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/connected-smoke/input.prm"
+      ],
+      "core_sha256": "7ad5fa95d70e0ec8ec8e60a574cd0c51a2fe877d4f9dac37dbe5ebcd3abffa83",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "0d29eba9cf3bf1c1ad2f3e27501e49ff88957695c71148b622ff61b7bc01c882",
+      "runner_sha256": "d931d4781fa8ac12bb7cdfcd483662cf96296fc834c6afa7034921737842eec9",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 0,
+      "wall_s": 7.631833770999947
+    },
+    "heterogeneous-cutback-control-final": {
+      "arguments": {
+        "label": "heterogeneous-cutback-control-final",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.2,
+        "initial_dt": 0.1,
+        "schedule": "if(time<.099999999,.1,.05)",
+        "level": 4,
+        "eta": "1+.5*tanh(4*x)",
+        "reject": false,
+        "audit": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/heterogeneous-cutback-control-final/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "c86534ff4dd082fbd78eefe09eb032a8fb06f00b8660516e6a406badd10700cd",
+      "input_sha256": "40232dbe605204f0d269b1b003b81c3b0056312a1fc377e98d7272b798c623f9",
+      "runner_sha256": "5ae8cd884ca6ae714f6d2abeda709fd774e32af7d40c77e2e4d683a30c16d5d7",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 33.78790231899984
+    },
+    "heterogeneous-half-dt-final": {
+      "arguments": {
+        "label": "heterogeneous-half-dt-final",
+        "speed": 0.4,
+        "dt": 0.05,
+        "end": 0.39999999999999997,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1+.5*tanh(4*x)",
+        "reject": false,
+        "audit": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/heterogeneous-half-dt-final/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "c86534ff4dd082fbd78eefe09eb032a8fb06f00b8660516e6a406badd10700cd",
+      "input_sha256": "cef61a0d99fefb6091f2d687bf8b9d49464df78a1d39bb74fc3c26ac6fcd5500",
+      "runner_sha256": "5ae8cd884ca6ae714f6d2abeda709fd774e32af7d40c77e2e4d683a30c16d5d7",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 71.76405353299924
+    },
+    "heterogeneous-negative": {
+      "arguments": {
+        "label": "heterogeneous-negative",
+        "speed": -0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1+.5*tanh(4*x)",
+        "reject": false,
+        "audit": true,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/heterogeneous-negative/input.prm"
+      ],
+      "core_sha256": "1b5fad8c8e704c19da4f1f6f727def4df474f589551269c3df92dc29190571a1",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "db7bf976a3edf0fa87279a3ec5193b3115e3316fa69b2b0440067560c39542f4",
+      "runner_sha256": "5ae8cd884ca6ae714f6d2abeda709fd774e32af7d40c77e2e4d683a30c16d5d7",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "ASPECT_K1_FLOOR_AUDIT": "1"
+      },
+      "exit_code": 1,
+      "wall_s": 2.7706745590003266
+    },
+    "heterogeneous-negative-audit-final": {
+      "arguments": {
+        "label": "heterogeneous-negative-audit-final",
+        "speed": -0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1+.5*tanh(4*x)",
+        "reject": false,
+        "audit": true,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/heterogeneous-negative-audit-final/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "c86534ff4dd082fbd78eefe09eb032a8fb06f00b8660516e6a406badd10700cd",
+      "input_sha256": "b87aa053057f55a7c1b0f670e736eb8073a3294519b1d8575ee8a0c2cf182a23",
+      "runner_sha256": "5ae8cd884ca6ae714f6d2abeda709fd774e32af7d40c77e2e4d683a30c16d5d7",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "ASPECT_K1_FLOOR_AUDIT": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 40.707738735998646
+    },
+    "heterogeneous-positive": {
+      "arguments": {
+        "label": "heterogeneous-positive",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1+.5*tanh(4*x)",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/heterogeneous-positive/input.prm"
+      ],
+      "core_sha256": "7ad5fa95d70e0ec8ec8e60a574cd0c51a2fe877d4f9dac37dbe5ebcd3abffa83",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "191e24d3c8479dac9bc73a62e8a8735d3055c3e25ca1af9670542695a21532e9",
+      "runner_sha256": "d032ac5223045d30e24a1882cb02e8a39a088a18acf38cc53a86694aa5bb3788",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 0,
+      "wall_s": 37.80646592099947
+    },
+    "heterogeneous-prefix-final": {
+      "arguments": {
+        "label": "heterogeneous-prefix-final",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.2,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1+.5*tanh(4*x)",
+        "reject": false,
+        "audit": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/heterogeneous-prefix-final/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "c86534ff4dd082fbd78eefe09eb032a8fb06f00b8660516e6a406badd10700cd",
+      "input_sha256": "a0d9efb5dae3f6f17ac7a1edb81ef3a8df1391774a0dc0c10eaedb7e0f2d7bc3",
+      "runner_sha256": "5ae8cd884ca6ae714f6d2abeda709fd774e32af7d40c77e2e4d683a30c16d5d7",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 25.471304801998485
+    },
+    "heterogeneous-rejection-final": {
+      "arguments": {
+        "label": "heterogeneous-rejection-final",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.2,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1+.5*tanh(4*x)",
+        "reject": true,
+        "audit": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/heterogeneous-rejection-final/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "c86534ff4dd082fbd78eefe09eb032a8fb06f00b8660516e6a406badd10700cd",
+      "input_sha256": "1eb82c012f79d807c1b4dcdd3ece8b9e60e18b2f6fa401d3265f95aecf744def",
+      "runner_sha256": "5ae8cd884ca6ae714f6d2abeda709fd774e32af7d40c77e2e4d683a30c16d5d7",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 40.503929799000616
+    },
+    "heterogeneous-restart-final": {
+      "arguments": {
+        "label": "heterogeneous-restart-final",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1+.5*tanh(4*x)",
+        "reject": false,
+        "audit": false,
+        "ranks": 4,
+        "restart": "build-particle-free/transported-objective/stage-c/material-runs/heterogeneous-prefix-final",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "4",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/heterogeneous-restart-final/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "c86534ff4dd082fbd78eefe09eb032a8fb06f00b8660516e6a406badd10700cd",
+      "input_sha256": "665045c57cbda0a88777e3d8d743182f507ba0b6e12541c152f3a325b72addb0",
+      "runner_sha256": "5ae8cd884ca6ae714f6d2abeda709fd774e32af7d40c77e2e4d683a30c16d5d7",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 18.757135826001104
+    },
+    "heterogeneous-smoke": {
+      "arguments": {
+        "label": "heterogeneous-smoke",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.1,
+        "schedule": null,
+        "level": 3,
+        "eta": "1+.5*tanh(4*x)",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/heterogeneous-smoke/input.prm"
+      ],
+      "core_sha256": "7ad5fa95d70e0ec8ec8e60a574cd0c51a2fe877d4f9dac37dbe5ebcd3abffa83",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "cfd3c0cf9b05350e2d591048de8e61f4d3046b1da4cf779adf0dfed2b39b2617",
+      "runner_sha256": "d931d4781fa8ac12bb7cdfcd483662cf96296fc834c6afa7034921737842eec9",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 0,
+      "wall_s": 9.735942748000525
+    },
+    "matched-cutback-control": {
+      "arguments": {
+        "label": "matched-cutback-control",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "initial_dt": 0.1,
+        "schedule": "if(time<.099999999,.1,if(time<.149999999,.05,.1))",
+        "level": 4,
+        "eta": "1",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/matched-cutback-control/input.prm"
+      ],
+      "core_sha256": "7ad5fa95d70e0ec8ec8e60a574cd0c51a2fe877d4f9dac37dbe5ebcd3abffa83",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "cec9f536f57f5e4e646e5c25acb719f6dfa31abbf7713e7807a670fed71fba97",
+      "runner_sha256": "8232613b6ae157211e9111e7c1aae38a2414933216173cdc68cdc2b060f92129",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 0,
+      "wall_s": 17.503937384999517
+    },
+    "matched-fine-final": {
+      "arguments": {
+        "label": "matched-fine-final",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 5,
+        "eta": "1",
+        "reject": false,
+        "audit": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/matched-fine-final/input.prm"
+      ],
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": "c86534ff4dd082fbd78eefe09eb032a8fb06f00b8660516e6a406badd10700cd",
+      "input_sha256": "322777d525bca3d520a4e8ade8c22b836d60a5d74d5bf62b64cfe60be3df406e",
+      "runner_sha256": "5ae8cd884ca6ae714f6d2abeda709fd774e32af7d40c77e2e4d683a30c16d5d7",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 34.08515396000075
+    },
+    "matched-half-dt": {
+      "arguments": {
+        "label": "matched-half-dt",
+        "speed": 0.4,
+        "dt": 0.05,
+        "end": 0.4,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1",
+        "reject": false,
+        "audit": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/matched-half-dt/input.prm"
+      ],
+      "core_sha256": "1b5fad8c8e704c19da4f1f6f727def4df474f589551269c3df92dc29190571a1",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "1bba1c58454e14f6391186d5ba4177a7646e1947bf430adb5b5e4ffcc4b4fe7d",
+      "runner_sha256": "5ae8cd884ca6ae714f6d2abeda709fd774e32af7d40c77e2e4d683a30c16d5d7",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 23.61460150700077
+    },
+    "matched-negative": {
+      "arguments": {
+        "label": "matched-negative",
+        "speed": -0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "schedule": null,
+        "level": 4,
+        "eta": "1",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/matched-negative/input.prm"
+      ],
+      "core_sha256": "7ad5fa95d70e0ec8ec8e60a574cd0c51a2fe877d4f9dac37dbe5ebcd3abffa83",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "b52f7bd84a31e87028b17b2567e09b48db1880b48b3dcade8275839ba7345ee2",
+      "runner_sha256": "d931d4781fa8ac12bb7cdfcd483662cf96296fc834c6afa7034921737842eec9",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 0,
+      "wall_s": 16.548120076000487
+    },
+    "matched-positive": {
+      "arguments": {
+        "label": "matched-positive",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "schedule": null,
+        "level": 4,
+        "eta": "1",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/matched-positive/input.prm"
+      ],
+      "core_sha256": "7ad5fa95d70e0ec8ec8e60a574cd0c51a2fe877d4f9dac37dbe5ebcd3abffa83",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "940d1ee4261607107232426b6bdc1603a82fb926c3eb065553fff4adf51f11da",
+      "runner_sha256": "d931d4781fa8ac12bb7cdfcd483662cf96296fc834c6afa7034921737842eec9",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 0,
+      "wall_s": 16.64707341400026
+    },
+    "matched-prefix": {
+      "arguments": {
+        "label": "matched-prefix",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.2,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/matched-prefix/input.prm"
+      ],
+      "core_sha256": "7ad5fa95d70e0ec8ec8e60a574cd0c51a2fe877d4f9dac37dbe5ebcd3abffa83",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "ceefdd527d03d218c97ff02fea6e7be8e03ce930cf927f649dedbdf102354bd6",
+      "runner_sha256": "8232613b6ae157211e9111e7c1aae38a2414933216173cdc68cdc2b060f92129",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 0,
+      "wall_s": 13.992489979998936
+    },
+    "matched-prefix-final": {
+      "arguments": {
+        "label": "matched-prefix-final",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.2,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1",
+        "reject": false,
+        "audit": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/matched-prefix-final/input.prm"
+      ],
+      "core_sha256": "1b5fad8c8e704c19da4f1f6f727def4df474f589551269c3df92dc29190571a1",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "eb770d2f77463453d21509d4d5d8937a62266010af503a45e6a2fb20c2ca2201",
+      "runner_sha256": "5ae8cd884ca6ae714f6d2abeda709fd774e32af7d40c77e2e4d683a30c16d5d7",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 12.739988901999823
+    },
+    "matched-rejection": {
+      "arguments": {
+        "label": "matched-rejection",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1",
+        "reject": true,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/matched-rejection/input.prm"
+      ],
+      "core_sha256": "7ad5fa95d70e0ec8ec8e60a574cd0c51a2fe877d4f9dac37dbe5ebcd3abffa83",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "c1f863f6ac62339ba8ba752ecb3bb9c9e601caf7fafbd23eede8ce78803d245e",
+      "runner_sha256": "8232613b6ae157211e9111e7c1aae38a2414933216173cdc68cdc2b060f92129",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 0,
+      "wall_s": 17.799758292998376
+    },
+    "matched-restart4": {
+      "arguments": {
+        "label": "matched-restart4",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1",
+        "reject": false,
+        "ranks": 4,
+        "restart": "build-particle-free/transported-objective/stage-c/material-runs/matched-prefix",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "4",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/matched-restart4/input.prm"
+      ],
+      "core_sha256": "7ad5fa95d70e0ec8ec8e60a574cd0c51a2fe877d4f9dac37dbe5ebcd3abffa83",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "6d7e0ca6a25cac87eb556fe1e1fdfbe7c5e0cd45ecfcbfc4cd8bcee881e367e1",
+      "runner_sha256": "8232613b6ae157211e9111e7c1aae38a2414933216173cdc68cdc2b060f92129",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 1,
+      "wall_s": 3.7209519749994797
+    },
+    "matched-restart4-final": {
+      "arguments": {
+        "label": "matched-restart4-final",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.4,
+        "initial_dt": 0.1,
+        "schedule": null,
+        "level": 4,
+        "eta": "1",
+        "reject": false,
+        "audit": false,
+        "ranks": 4,
+        "restart": "build-particle-free/transported-objective/stage-c/material-runs/matched-prefix-final",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "4",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/matched-restart4-final/input.prm"
+      ],
+      "core_sha256": "1b5fad8c8e704c19da4f1f6f727def4df474f589551269c3df92dc29190571a1",
+      "plugin_sha256": "a584ac4caaa5818c386b350398240a79a31a963310ff7f18a2afd4698f9de80e",
+      "input_sha256": "595b8c8d7b45224d3c1af25b76a203612b1c1f4585ac4121fe6b2da59dc6a801",
+      "runner_sha256": "5ae8cd884ca6ae714f6d2abeda709fd774e32af7d40c77e2e4d683a30c16d5d7",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "runtime_environment": {
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "wall_s": 7.981047747000048
+    },
+    "smoke-positive": {
+      "arguments": {
+        "label": "smoke-positive",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.1,
+        "level": 3,
+        "eta": "1",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/smoke-positive/input.prm"
+      ],
+      "core_sha256": "c99e03721ed5ce073d22c7c3f2795b7fccaaaaac21ca8408ef740bbed4cf6f58",
+      "plugin_sha256": "52aae391b88da0db57b93ac82fba7fcebdb409c74da480392fd1f193944018cd",
+      "input_sha256": "3d9200fc7853c703511cddbd871d1838fff1d7ec9bd054267886bf6a26ab9938",
+      "runner_sha256": "ea3a77a91a918b6509b8f633ebf06077c92e58ecba19260542fd49c0e983e7df",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 1,
+      "wall_s": 3.4202342059998045
+    },
+    "smoke-positive-2": {
+      "arguments": {
+        "label": "smoke-positive-2",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.1,
+        "level": 3,
+        "eta": "1",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/smoke-positive-2/input.prm"
+      ],
+      "core_sha256": "c99e03721ed5ce073d22c7c3f2795b7fccaaaaac21ca8408ef740bbed4cf6f58",
+      "plugin_sha256": "52aae391b88da0db57b93ac82fba7fcebdb409c74da480392fd1f193944018cd",
+      "input_sha256": "2d394fe648bef0a2c95201176158c2c99b91f632c84f9161f55488b1e3e8625b",
+      "runner_sha256": "28f095ca9c318d54e9c96c4900d6f4202809bd1488a0a2c7c52e14b8011dec13",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 1,
+      "wall_s": 3.4206249689996184
+    },
+    "smoke-positive-3": {
+      "arguments": {
+        "label": "smoke-positive-3",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.1,
+        "level": 3,
+        "eta": "1",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/smoke-positive-3/input.prm"
+      ],
+      "core_sha256": "78a61e756d8f949d6a8f4bf327c076c6a2e0edccdc78ea98651150747df440ba",
+      "plugin_sha256": "52aae391b88da0db57b93ac82fba7fcebdb409c74da480392fd1f193944018cd",
+      "input_sha256": "301f2ec412b0e2809f0024ae6441a15a89b49711d82c4c647e1b21584c2a5e20",
+      "runner_sha256": "28f095ca9c318d54e9c96c4900d6f4202809bd1488a0a2c7c52e14b8011dec13",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 1,
+      "wall_s": 3.622867778
+    },
+    "smoke-positive-4": {
+      "arguments": {
+        "label": "smoke-positive-4",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.1,
+        "level": 3,
+        "eta": "1",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/smoke-positive-4/input.prm"
+      ],
+      "core_sha256": "78a61e756d8f949d6a8f4bf327c076c6a2e0edccdc78ea98651150747df440ba",
+      "plugin_sha256": "5a3b556040f72d83f349b6fcd538c0c4d88940d9aaed8529ac99b764c9751dba",
+      "input_sha256": "8e2c964b96ed575ac83326e49619a0deac796d79da54be6eb02c746aafd13a6e",
+      "runner_sha256": "28f095ca9c318d54e9c96c4900d6f4202809bd1488a0a2c7c52e14b8011dec13",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 1,
+      "wall_s": 25.916784531000303
+    },
+    "smoke-positive-open": {
+      "arguments": {
+        "label": "smoke-positive-open",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.1,
+        "level": 3,
+        "eta": "1",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/smoke-positive-open/input.prm"
+      ],
+      "core_sha256": "78a61e756d8f949d6a8f4bf327c076c6a2e0edccdc78ea98651150747df440ba",
+      "plugin_sha256": "5a3b556040f72d83f349b6fcd538c0c4d88940d9aaed8529ac99b764c9751dba",
+      "input_sha256": "20a4bf136b7eacbeeaf21aeec5ff669d318fe8a04dc60efc5e28ac2f02f973c1",
+      "runner_sha256": "d6a14ca91108fd49f98d2f2885ad4147e6980f5fe4f216ccc529666afd91717c",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 1,
+      "wall_s": 6.67971591100104
+    },
+    "smoke-positive-open-2": {
+      "arguments": {
+        "label": "smoke-positive-open-2",
+        "speed": 0.4,
+        "dt": 0.1,
+        "end": 0.1,
+        "level": 3,
+        "eta": "1",
+        "reject": false,
+        "ranks": 2,
+        "restart": "None",
+        "seconds": 180
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/smoke-positive-open-2/input.prm"
+      ],
+      "core_sha256": "6e09491b076defa32545b4c502258067830648cec698082187752e6ba58177b7",
+      "plugin_sha256": "5a3b556040f72d83f349b6fcd538c0c4d88940d9aaed8529ac99b764c9751dba",
+      "input_sha256": "4658c04e1ff8645b9d348e7bbd5581f6f9acea5f9a77f575fad27edc6111c47c",
+      "runner_sha256": "d6a14ca91108fd49f98d2f2885ad4147e6980f5fe4f216ccc529666afd91717c",
+      "head": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "exit_code": 139,
+      "wall_s": 7.329412265000428
+    },
+    "tip-trace-cut": {
+      "arguments": {
+        "label": "tip-trace-cut",
+        "legacy": false,
+        "baseline": false,
+        "ranks": 2,
+        "steps": 8,
+        "restart": "None",
+        "reject": false,
+        "audit": false,
+        "schedule": "200000",
+        "seconds": 240,
+        "transport_check": false,
+        "refinement": 4,
+        "layered_check": false,
+        "transfer_check": false,
+        "spin": 0.0,
+        "cohesive_history": false,
+        "history_affine": false,
+        "history_level": 0,
+        "cohesive": true,
+        "cohesive_drive": 0.0,
+        "cohesive_dt": 0.000125,
+        "tip_airy": 3500.0,
+        "signed_trace": true,
+        "probe_old_cohesive_import": false
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/tip-trace-cut/input.prm"
+      ],
+      "runner_sha256": "75a57f91d0bdac3506433a8b4f9c28cfbb5e014c56949529404740af9585097c",
+      "source_revision": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "core_sha256": "c99e03721ed5ce073d22c7c3f2795b7fccaaaaac21ca8408ef740bbed4cf6f58",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "590aba69be17e6b9e1ad2e37e58a6806ca60d67b27dd155a38586de56cee0b43",
+      "runtime_environment": {
+        "OMP_PROC_BIND": "false",
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "ASPECT_COHESIVE_SIGNED_TRACE": "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/tip-trace-cut/signed-trace.csv",
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "exit_code": 1,
+      "elapsed_s": 6.726841829999103
+    },
+    "tip-trace-legacy": {
+      "arguments": {
+        "label": "tip-trace-legacy",
+        "legacy": true,
+        "baseline": false,
+        "ranks": 2,
+        "steps": 8,
+        "restart": "None",
+        "reject": false,
+        "audit": false,
+        "schedule": "200000",
+        "seconds": 240,
+        "transport_check": false,
+        "refinement": 4,
+        "layered_check": false,
+        "transfer_check": false,
+        "spin": 0.0,
+        "cohesive_history": false,
+        "history_affine": false,
+        "history_level": 0,
+        "cohesive": true,
+        "cohesive_drive": 0.0,
+        "cohesive_dt": 0.000125,
+        "tip_airy": 3500.0,
+        "signed_trace": true,
+        "probe_old_cohesive_import": false
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/tip-trace-legacy/input.prm"
+      ],
+      "runner_sha256": "75a57f91d0bdac3506433a8b4f9c28cfbb5e014c56949529404740af9585097c",
+      "source_revision": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "core_sha256": "78a61e756d8f949d6a8f4bf327c076c6a2e0edccdc78ea98651150747df440ba",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "5d7d32328b2c8f5426f8cb48d55244e86fa908eb1e290ba1db8944413dc61110",
+      "runtime_environment": {
+        "OMP_PROC_BIND": "false",
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "ASPECT_COHESIVE_SIGNED_TRACE": "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/tip-trace-legacy/signed-trace.csv",
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "exit_code": 1,
+      "elapsed_s": 6.679235663001236
+    },
+    "tip-trace-half": {
+      "arguments": {
+        "label": "tip-trace-half",
+        "legacy": false,
+        "baseline": false,
+        "ranks": 2,
+        "steps": 16,
+        "restart": "None",
+        "reject": false,
+        "audit": false,
+        "schedule": "200000",
+        "seconds": 240,
+        "transport_check": false,
+        "refinement": 4,
+        "layered_check": false,
+        "transfer_check": false,
+        "spin": 0.0,
+        "cohesive_history": false,
+        "history_affine": false,
+        "history_level": 0,
+        "cohesive": true,
+        "cohesive_drive": 0.0,
+        "cohesive_dt": 6.25e-05,
+        "tip_airy": 3500.0,
+        "signed_trace": true,
+        "probe_old_cohesive_import": false
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/tip-trace-half/input.prm"
+      ],
+      "runner_sha256": "75a57f91d0bdac3506433a8b4f9c28cfbb5e014c56949529404740af9585097c",
+      "source_revision": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "core_sha256": "78a61e756d8f949d6a8f4bf327c076c6a2e0edccdc78ea98651150747df440ba",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/cohesive-checks/libcohesive_rsf_native_checks.release.so": "5583c0d8dacb7211be4e67a38a3ad73ae42de1082c69fcf840afbbc8772ce6db"
+      },
+      "input_sha256": "e53ddb921e55a0e36ec990c7fe09f02050ebbd84f5eda19657c67a69df9c7475",
+      "runtime_environment": {
+        "OMP_PROC_BIND": "false",
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "ASPECT_COHESIVE_SIGNED_TRACE": "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/tip-trace-half/signed-trace.csv",
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "exit_code": 1,
+      "elapsed_s": 8.531732322999233
+    },
+    "coupled-legacy-final": {
+      "arguments": {
+        "label": "coupled-legacy-final",
+        "legacy": true,
+        "baseline": false,
+        "ranks": 2,
+        "steps": 3,
+        "restart": "None",
+        "reject": false,
+        "audit": false,
+        "schedule": "200000",
+        "seconds": 240,
+        "transport_check": false,
+        "refinement": 4,
+        "layered_check": false,
+        "transfer_check": false,
+        "spin": 0.0,
+        "cohesive_history": false,
+        "history_affine": false,
+        "history_level": 0,
+        "cohesive": false,
+        "cohesive_drive": 0.0,
+        "cohesive_dt": 0.000125,
+        "tip_airy": 0.0,
+        "signed_trace": false,
+        "probe_old_cohesive_import": false
+      },
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpirun",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/coupled-legacy-final/input.prm"
+      ],
+      "runner_sha256": "75a57f91d0bdac3506433a8b4f9c28cfbb5e014c56949529404740af9585097c",
+      "source_revision": "27178813cebd471b93a7a9308f41215b71b4a20b",
+      "core_sha256": "962c14d377bdb9027534949c2c2797faa1434cebb3fc09cac743dada9538618d",
+      "plugin_sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "b1375b799407809da445e604af751ace4762b545b4402f9fbba998e64d3a0da8"
+      },
+      "input_sha256": "b376bf4e2f2818723320f693b650c5a79efccf4b90b5e99d8610b4917c0950b7",
+      "runtime_environment": {
+        "OMP_PROC_BIND": "false",
+        "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      },
+      "exit_code": 0,
+      "elapsed_s": 9.984267687999818
+    }
+  },
+  "preservation": {
+    "protected": {
+      "checked": 16,
+      "mismatches": []
+    },
+    "server": {
+      "checked": 220,
+      "mismatches": []
+    },
+    "cleanup": {
+      "checked": 328,
+      "mismatches": []
+    },
+    "entry_controls": {
+      "checked": 4,
+      "mismatches": []
+    },
+    "pre_C_controls": {
+      "checked": 2,
+      "mismatches": []
+    }
+  },
+  "unit_suite": {
+    "assertions": 183170,
+    "cases": 152,
+    "exit_code": 0,
+    "log_sha256": "4ed1dff1d62c666936f9d0e1e5928cd3ef44cf01f5938f465319e923ac451d7b"
+  },
+  "legacy_accepted_steps_byte_identical": true,
+  "legacy_accepted_steps_sha256": "3fb823558aae1e2a56a8b5bde55b7fb4db5adcbf0135f81042e871033e6ba1a9",
+  "build_and_unit_logs": {
+    "build-particle-free/transported-objective/stage-c/coupled-build-5.log": "75da296896c70123f181ee169a0c6f40717f984f9ed565a512d361f3bed018e4",
+    "build-particle-free/transported-objective/stage-c/coupled-build-7.log": "9d882df75ccd02f5d178040c22717d067cd719e6c032bddb495d02897b4684d2",
+    "build-particle-free/transported-objective/stage-c/coupled-build-6.log": "6bc84b203fc578409deda58e2754bd49a3084b1b86bb77e1f5d1432b5ffc8dcb",
+    "build-particle-free/transported-objective/stage-c/coupled-build-2.log": "c9797b7d6b76d914e42b9acbb7956996828997b38bcc853c84ef349e8354fd2f",
+    "build-particle-free/transported-objective/stage-c/coupled-build-8.log": "d5b192075cce6d6aa599a417fef195ae9b851cb92633d11f37ffbb7f9684b7bd",
+    "build-particle-free/transported-objective/stage-c/coupled-build-4.log": "c668255a735617ba6a41fb4fbadb54230e492cbf2a7546f431ee97797167adda",
+    "build-particle-free/transported-objective/stage-c/coupled-build-3.log": "6bc84b203fc578409deda58e2754bd49a3084b1b86bb77e1f5d1432b5ffc8dcb",
+    "build-particle-free/transported-objective/stage-c/material-checks-build-4.log": "7064cf9db9ab6b146debeabd0703d81041c7af33e3ef489924e8bbf793d4637b",
+    "build-particle-free/transported-objective/stage-c/material-checks-build-2.log": "da18b6e6d08097ff13fc7d65d7740cdaef3be4f7f15a63ab62fd9a0566895e04",
+    "build-particle-free/transported-objective/stage-c/material-checks-build-3.log": "c2b586409e22cadf299ebd909b0ace7da29f406d5fbd1333f91cce708f60e444",
+    "build-particle-free/transported-objective/stage-c/coupled-bp3-build.log": "b546cd9890a689d7155e2bb80f8139cfe53761fb64ffac8f52324230cc2d7302",
+    "build-particle-free/transported-objective/stage-c/coupled-unit-final.log": "4ed1dff1d62c666936f9d0e1e5928cd3ef44cf01f5938f465319e923ac451d7b",
+    "build-particle-free/transported-objective/stage-c/tip-checks-build.log": "8d76d67ed45c016f2939df30abbaddb88db87c9c4e37a3da17c362e9b090811f"
+  },
+  "data_losses": [
+    "Cleanup:39 of45 historical animation frames lost.",
+    "Earlier temporary /tmp build logs lost; new logs are durable."
+  ],
+  "limits": [
+    "No production readiness or full temporal convergence claim.",
+    "No material resampling/birth/boundary completion/moving AMR.",
+    "No transported cohesive shape/pressure or mature moving energy-flux qualification.",
+    "No server jobs, protected checkpoint conversion, long replay or physical campaign."
+  ]
+}

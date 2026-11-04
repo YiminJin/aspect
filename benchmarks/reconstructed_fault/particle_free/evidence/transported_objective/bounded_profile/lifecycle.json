@@ -1,0 +1,2883 @@
+{
+  "c_restart": {
+    "3": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 1.6240864146866145e-19,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 1.2400562347802957e-18,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 2.4868887331386258e-18,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 4.223780613460404e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 1.36054667152722e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 1.3721933745519665e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 1.98840984367947e-19,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 1.2400562347802957e-18,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 2.4868887331386258e-18,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 4.223780613460404e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 2.0008506400922676e-18,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 1.9583401740519424e-18,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2285911544419596e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 6.505213034913027e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 7.105427357601002e-15,
+          "bound": 1.6663147050969378e-11
+        },
+        "V_m_s": {
+          "max_abs": 6.776263578034403e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "4": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 3.333074647445672e-18,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 9.999325586290686e-16,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 4.999662793145343e-16,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 6.548039020726204e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 6.2426328212641935e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 5.55653613398821e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 8.355980024663673e-19,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 9.999325586290686e-16,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 4.999662793145343e-16,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 6.548039020726204e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 6.879796415177296e-16,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 6.879804885506768e-16,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 6.74814208418556e-17,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 2.6245739387148123e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2381470546216073e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 7.589415207398531e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 5.329070518200751e-15,
+          "bound": 1.6798561149010034e-11
+        },
+        "V_m_s": {
+          "max_abs": 4.0657581468206416e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    }
+  },
+  "c_rejection": {
+    "0": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.1999147206083011e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 0.0,
+          "bound": 1.70747807765731e-11
+        },
+        "V_m_s": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "1": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2094749859355441e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 0.0,
+          "bound": 1.7421744098833102e-11
+        },
+        "V_m_s": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "2": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2142548034140743e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 0.0,
+          "bound": 1.73927675776864e-11
+        },
+        "V_m_s": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "3": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 2.7755575615628914e-17,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 2.710505431213761e-20,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 1.0842021724855044e-19,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 1.6263032587282567e-19,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 1.0829824450414582e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 2.261577969168982e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 2.524158182817815e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 4.489274620447792e-19,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 2.168404344971009e-19,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 2.168404344971009e-19,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 1.0829824450414582e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 3.3881317890172014e-19,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 1.7618285302889447e-19,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2190343335703207e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 5.421010862427522e-20,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 7.105427357601002e-15,
+          "bound": 1.7225050784070483e-11
+        },
+        "V_m_s": {
+          "max_abs": 1.6263032587282567e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    }
+  },
+  "c_rejection_byte_identity": {
+    "material-3-rank0.csv": false,
+    "material-2-rank0.csv": true,
+    "material-1-rank0.csv": true,
+    "material-3-surface.csv": false,
+    "material-1-surface.csv": true,
+    "material-model.csv": true,
+    "material-0-rank0.csv": true,
+    "material-0-rank1.csv": true,
+    "material-0-surface.csv": true,
+    "material-3-rank1.csv": false,
+    "material-2-rank1.csv": true,
+    "material-2-surface.csv": true,
+    "material-1-rank1.csv": true
+  },
+  "l_restart": {
+    "3": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 1.5102597449544175e-18,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 5.034848541774287e-16,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 2.4678982544611844e-16,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 2.679808957205265e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 6.056285572868247e-20,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 7.093900933254765e-20,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 1.2536087619363645e-19,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 5.034848541774287e-16,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 2.4678982544611844e-16,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 2.679808957205265e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 8.881784197001252e-16,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 4.440892098500626e-16,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 1.704399696465103e-17,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 1.0450692503223558e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1.4999998590128112e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2285911531359571e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 5.421010862427522e-20,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 3.552713678800501e-15,
+          "bound": 1.6663140825615536e-11
+        },
+        "V_m_s": {
+          "max_abs": 2.710505431213761e-20,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1.4993642109955264e-11
+        }
+      }
+    },
+    "4": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 9.014124624680264e-18,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 8.852781788887265e-16,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 4.39630428415716e-16,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 7.333950070506634e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 3.1848438816761693e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 3.3203691532368573e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 4.548566926755593e-19,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 8.852781788887265e-16,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 4.39630428415716e-16,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 7.333950070506634e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 8.881784197001252e-16,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 8.881784197001252e-16,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 1.4029406705372977e-16,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 1.0546618984500107e-16,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1.4999998590128112e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2381470465765422e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 1.0842021724855044e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 7.105427357601002e-15,
+          "bound": 1.679856588082286e-11
+        },
+        "V_m_s": {
+          "max_abs": 8.131516293641283e-20,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1.499538243319338e-11
+        }
+      }
+    }
+  },
+  "l_rejection": {
+    "0": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1.4999998590128112e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.1999147206083011e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 0.0,
+          "bound": 1.70747807765731e-11
+        },
+        "V_m_s": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1.4983411989198257e-11
+        }
+      }
+    },
+    "1": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1.4999998590128112e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.209474986262828e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 0.0,
+          "bound": 1.74217442108336e-11
+        },
+        "V_m_s": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1.4987949188447618e-11
+        }
+      }
+    },
+    "2": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1.4999998590128112e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2142548038263936e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 0.0,
+          "bound": 1.7392767067835216e-11
+        },
+        "V_m_s": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1.4989729159270906e-11
+        }
+      }
+    },
+    "3": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 9.486769009248164e-19,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 6.208963261610835e-18,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 6.660567347768938e-16,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 3.4267564914119975e-16,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 3.6189652078029433e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 2.6246109964062547e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 2.7846208140985124e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 3.1086109164232822e-19,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 6.660567347768938e-16,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 3.4267564914119975e-16,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 3.6189652078029433e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 1.3322676295501878e-15,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 8.881784197001252e-16,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 8.234854313206308e-17,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 6.463803711704132e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1.4999998590128112e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2190343342305244e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 1.0842021724855044e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 3.552713678800501e-15,
+          "bound": 1.7225048689890777e-11
+        },
+        "V_m_s": {
+          "max_abs": 2.168404344971009e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 8.881784197001252e-16,
+          "bound": 1.4991246449354132e-11
+        }
+      }
+    }
+  },
+  "l_rejection_byte_identity": {
+    "material-3-rank0.csv": false,
+    "material-2-rank0.csv": true,
+    "material-1-rank0.csv": true,
+    "material-3-surface.csv": false,
+    "material-1-surface.csv": true,
+    "material-model.csv": true,
+    "material-0-rank0.csv": true,
+    "material-0-rank1.csv": true,
+    "material-0-surface.csv": true,
+    "material-3-rank1.csv": false,
+    "material-2-rank1.csv": true,
+    "material-2-surface.csv": true,
+    "material-1-rank1.csv": true
+  },
+  "default_path": {
+    "0": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.1999147206083011e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 0.0,
+          "bound": 1.951246674769019e-11
+        },
+        "V_m_s": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "1": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 5.421010862427522e-19,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 1.1275702593849246e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 5.644356509959536e-16,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 6.547496919639961e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 1.1275702593849246e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 5.644356509959536e-16,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 6.547496919639961e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 8.881784197001252e-16,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 6.879804885506768e-16,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 3.821812658011403e-18,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 3.469446951953614e-18,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2094516591918822e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 1.0842021724855044e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 7.105427357601002e-15,
+          "bound": 1.943001045373066e-11
+        },
+        "V_m_s": {
+          "max_abs": 1.0842021724855044e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "2": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 1.5829351718288365e-17,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 2.4260107811535647e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 1.2091022627558345e-15,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 8.500145032286355e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 4.2351647362715017e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 4.2605757246891307e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 4.472333961502706e-19,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 2.4260107811535647e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 1.2091022627558345e-15,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 8.500145032286355e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 1.5762131183594263e-15,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 8.881784197001252e-16,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 1.240327285323417e-16,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 1.2197274440461925e-16,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2189647231820215e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 2.168404344971009e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 1.4210854715202004e-14,
+          "bound": 1.8882405636448133e-11
+        },
+        "V_m_s": {
+          "max_abs": 1.8973538018496328e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "3": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 1.7997756063259374e-17,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 2.688821387764051e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 1.3426759704060487e-15,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 1.3600232051658168e-15,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 7.161663569035109e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 6.378158092824882e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 1.2349740370967699e-18,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 2.688821387764051e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 1.3426759704060487e-15,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 1.3600232051658168e-15,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 1.5759962779249292e-15,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 1.5751289161869408e-15,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 1.8789223649173792e-16,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 1.6067876196235176e-16,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2284538352146619e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 2.168404344971009e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 1.9539925233402755e-14,
+          "bound": 1.80951700760548e-11
+        },
+        "V_m_s": {
+          "max_abs": 2.439454888092385e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "4": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 8.326672684688674e-17,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 2.3635607360183997e-17,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 4.720182578132892e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 2.36876490644633e-15,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 1.7034984534092246e-15,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 6.352747104407253e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 7.123547086408666e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 1.3162892000331827e-18,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 4.720182578132892e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 2.36876490644633e-15,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 1.7034984534092246e-15,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 1.576158908250802e-15,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 1.5751289161869408e-15,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 3.0964814046186007e-16,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 2.5095214534892607e-16,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2379202309497121e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 4.336808689942018e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 1.4210854715202004e-14,
+          "bound": 1.8002988491486834e-11
+        },
+        "V_m_s": {
+          "max_abs": 3.7947076036992655e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    }
+  },
+  "default_byte_identity": {
+    "material-3-rank0.csv": false,
+    "material-2-rank0.csv": false,
+    "material-1-rank0.csv": false,
+    "material-4-rank0.csv": false,
+    "material-3-surface.csv": false,
+    "material-1-surface.csv": false,
+    "material-4-surface.csv": false,
+    "material-model.csv": true,
+    "material-0-rank0.csv": true,
+    "material-4-rank1.csv": false,
+    "material-summary.csv": true,
+    "material-0-rank1.csv": true,
+    "material-0-surface.csv": true,
+    "material-3-rank1.csv": false,
+    "material-2-rank1.csv": false,
+    "material-2-surface.csv": false,
+    "material-1-rank1.csv": false
+  },
+  "entry_pair_default": {
+    "0": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.1999147206083011e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 0.0,
+          "bound": 1.951246674769019e-11
+        },
+        "V_m_s": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "1": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 5.421010862427522e-19,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 1.1275702593849246e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 5.644356509959536e-16,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 6.547496919639961e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 1.1275702593849246e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 5.644356509959536e-16,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 6.547496919639961e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 8.881784197001252e-16,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 6.879804885506768e-16,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 3.821812658011403e-18,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 3.469446951953614e-18,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2094516591918822e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 1.0842021724855044e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 7.105427357601002e-15,
+          "bound": 1.943001045373066e-11
+        },
+        "V_m_s": {
+          "max_abs": 1.0842021724855044e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "2": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 1.5829351718288365e-17,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 2.4260107811535647e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 1.2091022627558345e-15,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 8.500145032286355e-16,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 4.2351647362715017e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 4.2605757246891307e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 4.472333961502706e-19,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 2.4260107811535647e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 1.2091022627558345e-15,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 8.500145032286355e-16,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 1.5762131183594263e-15,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 8.881784197001252e-16,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 1.240327285323417e-16,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 1.2197274440461925e-16,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2189647231820215e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 2.168404344971009e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 1.4210854715202004e-14,
+          "bound": 1.8882405636448133e-11
+        },
+        "V_m_s": {
+          "max_abs": 1.8973538018496328e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "3": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 1.7997756063259374e-17,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 2.688821387764051e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 1.3426759704060487e-15,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 1.3600232051658168e-15,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 7.161663569035109e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 6.378158092824882e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 1.2349740370967699e-18,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 2.688821387764051e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 1.3426759704060487e-15,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 1.3600232051658168e-15,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 1.5759962779249292e-15,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 1.5751289161869408e-15,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 1.8789223649173792e-16,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 1.6067876196235176e-16,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2284538352146619e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 2.168404344971009e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 1.9539925233402755e-14,
+          "bound": 1.80951700760548e-11
+        },
+        "V_m_s": {
+          "max_abs": 2.439454888092385e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    },
+    "4": {
+      "bulk": {
+        "x": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1.971824583655185e-12
+        },
+        "q": {
+          "max_abs": 0.0,
+          "bound": 8e-12
+        },
+        "phi": {
+          "max_abs": 8.326672684688674e-17,
+          "bound": 1e-12
+        },
+        "vx": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "vy": {
+          "max_abs": 2.3635607360183997e-17,
+          "bound": 1e-12
+        },
+        "Txx": {
+          "max_abs": 4.720182578132892e-15,
+          "bound": 1e-12
+        },
+        "Tyy": {
+          "max_abs": 2.36876490644633e-15,
+          "bound": 1e-12
+        },
+        "Txy": {
+          "max_abs": 1.7034984534092246e-15,
+          "bound": 1e-12
+        },
+        "Rxx": {
+          "max_abs": 6.352747104407253e-19,
+          "bound": 1e-12
+        },
+        "Ryy": {
+          "max_abs": 7.123547086408666e-19,
+          "bound": 1e-12
+        },
+        "Rxy": {
+          "max_abs": 1.3162892000331827e-18,
+          "bound": 1e-12
+        },
+        "tauxx": {
+          "max_abs": 4.720182578132892e-15,
+          "bound": 1e-12
+        },
+        "tauyy": {
+          "max_abs": 2.36876490644633e-15,
+          "bound": 1e-12
+        },
+        "tauxy": {
+          "max_abs": 1.7034984534092246e-15,
+          "bound": 1e-12
+        },
+        "Lxx": {
+          "max_abs": 1.576158908250802e-15,
+          "bound": 1e-12
+        },
+        "Lxy": {
+          "max_abs": 1.5751289161869408e-15,
+          "bound": 1e-12
+        },
+        "Lyx": {
+          "max_abs": 3.0964814046186007e-16,
+          "bound": 1e-12
+        },
+        "Lyy": {
+          "max_abs": 2.5095214534892607e-16,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      },
+      "surface": {
+        "i": {
+          "max_abs": 0.0,
+          "bound": 1.7e-11
+        },
+        "x": {
+          "max_abs": 1.1102230246251565e-16,
+          "bound": 1e-12
+        },
+        "y": {
+          "max_abs": 0.0,
+          "bound": 1e-12
+        },
+        "Theta_s": {
+          "max_abs": 0.0,
+          "bound": 1.2379202309497121e-11
+        },
+        "Z_Pa_m": {
+          "max_abs": 4.336808689942018e-19,
+          "bound": 1e-12
+        },
+        "I_m": {
+          "max_abs": 1.4210854715202004e-14,
+          "bound": 1.8002988491486834e-11
+        },
+        "V_m_s": {
+          "max_abs": 3.7947076036992655e-19,
+          "bound": 1e-12
+        },
+        "width_m": {
+          "max_abs": 5.551115123125783e-17,
+          "bound": 1e-12
+        },
+        "eta": {
+          "max_abs": 0.0,
+          "bound": 1e-11
+        }
+      }
+    }
+  },
+  "entry_pair_byte_identity": {
+    "material-3-rank0.csv": false,
+    "material-2-rank0.csv": false,
+    "material-1-rank0.csv": false,
+    "material-4-rank0.csv": false,
+    "material-3-surface.csv": false,
+    "material-1-surface.csv": false,
+    "material-4-surface.csv": false,
+    "material-model.csv": true,
+    "material-0-rank0.csv": true,
+    "material-4-rank1.csv": false,
+    "material-summary.csv": true,
+    "material-0-rank1.csv": true,
+    "material-0-surface.csv": true,
+    "material-3-rank1.csv": false,
+    "material-2-rank1.csv": false,
+    "material-2-surface.csv": false,
+    "material-1-rank1.csv": false
+  },
+  "bound": "Each numeric column <=1e-12*max(1,max(abs(control))); exact labels and point keys.",
+  "input_sha256": {
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-3-rank0.csv": "238b88c9ced4213fded134abb8143a041809b94f0ee8b178223a74afe3c775cc",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-2-rank0.csv": "011079ed8f4bb2d8206fb8bf9be07c70c03d759ffa9d4bdc669ecfe6af0f8767",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-1-rank0.csv": "5a9e8aef8d65049af2085d94e88ca7426edd75872fa1b76d6939cace6396c8af",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-3-surface.csv": "d7c0087ee59e270589b6eade8d0d669d5b3709985c6a783cff27417b90889e2e",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-1-surface.csv": "b96c62263f2e043a3857c725656a4874ef6b50e44949f9e730dc10842f7c700d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-0-rank0.csv": "aadc070b5916b9241f855d171a158285ffa19e884821a4f8223138e048585aac",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-summary.csv": "5762c9b0164f3718f47567efac3ce269272b4e0b855fb5bc11322cc113fb1685",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-0-rank1.csv": "fdfb202f1c48508185efa2f913649959f20dcedbcd1ec552527975e944a26b5f",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-0-surface.csv": "e400e50f08837e5fd05e00f7e570e0f7d366db5e35eece6c73b08d9e7ec56195",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-3-rank1.csv": "3a6066136c5a7cc81da75afbd0a7cc67bbdfd524840608bd47cce3ea1def51da",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-2-rank1.csv": "de6590e317d1c4a964e4d1145d379a97caa8a579aeb9a956854d532c51a068d4",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-2-surface.csv": "db935989150535b476b5961bbebcdc55295e9f8bbf86253d9b51bc69e959f5e7",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-reject/output/material-1-rank1.csv": "1dfd5507a5af6758ab20a0ad5909bd23dbddc8a4424115ea7226164a2f58add6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-3-rank0.csv": "7b9162ca3b71fbcfac51885dd3bf89baca3a3dfe5398bb13a78a8adec9ade772",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-2-rank0.csv": "2ee45910980a3cf6ef0f57288094420c6d2b98bf6540f7aff1a3036b6946a926",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-1-rank0.csv": "48f03e5e86c70d28fae2b2c526b9cc0df178c48355ef43eec0daa4dd641f664d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-3-surface.csv": "b3d05398e5cdf2935c900d601a92b27f271d31fb90d375ff2351f07b3d40d67e",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-1-surface.csv": "8d21be3d178140bccbb2c0ddee80811e0848cedbcd4e21f9496c2e640c1311d0",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-0-rank0.csv": "2b01cfd8d63f14e153e6b6db44e63bfd3bf68a47927e7a9e980e5b1518ab3ed6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-summary.csv": "5762c9b0164f3718f47567efac3ce269272b4e0b855fb5bc11322cc113fb1685",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-0-rank1.csv": "c888d2f08e2f6d6d0152ab9f35458a966bcc3873e4fed87fccefc36cf180581d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-0-surface.csv": "55143a429a38b8035f96ec6ea56f5b7fcfc84e88c25aa2d8fec8f986ebf3a1b7",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-3-rank1.csv": "f2a6b1e1b31dee4ebdc6e6a85bbca55b500a02a16d856b4990cccf28e0f9b68b",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-2-rank1.csv": "24c5853e826edb092e8788bbef8be665b730ff82ff9400b946e1a7f9d2b650c6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-2-surface.csv": "fa92989d34dbe680f864c9ea23fd7940ed53836cb7c4e8ed975e9a9bd57eadad",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-reject/output/material-1-rank1.csv": "1ca86472e8c990933bc3dfe1bd025d84104ee0f252e6883fe498bee726bdf78d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-3-rank0.csv": "dfce5d1f7aecab28174e5a8e761b9ee61f2b9ba6900601a5635bb250d01f65ac",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-2-rank0.csv": "011079ed8f4bb2d8206fb8bf9be07c70c03d759ffa9d4bdc669ecfe6af0f8767",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-1-rank0.csv": "5a9e8aef8d65049af2085d94e88ca7426edd75872fa1b76d6939cace6396c8af",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-3-surface.csv": "1257a187fe778eed2a88a31eb82bc54366ac5fd2c3fe529eb90eec034ed14a40",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-1-surface.csv": "b96c62263f2e043a3857c725656a4874ef6b50e44949f9e730dc10842f7c700d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-0-rank0.csv": "aadc070b5916b9241f855d171a158285ffa19e884821a4f8223138e048585aac",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-summary.csv": "bc628a7ff0a8b380f2eda88174d19c246c5998c0e31c0111e4ecadfe367d64af",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-0-rank1.csv": "fdfb202f1c48508185efa2f913649959f20dcedbcd1ec552527975e944a26b5f",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-0-surface.csv": "e400e50f08837e5fd05e00f7e570e0f7d366db5e35eece6c73b08d9e7ec56195",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-3-rank1.csv": "67b12b2067838020c38e20d13ccc5535d332718fc99f0382cf6df6b0b584af63",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-2-rank1.csv": "de6590e317d1c4a964e4d1145d379a97caa8a579aeb9a956854d532c51a068d4",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-2-surface.csv": "db935989150535b476b5961bbebcdc55295e9f8bbf86253d9b51bc69e959f5e7",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-schedule/output/material-1-rank1.csv": "1dfd5507a5af6758ab20a0ad5909bd23dbddc8a4424115ea7226164a2f58add6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-3-rank0.csv": "0bb37f379a16a9bb05e99a10b83eb8d4e655b8df13ca65b541d4e90a044d59a7",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-2-rank0.csv": "2ee45910980a3cf6ef0f57288094420c6d2b98bf6540f7aff1a3036b6946a926",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-1-rank0.csv": "48f03e5e86c70d28fae2b2c526b9cc0df178c48355ef43eec0daa4dd641f664d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-3-surface.csv": "fe0a236085246d9f92154d46c40d64e62714cc2ed67755fb9cfbcc5bb2b3c98f",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-1-surface.csv": "8d21be3d178140bccbb2c0ddee80811e0848cedbcd4e21f9496c2e640c1311d0",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-0-rank0.csv": "2b01cfd8d63f14e153e6b6db44e63bfd3bf68a47927e7a9e980e5b1518ab3ed6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-summary.csv": "bc628a7ff0a8b380f2eda88174d19c246c5998c0e31c0111e4ecadfe367d64af",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-0-rank1.csv": "c888d2f08e2f6d6d0152ab9f35458a966bcc3873e4fed87fccefc36cf180581d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-0-surface.csv": "55143a429a38b8035f96ec6ea56f5b7fcfc84e88c25aa2d8fec8f986ebf3a1b7",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-3-rank1.csv": "ac4408ac567f9924d5d5b08061c98139088361409714227f890ffed061df29f6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-2-rank1.csv": "24c5853e826edb092e8788bbef8be665b730ff82ff9400b946e1a7f9d2b650c6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-2-surface.csv": "fa92989d34dbe680f864c9ea23fd7940ed53836cb7c4e8ed975e9a9bd57eadad",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-schedule/output/material-1-rank1.csv": "1ca86472e8c990933bc3dfe1bd025d84104ee0f252e6883fe498bee726bdf78d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-3-rank0.csv": "1808ecba7cae76b441c03667be124943eb61b78ddd3ac524c4490756ee28f590",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-4-rank0.csv": "98f0343dad171eb386636c53c143862b92645b023074c4a77712b0b18d7fb042",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-3-surface.csv": "623b484800f2c1dd0ca3ea2bc008c2bee7daeebb0e5c25f29ac6aebe81b9502a",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-4-surface.csv": "009119f970bf82fba7dd1e1a9c541746685b67da8db0228e4b80f15a29829013",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-4-rank2.csv": "1bb5457dbde4aadbcd229183185b564a6c8f28b32365eb35cba25649d532d043",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-3-rank3.csv": "b7fec9603f18033074c863bb811d8856056d95ddd1984201ee015825d7daa853",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-4-rank1.csv": "5b75df9fc81bdbd7197c542e25c94e0b1335ea2b3be146f6a9c4208a8fe89d3f",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-summary.csv": "f3c7fc3ca52dfec3000f14c5a748e12bedbfeb7ef24b304800bebf1cfb0d8659",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-3-rank2.csv": "3dafd2aca3443f4b2d2586390e288921de287181805c2a1e5a0bee3130930519",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-3-rank1.csv": "d04aedf2e87c5b83ecbe4ba6622326d6fe7ada2872f0a5af3988a41c602c7e83",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-l-p-m-restart/output/material-4-rank3.csv": "0f6b9658018e3ae3a3ecbdc42e7ae6ad36d87faefbbd62ab9c911e6bad66e322",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-3-rank0.csv": "0eb4a8e42e59d477a12a7620336866afa186cfed3348124ea7aeb26c2affb870",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-4-rank0.csv": "26af0ad3f598e023fec33ebb1cb0d25ccd9ee922c2bc447bf345a5551302c15a",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-3-surface.csv": "d4081f08b27bffb8f491ddf292c0a2b4edc684610a033526751c225795a8f4d9",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-4-surface.csv": "a9cb979c335d1291e27aad00bcfa5594ac5350d25adb82862d560281816c7e86",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-4-rank2.csv": "1773263e7093d85e081fd9777164d12eceae393cebb12da79cd916041f1dc99d",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-3-rank3.csv": "9bc6e2fcfadd506e0b0552db4e5cf26ad9ee50acdfd67d10e5db33df63cd50f0",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-4-rank1.csv": "4ffbf666fff6c341466915e81f8b03cc7945be6a94ac3a4f8a863369aafad517",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-summary.csv": "f3c7fc3ca52dfec3000f14c5a748e12bedbfeb7ef24b304800bebf1cfb0d8659",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-3-rank2.csv": "9bc25dffceb8251589993ec54ffa9703109c3aa39b12825c209cc513df3fb1b8",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-3-rank1.csv": "6a7e5c32fc4f19dcf3fc02b356aecbe5f9d5fdadf98f76a60b62ec3f081ba5df",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-c-p-m-restart/output/material-4-rank3.csv": "485e5926600146b55ba08980bfae09d2009d4c9fe4182096b0a9b4873fa5d34e",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-3-rank0.csv": "2b827346caf61c56177012c22fca213318e6d14d8a5241a82c8dc0336496ac1c",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-2-rank0.csv": "5f37b9e247a18afdddef4d3c817bffaadd47cc5276967f8ca1b0cb68bd8596ae",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-1-rank0.csv": "58baaf4c33dcfdc9e8c85e3f225b4f47becbad7c75ad3922e15cc7d6ae06c372",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-4-rank0.csv": "630b642e1048dc4daa7d5d49089825f8a479e910d0e3eb2faac2e0a0a3238c21",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-3-surface.csv": "201dbb6607315cd87d03e87a62c2a292749810d92f889a7120f88af191c10251",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-1-surface.csv": "a428e91500e29bf0b759c6606e08fdf1644912290da99dc722dbafcfbfc661fc",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-4-surface.csv": "1d8bb85874dded3c4fc0b57b96264bda8ab3d15d6e4a1354631eb395b6eebb92",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-0-rank0.csv": "423e2a479e255a7627a5d4279750868cf2fbe88739a65e9a9e2d12cffb442ef6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-4-rank1.csv": "cc48c634325392ba5572c83436dc0934a56ad6fb5089a34517d754a0cf4926f7",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-summary.csv": "9c81708c0cfc710b12c40cac04309dfa618548c5870bdd7bdf0bd96e0e73382b",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-0-rank1.csv": "511dcaaf7813c3c55ac8846909061f383168635f155d4b0799c40e7ce5647ccf",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-0-surface.csv": "03cc18061b99096f6062030b7a0b54f2d15ae8c6142b992dc5f331511a06bcdd",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-3-rank1.csv": "cbf9d04daa9f0785fbb9d092ea4f556c65921312363f6cb06cfd6dad6bfabf75",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-2-rank1.csv": "6c5b9e409c66a035519a8fdf1de36419d6ca47e7d3a07ea907c2f135ddb41265",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-2-surface.csv": "bcc0c194af3600a1036615ee0ae40955b40d3f828ffddedea1c906fbfacf2cfc",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-default-control/output/material-1-rank1.csv": "3828ec9f4dab6feca87d0095e372d658163011560eb1f9fac9e50291c7fd9731",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-3-rank0.csv": "e5a5f16500bca1f67e254a111a155b3789ca9b673476468bb564f29efa2770db",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-2-rank0.csv": "7fcc834d46fab61f5bf8dc23b4f0037b4f9bf1d8404ce78a662b1d465d3c8f0e",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-1-rank0.csv": "152e5fb0a3a3a508d585a5b8ddda3d70011f4d65666138ba6f62fdeee0da5849",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-4-rank0.csv": "3f769a0a3a7bcab31bfe1138b1a36173f2673817a4c60d4fdd25f8007087c310",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-3-surface.csv": "011c06c0965d71b9b756be47f08d42dc983967489c394bf9162a26174b297795",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-1-surface.csv": "0f404fab4d518c098a57bdc5be3fc2aeaaabd6c682c97d137ae204bfaa5fadf3",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-4-surface.csv": "2fa6a7c6bfdf873a2884f6d3ffa1be44ae7a4e51912460e5c42eed6ac66f9e51",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-model.csv": "ae933342fa43637270d578180edbffb2e0ce306c2bcfc780d37110683090dad1",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-0-rank0.csv": "423e2a479e255a7627a5d4279750868cf2fbe88739a65e9a9e2d12cffb442ef6",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-4-rank1.csv": "f489c9682347e078ddb6555a66fc8ed48cff0bb4bd699b07705299ef0b466011",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-summary.csv": "9c81708c0cfc710b12c40cac04309dfa618548c5870bdd7bdf0bd96e0e73382b",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-0-rank1.csv": "511dcaaf7813c3c55ac8846909061f383168635f155d4b0799c40e7ce5647ccf",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-0-surface.csv": "03cc18061b99096f6062030b7a0b54f2d15ae8c6142b992dc5f331511a06bcdd",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-3-rank1.csv": "a4a377143e23477629e9c72fc46e71f0794cefd482fd49206721c0623fa073f5",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-2-rank1.csv": "b131f448f17e3d4cda119302b1c69c4cf1c41a8f27ea6a58a84ebe691b1dc546",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-2-surface.csv": "1b7b2a57e90324cba88e8cfe22452d94a13ab73ce681206b1205a19e81d5baf2",
+    "build-particle-free/transported-objective/stage-c/material-runs/bp-entry-default-control/output/material-1-rank1.csv": "a47d723a94ddd7c0419a14937a10a7f7fd22abb3ddc3a0b7f1343e99d9809905"
+  }
+}

@@ -17,6 +17,8 @@ namespace aspect
                                             const bool include_relaxation) const
     {
       validate_fe_strain_restrictions();
+      if (jaumann_dg_stress)
+        return make_objective_dg_transport(velocity,quadrature_order,include_relaxation);
       AssertThrow(dim==2 && dg_trial_stress_history && !consistent_endpoint_phase && quadrature_order>=4
                   && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1,
                   ExcMessage("PF4 transport requires fixed serial Cartesian DGQ2 and at least Gauss4."));
@@ -197,6 +199,12 @@ namespace aspect
             }
         }
       for (auto &component:result->trial_stress) component.compress(VectorOperation::insert);
+      if (op.distributed)
+        for (auto &component:result->trial_stress)
+          {
+            LinearAlgebra::Vector owned(space.dofs.locally_owned_dofs(),this->get_mpi_communicator());
+            owned=component;component=owned;
+          }
       return result;
     }
 
@@ -208,6 +216,11 @@ namespace aspect
       const DGField &source,const double time,const double dt,
       const DGLimiter *limiter,DGLimiterStats *statistics) const
     {
+      if (op.distributed)
+        {
+          AssertThrow(!limiter,ExcMessage("Distributed smooth DG transport does not use the serial diagnostic limiter."));
+          return advance_objective_dg_transport(op,incoming,inflow,source,time,dt);
+        }
       AssertThrow(incoming.space==op.space && (!limiter || limiter->space==op.space)
                   && this->get_triangulation().get_vertices()==op.mesh_vertices,
                   ExcMessage("PF4 transport rejects changed spaces or mesh motion."));

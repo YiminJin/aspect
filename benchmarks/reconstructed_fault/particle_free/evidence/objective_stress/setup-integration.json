@@ -1,0 +1,10 @@
+{
+  "package": "/home/ein/Downloads/research_review_setup.zip",
+  "sha256": {
+    "AGENTS_RESEARCH_SUPPLEMENT.md": "72c25e8cf8ae7ff1fc266c9aee7bd31d47d94fd81446b68a2a490e6399f7ec83",
+    "REVIEW_PLAN.md": "32497820a68e8f8a0e71914e3eff923aefd517143111ba11e4e45370f26f7c9d",
+    "OBJECTIVE_STRESS_SPEC.md": "959c2d9642b9c4957fe4e3f5d3a5699ca433858a93b81c02ee8ba1357e48f33a"
+  },
+  "supplement_occurrences": 1,
+  "action": "Existing current AGENTS contains the exact supplement once; setup documents already byte-identical. Preserved them and appended actual progress only to REVIEW_PLAN."
+}

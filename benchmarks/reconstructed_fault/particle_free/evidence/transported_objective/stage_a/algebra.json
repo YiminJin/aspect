@@ -1,0 +1,67 @@
+{
+  "scope": "Stage A algebra and kinematics only; not Stage B representation/transport qualification",
+  "script_sha256": "5804c9b708f970ba7a53d57a2006ce08e6eb54b4f25d9c87176f662b4b359cce",
+  "seed": 20261102,
+  "checks": {
+    "exact_rational_product_rules": {
+      "cases": 512,
+      "maximum_defect": 0,
+      "included": [
+        "spin",
+        "changing profile",
+        "orientation",
+        "surface/bulk transport",
+        "rate mismatch",
+        "zz",
+        "spin work"
+      ]
+    },
+    "exact_native_lifting_product_rules": {
+      "cases": 128,
+      "maximum_defect": 0
+    },
+    "lifting_rate_product_counterexample": {
+      "defect": "-7/4"
+    },
+    "geometry": {
+      "normal_derivative_error": 1.2786202253360605e-10,
+      "curvature_derivative_error": 1.061943866176307e-10,
+      "association_derivative_error": 5.4870723031387515e-11,
+      "tolerance": 2e-09,
+      "shear_normal_vs_spin_defect": 0.85
+    },
+    "surface_ALE_and_projection": {
+      "relabel_state_error_rate": "14/15",
+      "mass_solve_derivative_defect": 0
+    },
+    "Eulerian_max_negative_control": {
+      "spurious_trailing_damage": 1.0
+    },
+    "variable_rate_scalar": {
+      "steps": [
+        20,
+        40,
+        80
+      ],
+      "errors": [
+        0.00889730961122237,
+        0.004470897894280457,
+        0.0022410375578651998
+      ],
+      "ratios": [
+        1.9900498337491774,
+        1.9950124791926334
+      ],
+      "acceptance": "Both error ratios in (1.9,2.1), declared before run"
+    },
+    "prestress_nonuniqueness": {
+      "equal_fault_shear_and_normal": true,
+      "stress_rate_difference": 1.697056274847714
+    },
+    "cohesive_measure_work_negative_control": {
+      "omitted_work_J_m_s": 2.4000000000000004,
+      "meaning": "Current-arclength fully formed crack stretches at zero da and zero slip"
+    }
+  },
+  "status": "passed"
+}

@@ -1,0 +1,103 @@
+{
+  "scope": "Stage B completed; Stage C native integration not performed",
+  "selection": "Existing trial T DGQ2 plus independent complete residual R DGQ2 and surface scalar memory",
+  "reason": "At the predeclared1e-3 target, actual separated Q2 meets accuracy at N8 with3456 tensor coefficients; direct Q2 first passes at N16 with6912. Best P1 residual already misses the N8 target.",
+  "refinement_limit": "Selection is conditional on measured affine Cartesian, constant-G controls. No globally minimal basis, native pressure/work/lifecycle, AMR or physical event qualification is claimed.",
+  "candidates_at_first_passing_tested_mesh": [
+    {
+      "representation": "direct",
+      "n": 16,
+      "tensor_scaled": 0.000698609164093564,
+      "scalar_tensor_coefficients": 6912,
+      "independent_storage_bytes": 55296
+    },
+    {
+      "representation": "separated",
+      "n": 8,
+      "tensor_scaled": 0.0005683355594598466,
+      "scalar_tensor_coefficients": 3456,
+      "independent_storage_bytes": 27648
+    }
+  ],
+  "surface_memory_capacity": {
+    "scope": "Snapshot Q1 surface-memory representation; no numerical ALE/evolution claim",
+    "rows": [
+      {
+        "material_intervals": 16,
+        "stored_scalars": 17,
+        "scalar_max_error_m": 0.0006779688061750461,
+        "B_extension_scaled": 0.0015077649801950941
+      },
+      {
+        "material_intervals": 32,
+        "stored_scalars": 33,
+        "scalar_max_error_m": 0.000175875274144921,
+        "B_extension_scaled": 0.00039578056329848553
+      },
+      {
+        "material_intervals": 64,
+        "stored_scalars": 65,
+        "scalar_max_error_m": 4.3850253388776766e-05,
+        "B_extension_scaled": 9.890083824055805e-05
+      }
+    ],
+    "orders": [
+      1.929638900187663,
+      2.0006461098648254
+    ],
+    "status": "passed",
+    "script_sha256": "fdb388d7960c6a64320fea91dbbd4bf5af9c6bc9209d8f3fea8dfa8c83e79c88"
+  },
+  "P1_screen": {
+    "n8_full_tensor_best_projection": 0.0013455180941600582,
+    "n8_Q2_full_tensor_best_projection": 0.00044363608386029134,
+    "transported_P1_implemented": false
+  },
+  "profile": {
+    "material_pullback_max_defect": 9.43689570931383e-16,
+    "wrong_Eulerian_max_trailing_damage": 0.8439358721484276,
+    "native_obstacle_implementation": false
+  },
+  "checks": [
+    {
+      "name": "B1_selected_configuration",
+      "passed": true
+    },
+    {
+      "name": "B2_all_declared_gates",
+      "passed": true
+    },
+    {
+      "name": "coarse_P1_residual_rejected",
+      "passed": true
+    },
+    {
+      "name": "coarse_complete_Q2_capacity",
+      "passed": true
+    },
+    {
+      "name": "separated_minimum_tested_coefficient_count",
+      "passed": true
+    },
+    {
+      "name": "material_profile_pullback",
+      "passed": true
+    },
+    {
+      "name": "bad_Eulerian_damage_max_detected",
+      "passed": true
+    },
+    {
+      "name": "surface_memory_capacity",
+      "passed": true
+    }
+  ],
+  "status": "passed",
+  "provenance": {
+    "script_sha256": "500428253a78334d28dbc6fed9bf30abf648a9f2d22d9a9a266566942c9c95a4",
+    "moving_results_sha256": "3e2a987ca14fd5cdea284fd8c9440e81af00b1571afd4cf57859e7ab4d5363d1",
+    "space_screen_sha256": "85a7b4314ab367225c3e8c8bbd5d7bbe1915b8847846ccd99345fd5d7275aa29",
+    "surface_screen_sha256": "48cc1dd8acbcd1e01ecb8fa15daa1c7aaaf0e0bcdc17b3684b88a481aca472fc",
+    "B1_results_sha256": "64a6d6152363522e9c257e6d1b8ce575a79b5ab25efd0456195e756b65ba29d9"
+  }
+}

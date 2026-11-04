@@ -79,6 +79,7 @@ namespace aspect
       double clock_bound (const State &) const;
       std::shared_ptr<State> import (const BulkSolve &);
       std::shared_ptr<State> initialize_seed ();
+      State objective_anchor(const State &) const;
       std::shared_ptr<Field> elastic (const Geometry &, const Field &, const std::vector<double> &,
                                       const BulkSolve &) const;
       void conversion_check (State &, const std::string &) const;
@@ -111,6 +112,7 @@ namespace aspect
       std::shared_ptr<State> accepted;
       std::weak_ptr<Trial> active_trial;
       bool solving = false;
+      bool jaumann_stress=false;
       unsigned int clock_attempts = 0;
       std::string pending_checkpoint;
       std::map<std::string, Column> cached_columns, cached_normals;

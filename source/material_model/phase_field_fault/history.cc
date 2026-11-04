@@ -256,6 +256,14 @@ namespace aspect
                     ExcMessage("Native bulk history is fresh-run only; checkpoint conversion is forbidden."));
         invalidate_normalization_cache();
         AssertThrow(this->get_reconstructed_fault_manager().has_property(
+                      "Jaumann total material spin lagged Lie v1") == jaumann_particle_stress,
+                    ExcMessage("Stress rotation/integrator mismatch on restart. Missing marker means legacy; conversion is forbidden."));
+        AssertThrow(this->get_reconstructed_fault_manager().has_property(
+                      "Jaumann projected DGQ2 residual Lie v1") == jaumann_dg_stress,
+                    ExcMessage("Objective DG law/residual schema mismatch; checkpoint conversion is forbidden."));
+        AssertThrow(this->get_reconstructed_fault_manager().has_property("Jaumann DG material transaction v1")==dg_material_transport,
+                    ExcMessage("Material history transport law mismatch; checkpoint conversion is forbidden."));
+        AssertThrow(this->get_reconstructed_fault_manager().has_property(
                       "homogeneous mesh data v1") == homogeneous_mesh_data,
                     ExcMessage("Cannot change homogeneous mesh data configuration on restart."));
         AssertThrow(this->get_reconstructed_fault_manager().has_property(
@@ -344,6 +352,16 @@ namespace aspect
         fault_manager.register_property("PF5 accepted DG history v1", 1);
       if (homogeneous_mesh_data)
         fault_manager.register_property("homogeneous mesh data v1", 1);
+      if (jaumann_particle_stress)
+        fault_manager.register_property("Jaumann total material spin lagged Lie v1", 1);
+      if (jaumann_dg_stress)
+        fault_manager.register_property("Jaumann projected DGQ2 residual Lie v1",1);
+      if (dg_material_transport)
+        fault_manager.register_property("Jaumann DG material transaction v1",1);
+      this->get_pcout()<<"   Reconstructed-fault stress rotation: "
+        <<(jaumann_particle_stress ? "Jaumann total material spin; accepted-gradient lag; finite rotation then exponential Maxwell/source (Lie v1); stationary particle stress."
+                                    : (jaumann_dg_stress ? "Jaumann total material spin; accepted-gradient lag; complete projected DGQ2 trial/residual Lie v1."
+                                                          : "legacy component rate."))<<std::endl;
     }
 
     template <int dim>
@@ -376,7 +394,7 @@ namespace aspect
                 {
                   if (fresh_timestep_zero && !faults[f].property_value_is_initialized(v,position+d))
                     fault_manager.get_fault(f).get_properties(v)[position+d]=faults[f].vertex(v)[d];
-                  AssertThrow(faults[f].get_properties(v)[position+d]==faults[f].vertex(v)[d],
+                  AssertThrow(dg_material_transport || faults[f].get_properties(v)[position+d]==faults[f].vertex(v)[d],
                               ExcMessage("Mature frictional faults require fixed reconstructed geometry."));
                 }
         }
@@ -400,6 +418,7 @@ namespace aspect
         compute_normalization_integrals();
       compute_fault_surface_temperatures();
       prepare_fe_strain_history();
+      if (jaumann_dg_stress) prepare_objective_dg_anchor();
 
       // Rate-and-state friction needs one complete positive Theta field. On a
       // fresh model it is projected from the user-mapped particle field;
@@ -594,6 +613,7 @@ namespace aspect
       std::vector<Point<dim>> points;
       std::shared_ptr<Utilities::MPI::RemotePointEvaluation<dim>> point_cache;
       std::vector<Tensor<2,dim>> velocity_gradients;
+      std::vector<Tensor<2,dim>> history_velocity_gradients;
       std::vector<double> temperatures;
       std::vector<double> phase_fields;
       std::vector<double> previous_phase_fields;
@@ -697,7 +717,7 @@ namespace aspect
                 double bound=128*std::numeric_limits<double>::epsilon()
                              *std::max(1.,evaluation_scale);
                 if (error>bound)++old_allowance_failures;
-                if (dg_trial_stress_history)
+                if (dg_trial_stress_history && !material_variable_viscosity)
                   bound+=dg_source_publication_allowance(*fe_update->dg_history,particle.get_surrounding_cell()->id(),particle.get_location());
                 fe_publication_ratio=std::max(fe_publication_ratio,error/bound);
                 fe_publication_error=std::max(fe_publication_error,error);
@@ -921,6 +941,10 @@ namespace aspect
             }
         }
       auto &point_cache=*samples.point_cache;
+      if (jaumann_particle_stress)
+        samples.history_velocity_gradients = VectorTools::point_gradients<dim>(
+          point_cache,this->get_dof_handler(),this->get_old_solution(),
+          VectorTools::EvaluationFlags::avg,this->introspection().component_indices.velocities[0]);
       if (!dg_trial_stress_history)
         samples.velocity_gradients = VectorTools::point_gradients<dim>(
                                        point_cache, this->get_dof_handler(), accepted_bulk_state,
@@ -1042,10 +1066,10 @@ namespace aspect
 
       if (std::getenv("ASPECT_STRESS_CYCLE_TRACE"))
         diagnostics.open_stress_cycle(this->get_output_directory(),
-                                      this->get_timestep_number(), this->get_mpi_communicator());
+                                      this->get_timestep_number(), this->get_mpi_communicator(),jaumann_particle_stress);
       if (std::getenv("ASPECT_FAULT_SOURCE_HISTORY_DIAGNOSTIC"))
         diagnostics.open_source_history(this->get_output_directory(),
-                                        this->get_timestep_number(), this->get_mpi_communicator());
+                                        this->get_timestep_number(), this->get_mpi_communicator(),jaumann_particle_stress);
 
       if (nodal_cohesive_history)
         {
@@ -1076,9 +1100,9 @@ namespace aspect
                       previous_phase_fields[particle_index], "history commit");
                   const MaxwellCoefficients surface_coefficients =
                     compute_maxwell_coefficients(
-                      compute_creep_viscosity(
+                      material_surface_viscosity(association.fault_index,association.segment_index,association.xi,compute_creep_viscosity(
                         localization.surface_material_fractions,
-                        localization.surface_temperature),
+                        localization.surface_temperature)),
                       compute_elastic_shear_modulus(localization.surface_material_fractions),
                       time_step);
                   const double slip_rate = fault_manager.interpolate_slip_rate(
@@ -1193,8 +1217,8 @@ namespace aspect
                 bulk_fractions = MaterialUtilities::compute_composition_fractions(bulk_compositions);
               const MaxwellCoefficients bulk_coefficients =
                 compute_maxwell_coefficients(
-                  compute_creep_viscosity(bulk_fractions,
-                                          temperatures[particle_index]),
+                  material_viscosity(particle.get_location(),compute_creep_viscosity(bulk_fractions,
+                                          temperatures[particle_index])),
                   compute_elastic_shear_modulus(bulk_fractions),
                   time_step);
 
@@ -1227,9 +1251,9 @@ namespace aspect
                       previous_phase_fields[particle_index], "history commit");
                   const MaxwellCoefficients surface_coefficients =
                     compute_maxwell_coefficients(
-                      compute_creep_viscosity(
+                      material_surface_viscosity(association.fault_index,association.segment_index,association.xi,compute_creep_viscosity(
                         localization.surface_material_fractions,
-                        localization.surface_temperature),
+                        localization.surface_temperature)),
                       compute_elastic_shear_modulus(localization.surface_material_fractions),
                       time_step);
                   const double slip_rate = fault_manager.interpolate_slip_rate(
@@ -1276,9 +1300,15 @@ namespace aspect
                 }
 
               ParticleCandidate candidate;
+              const auto rotated_history = jaumann_particle_stress
+                ? rotate_maxwell_history(old_stress,samples.history_velocity_gradients.at(particle_index),time_step)
+                : old_stress;
+              const double spin_angle = jaumann_particle_stress
+                ? .5*time_step*(samples.history_velocity_gradients[particle_index][1][0]
+                                 -samples.history_velocity_gradients[particle_index][0][1]) : 0.;
               candidate.stress = compute_maxwell_stress(
-                                   bulk_coefficients, effective_strain_rate, old_stress);
-              candidate.incoming_stress=old_stress;
+                                   bulk_coefficients, effective_strain_rate, rotated_history);
+              candidate.incoming_stress=rotated_history;
               candidate.effective_rate=effective_strain_rate;
               candidate.coefficients=bulk_coefficients;
               candidate.crack_driving_force = new_H;
@@ -1295,13 +1325,13 @@ namespace aspect
                   particle_index, particle, points[particle_index],
                   bulk_coefficients.beta, bulk_coefficients.eta_ve,
                   velocity_gradients[particle_index], old_stress,
-                  effective_strain_rate, candidate.stress);
+                  effective_strain_rate, candidate.stress,spin_angle,&rotated_history);
               if (diagnostics.source_history_is_open() && association.active && !associations[particle_index].active)
                 diagnostics.record_source_history(
                   particle, phase_fields[particle_index], continued_chi, continued_V,
                   bulk_coefficients.eta_ve, bulk_coefficients.beta,
                   velocity_gradients[particle_index], continued_crack,
-                  old_stress, candidate.stress);
+                  old_stress, candidate.stress,spin_angle,&rotated_history);
               ++particle_index;
             }
         }

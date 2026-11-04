@@ -1,0 +1,20 @@
+{
+  "critical_files_checked": 328,
+  "missing": [],
+  "changed": [],
+  "protected_copies": [
+    {
+      "path": "build-particle-free/objective-stress/baseline/0-aspect-release",
+      "unchanged": true
+    },
+    {
+      "path": "build-particle-free/objective-stress/baseline/1-aspect-release",
+      "unchanged": true
+    },
+    {
+      "path": "build-particle-free/objective-stress/baseline/2-libcohesive_rsf_native_checks.release.so",
+      "unchanged": true
+    }
+  ],
+  "current_rsf_marker": "2"
+}

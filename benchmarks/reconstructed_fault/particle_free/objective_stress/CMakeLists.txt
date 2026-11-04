@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(objective_stress_checks)
+add_library(objective_stress_checks SHARED native_checks.cc)
+ASPECT_SETUP_PLUGIN(objective_stress_checks)
+target_compile_options(objective_stress_checks PRIVATE -fno-finite-math-only -ffp-contract=off)

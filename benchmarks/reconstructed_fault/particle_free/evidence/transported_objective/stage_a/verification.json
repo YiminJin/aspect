@@ -1,0 +1,43 @@
+{
+  "root": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "branch": "pf-rsf-particle-free",
+  "revision": "27178813cebd471b93a7a9308f41215b71b4a20b",
+  "stage": "A only",
+  "native_source_files_unchanged": 921,
+  "protected_binary_checkpoint_files_unchanged": 16,
+  "server_input_files_unchanged": 220,
+  "cleanup_critical_files_unchanged": 328,
+  "local_links_checked": 391,
+  "preexisting_historical_missing_targets": [
+    [
+      "doc/reconstructed_fault/particle_free/STATUS.md",
+      "../../../benchmarks/reconstructed_fault/particle_free/evidence/bulk_continuation.zip"
+    ]
+  ],
+  "whitespace": "git diff --check passed",
+  "native_build_or_timestep_executed": false,
+  "formerly_unsupported_combinations_enabled": false,
+  "files": {
+    "AGENTS.md": "a72fef67cd685fe6e8b7cccc2bf4988831896231f9bf0c8236137ae68ba34320",
+    "doc/reconstructed_fault/current_design.md": "4969ef69fd5431eb2d2b23df4fa3fa00c9bba91806dcfea47cfe4d65af8c143b",
+    "doc/reconstructed_fault/specification.tex": "a872d44e01cb6004e4c8c4f3ef63f0c2941aa5d938cb3ae637ddcdc38e4c5880",
+    "doc/reconstructed_fault/particle_free_history.tex": "ab8b782b15e4cd6b33b8bb39cbfdc7d351be20ce84c99e11d83606be1d2dd4d0",
+    "benchmarks/reconstructed_fault/particle_free/transported_objective/check_stage_a.py": "5804c9b708f970ba7a53d57a2006ce08e6eb54b4f25d9c87176f662b4b359cce",
+    "doc/reconstructed_fault/particle_free/TRANSPORTED_OBJECTIVE_SPEC.md": "d3daf76190d3a4271027658d9faa2a10c29a7ca4b8313711adfefe674d514b0a",
+    "doc/reconstructed_fault/particle_free/TRANSPORTED_OBJECTIVE_REPORT.md": "ad60f7621e69a534b254d2beee6912ab304b26274d58ff44c95c599f5dcf22a3",
+    "doc/reconstructed_fault/particle_free/TRANSPORTED_OBJECTIVE_TASK_STATE.md": "ede7356f81f5e208b532503e3345c4a906ac82e3a01cb47162e7d9bcc4212ff7",
+    "doc/reconstructed_fault/particle_free/IMPLEMENTATION_MAPS.md": "71bfdfb4c258af6bb7860d72c4e97e95bb47e3959c69ce87012f9b080891c9ce",
+    "doc/reconstructed_fault/particle_free/STATUS.md": "19e32eebffb00042e7114f0cb9ee00e8d39320d9b946868589323992dd721226",
+    "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md": "1b5b6511926e9b97f5040dacbdfdb9f83bc1536ba5e80ca8aa85f41988f1d9bf",
+    "doc/reconstructed_fault/particle_free/RESEARCH_HANDOFF.md": "8627471b94191d85a8db26c58703f3bb9445a8f6db8dafe534bc02b008669151",
+    "doc/reconstructed_fault/particle_free/REVIEW_PLAN.md": "e4b5c5a4722d7a97eac02f47a1ceea29e1239dab76cbfe38646a5be92c743eca",
+    "benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/stage_a/README.md": "d16c9d71048e5e70e2a80e9bb397174d99884893752d5ccc6c64395f35406771"
+  },
+  "evidence": {
+    "entry.json": "8f5c1fd8da4cf52e74333d0c4eda1c35779cae8e542364a0d53b3a743156ac86",
+    "algebra.json": "8f179ed261c85ccd9ffe60e5b6925eb9526f4fe70cb31e5a40e514b998b74355",
+    "entry-status.nul": "a40b23768d034949327939a8d7385d0f0decb8b56e29e57bab25a5473dfecbc1",
+    "entry-source-sha256.json": "0e8778f4506620458d6e8fbe10ff9e45bf3581e1569516508bde303f3fe64f6d",
+    "README.md": "d16c9d71048e5e70e2a80e9bb397174d99884893752d5ccc6c64395f35406771"
+  }
+}

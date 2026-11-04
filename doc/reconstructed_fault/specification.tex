@@ -3740,4 +3740,268 @@ Persist only numerical diagnostics through the existing owner; physical historie
 and once-only acceptance remain unchanged. The original estimator stays available.
 See \texttt{RSF\_EPISODE\_ESTIMATOR.md} for the explicit defects and scope.
 
+\section{Selected objective-stress experiment, 30 October 2026}
+The default reconstructed-fault component-rate law is retained. The parameter
+\texttt{Stress rotation = Jaumann lagged Lie} selects only fixed-mesh, frozen
+mature particle-owned physical branch stress, matched constant $G$ and
+temperature-independent $\eta$, full-three-dimensional plane-strain
+deviators, stationary BP3 samples and no replenishment. Other history
+representations and cohesive modes are rejected for this option.
+
+With $L_{ij}=\partial_j v_i$, $W=\tfrac12(L-L^T)$ and
+$J_W[A]=D_tA+AW-WA$, the selected continuous branch is
+\[
+ J_W[\tau]+(G/\eta)\tau=2G(D_3-\chi V S).
+\]
+The spin is total material spin. No subtraction of a localized-slip spin or
+change to friction, pressure, localization or Maxwell parameters is implied.
+For each attempt sample $W^-$ from the accepted native velocity gradient and
+hold it fixed. The finite-rotation Lie update is
+\[
+ R=\exp(\Delta t W^-),\quad
+ \tau^+=\beta R\tau^-R^T+2\eta_{\rm ve}(D_3(v^+)-\chi V^+S),\qquad
+ \beta=e^{-\Delta tG/\eta},\quad
+ \eta_{\rm ve}=-\eta\operatorname{expm1}(-\Delta tG/\eta).
+\]
+Rotation precedes the exact frozen-source Maxwell substep. The combined method,
+including the accepted-gradient lag, is first order; it does not evaluate the
+exact simultaneous rotated-forcing integral. Its zero-spin limit is the retained
+formula and its zero-forcing rotation/relaxation limit is exact for frozen spin.
+The full3D norm retains $\tau_{zz}=-(\tau_{xx}+\tau_{yy})$.
+Congruence preserves quadratic storage and
+$\tau:(W\tau-\tau W)=0$; there is no additional spin dissipation.
+
+The frozen load, surface residual, diagnostic stresses and terminal candidates
+must use the same accepted gradient and physical tensor. The current-velocity,
+slip and pressure tangent remains the derivative of this explicitly lagged
+discrete residual; it is not a tangent for current-iterate spin. Trials and
+observations do not mutate incoming history. Rotated particles use the existing
+deferred native acceptance transaction, including entry-vector restoration on
+outer rejection and one publication after acceptance. Checkpoints carry the
+registry marker \texttt{Jaumann total material spin lagged Lie v1}; its absence
+means legacy and mismatched continuation is forbidden.
+
+For the production mature separated state $\tau=T-B$, $B=2\chi ZS$, fixed
+geometry does not imply zero objective commutator. Rotating $T$ alone would
+produce an extra physical forcing $Q_{\rm geo}=[W,B]$. Preserving the mature
+$Q_{\rm geo}=0$ law instead requires the residual history in
+\texttt{particle\_free\_history.tex}, or a verified direct-stress replacement.
+The new cohesive-interface bulk native-gradient remainder and analytic lifting
+memory likewise cannot be omitted from an objective update. These configurations
+remain explicitly unsupported, without converting histories or changing
+production inputs. A full background prestress is not determined by BP3's two
+prescribed surface traction scalars. No finite-strain hyperelasticity, coupled
+transport, moving-geometry or production-readiness claim follows from local
+objectivity tests.
+The stationary native experiment advances only the spatial spin/source reaction
+equation, with transport set to identity. If $v\cdot\nabla\tau\ne0$, it is not
+the complete material equation or a globally objective transported continuum.
+Local constitutive objectivity and transport qualification are separate claims.
+See the current formulation table in
+\texttt{particle\_free/IMPLEMENTATION\_MAPS.md} and measured qualification in
+\texttt{particle\_free/OBJECTIVE\_STRESS\_REPORT.md}.
+
+
+\subsection{Transported objective extension: Stage A design (2026-11-02)}
+This is a derived extension contract, not an enabled configuration. See
+\texttt{particle\_free/TRANSPORTED\_OBJECTIVE\_SPEC.md} and the consolidated
+\texttt{IMPLEMENTATION\_MAPS.md} for kinematics, ownership and acceptance gates.
+For constant $G$, define $J_v A=(\partial_t+v\cdot\nabla)A-[W,A]$,
+$W=\operatorname{skw}\nabla v$, $r_b=G/\eta(x,t)$ and
+$\mathcal L[s]=\chi(s\circ\pi)S$. Mature physical branch stress satisfies
+\[
+ J_v\tau+r_b\tau=2G\{D_3(v)-\mathcal L[V]\}.
+\]
+For $\tau=T-2G\mathcal L[s]-R$,
+$D_\Gamma s+r_\Gamma s=V$ and
+$C[s]=J_v\mathcal L[s]-\mathcal L[D_\Gamma s]$, the necessary residual is
+\[
+ J_vR+r_bR=-2G\{C[s]+r_b\mathcal L[s]-\mathcal L[r_\Gamma s]\}.
+\]
+The fixed-profile commutator alone omits transport/profile and coefficient
+terms. Keep the full three-dimensional plane-strain deviator and the pressure/
+background-load distinction. Bulk histories follow $v$, interface intensive
+histories follow the selected symmetric interface labels, and node tangential
+redistribution uses an ALE correction. The common normal speed satisfies
+$v^+\cdot n=v^-\cdot n=u_\Gamma\cdot n$. Normals follow geometric deformation;
+a stress-spin update is insufficient. Materially transported phase obstacles
+precede irreversible growth; an Eulerian maximum must not create a damage trail.
+
+The sharp-jump cohesive native remainder and lifting memory require their own
+complete correction. Current-arclength surface energy additionally requires
+shape/measure work under deformation; the existing fixed-geometry backward-Euler
+ledger omits that coupling. Enabling it is gated on the derived shape residual,
+pressure/work adjoint and independent measured checks, not a reference-area
+replacement or added damping. Stage A introduces no runtime selector or schema
+change. Later representation qualification and integrated lifecycle/transfer
+checks are required before any old guard can be lifted or new checkpoint written.
+
+
+\paragraph{Stage B first-part evidence (2026-11-02).}
+The bounded fixed-profile, no-advection, constant-coefficient comparison in
+\texttt{particle\_free/TRANSPORTED\_OBJECTIVE\_STAGE\_B\_FIXED\_REPORT.md}
+evolves independent direct physical and complete $T-B-R$ tensors on Cartesian
+DGQ2. It verifies the positive commutator source, approximately third-order
+spatial and first-order Lie temporal convergence. The initial six-point
+quadrature candidate fails its unchanged strict coarse-grid bound; the selected
+eight-point rule passes. No native selector, state owner or schema is modified.
+The remaining Stage B moving-profile/coefficient experiment is recorded below;
+coupled native pressure/work, lifecycle and cohesive shape-force qualification
+remain pending.
+
+
+\paragraph{Completed Stage B representation decision (2026-11-02).}
+The prescribed material shear/translation and layered-relaxation comparison in
+\texttt{particle\_free/TRANSPORTED\_OBJECTIVE\_STAGE\_B\_MOVING\_REPORT.md}
+verifies all constant-$G$ profile, extension-gradient and local/projected-rate
+terms with independent direct physical stress and Eulerian DGQ2 histories.
+Twenty numerical and eight consolidation/profile/selection checks pass.
+Select complete residual DGQ2 beside existing trial-stress DGQ2 and surface
+memory for the first native mature extension; retain direct stress as the
+independent control. A best-projection P1 residual fails the declared coarse
+accuracy target. The decision is conditional on the measured affine history
+space and does not coarsen mechanics or qualify native scalar/ALE transfer.
+No native parameter, accepted owner, checkpoint or default is changed by this
+experiment. Stage C must integrate source/tangent/observer and the complete
+history/geometry transaction; non-affine native and cohesive lifting/shape-work
+requirements remain separate. All older failed physical screens are retained.
+
+
+\paragraph{Native objective controls, partial Stage C (2026-11-03).}
+For the explicitly selected matched, fixed-profile mature reaction control,
+let $B=2\chi ZS$, $Q=\exp(\Delta t W^-)$ and $P$ be the common DGQ2 projection.
+The incoming fields are
+$\bar T=P[QT^-Q^T]$ and
+$\bar R=P[QR^-Q^T+QB^-Q^T-B^-]$.
+Use $\bar T-\bar R-B^-$ in the actual mechanical residual and observer, and
+publish $T^+=\beta\bar T+2\kappa D_3(v^+)$,
+$R^+=\beta\bar R$, $Z^+=\beta Z^-+\kappa V^+$.
+The admitted affine native strain is in DGQ2, so the published reconstruction
+matches the solved point stress. Accepted gradients are explicitly lagged;
+retry keys include the actual timestep. Schema6 stores both independent
+T/R fields, and restricted fixed-geometry mesh transfer carries both.
+
+For the newer cohesive reaction path, retain the complete native remainder
+and analytic lifting $H=2G K[b]$. Its independent tensor is enriched on formed
+lifting pieces and material sides, with
+$\bar T_{\rm ind}=P_{\rm cut}[T_{\rm ind}+Q(A+H)Q^T-(A+H)]$ before the existing
+backward-Euler source/relaxation. Local source restriction preserves the native
+point recurrence. Partition geometry, basis bounds, coefficients and native
+memory checkpoint together; temporary candidate tails are not persistent cut
+partitions. Sided tensor and lifting observations use the same side. The
+measured uncut DGQ2 rotation space fails and is explicitly rejected.
+
+These are reaction controls, not a completed material-transported native step.
+The distributed advection/layered-relaxation operators are locally verified
+separately. The restricted mature coupled extension below now connects
+material curve/profile/surface state and prescribed spatial coefficients.
+General moving transfer and the previously derived deformed-cohesive
+shape/pressure work remain pending. The short phase physical-energy and
+localized tip-admission screens remain failures, despite small numerical
+ledger errors. See
+\texttt{particle\_free/TRANSPORTED\_OBJECTIVE\_STAGE\_C\_REPORT.md} for measured
+criteria, source/commands and limits. Legacy defaults and trajectory laws stay
+unchanged; no old checkpoint is converted.
+
+\paragraph{Material geometry staging.}
+The manager may stage current coordinates and normal support widths for the
+same ordered material labels. Generic histories, orientation and committed
+rates persist; geometry generations and spatial-association caches change.
+Candidate validation precedes publication, and a nonthrowing owner swap permits
+rollback. This container operation alone advances no bulk tensor, phase profile
+or surface reaction. Resampling, nonlinear-trial mutation and unreconstructed
+boundary completion are not admitted. A transported native step still requires
+one joint geometry/profile/tensor/surface-history transaction.
+
+
+\paragraph{Restricted coupled mature material extension (2026-11-03).}
+The separate experimental \texttt{Jaumann DG material Lie} selection transports
+$T$ and $R+PB$ using accepted bulk velocity, with $B=2\chi ZS$ and common DGQ2
+projection $P$. The same velocity moves material labels and pulls back the Q1
+physical phase/obstacle; growth is disabled. Geometric normals are rebuilt,
+not rotated by stress spin. With DG transport $\mathcal A$ and total-spin
+$Q=\exp(\Delta t W^-)$, stage
+$\bar T=P[Q\mathcal A(T^-)Q^T]$ and
+$\bar R=P[Q\mathcal A(R^-+PB^-)Q^T-B_{\rm mapped}(Z^-)]$.
+All geometry, normalization, tensors and surface histories use the same parent.
+
+For positive prescribed Eulerian $\eta(x,t)$, freeze endpoint coefficients on
+bulk quadrature and surface labels, retain
+$Z_j^+=\beta_{\Gamma,j}Z_j^-+\kappa_{\Gamma,j}V_j^+$,
+$T^+=P[\beta_b\bar T+2\kappa_bD_3(v^+)]$ and
+$R^+=P[\beta_b(\bar R+B(Z^-))+2\kappa_b\mathcal L[V^+]-B(Z^+)]$.
+A converged outer iteration resolves the projected constitutive correction
+before the unchanged native residual/KKT/publication gate. This is an explicit
+first-order coefficient/transport splitting, not an exact finite-step change
+of variables or a full projected Newton tangent. Constant matched coefficients
+reduce to the preceding exponential reaction.
+
+Schema7 stores complete restricted material state and law/material identity;
+rejection restores the full accepted parent and invalidates derived maps.
+Local translation, completed-trial rejection and MPI restart through cell
+crossing are verified, with finite characteristic/profile errors reported in
+\texttt{particle\_free/TRANSPORTED\_OBJECTIVE\_STAGE\_C\_COUPLED\_REPORT.md}.
+The admitted scope is fixed Cartesian bulk mesh, same interior labels and
+constant $G$. No birth, resampling, boundary completion, moving AMR, deformed
+cohesive energy or production trajectory is qualified. Legacy defaults and
+old trajectory laws remain unchanged.
+
+
+\paragraph{Boundary/profile isolation evidence (2026-11-03).}
+Prescribed constant-velocity native DG transport satisfies the independently
+integrated volume/face identity
+$\dot E_h+F_{\partial\Omega}+D_{\rm upwind}=0$, with
+$E_h=\int|\tau_h|_3^2/(4G)$ and prescribed incoming tensor energy.
+The numerical upwind jump loss is separate from physical Maxwell dissipation.
+Exact polynomial inflow and zero inflow define different boundary-value
+problems. Compact tensor translation isolates approximately third-order spatial
+error; this component result does not qualify the coupled work balance.
+
+For the existing Q1 nodal characteristic pullback and
+$0\le C=|c|\Delta t/h\le1$, repeated interpolation adds variance
+$NC(1-C)h^2=|c|Th(1-C)$. Thus timestep reduction at fixed mesh does not remove
+its spatial diffusion floor. No boundary, interpolation, constitutive or solver
+algorithm is changed by these diagnostics. See
+\texttt{particle\_free/BOUNDARY\_PROFILE\_ISOLATION\_REPORT.md} for measured
+errors, signed projection cross terms and retained qualification limits.
+
+\paragraph{Optional bounded Q1 material profile (2026-11-03).}
+For the restricted mature material selector, let $A_-$ be the Q1 pullback
+at $x-\Delta t v^-(x)$ and $A_+$ the return lookup at $x+\Delta t v^-(x)$.
+The optional bounded MacCormack update is
+\[
+ \phi_{\rm tr}=\operatorname{clamp}_{[\phi_{\min},\phi_{\max}]}
+ \left(A_-\phi^-+\tfrac12(\phi^- - A_+A_-\phi^-)\right),
+\]
+where the bounds are extrema of accepted Q1 vertices in admitted departure
+cells. Missing departure coverage gives zero; missing return coverage retains
+the first-order forward value. Growth remains disabled, and this same field
+is the transported irreversibility obstacle. No Eulerian maximum, fixed phase
+cap or normalization floor is introduced. Q1 storage and the physical material
+transport equation are unchanged; this scheme is not a conservative remap or
+a higher-order characteristic trajectory.
+
+A separate accepted-trace inflow option freezes incoming $T^-$ and
+$R^-+PB^-$ during all DG transport substeps. It explicitly models constant-normal
+exterior continuation of the accepted tensors; original rotation and reaction
+follow once. The coupled accuracy reference uses identical finite-domain
+boundary data, pure-translation mechanical Dirichlet conditions and the existing
+natural top. Default Q1 remapping and zero tensor inflow remain. Nondefault
+selectors enter schema7 identity, with no new independent stored history or
+automatic conversion. All fields and maps remain in the same acceptance and
+rollback transaction. See transported specification section10.3 and
+\texttt{particle\_free/BOUNDED\_PROFILE\_PROTOCOL.md}.
+
+
+\paragraph{Coverage for the bounded material-profile experiment.}
+The nondefault profile or tensor-inflow selectors require full normal
+cross-section association. This existing policy is admitted for the transported
+mature route with finite interior endpoints; it creates no tangential
+continuation and does not enable the cohesive route. The existing
+inverse-transpose material support-width map is retained. Full-normal support
+enters the material checkpoint identity, so incompatible histories are rejected
+without conversion. Default Q1/zero-inflow identity is unchanged. Normal
+coverage and localization normalization are measured separately from profile
+accuracy in the coupled comparison.
+
 \end{document}

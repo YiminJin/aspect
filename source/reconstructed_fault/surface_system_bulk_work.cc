@@ -119,6 +119,7 @@ namespace aspect
     std::vector<double> phase(nq),previous_phase(nq),temperature(nq),pressure(nq);
     std::vector<SymmetricTensor<2,dim>> strain(nq);
     std::vector<Tensor<2,dim>> diagnostic_gradients(nq);
+    std::vector<Tensor<2,dim>> history_gradients(nq);
     std::vector<std::vector<double>> composition(intro.n_compositional_fields,std::vector<double>(nq));
     std::array<unsigned int,SymmetricTensor<2,dim>::n_independent_components> stress_fields;
     stress_fields.fill(numbers::invalid_unsigned_int);
@@ -134,6 +135,8 @@ namespace aspect
       if (cell->is_locally_owned())
         {
           fe.reinit(cell);
+          if (phase_field_fault.uses_jaumann_particle_stress())
+            fe[intro.extractors.velocities].get_function_gradients(this->get_old_solution(),history_gradients);
           const auto &associations=manager.get_stokes_qp_fault_associations(
                                      cell->id(),quadrature,fe.get_quadrature_points());
           fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(bulk_state,phase);
@@ -198,6 +201,11 @@ namespace aspect
                 input.temperature=temperature[q];
                 input.dynamic_pressure=pressure[q];
                 input.strain_rate=strain[q];
+                if (phase_field_fault.uses_jaumann_particle_stress())
+                  {
+                    input.history_velocity_gradient=history_gradients[q];
+                    input.has_history_velocity_gradient=true;
+                  }
                 input.slip_tensor=manager.get_shear_sense(a.fault_index)
                                   *symmetrize(outer_product(a.tangent,a.normal));
                 input.normal_tensor=symmetrize(outer_product(a.normal,a.normal));
