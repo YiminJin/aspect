@@ -599,6 +599,8 @@ namespace aspect
        */
       void solve_single_advection_iterated_newton_stokes (bool use_newton_iterations);
 
+      struct ReconstructedFaultAffineAudit;
+
       /** Solve the Stage-I coupled bulk/reconstructed-fault mechanical system. */
       void solve_reconstructed_fault_stokes (bool publish_history = true,
                                              ReconstructedFaultVector *trial_slip_rate = nullptr,

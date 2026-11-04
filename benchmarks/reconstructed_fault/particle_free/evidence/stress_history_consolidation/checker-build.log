@@ -1,0 +1,138 @@
+[ 12%] Building CXX object CMakeFiles/transported_objective_native.dir/native_checks.cc.o
+[ 25%] Building CXX object CMakeFiles/transported_material_energy.dir/material_checks.cc.o
+[ 37%] Building CXX object CMakeFiles/transported_material_native.dir/material_checks.cc.o
+[ 50%] Building CXX object CMakeFiles/transported_isolation_native.dir/material_checks.cc.o
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In member function ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:105:9: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+  105 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |         ^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:105:34: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+  105 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |                                  ^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In member function ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:105:9: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+  105 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |         ^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:105:34: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+  105 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |                                  ^~~
+In file included from /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:97:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:88:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 2>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 2> [4]’} [-Wmissing-braces]
+   88 |                     const std::array<Tensor,4> fields={2*k*D-k*slip,B,2*k*D,-k*slip};
+      |                                                ^~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In instantiation of ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const [with int dim = 2; std::string = std::__cxx11::basic_string<char>]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:104:94: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>’ used in nested name specifier
+  104 |         for(auto v:MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m))o<<' '<<v;
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In member function ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:105:9: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+  105 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |         ^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:105:34: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+  105 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |                                  ^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:88:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 3>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 3> [4]’} [-Wmissing-braces]
+   88 |                     const std::array<Tensor,4> fields={2*k*D-k*slip,B,2*k*D,-k*slip};
+      |                                                ^~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In instantiation of ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const [with int dim = 3; std::string = std::__cxx11::basic_string<char>]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:104:94: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<3>’ used in nested name specifier
+  104 |         for(auto v:MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m))o<<' '<<v;
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::transport_check() const [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:308:3:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:135:101: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>’ used in nested name specifier
+  135 |       const auto accepted=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model);
+      |                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+In file included from /opt/dealii/9.6-local/include/deal.II/base/array_view.h:20,
+                 from /opt/dealii/9.6-local/include/deal.II/base/mpi.h:20,
+                 from /home/ein/repository/aspect-pf-rsf-particle-free/include/aspect/global.h:28,
+                 from /home/ein/repository/aspect-pf-rsf-particle-free/include/aspect/simulator_access.h:25,
+                 from /home/ein/repository/aspect-pf-rsf-particle-free/include/aspect/material_model/phase_field_fault.h:24,
+                 from /home/ein/repository/aspect-pf-rsf-particle-free/include/aspect/material_model/phase_field_fault/dg_history_internal.h:5,
+                 from /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/spatial_relaxation.h:4,
+                 from /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:1:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:187:152: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>’ used in nested name specifier
+  187 |           AssertThrow(parent==model.fe_strain_state->dg_history && accepted==MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model),
+      |                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::capture(bool) [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:308:3:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:216:104: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>’ used in nested name specifier
+  216 |             && coefficients==MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model) && Z==state.Z && I==state.I;
+      |                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:222:140: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>’ used in nested name specifier
+  222 |       incoming=state.dg_history;Z=state.Z;I=state.I;coefficients=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model);
+      |                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+In file included from /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:97:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:88:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 2>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 2> [4]’} [-Wmissing-braces]
+   88 |                     const std::array<Tensor,4> fields={2*k*D-k*slip,B,2*k*D,-k*slip};
+      |                                                ^~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In instantiation of ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const [with int dim = 2; std::string = std::__cxx11::basic_string<char>]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:104:94: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>’ used in nested name specifier
+  104 |         for(auto v:MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m))o<<' '<<v;
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::transport_check() const [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:308:3:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:135:101: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<3>’ used in nested name specifier
+  135 |       const auto accepted=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model);
+      |                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:88:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 3>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 3> [4]’} [-Wmissing-braces]
+   88 |                     const std::array<Tensor,4> fields={2*k*D-k*slip,B,2*k*D,-k*slip};
+      |                                                ^~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In instantiation of ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const [with int dim = 3; std::string = std::__cxx11::basic_string<char>]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:104:94: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<3>’ used in nested name specifier
+  104 |         for(auto v:MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m))o<<' '<<v;
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+In file included from /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:97:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:88:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 2>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 2> [4]’} [-Wmissing-braces]
+   88 |                     const std::array<Tensor,4> fields={2*k*D-k*slip,B,2*k*D,-k*slip};
+      |                                                ^~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In instantiation of ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const [with int dim = 2; std::string = std::__cxx11::basic_string<char>]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:104:94: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>’ used in nested name specifier
+  104 |         for(auto v:MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m))o<<' '<<v;
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:187:152: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<3>’ used in nested name specifier
+  187 |           AssertThrow(parent==model.fe_strain_state->dg_history && accepted==MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model),
+      |                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::capture(bool) [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:308:3:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:216:104: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<3>’ used in nested name specifier
+  216 |             && coefficients==MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model) && Z==state.Z && I==state.I;
+      |                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc:222:140: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<3>’ used in nested name specifier
+  222 |       incoming=state.dg_history;Z=state.Z;I=state.I;coefficients=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model);
+      |                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:88:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 3>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 3> [4]’} [-Wmissing-braces]
+   88 |                     const std::array<Tensor,4> fields={2*k*D-k*slip,B,2*k*D,-k*slip};
+      |                                                ^~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In instantiation of ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const [with int dim = 3; std::string = std::__cxx11::basic_string<char>]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:217:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:104:94: error: incomplete type ‘aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<3>’ used in nested name specifier
+  104 |         for(auto v:MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m))o<<' '<<v;
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+make[2]: *** [CMakeFiles/transported_material_energy.dir/build.make:79: CMakeFiles/transported_material_energy.dir/material_checks.cc.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:160: CMakeFiles/transported_material_energy.dir/all] Error 2
+make[1]: *** Waiting for unfinished jobs....
+make[2]: *** [CMakeFiles/transported_material_native.dir/build.make:79: CMakeFiles/transported_material_native.dir/material_checks.cc.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:128: CMakeFiles/transported_material_native.dir/all] Error 2
+make[2]: *** [CMakeFiles/transported_objective_native.dir/build.make:79: CMakeFiles/transported_objective_native.dir/native_checks.cc.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:96: CMakeFiles/transported_objective_native.dir/all] Error 2
+make[2]: *** [CMakeFiles/transported_isolation_native.dir/build.make:79: CMakeFiles/transported_isolation_native.dir/material_checks.cc.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:192: CMakeFiles/transported_isolation_native.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2

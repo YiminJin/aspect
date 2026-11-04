@@ -54,9 +54,7 @@ namespace aspect { namespace MaterialModel
                     *(speed[q]*dg.shape_grad(i,q)+(trace(gradient[q])-op->relaxation_rate)*dg.shape_value(i,q));
               }
             local.inverse_mass.vmult(load,test);
-            std::vector<double> trial_shape(n);
-            for(unsigned int j=0;j<n;++j)trial_shape[j]=dg.shape_value(j,q);
-            op->source.push_back({dg.quadrature_point(q),local.indices,std::move(load),std::move(trial_shape)});
+            op->source.push_back({dg.quadrature_point(q),local.indices,std::move(load)});
             for(unsigned int d=0;d<dim;++d)maximum_speed[d]=std::max(maximum_speed[d],std::abs(speed[q][d]));
           }
         // Cartesian face patches support both sides of a hanging face. Native

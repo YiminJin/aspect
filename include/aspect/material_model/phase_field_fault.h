@@ -463,8 +463,6 @@ namespace aspect
         struct DGTransport;
         struct DGCheckpoint;
         struct DGTransfer;
-        struct DGLimiter;
-        struct DGLimiterStats;
         struct FENormalization;
         struct MaxwellCoefficients;
         std::shared_ptr<FEStrainState> fe_strain_state;
@@ -504,6 +502,12 @@ namespace aspect
           const LinearAlgebra::BlockVector &,const std::vector<double> &) const;
         double refresh_material_reaction(const LinearAlgebra::BlockVector &,const std::vector<double> &);
         SymmetricTensor<2,dim> material_reaction_correction(const CellId &,const Point<dim> &) const;
+        /** Project a material tensor field with the current staged phase and
+         * accepted velocity gradient. Owns integration only, never publication. */
+        using DGMaterialField = std::function<SymmetricTensor<2,dim>(
+          const std::vector<types::global_dof_index> &,const Point<dim> &,
+          const Point<dim> &,double,const Tensor<2,dim> &)>;
+        std::shared_ptr<DGHistory> project_material_tensor(const DGHistory &,const DGMaterialField &) const;
         void prepare_objective_dg_anchor();
         SymmetricTensor<2,dim> evaluate_mature_dg_memory(
           const Point<dim> &,double,const std::vector<double> &,const std::vector<double> &,
@@ -524,15 +528,17 @@ namespace aspect
         std::shared_ptr<FEStrainUpdate> prepare_dg_accepted_step(
           const DGTransport &,const LinearAlgebra::BlockVector &,double time) const;
         void commit_dg_accepted_step(const std::shared_ptr<FEStrainUpdate> &);
-        /** Independent tensor values, before any phase/localization correction. */
+        /** Raw independent coefficients: T for separated history, tau for direct.
+         * Physical reconstruction belongs to evaluate_dg_history_stress below. */
         std::vector<SymmetricTensor<2,dim>> evaluate_dg_trial_tensor(
                                            const DGHistory &, const CellId &, const Quadrature<dim> &) const;
         void prepare_dg_point_samples(const CellId &,const std::vector<Point<dim>> &) const;
+        /** Physical stress access shared by mechanics, traction and observers.
+         * Direct returns tau; separated reconstructs T-R-B with supplied Z/I. */
         SymmetricTensor<2,dim> evaluate_dg_history_stress(
           const DGHistory &, const std::vector<double> &, const std::vector<double> &,
           const CellId &, const Point<dim> &, double *evaluation_scale = nullptr,
           const LinearAlgebra::BlockVector *phase_trial = nullptr) const;
-        std::vector<double> dg_history_values() const;
         /** Forward error from native Q2 differentiation and DG source projection. */
         double dg_source_publication_allowance(const DGHistory &,const CellId &,const Point<dim> &) const;
         static void validate_fe_strain_publication(double error,double bound);
@@ -540,7 +546,6 @@ namespace aspect
          * upwind material advection and explicit prescribed source/inflow.
          * Relaxation, when selected, uses the existing G/eta. No spin. */
         using DGField = std::function<SymmetricTensor<2,dim>(const Point<dim> &,double)>;
-        using DGComponents = std::array<Vector<double>,SymmetricTensor<2,dim>::n_independent_components>;
         std::shared_ptr<DGTransport> make_dg_transport(
           const LinearAlgebra::BlockVector &,unsigned int quadrature_order,
           bool include_relaxation) const;
@@ -553,14 +558,7 @@ namespace aspect
           const DGTransport &,const DGField &,double time,unsigned int quadrature_order) const;
         std::shared_ptr<DGHistory> advance_dg_transport(
           const DGTransport &,const DGHistory &,const DGField &inflow,
-          const DGField &source,double time,double dt,
-          const DGLimiter *limiter = nullptr,DGLimiterStats *statistics = nullptr) const;
-        /** Optional scratch-only PF4 comparison. No runtime/default selector. */
-        std::shared_ptr<DGLimiter> make_dg_limiter(
-          const DGTransport &,const LinearAlgebra::BlockVector &,
-          bool constrained_candidates = false) const;
-        void limit_dg_transport(const DGLimiter &,const DGComponents &,DGComponents &,
-                                const DGField &,double,DGLimiterStats &) const;
+          const DGField &source,double time,double dt) const;
         /** Build fixed normal rays and their consistent surface projection once. */
         void prepare_fe_normalization_geometry(FEStrainState &);
         /** Values only unless dense derivatives or a directional action is requested.
@@ -575,9 +573,6 @@ namespace aspect
         void add_fe_normalization_action_pullback(
           const FENormalization &, const std::vector<double> &, const std::vector<double> &,
           const std::vector<double> &, std::vector<double> &) const;
-        /** Test-access-only fixed-entry reference; no checkpoint conversion or particle writes. */
-        void set_fe_diagnostic_reference(const LinearAlgebra::BlockVector &,
-                                         const std::vector<double> &,const std::vector<double> &);
         FEPhaseEnergy evaluate_fe_phase_energy_at(const LinearAlgebra::BlockVector &,
                                                   bool, bool,
                                                   const LinearAlgebra::BlockVector &,

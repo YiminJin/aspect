@@ -1,8 +1,10 @@
 # Transported objective histories: equations and executable design
 
 3 November 2026 — Stages A/B derivation with Stage C native controls in §10.
-This extends the selected total-spin model. A native transported configuration
-is not yet enabled or qualified. Current
+This extends the selected total-spin model. Stages A/B below began as a
+proposal; §§10.1–10.3 now describe the implemented, restricted mature material
+configuration and bounded local evidence. Broader transported/cohesive cases
+and production readiness remain unqualified. Current
 owners and proposed additions are in [IMPLEMENTATION_MAPS](IMPLEMENTATION_MAPS.md);
 plan, measured checks and readiness are in [REPORT](TRANSPORTED_OBJECTIVE_REPORT.md).
 Existing legacy algorithms, inputs and restart schemas stay authoritative for
@@ -724,3 +726,50 @@ checkpoint from the truncated or early unidentified-support path is rejected.
 The default Q1/zero-inflow/stationary-support identity is unchanged. See
 [the measured comparison](BOUNDED_PROFILE_TRANSPORT_REPORT.md) for coverage,
 normalization and the remaining spatial/time errors.
+
+### Direct physical-history experiment (2026-11-04; locally verified reference)
+
+The opt-in `Material stress representation = direct physical stress` retains
+`Jaumann DG material Lie`, fixed Cartesian DGQ2, constant G, endpoint spatial eta,
+growth-disabled mature geometry and the existing exponential Maxwell/age laws.
+It changes the discrete tensor representation, not the constitutive equation.
+`DGHistory::Representation::physical_stress` owns one xx/yy/xy tensor with
+zz=-xx-yy and no residual owner. Z remains a surface diagnostic and never enters
+physical stress access. Separated history remains the default.
+
+For each attempt, advection uses the accepted velocity and frozen accepted
+physical tensor inflow; finite Jaumann rotation uses the accepted FE gradient.
+The staged anchor is P[Q A(tau) Q^T]. The native reaction projects the complete
+`beta(x) anchor + 2 kappa(x) (D(v)-chi V S)` at the existing common Gauss rule.
+A frozen projection defect corrects the existing local Maxwell inner solve;
+constant and variable viscosity direct modes both iterate this correction.
+The final residual/publication gate must start from the converged bulk and slip
+unknowns, not reset V to its accepted-parent value. No tolerance changes apply.
+The unloaded accepted initialization and 0.1 s predictor remain comparison
+conventions; no initial physical stress is inferred from imposed loads.
+
+Schema7 direct material identity includes an explicit representation suffix;
+its residual-coefficient packet is empty and incompatible separated loads are
+rejected. The existing material transaction owns transport, geometry, profile,
+surface state, rejection and publication. No old checkpoint conversion, AMR,
+cohesive-law change or production qualification follows from this option.
+See `DIRECT_TRUE_STRESS_REPORT.md` for actual evidence and remaining limits.
+
+### Frozen finite-end qualification follow-up (2026-11-04)
+
+[FROZEN_FINITE_END_REPORT.md](FROZEN_FINITE_END_REPORT.md) compares the same
+frozen Q1 profile, labels/I and complete local reaction on16²–128² tensor grids.
+A cut-integrated reference separates uncut DGQ2 approximation from Gauss8–24
+quadrature error. The former dominates and is concentrated at finite mature
+curve ends; it is not the cohesive physical-tip gate. Projection energy
+identities apply in their stated integration measure. This is an offline
+qualification result, not a change to P_h, history space, source support,
+constitutive rate or work assembly. Direct remains an opt-in reference.
+
+## Consolidated implementation locations — 4 November 2026
+
+The equations/state ownership in this document are unchanged. See the current
+[module table](STRESS_HISTORY_CONSOLIDATION_REPORT.md#implemented-boundaries-and-caller-audit)
+for physical stress access, material projection, transport/rotation, transaction
+and benchmark/audit ownership. Earlier file locations are historical. No new
+constitutive, checkpoint, quadrature or convergence convention is selected.

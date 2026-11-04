@@ -1,3 +1,96 @@
+# Stress-history consolidation complete — 4 November 2026
+
+The tested direct-stress/publication baseline is preserved as `e4b74c556`,
+separately from the subsequent behavior-preserving restructuring. The local
+origin-tracking reference remains `69e8a10a93a08`; no fetch/push was performed.
+See [report](STRESS_HISTORY_CONSOLIDATION_REPORT.md),
+[baseline](STRESS_HISTORY_CONSOLIDATION_BASELINE.md) and
+[plan](STRESS_HISTORY_CONSOLIDATION_PLAN.md).
+
+- Serial limiter/statistics and standalone spatial relaxation now live in
+  benchmark support; unused production wrappers and limiter hooks are removed.
+- Physical stress access, material projection and affine residual reporting have
+  identifiable modules. Direct/separated share mechanics; mature/cohesive state
+  remains distinct. Transaction ownership and checkpoint meanings are unchanged.
+- All 183170 assertions/152 unit cases pass. Four direct/separated constant/
+  layered pairs agree within 1.58e−15 bulk and 1.07e−14 surface; default,
+  forced rejection and 2→4-rank restart pass. The layered operator CSV is
+  byte-identical. Migrated serial fixtures pass; measured roundoff is reported.
+- All 39 protected files match their saved hashes. Defaults, incoming-gradient
+  spin lag, quadrature and criteria are unchanged; checker DSOs were rebuilt.
+  No production run, checkpoint conversion or new physical qualification.
+
+Scientific work is paused. Finite-end approximation, coupled energy and the
+independent cohesive failures remain open. A frozen endpoint-aware tensor-space
+comparison is the next justified scientific experiment **only if selected**.
+Earlier recommendations below are historical. Cleanup losses remain unchanged.
+
+## Historical record: Frozen finite-end comparison complete — 4 November 2026
+
+The selected common-frozen spatial/quadrature study is complete. **Uncut DGQ2
+approximation at finite mature curve ends dominates; increasing quadrature alone
+is not the remedy.** [Report](FROZEN_FINITE_END_REPORT.md) ·
+[Protocol](FROZEN_FINITE_END_PROTOCOL.md) ·
+[Evidence/figure](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/frozen_finite_end/README.md).
+
+- One retained64² Q1 profile, 18 labels/I and prescribed source are fixed across
+  16²–128² tensor grids, q8–24 and constant/layered eta. Cut integration resolves
+  all source breaks; Gauss6→10 reference changes are below2.7e−14 Pa m.
+- At64² constant eta, best tensor error is2.888e−4 Pa m; q8 quadrature error is
+  3.211e−5. More than99.99% of squared best error is in fixed end windows.
+  Fine-grid best errors scale near sqrt(h). Best point/work traction errors
+  improve .936%/.317%→.579%/.159% from64² to128². Layered results agree.
+- q8→24 reduces quadrature error but reduces total64² tensor error only.59%.
+  Projection loss is nonnegative in its own rule; its independently integrated
+  energy difference can be negative. Both measures are retained.
+- Native source/binaries/checkpoints and defaults are unchanged. All numerical
+  reference/identity checks pass. A measure-zero endpoint ownership error in
+  the diagnostic was corrected to a one-sided limit; original evidence remains.
+- Keep direct history as an opt-in reference and separated history as default.
+  Next justified experiment: a frozen endpoint-aware tensor-space prototype
+  with matching work integration, before any coupled implementation. It is not
+  enabled or automatically selected. Broader Stage C, cohesive gates and
+  production remain open; prior campaigns stay paused and cleanup losses remain.
+
+## Historical record: Direct physical-stress comparison complete — 4 November 2026
+
+The selected opt-in direct physical-history implementation and bounded native comparison are complete. **Retain it as an independent reference; keep separated history as default.** See [DIRECT_TRUE_STRESS_REPORT.md](DIRECT_TRUE_STRESS_REPORT.md) and its evidence index.
+
+- Direct owns 27 DGQ2 coefficients/cell, versus 54 for separated T/R; auxiliary Z is mechanically inactive. Both constant and spatial eta use a converged projected reaction in direct mode. A final-gate slip-guess defect was fixed without changing tolerances.
+- Constant ± and layered + coupled pairs pass. Positive direct/separated stress difference is 2.24% at 32² and 1.59% at 64², with unchanged .1 m labels. More than 99.5% of squared difference is near finite curve ends; central-band difference improves .173%→.0414%.
+- Endpoint energy remains about17.20%→8.741% under joint refinement, essentially unchanged by representation. Native source-projection losses are separately measured; no new dissipation or energy gate was introduced.
+- Rejection/cutback is bitwise identical to the matched accepted schedule. Layered restart2→4 continues two cell-crossing steps within3.2e-15 bulk/7.2e-15 surface differences. Both representation mismatches reject. Default regression and183170 assertions in152 unit cases pass. The changed old/new layered-control arithmetic comparison fails its original bound and remains recorded; A/B uses a fresh corrected control.
+- Production, moving AMR, birth, cohesive energy/tip/shape work remain unqualified. The prior broader accuracy campaign stays paused. Next justified experiment: frozen finite-end stress/projection/quadrature comparison, only on a new user selection. Protected binaries/checkpoints, BP3 evidence and inherited39/45-frame/temporary-log losses are preserved.
+
+## Historical record: Positive-translation refinement complete — 3 November 2026
+
+The two selected 64² constant-viscosity runs at .05 m initial label spacing
+and dt=.025/.0125 s passed, using four MPI ranks sequentially and unchanged
+native source/binaries. [Report](POSITIVE_TRANSLATION_REFINEMENT_REPORT.md) ·
+[Evidence/figure](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/positive_refinement/README.md).
+
+- Endpoint active-energy remainder: 8.7411% → 4.4151%; one-halving order .9859.
+  Cost: 106.10 → 180.08 s. No endpoint or constitutive change was made.
+- Surface refinement at fixed dt changes stress .520%, work traction .903%,
+  and slip rate .670%. The slip-rate difference is already .669% at initialization.
+- Timestep halving at fixed grids changes stress .861%, point/work traction
+  .0442%/.0258%, and slip rate .0563%. These are pairwise sensitivities,
+  not absolute continuum-error guarantees.
+- Raw boundary face-power magnitude worsens from 3.115e-6 to 4.192e-6 W/m;
+  weak reaction power remains near1e-20 W/m. Boundary traction is unqualified.
+- All 8/16 physical steps publish exactly once, with zero retries. Independent
+  profile, donor-bound and surface-source checks pass. Earlier lifecycle/unit
+  evidence is reused for unchanged code; production readiness is not claimed.
+
+Next: diagnose independent weak boundary residual/reaction components and raw
+face traction resultants from these saved states before further trajectories
+or solver changes. Broader Stage C and the unrelated cohesive energy/tip gates
+remain open. Protected data and inherited cleanup losses are unchanged; no
+server/production restart or deferred physical campaign ran. The two-run
+recommendation in the historical entries below is now completed.
+
+---
+
 # Bounded profile implementation and coupled comparison — 3 November 2026
 
 **Implemented and locally verified:** native donor-bounded MacCormack on the

@@ -640,3 +640,21 @@ against the corrected core. Record full production boundary/material qualificati
 separately from a mechanics solve and resource-limited attempts. The historical
 unbuffered 45-degree failure does not block qualified 60-degree completion. Stop
 for review before server execution, another cleanup section, or R7.
+
+## Stress-history module boundary update — 4 November 2026
+
+Behavior-preserving consolidation is documented in
+[particle_free/STRESS_HISTORY_CONSOLIDATION_REPORT.md](particle_free/STRESS_HISTORY_CONSOLIDATION_REPORT.md).
+`dg_stress_access.cc` supplies common physical stress observations (direct tau
+or separated T−R−B) and stationary caches. `dg_history.cc` retains initial/source
+projection; `dg_material_projection.cc` owns material integration only.
+`dg_material.cc` retains the geometry/history preparation transaction and
+existing transport/rotation ordering; `dg_material_reaction.cc` retains coupled
+reaction and `dg_accepted.cc` retains checkpoint/publication ownership. Cohesive
+formed-side histories remain separate. The incoming-gradient spin lag,
+quadrature, schemas and criteria are unchanged. The solver's optional affine
+residual audit now lives in `solver/reconstructed_fault_affine_audit.h`;
+mechanics and acceptance stay in the same solver. Serial limiter/statistics and
+standalone spatial relaxation are benchmark support, with checker-only reference
+setup/snapshots in `tests/phase_field_fault_test_access.h`. Smooth serial PF5
+transport remains supported. Rebuild matching DSOs after internal API changes.

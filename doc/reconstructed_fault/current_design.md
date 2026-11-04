@@ -3423,3 +3423,47 @@ restart; default Q1/zero-inflow behavior and identity remain. The existing
 material support-width map remains in force. The corrected coupled comparison
 and clipped-support controls are distinguished in
 [the profile report](particle_free/BOUNDED_PROFILE_TRANSPORT_REPORT.md).
+
+
+### Direct physical-stress representation experiment (2026-11-04)
+
+The selected mature material extension optionally stores tagged DGQ2 physical
+stress instead of T and R. It retains the same total-material Jaumann equation,
+exponential Maxwell reaction, incoming-age friction convention, transported Q1
+profile, geometry transaction and constant-G/spatial-eta restrictions. Physical
+stress access returns the tensor directly; diagnostic Z has no mechanical or
+energy role. DG advection and accepted-gradient finite rotation precede projection
+of the complete endpoint source. Constant-eta direct mode also uses the existing
+projection-correction outer iteration; its terminal gate receives the converged
+private slip guess. This is a discrete representation comparison, not a change
+to cohesive energy or an enablement of growth/AMR. Separated defaults remain.
+See [the direct report](particle_free/DIRECT_TRUE_STRESS_REPORT.md) and the
+[transported specification](particle_free/TRANSPORTED_OBJECTIVE_SPEC.md) for
+current verification, checkpoint identity and adoption status.
+
+The subsequent [frozen finite-end comparison](particle_free/FROZEN_FINITE_END_REPORT.md)
+holds Q1 phase, surface labels/I and local forcing fixed. Cut integration shows
+that the uncut DGQ2 approximation of the finite-end source jump dominates
+ordinary quadrature error. It does not change the source or introduce a tip
+model. Higher quadrature alone is insufficient; endpoint-aware representation
+is a proposed frozen experiment, not an enabled algorithm. Energy projection
+identities must state their integration measure. Direct remains an opt-in
+reference and separated history remains default.
+
+## Stress-history module boundary update — 4 November 2026
+
+Behavior-preserving consolidation is documented in
+[particle_free/STRESS_HISTORY_CONSOLIDATION_REPORT.md](particle_free/STRESS_HISTORY_CONSOLIDATION_REPORT.md).
+`dg_stress_access.cc` supplies common physical stress observations (direct tau
+or separated T−R−B) and stationary caches. `dg_history.cc` retains initial/source
+projection; `dg_material_projection.cc` owns material integration only.
+`dg_material.cc` retains the geometry/history preparation transaction and
+existing transport/rotation ordering; `dg_material_reaction.cc` retains coupled
+reaction and `dg_accepted.cc` retains checkpoint/publication ownership. Cohesive
+formed-side histories remain separate. The incoming-gradient spin lag,
+quadrature, schemas and criteria are unchanged. The solver's optional affine
+residual audit now lives in `solver/reconstructed_fault_affine_audit.h`;
+mechanics and acceptance stay in the same solver. Serial limiter/statistics and
+standalone spatial relaxation are benchmark support, with checker-only reference
+setup/snapshots in `tests/phase_field_fault_test_access.h`. Smooth serial PF5
+transport remains supported. Rebuild matching DSOs after internal API changes.

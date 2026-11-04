@@ -1,3 +1,4 @@
+#include "../../../../../tests/phase_field_fault_test_access.h"
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
@@ -101,7 +102,7 @@ namespace aspect
         if(!m.fe_strain_state)return "uninitialized";
         const auto &s=*m.fe_strain_state;
         std::ostringstream o;o<<std::setprecision(17)<<s.accepted_publications<<' '<<s.geometry_publications<<' '<<s.geometry_version;
-        for(auto v:m.dg_history_values())o<<' '<<v;
+        for(auto v:MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m))o<<' '<<v;
         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
         const auto block=this->introspection().variable("phase_field").block_index;
         for(auto i:s.displacement_history.block(block).locally_owned_elements())o<<' '<<s.displacement_history.block(block)[i];

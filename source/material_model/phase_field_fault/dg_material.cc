@@ -85,49 +85,11 @@ namespace aspect { namespace MaterialModel
     const auto &space=*old.dg_history->space;
     const auto comm=this->get_mpi_communicator();
     const auto phase_block=this->introspection().variable("phase_field").block_index;
-    const auto phase_component=this->introspection().variable("phase_field").first_component_index;
     const auto velocity_component=this->introspection().component_indices.velocities[0];
     const QGauss<dim> rule(std::max(8u,fe_bulk_normal_quadrature_points));
-    const auto project=[&](const auto &field)
-      {
-        TimerOutput::Scope timer(this->get_computing_timer(),"Material tensor projection");
-        auto result=std::make_shared<DGHistory>();result->space=old.dg_history->space;
-        result->representation=old.dg_history->representation;
-        std::array<LinearAlgebra::Vector,SymmetricTensor<2,dim>::n_independent_components> owned;
-        for(auto &v:owned)v.reinit(space.dofs.locally_owned_dofs(),comm);
-        FEValues<dim> dg(this->get_mapping(),space.element,rule,update_values|update_JxW_values|update_quadrature_points);
-        FEValues<dim> native(this->get_mapping(),this->get_fe(),rule,update_values|update_gradients);
-        std::vector<Tensor<2,dim>> gradients(rule.size());std::vector<double> phase(rule.size());
-        std::vector<types::global_dof_index> ids(9);
-        for(const auto &entry:fe_strain_state->cells)
-          {
-            native.reinit(entry.second);dg.reinit(space.cells.at(entry.first));space.cells.at(entry.first)->get_dof_indices(ids);
-            native[this->introspection().extractors.velocities].get_function_gradients(this->get_old_solution(),gradients);
-            native[FEValuesExtractors::Scalar(phase_component)].get_function_values(fe_strain_state->displacement_history,phase);
-            FullMatrix<double> mass(9,9);std::array<Vector<double>,SymmetricTensor<2,dim>::n_independent_components> rhs;
-            for(auto &v:rhs)v.reinit(9);
-            for(unsigned q=0;q<rule.size();++q)
-              {
-                const auto value=field(ids,rule.point(q),dg.quadrature_point(q),phase[q],gradients[q]);
-                for(unsigned i=0;i<9;++i)
-                  {
-                    const double w=dg.JxW(q)*dg.shape_value(i,q);
-                    for(unsigned j=0;j<9;++j)mass(i,j)+=w*dg.shape_value(j,q);
-                    for(unsigned c=0;c<rhs.size();++c)rhs[c][i]+=w*value[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)];
-                  }
-              }
-            mass.gauss_jordan();
-            for(unsigned c=0;c<rhs.size();++c)
-              {Vector<double> v(9);mass.vmult(v,rhs[c]);for(unsigned i=0;i<9;++i)owned[c][ids[i]]=v[i];}
-          }
-        for(unsigned c=0;c<owned.size();++c)
-          {
-            owned[c].compress(VectorOperation::insert);
-            result->trial_stress[c].reinit(space.dofs.locally_owned_dofs(),space.relevant,comm);
-            result->trial_stress[c]=owned[c];
-          }
-        return result;
-      };
+    const auto project=[&](const DGMaterialField &field)
+      { return project_material_tensor(*old.dg_history,field); };
+
     const auto value=[&](const DGHistory &h,const auto &ids,const Point<dim> &unit)
       {
         SymmetricTensor<2,dim> result;

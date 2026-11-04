@@ -2,7 +2,7 @@
  * Compact whole-polynomial reconstruction adapted from
  * ../aspect-weno/source/simulator/limiters.cc, apply_WENO_limiter_to_dg_solutions.
  * Tensor RMS detectors and the Q2 reference smoothness are PF4 experiments. */
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include "serial_dg_limiter.h"
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/utilities.h>
 #include <deal.II/base/quadrature_lib.h>
@@ -14,15 +14,15 @@
 
 namespace aspect
 {
-  namespace MaterialModel
+  namespace ParticleFreeBenchmark
   {
     template <int dim>
-    std::shared_ptr<typename PhaseFieldFault<dim>::DGLimiter>
-    PhaseFieldFault<dim>::make_dg_limiter(const DGTransport &op,
+    std::shared_ptr<typename SerialDGLimiter<dim>::DGLimiter>
+    SerialDGLimiter<dim>::make_dg_limiter(const DGTransport &op,
                                           const LinearAlgebra::BlockVector &velocity,
                                           const bool constrained_candidates) const
     {
-      AssertThrow(dim==2 && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1,
+      AssertThrow(dim==2 && Utilities::MPI::n_mpi_processes(context.get_mpi_communicator())==1,
                   ExcMessage("PF4 limiting requires serial fixed Cartesian 2D DGQ2."));
       auto result=std::make_shared<DGLimiter>();
       auto &data=*result;
@@ -67,9 +67,9 @@ namespace aspect
       const double reference_length=lo.distance(hi);
       const double reference_area=(hi[0]-lo[0])*(hi[1]-lo[1]);
       const QGauss<dim-1> face_rule(op.quadrature_order);
-      FEFaceValues<dim> face(this->get_mapping(),element,face_rule,
+      FEFaceValues<dim> face(context.get_mapping(),element,face_rule,
                              update_values|update_quadrature_points|update_normal_vectors|update_JxW_values);
-      FEFaceValues<dim> flow(this->get_mapping(),this->get_fe(),face_rule,update_values);
+      FEFaceValues<dim> flow(context.get_mapping(),context.get_fe(),face_rule,update_values);
       std::vector<Tensor<1,dim>> face_velocity(face_rule.size());
       // Reference coordinates outside a neighbor are intentional extrapolation.
       const auto reference_point=[](const auto &cell,const Point<dim> &p)
@@ -119,8 +119,8 @@ namespace aspect
                   append(target->neighbor(f));
                 }
               face.reinit(target,f);
-              flow.reinit(fe_strain_state->cells.at(cell.id),f);
-              flow[this->introspection().extractors.velocities].get_function_values(velocity,face_velocity);
+              flow.reinit(Access::native_cells(model).at(cell.id),f);
+              flow[context.introspection().extractors.velocities].get_function_values(velocity,face_velocity);
               for (unsigned int q=0; q<face_rule.size(); ++q)
                 if (face_velocity[q]*face.normal_vector(q)<0.)
                   {
@@ -224,13 +224,13 @@ namespace aspect
 
 
     template <int dim>
-    void PhaseFieldFault<dim>::limit_dg_transport(const DGLimiter &data,
+    void SerialDGLimiter<dim>::limit_dg_transport(const DGLimiter &data,
                                                   const DGComponents &incoming,DGComponents &result,
                                                   const DGField &boundary,const double time,
                                                   DGLimiterStats &statistics) const
     {
-      AssertThrow(dim==2 && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
-                  && this->get_triangulation().get_vertices()==data.mesh_vertices
+      AssertThrow(dim==2 && Utilities::MPI::n_mpi_processes(context.get_mpi_communicator())==1
+                  && context.get_triangulation().get_vertices()==data.mesh_vertices
                   && &incoming!=&result && std::isfinite(data.threshold) && data.threshold>0.,
                   ExcMessage("PF4 limiter requires a separate output, serial fixed mesh and positive threshold."));
       using TensorType=SymmetricTensor<2,dim>;
@@ -564,9 +564,96 @@ namespace aspect
       if (statistics.stage_observer) statistics.stage_observer(incoming,result,time,statistics.last);
     }
 
+    template <int dim>
+    std::shared_ptr<typename SerialDGLimiter<dim>::DGHistory>
+    SerialDGLimiter<dim>::advance_dg_transport(
+      const DGTransport &op,const DGHistory &incoming,const DGField &inflow,
+      const DGField &source,const double time,const double dt,
+      const DGLimiter *limiter,DGLimiterStats *statistics) const
+    {
+      AssertThrow(!op.distributed,ExcMessage("Serial limiter experiment requires the serial transport control."));
+      AssertThrow(incoming.space==op.space && (!limiter || limiter->space==op.space)
+                  && context.get_triangulation().get_vertices()==op.mesh_vertices,
+                  ExcMessage("PF4 transport rejects changed spaces or mesh motion."));
+      AssertThrow(std::isfinite(time) && std::isfinite(dt) && dt>0.
+                  && dt*(op.inverse_advection_time+op.relaxation_rate)<=.125,
+                  ExcMessage("PF4 explicit transport requires finite positive dt and its bounded diagnostic CFL."));
+      using Components=std::array<Vector<double>,SymmetricTensor<2,dim>::n_independent_components>;
+      const auto n=op.space->dofs.n_dofs();
+      Components initial,stage1,stage2,rhs;
+      const auto limit=[&](Components &stage,const double stage_time)
+      {
+        if (limiter)
+          {
+            AssertThrow(statistics,ExcMessage("PF4 limiter requires comparison statistics."));
+            Components candidate;
+            limit_dg_transport(*limiter,stage,candidate,inflow,stage_time,*statistics);
+            stage=std::move(candidate);
+          }
+      };
+      for (unsigned int c=0; c<initial.size(); ++c)
+        {
+          initial[c].reinit(n);
+          rhs[c].reinit(n);
+          for (unsigned int i=0; i<n; ++i)
+            {
+              initial[c][i]=incoming.trial_stress[c][i];
+              AssertThrow(std::isfinite(initial[c][i]),ExcMessage("Nonfinite incoming DG transport history."));
+            }
+        }
+      const auto evaluate=[&](const Components &values,const double stage_time)
+      {
+        for (unsigned int c=0; c<values.size(); ++c) op.matrix.vmult(rhs[c],values[c]);
+        for (unsigned int kind=0; kind<2; ++kind)
+          for (const auto &load:kind?op.inflow:op.source)
+            {
+              const auto value=(kind?inflow:source)(load.point,stage_time);
+              AssertThrow(std::isfinite(value.norm()),ExcMessage("Nonfinite DG transport source or inflow."));
+              for (unsigned int c=0; c<rhs.size(); ++c)
+                {
+                  const double component=value[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)];
+                  if (component!=0.)
+                    for (unsigned int i=0; i<load.indices.size(); ++i) rhs[c][load.indices[i]]+=load.weights[i]*component;
+                }
+            }
+      };
+      evaluate(initial,time);
+      stage1=initial;
+      for (unsigned int c=0; c<initial.size(); ++c) stage1[c].add(dt,rhs[c]);
+      limit(stage1,time+dt);
+      evaluate(stage1,time+dt);
+      stage2=stage1;
+      for (unsigned int c=0; c<initial.size(); ++c)
+        {
+          stage2[c].add(dt,rhs[c]);
+          stage2[c].sadd(.25,.75,initial[c]);
+        }
+      limit(stage2,time+.5*dt);
+      evaluate(stage2,time+.5*dt);
+      for (unsigned int c=0; c<initial.size(); ++c)
+        {
+          stage2[c].add(dt,rhs[c]);
+          stage2[c].sadd(2./3.,1./3.,initial[c]);
+        }
+      limit(stage2,time+dt);
+      auto result=std::make_shared<DGHistory>();
+      result->space=op.space;
+      for (unsigned int c=0; c<stage2.size(); ++c)
+        {
+          result->trial_stress[c].reinit(op.space->dofs.locally_owned_dofs(),op.space->relevant,context.get_mpi_communicator());
+          for (unsigned int i=0; i<n; ++i)
+            {
+              AssertThrow(std::isfinite(stage2[c][i]),ExcMessage("Nonfinite DG transport candidate."));
+              result->trial_stress[c][i]=stage2[c][i];
+            }
+          result->trial_stress[c].compress(VectorOperation::insert);
+        }
+      return result;
+    }
 #define INSTANTIATE(dim) \
-  template std::shared_ptr<PhaseFieldFault<dim>::DGLimiter> PhaseFieldFault<dim>::make_dg_limiter(const DGTransport &,const LinearAlgebra::BlockVector &,bool) const; \
-  template void PhaseFieldFault<dim>::limit_dg_transport(const DGLimiter &,const DGComponents &,DGComponents &,const DGField &,double,DGLimiterStats &) const;
+  template std::shared_ptr<SerialDGLimiter<dim>::DGLimiter> SerialDGLimiter<dim>::make_dg_limiter(const DGTransport &,const LinearAlgebra::BlockVector &,bool) const; \
+  template void SerialDGLimiter<dim>::limit_dg_transport(const DGLimiter &,const DGComponents &,DGComponents &,const DGField &,double,DGLimiterStats &) const; \
+  template std::shared_ptr<SerialDGLimiter<dim>::DGHistory> SerialDGLimiter<dim>::advance_dg_transport(const DGTransport &,const DGHistory &,const DGField &,const DGField &,double,double,const DGLimiter *,DGLimiterStats *) const;
     ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE
   }

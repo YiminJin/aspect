@@ -1,0 +1,20 @@
+{
+  "command": [
+    "env",
+    "LD_LIBRARY_PATH=/opt/openmpi/5.0.6/lib",
+    "/opt/openmpi/5.0.6/bin/mpirun",
+    "-n",
+    "1",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/stress-history-consolidation/limiter/input.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "exit_code": 0,
+  "seconds": 3.9743559419985104,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

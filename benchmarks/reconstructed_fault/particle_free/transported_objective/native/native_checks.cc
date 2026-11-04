@@ -1,3 +1,5 @@
+#include "../../../../../tests/phase_field_fault_test_access.h"
+#include "spatial_relaxation.h"
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
@@ -131,7 +133,7 @@ namespace aspect { namespace Postprocess
     void transport_check() const
     {
       const auto &model=Plugins::get_plugin_as_type<const Model>(this->get_material_model());
-      const auto accepted=model.dg_history_values();
+      const auto accepted=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model);
       const auto parent=model.fe_strain_state->dg_history;
       struct Flow : Function<dim>
       {
@@ -148,7 +150,8 @@ namespace aspect { namespace Postprocess
           VectorTools::interpolate(this->get_mapping(),this->get_dof_handler(),Flow(this->get_fe().n_components(),c,cy),owned);
           LinearAlgebra::BlockVector velocity(this->get_solution());velocity=owned;
           const auto op=model.make_dg_transport(velocity,8,false);
-          if(layered)op->add_relaxation([](const Point<dim> &x){return .5+.3*std::tanh((x[1]-637.25)/120.);},this->get_mpi_communicator());
+          ParticleFreeBenchmark::SpatialRelaxation relaxation;
+          if(layered)relaxation.template attach<typename Model::DGTransport,dim>(*op,[](const Point<dim> &x){return .5+.3*std::tanh((x[1]-637.25)/120.);},this->get_mapping(),this->get_mpi_communicator());
           const auto exact=[c,cy,layered](const Point<dim> &x,double time)
             {
               const double u=(x[0]-c*time+200)/180.,v=(x[1]-cy*time-637.25)/160.;
@@ -182,7 +185,7 @@ namespace aspect { namespace Postprocess
           const auto comm=this->get_mpi_communicator();
           error=Utilities::MPI::sum(error,comm);reference=Utilities::MPI::sum(reference,comm);
           maximum=Utilities::MPI::max(maximum,comm);
-          AssertThrow(parent==model.fe_strain_state->dg_history && accepted==model.dg_history_values(),
+          AssertThrow(parent==model.fe_strain_state->dg_history && accepted==MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model),
                       ExcMessage("Nonpublishing transport operator changed accepted history."));
           if(Utilities::MPI::this_mpi_process(comm)==0)
             {
@@ -211,13 +214,13 @@ namespace aspect { namespace Postprocess
       if (captured==this->get_timestep_number())
         {
           const bool unchanged=publications==0 && incoming==state.dg_history
-            && coefficients==model.dg_history_values() && Z==state.Z && I==state.I;
+            && coefficients==MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model) && Z==state.Z && I==state.I;
           AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(unchanged),this->get_mpi_communicator())==1,
                       ExcMessage("Rejected objective DG trial modified accepted tensor/residual/scalar history."));
           ++retries;
         }
       captured=this->get_timestep_number();publications=0;
-      incoming=state.dg_history;Z=state.Z;I=state.I;coefficients=model.dg_history_values();
+      incoming=state.dg_history;Z=state.Z;I=state.I;coefficients=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model);
       lagged.reinit(this->get_old_solution());lagged=this->get_old_solution();
     }
   public:

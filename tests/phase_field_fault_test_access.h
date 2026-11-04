@@ -13,6 +13,7 @@
 #define _aspect_tests_phase_field_fault_test_access_h
 
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
+#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
 
 namespace aspect
 {
@@ -25,6 +26,11 @@ namespace aspect
       class PhaseFieldFaultTestAccess
       {
         public:
+          using DGHistory=typename PhaseFieldFault<dim>::DGHistory;
+          using DGTransport=typename PhaseFieldFault<dim>::DGTransport;
+          using DGField=typename PhaseFieldFault<dim>::DGField;
+          static const auto &native_cells(const PhaseFieldFault<dim> &model)
+          { return model.fe_strain_state->cells; }
           using PointSample = typename PhaseFieldFault<dim>::NormalizationPointSample;
           using NormalizationPointLookupCache =
             typename PhaseFieldFault<dim>::NormalizationPointLookupCache;
@@ -77,7 +83,17 @@ namespace aspect
 
           static std::vector<double> dg_history_values(const PhaseFieldFault<dim> &model)
           {
-            return model.dg_history_values();
+            AssertThrow(model.dg_trial_stress_history && model.fe_strain_state && model.fe_strain_state->dg_history,
+                        ExcMessage("Missing DG history for the diagnostic snapshot."));
+            const auto &history=*model.fe_strain_state->dg_history;
+            std::vector<double> values;
+            for (const auto &component : history.trial_stress)
+              for (const auto i : component.locally_owned_elements())
+                values.push_back(component[i]);
+            if (history.residual)
+              for (const auto &component:history.residual->trial_stress)
+                for (const auto i:component.locally_owned_elements()) values.push_back(component[i]);
+            return values;
           }
 
           static void clear_native_stress_samples(PhaseFieldFault<dim> &model)
@@ -295,7 +311,18 @@ namespace aspect
                                                                const LinearAlgebra::BlockVector &reference,const std::vector<double> &Z,const std::vector<double> &I)
           {
             const auto saved=m.fe_strain_state;
-            m.set_fe_diagnostic_reference(reference,Z,I);
+            AssertThrow(m.consistent_endpoint_phase && m.fe_strain_state && m.get_timestep_number()>0
+                        && Z.size()==m.fe_strain_state->Z.size()
+                        && I.size()==Z.size(),ExcMessage("Invalid restricted fixed-entry reference."));
+            for (unsigned int i=0; i<I.size(); ++i)
+              AssertThrow(std::isfinite(Z[i]) && std::isfinite(I[i]) && I[i]>0.,ExcMessage("Undefined diagnostic surface history."));
+            auto trial=std::make_shared<typename PhaseFieldFault<dim>::FEStrainState>(*m.fe_strain_state);
+            trial->displacement_history=reference;
+            trial->Z=Z;
+            trial->I=I;
+            trial->stress_samples.clear();
+            trial->committed_step=m.get_timestep_number()-1;
+            m.fe_strain_state=std::move(trial);
             return [&m,saved]()
             {
               m.fe_strain_state=saved;

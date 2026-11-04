@@ -53,7 +53,7 @@ namespace aspect
         std::vector<double> persistent() const
         {
           const auto &m=model();
-          auto v=m.dg_history_values();
+          auto v=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m);
           const auto &s=*m.fe_strain_state;
           v.insert(v.end(),s.Z.begin(),s.Z.end());
           v.insert(v.end(),s.I.begin(),s.I.end());

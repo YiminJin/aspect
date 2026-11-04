@@ -1,0 +1,18 @@
+{
+  "before": "build-particle-free/transported-objective/stage-c/runs/layered-native-r3/output/objective-dg-transport.csv",
+  "after": "build-particle-free/transported-objective/stage-c/runs/consolidate-layered-operator/output/objective-dg-transport.csv",
+  "errors": {
+    "direction": 0.0,
+    "cells": 0.0,
+    "steps": 0.0,
+    "dt_s": 0.0,
+    "distance_m": 0.0,
+    "relative_L2": 0.0,
+    "max_error_Pa": 0.0,
+    "layered": 0.0,
+    "max_rate_per_s": 0.0
+  },
+  "identical_bytes": true,
+  "before_sha256": "eb777bb02f5948d6d74c0fbd86e6b6f7062165b3edb0184d56b5f05aec368b6f",
+  "after_sha256": "eb777bb02f5948d6d74c0fbd86e6b6f7062165b3edb0184d56b5f05aec368b6f"
+}

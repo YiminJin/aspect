@@ -213,15 +213,11 @@ namespace aspect
     std::shared_ptr<typename PhaseFieldFault<dim>::DGHistory>
     PhaseFieldFault<dim>::advance_dg_transport(
       const DGTransport &op,const DGHistory &incoming,const DGField &inflow,
-      const DGField &source,const double time,const double dt,
-      const DGLimiter *limiter,DGLimiterStats *statistics) const
+      const DGField &source,const double time,const double dt) const
     {
       if (op.distributed)
-        {
-          AssertThrow(!limiter,ExcMessage("Distributed smooth DG transport does not use the serial diagnostic limiter."));
-          return advance_objective_dg_transport(op,incoming,inflow,source,time,dt);
-        }
-      AssertThrow(incoming.space==op.space && (!limiter || limiter->space==op.space)
+        return advance_objective_dg_transport(op,incoming,inflow,source,time,dt);
+      AssertThrow(incoming.space==op.space
                   && this->get_triangulation().get_vertices()==op.mesh_vertices,
                   ExcMessage("PF4 transport rejects changed spaces or mesh motion."));
       AssertThrow(std::isfinite(time) && std::isfinite(dt) && dt>0.
@@ -230,16 +226,6 @@ namespace aspect
       using Components=std::array<Vector<double>,SymmetricTensor<2,dim>::n_independent_components>;
       const auto n=op.space->dofs.n_dofs();
       Components initial,stage1,stage2,rhs;
-      const auto limit=[&](Components &stage,const double stage_time)
-      {
-        if (limiter)
-          {
-            AssertThrow(statistics,ExcMessage("PF4 limiter requires comparison statistics."));
-            Components candidate;
-            limit_dg_transport(*limiter,stage,candidate,inflow,stage_time,*statistics);
-            stage=std::move(candidate);
-          }
-      };
       for (unsigned int c=0; c<initial.size(); ++c)
         {
           initial[c].reinit(n);
@@ -269,7 +255,6 @@ namespace aspect
       evaluate(initial,time);
       stage1=initial;
       for (unsigned int c=0; c<initial.size(); ++c) stage1[c].add(dt,rhs[c]);
-      limit(stage1,time+dt);
       evaluate(stage1,time+dt);
       stage2=stage1;
       for (unsigned int c=0; c<initial.size(); ++c)
@@ -277,14 +262,12 @@ namespace aspect
           stage2[c].add(dt,rhs[c]);
           stage2[c].sadd(.25,.75,initial[c]);
         }
-      limit(stage2,time+.5*dt);
       evaluate(stage2,time+.5*dt);
       for (unsigned int c=0; c<initial.size(); ++c)
         {
           stage2[c].add(dt,rhs[c]);
           stage2[c].sadd(2./3.,1./3.,initial[c]);
         }
-      limit(stage2,time+dt);
       auto result=std::make_shared<DGHistory>();
       result->space=op.space;
       for (unsigned int c=0; c<stage2.size(); ++c)
@@ -303,7 +286,7 @@ namespace aspect
 #define INSTANTIATE(dim) \
   template std::shared_ptr<PhaseFieldFault<dim>::DGTransport> PhaseFieldFault<dim>::make_dg_transport(const LinearAlgebra::BlockVector &,unsigned int,bool) const; \
   template std::shared_ptr<PhaseFieldFault<dim>::DGHistory> PhaseFieldFault<dim>::project_dg_transport_field(const DGTransport &,const DGField &,double,unsigned int) const; \
-  template std::shared_ptr<PhaseFieldFault<dim>::DGHistory> PhaseFieldFault<dim>::advance_dg_transport(const DGTransport &,const DGHistory &,const DGField &,const DGField &,double,double,const DGLimiter *,DGLimiterStats *) const;
+  template std::shared_ptr<PhaseFieldFault<dim>::DGHistory> PhaseFieldFault<dim>::advance_dg_transport(const DGTransport &,const DGHistory &,const DGField &,const DGField &,double,double) const;
     ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE
   }

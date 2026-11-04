@@ -1,3 +1,4 @@
+#include "../../../tests/phase_field_fault_test_access.h"
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 // Separate identical-field evaluation and frozen-history native mechanics.
 #include <aspect/simulator.h>
@@ -410,7 +411,7 @@ namespace aspect
           install(1);
           const auto Z=m.fe_strain_state->Z;
           const BV anchor(m.fe_strain_state->displacement_history);
-          const auto tensor=m.uses_dg_trial_stress_history()?m.dg_history_values():std::vector<double>();
+          const auto tensor=m.uses_dg_trial_stress_history()?MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m):std::vector<double>();
           ReconstructedFaultVector rates;
           Access::mechanical_trial(sim,rates);
           check("phase frozen during native mechanical resolution",sim.solution.block(this->introspection().variable("phase_field").block_index)==anchor.block(this->introspection().variable("phase_field").block_index));
@@ -420,7 +421,7 @@ namespace aspect
           export_state(endpoint,&rates);
           auto residual=output("residual.csv");
           residual<<"bulk_norm,surface_RMS\n"<<defects.first<<','<<defects.second<<'\n';
-          check("incoming histories unchanged",m.fe_strain_state->Z==Z && m.fe_strain_state->displacement_history==anchor && (!m.uses_dg_trial_stress_history() || m.dg_history_values()==tensor));
+          check("incoming histories unchanged",m.fe_strain_state->Z==Z && m.fe_strain_state->displacement_history==anchor && (!m.uses_dg_trial_stress_history() || MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m)==tensor));
           check("no diagnostic publication",m.fe_strain_state->accepted_publications==0 && m.fe_strain_state->committed_step==0);
           m.fe_strain_state=original;
           clock();

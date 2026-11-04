@@ -1,0 +1,123 @@
+-- The C compiler identification is GNU 16.2.1
+-- The CXX compiler identification is GNU 16.2.1
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/openmpi/5.0.6/bin/mpic++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Setting up plugin:
+--   name <fixed_profile_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <phase_energy_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <transport_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <limiter_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <stabilization_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <scalar_method_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <native_method_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <pf5_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <pf6a_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <pf6a_spatial_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <pf6_transfer_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <p3_native_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <bulk_cohesive_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <bulk_orientation_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <bulk_source_history_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <bulk_energy_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <bulk_spatial_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <bulk_continued_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <bulk_parallel_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <bulk_propagation_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <bulk_tensor_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <bulk_p5c_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <bulk_p5c_campaign_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <coulomb_archive_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <coulomb_native_checks>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <cohesive_interface_native>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <cohesive_interface_kink_owner>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+--   setting up RELEASE variant
+-- Configuring done (0.6s)
+-- Generating done (0.3s)
+-- Build files have been written to: /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/stress-history-consolidation/checks

@@ -1,0 +1,54 @@
+{
+  "arguments": {
+    "label": "consolidate-layered-operator",
+    "legacy": false,
+    "baseline": false,
+    "ranks": 2,
+    "steps": 0,
+    "restart": "None",
+    "reject": false,
+    "audit": false,
+    "schedule": "200000",
+    "seconds": 120,
+    "transport_check": true,
+    "refinement": 3,
+    "layered_check": true,
+    "transfer_check": false,
+    "spin": 0.0,
+    "cohesive_history": false,
+    "history_affine": false,
+    "history_level": 0,
+    "cohesive": false,
+    "cohesive_drive": 0.0,
+    "cohesive_dt": 0.000125,
+    "tip_airy": 0.0,
+    "signed_trace": false,
+    "probe_old_cohesive_import": false
+  },
+  "command": [
+    "/opt/openmpi/5.0.6/bin/mpirun",
+    "-n",
+    "2",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/consolidate-layered-operator/input.prm"
+  ],
+  "runner_sha256": "75a57f91d0bdac3506433a8b4f9c28cfbb5e014c56949529404740af9585097c",
+  "source_revision": "e4b74c55620875dab60a05b9a53d7f1a538111cc",
+  "core_sha256": "7a853c10eb6f1c8f2281ca3c0ee39bfdf08ca401cc8c28b6237cf655be606309",
+  "plugin_sha256": {
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "67740f8fa5a7ba645249ea4b3518195232499bbecacd15052e2f9d37b7fdb0e3",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "09def114b3280469295e1ad3c388ddb4c1aa5bd21cd25d445db3bad4c23d5d41"
+  },
+  "input_sha256": "84232aea7c38d5aa22892ac69973257152c58b6b9b91796b3ea4e3fa13eb0f16",
+  "runtime_environment": {
+    "OMP_PROC_BIND": "false",
+    "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "ASPECT_OBJECTIVE_DG_TRANSPORT_CHECK": "1",
+    "ASPECT_OBJECTIVE_DG_LAYERED_CHECK": "1"
+  },
+  "exit_code": 0,
+  "elapsed_s": 9.886086937998698
+}

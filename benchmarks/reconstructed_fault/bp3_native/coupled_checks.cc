@@ -1080,7 +1080,7 @@ namespace aspect
         {
           auto &model=const_cast<Model &>(Plugins::get_plugin_as_type<const Model>(this->get_material_model()));
           if(!model.uses_stationary_mature_dg_optimizations())return;
-          const auto original=model.dg_history_values();
+          const auto original=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model);
           const auto publications=model.fe_strain_state->accepted_publications;
           const auto Z=model.fe_strain_state->Z;
           auto &manager=this->get_reconstructed_fault_manager();
@@ -1186,7 +1186,7 @@ namespace aspect
           mu_min=Utilities::MPI::min(mu_min,this->get_mpi_communicator());mu_max=Utilities::MPI::max(mu_max,this->get_mpi_communicator());
           AssertThrow(hanging>0 && restricted_rows>0 && this->get_pressure_scaling()!=1. && mu_max>mu_min,
                       ExcMessage("Frozen operator fixture lacks required constraints, scaling or varying friction."));
-          AssertThrow(model.dg_history_values()==original && model.fe_strain_state->accepted_publications==publications && model.fe_strain_state->Z==Z,
+          AssertThrow(MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model)==original && model.fe_strain_state->accepted_publications==publications && model.fe_strain_state->Z==Z,
                       ExcMessage("Stationary frozen operator checks published history."));
           BP3::collective_root_write(this->get_mpi_communicator(),[&]()
             {

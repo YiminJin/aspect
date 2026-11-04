@@ -1,3 +1,4 @@
+#include "../../../tests/phase_field_fault_test_access.h"
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
@@ -59,7 +60,7 @@ namespace aspect
         }
         std::vector<double> persistent(Model &m) const
         {
-          auto values=m.dg_history_values();
+          auto values=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m);
           const auto &s=*m.fe_strain_state;
           values.insert(values.end(),s.Z.begin(),s.Z.end());
           values.insert(values.end(),s.I.begin(),s.I.end());

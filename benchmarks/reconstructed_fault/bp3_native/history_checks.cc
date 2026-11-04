@@ -222,7 +222,7 @@ namespace aspect
                        : 1.e-9*(1.+.35*std::sin(2.3*j/(rates.size()-1)+.2*path_step));
             const auto incoming_Z=F::fe_slip_memory(model);
             const BV incoming(model.accepted_fe_strain_state());
-            const auto incoming_dg=model.uses_dg_trial_stress_history() ? model.dg_history_values() : std::vector<double>();
+            const auto incoming_dg=model.uses_dg_trial_stress_history() ? MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model) : std::vector<double>();
             const auto coefficients=F::maxwell_coefficients(eta,G,sim.time_step);
             const auto candidate=F::prepared_fe_state(model,prescribed);
             std::shared_ptr<typename Model::FEStrainUpdate> fe_candidate;
@@ -275,7 +275,7 @@ namespace aspect
               }
             rates.front()=first_rate;
             AssertThrow(invalid_rejected && model.accepted_fe_strain_state()==incoming
-                        && (!model.uses_dg_trial_stress_history() || model.dg_history_values()==incoming_dg)
+                        && (!model.uses_dg_trial_stress_history() || MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model)==incoming_dg)
                         && F::fe_slip_memory(model)==incoming_Z,ExcMessage("Rejected FE candidate changed accepted history."));
             double error=0.,allowance=0.,error_fraction=0.,trace_error=0.,trace_signal=0.,max_trace=0.;
             double slip_work=0.,bulk_form=0.;
@@ -396,7 +396,7 @@ namespace aspect
                 check(dof_cell, {particle.get_location()},nullptr);
               }
             AssertThrow(model.accepted_fe_strain_state()==incoming && F::fe_slip_memory(model)==incoming_Z
-                        && (!model.uses_dg_trial_stress_history() || model.dg_history_values()==incoming_dg),
+                        && (!model.uses_dg_trial_stress_history() || MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model)==incoming_dg),
                         ExcMessage("Preparing FE trials advanced accepted history."));
             if (fe_candidate)
               {

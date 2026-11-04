@@ -1,3 +1,103 @@
+# Stress-history consolidation audit — 4 November 2026
+
+Baseline `e4b74c556` preserves the tested direct tensor and final publication fix.
+The subsequent caller audit and implementation are recorded in
+[STRESS_HISTORY_CONSOLIDATION_REPORT.md](STRESS_HISTORY_CONSOLIDATION_REPORT.md).
+Core limiter types/hooks, checker-only snapshot/reference wrappers and standalone
+spatial-relaxation attachment are removed; useful experiments are maintained in
+benchmark/test support. Smooth serial transport remains live through PF5.
+`dg_stress_access.cc` centralizes physical observations;
+`dg_material_projection.cc` owns integration without publication;
+`reconstructed_fault_affine_audit.h` extracts observational solver work.
+
+Full units, direct/separated constant/layered comparisons, affine diagnostics,
+default, rejection, cross-rank restart and migrated checker tests pass. Initial
+missing-include build failure and all previous scientific failures remain.
+[Final provenance](../../../benchmarks/reconstructed_fault/particle_free/evidence/stress_history_consolidation/final-provenance.json)
+records current source/binary hashes and verifies 39 protected files. Matching
+checker rebuilds are required after the internal layout/API change. No physics,
+criteria, checkpoint schema, spin ordering or default changed. The historical
+source maps below describe their original revision; use the new report's module
+table for current file ownership. Science remains paused.
+
+## Historical frozen finite-end analysis audit — 4 November 2026
+
+The current selected [comparison](FROZEN_FINITE_END_REPORT.md) adds only three
+Python analysis/plot drivers and compact evidence/documentation. Native source,
+CMake, current binaries, protected controls and retained inputs remain unchanged
+from task entry; see the new evidence `entry.json` / `verification.json`.
+
+`compare_frozen_finite_end.py` freezes actual64² Q1 coefficients and surface I,
+implements independent polygon-cut integration, and separates DG approximation
+from ordinary quadrature. `audit_frozen_finite_end.py` verifies analytic moments,
+full DGQ2 masses, the retained native-source bridges, regional work and energy
+in each integration measure. `plot_frozen_finite_end.py` reads compact saved
+inputs/coefficients without native output dependencies. The one-sided endpoint
+jump diagnostic replaces an ambiguous exact-vertex ownership query; the initial
+misleading diagnostic is preserved. It changed no native logic or integrated
+results. All predeclared numerical screens pass; no new unit/MPI suite was
+needed for unchanged native code. The next proposed approximation-space study
+is not an implemented feature. Earlier audits below remain historical evidence.
+
+## Previous direct physical-history source audit — 4 November 2026
+
+Entry is branch `pf-rsf-particle-free`, HEAD
+`69e8a10a93a08718d31af961197899e320657c04`, preserving incoming dirty documentation
+and manual work. [Report](DIRECT_TRUE_STRESS_REPORT.md) and
+[provenance/evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/direct_true_stress/README.md)
+identify actual source, binaries, commands and failed evidence. The printed
+`27178813c` string is historical. No CMake algorithm/build-option change was
+needed; core and matching checker DSOs were rebuilt in place after preserving
+six incoming binary/library controls.
+
+| Boundary | Implemented change and verification |
+|---|---|
+| `phase_field_fault.h/.cc`, `dg_history_internal.h` | One opt-in material stress-representation selector and explicit physical/separated tag; mature material guards; default unchanged. Representation-aware projected-reaction dispatch, without pretending constant eta is variable. |
+| `dg_history.cc`, `dg_objective_transport.cc` | One accepted physical DG tensor, no R; direct physical access never subtracts B or reads Z. Advection propagates the tag. Native source/observer, analytic spin/relaxation and diagnostic-Z independence checks pass. |
+| `dg_material.cc`, `dg_objective.cc` | Direct transports only tau and its accepted trace, then applies accepted-gradient finite rotation within the existing geometry/profile/surface transaction. No U or analytic B reconstruction. Rollback preparation observes accepted state without a second rotation. Optional energy ledger measures actual intermediate tensor energies. |
+| `dg_material_reaction.cc`, `fe_strain.cc`, `history.cc` | Project complete endpoint beta/kappa products and physical forcing. Constant and layered direct configurations use the correction loop; final physical candidate and publication use the same projected law. Existing arithmetic publication bounds remain, without the separate legacy native-source allowance. |
+| `reconstructed_fault_stokes.cc` | Final projected-reaction gate retains the converged private V guess. The first failed direct run exposed the old reset. Old/new layered separated data fail the original arithmetic comparison bound; the failure is retained and fresh corrected separated data supply A/B. Unchanged constant/default controls pass. |
+| `dg_accepted.cc` | Schema7 direct identity suffix plus empty residual packet; direct restore allocates one tensor. Both mismatch directions reject before continuation. No old checkpoint conversion. |
+| Native checker and reducers | Explicit export metadata distinguishes physical coefficient vectors from legacy T-column names. Independent frozen-source/decomposition/velocity-and-slip actions, layered characteristic reference, full weak-equilibrium audit, state/energy/cost reductions, rollback and2→4 continued restart checks. |
+
+Final full unit suite passes **183170 assertions in152 cases**. Native tests
+cover constant ± / layered + paired32² cases and the64² positive pair, same
+.1 m labels, completed rejection/cutback and two continued restart steps crossing
+cells. Exact commands/hashes are retained. The final energy-ledger core differs
+from the main-comparison core only by optional diagnostics; its prefix agrees
+within5.6e-18 in bulk exports and exactly in surface state. This is local
+verification and a physical comparison, not production readiness.
+
+The implemented option remains an independent reference: finite-curve-end
+stress/traction differences dominate the remaining representation discrepancy.
+Default/legacy paths, pressure/background convention, exponential reaction,
+incoming-age law, endpoint scheme, profile bounds and the cohesive/native/lifting
+owners remain unchanged. The prior broader accuracy campaign is paused. No
+production data or protected RSF/BP3 checkpoints were resumed. Original native-
+pilot39/45-frame and earlier temporary-log losses remain explicitly preserved.
+
+## Historical positive-translation refinement audit — 3 November 2026
+
+[Report](POSITIVE_TRANSLATION_REFINEMENT_REPORT.md). Two fresh four-rank cases
+reuse the exact qualified core and pressure checker: all929 native source/build
+inputs and six binaries match the previous manifests. No C++/CMake, law,
+profile method, boundary selection, solver or checkpoint representation changed.
+The executable's printed pre-commit revision remains historical; entry is
+69e8a10a93a08718d31af961197899e320657c04 and actual hashes identify the binary.
+
+- `run_material_native.py` is reused unchanged; new labels isolate the .05 m
+  spacing, dt=.025/.0125 cases. Both use fresh state and the same .1 s initializer.
+- `assess_positive_refinement.py` reuses the existing independent profile/
+  energy reducers, compares differing label grids in a fixed material parameter,
+  records initialization and final sensitivities, and checks commit counters.
+- `plot_positive_refinement.py` and `record_positive_refinement.py` retain the
+  measured energy/field/cost comparison and exact unchanged-source provenance.
+- Endpoint work improves with halving, but raw face work worsens; neither its
+  cause nor full weak nodal reaction balance is established here. This selects
+  diagnosis from saved states, not a tolerance, loading or solver modification.
+
+---
+
 # Bounded profile source audit — 3 November 2026
 
 [Implementation/comparison report](BOUNDED_PROFILE_TRANSPORT_REPORT.md). The

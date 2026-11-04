@@ -1,3 +1,4 @@
+#include "../../../tests/phase_field_fault_test_access.h"
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 // Bounded native fixed-reference transfer and outer-lifecycle observer.
 #include <aspect/simulator.h>
@@ -208,7 +209,7 @@ namespace aspect
         std::vector<double> persistent() const
         {
           auto &m=model();
-          auto v=m.dg_history_values();
+          auto v=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m);
           const auto &s=*m.fe_strain_state;
           v.insert(v.end(),s.Z.begin(),s.Z.end());
           v.insert(v.end(),s.I.begin(),s.I.end());

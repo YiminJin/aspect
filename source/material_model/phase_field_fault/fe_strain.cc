@@ -103,23 +103,6 @@ namespace aspect
       this->get_pcout()<<"   Accepted supplied continuum phase seed; native particle H retained as diagnostic, unloaded independent histories constructed afterward."<<std::endl;
       return true;
     }
-    template<int dim> void PhaseFieldFault<dim>::set_fe_diagnostic_reference(
-      const LinearAlgebra::BlockVector &reference,const std::vector<double> &Z,const std::vector<double> &I)
-    {
-      AssertThrow(consistent_endpoint_phase && fe_strain_state && this->get_timestep_number()>0
-                  && Z.size()==fe_strain_state->Z.size()
-                  && I.size()==Z.size(),ExcMessage("Invalid restricted fixed-entry reference."));
-      for (unsigned int i=0; i<I.size(); ++i)
-        AssertThrow(std::isfinite(Z[i]) && std::isfinite(I[i]) && I[i]>0.,ExcMessage("Undefined diagnostic surface history."));
-      auto trial=std::make_shared<FEStrainState>(*fe_strain_state);
-      trial->displacement_history=reference;
-      trial->Z=Z;
-      trial->I=I;
-      trial->stress_samples.clear();
-      trial->committed_step=this->get_timestep_number()-1;
-      fe_strain_state=std::move(trial);
-    }
-
     template<int dim> Quadrature<dim> PhaseFieldFault<dim>::mechanical_quadrature() const
     {
       if(bulk_cohesive_phase)
@@ -719,7 +702,6 @@ namespace aspect
   {
 #define INSTANTIATE(dim) \
   template bool PhaseFieldFault<dim>::initialize_fe_shared_phase(LinearAlgebra::BlockVector &) const; \
-  template void PhaseFieldFault<dim>::set_fe_diagnostic_reference(const LinearAlgebra::BlockVector &,const std::vector<double> &,const std::vector<double> &); \
   template Quadrature<dim> PhaseFieldFault<dim>::mechanical_quadrature() const; \
   template void PhaseFieldFault<dim>::prepare_fe_strain_history(const bool restoring, const bool transferring); \
   template void PhaseFieldFault<dim>::validate_fe_strain_restrictions() const; \

@@ -1,0 +1,564 @@
+{
+  "limiter": {
+    "files": [
+      {
+        "file": "accepted.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1,
+        "identical_bytes": true
+      },
+      {
+        "file": "basis.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 27,
+        "identical_bytes": true
+      },
+      {
+        "file": "boundary-indicators.csv",
+        "scaled_max_difference": 5.404566600058048e-16,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "cells.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 448,
+        "identical_bytes": true
+      },
+      {
+        "file": "constants.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 4,
+        "identical_bytes": true
+      },
+      {
+        "file": "costs.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 12,
+        "identical_bytes": false
+      },
+      {
+        "file": "field-pulse_translation-unlimited.csv",
+        "scaled_max_difference": 2.220446049250313e-16,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "field-signed_jump-unlimited.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "inflow-points.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 640,
+        "identical_bytes": true
+      },
+      {
+        "file": "initial-pulse_translation.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "initial-signed_jump.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "limited-lifecycle.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 6,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-indicators-affine.csv",
+        "scaled_max_difference": 3.9726792475218627e-16,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-indicators-background.csv",
+        "scaled_max_difference": 4.601599593408736e-16,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-indicators-constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 512,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-indicators-huge.csv",
+        "scaled_max_difference": 1.4576554310979427e-15,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-indicators-mixed_xy.csv",
+        "scaled_max_difference": 4.2363773308065185e-16,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-indicators-near_constant.csv",
+        "scaled_max_difference": 2.603703785810335e-16,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-indicators-nonproportional.csv",
+        "scaled_max_difference": 6.892080325254869e-16,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-indicators-orientation.csv",
+        "scaled_max_difference": 1.3361259830329832e-15,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-indicators-piecewise_constant.csv",
+        "scaled_max_difference": 3.14018491736755e-16,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-indicators-q2.csv",
+        "scaled_max_difference": 3.414977377793481e-16,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-indicators-tiny.csv",
+        "scaled_max_difference": 1.2368678427844626e-15,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-indicators-zero.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 512,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-indicators-zero_crossing.csv",
+        "scaled_max_difference": 1.1602458966766604e-15,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-input-affine.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-background.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-huge.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-mixed_xy.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-near_constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-nonproportional.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-orientation.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-piecewise_constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-q2.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-tiny.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-zero.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-input-zero_crossing.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-kx-mixed_xy.csv",
+        "scaled_max_difference": 4.2363773308065185e-16,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-output-affine.csv",
+        "scaled_max_difference": 2.914335439641033e-16,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-output-background.csv",
+        "scaled_max_difference": 2.1287373377453716e-16,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-output-constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-output-huge.csv",
+        "scaled_max_difference": 1.4057097049314696e-12,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-output-mixed_xy.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-output-near_constant.csv",
+        "scaled_max_difference": 1.624097681737219e-16,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-output-nonproportional.csv",
+        "scaled_max_difference": 3.885780586188048e-16,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-output-orientation.csv",
+        "scaled_max_difference": 5.551115123125783e-17,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-output-piecewise_constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-output-q2.csv",
+        "scaled_max_difference": 2.5328326750488946e-16,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-output-tiny.csv",
+        "scaled_max_difference": 9.30390096871509e-266,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "local-output-zero.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "local-output-zero_crossing.csv",
+        "scaled_max_difference": 1.1102230246251565e-15,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "local.csv",
+        "scaled_max_difference": 3.8180297012567744e-16,
+        "numeric_values": 78,
+        "identical_bytes": false
+      },
+      {
+        "file": "metrics.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 24,
+        "identical_bytes": true
+      },
+      {
+        "file": "snapshot-indicators-pulse_translation-final.csv",
+        "scaled_max_difference": 2.1027789896106502e-15,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "snapshot-indicators-pulse_translation-initial.csv",
+        "scaled_max_difference": 4.199609378016587e-15,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "snapshot-indicators-signed_jump-final.csv",
+        "scaled_max_difference": 2.4584303695367485e-15,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "snapshot-indicators-signed_jump-initial.csv",
+        "scaled_max_difference": 2.9605947323337506e-16,
+        "numeric_values": 512,
+        "identical_bytes": false
+      },
+      {
+        "file": "snapshot-pulse_translation-final.csv",
+        "scaled_max_difference": 2.220446049250313e-16,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "snapshot-pulse_translation-initial.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "snapshot-signed_jump-final.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "snapshot-signed_jump-initial.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      }
+    ],
+    "maximum_scaled_difference": 1.4057097049314696e-12
+  },
+  "stabilization": {
+    "files": [
+      {
+        "file": "accepted.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1,
+        "identical_bytes": true
+      },
+      {
+        "file": "basis.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 27,
+        "identical_bytes": true
+      },
+      {
+        "file": "cells.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 448,
+        "identical_bytes": true
+      },
+      {
+        "file": "constants.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 6,
+        "identical_bytes": true
+      },
+      {
+        "file": "costs.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 0,
+        "identical_bytes": false
+      },
+      {
+        "file": "metrics.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 0,
+        "identical_bytes": true
+      },
+      {
+        "file": "physical.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 0,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-input-affine.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-input-constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-input-nonproportional.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-input-overshoot.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-input-piecewise_constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-input-q2.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-input-zero.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-local.csv",
+        "scaled_max_difference": 1.1368683772161603e-16,
+        "numeric_values": 70,
+        "identical_bytes": false
+      },
+      {
+        "file": "scaling-output-affine.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-output-constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-output-nonproportional.csv",
+        "scaled_max_difference": 2.628341088380765e-15,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "scaling-output-overshoot.csv",
+        "scaled_max_difference": 3.970879977836347e-16,
+        "numeric_values": 1152,
+        "identical_bytes": false
+      },
+      {
+        "file": "scaling-output-piecewise_constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-output-q2.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-output-zero.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1152,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-rejection.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 1,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-theta-affine.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 64,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-theta-constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 64,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-theta-nonproportional.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 64,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-theta-overshoot.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 64,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-theta-piecewise_constant.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 64,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-theta-q2.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 64,
+        "identical_bytes": true
+      },
+      {
+        "file": "scaling-theta-zero.csv",
+        "scaled_max_difference": 0.0,
+        "numeric_values": 64,
+        "identical_bytes": true
+      }
+    ],
+    "maximum_scaled_difference": 2.628341088380765e-15
+  }
+}

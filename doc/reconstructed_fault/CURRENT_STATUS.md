@@ -1,3 +1,15 @@
+> **4 November 2026 — stress-history consolidation complete:** tested direct/publication baseline `e4b74c556` preserved before interface cleanup. Existing unit suite and short constant/layered, default and lifecycle comparisons pass; scientific work remains paused. See [report](particle_free/STRESS_HISTORY_CONSOLIDATION_REPORT.md). This changes no production or cohesive qualification claim.
+
+> **4 November frozen finite-end comparison complete:** uncut DGQ2 source approximation dominates quadrature error with identical profile/labels/material data. No native change; direct remains an opt-in reference. See [report](particle_free/FROZEN_FINITE_END_REPORT.md). Next proposed step is a frozen endpoint-aware tensor-space study with matching work integration, not a resumed coupled or production campaign. Earlier entries below are historical.
+
+> **4 November direct-stress comparison:** the opt-in physical DG history and bounded coupled/lifecycle tests are complete. Retain it as an independent reference pending finite-end stress accuracy; separated defaults remain. See [report](particle_free/DIRECT_TRUE_STRESS_REPORT.md) and [current status](particle_free/STATUS.md). The former accuracy campaign remains paused; earlier entries below are historical.
+
+> **Positive-translation refinement:** the two selected 64² constant-viscosity
+> cases are complete; endpoint energy improves but raw boundary-traction work
+> worsens. See [report](particle_free/POSITIVE_TRANSLATION_REFINEMENT_REPORT.md)
+> and current [particle-free status](particle_free/STATUS.md). Historical
+> missing-transaction statements below do not describe the current mature path.
+
 > **3 November coupled Stage C update:** the experimental mature material
 > transaction and heterogeneous projected reaction now have bounded local
 > translation/rejection/MPI-restart evidence. See

@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iomanip>
 #include <chrono>
+#include "support/serial_dg_limiter.h"
 
 namespace aspect
 {
@@ -25,9 +26,10 @@ namespace aspect
         using Field=typename Model::DGField;
         using BV=LinearAlgebra::BlockVector;
         using TensorField=SymmetricTensor<2,dim>;
-        using Limiter=typename Model::DGLimiter;
-        using Stats=typename Model::DGLimiterStats;
-        using Components=typename Model::DGComponents;
+        using Experiment=ParticleFreeBenchmark::SerialDGLimiter<dim>;
+        using Limiter=typename Experiment::DGLimiter;
+        using Stats=typename Experiment::DGLimiterStats;
+        using Components=typename Experiment::DGComponents;
         bool calibration_only=false;
         unsigned int nx,ny;
         std::ofstream metrics;
@@ -230,7 +232,7 @@ namespace aspect
         }
         void local_checks(Model &model,const Transport &op,const BV &v)
         {
-          auto limiter=model.make_dg_limiter(op,v);
+          auto limiter=Experiment(*this,model).make_dg_limiter(op,v);
           limiter->detector=Limiter::Detector::force;
           const Field zero=[](const Point<dim> &,double)
           {
@@ -270,11 +272,11 @@ namespace aspect
               const auto incoming=nodal(op,field),snapshot=incoming;
               Components result,reordered,rotated_input=incoming,rotated_result;
               Stats stats,order_stats,rotated_stats;
-              model.limit_dg_transport(*limiter,incoming,result,zero,0.,stats);
+              Experiment(*this,model).limit_dg_transport(*limiter,incoming,result,zero,0.,stats);
               auto reversed=*limiter;
               std::reverse(reversed.cells.begin(),reversed.cells.end());
               for (auto &c:reversed.cells) std::reverse(c.candidates.begin()+1,c.candidates.end());
-              model.limit_dg_transport(reversed,incoming,reordered,zero,0.,order_stats);
+              Experiment(*this,model).limit_dg_transport(reversed,incoming,reordered,zero,0.,order_stats);
               for (unsigned int i=0; i<incoming[0].size(); ++i)
                 {
                   TensorField a;
@@ -282,7 +284,7 @@ namespace aspect
                   const auto b=rotate(a);
                   for (unsigned int c=0; c<incoming.size(); ++c) rotated_input[c][i]=b[TensorField::unrolled_to_component_indices(c)];
                 }
-              model.limit_dg_transport(*limiter,rotated_input,rotated_result,zero,0.,rotated_stats);
+              Experiment(*this,model).limit_dg_transport(*limiter,rotated_input,rotated_result,zero,0.,rotated_stats);
               for (unsigned int k=0; k<stats.last.size(); ++k)
                 AssertThrow(std::abs(stats.last[k].mean-rotated_stats.last[k].mean)<1e-11
                             && std::abs(stats.last[k].polynomial-rotated_stats.last[k].polynomial)<1e-11,
@@ -328,8 +330,8 @@ namespace aspect
                   kx.threshold=1.;
                   Stats original_kx,rotated_kx;
                   Components original_output,rotated_output;
-                  model.limit_dg_transport(kx,incoming,original_output,zero,0.,original_kx);
-                  model.limit_dg_transport(kx,rotated_input,rotated_output,zero,0.,rotated_kx);
+                  Experiment(*this,model).limit_dg_transport(kx,incoming,original_output,zero,0.,original_kx);
+                  Experiment(*this,model).limit_dg_transport(kx,rotated_input,rotated_output,zero,0.,rotated_kx);
                   double indicator_error=0.;
                   for (unsigned int k=0; k<original_kx.last.size(); ++k)
                     {
@@ -346,7 +348,7 @@ namespace aspect
                   kx.detector=Limiter::Detector::kxrcf;
                   kx.threshold=1.;
                   Stats kx_stats;
-                  model.limit_dg_transport(kx,incoming,result,zero,0.,kx_stats);
+                  Experiment(*this,model).limit_dg_transport(kx,incoming,result,zero,0.,kx_stats);
                   indicators("local-kx-mixed_xy",kx_stats);
                 }
             }
@@ -358,7 +360,7 @@ namespace aspect
             return v;
           });
           const auto mixed_op=model.make_dg_transport(mixed_velocity,4,false);
-          auto mixed=model.make_dg_limiter(*mixed_op,mixed_velocity);
+          auto mixed=Experiment(*this,model).make_dg_limiter(*mixed_op,mixed_velocity);
           mixed->detector=Limiter::Detector::kxrcf;
           const auto constant=nodal(op,[](const auto &,const auto &,double,double)
           {
@@ -366,7 +368,7 @@ namespace aspect
           });
           Components result;
           Stats boundary_stats;
-          model.limit_dg_transport(*mixed,constant,result,zero,0.,boundary_stats);
+          Experiment(*this,model).limit_dg_transport(*mixed,constant,result,zero,0.,boundary_stats);
           indicators("boundary-indicators",boundary_stats);
           auto face_data=output("inflow-points.csv");
           face_data << "cell,x,y,weight,boundary\n";
@@ -389,12 +391,12 @@ namespace aspect
             limiter->detector=detector;
             limiter->threshold=detector==Limiter::Detector::fu_shu?.1:1.;
             Stats a_stats,b_stats,failed_stats;
-            const auto a=model.advance_dg_transport(op,*input,smooth,zero,0.,.001,limiter.get(),&a_stats);
-            const auto b=model.advance_dg_transport(op,*input,smooth,zero,0.,.001,limiter.get(),&b_stats);
+            const auto a=Experiment(*this,model).advance_dg_transport(op,*input,smooth,zero,0.,.001,limiter.get(),&a_stats);
+            const auto b=Experiment(*this,model).advance_dg_transport(op,*input,smooth,zero,0.,.001,limiter.get(),&b_stats);
             bool rejected=false,unchanged=true;
             try
               {
-                model.advance_dg_transport(op,*input,smooth,[](const Point<dim> &,double t)
+                Experiment(*this,model).advance_dg_transport(op,*input,smooth,[](const Point<dim> &,double t)
                 {
                   return t>0.?basis(std::numeric_limits<double>::quiet_NaN()):TensorField();
                 },0.,.001,limiter.get(),&failed_stats);
@@ -412,10 +414,10 @@ namespace aspect
         void snapshot(Model &model,const std::string &name,const Transport &op,const BV &v,const Components &incoming,const Field &boundary,double t)
         {
           coefficients("snapshot-"+name,incoming);
-          auto limiter=model.make_dg_limiter(op,v);
+          auto limiter=Experiment(*this,model).make_dg_limiter(op,v);
           Components out;
           Stats stats;
-          model.limit_dg_transport(*limiter,incoming,out,boundary,t,stats);
+          Experiment(*this,model).limit_dg_transport(*limiter,incoming,out,boundary,t,stats);
           indicators("snapshot-indicators-"+name,stats);
         }
       public:
@@ -488,14 +490,14 @@ namespace aspect
             })
             {
               if (calibration_only && path!="unlimited") continue;
-              auto limiter=model.make_dg_limiter(*op,v);
+              auto limiter=Experiment(*this,model).make_dg_limiter(*op,v);
               limiter->detector=path=="kxrcf"?Limiter::Detector::kxrcf:Limiter::Detector::fu_shu;
               limiter->threshold=path=="kxrcf"?1.:.1;
               Stats stats;
               auto state=initial;
               const auto begin=std::chrono::steady_clock::now();
               for (unsigned int step=0; step<steps; ++step)
-                state=model.advance_dg_transport(*op,*state,exact,zero,step*final_time/steps,final_time/steps,path=="unlimited"?nullptr:limiter.get(),&stats);
+                state=Experiment(*this,model).advance_dg_transport(*op,*state,exact,zero,step*final_time/steps,final_time/steps,path=="unlimited"?nullptr:limiter.get(),&stats);
               const double elapsed=std::chrono::duration<double>(std::chrono::steady_clock::now()-begin).count();
               record(model,name+"-"+path,*state,exact,steps);
               costs << name+'-'+path << ',' << steps << ',' << stats.visits << ',' << stats.limited << ',' << stats.mean_flagged << ',' << stats.safeguard_only << ',' << stats.detector_seconds << ',' << stats.reconstruction_seconds << ',' << elapsed << ',' << stats.maximum_mean_error << '\n';

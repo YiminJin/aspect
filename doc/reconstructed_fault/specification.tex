@@ -4004,4 +4004,42 @@ without conversion. Default Q1/zero-inflow identity is unchanged. Normal
 coverage and localization normalization are measured separately from profile
 accuracy in the coupled comparison.
 
+
+\paragraph{Optional direct mature physical stress (2026-11-04).}
+The selected representation experiment stores one independent DGQ2 tensor
+$\tau_h$, with $\tau_{zz}=-\tau_{xx}-\tau_{yy}$, instead of the separated
+$T_h,R_h$ pair. The same continuum law is retained:
+\[
+ (\partial_t+v\cdot\nabla)\tau-W\tau+\tau W+(G/\eta_b)\tau
+ =2G(D-\chi\widetilde V\widetilde S),\qquad W=\operatorname{skw}\nabla v.
+\]
+With the existing common projection $P_h$, accepted-gradient rotation $Q$,
+DG advection $A_h$, and endpoint coefficients
+$\beta_b=\exp(-G\Delta t/\eta_b)$,
+$\kappa_b=-\eta_b\operatorname{expm1}(-G\Delta t/\eta_b)$,
+\[
+ \bar\tau_h=P_h[Q A_h(\tau_h^-)Q^T],\qquad
+ \tau_h^+=P_h[\beta_b\bar\tau_h+2\kappa_b(D(v^+)-\chi^+\widetilde V^+\widetilde S^+)].
+\]
+Complete spatially varying products are projected. A frozen projection defect
+corrects the local Maxwell inner solve and is updated before the original
+acceptance/publication gate, including constant-viscosity direct mode. The final
+solve retains the converged private slip unknown. Auxiliary surface $Z$ remains
+diagnostic and is never subtracted from direct stress. Incoming-age friction and
+once-only accepted aging remain unchanged. This representation has its own
+checkpoint identity and no separated-to-direct conversion. The fixed Cartesian,
+growth-disabled mature scope does not include cohesive native/lifting histories,
+AMR, birth or production qualification. Source projection can change localization
+accuracy and numerical energy; see the measured comparison in
+\texttt{particle\_free/DIRECT\_TRUE\_STRESS\_REPORT.md}.
+
+The subsequent frozen finite-end qualification holds the Q1 profile, surface
+labels, normalization and complete local source fixed while varying only tensor
+mesh and integration. A cut-integrated reference separates best DGQ2
+approximation from ordinary quadrature error; the finite-end approximation
+dominates. Projection energy identities refer to their specified integration
+measure. This result changes neither the history space nor source support or
+work assembly, and does not qualify cohesive physical tips. See
+\texttt{particle\_free/FROZEN\_FINITE\_END\_REPORT.md}.
+
 \end{document}

@@ -1,3 +1,4 @@
+#include "../../../tests/phase_field_fault_test_access.h"
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 // Frozen geometry transaction, using native material/manager/checkpoint owners.
 #include <aspect/simulator.h>
@@ -71,7 +72,7 @@ namespace aspect { namespace Postprocess
     std::vector<double> persistent()const
     {
       const auto &m=model();const auto &s=*m.fe_strain_state;
-      auto v=m.dg_history_values();v.insert(v.end(),s.Z.begin(),s.Z.end());v.insert(v.end(),s.I.begin(),s.I.end());
+      auto v=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m);v.insert(v.end(),s.Z.begin(),s.Z.end());v.insert(v.end(),s.I.begin(),s.I.end());
       for(unsigned int i=0;i<s.displacement_history.size();++i)v.push_back(s.displacement_history[i]);
       for(const auto *field:{&sim().solution,&sim().old_solution,&sim().old_old_solution})
         for(unsigned int i=0;i<field->size();++i)v.push_back((*field)[i]);

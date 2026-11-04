@@ -1,9 +1,32 @@
+> **Current selection complete, 2026-11-04:** behavior-preserving stress-history consolidation. Tested direct/publication baseline committed as `e4b74c556`; limiter/experimental relaxation and checker-only helpers moved out of core, stress access/projection/audit boundaries clarified. Full units and bounded constant/layered, default, rejection/restart comparisons pass. See [STRESS_HISTORY_CONSOLIDATION_REPORT.md](STRESS_HISTORY_CONSOLIDATION_REPORT.md). Scientific experiments remain paused; no new physical or production qualification. Cleanup losses remain.
+
+> **Historical selection complete, 2026-11-04:** the frozen finite-end spatial/quadrature comparison identifies uncut DGQ2 approximation as the dominant local error. Higher quadrature alone is insufficient; native source and defaults are unchanged. See [FROZEN_FINITE_END_REPORT.md](FROZEN_FINITE_END_REPORT.md). Next proposed experiment is a frozen endpoint-aware tensor-space prototype with matching work integration, only on a new selection. No coupled/production campaign was resumed. Cleanup losses remain.
+
+> **Previous direct-stress selection complete, 2026-11-04:** direct physical-history implementation, paired native comparison and lifecycle checks are complete. Retain the opt-in path as an independent reference pending finite-curve-end stress/traction accuracy; separated remains default. See [DIRECT_TRUE_STRESS_REPORT.md](DIRECT_TRUE_STRESS_REPORT.md). The broader previous accuracy/energy campaign remains paused; plans below do not authorize continuation. All production/cohesive limits and cleanup losses remain.
+
 # BP3 review and objective stress implementation
 
-Status: the selected bounded-profile implementation/comparison is complete; broader Stage C remains open.
+Status: behavior-preserving stress-history consolidation is complete; scientific work is paused and broader Stage C remains open.
 Prepared 2026-10-30. Update this document from actual repository evidence.
 
 ## Current execution record
+
+**4 November frozen finite-end comparison completed:** one common64² Q1 profile,
+labels/I and prescribed source on16²–128² tensor grids, ordinary q8–24 versus
+cut integration, both constant and layered eta. The finite-end DGQ2
+approximation dominates; more quadrature alone is insufficient. See
+[report](FROZEN_FINITE_END_REPORT.md) and [protocol](FROZEN_FINITE_END_PROTOCOL.md).
+Native code and defaults are unchanged. Next proposed work is a frozen
+endpoint-aware tensor-space experiment with matching work integration, before
+any coupled change; it requires a new user selection. Earlier next-step
+recommendations below are historical, not automatic authorization.
+
+**3 November positive-translation refinement completed:** two fresh 64² cases,
+.05 m initial label spacing and dt=.025/.0125. Endpoint remainder decreases
+8.7411% → 4.4151%, while raw boundary face work worsens. See
+[report](POSITIVE_TRANSLATION_REFINEMENT_REPORT.md). Next is an independent
+weak boundary-reaction/trace diagnosis using these saved states, not a further
+trajectory. Native source, defaults, endpoint physics and protected data remain.
 
 **3 November implementation follow-up completed:** implemented donor-bounded Q1
 profile transport in the complete material transaction, specify accepted tensor

@@ -1,0 +1,29 @@
+[ 33%] Building CXX object CMakeFiles/limiter_checks.dir/support/serial_dg_limiter.cc.o
+[ 66%] Building CXX object CMakeFiles/limiter_checks.dir/limiter_checks.cc.o
+[100%] Linking CXX shared library liblimiter_checks.release.so
+[100%] Built target limiter_checks
+[ 33%] Building CXX object CMakeFiles/stabilization_checks.dir/stabilization_checks.cc.o
+[ 66%] Building CXX object CMakeFiles/stabilization_checks.dir/support/serial_dg_limiter.cc.o
+[100%] Linking CXX shared library libstabilization_checks.release.so
+[100%] Built target stabilization_checks
+[ 50%] Building CXX object CMakeFiles/transport_checks.dir/transport_checks.cc.o
+[100%] Linking CXX shared library libtransport_checks.release.so
+[100%] Built target transport_checks
+[ 50%] Building CXX object CMakeFiles/native_method_checks.dir/native_method_checks.cc.o
+[100%] Linking CXX shared library libnative_method_checks.release.so
+[100%] Built target native_method_checks
+[ 50%] Building CXX object CMakeFiles/pf5_checks.dir/pf5_checks.cc.o
+[100%] Linking CXX shared library libpf5_checks.release.so
+[100%] Built target pf5_checks
+[ 50%] Building CXX object CMakeFiles/pf6a_checks.dir/pf6a_checks.cc.o
+[100%] Linking CXX shared library libpf6a_checks.release.so
+[100%] Built target pf6a_checks
+[ 50%] Building CXX object CMakeFiles/pf6_transfer_checks.dir/pf6_transfer_checks.cc.o
+[100%] Linking CXX shared library libpf6_transfer_checks.release.so
+[100%] Built target pf6_transfer_checks
+[ 50%] Building CXX object CMakeFiles/p3_native_checks.dir/p3_native_checks.cc.o
+[100%] Linking CXX shared library libp3_native_checks.release.so
+[100%] Built target p3_native_checks
+[ 50%] Building CXX object CMakeFiles/pf6a_spatial_checks.dir/pf6a_spatial_checks.cc.o
+[100%] Linking CXX shared library libpf6a_spatial_checks.release.so
+[100%] Built target pf6a_spatial_checks

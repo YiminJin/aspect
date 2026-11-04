@@ -1,3 +1,38 @@
+> **Current selection complete, 2026-11-04:** behavior-preserving stress-history consolidation. Tested direct/publication baseline committed as `e4b74c556`; limiter/experimental relaxation and checker-only helpers moved out of core, stress access/projection/audit boundaries clarified. Full units and bounded constant/layered, default, rejection/restart comparisons pass. See [STRESS_HISTORY_CONSOLIDATION_REPORT.md](STRESS_HISTORY_CONSOLIDATION_REPORT.md). Scientific experiments remain paused; no new physical or production qualification. Cleanup losses remain.
+
+> **Historical selection complete, 2026-11-04:** the frozen finite-end spatial/quadrature comparison identifies uncut DGQ2 approximation as the dominant local error. Higher quadrature alone is insufficient; native source and defaults are unchanged. See [FROZEN_FINITE_END_REPORT.md](FROZEN_FINITE_END_REPORT.md). Next proposed experiment is a frozen endpoint-aware tensor-space prototype with matching work integration, only on a new selection. No coupled/production campaign was resumed. Cleanup losses remain.
+
+> **Previous direct-stress selection complete, 2026-11-04:** direct physical-history implementation, paired native comparison and lifecycle checks are complete. Retain the opt-in path as an independent reference pending finite-curve-end stress/traction accuracy; separated remains default. See [DIRECT_TRUE_STRESS_REPORT.md](DIRECT_TRUE_STRESS_REPORT.md). The broader previous accuracy/energy campaign remains paused; plans below do not authorize continuation. All production/cohesive limits and cleanup losses remain.
+
+# Historical record: Positive-translation refinement complete — 3 November 2026
+
+The two selected 64² constant-viscosity runs at .05 m initial label spacing
+and dt=.025/.0125 s passed, using four MPI ranks sequentially and unchanged
+native source/binaries. [Report](POSITIVE_TRANSLATION_REFINEMENT_REPORT.md) ·
+[Evidence/figure](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/positive_refinement/README.md).
+
+- Endpoint active-energy remainder: 8.7411% → 4.4151%; one-halving order .9859.
+  Cost: 106.10 → 180.08 s. No endpoint or constitutive change was made.
+- Surface refinement at fixed dt changes stress .520%, work traction .903%,
+  and slip rate .670%. The slip-rate difference is already .669% at initialization.
+- Timestep halving at fixed grids changes stress .861%, point/work traction
+  .0442%/.0258%, and slip rate .0563%. These are pairwise sensitivities,
+  not absolute continuum-error guarantees.
+- Raw boundary face-power magnitude worsens from 3.115e-6 to 4.192e-6 W/m;
+  weak reaction power remains near1e-20 W/m. Boundary traction is unqualified.
+- All 8/16 physical steps publish exactly once, with zero retries. Independent
+  profile, donor-bound and surface-source checks pass. Earlier lifecycle/unit
+  evidence is reused for unchanged code; production readiness is not claimed.
+
+Next: diagnose independent weak boundary residual/reaction components and raw
+face traction resultants from these saved states before further trajectories
+or solver changes. Broader Stage C and the unrelated cohesive energy/tip gates
+remain open. Protected data and inherited cleanup losses are unchanged; no
+server/production restart or deferred physical campaign ran. The two-run
+recommendation in the historical entries below is now completed.
+
+---
+
 # Bounded profile implementation and coupled comparison — 3 November 2026
 
 **Implemented and locally verified:** native donor-bounded MacCormack on the

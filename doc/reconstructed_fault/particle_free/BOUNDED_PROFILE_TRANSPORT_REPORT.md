@@ -290,6 +290,11 @@ is planned.
 
 ## Next justified experiment
 
+**Completed follow-up:** the selected two cases are now documented in
+[positive-translation refinement](POSITIVE_TRANSLATION_REFINEMENT_REPORT.md).
+The recommendation below records the original selection; the new report
+supplies results and the next boundary-reaction diagnosis.
+
 Run two short positive-translation constant-viscosity cases at 64² with
 initial label spacing .05 m and dt=.025/.0125, retaining the same endpoint
 scheme, inflow and mechanical data. Comparing the first to the existing

@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iomanip>
 #include <chrono>
+#include "support/serial_dg_limiter.h"
 
 namespace aspect
 {
@@ -26,9 +27,10 @@ namespace aspect
         using Field=typename Model::DGField;
         using BV=LinearAlgebra::BlockVector;
         using TensorField=SymmetricTensor<2,dim>;
-        using Limiter=typename Model::DGLimiter;
-        using Stats=typename Model::DGLimiterStats;
-        using Components=typename Model::DGComponents;
+        using Experiment=ParticleFreeBenchmark::SerialDGLimiter<dim>;
+        using Limiter=typename Experiment::DGLimiter;
+        using Stats=typename Experiment::DGLimiterStats;
+        using Components=typename Experiment::DGComponents;
         unsigned int time_divisor=1;
         bool local_only=false;
         bool constrained_candidates=false,trace_reconstruction=false,candidate_local=false;
@@ -173,7 +175,7 @@ namespace aspect
         }
         void candidate_local_checks(Model &model,const Transport &op,const BV &v)
         {
-          auto limiter=model.make_dg_limiter(op,v,true);
+          auto limiter=Experiment(*this,model).make_dg_limiter(op,v,true);
           limiter->detector=Limiter::Detector::force;
           const Field zero=[](const auto &,double)
           {
@@ -231,11 +233,11 @@ namespace aspect
             stats.measure_physical_means=true;
             for (unsigned int k=0; k<op.cells.size(); ++k) stats.trace_cells.insert(k);
             Components result,reverse,rotated_result;
-            model.limit_dg_transport(*limiter,input,result,zero,0.,stats);
+            Experiment(*this,model).limit_dg_transport(*limiter,input,result,zero,0.,stats);
             auto reordered=*limiter;
             std::reverse(reordered.cells.begin(),reordered.cells.end());
             Stats reverse_stats;
-            model.limit_dg_transport(reordered,input,reverse,zero,0.,reverse_stats);
+            Experiment(*this,model).limit_dg_transport(reordered,input,reverse,zero,0.,reverse_stats);
             Tensor<2,dim> R;
             R[0][0]=R[1][1]=std::cos(.43);
             R[0][1]=-std::sin(.43);
@@ -249,7 +251,7 @@ namespace aspect
                 for (unsigned int c=0; c<input.size(); ++c) rotated[c][i]=b[TensorField::unrolled_to_component_indices(c)];
               }
             Stats rotated_stats;
-            model.limit_dg_transport(*limiter,rotated,rotated_result,zero,0.,rotated_stats);
+            Experiment(*this,model).limit_dg_transport(*limiter,rotated,rotated_result,zero,0.,rotated_stats);
             double polynomial=0.,order=0.,basis_error=0.,weights=0.,rescale=0.;
             for (unsigned int i=0; i<input[0].size(); ++i)
               {
@@ -275,7 +277,7 @@ namespace aspect
               for (auto &c:scaled) c*=factor;
               Stats scaled_stats;
               Components scaled_result;
-              model.limit_dg_transport(*limiter,scaled,scaled_result,zero,0.,scaled_stats);
+              Experiment(*this,model).limit_dg_transport(*limiter,scaled,scaled_result,zero,0.,scaled_stats);
               for (unsigned int c=0; c<input.size(); ++c)
                 for (unsigned int i=0; i<input[c].size(); ++i)
                   rescale=std::max(rescale,std::abs(scaled_result[c][i]/factor-result[c][i])/1000.);
@@ -424,7 +426,7 @@ namespace aspect
         }
         void local_checks(Model &model,const Transport &op,const BV &v)
         {
-          auto limiter=model.make_dg_limiter(op,v);
+          auto limiter=Experiment(*this,model).make_dg_limiter(op,v);
           limiter->detector=Limiter::Detector::scaling;
           limiter->scaling_reference=basis(1.);
           const Field zero=[](const Point<dim> &,double)
@@ -459,13 +461,13 @@ namespace aspect
             Components result,reordered,rotated_input=input,rotated_output;
             Stats stats,reverse_stats,rotation_stats;
             stats.measure_norm_changes=true;
-            model.limit_dg_transport(*limiter,input,result,zero,0.,stats);
+            Experiment(*this,model).limit_dg_transport(*limiter,input,result,zero,0.,stats);
             Components repeated;
             Stats repeat_stats;
-            model.limit_dg_transport(*limiter,result,repeated,zero,0.,repeat_stats);
+            Experiment(*this,model).limit_dg_transport(*limiter,result,repeated,zero,0.,repeat_stats);
             auto reversed=*limiter;
             std::reverse(reversed.cells.begin(),reversed.cells.end());
-            model.limit_dg_transport(reversed,input,reordered,zero,0.,reverse_stats);
+            Experiment(*this,model).limit_dg_transport(reversed,input,reordered,zero,0.,reverse_stats);
             for (unsigned int i=0; i<input[0].size(); ++i)
               {
                 TensorField a;
@@ -475,7 +477,7 @@ namespace aspect
               }
             auto rotated=*limiter;
             rotated.scaling_reference=rotate(limiter->scaling_reference);
-            model.limit_dg_transport(rotated,rotated_input,rotated_output,zero,0.,rotation_stats);
+            Experiment(*this,model).limit_dg_transport(rotated,rotated_input,rotated_output,zero,0.,rotation_stats);
             double order_error=0.,basis_error=0.,indicator_error=0.,theta_min=1.,theta_max=0.,idempotence_error=0.;
             for (unsigned int i=0; i<input[0].size(); ++i)
               {
@@ -516,7 +518,7 @@ namespace aspect
             {
               Components out;
               Stats stats;
-              model.limit_dg_transport(*limiter,invalid,out,zero,0.,stats);
+              Experiment(*this,model).limit_dg_transport(*limiter,invalid,out,zero,0.,stats);
             }
           catch (const std::exception &)
             {
@@ -619,7 +621,7 @@ namespace aspect
               if (selected_path!="all" && path!=selected_path) continue;
               if (name=="pulse_translation" && path!="unlimited") continue;
               const auto setup_begin=std::chrono::steady_clock::now();
-              auto limiter=model.make_dg_limiter(*op,v,constrained_candidates);
+              auto limiter=Experiment(*this,model).make_dg_limiter(*op,v,constrained_candidates);
               const double setup_seconds=std::chrono::duration<double>(std::chrono::steady_clock::now()-setup_begin).count();
               limiter->detector=path=="kxrcf"?Limiter::Detector::kxrcf:(path=="scaling"?Limiter::Detector::scaling:Limiter::Detector::fu_shu);
               limiter->threshold=path=="kxrcf"?1.:.1;
@@ -637,7 +639,7 @@ namespace aspect
               for (unsigned int step=0; step<steps; ++step)
                 {
                   const auto begin=std::chrono::steady_clock::now();
-                  state=model.advance_dg_transport(*op,*state,exact,zero,step*dt,dt,path=="unlimited"?nullptr:limiter.get(),&stats);
+                  state=Experiment(*this,model).advance_dg_transport(*op,*state,exact,zero,step*dt,dt,path=="unlimited"?nullptr:limiter.get(),&stats);
                   elapsed+=std::chrono::duration<double>(std::chrono::steady_clock::now()-begin).count();
                   if ((step+1)%time_divisor==0 && std::find(common.begin(),common.end(),(step+1)/time_divisor)!=common.end())
                     {
@@ -676,7 +678,7 @@ namespace aspect
                           Components next;
                           Stats held_stats;
                           held_stats.measure_norm_changes=true;
-                          model.limit_dg_transport(*limiter,held,next,exact,final_time,held_stats);
+                          Experiment(*this,model).limit_dg_transport(*limiter,held,next,exact,final_time,held_stats);
                           held=std::move(next);
                           history << pass << ',' << held_stats.norm_changes.front().after << ',' << held_stats.norm_changes.front().change << ',' << held_stats.limited << '\n';
                           if (pass==1 || pass==12) coefficients("held-field-"+label+'-'+std::to_string(pass),held);
