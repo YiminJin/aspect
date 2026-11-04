@@ -24,11 +24,14 @@ def main():
     p.add_argument('--schedule',help='Explicit time function for a matched rejection control')
     p.add_argument('--level',type=int,choices=[3,4,5,6],default=4)
     p.add_argument('--profile-method',choices=['Q1 remap','bounded MacCormack'],default='Q1 remap')
+    p.add_argument('--representation',choices=['separated','direct physical stress'],default='separated')
     p.add_argument('--inflow',choices=['zero','accepted trace'],default='zero')
     p.add_argument('--shear',type=float,default=.01)
     p.add_argument('--support',choices=['stationary profile','full normal cross-section'],default='stationary profile')
     p.add_argument('--spacing',type=float,default=.1,help='Initial material-label spacing; no within-run resampling')
     p.add_argument('--eta',default='1');p.add_argument('--reject',action='store_true')
+    p.add_argument('--stage-energy',action='store_true',help='Log direct advection/rotation/source projection energies')
+    p.add_argument('--true-checks',action='store_true',help='Nonpublishing direct source/derivative checks at initialization')
     p.add_argument('--audit',action='store_true',help='Existing native residual/directional audit')
     p.add_argument('--isolation',action='store_true',help='Nonpublishing prescribed DG boundary/energy checks at initialization')
     p.add_argument('--energy',action='store_true',help='Separate checker additionally exports physical pressure for work accounting')
@@ -161,6 +164,7 @@ subsection Material model
   set Stress rotation = Jaumann DG material Lie
   set Material profile transport = {a.profile_method}
   set Material tensor inflow = {a.inflow}
+{("  set Material stress representation = "+a.representation) if a.representation!="separated" else ""}
   set FE bulk normal quadrature points = 8
   subsection Material initial phase
    set Function expression = {a.phase}
@@ -230,6 +234,8 @@ end
     path=out/'input.prm';path.write_text(text)
     env=os.environ.copy();env.update(LD_LIBRARY_PATH='/opt/openmpi/5.0.6/lib',OMP_NUM_THREADS='1',DEAL_II_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1',OMP_PROC_BIND='false',OMPI_MCA_mpi_yield_when_idle='1')
     if a.audit:env['ASPECT_K1_FLOOR_AUDIT']='1'
+    if a.true_checks:env['ASPECT_TRUE_STRESS_CHECKS']='1'
+    if a.stage_energy:env['ASPECT_TRUE_STRESS_ENERGY']='1'
     command=['/opt/openmpi/5.0.6/bin/mpirun','-n',str(a.ranks),str(binary),str(path)]
     sha=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
     (out/'runner.py').write_bytes(Path(__file__).read_bytes())

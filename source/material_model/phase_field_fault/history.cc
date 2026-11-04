@@ -717,7 +717,7 @@ namespace aspect
                 double bound=128*std::numeric_limits<double>::epsilon()
                              *std::max(1.,evaluation_scale);
                 if (error>bound)++old_allowance_failures;
-                if (dg_trial_stress_history && !material_variable_viscosity)
+                if (dg_trial_stress_history && !uses_projected_material_reaction())
                   bound+=dg_source_publication_allowance(*fe_update->dg_history,particle.get_surrounding_cell()->id(),particle.get_location());
                 fe_publication_ratio=std::max(fe_publication_ratio,error/bound);
                 fe_publication_error=std::max(fe_publication_error,error);

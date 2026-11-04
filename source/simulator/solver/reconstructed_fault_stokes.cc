@@ -643,7 +643,7 @@ namespace aspect
     auto &phase_field_fault =
       Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(
         *material_model);
-    if(publish_history && timestep_number>0 && phase_field_fault.material_variable_viscosity
+    if(publish_history && timestep_number>0 && phase_field_fault.uses_projected_material_reaction()
         && !phase_field_fault.material_reaction_solving)
       {
         // The local Maxwell tangent preconditions the projected constitutive
@@ -666,7 +666,7 @@ namespace aspect
             AssertThrow(converged,ExcMessage("Coupled projected material reaction did not converge; no history published."));
             // Re-enter the unchanged final residual/KKT gate with the converged
             // frozen correction. This call only stages outer publication.
-            solve_reconstructed_fault_stokes(true,nullptr,false);
+            solve_reconstructed_fault_stokes(true,&rates,false);
             phase_field_fault.material_reaction_solving=false;
             return;
           }
@@ -742,9 +742,10 @@ namespace aspect
         // geometry used throughout this mechanical solve.
         fault_manager.begin_slip_rate_nonlinear_solve();
         nonlinear_state_is_active = true;
-        if (!publish_history && !trial_slip_rate->empty())
+        if (trial_slip_rate && !trial_slip_rate->empty())
           {
-            // Non-committing endpoint calls may supply a private rate guess
+            // Endpoint calls may supply a private rate guess, including
+            // the final gate of a converged projected-reaction solve.
             // in the output vector. It is a nonlinear unknown, not Z or any
             // accepted history; the manager rolls it back on return/failure.
             fault_manager.begin_slip_rate_trial();

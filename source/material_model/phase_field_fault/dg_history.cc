@@ -112,6 +112,8 @@ namespace aspect
                   && state.Z==std::vector<double>(state.Z.size(),0.),
                   ExcMessage("Independent DG history initializes only an unloaded seed."));
       auto history=std::make_shared<DGHistory>();
+      history->representation=material_direct_stress ? DGHistory::Representation::physical_stress
+                                                      : DGHistory::Representation::separated_trial;
       history->space=std::make_shared<typename DGHistory::Space>(this->get_triangulation());
       for (auto &component : history->trial_stress)
         {
@@ -119,7 +121,7 @@ namespace aspect
                            this->get_mpi_communicator());
           component=0.;
         }
-      if (jaumann_dg_stress)
+      if (jaumann_dg_stress && !material_direct_stress)
         {
           history->residual=std::make_shared<DGHistory>();
           history->residual->space=history->space;
@@ -469,6 +471,24 @@ namespace aspect
       const CellId &id,const Point<dim> &point,double *evaluation_scale,
       const LinearAlgebra::BlockVector *phase_trial) const
     {
+      if(history.representation==DGHistory::Representation::physical_stress)
+        {
+          AssertThrow(material_direct_stress && !history.residual,
+                      ExcMessage("Physical DG stress cannot own a separated residual."));
+          const auto cell=history.space->cells.at(id);
+          const auto unit=this->get_mapping().transform_real_to_unit_cell(cell,point);
+          const auto value=evaluate_dg_trial_tensor(history,id,Quadrature<dim>({unit}))[0];
+          if(evaluation_scale)
+            {
+              *evaluation_scale=0.;
+              std::vector<types::global_dof_index> ids(history.space->element.n_dofs_per_cell());
+              cell->get_dof_indices(ids);
+              for(const auto &component:history.trial_stress)
+                for(unsigned i=0;i<ids.size();++i)
+                  *evaluation_scale+=std::abs(component[ids[i]]*history.space->element.shape_value(i,unit));
+            }
+          return value;
+        }
       const auto &state=*fe_strain_state;
       const auto cell=history.space->cells.at(id);
       const typename DGHistory::Space::PointSample *sample=nullptr;

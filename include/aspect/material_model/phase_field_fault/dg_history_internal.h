@@ -50,6 +50,8 @@ namespace aspect
         std::map<CellId,typename DoFHandler<dim>::active_cell_iterator> cells;
       };
 
+      enum class Representation { separated_trial, physical_stress };
+      Representation representation = Representation::separated_trial;
       std::shared_ptr<Space> space;
       // In 2D these are xx, yy, xy in Pa. zz=-(xx+yy), never zero.
       std::array<LinearAlgebra::Vector,SymmetricTensor<2,dim>::n_independent_components> trial_stress;

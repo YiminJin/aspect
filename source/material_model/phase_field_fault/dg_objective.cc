@@ -43,13 +43,26 @@ namespace aspect
     void PhaseFieldFault<dim>::prepare_objective_dg_anchor()
     {
       AssertThrow(jaumann_dg_stress && fe_strain_state && fe_strain_state->dg_history
-                  && fe_strain_state->dg_history->residual,ExcMessage("Missing complete objective DG history."));
+                  && (material_direct_stress || fe_strain_state->dg_history->residual),ExcMessage("Missing complete objective DG history."));
       auto &state=*fe_strain_state;
       const auto parent=state.dg_history;
       const double dt=this->get_timestep_number()>0 ? this->get_timestep() : initial_time_step;
       if (state.objective_anchor && state.objective_parent.lock()==parent
           && state.objective_step==this->get_timestep_number() && state.objective_dt==dt)
         return;
+      if(material_direct_stress)
+        {
+          // Initialization and rollback prepare accepted observations outside a
+          // material trial. A physical solve gets its rotated/advected anchor
+          // from begin_dg_material_step; do not rotate again on restoration.
+          AssertThrow(!dg_material_trial,
+                      ExcMessage("Direct material trial is missing its complete objective anchor."));
+          state.objective_anchor=parent;
+          state.objective_parent=parent;
+          state.objective_step=this->get_timestep_number()==0 ? 0 : numbers::invalid_unsigned_int;
+          state.objective_dt=dt;
+          return;
+        }
       TimerOutput::Scope timer(this->get_computing_timer(),"DG objective anchor");
       auto anchor=std::make_shared<DGHistory>();
       anchor->space=parent->space;

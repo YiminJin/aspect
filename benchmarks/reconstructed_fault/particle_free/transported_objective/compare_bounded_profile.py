@@ -31,7 +31,7 @@ def quadrature(n,order=8):
 
 def tensor(state,x):
     v=state.at(x)
-    return v[:,3:6]-v[:,6:9]-state.memory(x,v[:,0])
+    return v[:,3:6] if state.direct else v[:,3:6]-v[:,6:9]-state.memory(x,v[:,0])
 
 def work_traction(state):
     """Independent common-volume weak shear load, projected with its own mass."""
@@ -167,7 +167,7 @@ def reduce(name):
     normal=np.array([-tangent[1],tangent[0]])
     normal_variance=float((w*phi)@((x-center)@normal)**2/mass)
     initial=states[min(states)];initial_mass=float(w@initial.at(x)[:,0])
-    delta=MemoryProjection(final).at(x)-final.memory(x,phi)
+    delta=np.zeros((len(x),3)) if final.direct else MemoryProjection(final).at(x)-final.memory(x,phi)
     tau=tensor(final,x);delta2=float(w@dot3(delta,delta))
     projected_storage_difference=float(w@(-2*dot3(tau,delta)+dot3(delta,delta))/(4*meta['G']))
     projection_identity=projected_storage_difference+delta2/(4*meta['G'])

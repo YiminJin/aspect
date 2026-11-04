@@ -4,6 +4,7 @@
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault/dg_history_internal.h>
 #include <aspect/reconstructed_fault/surface_system.h>
+#include <aspect/reconstructed_fault/objective_stress.h>
 #include <aspect/particle/integrator/interface.h>
 #include <aspect/time_stepping/interface.h>
 #include <aspect/phase_field.h>
@@ -92,6 +93,8 @@ namespace aspect
 #ifdef MATERIAL_ISOLATION_CHECKS
 #include "boundary_profile_checks.h"
 #endif
+      #include "true_stress_moving_checks.h"
+      #include "true_stress_checks.h"
       std::string snapshot() const
       {
         const auto &m=Plugins::get_plugin_as_type<const Model>(this->get_material_model());
@@ -132,10 +135,24 @@ namespace aspect
 #ifdef MATERIAL_ISOLATION_CHECKS
         if(step==0)boundary_profile_checks();
 #endif
+        if(step==0 && m.material_direct_stress && std::getenv("ASPECT_TRUE_STRESS_CHECKS"))true_stress_checks();
         AssertThrow(s.accepted_publications==step && s.geometry_publications==step,
                     ExcMessage("Material histories/geometry did not publish exactly once per physical step."));
         const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
         const auto stem=this->get_output_directory()+"material-"+std::to_string(step);
+        {
+          std::ofstream storage(stem+"-storage-rank"+std::to_string(rank)+".csv");
+          const auto tensors=s.dg_history->residual ? 2u : 1u;
+          storage<<"owned_tensor_coefficients,relevant_tensor_coefficients,surface_scalar_entries,tensor_vector_bytes,rank_peak_rss_kib,point_sample_cells,source_mass_cache_entries,accepted_stress_sample_entries,mechanical_cache_present,trial_anchor_present,trial_reaction_present\n";
+          std::size_t bytes=0;for(const auto &v:s.dg_history->trial_stress)bytes+=v.memory_consumption();
+          if(s.dg_history->residual)for(const auto &v:s.dg_history->residual->trial_stress)bytes+=v.memory_consumption();
+          std::ifstream proc("/proc/self/status");std::string line;unsigned long peak=0;
+          while(std::getline(proc,line))if(line.find("VmHWM:")==0){std::istringstream parser(line.substr(6));parser>>peak;}
+          storage<<3*tensors*s.dg_history->space->dofs.locally_owned_dofs().n_elements()<<','
+                 <<3*tensors*s.dg_history->space->relevant.n_elements()<<','<<s.Z.size()+s.I.size()<<','<<bytes<<','<<peak<<','<<s.dg_history->space->point_samples.size()<<','
+                 <<s.dg_history->space->source_geometry.size()<<','<<s.stress_samples.size()<<','
+                 <<bool(s.mechanical_samples)<<','<<bool(s.objective_anchor)<<','<<bool(m.dg_material_reaction)<<'\n';
+        }
         std::ofstream fields(stem+"-rank"+std::to_string(rank)+".csv");
         fields<<std::setprecision(17)<<"cell,x,y,q,phi,vx,vy,Txx,Tyy,Txy,Rxx,Ryy,Rxy,tauxx,tauyy,tauxy,Lxx,Lxy,Lyx,Lyy,eta";
 #ifdef MATERIAL_ENERGY_CHECKS
@@ -158,10 +175,18 @@ namespace aspect
 #ifdef MATERIAL_ENERGY_CHECKS
             fe[this->introspection().extractors.pressure].get_function_values(this->get_solution(),pressure);
 #endif
-            const auto T=m.evaluate_dg_trial_tensor(*s.dg_history,entry.first,rule),R=m.evaluate_dg_trial_tensor(*s.dg_history->residual,entry.first,rule);
+            const auto T=m.evaluate_dg_trial_tensor(*s.dg_history,entry.first,rule);
+            const auto R=s.dg_history->residual ? m.evaluate_dg_trial_tensor(*s.dg_history->residual,entry.first,rule) : std::vector<SymmetricTensor<2,dim>>(rule.size());
             for(unsigned q=0;q<rule.size();++q)
               {
-                const auto x=fe.quadrature_point(q),tau=T[q]-R[q]-m.evaluate_mature_dg_memory(x,phase[q],s.Z,s.I);
+                const auto x=fe.quadrature_point(q);
+                const auto tau=m.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,entry.first,x);
+                if(m.material_direct_stress && std::getenv("ASPECT_TRUE_STRESS_CHECKS"))
+                  {
+                    auto diagnostic_Z=s.Z;for(auto &z:diagnostic_Z)z+=1.;
+                    AssertThrow(tau==m.evaluate_dg_history_stress(*s.dg_history,diagnostic_Z,s.I,entry.first,x),
+                                ExcMessage("Diagnostic Z changed direct physical stress."));
+                  }
                 fields<<entry.first.to_string()<<','<<x[0]<<','<<x[1]<<','<<q<<','<<phase[q]<<','<<velocity[q][0]<<','<<velocity[q][1];
                 for(const auto &a:{T[q],R[q],tau})fields<<','<<a[0][0]<<','<<a[1][1]<<','<<a[0][1];
                 fields<<','<<gradients[q][0][0]<<','<<gradients[q][0][1]<<','<<gradients[q][1][0]<<','<<gradients[q][1][1]<<','<<m.material_viscosity(x,s.eta);
@@ -179,7 +204,7 @@ namespace aspect
             for(unsigned i=0;i<f.n_vertices();++i)surf<<i<<','<<f.vertex(i)[0]<<','<<f.vertex(i)[1]<<','<<f.get_properties(i)[age]<<','<<s.Z[i]<<','<<s.I[i]<<','<<manager.get_slip_rate(0)[i]<<','<<manager.get_projection_half_widths()[0][i]<<','<<m.material_viscosity(f.vertex(i),s.eta)<<'\n';
             std::ofstream metadata(this->get_output_directory()+"material-model.csv");
             const double mphi=(1./this->get_phase_field_handler().energetic_degradation(std::vector<double>{1.},.5)-1.)/3.;
-            metadata<<std::setprecision(17)<<"G,reference_eta,m,sense,Dc\n"<<s.G<<','<<s.eta<<','<<mphi<<','<<manager.get_shear_sense(0)<<",.008\n";
+            metadata<<std::setprecision(17)<<"G,reference_eta,m,sense,Dc,direct\n"<<s.G<<','<<s.eta<<','<<mphi<<','<<manager.get_shear_sense(0)<<",.008,"<<m.material_direct_stress<<'\n';
             const auto summary_path=this->get_output_directory()+"material-summary.csv";
             const bool header=step==0 || !std::ifstream(summary_path).good();
             std::ofstream summary(summary_path,step==0 ? std::ios::out : std::ios::app);

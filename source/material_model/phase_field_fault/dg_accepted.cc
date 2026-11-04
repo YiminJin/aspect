@@ -134,7 +134,7 @@ namespace aspect
                   s.dg_history->space->cells.at(entry.first)->get_dof_indices(indices);
                   for(const auto &component:s.dg_history->trial_stress)
                     for(const auto i:indices)values.push_back(component[i]);
-                  if (jaumann_dg_stress)
+                  if (jaumann_dg_stress && !material_direct_stress)
                     {
                       AssertThrow(s.dg_history->residual,ExcMessage("Objective checkpoint lacks residual history."));
                       for (const auto &component:s.dg_history->residual->trial_stress)
@@ -156,9 +156,9 @@ namespace aspect
                       p.mesh.push_back(x);
                       p.phase.push_back(entry.second[offset++]);
                     }
-                  AssertThrow(entry.second.size()==offset+(jaumann_dg_stress ? 54 : 27),ExcMessage("Malformed complete DG checkpoint record."));
+                  AssertThrow(entry.second.size()==offset+(jaumann_dg_stress && !material_direct_stress ? 54 : 27),ExcMessage("Malformed complete DG checkpoint record."));
                   p.coefficients.insert(p.coefficients.end(),entry.second.begin()+offset,entry.second.begin()+offset+27);
-                  if (jaumann_dg_stress)
+                  if (jaumann_dg_stress && !material_direct_stress)
                     p.residual_coefficients.insert(p.residual_coefficients.end(),entry.second.begin()+offset+27,entry.second.end());
                 }
             }
@@ -211,7 +211,7 @@ namespace aspect
                          && p.clock_time==this->get_time() && p.clock_dt==this->get_timestep())
                       : p.step==this->get_timestep_number())
                   && p.coefficients.size()==27*p.cells.size()
-                  && (!jaumann_dg_stress || p.residual_coefficients.size()==p.coefficients.size()),
+                  && (material_direct_stress ? p.residual_coefficients.empty() : (!jaumann_dg_stress || p.residual_coefficients.size()==p.coefficients.size())),
                   ExcMessage("PF5 restore rejects changed fixed mesh or malformed DG history."));
       current_normalization_integrals= {p.I};
       prepare_fe_strain_history(true);
@@ -234,7 +234,7 @@ namespace aspect
       std::array<LinearAlgebra::Vector,SymmetricTensor<2,dim>::n_independent_components> owned;
       for(auto &component:owned)component.reinit(s.dg_history->space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
       std::array<LinearAlgebra::Vector,SymmetricTensor<2,dim>::n_independent_components> residual_owned;
-      if (jaumann_dg_stress)
+      if (jaumann_dg_stress && !material_direct_stress)
         for (auto &component:residual_owned) component.reinit(s.dg_history->space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
       std::vector<types::global_dof_index> indices(9);
       unsigned int offset=0,cell_number=0,matching_cells=0;
@@ -261,7 +261,7 @@ namespace aspect
                 AssertThrow(std::isfinite(value),ExcMessage("Nonfinite checkpoint DG history."));
                 if(local)component[indices[i]]=value;
               }
-          if (jaumann_dg_stress)
+          if (jaumann_dg_stress && !material_direct_stress)
             {
               unsigned int r=27*cell_number;
               for (auto &component:residual_owned)
@@ -279,7 +279,7 @@ namespace aspect
                   ExcMessage("DG checkpoint physical mesh/phase anchor or CellId ownership mismatch."));
       for(unsigned int c=0;c<owned.size();++c)
         {owned[c].compress(VectorOperation::insert);s.dg_history->trial_stress[c]=owned[c];}
-      if (jaumann_dg_stress)
+      if (jaumann_dg_stress && !material_direct_stress)
         {
           AssertThrow(s.dg_history->residual,ExcMessage("Missing restored DG residual owner."));
           for (unsigned int c=0;c<residual_owned.size();++c)

@@ -236,6 +236,7 @@ namespace aspect
                                       const Point<dim> *position = nullptr) const;
 
         bool uses_jaumann_particle_stress() const { return jaumann_particle_stress; }
+        bool uses_direct_material_stress() const { return material_direct_stress; }
         bool uses_jaumann_dg_stress() const { return jaumann_dg_stress; }
         bool uses_transported_mature_history() const { return dg_material_transport; }
         /** Lie substep from immutable physical history; the subsequent Maxwell
@@ -481,6 +482,9 @@ namespace aspect
         bool jaumann_dg_stress = false;
         bool dg_material_transport = false;
         bool material_variable_viscosity = false;
+        bool material_direct_stress = false;
+        bool uses_projected_material_reaction() const
+        { return dg_material_transport && (material_variable_viscosity || material_direct_stress); }
         bool material_reaction_solving = false;
         bool material_bounded_profile = false;
         bool material_trace_inflow = false;

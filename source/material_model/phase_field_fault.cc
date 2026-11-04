@@ -483,6 +483,11 @@ namespace aspect
                             "matched-constant-material fixed-profile mature path with accepted history. "
                             "Jaumann DG material Lie additionally transports complete mature histories, "
                             "curve and phase with accepted FE velocity. Growth and boundary completion remain disabled.");
+          prm.declare_entry("Material stress representation", "separated",
+                            Patterns::Selection("separated|direct physical stress"),
+                            "Opt-in DGQ2 physical branch stress for mature material transport. "
+                            "Uses the same objective exponential law with a projected reaction correction; "
+                            "does not reconstruct stress from auxiliary slip memory.");
           prm.declare_entry("Material profile transport", "Q1 remap",
                             Patterns::Selection("Q1 remap|bounded MacCormack"),
                             "Material Q1 profile and obstacle transport. The optional MacCormack "
@@ -637,6 +642,9 @@ namespace aspect
           consistent_particle_strain = prm.get("Particle stress strain convention") == "three dimensional deviator";
           jaumann_particle_stress = prm.get("Stress rotation") == "Jaumann lagged Lie";
           dg_material_transport = prm.get("Stress rotation") == "Jaumann DG material Lie";
+          material_direct_stress=prm.get("Material stress representation")=="direct physical stress";
+          AssertThrow(!material_direct_stress || dg_material_transport,
+                      ExcMessage("Direct physical stress requires Jaumann DG material Lie."));
           material_bounded_profile=prm.get("Material profile transport")=="bounded MacCormack";
           material_trace_inflow=prm.get("Material tensor inflow")=="accepted trace";
           AssertThrow(dg_material_transport || (!material_bounded_profile && !material_trace_inflow),
@@ -657,6 +665,8 @@ namespace aspect
           if(material_bounded_profile || material_trace_inflow)
             material_viscosity_identity+="|profile transport:"+prm.get("Material profile transport")
                                       +"|tensor inflow:"+prm.get("Material tensor inflow");
+          if(material_direct_stress)
+            material_viscosity_identity+="|stress representation:direct physical stress";
           fe_bulk_normal_quadrature_points = prm.get_integer("FE bulk normal quadrature points");
           consistent_endpoint_phase = prm.get_bool("Consistent endpoint phase solve");
           fe_initial_phase_profile = prm.get("FE initial phase profile file");
@@ -780,6 +790,8 @@ namespace aspect
             material_viscosity_identity+="|"+std::string(name)+"="+prm.get(name);
           prm.leave_subsection();
         }
+      AssertThrow(!material_direct_stress || (mature_frictional_fault && !bulk_cohesive_phase),
+                  ExcMessage("Direct physical stress is restricted to the mature material branch."));
       if(bulk_cohesive_phase)
         {
           // Tensor histories use the same unique CellId ownership and native

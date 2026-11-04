@@ -187,6 +187,7 @@ namespace aspect { namespace MaterialModel
     for(unsigned int c=0;c<stage.size();++c){stage[c].add(dt,rhs[c]);stage[c].sadd(.25,.75,initial[c]);}
     evaluate(stage,time+.5*dt);
     auto result=std::make_shared<DGHistory>();result->space=op.space;
+    result->representation=incoming.representation;
     for(unsigned int c=0;c<stage.size();++c)
       {
         stage[c].add(dt,rhs[c]);stage[c].sadd(2./3.,1./3.,initial[c]);

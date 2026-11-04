@@ -2,6 +2,8 @@
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault/dg_history_internal.h>
 #include <aspect/utilities.h>
+#include <cstdlib>
+#include <iomanip>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/base/quadrature_lib.h>
 
@@ -11,8 +13,9 @@ namespace aspect { namespace MaterialModel
   PhaseFieldFault<dim>::make_material_reaction(const LinearAlgebra::BlockVector &bulk,
                                              const std::vector<double> &rates) const
   {
-    AssertThrow(dg_material_transport && material_variable_viscosity && fe_strain_state->objective_anchor,
+    AssertThrow(dg_material_transport && fe_strain_state->objective_anchor,
                 ExcMessage("Projected material reaction requires its complete transported anchor."));
+    TimerOutput::Scope timer(this->get_computing_timer(),"Material reaction projection");
     const auto &s=*fe_strain_state;const auto &anchor=*s.objective_anchor;
     const auto &space=*anchor.space;
     const auto comm=this->get_mpi_communicator();
@@ -26,10 +29,15 @@ namespace aspect { namespace MaterialModel
         update->Z[j]=c.beta*s.Z[j]+c.eta_ve*rates[j];
       }
     update->dg_history=std::make_shared<DGHistory>();update->dg_history->space=anchor.space;
-    update->dg_history->residual=std::make_shared<DGHistory>();update->dg_history->residual->space=anchor.space;
+    update->dg_history->representation=anchor.representation;
+    if(!material_direct_stress)
+      {update->dg_history->residual=std::make_shared<DGHistory>();update->dg_history->residual->space=anchor.space;}
     constexpr unsigned components=SymmetricTensor<2,dim>::n_independent_components;
-    std::array<LinearAlgebra::Vector,2*components> owned;
+    const unsigned tensors=material_direct_stress ? 1 : 2;
+    std::vector<LinearAlgebra::Vector> owned(tensors*components);
     for(auto &v:owned)v.reinit(space.dofs.locally_owned_dofs(),comm);
+    const bool energy_ledger=material_direct_stress && std::getenv("ASPECT_TRUE_STRESS_ENERGY");
+    double local_energy=0.;
     const QGauss<dim> rule(std::max(8u,fe_bulk_normal_quadrature_points));
     FEValues<dim> native(this->get_mapping(),this->get_fe(),rule,update_gradients|update_values|update_quadrature_points);
     FEValues<dim> dg(this->get_mapping(),space.element,rule,update_values|update_JxW_values);
@@ -40,24 +48,28 @@ namespace aspect { namespace MaterialModel
         native.reinit(entry.second);dg.reinit(space.cells.at(entry.first));space.cells.at(entry.first)->get_dof_indices(ids);
         native[this->introspection().extractors.velocities].get_function_symmetric_gradients(bulk,strain);
         native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(s.displacement_history,phase);
-        const auto T=evaluate_dg_trial_tensor(anchor,entry.first,rule),R=evaluate_dg_trial_tensor(*anchor.residual,entry.first,rule);
-        FullMatrix<double> mass(n,n);std::array<Vector<double>,2*components> rhs;
+        const auto T=evaluate_dg_trial_tensor(anchor,entry.first,rule);
+        const auto R=anchor.residual ? evaluate_dg_trial_tensor(*anchor.residual,entry.first,rule)
+                                    : std::vector<SymmetricTensor<2,dim>>(rule.size());
+        FullMatrix<double> mass(n,n);std::vector<Vector<double>> rhs(tensors*components);
         for(auto &v:rhs)v.reinit(n);
         for(unsigned q=0;q<rule.size();++q)
           {
             const auto x=native.quadrature_point(q);
             const auto c=compute_maxwell_coefficients(material_viscosity(x,s.eta),s.G,dt);
-            const auto B0=evaluate_mature_dg_memory(x,phase[q],s.Z,s.I);
-            const auto B1=evaluate_mature_dg_memory(x,phase[q],update->Z,update->I);
+            const auto B0=material_direct_stress ? SymmetricTensor<2,dim>() : evaluate_mature_dg_memory(x,phase[q],s.Z,s.I);
+            const auto B1=material_direct_stress ? SymmetricTensor<2,dim>() : evaluate_mature_dg_memory(x,phase[q],update->Z,update->I);
             const auto twice_LV=evaluate_mature_dg_memory(x,phase[q],rates,s.I);
             const std::array<SymmetricTensor<2,dim>,2> values={
-              c.beta*T[q]+2*c.eta_ve*Utilities::Tensors::consistent_deviator(strain[q]),
+              c.beta*T[q]+2*c.eta_ve*Utilities::Tensors::consistent_deviator(strain[q])
+                -(material_direct_stress ? c.eta_ve*twice_LV : SymmetricTensor<2,dim>()),
               c.beta*(R[q]+B0)+c.eta_ve*twice_LV-B1};
+            if(energy_ledger)local_energy+=dg.JxW(q)*(scalar_product(values[0],values[0])+trace(values[0])*trace(values[0]))/(4*s.G);
             for(unsigned i=0;i<n;++i)
               {
                 const double w=dg.JxW(q)*dg.shape_value(i,q);
                 for(unsigned j=0;j<n;++j)mass(i,j)+=w*dg.shape_value(j,q);
-                for(unsigned k=0;k<2;++k)for(unsigned cpt=0;cpt<components;++cpt)
+                for(unsigned k=0;k<tensors;++k)for(unsigned cpt=0;cpt<components;++cpt)
                   rhs[k*components+cpt][i]+=w*values[k][SymmetricTensor<2,dim>::unrolled_to_component_indices(cpt)];
               }
           }
@@ -70,6 +82,23 @@ namespace aspect { namespace MaterialModel
         owned[c].compress(VectorOperation::insert);
         auto &v=c<components ? update->dg_history->trial_stress[c] : update->dg_history->residual->trial_stress[c-components];
         v.reinit(space.dofs.locally_owned_dofs(),space.relevant,comm);v=owned[c];
+      }
+    if(energy_ledger)
+      {
+        double projected_energy=0.;
+        for(const auto &entry:s.cells)
+          {
+            dg.reinit(space.cells.at(entry.first));
+            const auto values=evaluate_dg_trial_tensor(*update->dg_history,entry.first,rule);
+            for(unsigned q=0;q<rule.size();++q)
+              projected_energy+=dg.JxW(q)*(scalar_product(values[q],values[q])+trace(values[q])*trace(values[q]))/(4*s.G);
+          }
+        local_energy=Utilities::MPI::sum(local_energy,comm);
+        projected_energy=Utilities::MPI::sum(projected_energy,comm);
+        this->get_pcout()<<std::setprecision(17)<<"   Direct source energy: step="<<this->get_timestep_number()
+                         <<" dt="<<dt<<" publication="<<!material_reaction_solving
+                         <<" local="<<local_energy<<" projected="<<projected_energy
+                         <<" loss="<<local_energy-projected_energy<<std::endl;
       }
     return update;
   }

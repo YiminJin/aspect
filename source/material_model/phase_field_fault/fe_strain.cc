@@ -607,7 +607,7 @@ namespace aspect
       validate_fe_strain_restrictions();
       const auto &s=*fe_strain_state;
       AssertThrow(s.committed_step!=this->get_timestep_number(),ExcMessage("FE strain cannot commit twice in a physical step."));
-      if(material_variable_viscosity)
+      if(uses_projected_material_reaction())
         {
           AssertThrow(dg_material_reaction && !transported,ExcMessage("Missing converged coupled material reaction."));
           return make_material_reaction(bulk,this->get_reconstructed_fault_manager().get_slip_rate(0));

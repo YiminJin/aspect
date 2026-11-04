@@ -3,6 +3,8 @@
 #include <aspect/material_model/phase_field_fault/dg_history_internal.h>
 #include <aspect/reconstructed_fault/objective_stress.h>
 #include <aspect/phase_field.h>
+#include <cstdlib>
+#include <iomanip>
 #include <aspect/particle/manager.h>
 #include <deal.II/numerics/vector_tools_evaluate.h>
 #include <deal.II/fe/fe_values.h>
@@ -88,7 +90,9 @@ namespace aspect { namespace MaterialModel
     const QGauss<dim> rule(std::max(8u,fe_bulk_normal_quadrature_points));
     const auto project=[&](const auto &field)
       {
+        TimerOutput::Scope timer(this->get_computing_timer(),"Material tensor projection");
         auto result=std::make_shared<DGHistory>();result->space=old.dg_history->space;
+        result->representation=old.dg_history->representation;
         std::array<LinearAlgebra::Vector,SymmetricTensor<2,dim>::n_independent_components> owned;
         for(auto &v:owned)v.reinit(space.dofs.locally_owned_dofs(),comm);
         FEValues<dim> dg(this->get_mapping(),space.element,rule,update_values|update_JxW_values|update_quadrature_points);
@@ -134,7 +138,10 @@ namespace aspect { namespace MaterialModel
       };
     // Evolve the whole R+B combination. Its subtraction uses the transported
     // profile/normalization below, so no geometry/product-rule term is dropped.
-    auto U=project([&](const auto &,const auto &,const auto &x,const double phi,const auto &)
+    std::shared_ptr<DGHistory> U;
+    if(!material_direct_stress)
+    {
+    U=project([&](const auto &,const auto &,const auto &x,const double phi,const auto &)
       {return evaluate_mature_dg_memory(x,phi,old.Z,old.I);});
     for(unsigned c=0;c<U->trial_stress.size();++c)
       {
@@ -143,7 +150,26 @@ namespace aspect { namespace MaterialModel
         for(const auto i:owned.locally_owned_elements())owned[i]+=old.dg_history->residual->trial_stress[c][i];
         owned.compress(VectorOperation::insert);U->trial_stress[c]=owned;
       }
+    }
     auto T=std::make_shared<DGHistory>(*old.dg_history);T->residual.reset();
+    // Optional diagnostic ledger, not constitutive state or checkpoint data.
+    const bool energy_ledger=material_direct_stress && std::getenv("ASPECT_TRUE_STRESS_ENERGY");
+    const auto tensor_energy=[&](const DGHistory &history)
+      {
+        double energy=0.;
+        FEValues<dim> fe(this->get_mapping(),space.element,rule,update_JxW_values);
+        for(const auto &entry:old.cells)
+          {
+            fe.reinit(space.cells.at(entry.first));
+            std::vector<types::global_dof_index> ids(9);space.cells.at(entry.first)->get_dof_indices(ids);
+            for(unsigned q=0;q<rule.size();++q)
+              {const auto a=value(history,ids,rule.point(q));
+               energy+=fe.JxW(q)*(scalar_product(a,a)+trace(a)*trace(a))/(4*old.G);}
+          }
+        return Utilities::MPI::sum(energy,comm);
+      };
+    const double energy_before=energy_ledger ? tensor_energy(*T) : 0.;
+
     const auto transport=make_dg_transport(this->get_old_solution(),std::max(8u,fe_bulk_normal_quadrature_points),false);
     const unsigned substeps=std::max(1u,static_cast<unsigned>(std::ceil(dt*transport->inverse_advection_time/.1)));
     AssertThrow(substeps<=4096,ExcMessage("Material DG advection requires a smaller physical timestep (CFL substep budget)."));
@@ -165,19 +191,23 @@ namespace aspect { namespace MaterialModel
             const auto cell=space.cells.at(owner.at(load.indices.front()));
             const auto unit=this->get_mapping().transform_real_to_unit_cell(cell,load.point);
             trial_inflow.emplace(load.point,value(*T,load.indices,unit));
-            residual_inflow.emplace(load.point,value(*U,load.indices,unit));
+            if(U)residual_inflow.emplace(load.point,value(*U,load.indices,unit));
           }
       }
     const DGField T_inflow=[&](const Point<dim> &x,double)
       {return material_trace_inflow ? trial_inflow.at(x) : SymmetricTensor<2,dim>();};
     const DGField U_inflow=[&](const Point<dim> &x,double)
       {return material_trace_inflow ? residual_inflow.at(x) : SymmetricTensor<2,dim>();};
+    {
+    TimerOutput::Scope timer(this->get_computing_timer(),"Material tensor advection");
     for(unsigned k=0;k<substeps;++k)
       {
         const double start=this->get_time()-dt+dt*k/substeps,sub_dt=dt/substeps;
         T=advance_dg_transport(*transport,*T,T_inflow,zero,start,sub_dt);
-        U=advance_dg_transport(*transport,*U,U_inflow,zero,start,sub_dt);
+        if(U)U=advance_dg_transport(*transport,*U,U_inflow,zero,start,sub_dt);
       }
+    }
+    const double energy_advected=energy_ledger ? tensor_energy(*T) : 0.;
     // Label-following vertices retain all surface histories; V is not their
     // velocity. The same accepted FE field supplies bulk, curve and profile.
     auto vertices=std::vector<std::vector<Point<dim>>>(1,old.vertices);
@@ -225,17 +255,21 @@ namespace aspect { namespace MaterialModel
             if constexpr(dim==2)return ReconstructedFaultUtilities::rotate_plane_strain_stress(value(*T,ids,u),gradient,dt);
             else return SymmetricTensor<2,dim>();
           });
-        anchor->residual=project([&](const auto &ids,const auto &u,const auto &x,double p,const auto &gradient)
+        if(!material_direct_stress)anchor->residual=project([&](const auto &ids,const auto &u,const auto &x,double p,const auto &gradient)
           {
             if constexpr(dim==2)return ReconstructedFaultUtilities::rotate_plane_strain_stress(value(*U,ids,u),gradient,dt)
                                      -evaluate_mature_dg_memory(x,p,next->Z,next->I);
             else return SymmetricTensor<2,dim>();
           });
+        if(energy_ledger)
+          this->get_pcout()<<std::setprecision(17)<<"   Direct transport energy: step="<<this->get_timestep_number()
+                           <<" dt="<<dt<<" accepted="<<energy_before<<" advected="<<energy_advected
+                           <<" rotated_projected="<<tensor_energy(*anchor)<<std::endl;
         next->objective_anchor=anchor;next->objective_parent=next->dg_history;
         next->objective_step=this->get_timestep_number();next->objective_dt=dt;
         old.dg_history->space->point_samples.clear();
         old.dg_history->space->point_geometry_generation=numbers::invalid_unsigned_int;
-        this->get_pcout()<<"   Material DG staged complete curve/profile/T/R/surface state; advection substeps="<<substeps<<std::endl;
+        this->get_pcout()<<"   Material DG staged complete curve/profile/tensor/surface state; advection substeps="<<substeps<<std::endl;
       }
     catch(...){finish_dg_material_step(false);throw;}
   }

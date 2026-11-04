@@ -32,6 +32,7 @@ def basis(u):
 class State:
     def __init__(self,path,step,level,m):
         self.h=4/2**level;self.n=2**level;self.m=m
+        self.direct=float(read(path/"material-model.csv")[0].get("direct",0))==1
         records=[r for p in sorted(path.glob(f'material-{step}-rank*.csv')) for r in read(p)]
         records.sort(key=lambda r:(r['cell'],int(r['q'])))
         self.x=np.array([[float(r['x']),float(r['y'])] for r in records])
@@ -70,7 +71,7 @@ class State:
 
     def stress(self,x):
         v=self.at(x)
-        return v[:,3:6]-v[:,6:9]-self.memory(x,v[:,0])
+        return v[:,3:6] if self.direct else v[:,3:6]-v[:,6:9]-self.memory(x,v[:,0])
 
 def rotation(tau,angle):
     c=np.cos(angle);s=np.sin(angle);xx,yy,xy=tau.T
