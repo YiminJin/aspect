@@ -21,7 +21,7 @@
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/material_model/phase_field_fault/history_diagnostics.h>
 #include <aspect/material_model/utilities.h>
 #include <aspect/phase_field.h>
@@ -593,8 +593,11 @@ namespace aspect
         }
     }
 
-    // Per-call scratch storage, never a second owner of committed history.
-    template<int dim> struct PhaseFieldFault<dim>::FEStrainState::ParticleSamples
+    /** Shared particle observation cache: physical points, cell reference
+     * coordinates and MPI lookup. Reused while geometry/layout is unchanged;
+     * does not own stress. Reset at the existing motion/publication boundaries. */
+    template <int dim>
+    struct PhaseFieldFault<dim>::FEStrainState::ParticleSamples
     {
       struct Cell
       {
@@ -608,7 +611,9 @@ namespace aspect
       unsigned int geometry;
     };
 
-    // Keep the sampling cache and audit streams alive through publication.
+    /** Per-call native/particle samples retained through candidate validation
+     * and publication. All tensors are spatial-frame values; gradients 1/s,
+     * temperatures K, phases dimensionless. No accepted history is mutated. */
     template <int dim>
     struct PhaseFieldFault<dim>::HistorySamples
     {
@@ -721,7 +726,7 @@ namespace aspect
                 if (error > bound)
                   ++old_allowance_failures;
                 if (dg_tensor_history && !uses_projected_material_reaction())
-                  bound += dg_source_publication_allowance(*fe_update->dg_history, particle.get_surrounding_cell()->id(), particle.get_location());
+                  bound += dg_source_publication_allowance(*fe_update->bulk_history.tensor, particle.get_surrounding_cell()->id(), particle.get_location());
                 fe_publication_ratio = std::max(fe_publication_ratio, error / bound);
                 fe_publication_error = std::max(fe_publication_error, error);
                 fe_publication_bound = std::max(fe_publication_bound, bound);
@@ -735,7 +740,7 @@ namespace aspect
                     const auto &s = *fe_strain_state;
                     const auto id = particle.get_surrounding_cell()->id();
                     const auto cell = s.evaluation_cells.at(id);
-                    const auto dg_cell = s.dg_history->space->cells.at(id);
+                    const auto dg_cell = s.bulk_history.tensor->primary.space->cells.at(id);
                     const auto unit = this->get_mapping().transform_real_to_unit_cell(cell, particle.get_location());
                     std::ofstream out(this->get_output_directory() + "publication-failure.csv");
                     out << std::setprecision(17) << "key,i,j,k,value\n";
@@ -785,7 +790,7 @@ namespace aspect
                         put("new_I", j, 0, 0, fe_update->I[j]);
                         put("V", j, 0, 0, this->get_reconstructed_fault_manager().get_slip_rate(0)[j]);
                       }
-                    std::vector<types::global_dof_index> native_indices(this->get_fe().n_dofs_per_cell()), dg_indices(s.dg_history->space->element.n_dofs_per_cell());
+                    std::vector<types::global_dof_index> native_indices(this->get_fe().n_dofs_per_cell()), dg_indices(s.bulk_history.tensor->primary.space->element.n_dofs_per_cell());
                     cell->get_dof_indices(native_indices);
                     dg_cell->get_dof_indices(dg_indices);
                     for (unsigned int i = 0; i < native_indices.size(); ++i)
@@ -793,18 +798,18 @@ namespace aspect
                         const auto component = this->get_fe().system_to_component_index(i).first;
                         put("native_component", i, 0, 0, component);
                         put("native_coefficient", i, 0, 0, accepted_bulk_state[native_indices[i]]);
-                        put("old_anchor", i, 0, 0, s.displacement_history[native_indices[i]]);
-                        put("new_anchor", i, 0, 0, fe_update->displacement_history[native_indices[i]]);
+                        put("old_anchor", i, 0, 0, s.bulk_history.native[native_indices[i]]);
+                        put("new_anchor", i, 0, 0, fe_update->bulk_history.native[native_indices[i]]);
                         const auto base = this->get_fe().system_to_base_index(i);
                         const auto support = this->get_fe().base_element(base.first.first).get_unit_support_points()[base.second];
                         for (unsigned int d = 0; d < dim; ++d)
                           put("native_support", i, d, 0, support[d]);
                       }
                     for (unsigned int i = 0; i < dg_indices.size(); ++i)
-                      for (unsigned int c = 0; c < s.dg_history->coefficients.size(); ++c)
+                      for (unsigned int c = 0; c < s.bulk_history.tensor->primary.coefficients.size(); ++c)
                         {
-                          put("old_T", i, c, 0, s.dg_history->coefficients[c][dg_indices[i]]);
-                          put("new_T", i, c, 0, fe_update->dg_history->coefficients[c][dg_indices[i]]);
+                          put("old_T", i, c, 0, s.bulk_history.tensor->primary.coefficients[c][dg_indices[i]]);
+                          put("new_T", i, c, 0, fe_update->bulk_history.tensor->primary.coefficients[c][dg_indices[i]]);
                         }
                     for (unsigned int v = 0; v < GeometryInfo<dim>::vertices_per_cell; ++v)
                       for (unsigned int d = 0; d < dim; ++d)
@@ -815,7 +820,7 @@ namespace aspect
                     weights.insert(weights.begin(), 0.);
                     const Quadrature<dim> quad(points, weights);
                     FEValues<dim> native(this->get_mapping(), this->get_fe(), quad, update_values | update_gradients | update_JxW_values);
-                    FEValues<dim> dg(this->get_mapping(), s.dg_history->space->element, quad, update_values);
+                    FEValues<dim> dg(this->get_mapping(), s.bulk_history.tensor->primary.space->element, quad, update_values);
                     native.reinit(cell);
                     dg.reinit(dg_cell);
                     for (unsigned int q = 0; q < quad.size(); ++q)
@@ -870,29 +875,30 @@ namespace aspect
     }
 
     template <int dim>
-    void PhaseFieldFault<dim>::commit_dg_accepted_step(const std::shared_ptr<FEStrainUpdate> &update)
+    void
+    PhaseFieldFault<dim>::commit_dg_accepted_step(const std::shared_ptr<FEStrainUpdate> &update)
     {
       validate_fe_strain_restrictions();
-      AssertThrow(dg_accepted_history && !mature_frictional_fault && update && update->dg_parent == fe_strain_state->dg_history
-                  && update->dg_step == this->get_timestep_number()
-                  && update->dg_step != fe_strain_state->committed_step
-                  && update->dg_dt == this->get_timestep()
-                  && update->dg_time + update->dg_dt == this->get_time()
-                  && update->dg_rates == this->get_reconstructed_fault_manager().get_slip_rate(0),
+      AssertThrow(dg_accepted_history && !mature_frictional_fault && update && update->prescribed.parent == fe_strain_state->bulk_history.tensor
+                  && update->prescribed.step == this->get_timestep_number()
+                  && update->prescribed.step != fe_strain_state->committed_step
+                  && update->prescribed.dt == this->get_timestep()
+                  && update->prescribed.start_time + update->prescribed.dt == this->get_time()
+                  && update->prescribed.rates == this->get_reconstructed_fault_manager().get_slip_rate(0),
                   ExcMessage("PF5 rejects stale/repeated or changed-context history publication."));
-      AssertThrow(update->dg_history && update->dg_history->space == fe_strain_state->dg_history->space
+      AssertThrow(update->bulk_history.tensor && update->bulk_history.tensor->primary.space == fe_strain_state->bulk_history.tensor->primary.space
                   && update->I == fe_strain_state->I && update->Z.size() == fe_strain_state->Z.size()
-                  && update->dg_cohesive.size() == update->Z.size(), ExcMessage("PF5 staged history layout changed."));
-      for (const auto &component : update->dg_history->coefficients)
+                  && update->prescribed.cohesive.size() == update->Z.size(), ExcMessage("PF5 staged history layout changed."));
+      for (const auto &component : update->bulk_history.tensor->primary.coefficients)
         for (const auto i : component.locally_owned_elements())
           AssertThrow(std::isfinite(component[i]), ExcMessage("Nonfinite PF5 DG candidate."));
       for (unsigned int j = 0; j < update->Z.size(); ++j)
         AssertThrow(std::isfinite(update->Z[j]) && update->Z[j] >= 0.
-                    && std::abs(update->Z[j] - update->dg_cohesive[j]*update->I[j])
+                    && std::abs(update->Z[j] - update->prescribed.cohesive[j]*update->I[j])
                     <= 64 * std::numeric_limits<double>::epsilon()*std::max(1., std::abs(update->Z[j])),
                     ExcMessage("PF5 staged surface histories disagree."));
       HistoryCandidates candidates;
-      candidates.cohesive_nodal_values = {update->dg_cohesive};
+      candidates.cohesive_nodal_values = {update->prescribed.cohesive};
       auto &manager = this->get_phase_field_handler().get_associated_particle_manager();
       const auto &info = manager.get_property_manager().get_data_info();
       const unsigned int stress_position = info.get_position_by_field_name("maxwell stress");
@@ -933,7 +939,7 @@ namespace aspect
       // interpolated from the frozen reconstructed-fault Q1 fields.
       TimerOutput::Scope timer(this->get_computing_timer(), "DG independent history sampling");
       const bool stationary = uses_stationary_mature_dg_optimizations();
-      auto *cache = stationary ? &fe_strain_state->particle_samples : nullptr;
+      auto *cache = stationary ? &fe_strain_state->observations.particles : nullptr;
       const auto generation = fault_manager.get_stokes_qp_cache_diagnostics().rebuild_count;
       const bool reuse = stationary && Utilities::MPI::min(static_cast<unsigned int>(
                                                              bool(*cache) && (*cache)->geometry == generation && (*cache)->points == points), this->get_mpi_communicator());

@@ -1,0 +1,42 @@
+{
+  "readability-build.log": {
+    "path": "build-particle-free/readability-build.log",
+    "sha256": "6de0ce6715ea10c0733441dc37b5e7076c70f79b6606d42ef5bd55d05c04881f"
+  },
+  "readability-build-retry.log": {
+    "path": "build-particle-free/readability-build-retry.log",
+    "sha256": "81213245a6f7c9f993ae78c51f06832e06f5028165463c07836f0bbc54c23c35"
+  },
+  "readability-build-final.log": {
+    "path": "build-particle-free/readability-build-final.log",
+    "sha256": "89b766923b4c09ac0636e5504a7cc41046663aad49890832b5128e153fc3f43e"
+  },
+  "readability-checkers.log": {
+    "path": "build-particle-free/readability-checkers.log",
+    "sha256": "dc0fc6dfa446062e2ee97a47601af34db3a38af251a6f008053c957ce89857a6"
+  },
+  "readability-checkers-final.log": {
+    "path": "build-particle-free/readability-checkers-final.log",
+    "sha256": "36fdef6e7956b9159846172159c84942bfe9b29297b57527b50b8a0d0a975085"
+  },
+  "readability-bp3-plugin.log": {
+    "path": "build-particle-free/readability-bp3-plugin.log",
+    "sha256": "43071b592351503dac03b03e442ce44ea40111607198a6605a872a27a531a116"
+  },
+  "readability-serial-checkers.log": {
+    "path": "build-particle-free/readability-serial-checkers.log",
+    "sha256": "4fbed9288edb7ffa50ecb3aeda032054525527916dab5dc8ddb7c8b70327d83e"
+  },
+  "readability-serial-checkers-final.log": {
+    "path": "build-particle-free/readability-serial-checkers-final.log",
+    "sha256": "87dab019fad0b117f49f9a240f037bee7654fd29e6466e72d1de7702c41cb258"
+  },
+  "readability-additional-checkers.log": {
+    "path": "build-particle-free/readability-additional-checkers.log",
+    "sha256": "aebe01439ace0d2b8a65611d04fdcece20a343c6ac5825068bc49629c471af8c"
+  },
+  "readability-units.log": {
+    "path": "build-particle-free/readability-units.log",
+    "sha256": "1ddcd32465aab7f5079e4b4f0fcb8b6010943ff148c19ee831045c5cf10a7b11"
+  }
+}

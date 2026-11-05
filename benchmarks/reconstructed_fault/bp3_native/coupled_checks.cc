@@ -3,7 +3,7 @@
 #include <aspect/simulator.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/particle/manager.h>
 #include <aspect/particle/integrator/rk_2.h>
 #include <aspect/particle/particle_domain.h>
@@ -561,7 +561,7 @@ namespace aspect
           const auto saved_step=model.fe_strain_state->committed_step;
           const auto saved_publications=model.fe_strain_state->accepted_publications;
           const auto saved_dg=model.uses_dg_tensor_history()
-            ? std::make_shared<typename Model::DGHistory>(*model.fe_strain_state->dg_history) : nullptr;
+            ? std::make_shared<typename Model::DGHistory>(*model.fe_strain_state->bulk_history.tensor) : nullptr;
           const auto saved_V=manager.get_timestep_committed_slip_rate(0);
           const auto saved_pressure=sim.last_pressure_normalization_adjustment;
           const auto saved_iteration=sim.nonlinear_iteration;
@@ -634,9 +634,9 @@ namespace aspect
               unchanged &= data.size()==saved.size() && std::memcmp(data.data(),saved.data(),data.size()*sizeof(double))==0;
             }
           unchanged=unchanged && model.fe_strain_state->accepted_publications==saved_publications;
-          if(saved_dg)for(unsigned int c=0;c<saved_dg->coefficients.size();++c)
-            for(const auto i:saved_dg->coefficients[c].locally_owned_elements())
-              unchanged=unchanged && model.fe_strain_state->dg_history->coefficients[c][i]==saved_dg->coefficients[c][i];
+          if(saved_dg)for(unsigned int c=0;c<saved_dg->primary.coefficients.size();++c)
+            for(const auto i:saved_dg->primary.coefficients[c].locally_owned_elements())
+              unchanged=unchanged && model.fe_strain_state->bulk_history.tensor->primary.coefficients[c][i]==saved_dg->primary.coefficients[c][i];
           AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(unchanged),comm)==1,
                       ExcMessage("Rejected candidate changed an accepted history."));
           manager.rollback_slip_rate_nonlinear_solve();
@@ -917,7 +917,7 @@ namespace aspect
           const auto phase_block = this->introspection().variable("phase_field").block_index;
           if (lifecycle && incoming_step==step)
             {
-              bool same=model.fe_strain_state->dg_history==incoming_dg
+              bool same=model.fe_strain_state->bulk_history.tensor==incoming_dg
                 && model.fe_strain_state->Z==incoming_Z
                 && model.fe_strain_state->accepted_publications==incoming_publications
                 && model.accepted_fe_strain_state()==incoming_fe;
@@ -925,9 +925,9 @@ namespace aspect
                 && model.fe_strain_state->committed_step+1==step
                 && manager.get_timestep_committed_slip_rate(0)==incoming_rates
                 && manager.get_slip_rate(0)==incoming_rates;
-              for(unsigned int c=0;c<incoming_dg_snapshot->coefficients.size();++c)
-                for(const auto i:incoming_dg_snapshot->coefficients[c].locally_owned_elements())
-                  same=same && model.fe_strain_state->dg_history->coefficients[c][i]==incoming_dg_snapshot->coefficients[c][i];
+              for(unsigned int c=0;c<incoming_dg_snapshot->primary.coefficients.size();++c)
+                for(const auto i:incoming_dg_snapshot->primary.coefficients[c].locally_owned_elements())
+                  same=same && model.fe_strain_state->bulk_history.tensor->primary.coefficients[c][i]==incoming_dg_snapshot->primary.coefficients[c][i];
               for(unsigned int j=0;j<fault.n_vertices();++j)
                 {
                   const auto values=fault.get_properties(j);
@@ -1006,7 +1006,7 @@ namespace aspect
               incoming_fe.reinit(model.accepted_fe_strain_state());
               incoming_fe = model.accepted_fe_strain_state();
               incoming_Z = Access::fe_slip_memory(model);
-              incoming_dg = model.fe_strain_state->dg_history;
+              incoming_dg = model.fe_strain_state->bulk_history.tensor;
               if(lifecycle)incoming_dg_snapshot=std::make_shared<typename Model::DGHistory>(*incoming_dg);
             }
           anchors.clear();
@@ -1126,12 +1126,12 @@ namespace aspect
           // All nine incoming modes/components survive a source update. Compare
           // mass/inverse and roundoff caching against the unchanged reference
           // arithmetic on the SAME manufactured native Q2 velocity and history.
-          auto incoming=*model.fe_strain_state->dg_history;
-          for(unsigned int c=0;c<incoming.coefficients.size();++c)
+          auto incoming=*model.fe_strain_state->bulk_history.tensor;
+          for(unsigned int c=0;c<incoming.primary.coefficients.size();++c)
             {
-              LinearAlgebra::Vector owned(incoming.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
+              LinearAlgebra::Vector owned(incoming.primary.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
               for(const auto i:owned.locally_owned_elements())owned[i]=100.*std::sin(.13*(i+1+17*c));
-              owned.compress(VectorOperation::insert);incoming.coefficients[c]=owned;
+              owned.compress(VectorOperation::insert);incoming.primary.coefficients[c]=owned;
             }
           BV bulk(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());bulk=this->get_solution();
           for(const auto i:bulk.block(0).locally_owned_elements())bulk.block(0)[i]=1e-9*(std::cos(.07*i)+.2*std::sin(.3*i));
@@ -1142,10 +1142,10 @@ namespace aspect
           const auto reference=model.make_dg_history_trial(incoming,ghost,coefficients,true,true);
           const auto optimized=model.make_dg_history_trial(incoming,ghost,coefficients,true,false);
           double source_error=0.,bound_error=0.;
-          for(unsigned int c=0;c<incoming.coefficients.size();++c)
+          for(unsigned int c=0;c<incoming.primary.coefficients.size();++c)
             {
-              LinearAlgebra::Vector difference(incoming.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
-              for(const auto i:difference.locally_owned_elements())difference[i]=reference->coefficients[c][i]-optimized->coefficients[c][i];
+              LinearAlgebra::Vector difference(incoming.primary.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
+              for(const auto i:difference.locally_owned_elements())difference[i]=reference->primary.coefficients[c][i]-optimized->primary.coefficients[c][i];
               difference.compress(VectorOperation::insert);source_error=std::max(source_error,difference.linfty_norm());
             }
           for(const auto &entry:reference->source_roundoff)
@@ -1162,7 +1162,7 @@ namespace aspect
           for(const auto &entry:model.fe_strain_state->cells)
             {
               fe.reinit(entry.second);std::vector<double> phase(quadrature.size());
-              fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(model.fe_strain_state->displacement_history,phase);
+              fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(model.fe_strain_state->bulk_history.native,phase);
               if(*std::max_element(phase.begin(),phase.end())==0.)continue;
               const auto center=entry.second->center();const double s=BP3::down_dip(center[0],center[1])/BP3::geometry().length;
               const unsigned int bin=s<.2 ? 0 : (s>.8 ? 2 : 1);
@@ -1171,7 +1171,7 @@ namespace aspect
               const auto &fast=model.retained_dg_qp_stress(entry.first,quadrature,fe.get_quadrature_points());
               for(unsigned int q=0;q<quadrature.size();++q)
                 {
-                  double scale=0.;const auto old=model.evaluate_dg_history_stress(*model.fe_strain_state->dg_history,Z,model.fe_strain_state->I,entry.first,fe.quadrature_point(q),&scale,&model.fe_strain_state->displacement_history);
+                  double scale=0.;const auto old=model.evaluate_dg_history_stress(*model.fe_strain_state->bulk_history.tensor,Z,model.fe_strain_state->I,entry.first,fe.quadrature_point(q),&scale,&model.fe_strain_state->bulk_history.native);
                   const auto d=old-fast[q];stress_error=std::max(stress_error,std::sqrt((d*d)+trace(d)*trace(d)));stress_scale=std::max(stress_scale,scale);
                 }
             }
@@ -1603,12 +1603,12 @@ namespace aspect
                   double new_scale = 0.,old_scale = 0.;
                   if (model.uses_dg_tensor_history())
                     {
-                      actual=model.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,CellId(q.cell),q.position,&new_scale);
+                      actual=model.evaluate_dg_history_stress(*s.bulk_history.tensor,s.Z,s.I,CellId(q.cell),q.position,&new_scale);
                       model.evaluate_dg_history_stress(*incoming_dg,incoming_Z,initial_I,CellId(q.cell),q.position,&old_scale);
                     }
                   else
                     {
-                      actual = model.evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,CellId(q.cell),q.position,&new_scale);
+                      actual = model.evaluate_fe_strain_stress(s.bulk_history.native,s.Z,s.I,CellId(q.cell),q.position,&new_scale);
                       model.evaluate_fe_strain_stress(incoming_fe,incoming_Z,initial_I,CellId(q.cell),q.position,&old_scale);
                     }
                   scale = std::max(scale,2*(new_scale+coefficients.beta*old_scale));
@@ -1617,7 +1617,7 @@ namespace aspect
               const double error = (actual-expected).norm();
               const double bound = 128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)
                                    +(step && model.uses_dg_tensor_history()
-                                     ? model.dg_source_publication_allowance(*model.fe_strain_state->dg_history,
+                                     ? model.dg_source_publication_allowance(*model.fe_strain_state->bulk_history.tensor,
                                                                             CellId(q.cell),q.position) : 0.);
               if (error > bound)
                 this->get_pcout() << std::setprecision(17) << "7B QP mismatch: step=" << step
@@ -1710,12 +1710,12 @@ namespace aspect
                   double new_scale = 0.,old_scale = 0.;
                   if (model.uses_dg_tensor_history())
                     {
-                      model.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,a.cell,a.position,&new_scale);
+                      model.evaluate_dg_history_stress(*s.bulk_history.tensor,s.Z,s.I,a.cell,a.position,&new_scale);
                       model.evaluate_dg_history_stress(*incoming_dg,incoming_Z,initial_I,a.cell,a.position,&old_scale);
                     }
                   else
                     {
-                      model.evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,a.cell,a.position,&new_scale);
+                      model.evaluate_fe_strain_stress(s.bulk_history.native,s.Z,s.I,a.cell,a.position,&new_scale);
                       model.evaluate_fe_strain_stress(incoming_fe,incoming_Z,initial_I,a.cell,a.position,&old_scale);
                     }
                   scale = std::max(scale,2*(new_scale+coefficients.beta*old_scale));
@@ -1745,7 +1745,7 @@ namespace aspect
               const double error = (published.at(a.id)-expected).norm();
               const double bound = 128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)
                                    +(step && model.uses_dg_tensor_history()
-                                     ? model.dg_source_publication_allowance(*model.fe_strain_state->dg_history,a.cell,a.position) : 0.);
+                                     ? model.dg_source_publication_allowance(*model.fe_strain_state->bulk_history.tensor,a.cell,a.position) : 0.);
               AssertThrow(error <= bound, ExcMessage("7B published particle sample has an incorrect Maxwell increment."));
               stress_error = std::max(stress_error,error);
               stress_fraction = std::max(stress_fraction,error/bound);
@@ -1936,25 +1936,25 @@ namespace aspect
                 }
               if (model.uses_dg_tensor_history())
                 {
-                  const auto &history=*model.fe_strain_state->dg_history;
+                  const auto &history=*model.fe_strain_state->bulk_history.tensor;
                   if(step==0)
                     {
                       std::ofstream support(local_file("dg-support.csv"));
                       support<<std::setprecision(17)<<"mode,xi,eta\n";
-                      const auto &nodes=history.space->element.get_unit_support_points();
+                      const auto &nodes=history.primary.space->element.get_unit_support_points();
                       for(unsigned int j=0;j<nodes.size();++j)
                         support<<j<<','<<nodes[j][0]<<','<<nodes[j][1]<<'\n';
                     }
                   std::ofstream coefficients_file(local_file("dg-coefficients-"+std::to_string(step)+".csv"));
                   coefficients_file<<std::setprecision(17)<<"cell,mode,xx,yy,xy\n";
-                  std::vector<types::global_dof_index> indices(history.space->element.n_dofs_per_cell());
-                  for (const auto &cell:history.space->dofs.active_cell_iterators())
+                  std::vector<types::global_dof_index> indices(history.primary.space->element.n_dofs_per_cell());
+                  for (const auto &cell:history.primary.space->dofs.active_cell_iterators())
                     if (cell->is_locally_owned())
                       {
                         cell->get_dof_indices(indices);
                         for (unsigned int j=0;j<indices.size();++j)
-                          coefficients_file<<cell->id()<<','<<j<<','<<history.coefficients[0][indices[j]]<<','
-                            <<history.coefficients[1][indices[j]]<<','<<history.coefficients[2][indices[j]]<<'\n';
+                          coefficients_file<<cell->id()<<','<<j<<','<<history.primary.coefficients[0][indices[j]]<<','
+                            <<history.primary.coefficients[1][indices[j]]<<','<<history.primary.coefficients[2][indices[j]]<<'\n';
                       }
                 }
             }

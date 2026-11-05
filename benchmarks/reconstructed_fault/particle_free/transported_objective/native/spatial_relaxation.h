@@ -2,7 +2,7 @@
 #ifndef ASPECT_BENCHMARK_SPATIAL_RELAXATION_H
 #define ASPECT_BENCHMARK_SPATIAL_RELAXATION_H
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
 namespace aspect

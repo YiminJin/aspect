@@ -1,0 +1,52 @@
+{
+  "arguments": {
+    "label": "readability-stationary",
+    "legacy": false,
+    "baseline": false,
+    "ranks": 2,
+    "steps": 1,
+    "restart": "None",
+    "reject": false,
+    "audit": false,
+    "schedule": "200000",
+    "seconds": 120,
+    "transport_check": false,
+    "refinement": 3,
+    "layered_check": false,
+    "transfer_check": false,
+    "spin": 0.0,
+    "cohesive_history": false,
+    "history_affine": false,
+    "history_level": 0,
+    "cohesive": false,
+    "cohesive_drive": 0.0,
+    "cohesive_dt": 0.000125,
+    "tip_airy": 0.0,
+    "signed_trace": false,
+    "probe_old_cohesive_import": false
+  },
+  "command": [
+    "/opt/openmpi/5.0.6/bin/mpirun",
+    "-n",
+    "2",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/readability-stationary/input.prm"
+  ],
+  "runner_sha256": "05cf7bcc73e145c319acfb8e5ee57be10fa8888368f59e76eaa4234bee4599da",
+  "source_revision": "47c2aae3be15d3ff60aab2a818c2f6e179077702",
+  "core_sha256": "0bec51ac406070b232006a56cb58f303307e5995f915b424748e5805b1aeaa7b",
+  "plugin_sha256": {
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "67740f8fa5a7ba645249ea4b3518195232499bbecacd15052e2f9d37b7fdb0e3",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "b627fd882c411dbe01903f60156a53b918450819f46856c1a56ddba2e903a08f"
+  },
+  "input_sha256": "bd6e3b56852f2497728de047860840ba1cb36c55bda35086663c5f7b6cb8318f",
+  "runtime_environment": {
+    "OMP_PROC_BIND": "false",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib"
+  },
+  "exit_code": 0,
+  "elapsed_s": 5.930185700999573
+}

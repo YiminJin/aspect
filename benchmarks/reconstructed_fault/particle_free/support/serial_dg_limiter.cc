@@ -572,7 +572,7 @@ namespace aspect
       const DGLimiter *limiter,DGLimiterStats *statistics) const
     {
       AssertThrow(!op.distributed,ExcMessage("Serial limiter experiment requires the serial transport control."));
-      AssertThrow(incoming.space==op.space && (!limiter || limiter->space==op.space)
+      AssertThrow(incoming.primary.space==op.space && (!limiter || limiter->space==op.space)
                   && context.get_triangulation().get_vertices()==op.mesh_vertices,
                   ExcMessage("PF4 transport rejects changed spaces or mesh motion."));
       AssertThrow(std::isfinite(time) && std::isfinite(dt) && dt>0.
@@ -597,7 +597,7 @@ namespace aspect
           rhs[c].reinit(n);
           for (unsigned int i=0; i<n; ++i)
             {
-              initial[c][i]=incoming.coefficients[c][i];
+              initial[c][i]=incoming.primary.coefficients[c][i];
               AssertThrow(std::isfinite(initial[c][i]),ExcMessage("Nonfinite incoming DG transport history."));
             }
         }
@@ -637,16 +637,16 @@ namespace aspect
         }
       limit(stage2,time+dt);
       auto result=std::make_shared<DGHistory>();
-      result->space=op.space;
+      result->primary.space=op.space;
       for (unsigned int c=0; c<stage2.size(); ++c)
         {
-          result->coefficients[c].reinit(op.space->dofs.locally_owned_dofs(),op.space->relevant,context.get_mpi_communicator());
+          result->primary.coefficients[c].reinit(op.space->dofs.locally_owned_dofs(),op.space->relevant,context.get_mpi_communicator());
           for (unsigned int i=0; i<n; ++i)
             {
               AssertThrow(std::isfinite(stage2[c][i]),ExcMessage("Nonfinite DG transport candidate."));
-              result->coefficients[c][i]=stage2[c][i];
+              result->primary.coefficients[c][i]=stage2[c][i];
             }
-          result->coefficients[c].compress(VectorOperation::insert);
+          result->primary.coefficients[c].compress(VectorOperation::insert);
         }
       return result;
     }

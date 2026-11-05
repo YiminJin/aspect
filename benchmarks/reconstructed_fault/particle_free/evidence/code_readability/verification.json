@@ -1,0 +1,31 @@
+{
+  "core_build": "passed",
+  "native_checkers": 4,
+  "bp3_support": "rebuilt",
+  "retained_checkers": [
+    "limiter_checks",
+    "stabilization_checks",
+    "transport_checks",
+    "native_method_checks",
+    "pf5_checks",
+    "pf6a_checks",
+    "pf6_transfer_checks",
+    "p3_native_checks",
+    "pf6a_spatial_checks",
+    "phase_energy_checks"
+  ],
+  "unit_assertions": 183170,
+  "unit_cases": 152,
+  "independent_compilations": 11,
+  "maximum_build_workers": 4,
+  "maximum_mpi_ranks": 4,
+  "native_simulations": "sequential",
+  "doxygen": {
+    "version": "1.18.0",
+    "configuration": "doc/options.dox with scoped INPUT/output paths; doc/filter retained",
+    "source_warnings": 0,
+    "exit_code": 0,
+    "limitations": "Existing configuration has obsolete-option warnings; full manual/network tag regeneration was not run."
+  },
+  "production_runs": 0
+}

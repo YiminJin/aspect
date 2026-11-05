@@ -6,7 +6,7 @@
 #include <aspect/particle/manager.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include "transport_method_fields.h"
 #include <deal.II/numerics/vector_tools_interpolate.h>
@@ -65,7 +65,7 @@ namespace aspect
           const auto &s=*m.fe_strain_state;
           values.insert(values.end(),s.Z.begin(),s.Z.end());
           values.insert(values.end(),s.I.begin(),s.I.end());
-          for (unsigned int i=0; i<s.displacement_history.size(); ++i) values.push_back(s.displacement_history[i]);
+          for (unsigned int i=0; i<s.bulk_history.native.size(); ++i) values.push_back(s.bulk_history.native[i]);
           values.push_back(s.committed_step);
           values.push_back(s.accepted_publications);
           const auto &manager=this->get_reconstructed_fault_manager();
@@ -85,19 +85,19 @@ namespace aspect
         }
         bool equal(const std::shared_ptr<Update> &a,const std::shared_ptr<Update> &b) const
         {
-          if (a->Z!=b->Z || a->I!=b->I || a->dg_cohesive!=b->dg_cohesive) return false;
-          for (unsigned int c=0; c<a->dg_history->coefficients.size(); ++c)
-            for (unsigned int i=0; i<a->dg_history->space->dofs.n_dofs(); ++i)
-              if (a->dg_history->coefficients[c][i]!=b->dg_history->coefficients[c][i]) return false;
+          if (a->Z!=b->Z || a->I!=b->I || a->prescribed.cohesive!=b->prescribed.cohesive) return false;
+          for (unsigned int c=0; c<a->bulk_history.tensor->primary.coefficients.size(); ++c)
+            for (unsigned int i=0; i<a->bulk_history.tensor->primary.space->dofs.n_dofs(); ++i)
+              if (a->bulk_history.tensor->primary.coefficients[c][i]!=b->bulk_history.tensor->primary.coefficients[c][i]) return false;
           return true;
         }
         void field(Model &m,const std::string &name) const
         {
           auto out=output("field-"+name+".csv");
           out<<"i,xx,yy,xy\n";
-          const auto &h=*m.fe_strain_state->dg_history;
-          for (unsigned int i=0; i<h.space->dofs.n_dofs(); ++i)
-            out<<i<<','<<h.coefficients[0][i]<<','<<h.coefficients[1][i]<<','<<h.coefficients[2][i]<<'\n';
+          const auto &h=*m.fe_strain_state->bulk_history.tensor;
+          for (unsigned int i=0; i<h.primary.space->dofs.n_dofs(); ++i)
+            out<<i<<','<<h.primary.coefficients[0][i]<<','<<h.primary.coefficients[1][i]<<','<<h.primary.coefficients[2][i]<<'\n';
         }
         void geometry(Model &m,const Transport &op) const
         {
@@ -161,8 +161,8 @@ namespace aspect
             }
           shared<<"i,anchor,solution,old,oldold\n";
           const auto &sim=this->get_simulator();
-          for (unsigned int i=0; i<s.displacement_history.size(); ++i)
-            shared<<i<<','<<s.displacement_history[i]<<','<<sim.solution[i]<<','<<sim.old_solution[i]<<','<<sim.old_old_solution[i]<<'\n';
+          for (unsigned int i=0; i<s.bulk_history.native.size(); ++i)
+            shared<<i<<','<<s.bulk_history.native[i]<<','<<sim.solution[i]<<','<<sim.old_solution[i]<<','<<sim.old_old_solution[i]<<'\n';
           auto clock=output("clock-"+label+".csv");
           clock<<"time,dt,old_dt,step,committed_step,publications,completed\n"<<this->get_time()<<','<<this->get_timestep()<<','<<this->get_old_timestep()<<','<<this->get_timestep_number()<<','<<s.committed_step<<','<<s.accepted_publications<<','<<completed<<'\n';
           auto particles=output("particles-"+label+".csv");
@@ -195,11 +195,11 @@ namespace aspect
           auto &mutable_manager=this->get_reconstructed_fault_manager();
           mutable_manager.prepare_stokes_qp_projection_cache();
           unsigned int k=0;
-          for (const auto &entry:s.dg_history->space->cells)
+          for (const auto &entry:s.bulk_history.tensor->primary.space->cells)
             {
               const auto cell=s.cells.at(entry.first);
               fe.reinit(cell);
-              fe[FEValuesExtractors::Scalar(pc)].get_function_values(s.displacement_history,phase);
+              fe[FEValuesExtractors::Scalar(pc)].get_function_values(s.bulk_history.native,phase);
               const auto &associations=mutable_manager.get_stokes_qp_fault_associations(entry.first,rule,fe.get_quadrature_points());
               for (unsigned int q=0; q<rule.size(); ++q)
                 {
@@ -304,8 +304,8 @@ namespace aspect
               for (unsigned int comp=0; comp<3; ++comp)
                 for (unsigned int i=0; i<op->space->dofs.n_dofs(); ++i)
                   {
-                    relax_error=std::max(relax_error,std::abs(pure->dg_history->coefficients[comp][i]-c.beta*m.fe_strain_state->dg_history->coefficients[comp][i]));
-                    source_error=std::max(source_error,std::abs(native->dg_history->coefficients[comp][i]-full->coefficients[comp][i]));
+                    relax_error=std::max(relax_error,std::abs(pure->bulk_history.tensor->primary.coefficients[comp][i]-c.beta*m.fe_strain_state->bulk_history.tensor->primary.coefficients[comp][i]));
+                    source_error=std::max(source_error,std::abs(native->bulk_history.tensor->primary.coefficients[comp][i]-full->primary.coefficients[comp][i]));
                   }
               control<<relax_error<<','<<source_error<<'\n';
               check("relaxation and source once",relax_error<1.e-10 && source_error<1.e-9);
@@ -332,7 +332,7 @@ namespace aspect
                   check("discarded larger interval",unchanged(anchor,persistent(m)));
                   check("retry identical",equal(trial,m.prepare_dg_accepted_step(*op,v,t)));
                   auto invalid=m.prepare_dg_accepted_step(*op,v,t);
-                  invalid->dg_history->coefficients[0][0]=std::numeric_limits<double>::quiet_NaN();
+                  invalid->bulk_history.tensor->primary.coefficients[0][0]=std::numeric_limits<double>::quiet_NaN();
                   bool failed=false;
                   try
                     {

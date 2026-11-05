@@ -7,7 +7,7 @@
         using Tensor=SymmetricTensor<2,dim>;using History=typename Model::DGHistory;
         auto &m=const_cast<Model &>(Plugins::get_plugin_as_type<const Model>(this->get_material_model()));
         auto &s=*m.fe_strain_state;const auto comm=this->get_mpi_communicator();
-        const double saved_dt=m.initial_time_step;const auto saved_anchor=s.objective_anchor;
+        const double saved_dt=m.initial_time_step;const auto saved_anchor=s.objective.tensor;
         struct Flow : Function<dim>
         {
           Flow(unsigned n):Function<dim>(n){}
@@ -26,7 +26,7 @@
             const auto id=cells.at({unsigned((x[0]+2)/h),unsigned((x[1]+2)/h)});const auto cell=space.cells.at(id);
             const auto u=this->get_mapping().transform_real_to_unit_cell(cell,x);
             std::vector<types::global_dof_index> ids(9);cell->get_dof_indices(ids);Tensor value;
-            for(unsigned c=0;c<3;++c)for(unsigned i=0;i<9;++i)value[Tensor::unrolled_to_component_indices(c)]+=history.coefficients[c][ids[i]]*space.element.shape_value(i,u);
+            for(unsigned c=0;c<3;++c)for(unsigned i=0;i<9;++i)value[Tensor::unrolled_to_component_indices(c)]+=history.primary.coefficients[c][ids[i]]*space.element.shape_value(i,u);
             return value;
           };
         const auto rotate=[](const Tensor &a,double angle)
@@ -63,10 +63,10 @@
                 const unsigned count=std::max(1u,unsigned(std::ceil(dt*op->inverse_advection_time/.1)));
                 for(unsigned k=0;k<count;++k)history=m.advance_dg_transport(*op,*history,inflow,zero,time+k*dt/count,dt/count);
                 dealii::Tensor<2,dim> gradient;gradient[0][1]=.01;
-                s.objective_anchor=m.project_dg_transport_field(*op,[&](const Point<dim> &x,double)
+                s.objective.tensor=m.project_dg_transport_field(*op,[&](const Point<dim> &x,double)
                   {if constexpr(dim==2)return ReconstructedFaultUtilities::rotate_plane_strain_stress(sample(*history,x),gradient,dt);else return Tensor();},0.,8);
-                s.objective_anchor->representation=History::Representation::physical_stress;
-                history=m.make_material_reaction(*m.fe_strain_state,bulk,std::vector<double>(s.Z.size(),0.))->dg_history;
+                s.objective.tensor->representation=History::Representation::physical_stress;
+                history=m.make_material_reaction(*m.fe_strain_state,bulk,std::vector<double>(s.Z.size(),0.))->bulk_history.tensor;
               }
             double error=0.,scale=0.,maximum=0.;const QGauss<dim> rule(12);
             FEValues<dim> fe(this->get_mapping(),space.element,rule,update_quadrature_points|update_JxW_values);
@@ -77,5 +77,5 @@
             error=Utilities::MPI::sum(error,comm);scale=Utilities::MPI::sum(scale,comm);maximum=Utilities::MPI::max(maximum,comm);
             if(out.is_open())out<<n*n<<','<<dt<<",.2,"<<std::sqrt(error/scale)<<','<<maximum<<'\n';
           }
-        m.initial_time_step=saved_dt;s.objective_anchor=saved_anchor;
+        m.initial_time_step=saved_dt;s.objective.tensor=saved_anchor;
       }

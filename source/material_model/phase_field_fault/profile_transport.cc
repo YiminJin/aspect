@@ -7,7 +7,8 @@ namespace aspect
 {
   namespace MaterialModel
   {
-    template<int dim> LinearAlgebra::BlockVector
+    template <int dim>
+    LinearAlgebra::BlockVector
     PhaseFieldFault<dim>::transport_material_profile(const MaterialHistoryInputs &input) const
     {
       const auto &old = input.accepted;
@@ -16,7 +17,7 @@ namespace aspect
       const auto velocity_component = this->introspection().component_indices.velocities[0];
       const double dt = input.dt;
       LinearAlgebra::BlockVector result(this->introspection().index_sets.system_partitioning, comm);
-      result = old.displacement_history;
+      result = old.bulk_history.native;
       std::map<types::global_dof_index, Point<dim>> locations;
       for (const auto &entry : old.cells)
         for (const auto vertex : entry.second->vertex_indices())
@@ -37,7 +38,7 @@ namespace aspect
       for (unsigned i = 0; i < points.size(); ++i)
         departure[i] -= dt * speeds[i];
       lookup.reinit(cache, departure);
-      const auto forward = VectorTools::point_values<1>(lookup, this->get_dof_handler(), old.displacement_history,
+      const auto forward = VectorTools::point_values<1>(lookup, this->get_dof_handler(), old.bulk_history.native,
                                                         VectorTools::EvaluationFlags::avg, component);
       std::vector<double> lower(points.size(), 0.), upper(points.size(), 0.);
       if (material_bounded_profile)
@@ -56,7 +57,7 @@ namespace aspect
                 bound[1] = 0.;
                 for (const auto v : cell->vertex_indices())
                   {
-                    const double phi = old.displacement_history[cell->vertex_dof_index(v, component)];
+                    const double phi = old.bulk_history.native[cell->vertex_dof_index(v, component)];
                     bound[0] = std::min(bound[0], phi);
                     bound[1] = std::max(bound[1], phi);
                   }
@@ -82,7 +83,7 @@ namespace aspect
       result.compress(VectorOperation::insert);
       if (material_bounded_profile)
         {
-          LinearAlgebra::BlockVector predicted(old.displacement_history);
+          LinearAlgebra::BlockVector predicted(old.bulk_history.native);
           predicted = result;
           auto return_points = points;
           for (unsigned j = 0; j < points.size(); ++j)
@@ -97,7 +98,7 @@ namespace aspect
               // Where reverse characteristics leave coverage there is no error
               // estimate: retain the causal first-order forward update.
               const double corrected = ptr[i] < ptr[i + 1]
-                                       ? forward[i] + .5 * (old.displacement_history[entry.first] - reverse[i]) : forward[i];
+                                       ? forward[i] + .5 * (old.bulk_history.native[entry.first] - reverse[i]) : forward[i];
               result[entry.first] = std::clamp(corrected, lower[i], upper[i]);
               ++i;
             }

@@ -145,7 +145,8 @@ namespace aspect
   namespace MaterialModel
   {
     template <int dim>
-    void PhaseFieldFault<dim>::prepare_fe_normalization_geometry(FEStrainState &state)
+    void
+    PhaseFieldFault<dim>::prepare_fe_normalization_geometry(FEStrainState &state)
     {
       const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
       const auto extent = box.get_extents();
@@ -155,7 +156,7 @@ namespace aspect
       const auto profiles = build_owned_normalization_profiles(true);
       prepare_cell_normalization_geometry(profiles);
       AssertThrow(normalization_cell_cache.supported, ExcMessage("FE strain requires affine normal-ray cell geometry."));
-      const auto offset = state.displacement_history.get_block_indices().block_start(b);
+      const auto offset = state.bulk_history.native.get_block_indices().block_start(b);
       for (unsigned int k = 0; k < profiles.size(); ++k)
         {
           typename FEStrainState::Profile p;
@@ -226,7 +227,8 @@ namespace aspect
       mass.mmult(state.projection, rhs);
     }
 
-    template<int dim> typename PhaseFieldFault<dim>::FENormalization
+    template <int dim>
+    typename PhaseFieldFault<dim>::FENormalization
     PhaseFieldFault<dim>::evaluate_fe_normalization(
       const LinearAlgebra::BlockVector &trial, bool assemble_dense_derivatives,
       const std::vector<double> *phase_direction) const
@@ -324,7 +326,9 @@ namespace aspect
       return result;
     }
 
-    template<int dim> void PhaseFieldFault<dim>::add_fe_normalization_energy_pullback(
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::add_fe_normalization_energy_pullback(
       const FENormalization &normalization, const std::vector<double> &forceI,
       const std::vector<double> &scaleI, const FullMatrix<double> &cross,
       const FullMatrix<double> &II, bool tangent, bool positive_search, FEPhaseEnergy &result) const
@@ -369,7 +373,9 @@ namespace aspect
           }
     }
 
-    template<int dim> void PhaseFieldFault<dim>::add_fe_normalization_action_pullback(
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::add_fe_normalization_action_pullback(
       const FENormalization &normalization, const std::vector<double> &direction,
       const std::vector<double> &force, const std::vector<double> &dforce,
       std::vector<double> &gradient) const

@@ -3,7 +3,7 @@
 #include <aspect/postprocess/interface.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/geometry_model/box.h>
 #include <aspect/phase_field.h>
@@ -322,19 +322,19 @@ namespace aspect
                   const auto actual=F::prepared_fe_stress(model,candidate,cell->id(),x,&scale);
                   if (fe_candidate)
                     {
-                      const auto reference=model.evaluate_fe_strain_stress(fe_candidate->displacement_history,
+                      const auto reference=model.evaluate_fe_strain_stress(fe_candidate->bulk_history.native,
                         fe_candidate->Z,fe_candidate->I,cell->id(),x);
                       const auto difference=actual-reference;
                       paired_error=std::max(paired_error,std::sqrt(difference*difference+trace(difference)*trace(difference)));
                       paired_scale=std::max(paired_scale,std::sqrt(reference*reference+trace(reference)*trace(reference)));
-                      source_bound=std::max(source_bound,model.dg_source_publication_allowance(*candidate->dg_history,cell->id(),x));
+                      source_bound=std::max(source_bound,model.dg_source_publication_allowance(*candidate->bulk_history.tensor,cell->id(),x));
                     }
                   // DG projection/differentiation has an operand-derived
                   // allowance separate from history point evaluation, exactly
                   // as in the retained native publication check.
                   const double bound=128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)
                     +(model.uses_dg_tensor_history()
-                      ? model.dg_source_publication_allowance(*candidate->dg_history,cell->id(),x) : 0.);
+                      ? model.dg_source_publication_allowance(*candidate->bulk_history.tensor,cell->id(),x) : 0.);
                   error=std::max(error,(actual-expected).norm());
                   allowance=std::max(allowance,bound);
                   error_fraction=std::max(error_fraction,(actual-expected).norm()
@@ -404,9 +404,9 @@ namespace aspect
                 AssertThrow(paired_error<=1.e-10*paired_scale && weak_error<=1.e-10*weak_scale,
                             ExcMessage("Matched DG/FE mature stress or weak coupling differs."));
                 paired<<path_step<<','<<ratio<<','<<paired_error<<','<<paired_scale<<','<<weak_error<<','<<weak_scale<<','<<source_bound<<std::endl;
-                fe_reference->displacement_history=fe_candidate->displacement_history;
+                fe_reference->bulk_history.native=fe_candidate->bulk_history.native;
                 fe_reference->Z=fe_candidate->Z;fe_reference->I=fe_candidate->I;
-                fe_reference->stress_samples.clear();
+                fe_reference->observations.stress.clear();
               }
             model.commit_reconstructed_fault_mechanical_history(prescribed);
             double memory_error=0.,memory_scale=1.;

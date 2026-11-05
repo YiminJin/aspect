@@ -7,7 +7,7 @@
 
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/phase_field.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/utilities.h>
@@ -23,7 +23,12 @@ namespace aspect
 {
   namespace MaterialModel
   {
-    template<int dim> struct PhaseFieldFault<dim>::FEStrainState::MechanicalSamples
+    /** Fixed-quadrature observation cache shared by state copies. Cell units
+     * and dimensionless phase depend on geometry/profile; physical stress (Pa)
+     * also depends on history identity. Access is guarded by the full sampling
+     * mutex below; returned cell stress arrays stay immutable during assembly. */
+    template <int dim>
+    struct PhaseFieldFault<dim>::FEStrainState::MechanicalSamples
     {
       explicit MechanicalSamples(const Quadrature<dim> &q): points(q.get_points()), weights(q.get_weights()) {}
       std::vector<Point<dim>> points;
@@ -47,7 +52,7 @@ namespace aspect
       const auto &s = *fe_strain_state;
       auto &manager = this->get_reconstructed_fault_manager();
       const unsigned int generation = manager.get_stokes_qp_cache_diagnostics().rebuild_count;
-      auto &pointer = s.mechanical_samples;
+      auto &pointer = s.observations.mechanics;
       if (!pointer || pointer->geometry != generation)
         {
           pointer = std::make_shared<typename FEStrainState::MechanicalSamples>(quadrature);
@@ -56,10 +61,10 @@ namespace aspect
       auto &cache = *pointer;
       AssertThrow(cache.points == quadrature.get_points() && cache.weights == quadrature.get_weights(),
                   ExcMessage("Stationary DG mechanical cache requires its original quadrature."));
-      if (cache.history.lock() != s.dg_history)
+      if (cache.history.lock() != s.bulk_history.tensor)
         {
           cache.stress.clear();
-          cache.history = s.dg_history;
+          cache.history = s.bulk_history.tensor;
         }
       const auto found = cache.stress.find(id);
       if (found != cache.stress.end())
@@ -80,22 +85,22 @@ namespace aspect
           phase_fe.reinit(cell);
           std::vector<double> values(quadrature.size());
           phase_fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
-          .get_function_values(s.displacement_history, values);
+          .get_function_values(s.bulk_history.native, values);
           phase = cache.phase_values.emplace(id, std::move(values)).first;
         }
-      FEValues<dim> dg(this->get_mapping(), s.dg_history->space->element, Quadrature<dim>(cache.units.at(id)), update_values);
+      FEValues<dim> dg(this->get_mapping(), s.bulk_history.tensor->primary.space->element, Quadrature<dim>(cache.units.at(id)), update_values);
       aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::dg_fevalues);
-      const auto dg_cell = s.dg_history->space->cells.at(id);
+      const auto dg_cell = s.bulk_history.tensor->primary.space->cells.at(id);
       dg.reinit(dg_cell);
-      std::vector<types::global_dof_index> indices(s.dg_history->space->element.n_dofs_per_cell());
+      std::vector<types::global_dof_index> indices(s.bulk_history.tensor->primary.space->element.n_dofs_per_cell());
       dg_cell->get_dof_indices(indices);
       std::vector<SymmetricTensor<2, dim>> stress(quadrature.size());
-      for (unsigned int c = 0; c < s.dg_history->coefficients.size(); ++c)
+      for (unsigned int c = 0; c < s.bulk_history.tensor->primary.coefficients.size(); ++c)
         {
           const auto ij = SymmetricTensor<2, dim>::unrolled_to_component_indices(c);
           for (unsigned int q = 0; q < stress.size(); ++q)
             for (unsigned int i = 0; i < indices.size(); ++i)
-              stress[q][ij] += s.dg_history->coefficients[c][indices[i]] * dg.shape_value(i, q);
+              stress[q][ij] += s.bulk_history.tensor->primary.coefficients[c][indices[i]] * dg.shape_value(i, q);
         }
       for (unsigned int q = 0; q < stress.size(); ++q)
         if (association[q].active)
@@ -115,6 +120,13 @@ namespace aspect
     std::vector<SymmetricTensor<2, dim>> PhaseFieldFault<dim>::evaluate_history_tensor(
       const DGHistory &history, const CellId &id, const Quadrature<dim> &quadrature) const
     {
+      return evaluate_history_tensor(history.primary, id, quadrature);
+    }
+
+    template <int dim>
+    std::vector<SymmetricTensor<2, dim>> PhaseFieldFault<dim>::evaluate_history_tensor(
+      const TensorField &history, const CellId &id, const Quadrature<dim> &quadrature) const
+    {
       FEValues<dim> fe(this->get_mapping(), history.space->element, quadrature, update_values);
       fe.reinit(history.space->cells.at(id));
       std::vector<SymmetricTensor<2, dim>> tensor(quadrature.size());
@@ -130,21 +142,25 @@ namespace aspect
     }
 
 
-    template<int dim> void PhaseFieldFault<dim>::prepare_dg_point_samples(
+    template <int dim>
+
+    void
+    PhaseFieldFault<dim>::prepare_dg_point_samples(
       const CellId &id, const std::vector<Point<dim>> &points) const
     {
       if (!uses_stationary_mature_dg_optimizations())
         return;
       const auto &s = *fe_strain_state;
-      auto &space = *s.dg_history->space;
+      auto &space = *s.bulk_history.tensor->primary.space;
+      auto &points_cache = *s.observations.tensor_points;
       const auto &manager = this->get_reconstructed_fault_manager();
       const auto generation = manager.get_stokes_qp_cache_diagnostics().rebuild_count;
-      if (space.point_geometry_generation != generation)
+      if (points_cache.geometry_generation != generation)
         {
-          space.point_samples.clear();
-          space.point_geometry_generation = generation;
+          points_cache.cells.clear();
+          points_cache.geometry_generation = generation;
         }
-      auto &data = space.point_samples[id];
+      auto &data = points_cache.cells[id];
       // Keep the few fixed, cell-owned layouts (publication particles and dense
       // diagnostic QPs) together. Adding a diagnostic layout must not evict the
       // publication layout or attach accepted stress values to geometry.
@@ -170,7 +186,7 @@ namespace aspect
       native.reinit(cell);
       std::vector<double> phi(missing.size());
       native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
-      .get_function_values(s.displacement_history, phi);
+      .get_function_values(s.bulk_history.native, phi);
       const auto old_size = data.size();
       data.resize(old_size + missing.size());
       for (unsigned int q = 0; q < missing.size(); ++q)
@@ -185,7 +201,8 @@ namespace aspect
     }
 
     template <int dim>
-    SymmetricTensor<2, dim> PhaseFieldFault<dim>::evaluate_dg_history_stress(
+    SymmetricTensor<2, dim>
+    PhaseFieldFault<dim>::evaluate_dg_history_stress(
       const DGHistory &history, const std::vector<double> &Z, const std::vector<double> &I,
       const CellId &id, const Point<dim> &point, double *evaluation_scale,
       const LinearAlgebra::BlockVector *phase_trial) const
@@ -194,7 +211,8 @@ namespace aspect
     }
 
     template <int dim>
-    SymmetricTensor<2, dim> PhaseFieldFault<dim>::physical_history_stress(
+    SymmetricTensor<2, dim>
+    PhaseFieldFault<dim>::physical_history_stress(
       const FEStrainState &state, const DGHistory &history,
       const std::vector<double> &Z, const std::vector<double> &I,
       const CellId &id, const Point<dim> &point, double *evaluation_scale,
@@ -204,26 +222,26 @@ namespace aspect
         {
           AssertThrow(material_direct_stress && !history.residual,
                       ExcMessage("Physical DG stress cannot own a separated residual."));
-          const auto cell = history.space->cells.at(id);
+          const auto cell = history.primary.space->cells.at(id);
           const auto unit = this->get_mapping().transform_real_to_unit_cell(cell, point);
           const auto value = evaluate_history_tensor(history, id, Quadrature<dim>({unit}))[0];
           if (evaluation_scale)
             {
               *evaluation_scale = 0.;
-              std::vector<types::global_dof_index> ids(history.space->element.n_dofs_per_cell());
+              std::vector<types::global_dof_index> ids(history.primary.space->element.n_dofs_per_cell());
               cell->get_dof_indices(ids);
-              for (const auto &component : history.coefficients)
+              for (const auto &component : history.primary.coefficients)
                 for (unsigned i = 0; i < ids.size(); ++i)
-                  *evaluation_scale += std::abs(component[ids[i]] * history.space->element.shape_value(i, unit));
+                  *evaluation_scale += std::abs(component[ids[i]] * history.primary.space->element.shape_value(i, unit));
             }
           return value;
         }
-      const auto cell = history.space->cells.at(id);
-      const typename DGHistory::Space::PointSample *sample = nullptr;
+      const auto cell = history.primary.space->cells.at(id);
+      const typename FEStrainState::TensorPointSamples::Sample *sample = nullptr;
       if (uses_stationary_mature_dg_optimizations() && phase_trial == nullptr)
         {
-          const auto found = history.space->point_samples.find(id);
-          if (found != history.space->point_samples.end())
+          const auto found = state.observations.tensor_points->cells.find(id);
+          if (found != state.observations.tensor_points->cells.end())
             for (const auto &p : found->second)
               if (p.point == point)
                 {
@@ -234,16 +252,16 @@ namespace aspect
       SymmetricTensor<2, dim> trial;
       double scale = 0.;
       std::vector<double> phi(1);
-      std::vector<types::global_dof_index> indices(history.space->element.n_dofs_per_cell());
+      std::vector<types::global_dof_index> indices(history.primary.space->element.n_dofs_per_cell());
       cell->get_dof_indices(indices);
       if (sample)
         {
-          for (unsigned int c = 0; c < history.coefficients.size(); ++c)
+          for (unsigned int c = 0; c < history.primary.coefficients.size(); ++c)
             {
               const auto ij = SymmetricTensor<2, dim>::unrolled_to_component_indices(c);
               for (unsigned int i = 0; i < indices.size(); ++i)
                 {
-                  const double value = history.coefficients[c][indices[i]] * sample->shape[i];
+                  const double value = history.primary.coefficients[c][indices[i]] * sample->shape[i];
                   trial[ij] += value;
                   scale += std::abs(value);
                 }
@@ -253,14 +271,14 @@ namespace aspect
       else
         {
           const auto unit = this->get_mapping().transform_real_to_unit_cell(cell, point);
-          FEValues<dim> dg(this->get_mapping(), history.space->element, Quadrature<dim>({unit}), update_values);
+          FEValues<dim> dg(this->get_mapping(), history.primary.space->element, Quadrature<dim>({unit}), update_values);
           dg.reinit(cell);
-          for (unsigned int c = 0; c < history.coefficients.size(); ++c)
+          for (unsigned int c = 0; c < history.primary.coefficients.size(); ++c)
             {
               const auto ij = SymmetricTensor<2, dim>::unrolled_to_component_indices(c);
               for (unsigned int i = 0; i < indices.size(); ++i)
                 {
-                  const double value = history.coefficients[c][indices[i]] * dg.shape_value(i, 0);
+                  const double value = history.primary.coefficients[c][indices[i]] * dg.shape_value(i, 0);
                   trial[ij] += value;
                   scale += std::abs(value);
                 }
@@ -272,7 +290,7 @@ namespace aspect
           FEValues<dim> phase(this->get_mapping(), this->get_fe(), Quadrature<dim>({unit}), update_values);
           phase.reinit(native_cell);
           phase[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
-          .get_function_values(phase_trial ? *phase_trial : state.displacement_history, phi);
+          .get_function_values(phase_trial ? *phase_trial : state.bulk_history.native, phi);
 
           aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::dg_fevalues);
           aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::native_fevalues);
@@ -290,7 +308,7 @@ namespace aspect
               // Include the independent residual operands in publication bounds.
               for (const auto &component : history.residual->coefficients)
                 for (unsigned int i = 0; i < indices.size(); ++i)
-                  scale += std::abs(component[indices[i]] * history.space->element.shape_value(i, unit));
+                  scale += std::abs(component[indices[i]] * history.primary.space->element.shape_value(i, unit));
             }
           if (evaluation_scale)
             *evaluation_scale = scale + correction.norm();
@@ -334,6 +352,7 @@ namespace aspect
 
 
 #define INSTANTIATE(dim) \
+  template std::vector<SymmetricTensor<2,dim>> PhaseFieldFault<dim>::evaluate_history_tensor(const TensorField &,const CellId &,const Quadrature<dim> &) const; \
   template SymmetricTensor<2,dim> PhaseFieldFault<dim>::physical_history_stress(const FEStrainState &,const DGHistory &,const std::vector<double> &,const std::vector<double> &,const CellId &,const Point<dim> &,double *,const LinearAlgebra::BlockVector *) const; \
   template const std::vector<SymmetricTensor<2,dim>> &PhaseFieldFault<dim>::retained_dg_qp_stress(const CellId &,const Quadrature<dim> &,const std::vector<Point<dim>> &) const; \
   template std::vector<SymmetricTensor<2,dim>> PhaseFieldFault<dim>::evaluate_history_tensor(const DGHistory &,const CellId &,const Quadrature<dim> &) const; \

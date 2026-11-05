@@ -1033,7 +1033,7 @@ namespace aspect
 
     const auto history_start=Clock::now();
     auto next=std::make_shared<BulkState>(*parent);
-    next->tensor=std::make_shared<typename Model::DGHistory>();next->tensor->space=parent->tensor->space;
+    next->tensor=std::make_shared<typename Model::TensorField>();next->tensor->space=parent->tensor->space;
     for(auto &field:next->tensor->coefficients)
       field.reinit(next->tensor->space->dofs.locally_owned_dofs(),mpi_communicator);
     // Independent DGQ2 T: actual Gauss3 mass/source projection, retaining all

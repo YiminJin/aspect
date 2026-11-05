@@ -1,6 +1,27 @@
-> **Current selection complete, 4 November 2026:** the ASPECT architecture refactor removes the rejected dedicated mature driver. Ordinary simulator/solver schemes own advancement and acceptance; tensor discretization, material laws and geometry have explicit boundaries. All 183170 unit assertions and seven moving controls pass; stationary/non-fault outputs and retained serial numerical results match their baselines. See [current guide](MATURE_MOVING_FAULT.md) and [report](ASPECT_ARCHITECTURE_REPORT.md). Defaults, checkpoint meanings and 51 protected artifacts are preserved. Scientific campaigns remain paused; this is not new physical or production qualification.
+> **Current selection complete, 4 November 2026:** fault-code readability and ownership refactoring on `47c2aae3be15d3ff60aab2a818c2f6e179077702`. Numerical `TensorField` is separate from material representation/residual and fault observations; material projection receives explicit inputs. All 183170 unit assertions, seven matched moving controls, stationary/serial/non-fault controls, analytic source checks and old/new checkpoint controls pass. Matched moving results are bitwise identical; new 2→4-rank restart agrees within 8.9e−16 bulk / 1.1e−14 surface. AStyle 2.04 is idempotent over all 44 primary files; all 57 protected hashes are unchanged. See [report](CODE_READABILITY_REPORT.md), [current guide](MATURE_MOVING_FAULT.md) and [provenance](../../../benchmarks/reconstructed_fault/particle_free/evidence/code_readability/final-provenance.json). Scientific campaigns remain paused; no new physical or production qualification.
 
-## Current architecture audit
+## Current readability/ownership audit
+
+The numerical field has only FE infrastructure and component vectors. Material
+`DGHistory` owns the representation and composes `primary` plus optional raw R;
+bulk-cohesive physical state remains in its distinct owner. `FEStrainState` groups
+bulk history, per-attempt objective anchor and observations. The phase/fault
+point cache shares the previous clone lifetime outside the numerical space.
+Numerical projection receives evaluated tensors; its material adapter explicitly
+samples the profile and accepted velocity. Checkpoint packets are unchanged.
+
+All primary files received scoped style/readability review. The formatter-only
+patch, token review, built/final source hashes, matching DSO identities and
+bounded comparisons are in [the evidence directory](../../../benchmarks/reconstructed_fault/particle_free/evidence/code_readability).
+Seven final comment/whitespace-only file edits are recorded separately from the
+core build; eleven affected translation units compile independently with final
+headers. Retained compile errors and the incorrectly selected restart window
+are documented as corrected implementation/test-orchestration issues. No criteria
+were relaxed. Historical scientific failures and cleanup losses remain.
+
+> **Previous selection complete, 4 November 2026:** the ASPECT architecture refactor removes the rejected dedicated mature driver. Ordinary simulator/solver schemes own advancement and acceptance; tensor discretization, material laws and geometry have explicit boundaries. All 183170 unit assertions and seven moving controls pass; stationary/non-fault outputs and retained serial numerical results match their baselines. See [current guide](MATURE_MOVING_FAULT.md) and [report](ASPECT_ARCHITECTURE_REPORT.md). Defaults, checkpoint meanings and 51 protected artifacts are preserved. Scientific campaigns remain paused; this is not new physical or production qualification.
+
+## Historical record: ASPECT architecture audit
 
 The final source/binary inventory and all 51 protected hashes are recorded in
 [final provenance](../../../benchmarks/reconstructed_fault/particle_free/evidence/aspect_architecture/final-provenance.json).

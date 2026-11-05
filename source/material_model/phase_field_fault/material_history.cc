@@ -13,7 +13,9 @@ namespace aspect
 {
   namespace MaterialModel
   {
-    template<int dim> double PhaseFieldFault<dim>::material_viscosity(
+    template <int dim>
+    double
+    PhaseFieldFault<dim>::material_viscosity(
       const Point<dim> &x, const double reference) const
     {
       if (!dg_material_transport)
@@ -24,8 +26,13 @@ namespace aspect
       return reference * multiplier;
     }
 
-    template<int dim> void PhaseFieldFault<dim>::finish_dg_material_step(const bool accept) noexcept
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::finish_dg_material_step(const bool accept) noexcept
     {
+      // The common endpoint owner has already validated/published on success.
+      // On failure, restore every bound geometry/history view before dropping
+      // the transaction. Clearing scratch alone would leave candidate mechanics.
       dg_material_reaction.reset();
       material_reaction_solving = false;
       if (!dg_material_trial)
@@ -41,13 +48,15 @@ namespace aspect
           for (auto &p : this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler())
             std::copy(trial.particle_properties.at(p.get_id()).begin(),
             trial.particle_properties.at(p.get_id()).end(), p.get_properties().begin());
-          fe_strain_state->stress_samples.clear();
-          fe_strain_state->mechanical_samples.reset();
+          fe_strain_state->observations.stress.clear();
+          fe_strain_state->observations.mechanics.reset();
         }
       dg_material_trial.reset();
     }
 
-    template<int dim> double PhaseFieldFault<dim>::material_surface_viscosity(
+    template <int dim>
+    double
+    PhaseFieldFault<dim>::material_surface_viscosity(
       unsigned int f, unsigned int j, double xi, double reference) const
     {
       if (!dg_material_transport)
@@ -56,7 +65,8 @@ namespace aspect
       return material_viscosity(fault.vertex(j) + xi * (fault.vertex(j + 1) - fault.vertex(j)), reference);
     }
 
-    template<int dim> typename PhaseFieldFault<dim>::MaterialHistoryInputs
+    template <int dim>
+    typename PhaseFieldFault<dim>::MaterialHistoryInputs
     PhaseFieldFault<dim>::prepare_material_history(
       const LinearAlgebra::BlockVector &accepted_velocity, const double time, const double dt)
     {
@@ -77,6 +87,8 @@ namespace aspect
       validate_fe_strain_restrictions();
       AssertThrow(dt > 0. && std::isfinite(dt), ExcMessage("Invalid material step interval."));
       material_viscosity_multiplier.set_time(time);
+      // Capture the accepted parent before transport or geometry binding. These
+      // references and backups are the sole rollback source for this attempt.
       auto transaction = std::make_shared<DGMaterialTrial>();
       transaction->accepted_history = fe_strain_state;
       transaction->step = this->get_timestep_number();
@@ -89,27 +101,36 @@ namespace aspect
       return {*transaction->accepted_history, accepted_velocity, time, dt, transaction->step};
     }
 
-    template<int dim> std::shared_ptr<typename PhaseFieldFault<dim>::DGTransport>
+    template <int dim>
+    std::shared_ptr<typename PhaseFieldFault<dim>::DGTransport>
     PhaseFieldFault<dim>::make_dg_transport(const LinearAlgebra::BlockVector &velocity,
                                             const unsigned int order, const bool relax) const
     {
       validate_fe_strain_restrictions();
       AssertThrow(jaumann_dg_stress || (dg_tensor_history && !consistent_endpoint_phase),
                   ExcMessage("Tensor transport requires objective history or the retained PF4 control."));
-      return DGTransport::assemble(*this, *fe_strain_state->dg_history, fe_strain_state->cells,
+      return DGTransport::assemble(*this, fe_strain_state->bulk_history.tensor->primary, fe_strain_state->cells,
                                    velocity, order, relax ? fe_strain_state->G / fe_strain_state->eta : 0., jaumann_dg_stress);
     }
-    template<int dim> std::shared_ptr<typename PhaseFieldFault<dim>::DGHistory>
+    template <int dim>
+    std::shared_ptr<typename PhaseFieldFault<dim>::DGHistory>
     PhaseFieldFault<dim>::project_dg_transport_field(const DGTransport &op, const DGField &field,
                                                      double time, unsigned int order) const
     {
-      return DGTransport::project(*this, op, field, time, order);
+      auto result = std::make_shared<DGHistory>();
+      result->primary = *DGTransport::project(*this, op, field, time, order);
+      return result;
     }
-    template<int dim> std::shared_ptr<typename PhaseFieldFault<dim>::DGHistory>
+    template <int dim>
+    std::shared_ptr<typename PhaseFieldFault<dim>::DGHistory>
     PhaseFieldFault<dim>::advance_dg_transport(const DGTransport &op, const DGHistory &history,
                                                const DGField &inflow, const DGField &source, double time, double dt) const
     {
-      return DGTransport::advance(*this, op, history, inflow, source, time, dt);
+      AssertThrow(!history.residual, ExcMessage("Transport one independent tensor at a time."));
+      auto result = std::make_shared<DGHistory>();
+      result->representation = history.representation;
+      result->primary = *DGTransport::advance(*this, op, history.primary, inflow, source, time, dt);
+      return result;
     }
 #define INSTANTIATE(dim) \
   template double PhaseFieldFault<dim>::material_viscosity(const Point<dim> &,double) const; \

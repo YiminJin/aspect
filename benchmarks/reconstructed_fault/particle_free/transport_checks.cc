@@ -2,7 +2,7 @@
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include "../../../tests/phase_field_fault_test_access.h"
@@ -99,8 +99,8 @@ namespace aspect
         {
           double error=0.;
           const QGauss<dim> rule(3);
-          FEValues<dim> fe(this->get_mapping(),a.space->element,rule,update_JxW_values);
-          for (const auto &entry:a.space->cells)
+          FEValues<dim> fe(this->get_mapping(),a.primary.space->element,rule,update_JxW_values);
+          for (const auto &entry:a.primary.space->cells)
             {
               fe.reinit(entry.second);
               const auto va=model.evaluate_history_tensor(a,entry.first,rule);
@@ -114,9 +114,9 @@ namespace aspect
         {
           const QGauss<dim> rule(8);
           const QGaussLobatto<dim> extrema_rule(9);
-          FEValues<dim> fe(this->get_mapping(),state.space->element,rule,update_JxW_values|update_quadrature_points);
+          FEValues<dim> fe(this->get_mapping(),state.primary.space->element,rule,update_JxW_values|update_quadrature_points);
           double error=0.,norm=0.,reference_norm=0.,maximum=0.,minimum_xx=std::numeric_limits<double>::max(),maximum_xx=-minimum_xx;
-          for (const auto &entry:state.space->cells)
+          for (const auto &entry:state.primary.space->cells)
             {
               fe.reinit(entry.second);
               const auto values=model.evaluate_history_tensor(state,entry.first,rule);
@@ -139,8 +139,8 @@ namespace aspect
                   << minimum_xx << ',' << maximum_xx << ',' << initial_error << '\n';
           auto coefficients=output("field-"+name+".csv");
           coefficients << "i,xx,yy,xy\n";
-          for (unsigned int i=0; i<state.space->dofs.n_dofs(); ++i)
-            coefficients << i << ',' << state.coefficients[0][i] << ',' << state.coefficients[1][i] << ',' << state.coefficients[2][i] << '\n';
+          for (unsigned int i=0; i<state.primary.space->dofs.n_dofs(); ++i)
+            coefficients << i << ',' << state.primary.coefficients[0][i] << ',' << state.primary.coefficients[1][i] << ',' << state.primary.coefficients[2][i] << '\n';
         }
         void export_geometry(const Transport &op) const
         {
@@ -195,7 +195,7 @@ namespace aspect
           const auto a=model.advance_dg_transport(*op,*incoming,constant,zero,0.,.001);
           const auto b=model.advance_dg_transport(*op,*incoming,constant,zero,0.,.001);
           controls << "constant_error," << difference(model,*a,*incoming) << "\nrepeat_error," << difference(model,*a,*b) << '\n';
-          const auto snapshot=incoming->coefficients;
+          const auto snapshot=incoming->primary.coefficients;
           bool rejected=false;
           try
             {
@@ -209,7 +209,7 @@ namespace aspect
               rejected=true;
             }
           bool unchanged=true;
-          for (unsigned int c=0; c<snapshot.size(); ++c) unchanged &= snapshot[c]==incoming->coefficients[c];
+          for (unsigned int c=0; c<snapshot.size(); ++c) unchanged &= snapshot[c]==incoming->primary.coefficients[c];
           controls << "invalid_source_rejected," << rejected << "\nincoming_unchanged," << unchanged << '\n';
           AssertThrow(rejected && unchanged && difference(model,*a,*b)==0.,ExcMessage("PF4 trial lifecycle failed."));
           rejected=false;
@@ -265,8 +265,8 @@ namespace aspect
           {
             auto initial=output("initial-pulse.csv");
             initial << "i,xx,yy,xy\n";
-            for (unsigned int i=0; i<pulse_initial->space->dofs.n_dofs(); ++i)
-              initial << i << ',' << pulse_initial->coefficients[0][i] << ',' << pulse_initial->coefficients[1][i] << ',' << pulse_initial->coefficients[2][i] << '\n';
+            for (unsigned int i=0; i<pulse_initial->primary.space->dofs.n_dofs(); ++i)
+              initial << i << ',' << pulse_initial->primary.coefficients[0][i] << ',' << pulse_initial->primary.coefficients[1][i] << ',' << pulse_initial->primary.coefficients[2][i] << '\n';
           }
           const auto translated_final=evolve(model,*op,pulse_initial,translated,zero,steps);
           record(model,"pulse_translation",*translated_final,translated,steps);
@@ -347,7 +347,7 @@ namespace aspect
           };
           auto residual=evolve(model,*normal,model.project_dg_transport_field(*normal,zero,0.,8),normal_residual,normal_source,normal_steps);
           auto reconstructed=model.project_dg_transport_field(*normal,normal_cohesive,final_time,8);
-          for (unsigned int c=0; c<reconstructed->coefficients.size(); ++c) reconstructed->coefficients[c]-=residual->coefficients[c];
+          for (unsigned int c=0; c<reconstructed->primary.coefficients.size(); ++c) reconstructed->primary.coefficients[c]-=residual->primary.coefficients[c];
           record(model,"normal_residual",*reconstructed,normal_direct,normal_steps);
           const auto tangent_velocity=velocity([](const Point<dim> &)
           {
@@ -380,7 +380,7 @@ namespace aspect
           };
           residual=evolve(model,*tangent,model.project_dg_transport_field(*tangent,zero,0.,8),tangent_residual,tangent_source,tangent_steps);
           reconstructed=model.project_dg_transport_field(*tangent,tangent_cohesive,final_time,8);
-          for (unsigned int c=0; c<reconstructed->coefficients.size(); ++c) reconstructed->coefficients[c]-=residual->coefficients[c];
+          for (unsigned int c=0; c<reconstructed->primary.coefficients.size(); ++c) reconstructed->primary.coefficients[c]-=residual->primary.coefficients[c];
           record(model,"tangent_residual",*reconstructed,tangent_direct,tangent_steps);
           const auto moving_velocity=velocity([](const Point<dim> &)
           {

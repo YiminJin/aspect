@@ -40,16 +40,18 @@ namespace aspect
 {
   namespace MaterialModel
   {
-    template<int dim> typename PhaseFieldFault<dim>::FEPhaseEnergy
+    template <int dim>
+    typename PhaseFieldFault<dim>::FEPhaseEnergy
     PhaseFieldFault<dim>::evaluate_fe_phase_energy(const LinearAlgebra::BlockVector &trial,
                                                    bool tangent, bool positive_search) const
     {
       validate_fe_strain_restrictions();
       return evaluate_fe_phase_energy_at(trial, tangent, positive_search,
-                                         fe_strain_state->displacement_history, fe_strain_state->Z);
+                                         fe_strain_state->bulk_history.native, fe_strain_state->Z);
     }
 
-    template<int dim> typename PhaseFieldFault<dim>::FEPhaseEnergy
+    template <int dim>
+    typename PhaseFieldFault<dim>::FEPhaseEnergy
     PhaseFieldFault<dim>::evaluate_fe_endpoint_energy(const LinearAlgebra::BlockVector &trial,
                                                       const FEEndpointTrial &endpoint,
                                                       const std::vector<double> *phase_direction) const
@@ -59,7 +61,8 @@ namespace aspect
       return evaluate_fe_phase_energy_at(trial, false, false, endpoint.strain, endpoint.Z, phase_direction, endpoint.dg_history.get());
     }
 
-    template<int dim> typename PhaseFieldFault<dim>::FEEndpointTrial
+    template <int dim>
+    typename PhaseFieldFault<dim>::FEEndpointTrial
     PhaseFieldFault<dim>::make_fe_endpoint_trial(const LinearAlgebra::BlockVector &bulk,
                                                  const std::vector<std::vector<double>> &V) const
     {
@@ -70,7 +73,7 @@ namespace aspect
       if (dg_tensor_history)
         {
           endpoint.dg_history = make_dg_history_trial(bulk, c);
-          endpoint.strain = s.displacement_history;
+          endpoint.strain = s.bulk_history.native;
           endpoint.strain.block(this->introspection().variable("phase_field").block_index) = bulk.block(this->introspection().variable("phase_field").block_index);
         }
       else
@@ -100,7 +103,8 @@ namespace aspect
       return endpoint;
     }
 
-    template<int dim> typename PhaseFieldFault<dim>::FEPhaseEnergy
+    template <int dim>
+    typename PhaseFieldFault<dim>::FEPhaseEnergy
     PhaseFieldFault<dim>::evaluate_fe_phase_energy_at(const LinearAlgebra::BlockVector &trial,
                                                       bool tangent, bool positive_search,
                                                       const LinearAlgebra::BlockVector &strain,
@@ -153,7 +157,7 @@ namespace aspect
         {
           fe.reinit(entry.second);
           if (dg_tensor_history)
-            R = evaluate_history_tensor(endpoint_history ? *endpoint_history : *s.dg_history, entry.first, quad);
+            R = evaluate_history_tensor(endpoint_history ? *endpoint_history : *s.bulk_history.tensor, entry.first, quad);
           else
             fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(strain, R);
           for (unsigned int q = 0; q < quad.size(); ++q, ++point)
@@ -257,7 +261,8 @@ namespace aspect
       return result;
     }
 
-    template<int dim> typename PhaseFieldFault<dim>::FEEndpointAction
+    template <int dim>
+    typename PhaseFieldFault<dim>::FEEndpointAction
     PhaseFieldFault<dim>::evaluate_fe_endpoint_action(
       const LinearAlgebra::BlockVector &trial, const FEEndpointTrial &endpoint,
       const std::vector<double> &direction,

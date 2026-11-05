@@ -4,7 +4,7 @@
 #include <aspect/phase_field.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include "../../../tests/phase_field_fault_test_access.h"
 #include "transport_method_fields.h"
@@ -51,8 +51,8 @@ namespace aspect
         {
           auto out=output(label+".csv");
           out<<"i,xx,yy,xy\n";
-          for (unsigned int i=0; i<h.space->dofs.n_dofs(); ++i)
-            out<<i<<','<<h.coefficients[0][i]<<','<<h.coefficients[1][i]<<','<<h.coefficients[2][i]<<'\n';
+          for (unsigned int i=0; i<h.primary.space->dofs.n_dofs(); ++i)
+            out<<i<<','<<h.primary.coefficients[0][i]<<','<<h.primary.coefficients[1][i]<<','<<h.primary.coefficients[2][i]<<'\n';
         }
       public:
         std::pair<std::string,std::string> execute(TableHandler &) override

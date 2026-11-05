@@ -643,7 +643,7 @@ for review before server execution, another cleanup section, or R7.
 
 ## Current stress-history architecture — 4 November 2026
 
-Follow [the selected instructions](particle_free/CODEX_ASPECT_ARCHITECTURE_REFACTOR.txt)
+Follow [the readability instructions](particle_free/CODEX_FAULT_CODE_READABILITY.txt)
 and [current guide](particle_free/MATURE_MOVING_FAULT.md). The ordinary simulator
 timestep and solver schemes own ordering and acceptance; coupled Stokes owns
 projection-consistency iteration. The rejected mature timestep driver, its
@@ -652,8 +652,13 @@ under another name, callback or pipeline. The existing coupled mechanical solver
 is retained; this does not undo its earlier M5 boundary above.
 
 Material components own constitutive/localization responses and history lifetime;
-independent `HistoryDiscretization::TensorHistory`/`TensorAdvection` own numerical
-coefficients, FE space and advection/projection. Reconstructed-fault infrastructure
+independent `HistoryDiscretization::TensorField`/`TensorAdvection` own numerical
+coefficients, FE space and advection/projection. Material `DGHistory` composes the
+primary field and optional residual; the numerical field has no constitutive tag
+or recursive history. Material sampling supplies evaluated fields to projection.
+Fault-dependent point caches live in `FEStrainState::observations`, preserving
+shared lifetimes/invalidation; `bulk_history` and `objective` separate accepted
+fields from the fixed attempt anchor. Reconstructed-fault infrastructure
 owns geometry/support mapping and generic properties without interpreting friction.
 Direct tau uses neutral coefficient storage and common physical-stress access;
 separated remains default. Cohesive physical histories remain distinct.
@@ -661,5 +666,6 @@ separated remains default. Cohesive physical histories remain distinct.
 Preserve single publication/rollback, final converged slip guess, accepted-gradient
 spin lag, quadrature, checkpoint meanings and acceptance criteria. Rebuild matching
 checkers after internal ABI changes. Prior consolidation and mature-step reports
-remain historical evidence; [architecture report](particle_free/ASPECT_ARCHITECTURE_REPORT.md)
-records this source and verification. No scientific campaign is selected.
+remain historical evidence. The [architecture report](particle_free/ASPECT_ARCHITECTURE_REPORT.md)
+records the incoming baseline; the [readability report](particle_free/CODE_READABILITY_REPORT.md)
+records the current ownership/API changes and verification. No scientific campaign is selected.

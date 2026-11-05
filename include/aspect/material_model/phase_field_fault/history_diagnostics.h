@@ -41,14 +41,19 @@ namespace aspect
     class FaultHistoryDiagnostics
     {
       public:
+        /** Open a rank-local optional stream for this call/step; no history reads. */
         void open_stress_cycle(const std::string &output_directory,
                                unsigned int step, MPI_Comm communicator, bool spin = false);
+        /** Open source audit selected by the existing environment controls. */
         void open_source_history(const std::string &output_directory,
                                  unsigned int step, MPI_Comm communicator, bool spin = false);
 
         bool selects_stress_cycle(const Particles::ParticleAccessor<dim> &particle) const;
         bool source_history_is_open() const;
 
+        /** Record already sampled spatial tensors (Pa) and gradient (1/s).
+         * time is the endpoint (s), time_step its interval; eta_ve=kappa (Pa s).
+         * Particle and optional rotated tensor are borrowed only for this call. */
         void record_stress_cycle(unsigned int step, double time, double time_step,
                                  unsigned int particle_index,
                                  const Particles::ParticleAccessor<dim> &particle,
@@ -59,6 +64,8 @@ namespace aspect
                                  const SymmetricTensor<2, dim> &effective_strain_rate,
                                  const SymmetricTensor<2, dim> &candidate_stress,
                                  double spin_angle = 0., const SymmetricTensor<2, dim> *rotated_history = nullptr);
+        /** Record localization/source values without reconstructing or accepting
+         * state. continued_V is m/s; continued_crack is a strain rate (1/s). */
         void record_source_history(const Particles::ParticleAccessor<dim> &particle,
                                    double phase_field, double continued_chi,
                                    double continued_V, double eta_ve, double beta,

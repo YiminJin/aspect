@@ -1,0 +1,747 @@
+{
+  "stationary": [
+    {
+      "file": "accepted_steps.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    },
+    {
+      "file": "objective-dg-summary.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    },
+    {
+      "file": "fault_0.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    },
+    {
+      "file": "fault_1.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    },
+    {
+      "file": "objective-dg-final-rank0.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    },
+    {
+      "file": "objective-dg-final-rank1.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    }
+  ],
+  "nonfault_statistics_byte_identical": true,
+  "serial": {
+    "limiter": [
+      {
+        "file": "accepted.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "basis.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "boundary-indicators.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "cells.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "constants.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "costs.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": [
+          "detector_seconds",
+          "reconstruction_seconds",
+          "transport_seconds"
+        ]
+      },
+      {
+        "file": "field-pulse_translation-unlimited.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "field-signed_jump-unlimited.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "inflow-points.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "initial-pulse_translation.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "initial-signed_jump.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "limited-lifecycle.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-affine.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-background.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-huge.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-mixed_xy.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-near_constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-nonproportional.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-orientation.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-piecewise_constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-q2.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-tiny.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-zero.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-indicators-zero_crossing.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-affine.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-background.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-huge.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-mixed_xy.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-near_constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-nonproportional.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-orientation.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-piecewise_constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-q2.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-tiny.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-zero.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-input-zero_crossing.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-kx-mixed_xy.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-kx-nonproportional.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-kx-orientation.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-kx-rotated-nonproportional.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-kx-rotated-orientation.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-affine.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-background.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-huge.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-mixed_xy.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-near_constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-nonproportional.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-orientation.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-piecewise_constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-q2.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-tiny.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-zero.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local-output-zero_crossing.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "local.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "metrics.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "snapshot-indicators-pulse_translation-final.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "snapshot-indicators-pulse_translation-initial.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "snapshot-indicators-signed_jump-final.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "snapshot-indicators-signed_jump-initial.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "snapshot-pulse_translation-final.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "snapshot-pulse_translation-initial.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "snapshot-signed_jump-final.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "snapshot-signed_jump-initial.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      }
+    ],
+    "stabilization": [
+      {
+        "file": "accepted.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "basis.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "cells.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "constants.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "costs.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": [
+          "detector_seconds",
+          "reconstruction_seconds",
+          "transport_seconds",
+          "norm_measurement_seconds",
+          "limiter_setup_seconds"
+        ]
+      },
+      {
+        "file": "metrics.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "physical.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-input-affine.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-input-constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-input-nonproportional.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-input-overshoot.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-input-piecewise_constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-input-q2.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-input-zero.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-local.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-output-affine.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-output-constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-output-nonproportional.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-output-overshoot.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-output-piecewise_constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-output-q2.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-output-zero.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-rejection.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-theta-affine.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-theta-constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-theta-nonproportional.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-theta-overshoot.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-theta-piecewise_constant.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-theta-q2.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      },
+      {
+        "file": "scaling-theta-zero.csv",
+        "max_scaled_difference": 0.0,
+        "excluded_columns": []
+      }
+    ]
+  },
+  "lifecycle": [
+    {
+      "before": "readability-dl",
+      "after": "readability-restart-new",
+      "steps": [
+        {
+          "time": 0.15000000000000002,
+          "bulk_Linf": 8.763741685471893e-17,
+          "surface_Linf": 3.552713678800501e-15,
+          "tensor_L2": 1.714670753041173e-17,
+          "work_traction_Linf": 3.645629804982509e-18,
+          "exported_values_bitwise": false
+        },
+        {
+          "time": 0.2,
+          "bulk_Linf": 8.881784197001252e-16,
+          "surface_Linf": 1.0658141036401503e-14,
+          "tensor_L2": 2.1088902372821917e-16,
+          "work_traction_Linf": 7.48099499014998e-18,
+          "exported_values_bitwise": false
+        }
+      ],
+      "before_iterations": [
+        32,
+        32,
+        32,
+        35,
+        34,
+        34,
+        34,
+        34,
+        34,
+        35,
+        34,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33
+      ],
+      "after_iterations": [
+        35,
+        35,
+        33,
+        35,
+        35,
+        33
+      ],
+      "before_wall_s": 22.456043905000115,
+      "after_wall_s": 8.435877427000378
+    },
+    {
+      "before": "true-cutback-control",
+      "after": "readability-reject",
+      "steps": [
+        {
+          "time": 0.0,
+          "bulk_Linf": 0.0,
+          "surface_Linf": 0.0,
+          "tensor_L2": 0.0,
+          "work_traction_Linf": 0.0,
+          "exported_values_bitwise": true
+        },
+        {
+          "time": 0.1,
+          "bulk_Linf": 1.3594539990252619e-16,
+          "surface_Linf": 3.552713678800501e-15,
+          "tensor_L2": 5.348604261100915e-17,
+          "work_traction_Linf": 3.0086610286472748e-18,
+          "exported_values_bitwise": false
+        },
+        {
+          "time": 0.15000000000000002,
+          "bulk_Linf": 9.413263490085436e-16,
+          "surface_Linf": 1.2434497875801753e-14,
+          "tensor_L2": 3.202575831178451e-16,
+          "work_traction_Linf": 2.756584023544395e-17,
+          "exported_values_bitwise": false
+        },
+        {
+          "time": 0.2,
+          "bulk_Linf": 1.5761572141849076e-15,
+          "surface_Linf": 5.329070518200751e-15,
+          "tensor_L2": 6.277236907869745e-16,
+          "work_traction_Linf": 5.51316804708879e-17,
+          "exported_values_bitwise": false
+        }
+      ],
+      "before_iterations": [
+        31,
+        31,
+        31,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33
+      ],
+      "after_iterations": [
+        31,
+        31,
+        31,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33
+      ],
+      "before_wall_s": 23.86398961699979,
+      "after_wall_s": 21.756451191999076
+    },
+    {
+      "before": "readability-dl",
+      "after": "readability-midpoint",
+      "steps": [
+        {
+          "time": 0.0,
+          "bulk_Linf": 0.0,
+          "surface_Linf": 0.0,
+          "tensor_L2": 0.0,
+          "work_traction_Linf": 0.0,
+          "exported_values_bitwise": true
+        },
+        {
+          "time": 0.05,
+          "bulk_Linf": 0.0,
+          "surface_Linf": 0.0,
+          "tensor_L2": 0.0,
+          "work_traction_Linf": 0.0,
+          "exported_values_bitwise": true
+        },
+        {
+          "time": 0.1,
+          "bulk_Linf": 0.0,
+          "surface_Linf": 0.0,
+          "tensor_L2": 0.0,
+          "work_traction_Linf": 0.0,
+          "exported_values_bitwise": true
+        }
+      ],
+      "before_iterations": [
+        32,
+        32,
+        32,
+        35,
+        34,
+        34,
+        34,
+        34,
+        34,
+        35,
+        34,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33
+      ],
+      "after_iterations": [
+        32,
+        32,
+        32,
+        35,
+        34,
+        34,
+        34,
+        34,
+        34,
+        35,
+        34,
+        33,
+        35,
+        35,
+        33
+      ],
+      "before_wall_s": 22.456043905000115,
+      "after_wall_s": 14.548008191999543
+    }
+  ]
+}

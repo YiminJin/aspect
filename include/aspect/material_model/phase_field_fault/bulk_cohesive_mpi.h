@@ -10,6 +10,8 @@ namespace aspect
   {
     namespace BulkCohesive
     {
+      /** Collectively replicate owned block entries for the bounded bulk solver.
+       * This intentionally scales as the global vector; not the DG transport API. */
       inline Vector<double> global_values(const LinearAlgebra::BlockVector &v,
                                           const MPI_Comm communicator)
       {
@@ -22,6 +24,7 @@ namespace aspect
         return result;
       }
 
+      /** Collectively union constraints; reject conflicting copies of a line. */
       inline AffineConstraints<double> global_constraints(const AffineConstraints<double> &local,
                                                           const MPI_Comm communicator)
       {
@@ -47,6 +50,7 @@ namespace aspect
         return result;
       }
 
+      /** Sum replicated scratch contributions in place on all ranks. */
       inline void sum(Vector<double> &v, const MPI_Comm communicator)
       {
         if (Utilities::MPI::n_mpi_processes(communicator) == 1)

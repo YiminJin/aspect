@@ -1,0 +1,44 @@
+[
+  {
+    "file": "include/aspect/material_model/history/tensor_advection.h",
+    "built_sha256": "44e9914fedf18487bf2ed591a393d8ce7c1229bb92fec846f0cabbf75dfb3675",
+    "final_sha256": "ce55ebfc52ef5e57c84c5631ea683c6cb50bd8c2ab78a59952918e03d734ac0c",
+    "change": "comments or whitespace only"
+  },
+  {
+    "file": "include/aspect/material_model/history/tensor_field.h",
+    "built_sha256": "443f35b31fa2691e4677f8cb1636ade49f11d05bf7e80b7ab8a91b0985232773",
+    "final_sha256": "3492c78925aeafa64326384cb47232b86c1b86202ec8f750a7ca5b1a6bf26d20",
+    "change": "comments or whitespace only"
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault.h",
+    "built_sha256": "17d28de78d5f520a012cc766c821c9aa6313c55ab9faee33d7aeeb6c3fe2b7d5",
+    "final_sha256": "8d14717688ddcaed4ac4df91fe29a736afcaee1afaf1283255c057b6f9fc9433",
+    "change": "comments or whitespace only"
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/material_history_internal.h",
+    "built_sha256": "148caa892d2f9a5677d43ff1cb955bb45b47479cacb0faea6b7de1e34b2f2c9d",
+    "final_sha256": "df8d4970a52fa59c0d0117b15a9f33c6aa79a6a29a801ebfcf143d650dbb84e7",
+    "change": "comments or whitespace only"
+  },
+  {
+    "file": "source/material_model/phase_field_fault/dg_history.cc",
+    "built_sha256": "47b19db12b08856825227161adacbdc94ab128d3720a4284178c7069e40dc836",
+    "final_sha256": "b15d5851ba8bcb19a56dafdbb8d644e204baec3d80d135f896da2fc4ac58a6c7",
+    "change": "comments or whitespace only"
+  },
+  {
+    "file": "source/material_model/phase_field_fault/history.cc",
+    "built_sha256": "9b6727f518f7505e6e29ed5be8aba69bc566ab48e3f603d29867ce6d069ac16e",
+    "final_sha256": "1eb8ae1d184a6dc4e57ad059522ffcf6e00e96c253137b9c33b64c37e5ed4078",
+    "change": "comments or whitespace only"
+  },
+  {
+    "file": "source/material_model/phase_field_fault/physical_stress.cc",
+    "built_sha256": "497f326a64305467c9cf4b3a17a835f596612b86806cc885e2d486a30987a9b1",
+    "final_sha256": "639cda172053affca9581218afe8608ecf0e55a431c513b0a129a24d50f7c727",
+    "change": "comments or whitespace only"
+  }
+]

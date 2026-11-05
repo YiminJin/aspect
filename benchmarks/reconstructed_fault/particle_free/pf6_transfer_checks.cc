@@ -6,7 +6,7 @@
 #include <aspect/postprocess/interface.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/reconstructed_fault/endpoint_mpi.h>
 #include <aspect/particle/manager.h>
 #include <aspect/particle/particle_domain.h>
@@ -177,13 +177,13 @@ namespace aspect
         {
           auto &m=model();
           Records local,global;
-          const auto &h=*m.fe_strain_state->dg_history;
+          const auto &h=*m.fe_strain_state->bulk_history.tensor;
           std::vector<types::global_dof_index> ids(9);
-          for (const auto &entry:h.space->cells)if (entry.second->is_locally_owned())
+          for (const auto &entry:h.primary.space->cells)if (entry.second->is_locally_owned())
               {
                 entry.second->get_dof_indices(ids);
                 auto &v=local[entry.first.to_string()];
-                for (const auto &c:h.coefficients)for (auto i:ids)v.push_back(c[i]);
+                for (const auto &c:h.primary.coefficients)for (auto i:ids)v.push_back(c[i]);
               }
           for (const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local))
             for (const auto &p:part)AssertThrow(global.emplace(p).second,ExcMessage("Duplicate DG CellId owner."));
@@ -191,13 +191,13 @@ namespace aspect
         }
         void assign(const Records &records)
         {
-          auto &h=*model().fe_strain_state->dg_history;
+          auto &h=*model().fe_strain_state->bulk_history.tensor;
           std::vector<types::global_dof_index> ids(9);
-          for (auto &c:h.coefficients)
+          for (auto &c:h.primary.coefficients)
             {
-              LinearAlgebra::Vector owned(h.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
-              const unsigned int component=&c-&h.coefficients[0];
-              for (const auto &entry:h.space->cells)if (entry.second->is_locally_owned())
+              LinearAlgebra::Vector owned(h.primary.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
+              const unsigned int component=&c-&h.primary.coefficients[0];
+              for (const auto &entry:h.primary.space->cells)if (entry.second->is_locally_owned())
                   {
                     entry.second->get_dof_indices(ids);
                     for (unsigned int i=0; i<9; ++i)owned[ids[i]]=records.at(entry.first.to_string())[9*component+i];
@@ -214,7 +214,7 @@ namespace aspect
           const auto &s=*m.fe_strain_state;
           v.insert(v.end(),s.Z.begin(),s.Z.end());
           v.insert(v.end(),s.I.begin(),s.I.end());
-          for (auto i:s.displacement_history.locally_owned_elements())v.push_back(s.displacement_history[i]);
+          for (auto i:s.bulk_history.native.locally_owned_elements())v.push_back(s.bulk_history.native[i]);
           v.push_back(s.committed_step);
           v.push_back(s.accepted_publications);
           const auto &manager=this->get_reconstructed_fault_manager();
@@ -267,9 +267,9 @@ namespace aspect
                     std::vector<double> phi(1),lower(1);
                     const FEValuesExtractors::Scalar p(pc);
                     fe[p].get_function_values(this->get_solution(),phi);
-                    fe[p].get_function_values(s.displacement_history,lower);
-                    const auto T=m.evaluate_history_tensor(*s.dg_history,entry.first,Quadrature<dim>({u}))[0];
-                    const auto tau=m.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,entry.first,x);
+                    fe[p].get_function_values(s.bulk_history.native,lower);
+                    const auto T=m.evaluate_history_tensor(*s.bulk_history.tensor,entry.first,Quadrature<dim>({u}))[0];
+                    const auto tau=m.evaluate_dg_history_stress(*s.bulk_history.tensor,s.Z,s.I,entry.first,x);
                     local[std::to_string(ix)+"-"+std::to_string(iy)]= {x[0],x[1],phi[0],lower[0],T[0][0],T[1][1],T[0][1],tau[0][0],tau[1][1],tau[0][1]};
                   }
               }
@@ -297,7 +297,7 @@ namespace aspect
                 }
               std::ofstream nodes(this->get_output_directory()+"dg-support.csv");
               nodes<<std::setprecision(17)<<"i,r,s\n";
-              const auto &unit=model().fe_strain_state->dg_history->space->element.get_unit_support_points();
+              const auto &unit=model().fe_strain_state->bulk_history.tensor->primary.space->element.get_unit_support_points();
               for (unsigned int i=0; i<unit.size(); ++i)nodes<<i<<','<<unit[i][0]<<','<<unit[i][1]<<'\n';
               std::ofstream f(this->get_output_directory()+label+"-tensor.csv");
               f<<std::setprecision(17)<<"CellId";
@@ -341,7 +341,7 @@ namespace aspect
                 const auto i=entry.second->vertex_dof_index(v,pc);
                 std::ostringstream key;
                 key<<std::setprecision(17)<<x[0]<<","<<x[1];
-                nodal[key.str()]= {this->get_solution()[i],s.displacement_history[i],this->get_old_solution()[i],this->get_old_old_solution()[i]};
+                nodal[key.str()]= {this->get_solution()[i],s.bulk_history.native[i],this->get_old_solution()[i],this->get_old_old_solution()[i]};
               }
           for (const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),nodal))all_nodal.insert(part.begin(),part.end());
           // Same physical weak functional before/after remapping, without
@@ -353,14 +353,14 @@ namespace aspect
             {
               fe.reinit(entry.second);
               std::vector<double> phi(quad.size());
-              fe[FEValuesExtractors::Scalar(pc)].get_function_values(s.displacement_history,phi);
+              fe[FEValuesExtractors::Scalar(pc)].get_function_values(s.bulk_history.native,phi);
               for (unsigned int q=0; q<quad.size(); ++q)
                 {
                   const auto x=fe.quadrature_point(q);
                   const auto j=std::min<unsigned int>(s.I.size()-2,x[0]*(s.I.size()-1));
                   const double xi=x[0]*(s.I.size()-1)-j;
                   const double I=(1-xi)*s.I[j]+xi*s.I[j+1],chi=s.m*phi[q]*(1+phi[q])/std::pow(1-phi[q],2)/I;
-                  const auto stress=m.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,entry.first,x);
+                  const auto stress=m.evaluate_dg_history_stress(*s.bulk_history.tensor,s.Z,s.I,entry.first,x);
                   shear[j]+=fe.JxW(q)*chi*s.shear_sense*stress[0][1]*(1-xi);
                   shear[j+1]+=fe.JxW(q)*chi*s.shear_sense*stress[0][1]*xi;
                 }
@@ -394,7 +394,7 @@ namespace aspect
           }
           std::ostringstream native_rows;
           native_rows<<std::setprecision(17);
-          const Quadrature<dim> native_nodes(s.dg_history->space->element.get_unit_support_points());
+          const Quadrature<dim> native_nodes(s.bulk_history.tensor->primary.space->element.get_unit_support_points());
           FEValues<dim> native_fe(this->get_mapping(),this->get_fe(),native_nodes,update_values);
           for (const auto &entry:s.cells)
             {
@@ -404,7 +404,7 @@ namespace aspect
               native_fe.get_function_values(this->get_solution(),current);
               native_fe.get_function_values(this->get_old_solution(),old);
               native_fe.get_function_values(this->get_old_old_solution(),older);
-              native_fe.get_function_values(s.displacement_history,anchor);
+              native_fe.get_function_values(s.bulk_history.native,anchor);
               for (unsigned int q=0; q<native_nodes.size(); ++q)for (unsigned int c=0; c<nc; ++c)
                   native_rows<<entry.first.to_string()<<','<<q<<','<<c<<','<<current[q][c]<<','<<old[q][c]<<','<<older[q][c]<<','<<anchor[q][c]<<'\n';
             }
@@ -418,7 +418,7 @@ namespace aspect
           const auto E=model().evaluate_fe_phase_energy(this->get_solution(),false);
           const auto F=this->get_phase_field_handler().evaluate_cell_fracture(this->get_solution(),true);
           const unsigned int phase_block=this->introspection().variable("phase_field").block_index;
-          const auto phase_offset=s.displacement_history.get_block_indices().block_start(phase_block);
+          const auto phase_offset=s.bulk_history.native.get_block_indices().block_start(phase_block);
           std::map<types::global_dof_index,Point<dim>> local_phase_nodes,phase_nodes;
           for (const auto &entry:s.cells)for (const auto v:entry.second->vertex_indices())local_phase_nodes[entry.second->vertex_dof_index(v,pc)-phase_offset]=entry.second->vertex(v);
           for (const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local_phase_nodes))phase_nodes.insert(part.begin(),part.end());
@@ -458,7 +458,7 @@ namespace aspect
           for (const auto &entry:s.cells)
             {
               const auto &cell=entry.second;
-              const auto stress=model.evaluate_history_tensor(endpoint ? *endpoint->dg_history : *s.dg_history,entry.first,samples);
+              const auto stress=model.evaluate_history_tensor(endpoint ? *endpoint->dg_history : *s.bulk_history.tensor,entry.first,samples);
               cells << c << ',' << cell->vertex(0)[0] << ',' << cell->vertex(0)[1] << ','
                     << cell->vertex(1)[0]-cell->vertex(0)[0] << ',' << cell->vertex(2)[1]-cell->vertex(0)[1];
               for (const auto v:cell->vertex_indices())
@@ -477,7 +477,7 @@ namespace aspect
           nodal << "i,x,y,accepted,phase,d1,d2\n";
           for (const auto &node:nodes)
             nodal << node.first << ',' << node.second[0] << ',' << node.second[1] << ','
-                  << s.displacement_history.block(block)[node.first] << ',' << phase.block(block)[node.first] << ','
+                  << s.bulk_history.native.block(block)[node.first] << ',' << phase.block(block)[node.first] << ','
                   << d1.block(block)[node.first] << ',' << d2.block(block)[node.first] << '\n';
           auto surface=output("surface.csv"),profiles=output("profiles.csv"),rule=output("rule.csv");
           surface << "i,x,Z,I_accepted\n";
@@ -497,7 +497,7 @@ namespace aspect
 
         unsigned int phase_block() const {return this->introspection().variable("phase_field").block_index;}
         Vector<double> s_phase() const {return aspect::internal::endpoint_values(this->get_solution().block(phase_block()),this->get_mpi_communicator());}
-        Vector<double> accepted_phase() const {return aspect::internal::endpoint_values(model().fe_strain_state->displacement_history.block(phase_block()),this->get_mpi_communicator());}
+        Vector<double> accepted_phase() const {return aspect::internal::endpoint_values(model().fe_strain_state->bulk_history.native.block(phase_block()),this->get_mpi_communicator());}
         aspect::internal::EndpointPhaseConstraints master_coordinates() const
         {return {sim().current_constraints,this->get_solution().get_block_indices().block_start(phase_block()),this->get_solution().block(phase_block()).size()};}
         void put_phase(BV &v,const Vector<double> &p) const
@@ -524,7 +524,7 @@ namespace aspect
           const auto endpoint=m.make_fe_endpoint_trial(base,rates);
           const auto repeat=m.make_fe_endpoint_trial(base,rates);
           bool identical=endpoint.Z==repeat.Z;
-          for(unsigned int c=0;c<3;++c)identical=identical && endpoint.dg_history->coefficients[c]==repeat.dg_history->coefficients[c];
+          for(unsigned int c=0;c<3;++c)identical=identical && endpoint.dg_history->primary.coefficients[c]==repeat.dg_history->primary.coefficients[c];
           check("local repeated endpoint trials unpublished",identical && same(before,persistent()));
           const auto p=C.select(s_phase()),lower=C.select(accepted_phase());
           const auto f=this->get_phase_field_handler().evaluate_cell_fracture(base,true);
@@ -636,11 +636,11 @@ namespace aspect
           hanging_constraints(label);check(label+" fixed 67 cells",this->get_triangulation().n_global_active_cells()==67);
           const auto C=master_coordinates();const auto physical=s_phase(),p=C.select(physical);
           check(label+" exact native phase expansion",C.expand(p)==physical && physical==accepted_phase());
-          const auto energy=m.evaluate_fe_phase_energy_at(s.solution,true,false,state.displacement_history,state.Z,nullptr,state.dg_history.get());
+          const auto energy=m.evaluate_fe_phase_energy_at(s.solution,true,false,state.bulk_history.native,state.Z,nullptr,state.bulk_history.tensor.get());
           const auto fracture=this->get_phase_field_handler().evaluate_cell_fracture(s.solution,true);
           Vector<double> raw(energy.gradient.begin(),energy.gradient.end());for(unsigned int i=0;i<raw.size();++i)raw[i]+=fracture.gradient[i];
           const auto g=C.transpose(raw);
-          const auto lower=incoming ? aspect::internal::endpoint_values(incoming->displacement_history.block(phase_block()),this->get_mpi_communicator()):physical;
+          const auto lower=incoming ? aspect::internal::endpoint_values(incoming->bulk_history.native.block(phase_block()),this->get_mpi_communicator()):physical;
           const auto master_lower=C.select(lower);
           double growth=0.,healing=0.,kkt=0.,interface_growth=0.;unsigned int interface_active=0;
           for(unsigned int i=0;i<physical.size();++i)
@@ -740,7 +740,7 @@ namespace aspect
           mesh(direction);
           export_state(label+"-refined");
           compare(label+" refinement",before,physical(),1e-11);
-          check(label+" refined scratch empty",model().fe_strain_state->dg_history->source_roundoff.empty());
+          check(label+" refined scratch empty",model().fe_strain_state->bulk_history.tensor->source_roundoff.empty());
           check(label+" refined fixed particle IDs coordinates",particles(label+"-refined")==initial_particles);
           mesh(-direction);
           export_state(label+"-coarsened");
@@ -855,7 +855,7 @@ namespace aspect
           BV bulk(this->get_solution());
           bulk=owned;
           const auto c=m.compute_maxwell_coefficients(m.fe_strain_state->eta,m.fe_strain_state->G,.01);
-          const auto projected=m.make_dg_history_trial(*m.fe_strain_state->dg_history,bulk,c,true);
+          const auto projected=m.make_dg_history_trial(*m.fe_strain_state->bulk_history.tensor,bulk,c,true);
           std::vector<Point<dim>> points;
           std::vector<CellId> ids;
           for (const auto &entry:m.fe_strain_state->cells)
@@ -881,7 +881,7 @@ namespace aspect
               fe.reinit(cell);
               std::vector<Tensor<2,dim>> gradient(1);
               fe[this->introspection().extractors.velocities].get_function_gradients(bulk,gradient);
-              const auto incoming=m.evaluate_history_tensor(*m.fe_strain_state->dg_history,ids[i],Quadrature<dim>({unit}))[0];
+              const auto incoming=m.evaluate_history_tensor(*m.fe_strain_state->bulk_history.tensor,ids[i],Quadrature<dim>({unit}))[0];
               const auto exact=c.beta*incoming+2*c.eta_ve*Utilities::Tensors::consistent_deviator(symmetrize(gradient[0]));
               const auto avg=c.beta*incoming+2*c.eta_ve*Utilities::Tensors::consistent_deviator(symmetrize(averages[i]));
               const auto T=m.evaluate_history_tensor(*projected,ids[i],Quadrature<dim>({unit}))[0];
@@ -928,7 +928,7 @@ namespace aspect
           progress("after refine");
           const auto saved=s.solution,linear=s.current_linearization_point,old=s.old_solution,older=s.old_old_solution;
           progress("saved native vectors");
-          const auto anchor=m.fe_strain_state->displacement_history;
+          const auto anchor=m.fe_strain_state->bulk_history.native;
           const auto block=this->introspection().variable("phase_field").block_index;
           const auto pc=this->introspection().variable("phase_field").first_component_index;
           progress("saved anchor");
@@ -950,7 +950,7 @@ namespace aspect
           progress("after ghost copy");
           s.solution=perturbed;
           progress("copied solution");
-          m.fe_strain_state->displacement_history.block(block)=perturbed.block(block);
+          m.fe_strain_state->bulk_history.native.block(block)=perturbed.block(block);
           progress("copied anchor phase");
           const auto before=persistent();
           const auto n=this->get_triangulation().n_global_active_cells();
@@ -973,7 +973,7 @@ namespace aspect
           s.current_linearization_point=linear;
           s.old_solution=old;
           s.old_old_solution=older;
-          m.fe_strain_state->displacement_history=anchor;
+          m.fe_strain_state->bulk_history.native=anchor;
           mesh(-direction);
         }
         void lossy_coarsening()
@@ -981,8 +981,8 @@ namespace aspect
           const auto accepted=coefficients();
           mesh(1);
           auto fine=coefficients();
-          const auto &h=*model().fe_strain_state->dg_history;
-          for (const auto &entry:h.space->cells)if (entry.second->is_locally_owned())
+          const auto &h=*model().fe_strain_state->bulk_history.tensor;
+          for (const auto &entry:h.primary.space->cells)if (entry.second->is_locally_owned())
               for (unsigned int c=0; c<3; ++c)for (unsigned int i=0; i<9; ++i)
                   fine[entry.first.to_string()][9*c+i]=std::sin((c+1.)*(i+1.)+5*entry.second->vertex(0)[0]+7*entry.second->vertex(0)[1]);
           assign(fine);
@@ -999,11 +999,11 @@ namespace aspect
           inadmissible_coarsening();
           const auto accepted=coefficients();
           Records manufactured=accepted;
-          const auto &h=*model().fe_strain_state->dg_history;
-          for (const auto &entry:h.space->cells)if (entry.second->is_locally_owned())
+          const auto &h=*model().fe_strain_state->bulk_history.tensor;
+          for (const auto &entry:h.primary.space->cells)if (entry.second->is_locally_owned())
               for (unsigned int c=0; c<3; ++c)for (unsigned int i=0; i<9; ++i)
                   {
-                    const auto x=this->get_mapping().transform_unit_to_real_cell(entry.second,h.space->element.get_unit_support_points()[i]);
+                    const auto x=this->get_mapping().transform_unit_to_real_cell(entry.second,h.primary.space->element.get_unit_support_points()[i]);
                     double v=0.;
                     for (unsigned int a=0; a<3; ++a)for (unsigned int b=0; b<3; ++b)v+=(1+c+3*a+5*b)*((c+a+b)%2?-1.:1.)*std::pow(x[0],a)*std::pow(x[1],b);
                     manufactured[entry.first.to_string()][9*c+i]=v;
@@ -1024,23 +1024,23 @@ namespace aspect
           const auto b=this->introspection().variable("phase_field").block_index;
           const auto pc=this->introspection().variable("phase_field").first_component_index;
           const auto offset=this->get_solution().get_block_indices().block_start(b);
-          const auto phase=aspect::internal::endpoint_values(s.displacement_history.block(b),this->get_mpi_communicator());
+          const auto phase=aspect::internal::endpoint_values(s.bulk_history.native.block(b),this->get_mpi_communicator());
           std::vector<double> local(phase.size()),direction(phase.size());
           for(const auto &entry:s.cells)for(const auto v:entry.second->vertex_indices())
             {
               const auto i=entry.second->vertex_dof_index(v,pc)-offset;
-              if(s.displacement_history.block(b).locally_owned_elements().is_element(i))
+              if(s.bulk_history.native.block(b).locally_owned_elements().is_element(i))
                 local[i]=phase[i]*(1-phase[i])*(1+.2*entry.second->vertex(v)[0]);
             }
           Utilities::MPI::sum(local,this->get_mpi_communicator(),direction);
-          const auto base=m.evaluate_fe_normalization(s.displacement_history,true,&direction);
+          const auto base=m.evaluate_fe_normalization(s.bulk_history.native,true,&direction);
           constexpr double epsilon=1e-5;
-          BV positive(s.displacement_history),negative(s.displacement_history);
+          BV positive(s.bulk_history.native),negative(s.bulk_history.native);
           BV owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
-          owned=s.displacement_history;
+          owned=s.bulk_history.native;
           for(const auto i:owned.block(b).locally_owned_elements())owned.block(b)[i]+=epsilon*direction[i];
           positive=owned;
-          owned=s.displacement_history;
+          owned=s.bulk_history.native;
           for(const auto i:owned.block(b).locally_owned_elements())owned.block(b)[i]-=epsilon*direction[i];
           negative=owned;
           const auto plus=m.evaluate_fe_normalization(positive,true),minus=m.evaluate_fe_normalization(negative,true);
@@ -1162,7 +1162,7 @@ namespace aspect
             m.fe_strain_state.reset();
             m.prepare_fe_strain_history(false,true);
             auto &s=*m.fe_strain_state;
-            s.dg_history=saved->dg_history;
+            s.bulk_history.tensor=saved->bulk_history.tensor;
             s.Z=saved->Z;
             s.I=saved->I;
             s.initial_fracture=saved->initial_fracture;
@@ -1182,8 +1182,8 @@ namespace aspect
           double error=0.;
           unsigned int count=0;
           const auto offset=s.solution.get_block_indices().block_start(this->introspection().variable("phase_field").block_index);
-          const auto phase_size=model().fe_strain_state->displacement_history.block(this->introspection().variable("phase_field").block_index).size();
-          const std::array<const BV *,4> fields= {{&s.solution,&s.old_solution,&s.old_old_solution,&model().fe_strain_state->displacement_history}};
+          const auto phase_size=model().fe_strain_state->bulk_history.native.block(this->introspection().variable("phase_field").block_index).size();
+          const std::array<const BV *,4> fields= {{&s.solution,&s.old_solution,&s.old_old_solution,&model().fe_strain_state->bulk_history.native}};
           std::array<std::vector<double>,4> values;
           for (unsigned int k=0; k<fields.size(); ++k)
             {
@@ -1268,11 +1268,11 @@ namespace aspect
           }));
           const auto accepted=coefficients();
           auto manufactured=accepted;
-          const auto &h=*model().fe_strain_state->dg_history;
-          for (const auto &entry:h.space->cells)if (entry.second->is_locally_owned())
+          const auto &h=*model().fe_strain_state->bulk_history.tensor;
+          for (const auto &entry:h.primary.space->cells)if (entry.second->is_locally_owned())
               for (unsigned int c=0; c<3; ++c)for (unsigned int i=0; i<9; ++i)
                   {
-                    const auto x=this->get_mapping().transform_unit_to_real_cell(entry.second,h.space->element.get_unit_support_points()[i]);
+                    const auto x=this->get_mapping().transform_unit_to_real_cell(entry.second,h.primary.space->element.get_unit_support_points()[i]);
                     double v=0.;
                     for (unsigned int a=0; a<3; ++a)for (unsigned int b=0; b<3; ++b)v+=(1+c+3*a+5*b)*((c+a+b)%2?-1.:1.)*std::pow(x[0],a)*std::pow(x[1],b);
                     manufactured[entry.first.to_string()][9*c+i]=v;

@@ -14,7 +14,7 @@
 
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 
 namespace aspect
 {
@@ -84,11 +84,11 @@ namespace aspect
 
           static std::vector<double> dg_history_values(const PhaseFieldFault<dim> &model)
           {
-            AssertThrow(model.dg_tensor_history && model.fe_strain_state && model.fe_strain_state->dg_history,
+            AssertThrow(model.dg_tensor_history && model.fe_strain_state && model.fe_strain_state->bulk_history.tensor,
                         ExcMessage("Missing DG history for the diagnostic snapshot."));
-            const auto &history=*model.fe_strain_state->dg_history;
+            const auto &history=*model.fe_strain_state->bulk_history.tensor;
             std::vector<double> values;
-            for (const auto &component : history.coefficients)
+            for (const auto &component : history.primary.coefficients)
               for (const auto i : component.locally_owned_elements())
                 values.push_back(component[i]);
             if (history.residual)
@@ -99,7 +99,7 @@ namespace aspect
 
           static void clear_native_stress_samples(PhaseFieldFault<dim> &model)
           {
-            model.fe_strain_state->stress_samples.clear();
+            model.fe_strain_state->observations.stress.clear();
           }
 
           static void validate_native_history(const PhaseFieldFault<dim> &model)
@@ -318,10 +318,10 @@ namespace aspect
             for (unsigned int i=0; i<I.size(); ++i)
               AssertThrow(std::isfinite(Z[i]) && std::isfinite(I[i]) && I[i]>0.,ExcMessage("Undefined diagnostic surface history."));
             auto trial=std::make_shared<typename PhaseFieldFault<dim>::FEStrainState>(*m.fe_strain_state);
-            trial->displacement_history=reference;
+            trial->bulk_history.native=reference;
             trial->Z=Z;
             trial->I=I;
-            trial->stress_samples.clear();
+            trial->observations.stress.clear();
             trial->committed_step=m.get_timestep_number()-1;
             m.fe_strain_state=std::move(trial);
             return [&m,saved]()

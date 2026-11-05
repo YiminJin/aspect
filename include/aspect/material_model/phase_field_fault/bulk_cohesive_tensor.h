@@ -15,12 +15,17 @@ namespace aspect
         /** Experimental point law only. T is a full 3-D plane-strain deviator.
          * A/K/Q are physical tensors in the in-plane trace-free shear space, never
          * scalars attached to a rotating director. A/K/L are dimensionless; Q is Pa.
-         * No native owner, checkpoint format, phase solver or model selection uses
-         * this type. Its serialization is available to the small point fixture. */
+         * The native bulk-cohesive adapter constructs this point state from its
+         * own accepted records; this stateless law does not own publication.
+         * Its member serialization serves the standalone point fixture. */
         struct State
         {
-          Tensor T, A, K, Q;
-          double phi = 0., L = 0.;
+          Tensor T; ///< Trial full 3-D deviatoric stress (Pa).
+          Tensor A; ///< Elastic inelastic-mode strain tensor.
+          Tensor K; ///< Accumulated inelastic strain tensor.
+          Tensor Q; ///< Cohesive tensor stress (Pa).
+          double phi = 0.; ///< Physical phase/obstacle.
+          double L = 0.; ///< Accumulated absolute inelastic strain magnitude.
 
           template<class Archive> void serialize(Archive &archive, const unsigned int)
           {
@@ -28,6 +33,7 @@ namespace aspect
           }
         };
 
+        /** Unpublished tensor endpoint; energies J/m^3, dissipations W/m^3. */
         struct Response
         {
           State state;
@@ -46,9 +52,10 @@ namespace aspect
          * restrict to span(S), S:S=1/2, for the fixed-direction identity control;
          * incoming A/K/Q must belong to that same span. No history is transformed.
          * The increment is dev3(symgrad du). Exact yield ties select sticking. */
-        Response update(const Parameters &, const State &, const Tensor &increment,
+        Response update(const Parameters &parameters, const State &incoming, const Tensor &increment,
                         double phi, double dt, const Tensor *fixed_direction = nullptr);
 
+        /** Directional action of Response with the incoming history held fixed. */
         struct Variation
         {
           Tensor T, A, K, Q, stress, flow_rate;
@@ -60,15 +67,18 @@ namespace aspect
          * the radial direction derivative. At h=0 use the admissible right phase
          * derivative; at a yield tie this returns the sticking generalized Jacobian,
          * not a classical derivative in every outward direction. */
-        Variation derivative(const Parameters &, const State &, const Response &,
+        Variation derivative(const Parameters &parameters, const State &incoming, const Response &response,
                              const Tensor &increment_variation, double phase_variation,
                              double dt, const Tensor *fixed_direction = nullptr);
 
-        StepAccounting account(const Parameters &, const State &, const Response &,
+        /** Endpoint work balance for the full tensor law; no history mutation. */
+        StepAccounting account(const Parameters &parameters, const State &incoming, const Response &response,
                                const Tensor &increment, double dt);
 
-        Tensor in_plane(const Tensor &);
-        double magnitude(const Tensor &); // sqrt((xx-yy)^2/4+xy^2), not Frobenius norm
+        /** Extract the in-plane trace-free part; preserve the supplied tensor. */
+        Tensor in_plane(const Tensor &tensor);
+        /** Shear-space magnitude sqrt((xx-yy)^2/4+xy^2). */
+        double magnitude(const Tensor &tensor); // sqrt((xx-yy)^2/4+xy^2), not Frobenius norm
       }
     }
   }

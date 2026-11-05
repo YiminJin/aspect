@@ -1,7 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/reconstructed_fault/endpoint_mpi.h>
 #include <aspect/particle/manager.h>
 #include <aspect/phase_field.h>
@@ -12,14 +12,17 @@ namespace aspect
 {
   namespace MaterialModel
   {
-    template<int dim> struct PhaseFieldFault<dim>::DGTransfer
+    template <int dim>
+    struct PhaseFieldFault<dim>::DGTransfer
     {
       std::shared_ptr<FEStrainState> accepted;
       std::unique_ptr<parallel::distributed::SolutionTransfer<dim, LinearAlgebra::Vector>> tensor;
       std::map<types::particle_index, Point<dim>> particles;
     };
 
-    template<int dim> void PhaseFieldFault<dim>::prepare_dg_history_transfer()
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::prepare_dg_history_transfer()
     {
       if (!dg_accepted_history || !fe_strain_state)
         return;
@@ -29,7 +32,7 @@ namespace aspect
       const auto &s = *fe_strain_state;
       const auto &comm = this->get_mpi_communicator();
       const unsigned int block = this->introspection().variable("phase_field").block_index;
-      AssertThrow(s.displacement_history.block(block) == this->get_solution().block(block),
+      AssertThrow(s.bulk_history.native.block(block) == this->get_solution().block(block),
                   ExcMessage("DG transfer rejects an unpublished physical phase trial."));
       unsigned long long refined = 0, coarsened = 0;
       for (const auto &cell : this->get_triangulation().active_cell_iterators())
@@ -51,8 +54,8 @@ namespace aspect
           // child. Reject lossy phase/obstacle coarsening; never repair by a cap
           // or an unselected obstacle projection. Gather physical vertex keys
           // because a coarsening family can straddle MPI ownership.
-          const auto phase = aspect::internal::endpoint_values(s.displacement_history.block(block), comm);
-          const auto offset = s.displacement_history.get_block_indices().block_start(block);
+          const auto phase = aspect::internal::endpoint_values(s.bulk_history.native.block(block), comm);
+          const auto offset = s.bulk_history.native.get_block_indices().block_start(block);
           const auto pc = this->introspection().variable("phase_field").first_component_index;
           std::map<std::array<double, dim>, double> local, values;
           for (const auto &entry : s.cells)
@@ -112,18 +115,20 @@ namespace aspect
       for (const auto &part : Utilities::MPI::all_gather(comm, s.particles))
         for (const auto &p : part)
           AssertThrow(transfer->particles.emplace(p).second, ExcMessage("Duplicate accepted particle owner."));
-      transfer->tensor = std::make_unique<parallel::distributed::SolutionTransfer<dim, LinearAlgebra::Vector>>(s.dg_history->space->dofs);
+      transfer->tensor = std::make_unique<parallel::distributed::SolutionTransfer<dim, LinearAlgebra::Vector>>(s.bulk_history.tensor->primary.space->dofs);
       std::vector<const LinearAlgebra::Vector *> fields;
-      for (const auto &component : s.dg_history->coefficients)
+      for (const auto &component : s.bulk_history.tensor->primary.coefficients)
         fields.push_back(&component);
-      if (s.dg_history->residual)
-        for (const auto &component : s.dg_history->residual->coefficients)
+      if (s.bulk_history.tensor->residual)
+        for (const auto &component : s.bulk_history.tensor->residual->coefficients)
           fields.push_back(&component);
       transfer->tensor->prepare_for_coarsening_and_refinement(fields);
       dg_transfer = std::move(transfer);
     }
 
-    template<int dim> void PhaseFieldFault<dim>::finish_dg_history_transfer()
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::finish_dg_history_transfer()
     {
       if (!dg_transfer)
         return;
@@ -136,19 +141,19 @@ namespace aspect
           fixed = 0;
       AssertThrow(Utilities::MPI::min(fixed, comm) == 1, ExcMessage("DG transfer moved or changed particles."));
       auto history = std::make_shared<DGHistory>();
-      history->space = old->dg_history->space;
-      auto &space = *history->space;
+      history->primary.space = old->bulk_history.tensor->primary.space;
+      auto &space = *history->primary.space;
       space.dofs.distribute_dofs(space.element);
       space.relevant = DoFTools::extract_locally_relevant_dofs(space.dofs);
       space.cells.clear();
-      space.point_samples.clear();
-      space.point_geometry_generation = numbers::invalid_unsigned_int;
+      old->observations.tensor_points->cells.clear();
+      old->observations.tensor_points->geometry_generation = numbers::invalid_unsigned_int;
       space.source_geometry.clear();
       for (const auto &cell : space.dofs.active_cell_iterators())
         if (!cell->is_artificial())
           space.cells.emplace(cell->id(), cell);
       constexpr unsigned int components = SymmetricTensor<2, dim>::n_independent_components;
-      std::vector<LinearAlgebra::Vector> owned(components * (old->dg_history->residual ? 2 : 1));
+      std::vector<LinearAlgebra::Vector> owned(components * (old->bulk_history.tensor->residual ? 2 : 1));
       std::vector<LinearAlgebra::Vector *> fields;
       for (auto &component : owned)
         {
@@ -156,14 +161,14 @@ namespace aspect
           fields.push_back(&component);
         }
       transfer->tensor->interpolate(fields);
-      if (old->dg_history->residual)
+      if (old->bulk_history.tensor->residual)
         {
-          history->residual = std::make_shared<DGHistory>();
-          history->residual->space = history->space;
+          history->residual = std::make_shared<TensorField>();
+          history->residual->space = history->primary.space;
         }
       for (unsigned int c = 0; c < owned.size(); ++c)
         {
-          auto &target = c < components ? history->coefficients[c]
+          auto &target = c < components ? history->primary.coefficients[c]
                          : history->residual->coefficients[c - components];
           target.reinit(space.dofs.locally_owned_dofs(), space.relevant, comm);
           target = owned[c];
@@ -178,7 +183,7 @@ namespace aspect
       AssertThrow(s.vertices == old->vertices && s.geometry_version == old->geometry_version
                   && s.n_particles_global == old->n_particles_global,
                   ExcMessage("DG transfer changed fixed surface geometry or particle population."));
-      s.dg_history = std::move(history);
+      s.bulk_history.tensor = std::move(history);
       s.Z = old->Z;
       s.I = old->I;
       s.initial_fracture = old->initial_fracture;

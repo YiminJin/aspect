@@ -5,7 +5,7 @@
 #include <aspect/postprocess/interface.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/reconstructed_fault/objective_stress.h>
 #include <aspect/particle/integrator/interface.h>
@@ -107,7 +107,7 @@ namespace aspect
         for(auto v:MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m))o<<' '<<v;
         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
         const auto block=this->introspection().variable("phase_field").block_index;
-        for(auto i:s.displacement_history.block(block).locally_owned_elements())o<<' '<<s.displacement_history.block(block)[i];
+        for(auto i:s.bulk_history.native.block(block).locally_owned_elements())o<<' '<<s.bulk_history.native.block(block)[i];
         const auto &f=this->get_reconstructed_fault_manager().get_fault(0);
         for(unsigned i=0;i<f.n_vertices();++i)
           {o<<' '<<f.vertex(i);for(auto p:f.get_properties(i))o<<' '<<p;}
@@ -145,16 +145,16 @@ namespace aspect
         const auto stem=this->get_output_directory()+"material-"+std::to_string(step);
         {
           std::ofstream storage(stem+"-storage-rank"+std::to_string(rank)+".csv");
-          const auto tensors=s.dg_history->residual ? 2u : 1u;
+          const auto tensors=s.bulk_history.tensor->residual ? 2u : 1u;
           storage<<"owned_tensor_coefficients,relevant_tensor_coefficients,surface_scalar_entries,tensor_vector_bytes,rank_peak_rss_kib,point_sample_cells,source_mass_cache_entries,accepted_stress_sample_entries,mechanical_cache_present,trial_anchor_present,trial_reaction_present\n";
-          std::size_t bytes=0;for(const auto &v:s.dg_history->coefficients)bytes+=v.memory_consumption();
-          if(s.dg_history->residual)for(const auto &v:s.dg_history->residual->coefficients)bytes+=v.memory_consumption();
+          std::size_t bytes=0;for(const auto &v:s.bulk_history.tensor->primary.coefficients)bytes+=v.memory_consumption();
+          if(s.bulk_history.tensor->residual)for(const auto &v:s.bulk_history.tensor->residual->coefficients)bytes+=v.memory_consumption();
           std::ifstream proc("/proc/self/status");std::string line;unsigned long peak=0;
           while(std::getline(proc,line))if(line.find("VmHWM:")==0){std::istringstream parser(line.substr(6));parser>>peak;}
-          storage<<3*tensors*s.dg_history->space->dofs.locally_owned_dofs().n_elements()<<','
-                 <<3*tensors*s.dg_history->space->relevant.n_elements()<<','<<s.Z.size()+s.I.size()<<','<<bytes<<','<<peak<<','<<s.dg_history->space->point_samples.size()<<','
-                 <<s.dg_history->space->source_geometry.size()<<','<<s.stress_samples.size()<<','
-                 <<bool(s.mechanical_samples)<<','<<bool(s.objective_anchor)<<','<<bool(m.dg_material_reaction)<<'\n';
+          storage<<3*tensors*s.bulk_history.tensor->primary.space->dofs.locally_owned_dofs().n_elements()<<','
+                 <<3*tensors*s.bulk_history.tensor->primary.space->relevant.n_elements()<<','<<s.Z.size()+s.I.size()<<','<<bytes<<','<<peak<<','<<s.observations.tensor_points->cells.size()<<','
+                 <<s.bulk_history.tensor->primary.space->source_geometry.size()<<','<<s.observations.stress.size()<<','
+                 <<bool(s.observations.mechanics)<<','<<bool(s.objective.tensor)<<','<<bool(m.dg_material_reaction)<<'\n';
         }
         std::ofstream fields(stem+"-rank"+std::to_string(rank)+".csv");
         fields<<std::setprecision(17)<<"cell,x,y,q,phi,vx,vy,Txx,Tyy,Txy,Rxx,Ryy,Rxy,tauxx,tauyy,tauxy,Lxx,Lxy,Lyx,Lyy,eta";
@@ -172,22 +172,22 @@ namespace aspect
         for(const auto &entry:s.cells)
           {
             fe.reinit(entry.second);
-            fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(s.displacement_history,phase);
+            fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(s.bulk_history.native,phase);
             fe[this->introspection().extractors.velocities].get_function_values(this->get_solution(),velocity);
             fe[this->introspection().extractors.velocities].get_function_gradients(this->get_solution(),gradients);
 #ifdef MATERIAL_ENERGY_CHECKS
             fe[this->introspection().extractors.pressure].get_function_values(this->get_solution(),pressure);
 #endif
-            const auto T=m.evaluate_history_tensor(*s.dg_history,entry.first,rule);
-            const auto R=s.dg_history->residual ? m.evaluate_history_tensor(*s.dg_history->residual,entry.first,rule) : std::vector<SymmetricTensor<2,dim>>(rule.size());
+            const auto T=m.evaluate_history_tensor(*s.bulk_history.tensor,entry.first,rule);
+            const auto R=s.bulk_history.tensor->residual ? m.evaluate_history_tensor(*s.bulk_history.tensor->residual,entry.first,rule) : std::vector<SymmetricTensor<2,dim>>(rule.size());
             for(unsigned q=0;q<rule.size();++q)
               {
                 const auto x=fe.quadrature_point(q);
-                const auto tau=m.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,entry.first,x);
+                const auto tau=m.evaluate_dg_history_stress(*s.bulk_history.tensor,s.Z,s.I,entry.first,x);
                 if(m.material_direct_stress && std::getenv("ASPECT_TRUE_STRESS_CHECKS"))
                   {
                     auto diagnostic_Z=s.Z;for(auto &z:diagnostic_Z)z+=1.;
-                    AssertThrow(tau==m.evaluate_dg_history_stress(*s.dg_history,diagnostic_Z,s.I,entry.first,x),
+                    AssertThrow(tau==m.evaluate_dg_history_stress(*s.bulk_history.tensor,diagnostic_Z,s.I,entry.first,x),
                                 ExcMessage("Diagnostic Z changed direct physical stress."));
                   }
                 fields<<entry.first.to_string()<<','<<x[0]<<','<<x[1]<<','<<q<<','<<phase[q]<<','<<velocity[q][0]<<','<<velocity[q][1];

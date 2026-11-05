@@ -20,7 +20,8 @@ namespace aspect
       // the accumulated memory, whose coefficients can be much larger than
       // their cellwise differences. This is the same native FE gradient, with
       // reduced cancellation; it changes neither the source nor its projection.
-      template<int dim> std::vector<SymmetricTensor<2, dim>> memory_strain(
+      template <int dim>
+      std::vector<SymmetricTensor<2, dim>> memory_strain(
         const FEValues<dim> &fe, const LinearAlgebra::BlockVector &memory,
         const std::array<unsigned int, dim> &components,
         const typename DoFHandler<dim>::active_cell_iterator &cell)
@@ -57,10 +58,12 @@ namespace aspect
       }
     }
 
-    template<int dim> void PhaseFieldFault<dim>::BulkCohesiveState::rebuild_native_projection(
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::BulkCohesiveState::rebuild_native_projection(
       const PhaseFieldFault<dim> &model)
     {
-      native_projection = std::make_shared<DGHistory>();
+      native_projection = std::make_shared<TensorField>();
       native_projection->space = tensor->space;
       for (auto &field : native_projection->coefficients)
         field.reinit(tensor->space->dofs.locally_owned_dofs(), model.get_mpi_communicator());
@@ -105,7 +108,8 @@ namespace aspect
         field.compress(VectorOperation::insert);
     }
 
-    template<int dim> std::vector<SymmetricTensor<2, dim>>
+    template <int dim>
+    std::vector<SymmetricTensor<2, dim>>
     PhaseFieldFault<dim>::BulkCohesiveState::evaluate_tensor(
       const PhaseFieldFault<dim> &model, const CellId &id, const Quadrature<dim> &quadrature)const
     {
@@ -119,7 +123,9 @@ namespace aspect
       return result;
     }
 
-    template<int dim> double PhaseFieldFault<dim>::BulkCohesiveState::check_tensor(
+    template <int dim>
+    double
+    PhaseFieldFault<dim>::BulkCohesiveState::check_tensor(
       const PhaseFieldFault<dim> &model, const CellId &id, const Quadrature<dim> &quadrature,
       const std::vector<BulkCohesive::Tensor> &expected)const
     {
@@ -162,7 +168,9 @@ namespace aspect
       return maximum;
     }
 
-    template<int dim> void PhaseFieldFault<dim>::initialize_bulk_cohesive_history(
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::initialize_bulk_cohesive_history(
       const LinearAlgebra::BlockVector &initial)
     {
       AssertThrow(bulk_cohesive_phase && !bulk_cohesive_state && dim == 2,
@@ -190,8 +198,8 @@ namespace aspect
         BulkCohesive::compliance(s->phase[i], s->parameters.m);
       s->mesh = this->get_triangulation().get_vertices();
       s->quadrature = fe_bulk_normal_quadrature_points;
-      s->tensor = std::make_shared<DGHistory>();
-      s->tensor->space = std::make_shared<typename DGHistory::Space>(this->get_triangulation());
+      s->tensor = std::make_shared<TensorField>();
+      s->tensor->space = std::make_shared<typename TensorField::Space>(this->get_triangulation());
       for (auto &component : s->tensor->coefficients)
         {
           component.reinit(s->tensor->space->dofs.locally_owned_dofs(), this->get_mpi_communicator());
@@ -210,8 +218,10 @@ namespace aspect
       bulk_cohesive_state = std::move(s);
     }
 
-    template<int dim> template<class Archive>
-    void PhaseFieldFault<dim>::serialize_bulk_cohesive_history(Archive &ar)
+    template <int dim>
+    template<class Archive>
+    void
+    PhaseFieldFault<dim>::serialize_bulk_cohesive_history(Archive &ar)
     {
       AssertThrow(bulk_cohesive_phase, ExcInternalError());
       auto record = std::make_shared<BulkCohesiveArchive>();
@@ -296,7 +306,9 @@ namespace aspect
         }
     }
 
-    template<int dim> void PhaseFieldFault<dim>::restore_bulk_cohesive_history()
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::restore_bulk_cohesive_history()
     {
       AssertThrow(bulk_cohesive_archive && !bulk_cohesive_state, ExcMessage("Missing bulk cohesive restart history."));
       initialize_bulk_cohesive_history(this->get_solution());

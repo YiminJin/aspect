@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/opt/openmpi/5.0.6/bin/mpirun",
+    "-n",
+    "1",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/code-readability/stabilization/input.prm"
+  ],
+  "exit_code": 0,
+  "seconds": 1.8691838579979958,
+  "core_sha256": "0bec51ac406070b232006a56cb58f303307e5995f915b424748e5805b1aeaa7b"
+}

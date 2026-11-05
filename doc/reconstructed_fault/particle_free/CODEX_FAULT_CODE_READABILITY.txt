@@ -1,0 +1,218 @@
+TASK: Make the phase-field fault code readable, documented, and consistent with ASPECT
+
+GOAL
+
+Improve the implementation so that an ASPECT developer can open its headers and
+source files, understand the physical quantities and algorithm, and modify it
+without reconstructing its meaning from historical reports. Comments, names,
+layout, and class responsibilities all contribute to this goal. The user also
+authorizes sensible joining/splitting of structures, classes, and files where it
+reduces the effort required to understand the code.
+
+Implement and verify the changes. Do not stop at an audit or proposal, and do not
+ask for approval of ordinary decisions within this task. This is a continuation
+of the architectural work, with readability of the actual source as the primary
+acceptance criterion. Retain the ordinary ASPECT timestep flow; do not restore
+the rejected special timestep driver or its supporting architecture.
+
+BASELINE AND SCOPE
+
+The reviewed remote commit is 47c2aae3be15d3ff60aab2a818c2f6e179077702,
+"Refactor fault history into ASPECT-style components". Verify the current local
+branch and changes before editing; use this hash as a reference, not a reset
+instruction. Read AGENTS.md and relevant refactoring/scientific contracts.
+
+Review every file in these primary areas and improve those that need it:
+- include/aspect/material_model/phase_field_fault.h
+- include/aspect/material_model/phase_field_fault/
+- source/material_model/phase_field_fault.cc and phase_field_fault/
+- include/aspect/material_model/history/ and source/material_model/history/
+
+Follow the affected interfaces into reconstructed-fault geometry, assemblers,
+and solver integration where necessary to make the complete path understandable.
+Do not reformat or redesign unrelated ASPECT modules. The examples below are
+starting points, not a limit of three or four files.
+
+CONFIRMED PROBLEMS TO ADDRESS
+
+- phase_field_fault.h declares several material-history functions with unnamed
+  parameters and little or no explanation of their contracts.
+- material_history_internal.h has short type comments but leaves many members,
+  including time/dt, rollback fields, and correction state, unexplained.
+- stress_reaction.cc, stress_evolution.cc, and physical_stress.cc contain dense
+  expressions, consecutive loops on one line, and compressed state changes.
+- tensor_projection.cc has visibly awkward continuation indentation. Running a
+  formatter on selected files did not establish consistent source readability.
+- TensorHistory mixes numerical coefficients with a representation tag and an
+  auxiliary residual history. Its Space also contains phase/fault association
+  caches using NormalProfileProjection.
+- TensorHistory::project looks like a numerical service but directly discovers
+  the phase_field variable and samples phase and velocity gradients.
+- FEStrainState combines native FE history, DG history, per-attempt anchors,
+  geometry/normalization data, publication metadata, and observation caches.
+
+1. APPLY THE ACTUAL ASPECT STYLE
+
+Read contrib/utilities/indent and contrib/utilities/astyle.rc. At the reviewed
+revision they require AStyle 2.04, GNU style, and two-space indentation. The
+wrapper also handles nested C++ template brackets and whitespace cleanup.
+Use that workflow on a scoped list of affected files. The full script traverses
+the repository and uses ten processes: do not run it indiscriminately or exceed
+the four-worker local budget. AStyle with default settings or a newly invented
+clang-format configuration is not an equivalent replacement.
+
+Compare the result with established ASPECT headers and implementations, including
+material_model/rheology/elasticity.h and its source. Follow their declaration,
+namespace, function, argument-continuation, and Doxygen conventions. Verify
+formatter idempotence. Manually repair awkward constructs that automatic
+formatting leaves difficult to read, then check formatting again.
+
+Expand compressed statements and nested loops. Separate logically distinct
+operations with whitespace and concise comments. Give nontrivial function
+parameters names in headers as well as definitions. Use meaningful local names
+for state and geometry; ordinary mathematical indices and well-defined symbols
+remain appropriate. Preserve expression evaluation, lifetime, and locking scope
+when expanding statements. A declaration with several unrelated members should
+be split so each member can be understood and documented.
+
+2. DOCUMENT CONTRACTS WHERE DEVELOPERS READ THEM
+
+Use proper Doxygen comments on classes/structures, nontrivial functions, and
+state members, including private internal APIs where most of this algorithm
+currently resides. A reader should learn the following where applicable:
+- What physical or numerical quantity is represented, its units and tensor frame.
+- Whether it is accepted state, an anchor, a candidate, scratch, or a cache.
+- Inputs, output, mutation, and the meaning of each non-obvious parameter.
+- Who owns the data and how long borrowed references or returned views remain valid.
+- Preconditions and supported dimensions/discretizations/configurations.
+- MPI owned/ghost expectations, collective participation, and thread-safety needs.
+- What invalidates a cache, whether it is shared across states, and whether it is
+  serialized or rebuilt after restart.
+
+Document the meaning of callback arguments and return entries, not just the
+std::function type. Distinguish end-of-step time from interval length, accepted
+velocity from a Newton iterate, and raw stored tensors from physical stress.
+Verify these descriptions against callers and implementation; do not infer them
+from a name alone.
+
+In source files, add short introductions to complicated algorithms and comments
+at meaningful stages. Explain why an operation is needed and the invariant or
+equation it implements. For example, explain the whole-field mass projection,
+the fixed rotated anchor used across nonlinear iterations, the projection
+correction, and the order of candidate binding and publication/rollback.
+
+Define mathematical quantities close to their use. Explain the relation between
+eta_ve and kappa, the factor of two in twice_localized_slip_rate, the plane-strain
+zz component, and representation-dependent meanings. Distinguish diagnostic Z
+from mechanical history in direct mode. Explain numerical constants such as the
+2-D Q2 local size and transport substep controls from their actual role; do not
+invent a theoretical justification or imply unsupported generality.
+
+Comments must describe the implemented method accurately. If code and the
+current mathematical contract disagree, report the discrepancy; do not hide it
+with a reassuring comment or silently change the physics. Avoid comment quotas,
+line-by-line paraphrases, stale stage labels, and repeated full derivations.
+The external reading guide supplements in-source documentation; it cannot
+substitute for it.
+
+3. MAKE TARGETED STRUCTURAL IMPROVEMENTS
+
+The following are reviewer recommendations based on the actual source. Inspect
+their callers and implement the ones that establish a clearer boundary. Choose
+the concrete names and composition using repository conventions. A short reason
+for retaining a structure is sufficient where a proposed split would add more
+indirection than clarity; do not turn that decision into another approval stage.
+
+A. Separate a numerical tensor field from its constitutive interpretation.
+   Prefer a numerical component that owns a space and tensor coefficients, while
+   material history owns the choice between physical tau and auxiliary T/R.
+   The generic field should not recursively own another constitutive history.
+   Keep common projection/advection reusable. A small material-side composed
+   structure is preferable to a new hierarchy of history plugins. Preserve the
+   serialized packet ordering and identities through the existing persistence
+   boundary; internal type cleanup is not a checkpoint conversion.
+
+B. Separate FE-space data from fault-dependent observation caches.
+   TensorHistory::Space should clearly own its FE, DoFHandler, index sets, and
+   appropriate numerical geometry data. The point cache containing phase values
+   and NormalProfileProjection has a material/fault dependency and belongs with
+   those observations. Keep purely numerical mass/projection caches where they
+   are useful. Preserve the existing sharing, invalidation, clone, and threading
+   semantics when moving caches; a new owner must not produce stale observations
+   or repeatedly rebuild an expensive cache on every evaluation.
+
+C. Give FEStrainState and its update meaningful internal groups.
+   Separate constitutive state, profile/native FE data, derived observations,
+   and attempt metadata where their lifetimes differ. Group related fields that
+   are always interpreted together. Use composition within the existing owner
+   where sufficient, rather than adding managers and duplicate state owners.
+   In particular, displacement_history has different block meanings in native
+   FE and DG configurations: document or expose those meanings clearly instead
+   of blindly renaming the entire vector to phase or stress.
+
+D. Make numerical and material projection responsibilities honest.
+   Consider keeping phase/gradient sampling in a material-side adapter and
+   passing the evaluated field to the numerical mass-projection operation.
+   Reuse existing FE infrastructure. Avoid a general callback pipeline. If a
+   routine intentionally remains phase-field-specific, locate/name/document it
+   accordingly rather than advertising it as independent tensor infrastructure.
+
+E. Join or split code by responsibility and use.
+   Tensor storage and advection have distinct APIs; consider separate headers
+   when that reduces coupling. Keep tightly related state definitions or small
+   implementation helpers together where this reduces navigation. Split a long
+   routine at an actual mathematical boundary only when the resulting interface
+   makes its inputs and effects clearer. Do not create one class/file per step,
+   replace short expressions with chains of wrappers, or move a monolithic
+   class's methods between files and call that modularization.
+
+Prioritize comprehensible ownership and a readable direct-tau path. Preserve
+the separated reference/default configurations and distinct cohesive histories.
+The direct path should not require reading the separated derivation to understand
+its stress update. Do not use this task to select a new default or retire a
+supported formulation.
+
+4. PRESERVE BEHAVIOR AND VERIFY PROPORTIONATELY
+
+Keep the physical equations, operator ordering, spin lag, discretization,
+quadrature, solver criteria, final slip publication, MPI semantics, checkpoint
+meaning, and accepted/candidate/rejection behavior unchanged. No new driver,
+solver framework, physical experiment, or performance campaign is selected.
+
+Keep mechanical formatting distinguishable from documentation, local naming,
+and structural changes in the diff/commits. Review all executable changes,
+including those introduced while expanding macros or one-line control flow.
+Do not assume that git diff -w alone proves semantic equivalence.
+
+Run formatting/whitespace checks and build the affected code. Use the existing
+documentation check if available; do not build a new documentation framework.
+For comment/format-only files, do not rerun physical experiments solely because
+line numbers changed. For class, ownership, or interface changes, rebuild matching
+checker libraries and run the relevant existing unit tests and short regression
+fixtures. Reuse the bounded direct/separated, constant/layered, stationary, and
+lifecycle controls as required by the affected paths. Preserve criteria and
+report failures honestly. Do not add tests that merely count comments or mirror
+the refactoring.
+
+Use at most four local build workers/MPI ranks, with native simulations run
+sequentially. No server jobs or event trajectories. Finish when the relevant
+checks and source review pass; do not expand into another validation campaign.
+
+DELIVERABLES AND READER CHECK
+
+Deliver the implemented source/header improvements and a concise report. Update
+the existing reading guide only where names, ownership, or links changed. Keep
+the code as the main deliverable. Report the actual formatting tool/version,
+structural decisions, tests, and representative before/after examples with file
+links. Use a commit description that states what was changed, rather than claiming
+that the entire extension is now ASPECT-style.
+
+Before finishing, read the edited path as a developer new to this implementation.
+Using the headers and source, explain where tau lives, which inputs a stress
+update uses, how the candidate reaches mechanics, and who publishes or restores
+it. Also explain where to change the friction law, numerical transport, and
+fault observations without editing unrelated components. These answers should
+follow directly from declarations, comments, and code organization.
+
+Passing compilation and formatting is necessary but not sufficient. The final
+code must be substantially easier for the user to read and modify.

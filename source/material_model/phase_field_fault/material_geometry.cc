@@ -13,7 +13,9 @@ namespace aspect
 {
   namespace MaterialModel
   {
-    template<int dim> void PhaseFieldFault<dim>::stage_material_geometry(
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::stage_material_geometry(
       const MaterialHistoryInputs &input, LinearAlgebra::BlockVector &bulk, LinearAlgebra::BlockVector &linear)
     {
       const auto &old = input.accepted;
@@ -32,15 +34,15 @@ namespace aspect
       transaction->manager = manager.stage_material_motion(input.dt, {velocity}, {curve_gradients});
       const auto phase_owned = transport_material_profile(input);
       auto next = std::make_shared<FEStrainState>(old);
-      next->displacement_history = phase_owned;
+      next->bulk_history.native = phase_owned;
       next->vertices = transaction->manager->get_fault(0).get_vertices();
       next->geometry_version = transaction->manager->get_fault(0).geometry_version();
       next->geometry_publications = old.geometry_publications + 1;
-      next->stress_samples.clear();
-      next->mechanical_samples.reset();
-      next->particle_samples.reset();
-      next->objective_anchor.reset();
-      next->objective_parent.reset();
+      next->observations.stress.clear();
+      next->observations.mechanics.reset();
+      next->observations.particles.reset();
+      next->objective.tensor.reset();
+      next->objective.parent.reset();
       transaction->candidate_history = next;
       manager.swap_prescribed_geometry(*transaction->manager);
       transaction->bound = true;

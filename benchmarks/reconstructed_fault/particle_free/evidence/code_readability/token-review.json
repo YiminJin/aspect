@@ -1,0 +1,222 @@
+[
+  {
+    "file": "include/aspect/material_model/history/tensor_advection.h",
+    "kind": "new",
+    "edits": 1
+  },
+  {
+    "file": "include/aspect/material_model/history/tensor_field.h",
+    "kind": "new",
+    "edits": 1
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault.h",
+    "kind": "tokens changed",
+    "edits": 140
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/bulk_cohesive.h",
+    "kind": "tokens changed",
+    "edits": 15
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/bulk_cohesive_coulomb.h",
+    "kind": "tokens changed",
+    "edits": 5
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/bulk_cohesive_gradient.h",
+    "kind": "tokens changed",
+    "edits": 13
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/bulk_cohesive_internal.h",
+    "kind": "tokens changed",
+    "edits": 20
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/bulk_cohesive_mpi.h",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/bulk_cohesive_tensor.h",
+    "kind": "tokens changed",
+    "edits": 14
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/bulk_stability.h",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/fe_strain_internal.h",
+    "kind": "tokens changed",
+    "edits": 39
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/history_diagnostics.h",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/material_history_internal.h",
+    "kind": "tokens changed",
+    "edits": 5
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/stress_law.h",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "include/aspect/material_model/phase_field_fault/tensor_history_internal.h",
+    "kind": "new",
+    "edits": 1
+  },
+  {
+    "file": "source/material_model/history/tensor_advection.cc",
+    "kind": "tokens changed",
+    "edits": 5
+  },
+  {
+    "file": "source/material_model/history/tensor_advection_distributed.cc",
+    "kind": "tokens changed",
+    "edits": 5
+  },
+  {
+    "file": "source/material_model/history/tensor_projection.cc",
+    "kind": "tokens changed",
+    "edits": 30
+  },
+  {
+    "file": "source/material_model/phase_field_fault.cc",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "source/material_model/phase_field_fault/boundary_completion.cc",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "source/material_model/phase_field_fault/bulk_cohesive.cc",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "source/material_model/phase_field_fault/bulk_cohesive_coulomb.cc",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "source/material_model/phase_field_fault/bulk_cohesive_gradient.cc",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "source/material_model/phase_field_fault/bulk_cohesive_history.cc",
+    "kind": "tokens changed",
+    "edits": 3
+  },
+  {
+    "file": "source/material_model/phase_field_fault/bulk_cohesive_tensor.cc",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "source/material_model/phase_field_fault/constitutive.cc",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "source/material_model/phase_field_fault/dg_accepted.cc",
+    "kind": "tokens changed",
+    "edits": 46
+  },
+  {
+    "file": "source/material_model/phase_field_fault/dg_geometry.cc",
+    "kind": "tokens changed",
+    "edits": 13
+  },
+  {
+    "file": "source/material_model/phase_field_fault/dg_history.cc",
+    "kind": "tokens changed",
+    "edits": 27
+  },
+  {
+    "file": "source/material_model/phase_field_fault/dg_objective.cc",
+    "kind": "tokens changed",
+    "edits": 33
+  },
+  {
+    "file": "source/material_model/phase_field_fault/dg_transfer.cc",
+    "kind": "tokens changed",
+    "edits": 25
+  },
+  {
+    "file": "source/material_model/phase_field_fault/fe_normalization.cc",
+    "kind": "tokens changed",
+    "edits": 1
+  },
+  {
+    "file": "source/material_model/phase_field_fault/fe_phase_energy.cc",
+    "kind": "tokens changed",
+    "edits": 3
+  },
+  {
+    "file": "source/material_model/phase_field_fault/fe_strain.cc",
+    "kind": "tokens changed",
+    "edits": 40
+  },
+  {
+    "file": "source/material_model/phase_field_fault/history.cc",
+    "kind": "tokens changed",
+    "edits": 36
+  },
+  {
+    "file": "source/material_model/phase_field_fault/history_diagnostics.cc",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "source/material_model/phase_field_fault/material_geometry.cc",
+    "kind": "tokens changed",
+    "edits": 6
+  },
+  {
+    "file": "source/material_model/phase_field_fault/material_history.cc",
+    "kind": "tokens changed",
+    "edits": 9
+  },
+  {
+    "file": "source/material_model/phase_field_fault/material_tensor_projection.cc",
+    "kind": "new",
+    "edits": 1
+  },
+  {
+    "file": "source/material_model/phase_field_fault/normalization.cc",
+    "kind": "tokens unchanged",
+    "edits": 0
+  },
+  {
+    "file": "source/material_model/phase_field_fault/physical_stress.cc",
+    "kind": "tokens changed",
+    "edits": 52
+  },
+  {
+    "file": "source/material_model/phase_field_fault/profile_transport.cc",
+    "kind": "tokens changed",
+    "edits": 5
+  },
+  {
+    "file": "source/material_model/phase_field_fault/stress_evolution.cc",
+    "kind": "tokens changed",
+    "edits": 79
+  },
+  {
+    "file": "source/material_model/phase_field_fault/stress_reaction.cc",
+    "kind": "tokens changed",
+    "edits": 95
+  }
+]

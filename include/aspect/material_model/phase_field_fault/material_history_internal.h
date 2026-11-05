@@ -2,59 +2,106 @@
 #ifndef ASPECT_MATERIAL_HISTORY_INTERNAL_H
 #define ASPECT_MATERIAL_HISTORY_INTERNAL_H
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
-#include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
 
 namespace aspect
 {
   namespace MaterialModel
   {
-    /** Read-only, nonowning mathematical inputs. The accepted parent and velocity
-     * outlive this attempt. In particular, rotation uses this velocity gradient,
-     * never the current Newton iterate. */
-    template<int dim> struct PhaseFieldFault<dim>::MaterialHistoryInputs
+    /**
+     * Borrowed inputs for one ordinary simulator material-history attempt.
+     * The accepted parent and old velocity outlive all synchronous preparation
+     * calls. They are not a Newton candidate. No large FE vectors are copied
+     * into this view, and it is not stored or serialized.
+     */
+    template <int dim>
+    struct PhaseFieldFault<dim>::MaterialHistoryInputs
     {
+      /** Accepted bulk/surface/profile parent; its history fields stay immutable. */
       const FEStrainState &accepted;
+      /** Ghost-readable accepted velocity (m/s), including the lagged spin source. */
       const LinearAlgebra::BlockVector &accepted_velocity;
-      double time, dt;
+      /** End-of-step physical time (s); advection starts at end_time-dt. */
+      double end_time;
+      /** Attempt interval length (s), which can change on rejection/retry. */
+      double dt;
+      /** Simulator step number associated with this attempt. */
       unsigned int step;
     };
 
-    /** Attempt-only transport variables, never serialized. Exactly one of
-     * physical_stress / separated_trial is present. The latter carries the
-     * separate total memory R+P(B), not a physical cohesive elastic history. */
-    template<int dim> struct PhaseFieldFault<dim>::TransportedHistory
+    /**
+     * Attempt-only transported material tensors, never accepted or serialized.
+     * Exactly one of physical_stress and separated_trial is present. The
+     * separated branch additionally transports R+P(B); it cannot transport R
+     * alone when the localization/profile moves. All tensors are in the spatial
+     * frame before the subsequent objective rotation.
+     */
+    template <int dim>
+    struct PhaseFieldFault<dim>::TransportedHistory
     {
+      /** Advected physical tau (Pa), direct representation only. */
       std::shared_ptr<DGHistory> physical_stress;
+      /** Advected auxiliary T (Pa), separated representation only. */
       std::shared_ptr<DGHistory> separated_trial;
+      /** Advected R+P(B) (Pa); never cohesive elastic history. */
       std::shared_ptr<DGHistory> separated_total_memory;
+      /** Number of explicit SSPRK3 transport substeps in this attempt. */
       unsigned int substeps = 0;
+      /** Whether the opt-in observational energy ledger is being collected. */
       bool energy_ledger = false;
-      double energy_before = 0., energy_advected = 0.;
+      /** Pre-advection physical elastic energy (J/m in plane strain). */
+      double energy_before = 0.;
+      /** Post-advection energy in the same quadrature; not an acceptance gate. */
+      double energy_advected = 0.;
     };
 
-    /** Frozen projection-defect cache for one coupled outer iteration. Its
-     * candidate is not accepted history; it is rebuilt from the same anchor. */
-    template<int dim> struct PhaseFieldFault<dim>::DGMaterialReaction
+    /**
+     * Frozen projection-defect data for one inner coupled solve. The outer
+     * solver rebuilds it from the same objective anchor at its latest bulk/slip
+     * iterate. Nothing here is an independent accepted history or checkpoint.
+     */
+    template <int dim>
+    struct PhaseFieldFault<dim>::DGMaterialReaction
     {
+      /** Ghost-readable bulk iterate whose gradient formed the local response. */
       LinearAlgebra::BlockVector bulk;
+      /** Surface slip rates (m/s), in current material-label order. */
       std::vector<double> rates;
+      /** Projected endpoint history evaluated at bulk/rates, still unaccepted. */
       std::shared_ptr<FEStrainUpdate> candidate;
     };
 
-    /** One rollback owner. Accepted physical coefficients stay unchanged.
-     * Derived caches on the shared FE state may be invalidated. The candidate
-     * holds the moved geometry/profile and per-attempt rotated anchor, and is
-     * bound to mechanics until final outer acceptance or rollback. */
-    template<int dim> struct PhaseFieldFault<dim>::DGMaterialTrial
+    /**
+     * Material rollback owner, coordinated by ordinary Simulator::solve_timestep.
+     * Once bound, mechanics sees candidate_history and the staged live manager.
+     * Acceptance is still exclusively the outer timestep controller's decision.
+     * Candidate publication happens once before this owner's rollback data is
+     * released. Rejection swaps back geometry and restores the accepted parent.
+     */
+    template <int dim>
+    struct PhaseFieldFault<dim>::DGMaterialTrial
     {
-      std::shared_ptr<FEStrainState> accepted_history, candidate_history;
+      /** Immutable physical parent retained through every trial of this attempt. */
+      std::shared_ptr<FEStrainState> accepted_history;
+      /** Privately staged profile/geometry and rotated anchor used by mechanics. */
+      std::shared_ptr<FEStrainState> candidate_history;
+      /** Advected tensors and optional diagnostics for this attempt. */
       TransportedHistory transport;
+      /**
+       * Before binding: staged manager clone. After swap/binding: saved accepted
+       * geometry, generic surface properties and rates, available for rollback.
+       */
       std::shared_ptr<ReconstructedFaultManager<dim>> manager;
-      std::vector<std::vector<double>> normalization, temperatures;
+      /** Accepted per-label normalization integrals (m) saved before rebuilding. */
+      std::vector<std::vector<double>> normalization;
+      /** Accepted per-label temperature (K) cache, restored with geometry. */
+      std::vector<std::vector<double>> temperatures;
+      /** Local particle diagnostic properties saved by particle id for rollback. */
       std::map<types::particle_index, std::vector<double>> particle_properties;
+      /** Step key at preparation; used to audit the attempt. */
       unsigned int step = 0;
+      /** Interval length (s) used for this candidate, not a global fixed timestep. */
       double dt = 0.;
+      /** True only after swapping the staged geometry into the live manager. */
       bool bound = false;
     };
   }

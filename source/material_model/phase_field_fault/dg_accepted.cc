@@ -1,7 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
@@ -32,7 +32,7 @@ namespace aspect
       const DGTransport &op, const LinearAlgebra::BlockVector &midpoint_bulk, const double time) const
     {
       validate_fe_strain_restrictions();
-      AssertThrow(dg_accepted_history && !mature_frictional_fault && !consistent_endpoint_phase && op.space == fe_strain_state->dg_history->space
+      AssertThrow(dg_accepted_history && !mature_frictional_fault && !consistent_endpoint_phase && op.space == fe_strain_state->bulk_history.tensor->primary.space
                   && op.relaxation_rate == 0. && op.inflow.empty(),
                   ExcMessage("PF5 requires closed-boundary pure transport; relaxation/source are applied by native half steps."));
       const auto &state = *fe_strain_state;
@@ -46,7 +46,7 @@ namespace aspect
                     && std::abs(state.Z[j] - state.Z[0]) <= 128 * std::numeric_limits<double>::epsilon()*std::max(1., std::abs(state.Z[0])),
                     ExcMessage("PF5 requires uniform surface V/Z; surface transport is not implemented."));
       const auto half = compute_maxwell_coefficients(state.eta, state.G, .5 * dt);
-      const auto first = make_dg_history_trial(*state.dg_history, midpoint_bulk, half);
+      const auto first = make_dg_history_trial(*state.bulk_history.tensor, midpoint_bulk, half);
       const DGField zero = [](const Point<dim> &, double)
       {
         return SymmetricTensor<2, dim>();
@@ -56,18 +56,19 @@ namespace aspect
       // Reuse the native full-step surface law and immutable accepted I/Z.
       const auto cohesive = compute_surface_cohesive_candidates(dt, {rates});
       auto update = prepare_fe_strain_commit(midpoint_bulk, cohesive, final);
-      update->dg_parent = state.dg_history;
-      update->dg_cohesive = cohesive.at(0);
-      update->dg_rates = rates;
-      update->dg_step = this->get_timestep_number();
-      update->dg_time = time;
-      update->dg_dt = dt;
+      update->prescribed.parent = state.bulk_history.tensor;
+      update->prescribed.cohesive = cohesive.at(0);
+      update->prescribed.rates = rates;
+      update->prescribed.step = this->get_timestep_number();
+      update->prescribed.start_time = time;
+      update->prescribed.dt = dt;
       return update;
     }
 
     template <int dim>
     template <class Archive>
-    void PhaseFieldFault<dim>::serialize_dg_accepted_history(Archive &archive)
+    void
+    PhaseFieldFault<dim>::serialize_dg_accepted_history(Archive &archive)
     {
       const bool stored = this->get_reconstructed_fault_manager().has_property("PF5 accepted DG history v1");
       AssertThrow(stored == dg_accepted_history,
@@ -91,7 +92,7 @@ namespace aspect
             {
               const unsigned int block = this->introspection().variable("phase_field").block_index;
               AssertThrow(this->get_solution() == this->get_old_solution()
-                          && s.displacement_history.block(block) == this->get_solution().block(block)
+                          && s.bulk_history.native.block(block) == this->get_solution().block(block)
                           && s.accepted_publications == s.committed_step,
                           ExcMessage("PF6a checkpoints require the canonical accepted state after advance_time, not a trial."));
             }
@@ -132,16 +133,16 @@ namespace aspect
                     {
                       for (unsigned int d = 0; d < dim; ++d)
                         values.push_back(entry.second->vertex(v)[d]);
-                      values.push_back(s.displacement_history[entry.second->vertex_dof_index(v, pc)]);
+                      values.push_back(s.bulk_history.native[entry.second->vertex_dof_index(v, pc)]);
                     }
-                  s.dg_history->space->cells.at(entry.first)->get_dof_indices(indices);
-                  for (const auto &component : s.dg_history->coefficients)
+                  s.bulk_history.tensor->primary.space->cells.at(entry.first)->get_dof_indices(indices);
+                  for (const auto &component : s.bulk_history.tensor->primary.coefficients)
                     for (const auto i : indices)
                       values.push_back(component[i]);
                   if (jaumann_dg_stress && !material_direct_stress)
                     {
-                      AssertThrow(s.dg_history->residual, ExcMessage("Objective checkpoint lacks residual history."));
-                      for (const auto &component : s.dg_history->residual->coefficients)
+                      AssertThrow(s.bulk_history.tensor->residual, ExcMessage("Objective checkpoint lacks residual history."));
+                      for (const auto &component : s.bulk_history.tensor->residual->coefficients)
                         for (const auto i : indices)
                           values.push_back(component[i]);
                     }
@@ -170,13 +171,13 @@ namespace aspect
             }
           else
             {
-              for (unsigned int i = 0; i < s.displacement_history.block(block).size(); ++i)
-                p.phase.push_back(s.displacement_history.block(block)[i]);
-              for (const auto &entry : s.dg_history->space->cells)
+              for (unsigned int i = 0; i < s.bulk_history.native.block(block).size(); ++i)
+                p.phase.push_back(s.bulk_history.native.block(block)[i]);
+              for (const auto &entry : s.bulk_history.tensor->primary.space->cells)
                 {
                   p.cells.push_back(entry.first.to_string());
                   entry.second->get_dof_indices(indices);
-                  for (const auto &component : s.dg_history->coefficients)
+                  for (const auto &component : s.bulk_history.tensor->primary.coefficients)
                     for (const auto i : indices)
                       p.coefficients.push_back(component[i]);
                 }
@@ -204,7 +205,8 @@ namespace aspect
     }
 
     template <int dim>
-    void PhaseFieldFault<dim>::restore_dg_accepted_history()
+    void
+    PhaseFieldFault<dim>::restore_dg_accepted_history()
     {
       if (!dg_accepted_history)
         return;
@@ -239,25 +241,25 @@ namespace aspect
                     ExcMessage("DG checkpoint physical phase/corner layout mismatch."));
       else
         {
-          AssertThrow(p.phase.size() == s.displacement_history.block(block).size(), ExcMessage("PF5 phase layout mismatch."));
+          AssertThrow(p.phase.size() == s.bulk_history.native.block(block).size(), ExcMessage("PF5 phase layout mismatch."));
           for (unsigned int i = 0; i < p.phase.size(); ++i)
-            AssertThrow(p.phase[i] == s.displacement_history.block(block)[i], ExcMessage("PF5 accepted phase anchor mismatch."));
+            AssertThrow(p.phase[i] == s.bulk_history.native.block(block)[i], ExcMessage("PF5 accepted phase anchor mismatch."));
         }
       std::array<LinearAlgebra::Vector, SymmetricTensor<2, dim>::n_independent_components> owned;
       for (auto &component : owned)
-        component.reinit(s.dg_history->space->dofs.locally_owned_dofs(), this->get_mpi_communicator());
+        component.reinit(s.bulk_history.tensor->primary.space->dofs.locally_owned_dofs(), this->get_mpi_communicator());
       std::array<LinearAlgebra::Vector, SymmetricTensor<2, dim>::n_independent_components> residual_owned;
       if (jaumann_dg_stress && !material_direct_stress)
         for (auto &component : residual_owned)
-          component.reinit(s.dg_history->space->dofs.locally_owned_dofs(), this->get_mpi_communicator());
+          component.reinit(s.bulk_history.tensor->primary.space->dofs.locally_owned_dofs(), this->get_mpi_communicator());
       std::vector<types::global_dof_index> indices(9);
       unsigned int offset = 0, cell_number = 0, matching_cells = 0;
       unsigned int matching_phase = 1;
       for (const auto &id : p.cells)
         {
-          const auto entry = s.dg_history->space->cells.find(CellId(id));
+          const auto entry = s.bulk_history.tensor->primary.space->cells.find(CellId(id));
           if (p.version < 3)
-            AssertThrow(entry != s.dg_history->space->cells.end(), ExcMessage("PF5 DG CellId mismatch."));
+            AssertThrow(entry != s.bulk_history.tensor->primary.space->cells.end(), ExcMessage("PF5 DG CellId mismatch."));
           const auto native = s.cells.find(CellId(id));
           if (native != s.cells.end())
             ++matching_cells;
@@ -266,10 +268,10 @@ namespace aspect
               {
                 const unsigned int i = 4 * cell_number + v;
                 if (p.mesh[i] != native->second->vertex(v)
-                    || p.phase[i] != s.displacement_history[native->second->vertex_dof_index(v, pc)])
+                    || p.phase[i] != s.bulk_history.native[native->second->vertex_dof_index(v, pc)])
                   matching_phase = 0;
               }
-          const bool local = entry != s.dg_history->space->cells.end() && entry->second->is_locally_owned();
+          const bool local = entry != s.bulk_history.tensor->primary.space->cells.end() && entry->second->is_locally_owned();
           if (local)
             entry->second->get_dof_indices(indices);
           for (auto &component : owned)
@@ -300,18 +302,18 @@ namespace aspect
       for (unsigned int c = 0; c < owned.size(); ++c)
         {
           owned[c].compress(VectorOperation::insert);
-          s.dg_history->coefficients[c] = owned[c];
+          s.bulk_history.tensor->primary.coefficients[c] = owned[c];
         }
       if (jaumann_dg_stress && !material_direct_stress)
         {
-          AssertThrow(s.dg_history->residual, ExcMessage("Missing restored DG residual owner."));
+          AssertThrow(s.bulk_history.tensor->residual, ExcMessage("Missing restored DG residual owner."));
           for (unsigned int c = 0; c < residual_owned.size(); ++c)
             {
               residual_owned[c].compress(VectorOperation::insert);
-              s.dg_history->residual->coefficients[c] = residual_owned[c];
+              s.bulk_history.tensor->residual->coefficients[c] = residual_owned[c];
             }
-          s.objective_anchor.reset();
-          s.objective_parent.reset();
+          s.objective.tensor.reset();
+          s.objective.parent.reset();
         }
       for (unsigned int j = 0; j < p.I.size(); ++j)
         AssertThrow(std::isfinite(p.I[j]) && p.I[j] > 0. && std::isfinite(p.Z[j]) && p.Z[j] >= 0.,
@@ -321,7 +323,7 @@ namespace aspect
       s.committed_step = p.step;
       s.accepted_publications = p.publications;
       s.geometry_publications = p.geometry_publications;
-      s.stress_samples.clear();
+      s.observations.stress.clear();
       // This transient constitutive cache is not history and is normally built
       // by mechanical-solve preparation. A prescribed restart bypasses that
       // solve, so rebuild it from the restored native temperature field.

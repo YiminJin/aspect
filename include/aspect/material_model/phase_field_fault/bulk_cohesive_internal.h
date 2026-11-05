@@ -2,7 +2,7 @@
 #ifndef ASPECT_MATERIAL_MODEL_BULK_COHESIVE_INTERNAL_H
 #define ASPECT_MATERIAL_MODEL_BULK_COHESIVE_INTERNAL_H
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/history/tensor_field.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_tensor.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_coulomb.h>
@@ -12,12 +12,24 @@ namespace aspect
 {
   namespace MaterialModel
   {
-    template<int dim> struct PhaseFieldFault<dim>::BulkCohesiveState
+    /** Accepted fixed-mesh bulk-cohesive owner. Separate from mature T/R/tau
+     * and surface cohesive histories; point-law temporaries never publish here. */
+    template <int dim>
+    struct PhaseFieldFault<dim>::BulkCohesiveState
     {
+      /** Native quadrature-point physical history; tensor and scalar flow rules
+       * use distinct entries. No fault-surface normalization is stored here. */
       struct LocalHistory
       {
-        double a = 0., signed_shear = 0., absolute_shear = 0., q = 0., rate = 0.;
-        BulkCohesive::Tensor A {}, K {}, Q {}, W {};
+        double a = 0.; ///< Elastic engineering shear.
+        double signed_shear = 0.; ///< Signed inelastic shear.
+        double absolute_shear = 0.; ///< Accumulated absolute inelastic shear.
+        double q = 0.; ///< Cohesive stress (Pa).
+        double rate = 0.; ///< Inelastic shear rate (1/s).
+        BulkCohesive::Tensor A {}; ///< Elastic strain tensor.
+        BulkCohesive::Tensor K {}; ///< Inelastic strain tensor.
+        BulkCohesive::Tensor Q {}; ///< Cohesive stress tensor (Pa).
+        BulkCohesive::Tensor W {}; ///< Inelastic strain rate (1/s).
         double L = 0.;
       };
       BulkFlowRule flow_rule = BulkFlowRule::scalar;
@@ -45,25 +57,30 @@ namespace aspect
         // Allocated only for the experimental Coulomb mode.
         std::shared_ptr<const BulkCohesive::CoulombReturn::Response> coulomb_point;
       };
-      std::shared_ptr<DGHistory> tensor;
-      // Same native FE velocity-memory representation as the accepted FE path,
-      // without that path's surface/normalization owner. Only the velocity block
-      // is nonzero: A+ = beta (A_n + du). The projection is a derived cache.
+      /** Independent numerical trial tensor, with interpretation owned here. */
+      std::shared_ptr<TensorField> tensor;
+      /** Same native FE velocity-memory representation as the accepted FE path,
+       * without that path's surface/normalization owner. Only the velocity block
+       * is nonzero: A+ = beta (A_n + du). The projection is a derived cache. */
       LinearAlgebra::BlockVector native_history;
-      std::shared_ptr<DGHistory> native_projection;
+      std::shared_ptr<TensorField> native_projection;
       std::map<CellId, typename DoFHandler<dim>::active_cell_iterator> native_cells;
-      void rebuild_native_projection(const PhaseFieldFault<dim> &);
+      /** Rebuild the derived tensor projection after accepted native publication. */
+      void rebuild_native_projection(const PhaseFieldFault<dim> &model);
+      /** Sample the native trial tensor on readable cells, without publication. */
       std::vector<SymmetricTensor<2, dim>> evaluate_tensor(
-        const PhaseFieldFault<dim> &, const CellId &, const Quadrature<dim> &) const;
-      double check_tensor(const PhaseFieldFault<dim> &, const CellId &, const Quadrature<dim> &,
-                          const std::vector<BulkCohesive::Tensor> &) const;
+        const PhaseFieldFault<dim> &model, const CellId &cell_id, const Quadrature<dim> &quadrature) const;
+      /** Compare sampled tensor with reference; return maximum point mismatch. */
+      double check_tensor(const PhaseFieldFault<dim> &model, const CellId &cell_id, const Quadrature<dim> &quadrature,
+                          const std::vector<BulkCohesive::Tensor> &reference) const;
       std::map<CellId, std::vector<LocalHistory>> history;
       Vector<double> phase;
       std::vector<Point<dim>> mesh;
       BulkCohesive::Parameters parameters;
-      unsigned int quadrature = 0, step = 0;
+      unsigned int quadrature = 0; ///< Native Gauss order; part of persistence identity.
+      unsigned int step = 0; ///< Accepted step number.
       std::uint64_t publications = 0;
-      double time = 0.;
+      double time = 0.; ///< Accepted endpoint time (s).
       // Only the fixed-phase Coulomb mode uses these physical parameters.
       double background_pressure = 0., coulomb_mu = 0.;
       double slip_length = BulkCohesive::SlipGradient::experimental_length();
@@ -83,12 +100,16 @@ namespace aspect
       }
     };
 
-    template<int dim> struct PhaseFieldFault<dim>::BulkCohesiveArchive
+    /** Explicit persistence packet. Field order/signatures remain checkpoint ABI;
+     * derived FE projections and observations are reconstructed after loading. */
+    template <int dim>
+    struct PhaseFieldFault<dim>::BulkCohesiveArchive
     {
       std::string signature = "bulk cohesive BE native remainder v2";
-      unsigned int quadrature = 0, step = 0;
+      unsigned int quadrature = 0; ///< Native Gauss order; part of persistence identity.
+      unsigned int step = 0; ///< Accepted step number.
       std::uint64_t publications = 0;
-      double time = 0.;
+      double time = 0.; ///< Accepted endpoint time (s).
       std::vector<double> material, phase, tensor, local, native;
       std::vector<std::string> cells;
       std::vector<Point<dim>> mesh;

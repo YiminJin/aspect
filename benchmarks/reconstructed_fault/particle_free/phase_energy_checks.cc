@@ -70,7 +70,7 @@ namespace aspect
           for (const auto &entry:s.cells)
             {
               const auto &cell=entry.second;
-              const auto stress=model.evaluate_history_tensor(*s.dg_history,entry.first,samples);
+              const auto stress=model.evaluate_history_tensor(*s.bulk_history.tensor,entry.first,samples);
               cells << c << ',' << cell->vertex(0)[0] << ',' << cell->vertex(0)[1] << ','
                     << cell->vertex(1)[0]-cell->vertex(0)[0] << ',' << cell->vertex(2)[1]-cell->vertex(0)[1];
               for (const auto v:cell->vertex_indices())
@@ -89,7 +89,7 @@ namespace aspect
           nodal << "i,x,y,accepted,phase,d1,d2\n";
           for (const auto &node:nodes)
             nodal << node.first << ',' << node.second[0] << ',' << node.second[1] << ','
-                  << s.displacement_history.block(block)[node.first] << ',' << phase.block(block)[node.first] << ','
+                  << s.bulk_history.native.block(block)[node.first] << ',' << phase.block(block)[node.first] << ','
                   << d1.block(block)[node.first] << ',' << d2.block(block)[node.first] << '\n';
           auto surface=output("surface.csv"),profiles=output("profiles.csv"),rule=output("rule.csv");
           surface << "i,x,Z,I_accepted\n";
@@ -180,7 +180,7 @@ namespace aspect
                 std::vector<SymmetricTensor<2,dim>> tensors;
                 for (const auto &cell:scratch->cells)
                   {
-                    const auto values=model.evaluate_history_tensor(*scratch->dg_history,cell.first,quad);
+                    const auto values=model.evaluate_history_tensor(*scratch->bulk_history.tensor,cell.first,quad);
                     tensors.insert(tensors.end(),values.begin(),values.end());
                   }
                 unsigned int point=0;
@@ -380,8 +380,8 @@ namespace aspect
             accepted_trial << i << ',' << bounded.block(block)[i] << ',' << lower.block(block)[i] << ',' << sim.system_rhs.block(block)[i] << '\n';
           for (const auto &p:s.bulk)
             {
-              const auto before=model.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,p.cell,p.x);
-              const auto after=model.evaluate_dg_history_stress(*s.dg_history,s.Z,updated.values,p.cell,p.x,nullptr,&bounded);
+              const auto before=model.evaluate_dg_history_stress(*s.bulk_history.tensor,s.Z,s.I,p.cell,p.x);
+              const auto after=model.evaluate_dg_history_stress(*s.bulk_history.tensor,s.Z,updated.values,p.cell,p.x,nullptr,&bounded);
               double phi0=0.,phi1=0.;
               for (unsigned int v=0; v<p.dofs.size(); ++v)
                 {

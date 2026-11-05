@@ -1,7 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/reconstructed_fault/objective_stress.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
@@ -11,7 +11,8 @@ namespace aspect
   namespace MaterialModel
   {
     template <int dim>
-    SymmetricTensor<2, dim> PhaseFieldFault<dim>::evaluate_mature_dg_memory(
+    SymmetricTensor<2, dim>
+    PhaseFieldFault<dim>::evaluate_mature_dg_memory(
       const Point<dim> &point, const double phase, const std::vector<double> &Z,
       const std::vector<double> &I,
       const ReconstructedFaultUtilities::NormalProfileProjection *cached) const
@@ -43,15 +44,16 @@ namespace aspect
     }
 
     template <int dim>
-    void PhaseFieldFault<dim>::prepare_objective_dg_anchor()
+    void
+    PhaseFieldFault<dim>::prepare_objective_dg_anchor()
     {
-      AssertThrow(jaumann_dg_stress && fe_strain_state && fe_strain_state->dg_history
-                  && (material_direct_stress || fe_strain_state->dg_history->residual), ExcMessage("Missing complete objective DG history."));
+      AssertThrow(jaumann_dg_stress && fe_strain_state && fe_strain_state->bulk_history.tensor
+                  && (material_direct_stress || fe_strain_state->bulk_history.tensor->residual), ExcMessage("Missing complete objective DG history."));
       auto &state = *fe_strain_state;
-      const auto parent = state.dg_history;
+      const auto parent = state.bulk_history.tensor;
       const double dt = this->get_timestep_number() > 0 ? this->get_timestep() : initial_time_step;
-      if (state.objective_anchor && state.objective_parent.lock() == parent
-          && state.objective_step == this->get_timestep_number() && state.objective_dt == dt)
+      if (state.objective.tensor && state.objective.parent.lock() == parent
+          && state.objective.step == this->get_timestep_number() && state.objective.dt == dt)
         return;
       if (material_direct_stress)
         {
@@ -60,38 +62,38 @@ namespace aspect
           // from rotate_material_history; do not rotate again on restoration.
           AssertThrow(!dg_material_trial,
                       ExcMessage("Direct material trial is missing its complete objective anchor."));
-          state.objective_anchor = parent;
-          state.objective_parent = parent;
-          state.objective_step = this->get_timestep_number() == 0 ? 0 : numbers::invalid_unsigned_int;
-          state.objective_dt = dt;
+          state.objective.tensor = parent;
+          state.objective.parent = parent;
+          state.objective.step = this->get_timestep_number() == 0 ? 0 : numbers::invalid_unsigned_int;
+          state.objective.dt = dt;
           return;
         }
       TimerOutput::Scope timer(this->get_computing_timer(), "DG objective anchor");
       auto anchor = std::make_shared<DGHistory>();
-      anchor->space = parent->space;
-      anchor->residual = std::make_shared<DGHistory>();
-      anchor->residual->space = parent->space;
+      anchor->primary.space = parent->primary.space;
+      anchor->residual = std::make_shared<TensorField>();
+      anchor->residual->space = parent->primary.space;
       const QGauss<dim> rule(std::max(8u, fe_bulk_normal_quadrature_points));
       FEValues<dim> native(this->get_mapping(), this->get_fe(), rule,
                            update_values | update_gradients | update_quadrature_points);
-      FEValues<dim> dg(this->get_mapping(), parent->space->element, rule,
+      FEValues<dim> dg(this->get_mapping(), parent->primary.space->element, rule,
                        update_values | update_JxW_values);
       constexpr unsigned int components = SymmetricTensor<2, dim>::n_independent_components;
       std::array<LinearAlgebra::Vector, 2 * components> owned;
       for (auto &v : owned)
-        v.reinit(parent->space->dofs.locally_owned_dofs(), this->get_mpi_communicator());
-      const unsigned int n = parent->space->element.n_dofs_per_cell();
+        v.reinit(parent->primary.space->dofs.locally_owned_dofs(), this->get_mpi_communicator());
+      const unsigned int n = parent->primary.space->element.n_dofs_per_cell();
       std::vector<types::global_dof_index> indices(n);
       std::vector<Tensor<2, dim>> gradients(rule.size());
       std::vector<double> phase(rule.size());
       for (const auto &entry : state.cells)
         {
           native.reinit(entry.second);
-          dg.reinit(parent->space->cells.at(entry.first));
-          parent->space->cells.at(entry.first)->get_dof_indices(indices);
+          dg.reinit(parent->primary.space->cells.at(entry.first));
+          parent->primary.space->cells.at(entry.first)->get_dof_indices(indices);
           native[this->introspection().extractors.velocities].get_function_gradients(this->get_old_solution(), gradients);
           native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
-          .get_function_values(state.displacement_history, phase);
+          .get_function_values(state.bulk_history.native, phase);
           const auto T = evaluate_history_tensor(*parent, entry.first, rule);
           const auto R = evaluate_history_tensor(*parent->residual, entry.first, rule);
           if constexpr (dim == 2)
@@ -104,7 +106,7 @@ namespace aspect
             for (unsigned int c = 0; c < components; ++c)
               for (const auto i : indices)
                 {
-                  owned[c][i] = parent->coefficients[c][i];
+                  owned[c][i] = parent->primary.coefficients[c][i];
                   owned[c + components][i] = parent->residual->coefficients[c][i];
                 }
             continue;
@@ -151,17 +153,17 @@ namespace aspect
         {
           owned[c].compress(VectorOperation::insert);
           owned[c + components].compress(VectorOperation::insert);
-          anchor->coefficients[c].reinit(parent->coefficients[c]);
-          anchor->coefficients[c] = owned[c];
+          anchor->primary.coefficients[c].reinit(parent->primary.coefficients[c]);
+          anchor->primary.coefficients[c] = owned[c];
           anchor->residual->coefficients[c].reinit(parent->residual->coefficients[c]);
           anchor->residual->coefficients[c] = owned[c + components];
         }
-      state.objective_anchor = std::move(anchor);
-      state.objective_parent = parent;
-      state.objective_step = this->get_timestep_number();
-      state.objective_dt = dt;
-      state.stress_samples.clear();
-      state.mechanical_samples.reset();
+      state.objective.tensor = std::move(anchor);
+      state.objective.parent = parent;
+      state.objective.step = this->get_timestep_number();
+      state.objective.dt = dt;
+      state.observations.stress.clear();
+      state.observations.mechanics.reset();
     }
 
 #define INSTANTIATE(dim) \

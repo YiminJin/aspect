@@ -6,7 +6,7 @@
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include "../../../tests/phase_field_fault_test_access.h"
 #include "../../../tests/phase_field_test_access.h"
 #include <deal.II/numerics/vector_tools_interpolate.h>
@@ -58,7 +58,7 @@ namespace aspect
           const auto &s=*m.fe_strain_state;
           v.insert(v.end(),s.Z.begin(),s.Z.end());
           v.insert(v.end(),s.I.begin(),s.I.end());
-          for (unsigned int i=0; i<s.displacement_history.size(); ++i)v.push_back(s.displacement_history[i]);
+          for (unsigned int i=0; i<s.bulk_history.native.size(); ++i)v.push_back(s.bulk_history.native[i]);
           v.push_back(s.committed_step);
           v.push_back(s.accepted_publications);
           const auto &manager=this->get_reconstructed_fault_manager();
@@ -133,7 +133,7 @@ namespace aspect
           for (const auto &entry:s.cells)
             {
               const auto &cell=entry.second;
-              const auto stress=model.evaluate_history_tensor(endpoint ? *endpoint->dg_history : *s.dg_history,entry.first,samples);
+              const auto stress=model.evaluate_history_tensor(endpoint ? *endpoint->dg_history : *s.bulk_history.tensor,entry.first,samples);
               cells << c << ',' << cell->vertex(0)[0] << ',' << cell->vertex(0)[1] << ','
                     << cell->vertex(1)[0]-cell->vertex(0)[0] << ',' << cell->vertex(2)[1]-cell->vertex(0)[1];
               for (const auto v:cell->vertex_indices())
@@ -152,7 +152,7 @@ namespace aspect
           nodal << "i,x,y,accepted,phase,d1,d2\n";
           for (const auto &node:nodes)
             nodal << node.first << ',' << node.second[0] << ',' << node.second[1] << ','
-                  << s.displacement_history.block(block)[node.first] << ',' << phase.block(block)[node.first] << ','
+                  << s.bulk_history.native.block(block)[node.first] << ',' << phase.block(block)[node.first] << ','
                   << d1.block(block)[node.first] << ',' << d2.block(block)[node.first] << '\n';
           auto surface=output("surface.csv"),profiles=output("profiles.csv"),rule=output("rule.csv");
           surface << "i,x,Z,I_accepted\n";
@@ -197,8 +197,8 @@ namespace aspect
           const auto repeat=m.make_fe_endpoint_trial(base,V);
           double repeat_error=0.;
           for (unsigned int c=0; c<3; ++c)
-            for (unsigned int i=0; i<endpoint.dg_history->coefficients[c].size(); ++i)
-              repeat_error=std::max(repeat_error,std::abs(endpoint.dg_history->coefficients[c][i]-repeat.dg_history->coefficients[c][i]));
+            for (unsigned int i=0; i<endpoint.dg_history->primary.coefficients[c].size(); ++i)
+              repeat_error=std::max(repeat_error,std::abs(endpoint.dg_history->primary.coefficients[c][i]-repeat.dg_history->primary.coefficients[c][i]));
           check("repeated endpoint candidates",repeat_error==0. && endpoint.Z==repeat.Z);
           prefix="operators/";
           std::filesystem::create_directory(this->get_output_directory()+prefix);
@@ -383,17 +383,17 @@ namespace aspect
           BV affine(saved);
           VectorTools::interpolate(this->get_mapping(),this->get_dof_handler(),function,affine,this->introspection().component_masks.velocities);
           auto update=m.prepare_fe_strain_commit(affine,tractions());
-          const auto plain=m.make_dg_history_trial(*s.dg_history,affine,c);
+          const auto plain=m.make_dg_history_trial(*s.bulk_history.tensor,affine,c);
           bool identical=true;
           for(unsigned int component=0;component<3;++component)
-            for(const auto i:plain->coefficients[component].locally_owned_elements())
-              identical=identical && plain->coefficients[component][i]==update->dg_history->coefficients[component][i];
-          check("source bound requested only for publication",plain->source_roundoff.empty() && update->dg_history->source_roundoff.size()==s.cells.size());
+            for(const auto i:plain->primary.coefficients[component].locally_owned_elements())
+              identical=identical && plain->primary.coefficients[component][i]==update->bulk_history.tensor->primary.coefficients[component][i];
+          check("source bound requested only for publication",plain->source_roundoff.empty() && update->bulk_history.tensor->source_roundoff.size()==s.cells.size());
           check("source bound leaves every DG coefficient identical",identical);
           double affine_error=0.;
           for(unsigned int component=0;component<3;++component)
-            for(const auto i:update->dg_history->coefficients[component].locally_owned_elements())
-              affine_error=std::max(affine_error,std::abs(update->dg_history->coefficients[component][i]-(component==2 ? .001*c.eta_ve : 0.)));
+            for(const auto i:update->bulk_history.tensor->primary.coefficients[component].locally_owned_elements())
+              affine_error=std::max(affine_error,std::abs(update->bulk_history.tensor->primary.coefficients[component][i]-(component==2 ? .001*c.eta_ve : 0.)));
           check("analytic affine sticking DG source",affine_error<1e-9);
           auto report=output("publication-controls.csv");
           report<<"probe,error,bound,ratio\n"<<"affine-source,"<<affine_error<<",1e-9,"<<affine_error/1e-9<<'\n';
@@ -405,15 +405,15 @@ namespace aspect
           {
             auto candidate=m.prepare_fe_strain_commit(sim.solution,tractions());
             double scale=0.;const auto expected=m.candidate_fe_strain_stress(candidate,id,point,&scale);
-            const double bound=128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)+m.dg_source_publication_allowance(*candidate->dg_history,id,point);
+            const double bound=128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)+m.dg_source_publication_allowance(*candidate->bulk_history.tensor,id,point);
             // An independently inconsistent incoming tensor must also fail;
             // source bounds must not grow with the inconsistent tensor.
             for(unsigned int component=0;component<3;++component)
               {
-                typename Model::DGHistory incoming_copy(*s.dg_history);
-                incoming_copy.coefficients[component].add(1.);
+                typename Model::DGHistory incoming_copy(*s.bulk_history.tensor);
+                incoming_copy.primary.coefficients[component].add(1.);
                 auto different=m.make_dg_history_trial(incoming_copy,sim.solution,c);
-                auto wrong=std::make_shared<typename Model::FEStrainUpdate>(*candidate);wrong->dg_history=different;
+                auto wrong=std::make_shared<typename Model::FEStrainUpdate>(*candidate);wrong->bulk_history.tensor=different;
                 const auto delta=m.candidate_fe_strain_stress(wrong,id,point)-expected;
                 const double error=std::sqrt(std::pow(delta.norm(),2)+std::pow(trace(delta),2));
                 bool rejected=false;
@@ -422,7 +422,7 @@ namespace aspect
                 check("inconsistent incoming tensor component "+std::to_string(component),rejected);
                 report<<"inconsistent-incoming-"<<component<<','<<error<<','<<bound<<','<<error/bound<<'\n';
               }
-            candidate->dg_history->coefficients[2].add(1.);
+            candidate->bulk_history.tensor->primary.coefficients[2].add(1.);
             const auto inconsistent=m.candidate_fe_strain_stress(candidate,id,point);
             const double error=(inconsistent-expected).norm();
             report<<"inconsistent-staged-history,"<<error<<','<<bound<<','<<error/bound<<std::endl;
@@ -582,7 +582,7 @@ namespace aspect
               healing=std::max(healing,previous_phase[i]-phase[i]);
             }
           check("single publication step "+std::to_string(step),s.accepted_publications==step && s.committed_step==step);
-          check("physical phase anchor step "+std::to_string(step),phase==values(s.displacement_history) && healing==0.);
+          check("physical phase anchor step "+std::to_string(step),phase==values(s.bulk_history.native) && healing==0.);
           check("fixed geometry particles step "+std::to_string(step),(m.validate_fe_strain_restrictions(),true));
           const auto E=m.evaluate_fe_phase_energy(state,false);
           const auto F=this->get_phase_field_handler().evaluate_cell_fracture(state,false);
@@ -647,7 +647,7 @@ namespace aspect
               if(batch_snapshots)
                 {
                   const auto start=std::chrono::steady_clock::now();
-                  tensor=m.evaluate_history_tensor(*s.dg_history,entry.first,quad);
+                  tensor=m.evaluate_history_tensor(*s.bulk_history.tensor,entry.first,quad);
                   batch_seconds+=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
                 }
               for (unsigned int q=0; q<quad.size(); ++q)
@@ -665,7 +665,7 @@ namespace aspect
                   if(!batch_snapshots || compare_batch)
                     {
                       const auto start=std::chrono::steady_clock::now();
-                      const auto point=m.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,entry.first,x);
+                      const auto point=m.evaluate_dg_history_stress(*s.bulk_history.tensor,s.Z,s.I,entry.first,x);
                       point_seconds+=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
                       if(!batch_snapshots)t=point;
                       else
@@ -725,7 +725,7 @@ namespace aspect
           {std::ofstream out(this->get_output_directory()+prefix+"rng.bin",std::ios::binary);aspect::oarchive archive(out);archive<<this->get_particle_manager(0).get_random_number_state();}
           {std::ofstream out(this->get_output_directory()+prefix+"manager.bin",std::ios::binary);aspect::oarchive archive(out);archive<<this->get_reconstructed_fault_manager();}
           auto shared=output("shared.csv");shared<<"i,anchor,solution,old,oldold\n";
-          for(unsigned int i=0;i<state.size();++i)shared<<i<<','<<s.displacement_history[i]<<','<<state[i]<<','<<sim.old_solution[i]<<','<<sim.old_old_solution[i]<<'\n';
+          for(unsigned int i=0;i<state.size();++i)shared<<i<<','<<s.bulk_history.native[i]<<','<<state[i]<<','<<sim.old_solution[i]<<','<<sim.old_old_solution[i]<<'\n';
           }
           auto clocks=output("clock.csv");clocks<<"time,dt,step,committed,publications\n"<<this->get_time()<<','<<this->get_timestep()<<','<<step<<','<<s.committed_step<<','<<s.accepted_publications<<'\n';
           prefix="";

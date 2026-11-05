@@ -1,5 +1,5 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/history/tensor_advection.h>
 #include <aspect/utilities.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
@@ -171,7 +171,7 @@ namespace aspect
 
 
       template <int dim>
-      std::shared_ptr<TensorHistory<dim>>
+      std::shared_ptr<TensorField<dim>>
       TensorAdvection<dim>::project(
         const SimulatorAccess<dim> &context, const TensorAdvection &op, const Field &field, const double time, const unsigned int quadrature_order)
       {
@@ -220,7 +220,7 @@ namespace aspect
 
 
       template <int dim>
-      std::shared_ptr<TensorHistory<dim>>
+      std::shared_ptr<TensorField<dim>>
       TensorAdvection<dim>::advance(
         const SimulatorAccess<dim> &context, const TensorAdvection &op, const History &incoming, const Field &inflow,
         const Field &source, const double time, const double dt)
@@ -298,8 +298,8 @@ namespace aspect
 
 #define INSTANTIATE(dim) \
   template std::shared_ptr<TensorAdvection<dim>> TensorAdvection<dim>::assemble(const SimulatorAccess<dim> &,const History &,const Cells &,const LinearAlgebra::BlockVector &,unsigned int,double,bool); \
-  template std::shared_ptr<TensorHistory<dim>> TensorAdvection<dim>::project(const SimulatorAccess<dim> &,const TensorAdvection &,const Field &,double,unsigned int); \
-  template std::shared_ptr<TensorHistory<dim>> TensorAdvection<dim>::advance(const SimulatorAccess<dim> &,const TensorAdvection &,const History &,const Field &,const Field &,double,double);
+  template std::shared_ptr<TensorField<dim>> TensorAdvection<dim>::project(const SimulatorAccess<dim> &,const TensorAdvection &,const Field &,double,unsigned int); \
+  template std::shared_ptr<TensorField<dim>> TensorAdvection<dim>::advance(const SimulatorAccess<dim> &,const TensorAdvection &,const History &,const Field &,const Field &,double,double);
       ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE
     }

@@ -4,7 +4,7 @@
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <deal.II/fe/fe_values.h>
 #include <aspect/time_stepping/interface.h>
@@ -65,11 +65,11 @@ namespace aspect { namespace Postprocess
           std::vector<types::global_dof_index> ids(9);
           for(const auto &entry:model.fe_strain_state->cells)
             {
-              const auto &h=*model.fe_strain_state->dg_history;
-              h.space->cells.at(entry.first)->get_dof_indices(ids);
+              const auto &h=*model.fe_strain_state->bulk_history.tensor;
+              h.primary.space->cells.at(entry.first)->get_dof_indices(ids);
               auto &row=local[entry.first.to_string()];
               for(unsigned int c=0;c<3;++c)for(const auto i:ids)
-                {row.push_back(h.coefficients[c][i]);row.push_back(h.residual->coefficients[c][i]);}
+                {row.push_back(h.primary.coefficients[c][i]);row.push_back(h.residual->coefficients[c][i]);}
             }
           for(const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local))
             for(const auto &entry:part)AssertThrow(all.emplace(entry).second,ExcMessage("Duplicate physical tensor owner in AMR audit."));
@@ -92,11 +92,11 @@ namespace aspect { namespace Postprocess
         }
       double error=0.,scale=1.;
       const QGauss<dim> rule(8);
-      const auto &element=model.fe_strain_state->dg_history->space->element;
+      const auto &element=model.fe_strain_state->bulk_history.tensor->primary.space->element;
       for(const auto &entry:model.fe_strain_state->cells)
         {
-          const auto T=model.evaluate_history_tensor(*model.fe_strain_state->dg_history,entry.first,rule);
-          const auto R=model.evaluate_history_tensor(*model.fe_strain_state->dg_history->residual,entry.first,rule);
+          const auto T=model.evaluate_history_tensor(*model.fe_strain_state->bulk_history.tensor,entry.first,rule);
+          const auto R=model.evaluate_history_tensor(*model.fe_strain_state->bulk_history.tensor->residual,entry.first,rule);
           for(unsigned int q=0;q<rule.size();++q)
             {
               const auto x=this->get_mapping().transform_unit_to_real_cell(entry.second,rule.point(q));
@@ -135,7 +135,7 @@ namespace aspect { namespace Postprocess
     {
       const auto &model=Plugins::get_plugin_as_type<const Model>(this->get_material_model());
       const auto accepted=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model);
-      const auto parent=model.fe_strain_state->dg_history;
+      const auto parent=model.fe_strain_state->bulk_history.tensor;
       struct Flow : Function<dim>
       {
         Flow(unsigned int n,double c,double cy):Function<dim>(n),c(c),cy(cy){}
@@ -186,7 +186,7 @@ namespace aspect { namespace Postprocess
           const auto comm=this->get_mpi_communicator();
           error=Utilities::MPI::sum(error,comm);reference=Utilities::MPI::sum(reference,comm);
           maximum=Utilities::MPI::max(maximum,comm);
-          AssertThrow(parent==model.fe_strain_state->dg_history && accepted==MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model),
+          AssertThrow(parent==model.fe_strain_state->bulk_history.tensor && accepted==MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model),
                       ExcMessage("Nonpublishing transport operator changed accepted history."));
           if(Utilities::MPI::this_mpi_process(comm)==0)
             {
@@ -214,14 +214,14 @@ namespace aspect { namespace Postprocess
       const auto &state=*model.fe_strain_state;
       if (captured==this->get_timestep_number())
         {
-          const bool unchanged=publications==0 && incoming==state.dg_history
+          const bool unchanged=publications==0 && incoming==state.bulk_history.tensor
             && coefficients==MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model) && Z==state.Z && I==state.I;
           AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(unchanged),this->get_mpi_communicator())==1,
                       ExcMessage("Rejected objective DG trial modified accepted tensor/residual/scalar history."));
           ++retries;
         }
       captured=this->get_timestep_number();publications=0;
-      incoming=state.dg_history;Z=state.Z;I=state.I;coefficients=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model);
+      incoming=state.bulk_history.tensor;Z=state.Z;I=state.I;coefficients=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model);
       lagged.reinit(this->get_old_solution());lagged=this->get_old_solution();
     }
   public:
@@ -239,12 +239,12 @@ namespace aspect { namespace Postprocess
           if(std::getenv("ASPECT_OBJECTIVE_DG_TRANSPORT_CHECK"))transport_check();
           return {"DG objective checks","initial accepted state"};
         }
-      AssertThrow(incoming && incoming->residual && state.dg_history->residual && publications==1,
+      AssertThrow(incoming && incoming->residual && state.bulk_history.tensor->residual && publications==1,
                   ExcMessage("Objective DG fixture lacks complete single-publication history."));
       const auto &intro=this->introspection();
       const QGauss<dim> rule(8);
       FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_gradients|update_values|update_quadrature_points|update_JxW_values);
-      FEValues<dim> dg(this->get_mapping(),incoming->space->element,rule,update_values);
+      FEValues<dim> dg(this->get_mapping(),incoming->primary.space->element,rule,update_values);
       std::vector<dealii::Tensor<2,dim>> gradients(rule.size());
       std::vector<SymmetricTensor<2,dim>> strains(rule.size());
       std::vector<double> phase(rule.size());
@@ -252,14 +252,14 @@ namespace aspect { namespace Postprocess
       double defect=0.,scale=1.,Rnorm=0.,angle=0.;
       for (const auto &entry:state.cells)
         {
-          fe.reinit(entry.second);dg.reinit(incoming->space->cells.at(entry.first));
+          fe.reinit(entry.second);dg.reinit(incoming->primary.space->cells.at(entry.first));
           fe[intro.extractors.velocities].get_function_gradients(lagged,gradients);
           fe[intro.extractors.velocities].get_function_symmetric_gradients(this->get_solution(),strains);
-          fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(state.displacement_history,phase);
+          fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(state.bulk_history.native,phase);
           const auto T0=model.evaluate_history_tensor(*incoming,entry.first,rule);
           const auto R0=model.evaluate_history_tensor(*incoming->residual,entry.first,rule);
-          const auto T1=model.evaluate_history_tensor(*state.dg_history,entry.first,rule);
-          const auto R1=model.evaluate_history_tensor(*state.dg_history->residual,entry.first,rule);
+          const auto T1=model.evaluate_history_tensor(*state.bulk_history.tensor,entry.first,rule);
+          const auto R1=model.evaluate_history_tensor(*state.bulk_history.tensor->residual,entry.first,rule);
           std::array<Tensor,9> moments_T,moments_R;
           const double volume=entry.second->measure();
           for (unsigned q=0;q<rule.size();++q)
@@ -299,9 +299,9 @@ namespace aspect { namespace Postprocess
       std::vector<types::global_dof_index> ids(9);
       for (const auto &entry:state.cells)
         {
-          state.dg_history->space->cells.at(entry.first)->get_dof_indices(ids);
+          state.bulk_history.tensor->primary.space->cells.at(entry.first)->get_dof_indices(ids);
           for (unsigned int c=0;c<3;++c)for(unsigned int i=0;i<9;++i)
-            fields<<entry.first.to_string()<<','<<c<<','<<i<<','<<state.dg_history->coefficients[c][ids[i]]<<','<<state.dg_history->residual->coefficients[c][ids[i]]<<'\n';
+            fields<<entry.first.to_string()<<','<<c<<','<<i<<','<<state.bulk_history.tensor->primary.coefficients[c][ids[i]]<<','<<state.bulk_history.tensor->residual->coefficients[c][ids[i]]<<'\n';
         }
       if(std::getenv("ASPECT_OBJECTIVE_DG_TRANSFER_CHECK") && this->get_timestep_number()==3)transfer_check();
       return {"DG objective checks","independent tensor/residual moments and publication passed"};

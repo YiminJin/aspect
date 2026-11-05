@@ -6,7 +6,7 @@
         auto &m=const_cast<Model &>(Plugins::get_plugin_as_type<const Model>(this->get_material_model()));
         auto &s=*m.fe_strain_state;
         const auto accepted=snapshot();
-        const auto saved_anchor=s.objective_anchor;
+        const auto saved_anchor=s.objective.tensor;
         const auto saved_Z=s.Z;
         const auto comm=this->get_mpi_communicator();
         struct Flow : Function<dim>
@@ -30,10 +30,9 @@
         LinearAlgebra::BlockVector explicit_fields(this->introspection().index_sets.system_partitioning,comm);
         explicit_fields=velocity(2.);
         explicit_fields.block(this->introspection().variable("phase_field").block_index)=.25;
-        projection_state.displacement_history=explicit_fields;
+        projection_state.bulk_history.native=explicit_fields;
         const auto explicit_velocity=velocity(2.);
-        const auto projected=Model::DGHistory::project(*this,*s.dg_history,projection_state.cells,
-          projection_state.displacement_history,explicit_velocity,std::max(8u,m.fe_bulk_normal_quadrature_points),
+        const auto projected=m.project_material_tensor(s.bulk_history.tensor->primary,projection_state,explicit_velocity,
           [](const auto &,const auto &,const auto &,double phase,const auto &gradient)
           {Tensor value;value[0][0]=phase+gradient[0][0];value[1][1]=gradient[1][1];
            value[0][1]=.5*(gradient[0][1]+gradient[1][0]);return value;});
@@ -52,7 +51,7 @@
         const auto zero=[](const Point<dim> &,double){return Tensor();};
         auto anchor=m.project_dg_transport_field(*op,zero,0.,8);
         anchor->representation=History::Representation::physical_stress;
-        s.objective_anchor=anchor;s.Z.assign(s.Z.size(),0.);
+        s.objective.tensor=anchor;s.Z.assign(s.Z.size(),0.);
         std::vector<double> rates(s.Z.size());
         for(unsigned j=0;j<rates.size();++j)rates[j]=.002*(1+.2*std::cos(s.vertices[j][0]));
         const double epsilon=1e-5,dt=m.initial_time_step;
@@ -60,9 +59,9 @@
         for(auto &z:s.Z)z=1.;
         const auto changed_diagnostic=m.make_material_reaction(*m.fe_strain_state,bulk,rates);
         double diagnostic_error=0.;
-        for(unsigned c=0;c<candidate->dg_history->coefficients.size();++c)
-          for(const auto i:candidate->dg_history->coefficients[c].locally_owned_elements())
-            diagnostic_error=std::max(diagnostic_error,std::abs(candidate->dg_history->coefficients[c][i]-changed_diagnostic->dg_history->coefficients[c][i]));
+        for(unsigned c=0;c<candidate->bulk_history.tensor->primary.coefficients.size();++c)
+          for(const auto i:candidate->bulk_history.tensor->primary.coefficients[c].locally_owned_elements())
+            diagnostic_error=std::max(diagnostic_error,std::abs(candidate->bulk_history.tensor->primary.coefficients[c][i]-changed_diagnostic->bulk_history.tensor->primary.coefficients[c][i]));
         AssertThrow(Utilities::MPI::max(diagnostic_error,comm)==0.,ExcMessage("Diagnostic Z changed direct reaction/mechanics."));
         s.Z.assign(s.Z.size(),0.);
         const auto perturbed_bulk=velocity(1.+epsilon);
@@ -72,7 +71,7 @@
         // Same frozen geometry, coefficients, zero physical parent, v and V.
         // Only the history representation changes in this scratch calculation.
         anchor->representation=History::Representation::separated_trial;
-        anchor->residual=m.project_dg_transport_field(*op,zero,0.,8);
+        anchor->residual=std::make_shared<typename Model::TensorField>(m.project_dg_transport_field(*op,zero,0.,8)->primary);
         m.material_direct_stress=false;
         auto separated=m.make_material_reaction(*m.fe_strain_state,bulk,rates);
         m.material_direct_stress=true;
@@ -89,19 +88,19 @@
             for(const auto &entry:s.cells)
               {
                 native.reinit(entry.second);
-                native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(s.displacement_history,phi);
-                const auto direct=m.evaluate_history_tensor(*candidate->dg_history,entry.first,rule);
-                const auto dv=m.evaluate_history_tensor(*cv->dg_history,entry.first,rule);
-                const auto ds=m.evaluate_history_tensor(*cs->dg_history,entry.first,rule);
-                const auto sepT=m.evaluate_history_tensor(*separated->dg_history,entry.first,rule);
-                const auto sepR=m.evaluate_history_tensor(*separated->dg_history->residual,entry.first,rule);
+                native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(s.bulk_history.native,phi);
+                const auto direct=m.evaluate_history_tensor(*candidate->bulk_history.tensor,entry.first,rule);
+                const auto dv=m.evaluate_history_tensor(*cv->bulk_history.tensor,entry.first,rule);
+                const auto ds=m.evaluate_history_tensor(*cs->bulk_history.tensor,entry.first,rule);
+                const auto sepT=m.evaluate_history_tensor(*separated->bulk_history.tensor,entry.first,rule);
+                const auto sepR=m.evaluate_history_tensor(*separated->bulk_history.tensor->residual,entry.first,rule);
                 // Independent higher-order projection of analytic B and local
                 // source, using the actual cell mass and Gauss8 below.
                 const QGauss<dim> qr(8);
                 FEValues<dim> massfe(this->get_mapping(),op->space->element,qr,update_values|update_JxW_values|update_quadrature_points);
                 FEValues<dim> phasefe(this->get_mapping(),this->get_fe(),qr,update_values);
                 massfe.reinit(op->space->cells.at(entry.first));phasefe.reinit(entry.second);
-                std::vector<double> p(qr.size());phasefe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(s.displacement_history,p);
+                std::vector<double> p(qr.size());phasefe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(s.bulk_history.native,p);
                 FullMatrix<double> M(9,9);std::array<Vector<double>,12> rhs;
                 for(auto &r:rhs)r.reinit(9);
                 for(unsigned q=0;q<qr.size();++q)
@@ -179,8 +178,8 @@
                     if(forced){gradient[0][0]=.03;gradient[1][1]=-.03;}
                     SymmetricTensor<2,dim> rotated;
                     if constexpr(dim==2)rotated=ReconstructedFaultUtilities::rotate_plane_strain_stress(expected,gradient,dt);
-                    s.objective_anchor=m.project_dg_transport_field(*advection,[&](const Point<dim> &,double){return rotated;},0.,8);
-                    s.objective_anchor->representation=History::Representation::physical_stress;
+                    s.objective.tensor=m.project_dg_transport_field(*advection,[&](const Point<dim> &,double){return rotated;},0.,8);
+                    s.objective.tensor->representation=History::Representation::physical_stress;
                     const auto update=m.make_material_reaction(*m.fe_strain_state,flow,std::vector<double>(rates.size(),0.));
                     const double c=std::cos(.08*dt),sn=std::sin(.08*dt),beta=std::exp(-s.G*dt/s.eta),k=-s.eta*std::expm1(-s.G*dt/s.eta);
                     const auto old=expected;
@@ -188,7 +187,7 @@
                     expected[1][1]=beta*(sn*sn*old[0][0]+c*c*old[1][1]+2*c*sn*old[0][1]);
                     expected[0][1]=beta*(c*sn*(old[0][0]-old[1][1])+(c*c-sn*sn)*old[0][1]);
                     if(forced){expected[0][0]+=2*k*.03;expected[1][1]-=2*k*.03;expected[0][1]+=2*k*.01;}
-                    h=update->dg_history;
+                    h=update->bulk_history.tensor;
                     for(const auto &cell:advection->cells)
                       for(const auto &v:m.evaluate_history_tensor(*h,cell.id,qr))maximum=std::max(maximum,std::sqrt(dot(v-expected,v-expected)));
                   }
@@ -199,6 +198,6 @@
               {std::ofstream file(this->get_output_directory()+"true-stress-uniform.csv");file<<std::setprecision(17)<<"full3_max_error\n"<<maximum<<'\n';}
           }
         if(m.material_variable_viscosity)true_stress_moving_checks();
-        s.objective_anchor=saved_anchor;s.Z=saved_Z;
+        s.objective.tensor=saved_anchor;s.Z=saved_Z;
         AssertThrow(snapshot()==accepted,ExcMessage("Direct scratch checks changed accepted state."));
       }

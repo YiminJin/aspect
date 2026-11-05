@@ -1,5 +1,5 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/history/tensor_advection.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
 
@@ -159,12 +159,12 @@ namespace aspect
       }
 
       template<int dim>
-      std::shared_ptr<TensorHistory<dim>>
+      std::shared_ptr<TensorField<dim>>
       TensorAdvection<dim>::advance_distributed(const SimulatorAccess<dim> &context, const TensorAdvection &op,
                                                 const History &incoming, const Field &inflow, const Field &source, const double time, const double dt)
       {
         AssertThrow(op.distributed && incoming.space == op.space
-                    && !incoming.residual
+
                     && context.get_triangulation().get_vertices() == op.mesh_vertices
                     && std::isfinite(time) && std::isfinite(dt) && dt > 0.
                     && dt * (op.inverse_advection_time + op.relaxation_rate) <= .125,
@@ -219,7 +219,6 @@ namespace aspect
         evaluate(stage, time + .5 * dt);
         auto result = std::make_shared<History>();
         result->space = op.space;
-        result->representation = incoming.representation;
         for (unsigned int c = 0; c < stage.size(); ++c)
           {
             stage[c].add(dt, rhs[c]);
@@ -236,7 +235,7 @@ namespace aspect
 
 #define INSTANTIATE(dim) \
   template std::shared_ptr<TensorAdvection<dim>> TensorAdvection<dim>::assemble_distributed(const SimulatorAccess<dim> &,const History &,const Cells &,const LinearAlgebra::BlockVector &,unsigned int,double); \
-  template std::shared_ptr<TensorHistory<dim>> TensorAdvection<dim>::advance_distributed(const SimulatorAccess<dim> &,const TensorAdvection &,const History &,const Field &,const Field &,double,double);
+  template std::shared_ptr<TensorField<dim>> TensorAdvection<dim>::advance_distributed(const SimulatorAccess<dim> &,const TensorAdvection &,const History &,const Field &,const Field &,double,double);
       ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE
     }

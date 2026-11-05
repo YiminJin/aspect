@@ -3,7 +3,7 @@
 #include <aspect/phase_field.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include "../../../tests/phase_field_fault_test_access.h"
@@ -84,9 +84,9 @@ namespace aspect
         {
           const QGauss<dim> rule(8);
           const QGaussLobatto<dim> extrema_rule(9);
-          FEValues<dim> fe(this->get_mapping(),state.space->element,rule,update_JxW_values|update_quadrature_points);
+          FEValues<dim> fe(this->get_mapping(),state.primary.space->element,rule,update_JxW_values|update_quadrature_points);
           double error=0.,norm=0.,reference_norm=0.,maximum=0.,minimum_xx=std::numeric_limits<double>::max(),maximum_xx=-minimum_xx;
-          for (const auto &entry:state.space->cells)
+          for (const auto &entry:state.primary.space->cells)
             {
               fe.reinit(entry.second);
               const auto values=model.evaluate_history_tensor(state,entry.first,rule);
@@ -109,8 +109,8 @@ namespace aspect
                   << minimum_xx << ',' << maximum_xx << ',' << initial_error << '\n';
           auto coefficients=output("field-"+name+".csv");
           coefficients << "i,xx,yy,xy\n";
-          for (unsigned int i=0; i<state.space->dofs.n_dofs(); ++i)
-            coefficients << i << ',' << state.coefficients[0][i] << ',' << state.coefficients[1][i] << ',' << state.coefficients[2][i] << '\n';
+          for (unsigned int i=0; i<state.primary.space->dofs.n_dofs(); ++i)
+            coefficients << i << ',' << state.primary.coefficients[0][i] << ',' << state.primary.coefficients[1][i] << ',' << state.primary.coefficients[2][i] << '\n';
         }
         void export_geometry(const Transport &op) const
         {
@@ -136,8 +136,8 @@ namespace aspect
           Components result;
           for (unsigned int c=0; c<result.size(); ++c)
             {
-              result[c].reinit(state.space->dofs.n_dofs());
-              for (unsigned int i=0; i<result[c].size(); ++i) result[c][i]=state.coefficients[c][i];
+              result[c].reinit(state.primary.space->dofs.n_dofs());
+              for (unsigned int i=0; i<result[c].size(); ++i) result[c][i]=state.primary.coefficients[c][i];
             }
           return result;
         }

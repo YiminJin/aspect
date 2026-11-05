@@ -55,7 +55,8 @@ namespace aspect
 
 
     template <int dim>
-    bool PhaseFieldFault<dim>::uses_adiabatic_friction_pressure() const
+    bool
+    PhaseFieldFault<dim>::uses_adiabatic_friction_pressure() const
     {
       return use_adiabatic_pressure_in_fault_friction;
     }
@@ -127,7 +128,8 @@ namespace aspect
 
 
     template <int dim>
-    bool PhaseFieldFault<dim>::is_compressible() const
+    bool
+    PhaseFieldFault<dim>::is_compressible() const
     {
       return equation_of_state.is_compressible();
     }
@@ -176,7 +178,8 @@ namespace aspect
 
 
     template <int dim>
-    void PhaseFieldFault<dim>::set_reconstructed_fault_background_traction_property(
+    void
+    PhaseFieldFault<dim>::set_reconstructed_fault_background_traction_property(
       const unsigned int property_index, const unsigned int correction_property)
     {
       const auto &manager = this->get_reconstructed_fault_manager();
@@ -242,14 +245,16 @@ namespace aspect
 
 
     template <int dim>
-    bool PhaseFieldFault<dim>::is_mature_frictional_fault() const
+    bool
+    PhaseFieldFault<dim>::is_mature_frictional_fault() const
     {
       return mature_frictional_fault;
     }
 
 
     template <int dim>
-    void PhaseFieldFault<dim>::set_boundary_normalization_completion_file(const std::string &path)
+    void
+    PhaseFieldFault<dim>::set_boundary_normalization_completion_file(const std::string &path)
     {
       AssertThrow(!path.empty() && mature_frictional_fault && !evolve_phase_field,
                   ExcMessage("Boundary normalization completion requires a file and a frozen mature fault."));

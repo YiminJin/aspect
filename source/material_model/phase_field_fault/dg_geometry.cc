@@ -1,7 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/simulator.h>
 #include <aspect/phase_field.h>
 #include <aspect/geometry_model/box.h>
@@ -14,7 +14,8 @@ namespace aspect
   {
     namespace
     {
-      template<int dim> std::string surface_stamp(const ReconstructedFaultManager<dim> &manager)
+      template <int dim>
+      std::string surface_stamp(const ReconstructedFaultManager<dim> &manager)
       {
         std::ostringstream out;
         {
@@ -27,7 +28,9 @@ namespace aspect
         return out.str();
       }
     }
-    template<int dim> void PhaseFieldFault<dim>::enable_prescribed_dg_geometry(
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::enable_prescribed_dg_geometry(
       const std::function<double(const Point<dim> &)> &phase)
     {
       AssertThrow(dim == 2 && phase && !fe_strain_state && homogeneous_mesh_data
@@ -41,7 +44,9 @@ namespace aspect
       this->get_reconstructed_fault_manager().register_property("prescribed cohesive DG geometry v1", 1);
     }
 
-    template<int dim> void PhaseFieldFault<dim>::initialize_prescribed_dg_geometry()
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::initialize_prescribed_dg_geometry()
     {
       AssertThrow(uses_prescribed_dg_geometry() && !fe_strain_state
                   && !this->get_parameters().resume_computation && this->get_timestep_number() == 0,
@@ -50,7 +55,8 @@ namespace aspect
       compute_fault_surface_temperatures();
     }
 
-    template<int dim> std::shared_ptr<DGGeometryUpdate<dim>>
+    template <int dim>
+    std::shared_ptr<DGGeometryUpdate<dim>>
     PhaseFieldFault<dim>::prepare_dg_geometry_append(
       const std::vector<Point<dim>> &vertices, const std::vector<double> &widths,
       const std::vector<std::vector<double>> &properties, const std::vector<double> &rates)
@@ -122,7 +128,7 @@ namespace aspect
               manager.get_fault(0).get_properties(j)[cp] = next.Z[j] / next.I[j];
               manager.get_fault(0).get_properties(j)[ip] = next.I[j];
             }
-          const auto &space = *next.dg_history->space;
+          const auto &space = *next.bulk_history.tensor->primary.space;
           const auto quad = mechanical_quadrature();
           FEValues<dim> dg(this->get_mapping(), space.element, quad, update_values | update_quadrature_points | update_JxW_values);
           FEValues<dim> fe(this->get_mapping(), this->get_fe(), quad, update_values);
@@ -150,7 +156,7 @@ namespace aspect
               fe.reinit(entry.second);
               cell->get_dof_indices(ids);
               fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
-              .get_function_values(next.displacement_history, phi);
+              .get_function_values(next.bulk_history.native, phi);
               FullMatrix<double> mass(9, 9);
               Vector<double> rhs(9), coefficients(9);
               for (unsigned int q = 0; q < quad.size(); ++q)
@@ -167,19 +173,19 @@ namespace aspect
               mass.gauss_jordan();
               mass.vmult(coefficients, rhs);
               std::vector<types::global_dof_index> old_ids(9);
-              old->dg_history->space->cells.at(entry.first)->get_dof_indices(old_ids);
+              old->bulk_history.tensor->primary.space->cells.at(entry.first)->get_dof_indices(old_ids);
               for (unsigned int c = 0; c < owned.size(); ++c)
                 for (unsigned int i = 0; i < 9; ++i)
                   {
                     const auto component = SymmetricTensor<2, dim>::unrolled_to_component_indices(c);
-                    owned[c][ids[i]] = old->dg_history->coefficients[c][old_ids[i]]
+                    owned[c][ids[i]] = old->bulk_history.tensor->primary.coefficients[c][old_ids[i]]
                                        + (component[0] == 0 && component[1] == 1 ? coefficients[i] : 0.);
                   }
             }
           for (unsigned int c = 0; c < owned.size(); ++c)
             {
               owned[c].compress(VectorOperation::insert);
-              next.dg_history->coefficients[c] = owned[c];
+              next.bulk_history.tensor->primary.coefficients[c] = owned[c];
             }
           update->next = fe_strain_state;
           update->normalization = current_normalization_integrals;
@@ -194,7 +200,9 @@ namespace aspect
       return update;
     }
 
-    template<int dim> void PhaseFieldFault<dim>::validate_dg_geometry_commit(
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::validate_dg_geometry_commit(
       const std::shared_ptr<DGGeometryUpdate<dim>> &u) const
     {
       AssertThrow(uses_prescribed_dg_geometry() && u && !u->published && u->incoming == fe_strain_state,
@@ -202,13 +210,15 @@ namespace aspect
       validate_fe_strain_restrictions();
       AssertThrow(u->parent_surface == surface_stamp(this->get_reconstructed_fault_manager()),
                   ExcMessage("Surface histories changed after geometry preparation."));
-      AssertThrow(u->next->displacement_history == u->incoming->displacement_history
+      AssertThrow(u->next->bulk_history.native == u->incoming->bulk_history.native
                   && u->next->accepted_publications == u->incoming->accepted_publications
                   && u->next->committed_step == u->incoming->committed_step,
                   ExcMessage("Geometry transfer cannot change physical phase/clock/history publication."));
     }
 
-    template<int dim> void PhaseFieldFault<dim>::publish_dg_geometry_commit(
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::publish_dg_geometry_commit(
       const std::shared_ptr<DGGeometryUpdate<dim>> &u) noexcept
     {
       if (!u->identity)

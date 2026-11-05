@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/run_stage_c_native.py",
+    "readability-stationary",
+    "--ranks",
+    "2",
+    "--steps",
+    "1",
+    "--refinement",
+    "3",
+    "--seconds",
+    "120"
+  ],
+  "exit_code": 0,
+  "seconds": 6.027649805997498,
+  "core_sha256": "0bec51ac406070b232006a56cb58f303307e5995f915b424748e5805b1aeaa7b"
+}

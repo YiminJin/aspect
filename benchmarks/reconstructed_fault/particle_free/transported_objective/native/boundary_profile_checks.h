@@ -39,7 +39,7 @@
                 Tensor a;
                 for(unsigned c=0;c<3;++c)
                   for(unsigned i=0;i<9;++i)
-                    a[Tensor::unrolled_to_component_indices(c)]+=h.coefficients[c][ids[i]]*space.element.shape_value(i,unit);
+                    a[Tensor::unrolled_to_component_indices(c)]+=h.primary.coefficients[c][ids[i]]*space.element.shape_value(i,unit);
                 return a;
               };
             for(unsigned kind=0;kind<3;++kind)
@@ -60,7 +60,7 @@
                   {
                     // Independently integrate volume energy and face flux/jumps.
                     // The algebraic RHS uses the native operator's actual rows.
-                    History rhs;rhs.space=op->space;
+                    History rhs;rhs.primary.space=op->space;
                     std::array<LinearAlgebra::Vector,3> rows;
                     for(unsigned c=0;c<3;++c)
                       {
@@ -68,7 +68,7 @@
                         for(const auto &block:op->blocks)
                           for(unsigned i=0;i<block.rows.size();++i)
                             for(unsigned j=0;j<block.columns.size();++j)
-                              rows[c][block.rows[i]]+=block.values(i,j)*h.coefficients[c][block.columns[j]];
+                              rows[c][block.rows[i]]+=block.values(i,j)*h.primary.coefficients[c][block.columns[j]];
                         for(const auto &load:op->inflow)
                           {
                             const auto a=inflow(load.point,time);
@@ -76,8 +76,8 @@
                               rows[c][load.indices[i]]+=load.weights[i]*a[Tensor::unrolled_to_component_indices(c)];
                           }
                         rows[c].compress(VectorOperation::insert);
-                        rhs.coefficients[c].reinit(space.dofs.locally_owned_dofs(),space.relevant,comm);
-                        rhs.coefficients[c]=rows[c];
+                        rhs.primary.coefficients[c].reinit(space.dofs.locally_owned_dofs(),space.relevant,comm);
+                        rhs.primary.coefficients[c]=rows[c];
                       }
                     const QGauss<dim> rule(8);const QGauss<1> face(8);
                     FEValues<dim> fe(this->get_mapping(),space.element,rule,update_quadrature_points|update_JxW_values);

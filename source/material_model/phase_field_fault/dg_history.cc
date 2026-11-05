@@ -7,7 +7,7 @@
 
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/phase_field.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/utilities.h>
@@ -34,7 +34,8 @@ namespace aspect
     }
 
     template <int dim>
-    void PhaseFieldFault<dim>::initialize_dg_history(FEStrainState &state) const
+    void
+    PhaseFieldFault<dim>::initialize_dg_history(FEStrainState &state) const
     {
       AssertThrow(dg_tensor_history && dim == 2 && this->get_parameters().stokes_velocity_degree == 2
                   && state.Z == std::vector<double>(state.Z.size(), 0.),
@@ -42,24 +43,24 @@ namespace aspect
       auto history = std::make_shared<DGHistory>();
       history->representation = material_direct_stress ? DGHistory::Representation::physical_stress
                                 : DGHistory::Representation::separated_trial;
-      history->space = std::make_shared<typename DGHistory::Space>(this->get_triangulation());
-      for (auto &component : history->coefficients)
+      history->primary.space = std::make_shared<typename DGHistory::Space>(this->get_triangulation());
+      for (auto &component : history->primary.coefficients)
         {
-          component.reinit(history->space->dofs.locally_owned_dofs(), history->space->relevant,
+          component.reinit(history->primary.space->dofs.locally_owned_dofs(), history->primary.space->relevant,
                            this->get_mpi_communicator());
           component = 0.;
         }
       if (jaumann_dg_stress && !material_direct_stress)
         {
-          history->residual = std::make_shared<DGHistory>();
-          history->residual->space = history->space;
+          history->residual = std::make_shared<TensorField>();
+          history->residual->space = history->primary.space;
           for (auto &component : history->residual->coefficients)
             {
-              component.reinit(history->space->dofs.locally_owned_dofs(), history->space->relevant, this->get_mpi_communicator());
+              component.reinit(history->primary.space->dofs.locally_owned_dofs(), history->primary.space->relevant, this->get_mpi_communicator());
               component = 0.;
             }
         }
-      state.dg_history = std::move(history);
+      state.bulk_history.tensor = std::move(history);
       this->get_pcout() << "   Accepted DGQ2 trial stress: independent native source; "
                         << (consistent_endpoint_phase ? "cohesive endpoint phase trials; fixed geometry; " : "fixed phase/geometry; ")
                         << (dg_accepted_history ? "accepted-history lifecycle/restart." : "no transport/restart.") << std::endl;
@@ -71,9 +72,9 @@ namespace aspect
     PhaseFieldFault<dim>::make_dg_history_trial(
       const LinearAlgebra::BlockVector &bulk, const MaxwellCoefficients &coefficients) const
     {
-      AssertThrow(fe_strain_state && fe_strain_state->dg_history,
+      AssertThrow(fe_strain_state && fe_strain_state->bulk_history.tensor,
                   ExcMessage("Missing authoritative DG trial-stress history."));
-      return make_dg_history_trial(*fe_strain_state->dg_history, bulk, coefficients);
+      return make_dg_history_trial(*fe_strain_state->bulk_history.tensor, bulk, coefficients);
     }
 
 
@@ -85,11 +86,11 @@ namespace aspect
     {
       TimerOutput::Scope timer(this->get_computing_timer(), "DG native source/update");
       const auto &state = *fe_strain_state;
-      AssertThrow(dg_tensor_history && incoming.space == state.dg_history->space,
+      AssertThrow(dg_tensor_history && incoming.primary.space == state.bulk_history.tensor->primary.space,
                   ExcMessage("Native DG source requires the accepted fixed space."));
       auto trial = std::make_shared<DGHistory>();
-      trial->space = incoming.space;
-      const auto &space = *trial->space;
+      trial->primary.space = incoming.primary.space;
+      const auto &space = *trial->primary.space;
       std::array<LinearAlgebra::Vector, SymmetricTensor<2, dim>::n_independent_components> owned;
       for (auto &component : owned)
         component.reinit(space.dofs.locally_owned_dofs(), this->get_mpi_communicator());
@@ -118,7 +119,7 @@ namespace aspect
           typename DGHistory::Space::SourceGeometry *geometry = nullptr;
           if (uses_stationary_mature_dg_optimizations() && !reference)
             {
-              std::array < long double, 9 + dim > key;
+              std::array<long double, 9+dim> key;
               for (unsigned int q = 0; q < 9; ++q)
                 key[q] = dg.JxW(q);
               for (unsigned int d = 0; d < dim; ++d)
@@ -269,7 +270,7 @@ namespace aspect
                       trial->source_roundoff.at(entry.first).projection[ij] = std::max(trial->source_roundoff.at(entry.first).projection[ij], std::nextafter(static_cast<double>(projection_error
                                                                                        * (1 + 4 * n * std::numeric_limits<long double>::epsilon())), std::numeric_limits<double>::infinity()));
                     }
-                  const double value = coefficients.beta * incoming.coefficients[c][indices[i]]
+                  const double value = coefficients.beta * incoming.primary.coefficients[c][indices[i]]
                                        + 2 * coefficients.eta_ve * projected[i];
                   AssertThrow(std::isfinite(value), ExcMessage("Nonfinite DG trial-stress candidate."));
                   owned[c][indices[i]] = value;
@@ -279,18 +280,18 @@ namespace aspect
       for (unsigned int c = 0; c < owned.size(); ++c)
         {
           owned[c].compress(VectorOperation::insert);
-          trial->coefficients[c].reinit(space.dofs.locally_owned_dofs(), space.relevant,
-                                        this->get_mpi_communicator());
-          trial->coefficients[c] = owned[c];
+          trial->primary.coefficients[c].reinit(space.dofs.locally_owned_dofs(), space.relevant,
+                                                this->get_mpi_communicator());
+          trial->primary.coefficients[c] = owned[c];
         }
       if (incoming.residual)
         {
-          trial->residual = std::make_shared<DGHistory>();
-          trial->residual->space = incoming.space;
+          trial->residual = std::make_shared<TensorField>();
+          trial->residual->space = incoming.primary.space;
           for (unsigned int c = 0; c < owned.size(); ++c)
             {
               LinearAlgebra::Vector scaled;
-              scaled.reinit(incoming.space->dofs.locally_owned_dofs(), this->get_mpi_communicator());
+              scaled.reinit(incoming.primary.space->dofs.locally_owned_dofs(), this->get_mpi_communicator());
               for (const auto i : scaled.locally_owned_elements())
                 scaled[i] = coefficients.beta * incoming.residual->coefficients[c][i];
               scaled.compress(VectorOperation::insert);
@@ -304,13 +305,14 @@ namespace aspect
 
 
     template <int dim>
-    double PhaseFieldFault<dim>::dg_source_publication_allowance(
+    double
+    PhaseFieldFault<dim>::dg_source_publication_allowance(
       const DGHistory &trial, const CellId &id, const Point<dim> &point) const
     {
       const auto &source = trial.source_roundoff.at(id);
-      const auto cell = trial.space->cells.at(id);
+      const auto cell = trial.primary.space->cells.at(id);
       const auto unit = this->get_mapping().transform_real_to_unit_cell(cell, point);
-      const auto &element = trial.space->element;
+      const auto &element = trial.primary.space->element;
       long double lebesgue = 0.;
       for (unsigned int i = 0; i < element.n_dofs_per_cell(); ++i)
         lebesgue += std::abs(element.shape_value(i, unit));

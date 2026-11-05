@@ -8,7 +8,7 @@
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <deal.II/fe/fe_values.h>
 #include <fstream>
 #include <iomanip>
@@ -74,7 +74,7 @@ namespace aspect { namespace Postprocess
     {
       const auto &m=model();const auto &s=*m.fe_strain_state;
       auto v=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m);v.insert(v.end(),s.Z.begin(),s.Z.end());v.insert(v.end(),s.I.begin(),s.I.end());
-      for(unsigned int i=0;i<s.displacement_history.size();++i)v.push_back(s.displacement_history[i]);
+      for(unsigned int i=0;i<s.bulk_history.native.size();++i)v.push_back(s.bulk_history.native[i]);
       for(const auto *field:{&sim().solution,&sim().old_solution,&sim().old_old_solution})
         for(unsigned int i=0;i<field->size();++i)v.push_back((*field)[i]);
       v.push_back(s.accepted_publications);v.push_back(s.geometry_publications);v.push_back(s.committed_step);
@@ -104,7 +104,7 @@ namespace aspect { namespace Postprocess
       auto cells=output(name+"-cells-0.csv");cells<<"cell,x0,y0,hx,hy";
       for(unsigned int c=0;c<3;++c)for(unsigned int i=0;i<9;++i)cells<<",c"<<c<<'_'<<i;
       cells<<'\n';
-      const auto &space=*s.dg_history->space;std::vector<types::global_dof_index> ids(9);
+      const auto &space=*s.bulk_history.tensor->primary.space;std::vector<types::global_dof_index> ids(9);
       std::map<std::pair<double,double>,std::pair<double,double>> nodes;
       const auto pc=this->introspection().variable("phase_field").first_component_index;
       for(const auto &entry:s.cells)
@@ -112,10 +112,10 @@ namespace aspect { namespace Postprocess
           const auto cell=entry.second;space.cells.at(entry.first)->get_dof_indices(ids);
           cells<<entry.first.to_string()<<','<<cell->vertex(0)[0]<<','<<cell->vertex(0)[1]<<','
             <<cell->vertex(1)[0]-cell->vertex(0)[0]<<','<<cell->vertex(2)[1]-cell->vertex(0)[1];
-          for(const auto &component:s.dg_history->coefficients)for(auto i:ids)cells<<','<<component[i];
+          for(const auto &component:s.bulk_history.tensor->primary.coefficients)for(auto i:ids)cells<<','<<component[i];
           cells<<'\n';
           for(auto v:cell->vertex_indices())
-            {auto i=cell->vertex_dof_index(v,pc);auto p=cell->vertex(v);nodes[{p[1],p[0]}]={sim().solution[i],s.displacement_history[i]};}
+            {auto i=cell->vertex_dof_index(v,pc);auto p=cell->vertex(v);nodes[{p[1],p[0]}]={sim().solution[i],s.bulk_history.native[i]};}
         }
       auto phases=output(name+"-phase.csv");phases<<"x,y,phi,obstacle\n";
       for(const auto &row:nodes)phases<<row.first.second<<','<<row.first.first<<','<<row.second.first<<','<<row.second.second<<'\n';
@@ -126,11 +126,11 @@ namespace aspect { namespace Postprocess
       const QGauss<dim> samples(3);
       for(const auto &entry:s.cells)
         {
-          const auto T=m.evaluate_history_tensor(*s.dg_history,entry.first,samples);
+          const auto T=m.evaluate_history_tensor(*s.bulk_history.tensor,entry.first,samples);
           for(unsigned int q=0;q<samples.size();++q)
             {
               const auto x=this->get_mapping().transform_unit_to_real_cell(entry.second,samples.point(q));
-              const auto tau=m.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,entry.first,x);
+              const auto tau=m.evaluate_dg_history_stress(*s.bulk_history.tensor,s.Z,s.I,entry.first,x);
               stress<<entry.first.to_string()<<','<<x[0]<<','<<x[1]<<','<<T[q][0][0]<<','<<T[q][1][1]<<','<<T[q][0][1]<<','
                 <<tau[0][0]<<','<<tau[1][1]<<','<<tau[0][1]<<'\n';
             }
@@ -163,13 +163,13 @@ namespace aspect { namespace Postprocess
       auto &m=model();auto &v=sim();m.initialize_fe_shared_phase(v.solution);
       v.old_solution=v.solution;v.old_old_solution=v.solution;v.current_linearization_point=v.solution;
       auto &manager=this->get_reconstructed_fault_manager();manager.reconstruct_initial_faults();m.initialize_prescribed_dg_geometry();
-      auto &s=*m.fe_strain_state;auto &space=*s.dg_history->space;
+      auto &s=*m.fe_strain_state;auto &space=*s.bulk_history.tensor->primary.space;
       std::array<LinearAlgebra::Vector,3> owned;for(auto &x:owned)x.reinit(space.dofs.locally_owned_dofs(),this->get_mpi_communicator());
       std::vector<types::global_dof_index> ids(9);
       for(const auto &entry:s.cells)
         {space.cells.at(entry.first)->get_dof_indices(ids);for(unsigned int i=0;i<9;++i)
             {const auto x=this->get_mapping().transform_unit_to_real_cell(entry.second,space.element.get_unit_support_points()[i]);auto T=tensor(x);for(unsigned int c=0;c<3;++c)owned[c][ids[i]]=T[c];}}
-      for(unsigned int c=0;c<3;++c){owned[c].compress(VectorOperation::insert);s.dg_history->coefficients[c]=owned[c];}
+      for(unsigned int c=0;c<3;++c){owned[c].compress(VectorOperation::insert);s.bulk_history.tensor->primary.coefficients[c]=owned[c];}
       const auto cp=manager.get_property_information()[m.fault_property_indices.cohesive_traction].position;
       const auto sp=manager.get_property_information()[slip_property].position;
       std::vector<double> rates(s.Z.size());
@@ -218,7 +218,7 @@ namespace aspect { namespace Postprocess
           const double Z=active ? (1-p.xi)*s.Z[p.segment]+p.xi*s.Z[p.segment+1] : 0.;
           const double h=s.m*phi*(1+phi)/std::pow(1-phi,2);
           const double hp=s.m*(1+3*phi)/std::pow(1-phi,3);
-          const auto tau=m.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,p.cell,p.x);
+          const auto tau=m.evaluate_dg_history_stress(*s.bulk_history.tensor,s.Z,s.I,p.cell,p.x);
           const double chi=active ? h/I : 0.;
           const double local=active ? -Z/s.G*s.shear_sense*tau[0][1]*hp/I : 0.;
           points<<p.cell.to_string()<<','<<p.x[0]<<','<<p.x[1]<<','<<p.weight<<','<<active<<','<<p.segment<<','<<p.xi<<','<<phi<<','<<I<<','<<Z<<','<<chi<<','<<tau[0][1]+s.shear_sense*Z*chi<<','<<tau[0][1]<<','<<local<<'\n';
@@ -281,15 +281,15 @@ namespace aspect { namespace Postprocess
       gate("preparation exception rolls back native owners",same(parent,persistent()));
       const auto make=[&](){return m.prepare_dg_geometry_append(nodes,std::vector<double>(nodes.size(),.5),std::vector<std::vector<double>>(nodes.size(),std::vector<double>(width)),std::vector<double>(nodes.size()));};
       auto rejected=make();gate("prepare leaves all accepted owners unchanged",same(parent,persistent()));
-      const auto rejected_values=[&](){std::vector<double> a;for(const auto &field:rejected->next->dg_history->coefficients)for(unsigned int i=0;i<field.size();++i)a.push_back(field[i]);return a;}();
+      const auto rejected_values=[&](){std::vector<double> a;for(const auto &field:rejected->next->bulk_history.tensor->primary.coefficients)for(unsigned int i=0;i<field.size();++i)a.push_back(field[i]);return a;}();
       // Inject an invalid acceptance precondition after complete preparation.
       // M5 must reject it before touching any actual owner or canonical cache.
       rejected->next->accepted_publications=1;
       gate("native rejected commit",rejects([&](){sim().commit_reconstructed_fault_geometry(rejected);}));
       gate("rejection preserves all native owners",same(parent,persistent()));rejected.reset();
-      auto retry=make();std::vector<double> retry_values;for(const auto &field:retry->next->dg_history->coefficients)for(unsigned int i=0;i<field.size();++i)retry_values.push_back(field[i]);
+      auto retry=make();std::vector<double> retry_values;for(const auto &field:retry->next->bulk_history.tensor->primary.coefficients)for(unsigned int i=0;i<field.size();++i)retry_values.push_back(field[i]);
       gate("deterministic retry candidate",same(rejected_values,retry_values));
-      gate("candidate phase obstacle exact",retry->next->displacement_history==incoming->displacement_history);
+      gate("candidate phase obstacle exact",retry->next->bulk_history.native==incoming->bulk_history.native);
       sim().commit_reconstructed_fault_geometry(retry);
       gate("geometry caches expired before reuse",!sim().reconstructed_fault_surface_system && !sim().reconstructed_fault_stokes_coupling && !sim().endpoint_velocity_inverse && !sim().endpoint_bulk_direct);
       gate("exactly one geometry publication and no physical publication",m.fe_strain_state->geometry_publications==1 && m.fe_strain_state->accepted_publications==0 && m.fe_strain_state->committed_step==0);

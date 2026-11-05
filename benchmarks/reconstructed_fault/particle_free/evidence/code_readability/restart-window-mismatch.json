@@ -1,0 +1,6 @@
+{
+  "incorrect_restart": "readability-restart4",
+  "cause": "The source readability-dl was run to 0.2; its newest checkpoint resumes at 0.25, whereas the reference resumes at 0.15. Run completed, but clock equality correctly rejected this comparison.",
+  "retained_output": "build-particle-free/transported-objective/stage-c/material-runs/readability-restart4",
+  "correction": "Use the existing reference checkpoint for the identical control; separately create a new 0.1 prefix and restart it on four ranks."
+}

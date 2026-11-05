@@ -5,7 +5,7 @@
 #include <aspect/postprocess/interface.h>
 #include <aspect/boundary_velocity/interface.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/history/tensor_history.h>
+#include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/phase_field.h>
 #include <aspect/utilities.h>
@@ -100,9 +100,9 @@ namespace aspect
           const auto &state=*m.fe_strain_state;
           check("one native accepted publication step "+std::to_string(step),state.committed_step==step && state.accepted_publications==step);
           typename Model::FEEndpointTrial accepted;
-          accepted.strain=state.displacement_history;
+          accepted.strain=state.bulk_history.native;
           accepted.Z=state.Z;
-          accepted.dg_history=state.dg_history;
+          accepted.dg_history=state.bulk_history.tensor;
           const ReconstructedFaultVector rates= {sim.reconstructed_fault_manager->get_timestep_committed_slip_rate(0)};
           prefix="event-"+std::to_string(step)+"/";
           export_state(accepted,&rates);
@@ -138,7 +138,7 @@ namespace aspect
             {
               const auto &cell=entry.second;
               fe.reinit(cell);
-              const auto T=m.evaluate_history_tensor(*state.dg_history,entry.first,rule);
+              const auto T=m.evaluate_history_tensor(*state.bulk_history.tensor,entry.first,rule);
               std::vector<Tensor<1,dim>> u(rule.size());
               fe[this->introspection().extractors.velocities].get_function_values(sim.solution,u);
               for (unsigned int q=0; q<rule.size(); ++q)
@@ -191,29 +191,29 @@ namespace aspect
           sim.solution=p;
           sim.current_linearization_point=p;
           auto state=std::make_shared<typename Model::FEStrainState>(*m.fe_strain_state);
-          state->displacement_history=m.uses_dg_tensor_history()?p:r;
+          state->bulk_history.native=m.uses_dg_tensor_history()?p:r;
           state->Z=data.Z[k];
-          state->stress_samples.clear();
+          state->observations.stress.clear();
           state->committed_step=0;
           state->accepted_publications=0;
           m.fe_strain_state=state;
           if (m.uses_dg_tensor_history())
             {
-              auto tensor=std::make_shared<typename Model::DGHistory>(*state->dg_history);
+              auto tensor=std::make_shared<typename Model::DGHistory>(*state->bulk_history.tensor);
               std::vector<types::global_dof_index> indices(9);
-              const auto &support=tensor->space->element.get_unit_support_points();
-              for (const auto &entry:tensor->space->cells)
+              const auto &support=tensor->primary.space->element.get_unit_support_points();
+              for (const auto &entry:tensor->primary.space->cells)
                 {
                   const auto &cell=entry.second;
                   cell->get_dof_indices(indices);
                   for (unsigned int q=0; q<9; ++q)
                     {
                       const auto x=this->get_mapping().transform_unit_to_real_cell(cell,support[q]);
-                      for (unsigned int c=0; c<3; ++c)tensor->coefficients[c][indices[q]]=data.tensor(k,x,cell->center(),c);
+                      for (unsigned int c=0; c<3; ++c)tensor->primary.coefficients[c][indices[q]]=data.tensor(k,x,cell->center(),c);
                     }
                 }
-              for (auto &component:tensor->coefficients)component.compress(VectorOperation::insert);
-              state->dg_history=tensor;
+              for (auto &component:tensor->primary.coefficients)component.compress(VectorOperation::insert);
+              state->bulk_history.tensor=tensor;
             }
           state->I=m.evaluate_fe_normalization(p,false).values;
           m.current_normalization_integrals= {state->I};
@@ -398,20 +398,20 @@ namespace aspect
           auto clock=Access::diagnostic_endpoint_clock(sim,.5625,1./128);
           install(0);
           typename Model::FEEndpointTrial identical;
-          identical.strain=m.fe_strain_state->displacement_history;
+          identical.strain=m.fe_strain_state->bulk_history.native;
           identical.Z=m.fe_strain_state->Z;
-          identical.dg_history=m.fe_strain_state->dg_history;
+          identical.dg_history=m.fe_strain_state->bulk_history.tensor;
           prefix="identical/";
           export_state(identical);
           install(2);
-          identical.strain=m.fe_strain_state->displacement_history;
+          identical.strain=m.fe_strain_state->bulk_history.native;
           identical.Z=m.fe_strain_state->Z;
-          identical.dg_history=m.fe_strain_state->dg_history;
+          identical.dg_history=m.fe_strain_state->bulk_history.tensor;
           prefix="entry_identical/";
           export_state(identical);
           install(1);
           const auto Z=m.fe_strain_state->Z;
-          const BV anchor(m.fe_strain_state->displacement_history);
+          const BV anchor(m.fe_strain_state->bulk_history.native);
           const auto tensor=m.uses_dg_tensor_history()?MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m):std::vector<double>();
           ReconstructedFaultVector rates;
           Access::mechanical_trial(sim,rates);
@@ -422,7 +422,7 @@ namespace aspect
           export_state(endpoint,&rates);
           auto residual=output("residual.csv");
           residual<<"bulk_norm,surface_RMS\n"<<defects.first<<','<<defects.second<<'\n';
-          check("incoming histories unchanged",m.fe_strain_state->Z==Z && m.fe_strain_state->displacement_history==anchor && (!m.uses_dg_tensor_history() || MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m)==tensor));
+          check("incoming histories unchanged",m.fe_strain_state->Z==Z && m.fe_strain_state->bulk_history.native==anchor && (!m.uses_dg_tensor_history() || MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m)==tensor));
           check("no diagnostic publication",m.fe_strain_state->accepted_publications==0 && m.fe_strain_state->committed_step==0);
           m.fe_strain_state=original;
           clock();
