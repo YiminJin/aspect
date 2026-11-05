@@ -612,7 +612,7 @@ namespace aspect
       if (uses_projected_material_reaction())
         {
           AssertThrow(dg_material_reaction && !transported, ExcMessage("Missing converged coupled material reaction."));
-          return make_material_reaction(*fe_strain_state, bulk, this->get_reconstructed_fault_manager().get_slip_rate(0));
+          return make_material_reaction(*fe_strain_state, bulk, this->get_reconstructed_fault_manager().get_slip_rate(0), true);
         }
       const auto c = compute_maxwell_coefficients(s.eta, s.G, this->get_timestep());
       auto update = std::make_shared<FEStrainUpdate>();

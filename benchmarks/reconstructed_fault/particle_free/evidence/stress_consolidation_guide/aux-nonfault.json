@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/opt/openmpi/5.0.6/bin/mpirun",
+    "-n",
+    "1",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/stress-consolidation-guide/nonfault/input.prm"
+  ],
+  "exit_code": 0,
+  "seconds": 1.6699555729974236
+}

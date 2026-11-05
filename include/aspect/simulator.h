@@ -606,6 +606,12 @@ namespace aspect
       void solve_reconstructed_fault_stokes (bool publish_history = true,
                                              ReconstructedFaultVector *trial_slip_rate = nullptr,
                                              bool reuse_endpoint_bulk_preconditioner = false);
+      /** Inner mechanics with a fixed material projection correction. A trial
+       * returns private slip rates; a terminal call stages ordinary acceptance.
+       * The caller owns outer iteration and retains the converged slip guess. */
+      void solve_reconstructed_fault_stokes_inner (bool publish_history,
+                                                   ReconstructedFaultVector *trial_slip_rate,
+                                                   bool reuse_endpoint_bulk_preconditioner);
       void solve_reconstructed_fault_endpoint_phase (bool publish_history = true,
                                                      const LinearAlgebra::BlockVector *initial_trial = nullptr,
                                                      ReconstructedFaultVector *trial_slip_rate = nullptr);

@@ -634,52 +634,52 @@ namespace aspect
   {
     AssertThrow(publish_history || trial_slip_rate!=nullptr,
                 ExcMessage("A non-committing mechanics trial must return its slip field."));
+    auto &phase_field_fault =
+      Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+    if (publish_history && timestep_number > 0 && phase_field_fault.uses_projected_material_reaction())
+      {
+        // Each inner solve holds the projection defect fixed. The material owns
+        // the response data; this solver owns the iteration and its private rates.
+        ReconstructedFaultVector rates(1, reconstructed_fault_manager->get_slip_rate(0));
+        bool converged = false;
+        for (unsigned int outer = 0; outer < 24; ++outer)
+          {
+            solve_reconstructed_fault_stokes_inner(false, &rates, false);
+            const double error = phase_field_fault.refresh_material_reaction(solution, rates.at(0));
+            pcout << std::setprecision(17) << "   Material projected reaction: outer=" << outer
+                  << " correction relative change=" << error << std::endl;
+            if (error <= 128 * std::numeric_limits<double>::epsilon())
+              {
+                converged = true;
+                break;
+              }
+          }
+        AssertThrow(converged, ExcMessage("Coupled projected material reaction did not converge; no history published."));
+        // Retain the converged private slip iterate at the final residual/KKT
+        // gate. The ordinary timestep controller later accepts the staged state.
+        solve_reconstructed_fault_stokes_inner(true, &rates, false);
+      }
+    else
+      solve_reconstructed_fault_stokes_inner(publish_history, trial_slip_rate,
+                                            reuse_endpoint_bulk_preconditioner);
+  }
+
+  template <int dim>
+  void
+  Simulator<dim>::solve_reconstructed_fault_stokes_inner(
+    const bool publish_history, ReconstructedFaultVector *trial_slip_rate,
+    const bool reuse_endpoint_bulk_preconditioner)
+  {
+    AssertThrow(publish_history || trial_slip_rate != nullptr,
+                ExcMessage("A non-committing mechanics trial must return its slip field."));
     unsigned int total_fault_krylov_iterations = 0;
     double minimum_fault_accepted_alpha = 1.0;
     AssertThrow(dim == 2, ExcNotImplemented());
     AssertThrow(newton_handler != nullptr,
                 ExcMessage("The coupled reconstructed-fault solver requires "
                            "the Newton solver handler."));
-
     auto &phase_field_fault =
-      Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(
-        *material_model);
-    if(publish_history && timestep_number>0 && phase_field_fault.uses_projected_material_reaction()
-        && !phase_field_fault.material_reaction_solving)
-      {
-        // The local Maxwell tangent preconditions the projected constitutive
-        // residual. Freeze only the projection defect inside each native solve;
-        // resolve that defect to arithmetic precision before terminal staging.
-        phase_field_fault.material_reaction_solving=true;
-        ReconstructedFaultVector rates(1,reconstructed_fault_manager->get_slip_rate(0));
-        try
-          {
-            bool converged=false;
-            for (unsigned outer=0; outer<24; ++outer)
-              {
-                solve_reconstructed_fault_stokes(false,&rates,false);
-                const double error=phase_field_fault.refresh_material_reaction(solution,rates.at(0));
-                pcout<<std::setprecision(17)<<"   Material projected reaction: outer="<<outer
-                     <<" correction relative change="<<error<<std::endl;
-                if (error<=128*std::numeric_limits<double>::epsilon())
-                  {
-                    converged=true;
-                    break;
-                  }
-              }
-            AssertThrow(converged,ExcMessage("Coupled projected material reaction did not converge; no history published."));
-            // Re-enter the unchanged final residual/KKT gate with the converged
-            // frozen correction. This call only stages outer publication.
-            solve_reconstructed_fault_stokes(true,&rates,false);
-            phase_field_fault.material_reaction_solving=false;
-          }
-        catch (...)
-          {
-            phase_field_fault.material_reaction_solving=false;
-            throw;
-          }
-        return;
-      }
+      Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
     AssertThrow(!reuse_endpoint_bulk_preconditioner
                 || (!publish_history && phase_field_fault.uses_consistent_endpoint_phase()
                     && Amg_preconditioner != nullptr && Mp_preconditioner != nullptr),
@@ -1381,6 +1381,7 @@ namespace aspect
   template std::pair<double,double> Simulator<dim>::endpoint_mechanical_defects(const LinearAlgebra::BlockVector &,const ReconstructedFaultVector &); \
   template std::function<Vector<double>(const Vector<double> &)> Simulator<dim>::make_reconstructed_fault_endpoint_tangent(const LinearAlgebra::BlockVector &,const ReconstructedFaultVector &,const LinearAlgebra::BlockVector &,const std::vector<double> &); \
   template void Simulator<dim>::solve_reconstructed_fault_stokes (bool,ReconstructedFaultVector *,bool); \
+  template void Simulator<dim>::solve_reconstructed_fault_stokes_inner (bool,ReconstructedFaultVector *,bool); \
   template Simulator<dim>::ReconstructedFaultCoupledResidual \
   Simulator<dim>::evaluate_reconstructed_fault_coupled_residual( \
     const LinearAlgebra::BlockVector &, const ReconstructedFaultVector &); \

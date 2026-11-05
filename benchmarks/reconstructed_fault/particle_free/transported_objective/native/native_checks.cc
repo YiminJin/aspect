@@ -264,7 +264,7 @@ namespace aspect { namespace Postprocess
           const double volume=entry.second->measure();
           for (unsigned q=0;q<rule.size();++q)
             {
-              const auto B=model.evaluate_mature_dg_memory(fe.quadrature_point(q),phase[q],Z,I);
+              const auto B=model.localize_surface_values(fe.quadrature_point(q),phase[q],Z,I);
               const double theta=.5*dt*(gradients[q][1][0]-gradients[q][0][1]);
               angle=std::max(angle,std::abs(theta));
               const auto expected_T=beta*rotate_reference(T0[q],theta)+2*kappa*Utilities::Tensors::consistent_deviator(strains[q]);

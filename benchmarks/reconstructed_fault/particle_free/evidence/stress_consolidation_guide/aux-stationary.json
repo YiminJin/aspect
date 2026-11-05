@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "benchmarks/reconstructed_fault/particle_free/transported_objective/run_stage_c_native.py",
+    "consolidation-stationary",
+    "--ranks",
+    "2",
+    "--steps",
+    "1",
+    "--refinement",
+    "3",
+    "--seconds",
+    "120"
+  ],
+  "exit_code": 0,
+  "seconds": 7.177595085999201
+}

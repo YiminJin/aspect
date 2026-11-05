@@ -15,7 +15,7 @@ namespace aspect
     template <int dim>
     std::shared_ptr<typename PhaseFieldFault<dim>::FEStrainUpdate>
     PhaseFieldFault<dim>::make_material_reaction(const FEStrainState &state, const LinearAlgebra::BlockVector &bulk,
-                                                 const std::vector<double> &rates) const
+                                                 const std::vector<double> &rates, const bool publication_candidate) const
     {
       AssertThrow(dg_material_transport && state.objective.tensor,
                   ExcMessage("Projected material reaction requires its complete transported anchor."));
@@ -36,30 +36,30 @@ namespace aspect
       // eta_ve is kappa (Pa s). Z still advances for diagnostics, but neither B0
       // nor B1 enters mechanics. The separated control retains both T and R.
       const MatureReactionField reaction_field = [&](const Point<dim> &x, const double phase,
-                                                     const SymmetricTensor<2, dim> &strain, const SymmetricTensor<2, dim> &primary,
+                                                     const SymmetricTensor<2, dim> &strain, const SymmetricTensor<2, dim> &anchor_value,
                                                      const SymmetricTensor<2, dim> &separated_residual)
       {
         const auto coefficients = compute_maxwell_coefficients(material_viscosity(x, state.eta), state.G, dt);
-        const auto B0 = material_direct_stress ? SymmetricTensor<2, dim>() : evaluate_mature_dg_memory(x, phase, state.Z, state.I);
-        const auto B1 = material_direct_stress ? SymmetricTensor<2, dim>() : evaluate_mature_dg_memory(x, phase, update->Z, update->I);
-        const auto twice_localized_slip_rate = evaluate_mature_dg_memory(x, phase, rates, state.I);
+        const auto B0 = material_direct_stress ? SymmetricTensor<2, dim>() : localize_surface_values(x, phase, state.Z, state.I);
+        const auto B1 = material_direct_stress ? SymmetricTensor<2, dim>() : localize_surface_values(x, phase, update->Z, update->I);
+        const auto twice_localized_slip_rate = localize_surface_values(x, phase, rates, state.I);
         if (material_direct_stress)
           return std::array<SymmetricTensor<2, dim>, 2>
           {
             {
-              MaterialModel::Rheology::mature_stress_endpoint(coefficients.beta, coefficients.eta_ve, primary, strain, twice_localized_slip_rate),
+              MaterialModel::Rheology::mature_stress_endpoint(coefficients.beta, coefficients.eta_ve, anchor_value, strain, twice_localized_slip_rate),
               SymmetricTensor<2, dim>()
             }
           };
         return std::array<SymmetricTensor<2, dim>, 2>
         {
           {
-            coefficients.beta *primary + 2 * coefficients.eta_ve *Utilities::Tensors::consistent_deviator(strain),
+            coefficients.beta *anchor_value + 2 * coefficients.eta_ve *Utilities::Tensors::consistent_deviator(strain),
             coefficients.beta *(separated_residual + B0) + coefficients.eta_ve *twice_localized_slip_rate - B1
           }
         };
       };
-      project_mature_reaction(state, bulk, *update, reaction_field);
+      project_mature_reaction(state, bulk, *update, reaction_field, publication_candidate);
       return update;
     }
 
@@ -67,7 +67,7 @@ namespace aspect
     void
     PhaseFieldFault<dim>::project_mature_reaction(
       const FEStrainState &state, const LinearAlgebra::BlockVector &bulk,
-      FEStrainUpdate &update, const MatureReactionField &field) const
+      FEStrainUpdate &update, const MatureReactionField &field, const bool publication_candidate) const
     {
       // Project the whole endpoint field with one mass matrix per cell. For
       // variable viscosity, projecting beta and kappa separately would define a
@@ -76,19 +76,7 @@ namespace aspect
       const auto &space = *anchor.primary.space;
       const auto comm = this->get_mpi_communicator();
       const double dt = this->get_timestep_number() > 0 ? this->get_timestep() : initial_time_step;
-      update.bulk_history.tensor = std::make_shared<DGHistory>();
-      update.bulk_history.tensor->primary.space = anchor.primary.space;
-      update.bulk_history.tensor->representation = anchor.representation;
-      if (!material_direct_stress)
-        {
-          update.bulk_history.tensor->residual = std::make_shared<TensorField>();
-          update.bulk_history.tensor->residual->space = anchor.primary.space;
-        }
-      constexpr unsigned components = SymmetricTensor<2, dim>::n_independent_components;
-      const unsigned tensors = material_direct_stress ? 1 : 2;
-      std::vector<LinearAlgebra::Vector> owned(tensors * components);
-      for (auto &v : owned)
-        v.reinit(space.dofs.locally_owned_dofs(), comm);
+      const unsigned int tensors = material_direct_stress ? 1 : 2;
       const bool energy_ledger = material_direct_stress && std::getenv("ASPECT_TRUE_STRESS_ENERGY");
       double local_energy = 0.;
       const QGauss<dim> rule(std::max(8u, fe_bulk_normal_quadrature_points));
@@ -96,53 +84,31 @@ namespace aspect
       FEValues<dim> dg(this->get_mapping(), space.element, rule, update_values | update_JxW_values);
       std::vector<SymmetricTensor<2, dim>> strain(rule.size());
       std::vector<double> phase(rule.size());
-      const unsigned n = space.element.n_dofs_per_cell();
-      std::vector<types::global_dof_index> ids(n);
-      for (const auto &entry : state.cells)
-        {
-          native.reinit(entry.second);
-          dg.reinit(space.cells.at(entry.first));
-          space.cells.at(entry.first)->get_dof_indices(ids);
-          native[this->introspection().extractors.velocities].get_function_symmetric_gradients(bulk, strain);
-          native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(state.bulk_history.native, phase);
-          const auto T = evaluate_history_tensor(anchor, entry.first, rule);
-          const auto R = anchor.residual ? evaluate_history_tensor(*anchor.residual, entry.first, rule)
-                         : std::vector<SymmetricTensor<2, dim>>(rule.size());
-          FullMatrix<double> mass(n, n);
-          std::vector<Vector<double>> rhs(tensors * components);
-          for (auto &v : rhs)
-            v.reinit(n);
-          for (unsigned q = 0; q < rule.size(); ++q)
-            {
-              const auto values = field(native.quadrature_point(q), phase[q], strain[q], T[q], R[q]);
-              if (energy_ledger)
-                local_energy += dg.JxW(q) * (scalar_product(values[0], values[0]) + trace(values[0]) * trace(values[0])) / (4 * state.G);
-              for (unsigned i = 0; i < n; ++i)
-                {
-                  const double w = dg.JxW(q) * dg.shape_value(i, q);
-                  for (unsigned j = 0; j < n; ++j)
-                    mass(i, j) += w * dg.shape_value(j, q);
-                  for (unsigned k = 0; k < tensors; ++k)
-                    for (unsigned cpt = 0; cpt < components; ++cpt)
-                      rhs[k * components + cpt][i] += w * values[k][SymmetricTensor<2, dim>::unrolled_to_component_indices(cpt)];
-                }
-            }
-          mass.gauss_jordan();
-          for (unsigned component = 0; component < rhs.size(); ++component)
-            {
-              Vector<double> coefficients(n);
-              mass.vmult(coefficients, rhs[component]);
-              for (unsigned i = 0; i < n; ++i)
-                owned[component][ids[i]] = coefficients[i];
-            }
-        }
-      for (unsigned component = 0; component < owned.size(); ++component)
-        {
-          owned[component].compress(VectorOperation::insert);
-          auto &v = component < components ? update.bulk_history.tensor->primary.coefficients[component] : update.bulk_history.tensor->residual->coefficients[component - components];
-          v.reinit(space.dofs.locally_owned_dofs(), space.relevant, comm);
-          v = owned[component];
-        }
+      const auto projected = TensorField::project(*this, anchor.primary, state.cells, rule, tensors,
+                                                  [&](const CellId &id, const std::vector<types::global_dof_index> &,
+                                                      const FEValues<dim> &target,
+                                                      std::vector<std::vector<SymmetricTensor<2, dim>>> &values)
+      {
+        native.reinit(state.cells.at(id));
+        native[this->introspection().extractors.velocities].get_function_symmetric_gradients(bulk, strain);
+        native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(state.bulk_history.native, phase);
+        const auto anchor_values = evaluate_history_tensor(anchor, id, rule);
+        const auto residual_values = anchor.residual ? evaluate_history_tensor(*anchor.residual, id, rule)
+                                     : std::vector<SymmetricTensor<2, dim>>(rule.size());
+        for (unsigned int q = 0; q < rule.size(); ++q)
+          {
+            const auto endpoint_values = field(native.quadrature_point(q), phase[q], strain[q], anchor_values[q], residual_values[q]);
+            for (unsigned int k = 0; k < tensors; ++k)
+              values[k][q] = endpoint_values[k];
+            if (energy_ledger)
+              local_energy += target.JxW(q) * (scalar_product(endpoint_values[0], endpoint_values[0]) + trace(endpoint_values[0]) * trace(endpoint_values[0])) / (4 * state.G);
+          }
+      });
+      update.bulk_history.tensor = std::make_shared<DGHistory>();
+      update.bulk_history.tensor->representation = anchor.representation;
+      update.bulk_history.tensor->primary = *projected[0];
+      if (!material_direct_stress)
+        update.bulk_history.tensor->residual = projected[1];
       if (energy_ledger)
         {
           double projected_energy = 0.;
@@ -156,7 +122,7 @@ namespace aspect
           local_energy = Utilities::MPI::sum(local_energy, comm);
           projected_energy = Utilities::MPI::sum(projected_energy, comm);
           this->get_pcout() << std::setprecision(17) << "   Direct source energy: step=" << this->get_timestep_number()
-                            << " dt=" << dt << " publication=" << !material_reaction_solving
+                            << " dt=" << dt << " publication=" << publication_candidate
                             << " local=" << local_energy << " projected=" << projected_energy
                             << " loss=" << local_energy - projected_energy << std::endl;
         }
@@ -191,7 +157,7 @@ namespace aspect
       const auto physical = physical_history_stress(state, *r.candidate->bulk_history.tensor, r.candidate->Z, state.I, id, x);
       const auto anchor = physical_history_stress(state, *state.objective.tensor, state.Z, state.I, id, x);
       const auto direct = MaterialModel::Rheology::mature_stress_endpoint(
-                            coefficients.beta, coefficients.eta_ve, anchor, strain[0], evaluate_mature_dg_memory(x, phi[0], r.rates, state.I));
+                            coefficients.beta, coefficients.eta_ve, anchor, strain[0], localize_surface_values(x, phi[0], r.rates, state.I));
       // Mechanics needs the projected endpoint, while its local tangent uses the
       // point law. This outer-iteration correction supplies exactly that defect.
       return physical - direct;
@@ -205,7 +171,7 @@ namespace aspect
       auto next = std::make_shared<DGMaterialReaction>();
       next->bulk = bulk;
       next->rates = rates;
-      next->candidate = make_material_reaction(*fe_strain_state, bulk, rates);
+      next->candidate = make_material_reaction(*fe_strain_state, bulk, rates, false);
       auto previous = dg_material_reaction;
       double difference = 0., scale = 1.;
       const QGauss<dim> rule(std::max(8u, fe_bulk_normal_quadrature_points));
@@ -232,9 +198,9 @@ namespace aspect
     }
 
 #define INSTANTIATE(dim) \
-  template void PhaseFieldFault<dim>::project_mature_reaction(const FEStrainState &,const LinearAlgebra::BlockVector &,FEStrainUpdate &,const MatureReactionField &) const; \
+  template void PhaseFieldFault<dim>::project_mature_reaction(const FEStrainState &,const LinearAlgebra::BlockVector &,FEStrainUpdate &,const MatureReactionField &,bool) const; \
   template SymmetricTensor<2,dim> PhaseFieldFault<dim>::evaluate_material_projection_correction(const DGMaterialReaction *,const FEStrainState &,const CellId &,const Point<dim> &) const; \
-  template std::shared_ptr<PhaseFieldFault<dim>::FEStrainUpdate> PhaseFieldFault<dim>::make_material_reaction(const FEStrainState &,const LinearAlgebra::BlockVector &,const std::vector<double> &) const; \
+  template std::shared_ptr<PhaseFieldFault<dim>::FEStrainUpdate> PhaseFieldFault<dim>::make_material_reaction(const FEStrainState &,const LinearAlgebra::BlockVector &,const std::vector<double> &,bool) const; \
   template SymmetricTensor<2,dim> PhaseFieldFault<dim>::material_reaction_correction(const CellId &,const Point<dim> &) const; \
   template double PhaseFieldFault<dim>::refresh_material_reaction(const LinearAlgebra::BlockVector &,const std::vector<double> &);
     ASPECT_INSTANTIATE(INSTANTIATE)

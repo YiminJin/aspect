@@ -119,6 +119,25 @@ namespace aspect
                                 const FEValues<dim> &target_values,
                                 std::vector<SymmetricTensor<2, dim>> &values)>;
 
+        /** Multiple whole fields, indexed [field][quadrature point]. The same
+         * callback/lifetime/collective rules as CellEvaluator apply. */
+        using MultiCellEvaluator = std::function<void(
+                                     const CellId &cell_id,
+                                     const std::vector<types::global_dof_index> &indices,
+                                     const FEValues<dim> &target_values,
+                                     std::vector<std::vector<SymmetricTensor<2, dim>>> &values)>;
+
+        /** Project n_fields together, assembling/inverting one cell mass matrix.
+         * Every field uses prototype's space and the same supplied quadrature.
+         * Output order is evaluator field order; all ranks pass the same count. */
+        static std::vector<std::shared_ptr<TensorField>>
+        project(const SimulatorAccess<dim> &context,
+                const TensorField &prototype,
+                const Cells &owned_cells,
+                const Quadrature<dim> &quadrature,
+                unsigned int n_fields,
+                const MultiCellEvaluator &evaluate_cell);
+
         /**
          * L2-project an evaluated tensor field using the supplied @p quadrature.
          * Only the keys of @p owned_cells select cells; @p prototype supplies

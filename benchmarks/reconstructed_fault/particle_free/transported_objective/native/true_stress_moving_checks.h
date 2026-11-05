@@ -66,7 +66,7 @@
                 s.objective.tensor=m.project_dg_transport_field(*op,[&](const Point<dim> &x,double)
                   {if constexpr(dim==2)return ReconstructedFaultUtilities::rotate_plane_strain_stress(sample(*history,x),gradient,dt);else return Tensor();},0.,8);
                 s.objective.tensor->representation=History::Representation::physical_stress;
-                history=m.make_material_reaction(*m.fe_strain_state,bulk,std::vector<double>(s.Z.size(),0.))->bulk_history.tensor;
+                history=m.make_material_reaction(*m.fe_strain_state,bulk,std::vector<double>(s.Z.size(),0.), false)->bulk_history.tensor;
               }
             double error=0.,scale=0.,maximum=0.;const QGauss<dim> rule(12);
             FEValues<dim> fe(this->get_mapping(),space.element,rule,update_quadrature_points|update_JxW_values);

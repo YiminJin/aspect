@@ -12,8 +12,8 @@ namespace aspect
   {
     template <int dim>
     SymmetricTensor<2, dim>
-    PhaseFieldFault<dim>::evaluate_mature_dg_memory(
-      const Point<dim> &point, const double phase, const std::vector<double> &Z,
+    PhaseFieldFault<dim>::localize_surface_values(
+      const Point<dim> &point, const double phase, const std::vector<double> &surface_values,
       const std::vector<double> &I,
       const ReconstructedFaultUtilities::NormalProfileProjection *cached) const
     {
@@ -24,10 +24,10 @@ namespace aspect
       const auto &fault = manager.get_fault(source.fault_index);
       const auto j = source.segment_index;
       const double xi = source.xi;
-      const double z = (1 - xi) * Z.at(j) + xi * Z.at(j + 1);
+      const double value = (1 - xi) * surface_values.at(j) + xi * surface_values.at(j + 1);
       const double normalization = (1 - xi) * I.at(j) + xi * I.at(j + 1);
-      AssertThrow(std::isfinite(z) && std::isfinite(normalization) && normalization > 0.,
-                  ExcMessage("Mature DG memory requires finite Z and positive native normalization."));
+      AssertThrow(std::isfinite(value) && std::isfinite(normalization) && normalization > 0.,
+                  ExcMessage("Surface localization requires finite values and positive native normalization."));
       auto tangent = fault.vertex(j + 1) - fault.vertex(j);
       tangent /= tangent.norm();
       Tensor<1, dim> normal;
@@ -40,7 +40,7 @@ namespace aspect
       const auto S = manager.get_shear_sense(source.fault_index) * symmetrize(outer_product(tangent, normal));
       const auto localization = evaluate_reconstructed_fault_localization(
                                   source.fault_index, j, xi, phase, phase, "mature DG stress");
-      return (2 * z * localization.current_h / normalization) * S;
+      return (2 * value * localization.current_h / normalization) * S;
     }
 
     template <int dim>
@@ -117,7 +117,7 @@ namespace aspect
             v.reinit(n);
           for (unsigned int q = 0; q < rule.size(); ++q)
             {
-              const auto B = evaluate_mature_dg_memory(native.quadrature_point(q), phase[q], state.Z, state.I);
+              const auto B = localize_surface_values(native.quadrature_point(q), phase[q], state.Z, state.I);
               SymmetricTensor<2, dim> rotated_T, rotated_R;
               if constexpr (dim == 2)
                 {
@@ -167,7 +167,7 @@ namespace aspect
     }
 
 #define INSTANTIATE(dim) \
-  template SymmetricTensor<2,dim> PhaseFieldFault<dim>::evaluate_mature_dg_memory(const Point<dim> &,double,const std::vector<double> &,const std::vector<double> &,const ReconstructedFaultUtilities::NormalProfileProjection *) const; \
+  template SymmetricTensor<2,dim> PhaseFieldFault<dim>::localize_surface_values(const Point<dim> &,double,const std::vector<double> &,const std::vector<double> &,const ReconstructedFaultUtilities::NormalProfileProjection *) const; \
   template void PhaseFieldFault<dim>::prepare_objective_dg_anchor();
     ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE

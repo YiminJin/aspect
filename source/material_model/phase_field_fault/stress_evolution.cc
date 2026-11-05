@@ -37,7 +37,7 @@ namespace aspect
         {
           separated_memory = project([&](const auto &, const auto &, const auto & x, const double phi, const auto &)
           {
-            return evaluate_mature_dg_memory(x, phi, accepted.Z, accepted.I);
+            return localize_surface_values(x, phi, accepted.Z, accepted.I);
           });
           for (unsigned c = 0; c < separated_memory->primary.coefficients.size(); ++c)
             {
@@ -179,7 +179,7 @@ namespace aspect
         {
           if constexpr(dim == 2)
             return ReconstructedFaultUtilities::rotate_plane_strain_stress(separated_memory->primary.tensor_at(ids, u), gradient, dt)
-                   - evaluate_mature_dg_memory(x, p, candidate->Z, candidate->I);
+                   - localize_surface_values(x, p, candidate->Z, candidate->I);
           else return SymmetricTensor<2, dim>();
         });
       if (workspace.energy_ledger)

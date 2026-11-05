@@ -1,0 +1,251 @@
+{
+  "lifecycle": [
+    {
+      "before": "consolidation-dl",
+      "after": "consolidation-restart_new",
+      "steps": [
+        {
+          "time": 0.15000000000000002,
+          "bulk_Linf": 8.763741685471893e-17,
+          "surface_Linf": 3.552713678800501e-15,
+          "tensor_L2": 1.714670753041173e-17,
+          "work_traction_Linf": 3.645629804982509e-18,
+          "exported_values_bitwise": false
+        },
+        {
+          "time": 0.2,
+          "bulk_Linf": 8.881784197001252e-16,
+          "surface_Linf": 1.0658141036401503e-14,
+          "tensor_L2": 2.1088902372821917e-16,
+          "work_traction_Linf": 7.48099499014998e-18,
+          "exported_values_bitwise": false
+        }
+      ],
+      "before_iterations": [
+        32,
+        32,
+        32,
+        35,
+        34,
+        34,
+        34,
+        34,
+        34,
+        35,
+        34,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33
+      ],
+      "after_iterations": [
+        35,
+        35,
+        33,
+        35,
+        35,
+        33
+      ],
+      "before_wall_s": 26.178184545999102,
+      "after_wall_s": 10.684930213999905
+    },
+    {
+      "before": "true-cutback-control",
+      "after": "consolidation-reject",
+      "steps": [
+        {
+          "time": 0.0,
+          "bulk_Linf": 0.0,
+          "surface_Linf": 0.0,
+          "tensor_L2": 0.0,
+          "work_traction_Linf": 0.0,
+          "exported_values_bitwise": true
+        },
+        {
+          "time": 0.1,
+          "bulk_Linf": 1.3594539990252619e-16,
+          "surface_Linf": 3.552713678800501e-15,
+          "tensor_L2": 5.348604261100915e-17,
+          "work_traction_Linf": 3.0086610286472748e-18,
+          "exported_values_bitwise": false
+        },
+        {
+          "time": 0.15000000000000002,
+          "bulk_Linf": 9.413263490085436e-16,
+          "surface_Linf": 1.2434497875801753e-14,
+          "tensor_L2": 3.202575831178451e-16,
+          "work_traction_Linf": 2.756584023544395e-17,
+          "exported_values_bitwise": false
+        },
+        {
+          "time": 0.2,
+          "bulk_Linf": 1.5761572141849076e-15,
+          "surface_Linf": 5.329070518200751e-15,
+          "tensor_L2": 6.277236907869745e-16,
+          "work_traction_Linf": 5.51316804708879e-17,
+          "exported_values_bitwise": false
+        }
+      ],
+      "before_iterations": [
+        31,
+        31,
+        31,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33
+      ],
+      "after_iterations": [
+        31,
+        31,
+        31,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33
+      ],
+      "before_wall_s": 23.86398961699979,
+      "after_wall_s": 25.073466440997436
+    },
+    {
+      "before": "consolidation-dl",
+      "after": "consolidation-midpoint",
+      "steps": [
+        {
+          "time": 0.0,
+          "bulk_Linf": 0.0,
+          "surface_Linf": 0.0,
+          "tensor_L2": 0.0,
+          "work_traction_Linf": 0.0,
+          "exported_values_bitwise": true
+        },
+        {
+          "time": 0.05,
+          "bulk_Linf": 0.0,
+          "surface_Linf": 0.0,
+          "tensor_L2": 0.0,
+          "work_traction_Linf": 0.0,
+          "exported_values_bitwise": true
+        },
+        {
+          "time": 0.1,
+          "bulk_Linf": 0.0,
+          "surface_Linf": 0.0,
+          "tensor_L2": 0.0,
+          "work_traction_Linf": 0.0,
+          "exported_values_bitwise": true
+        }
+      ],
+      "before_iterations": [
+        32,
+        32,
+        32,
+        35,
+        34,
+        34,
+        34,
+        34,
+        34,
+        35,
+        34,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33,
+        35,
+        35,
+        33
+      ],
+      "after_iterations": [
+        32,
+        32,
+        32,
+        35,
+        34,
+        34,
+        34,
+        34,
+        34,
+        35,
+        34,
+        33,
+        35,
+        35,
+        33
+      ],
+      "before_wall_s": 26.178184545999102,
+      "after_wall_s": 18.15346175799641
+    }
+  ],
+  "stationary": [
+    {
+      "file": "accepted_steps.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    },
+    {
+      "file": "objective-dg-summary.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    },
+    {
+      "file": "fault_0.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    },
+    {
+      "file": "fault_1.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    },
+    {
+      "file": "objective-dg-final-rank0.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    },
+    {
+      "file": "objective-dg-final-rank1.csv",
+      "max_absolute": 0.0,
+      "max_scaled": 0.0,
+      "byte_identical": true
+    }
+  ],
+  "nonfault_statistics_byte_identical": true
+}

@@ -1,6 +1,22 @@
-> **Current selection complete, 4 November 2026:** fault-code readability and ownership refactoring on `47c2aae3be15d3ff60aab2a818c2f6e179077702`. Numerical `TensorField` is separate from material representation/residual and fault observations; material projection receives explicit inputs. All 183170 unit assertions, seven matched moving controls, stationary/serial/non-fault controls, analytic source checks and old/new checkpoint controls pass. Matched moving results are bitwise identical; new 2→4-rank restart agrees within 8.9e−16 bulk / 1.1e−14 surface. AStyle 2.04 is idempotent over all 44 primary files; all 57 protected hashes are unchanged. See [report](CODE_READABILITY_REPORT.md), [current guide](MATURE_MOVING_FAULT.md) and [provenance](../../../benchmarks/reconstructed_fault/particle_free/evidence/code_readability/final-provenance.json). Scientific campaigns remain paused; no new physical or production qualification.
+> **Current selection complete, 4 November 2026:** stress consolidation and linked developer guide on `d7e4adbe99126f8c9faf9f35c657e287f2c29cea`. Shared `localize_surface_values`, one single/multiple-field mass projector, and explicit solver-owned outer/inner mechanics replace misleading names, duplicated algebra and hidden recursion. Full units and bounded moving, stationary, non-fault, analytical and rejection/restart controls pass; seven matched moving controls are bitwise identical. See [report](STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md) and [guide](MATURE_MOVING_FAULT.md). All 63 protected artifacts remain unchanged. Defaults, physics and checkpoint meanings are retained; scientific campaigns remain paused.
 
-## Current readability/ownership audit
+> **Previous selection complete, 4 November 2026:** fault-code readability and ownership refactoring on `47c2aae3be15d3ff60aab2a818c2f6e179077702`. Numerical `TensorField` is separate from material representation/residual and fault observations; material projection receives explicit inputs. All 183170 unit assertions, seven matched moving controls, stationary/serial/non-fault controls, analytic source checks and old/new checkpoint controls pass. Matched moving results are bitwise identical; new 2→4-rank restart agrees within 8.9e−16 bulk / 1.1e−14 surface. AStyle 2.04 is idempotent over all 44 primary files; all 57 protected hashes are unchanged. See [report](CODE_READABILITY_REPORT.md), [current guide](MATURE_MOVING_FAULT.md) and [provenance](../../../benchmarks/reconstructed_fault/particle_free/evidence/code_readability/final-provenance.json). Scientific campaigns remain paused; no new physical or production qualification.
+
+## Current consolidation audit
+
+`TensorField::project` owns common single/multiple-field mass assembly, inversion
+and ghost publication. `project_mature_reaction` only samples endpoint tensors
+and observes pre/post energy; `project_material_tensor` supplies explicit phase
+and accepted-gradient samples. `localize_surface_values` is shared by memory and
+slip forcing with their units stated at the interface. The coupled solver owns
+an explicit outer loop and calls `solve_reconstructed_fault_stokes_inner`;
+material `DGMaterialReaction` stores response data, with no recursion mode flag.
+The unchanged inner body still stages ordinary once-only acceptance. See the
+[mechanics chapter](mature_moving_fault/mechanics.md),
+[remaining distinct projectors](mature_moving_fault/alternatives.md) and
+[current provenance](../../../benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/final-provenance.json).
+
+## Historical readability/ownership audit
 
 The numerical field has only FE infrastructure and component vectors. Material
 `DGHistory` owns the representation and composes `primary` plus optional raw R;

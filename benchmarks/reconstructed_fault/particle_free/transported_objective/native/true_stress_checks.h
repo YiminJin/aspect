@@ -55,9 +55,9 @@
         std::vector<double> rates(s.Z.size());
         for(unsigned j=0;j<rates.size();++j)rates[j]=.002*(1+.2*std::cos(s.vertices[j][0]));
         const double epsilon=1e-5,dt=m.initial_time_step;
-        auto candidate=m.make_material_reaction(*m.fe_strain_state,bulk,rates);
+        auto candidate=m.make_material_reaction(*m.fe_strain_state,bulk,rates, false);
         for(auto &z:s.Z)z=1.;
-        const auto changed_diagnostic=m.make_material_reaction(*m.fe_strain_state,bulk,rates);
+        const auto changed_diagnostic=m.make_material_reaction(*m.fe_strain_state,bulk,rates, false);
         double diagnostic_error=0.;
         for(unsigned c=0;c<candidate->bulk_history.tensor->primary.coefficients.size();++c)
           for(const auto i:candidate->bulk_history.tensor->primary.coefficients[c].locally_owned_elements())
@@ -65,15 +65,15 @@
         AssertThrow(Utilities::MPI::max(diagnostic_error,comm)==0.,ExcMessage("Diagnostic Z changed direct reaction/mechanics."));
         s.Z.assign(s.Z.size(),0.);
         const auto perturbed_bulk=velocity(1.+epsilon);
-        auto cv=m.make_material_reaction(*m.fe_strain_state,perturbed_bulk,rates);
+        auto cv=m.make_material_reaction(*m.fe_strain_state,perturbed_bulk,rates, false);
         auto perturbed_rates=rates;for(auto &v:perturbed_rates)v*=1.+epsilon;
-        auto cs=m.make_material_reaction(*m.fe_strain_state,bulk,perturbed_rates);
+        auto cs=m.make_material_reaction(*m.fe_strain_state,bulk,perturbed_rates, false);
         // Same frozen geometry, coefficients, zero physical parent, v and V.
         // Only the history representation changes in this scratch calculation.
         anchor->representation=History::Representation::separated_trial;
         anchor->residual=std::make_shared<typename Model::TensorField>(m.project_dg_transport_field(*op,zero,0.,8)->primary);
         m.material_direct_stress=false;
-        auto separated=m.make_material_reaction(*m.fe_strain_state,bulk,rates);
+        auto separated=m.make_material_reaction(*m.fe_strain_state,bulk,rates, false);
         m.material_direct_stress=true;
         anchor->representation=History::Representation::physical_stress;anchor->residual.reset();
         const auto dot=[](const Tensor &a,const Tensor &b){return scalar_product(a,b)+trace(a)*trace(b);};
@@ -107,8 +107,8 @@
                   {
                     const auto x=massfe.quadrature_point(q);const double eta=m.material_viscosity(x,s.eta),k=-eta*std::expm1(-s.G*dt/eta);
                     Tensor D;D[0][0]=.03;D[1][1]=-.03;D[0][1]=.01;
-                    const auto slip=m.evaluate_mature_dg_memory(x,p[q],rates,s.I);
-                    const auto B=m.evaluate_mature_dg_memory(x,p[q],separated->Z,s.I);
+                    const auto slip=m.localize_surface_values(x,p[q],rates,s.I);
+                    const auto B=m.localize_surface_values(x,p[q],separated->Z,s.I);
                     const std::array<Tensor,4> fields={2*k*D-k*slip,B,2*k*D,-k*slip};
                     for(unsigned i=0;i<9;++i)
                       {const double w=massfe.JxW(q)*massfe.shape_value(i,q);
@@ -124,7 +124,7 @@
                     for(unsigned f=0;f<4;++f)for(unsigned c=0;c<3;++c)for(unsigned i=0;i<9;++i)
                       projected[f][Tensor::unrolled_to_component_indices(c)]+=coefficients[3*f+c][i]*op->space->element.shape_value(i,rule.point(q));
                     Tensor D;D[0][0]=.03;D[1][1]=-.03;D[0][1]=.01;
-                    const auto slip=m.evaluate_mature_dg_memory(x,phi[q],rates,s.I),B=m.evaluate_mature_dg_memory(x,phi[q],separated->Z,s.I);
+                    const auto slip=m.localize_surface_values(x,phi[q],rates,s.I),B=m.localize_surface_values(x,phi[q],separated->Z,s.I);
                     const auto local=2*k*D-k*slip;
                     const auto sep=sepT[q]-sepR[q]-B,Psep=sepT[q]-sepR[q]-projected[1];
                     const auto within=direct[q]-Psep,remainder=Psep-sep;
@@ -180,7 +180,7 @@
                     if constexpr(dim==2)rotated=ReconstructedFaultUtilities::rotate_plane_strain_stress(expected,gradient,dt);
                     s.objective.tensor=m.project_dg_transport_field(*advection,[&](const Point<dim> &,double){return rotated;},0.,8);
                     s.objective.tensor->representation=History::Representation::physical_stress;
-                    const auto update=m.make_material_reaction(*m.fe_strain_state,flow,std::vector<double>(rates.size(),0.));
+                    const auto update=m.make_material_reaction(*m.fe_strain_state,flow,std::vector<double>(rates.size(),0.), false);
                     const double c=std::cos(.08*dt),sn=std::sin(.08*dt),beta=std::exp(-s.G*dt/s.eta),k=-s.eta*std::expm1(-s.G*dt/s.eta);
                     const auto old=expected;
                     expected[0][0]=beta*(c*c*old[0][0]+sn*sn*old[1][1]-2*c*sn*old[0][1]);

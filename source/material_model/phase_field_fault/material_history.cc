@@ -34,7 +34,6 @@ namespace aspect
       // On failure, restore every bound geometry/history view before dropping
       // the transaction. Clearing scratch alone would leave candidate mechanics.
       dg_material_reaction.reset();
-      material_reaction_solving = false;
       if (!dg_material_trial)
         return;
       auto &trial = *dg_material_trial;

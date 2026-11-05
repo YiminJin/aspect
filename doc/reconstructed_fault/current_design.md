@@ -3462,4 +3462,9 @@ material coordinate/support map. Explicit fields/evaluators cross these boundari
 Do not restore a separate mature timestep driver, generic executor, or ordering
 pipeline. Historical reports document their tested source, not current ownership.
 The structural change preserves defaults, checkpoints, spin lag, quadrature and
-convergence criteria. See the architecture report for bounded verification.
+convergence criteria. The coupled solver now explicitly calls its inner solve;
+material correction data contains no solver recursion flag. Shared single/multiple
+tensor projection owns mass algebra; `localize_surface_values` expresses the
+common surface localization. See the
+[consolidation report](particle_free/STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md)
+for bounded verification and the linked guide for current entry points.

@@ -1,0 +1,16 @@
+{
+  "version": "AStyle 2.04",
+  "files": [
+    "include/aspect/material_model/history/tensor_field.h",
+    "include/aspect/material_model/phase_field_fault.h",
+    "source/material_model/history/tensor_projection.cc",
+    "source/material_model/phase_field_fault/dg_objective.cc",
+    "source/material_model/phase_field_fault/fe_strain.cc",
+    "source/material_model/phase_field_fault/material_history.cc",
+    "source/material_model/phase_field_fault/physical_stress.cc",
+    "source/material_model/phase_field_fault/stress_evolution.cc",
+    "source/material_model/phase_field_fault/stress_reaction.cc"
+  ],
+  "idempotent": true,
+  "remaining_changes": "Targeted edits in existing legacy solver/header and benchmark files; no whole-file reformat"
+}

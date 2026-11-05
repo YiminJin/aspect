@@ -299,7 +299,7 @@ namespace aspect
         {
           // General oblique map, including the retained constant endpoint
           // continuation. Z is auxiliary Maxwell/slip memory, not I*C.
-          const auto correction = evaluate_mature_dg_memory(point, phi[0], Z, I, sample ? &sample->source : nullptr);
+          const auto correction = localize_surface_values(point, phi[0], Z, I, sample ? &sample->source : nullptr);
           if (history.residual)
             {
               const auto unit = this->get_mapping().transform_real_to_unit_cell(cell, point);

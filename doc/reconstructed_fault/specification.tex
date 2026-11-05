@@ -4052,6 +4052,11 @@ infrastructure owns the material coordinate/support map. There is no separate
 mature timestep driver or generic executor. Explicit fields and evaluators cross
 these boundaries. Equations, quadrature, checkpoint identities, incoming-gradient
 spin lag and acceptance criteria above are unchanged. Historical phase reports
-remain evidence, not current architectural directions.
+remain evidence, not current architectural directions. The coupled solver owns
+an explicit outer iteration calling one inner mechanical implementation; the
+material retains correction data but no solver recursion flag. Common evaluated
+tensor mass projection supports one or multiple fields with one cell inverse.
+The shared surface localization operation is named
+\texttt{localize\_surface\_values}; its interpolation and normalization are unchanged.
 
 \end{document}

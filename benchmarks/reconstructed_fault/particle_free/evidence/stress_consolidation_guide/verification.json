@@ -1,0 +1,56 @@
+{
+  "build_commands": [
+    "cmake --build build-particle-free/native --parallel 4",
+    "cmake --build build-particle-free/transported-objective/stage-c/checks --parallel 4",
+    "cmake --build build-particle-free/transported-objective/stage-c/bp3-plugin --parallel 4"
+  ],
+  "unit_command": "OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 ctest --test-dir build-particle-free/native -R '^unit_tests$' --output-on-failure",
+  "unit_assertions": 183170,
+  "unit_cases": 152,
+  "unit_seconds": 7.99,
+  "source_unchanged_after_build": true,
+  "protected_count": 63,
+  "native_runs_sequential": true,
+  "maximum_ranks": 4,
+  "maximum_build_workers": 4,
+  "build_logs": {
+    "build-particle-free/stress-consolidation-guide/build.log": {
+      "sha256": "e889f9f4e704d670cfe88fbbf9ec1e22c5869de22bdf603046508d873b09b878",
+      "exit_code": 0
+    },
+    "build-particle-free/stress-consolidation-guide/checker-build.log": {
+      "sha256": "bc6609a94fb39bfcdff3a28b4d75705bf2141f07477813045cee32d824ea703b",
+      "exit_code": 0
+    },
+    "build-particle-free/stress-consolidation-guide/bp3-build.log": {
+      "sha256": "57b14a4649aad5ee884fd402f4398e15c469820db082d8e9b1dd49483d0d9d65",
+      "exit_code": 0
+    }
+  },
+  "runs": [
+    "benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/runs/consolidation-dc",
+    "benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/runs/consolidation-default",
+    "benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/runs/consolidation-dl",
+    "benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/runs/consolidation-midpoint",
+    "benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/runs/consolidation-reject",
+    "benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/runs/consolidation-restart4",
+    "benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/runs/consolidation-restart_new",
+    "benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/runs/consolidation-sc",
+    "benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/runs/consolidation-sl",
+    "benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/runs/consolidation-source",
+    "benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide/runs/consolidation-source_layered"
+  ],
+  "rendering": {
+    "tool": "Doxygen 1.18.0 using doc/options.dox, doc/filter and local LaTeX",
+    "html": "build-particle-free/stress-consolidation-guide/docs/rendered",
+    "screenshot": "build-particle-free/stress-consolidation-guide/docs/model.png",
+    "visually_inspected": true,
+    "scope_limit": "Temporary $$ delimiter conversion; references outside scoped input remain warnings",
+    "corrected_issue": "Escaped underscore in localization display equation"
+  },
+  "auxiliary_launch_script": {
+    "executed": "/tmp/stress_auxiliary.py",
+    "maintained": "benchmarks/reconstructed_fault/particle_free/transported_objective/run_stress_consolidation_auxiliary.py",
+    "note": "Maintained version resolves root from its path; the commands and inputs are the same bounded controls."
+  }
+}

@@ -1,3 +1,20 @@
+> **Current selection complete, 4 November 2026:** stress consolidation and linked developer guide on `d7e4adbe99126f8c9faf9f35c657e287f2c29cea`. Shared `localize_surface_values`, one single/multiple-field mass projector, and explicit solver-owned outer/inner mechanics replace misleading names, duplicated algebra and hidden recursion. Full units and bounded moving, stationary, non-fault, analytical and rejection/restart controls pass; seven matched moving controls are bitwise identical. See [report](STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md) and [guide](MATURE_MOVING_FAULT.md). All 63 protected artifacts remain unchanged. Defaults, physics and checkpoint meanings are retained; scientific campaigns remain paused.
+
+## Current numerical/mechanical entry points
+
+| Operation | Current entry | Owner |
+|---|---|---|
+| Surface interpolation/localization | `localize_surface_values` in `dg_objective.cc` | Material geometry/profile interpretation; supplied values determine units |
+| One/multiple whole tensor projections | `TensorField::project` in `history/tensor_projection.cc` | Numerical mass/RHS/inversion and ghost publication |
+| Endpoint field sampling and energy observation | `project_mature_reaction` in `stress_reaction.cc` | Material response using explicit anchor/current fields |
+| Projection-consistency outer iteration | `solve_reconstructed_fault_stokes` | Simulator coupled solver |
+| Fixed-correction mechanics and terminal gates | `solve_reconstructed_fault_stokes_inner` | Same solver body, no recursive dispatch or material mode flag |
+
+See the [equation-to-code map](mature_moving_fault/configuration.md#equation-to-code-and-modification-map)
+and [one attempted step](mature_moving_fault/lifecycle.md). The formulation/state
+maps below retain their scientific distinctions; historical stage names do not
+select additional work.
+
 # Current formulation, variables, timestep and energy
 
 Current direct extension audited at `69e8a10a93a08718d31af961197899e320657c04`

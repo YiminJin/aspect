@@ -1,0 +1,505 @@
+{
+  "pages": 9,
+  "relative_links": 98,
+  "symbols": {
+    "localize_surface_values": "source/material_model/phase_field_fault/dg_objective.cc",
+    "make_material_reaction": "source/material_model/phase_field_fault/stress_reaction.cc",
+    "project_mature_reaction": "source/material_model/phase_field_fault/stress_reaction.cc",
+    "refresh_material_reaction": "source/material_model/phase_field_fault/stress_reaction.cc",
+    "solve_reconstructed_fault_stokes_inner": "source/simulator/solver/reconstructed_fault_stokes.cc",
+    "prepare_material_history": "source/material_model/phase_field_fault/material_history.cc",
+    "stage_material_geometry": "source/material_model/phase_field_fault/material_geometry.cc",
+    "transport_material_profile": "source/material_model/phase_field_fault/profile_transport.cc",
+    "transport_material_history": "source/material_model/phase_field_fault/stress_evolution.cc",
+    "rotate_material_history": "source/material_model/phase_field_fault/stress_evolution.cc",
+    "physical_history_stress": "source/material_model/phase_field_fault/physical_stress.cc",
+    "project_material_tensor": "source/material_model/phase_field_fault/material_tensor_projection.cc",
+    "project_to_normal_profiles_unchecked": "source/reconstructed_fault/utilities.cc",
+    "stage_material_motion": "source/reconstructed_fault/manager.cc",
+    "mature_stress_endpoint": "include/aspect/material_model/phase_field_fault/stress_law.h"
+  },
+  "examples": [
+    {
+      "label": "guide-direct",
+      "verified_run": "build-particle-free/transported-objective/stage-c/material-runs/consolidation-dc",
+      "command": [
+        "python3",
+        "benchmarks/reconstructed_fault/particle_free/transported_objective/run_material_native.py",
+        "guide-direct",
+        "--representation",
+        "direct physical stress",
+        "--profile-method",
+        "bounded MacCormack",
+        "--inflow",
+        "accepted trace",
+        "--support",
+        "full normal cross-section",
+        "--phase",
+        ".35*max(0,1-(x/1.4)^2)^4*max(0,1-((y-.3*x)/.6)^2)^4",
+        "--speed",
+        ".4",
+        "--shear",
+        "0",
+        "--dt",
+        ".05",
+        "--end",
+        ".1",
+        "--level",
+        "4",
+        "--eta",
+        "1",
+        "--ranks",
+        "2",
+        "--seconds",
+        "120",
+        "--energy",
+        "--stage-energy",
+        "--true-checks",
+        "--audit"
+      ],
+      "only_label_differs": true
+    },
+    {
+      "label": "guide-layered",
+      "verified_run": "build-particle-free/transported-objective/stage-c/material-runs/consolidation-dl",
+      "command": [
+        "python3",
+        "benchmarks/reconstructed_fault/particle_free/transported_objective/run_material_native.py",
+        "guide-layered",
+        "--representation",
+        "direct physical stress",
+        "--profile-method",
+        "bounded MacCormack",
+        "--inflow",
+        "accepted trace",
+        "--support",
+        "full normal cross-section",
+        "--phase",
+        ".35*max(0,1-(x/1.4)^2)^4*max(0,1-((y-.3*x)/.6)^2)^4",
+        "--speed",
+        ".4",
+        "--shear",
+        "0",
+        "--dt",
+        ".05",
+        "--end",
+        ".2",
+        "--level",
+        "4",
+        "--eta",
+        "1+.5*tanh(4*x)",
+        "--ranks",
+        "2",
+        "--seconds",
+        "120",
+        "--energy",
+        "--stage-energy"
+      ],
+      "only_label_differs": true
+    }
+  ],
+  "links": [
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "mature_moving_fault/model.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "mature_moving_fault/discretization.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "mature_moving_fault/geometry.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "mature_moving_fault/mechanics.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "mature_moving_fault/lifecycle.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "mature_moving_fault/configuration.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "mature_moving_fault/alternatives.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "../current_design.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "../specification.tex"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "TRANSPORTED_OBJECTIVE_SPEC.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md",
+      "target": "FROZEN_FINITE_END_REPORT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md",
+      "target": "../../../benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md",
+      "target": "MATURE_MOVING_FAULT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md",
+      "target": "../../../benchmarks/reconstructed_fault/particle_free/evidence/stress_consolidation_guide"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md",
+      "target": "../MATURE_MOVING_FAULT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md",
+      "target": "model.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md",
+      "target": "configuration.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md",
+      "target": "../../../../source/material_model/phase_field_fault/stress_evolution.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md",
+      "target": "../../../../source/material_model/history/tensor_projection.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md",
+      "target": "../../../../source/material_model/phase_field_fault/dg_history.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md",
+      "target": "../../../../source/material_model/phase_field_fault/dg_objective.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md",
+      "target": "../../../../source/material_model/phase_field_fault/dg_geometry.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md",
+      "target": "../STATUS.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md",
+      "target": "../FROZEN_FINITE_END_REPORT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md",
+      "target": "../STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../MATURE_MOVING_FAULT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "lifecycle.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "alternatives.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../benchmarks/reconstructed_fault/particle_free/transported_objective/run_material_native.py"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../benchmarks/reconstructed_fault/particle_free/transported_objective/native/CMakeLists.txt"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../benchmarks/reconstructed_fault/particle_free/transported_objective/check_stress_history_consolidation.py"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../include/aspect/material_model/phase_field_fault/stress_law.h"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/material_model/phase_field_fault/stress_reaction.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/material_model/phase_field_fault/dg_objective.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/material_model/history/tensor_advection.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/material_model/history/tensor_advection_distributed.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/material_model/history/tensor_projection.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../include/aspect/reconstructed_fault/objective_stress.h"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/material_model/phase_field_fault/stress_evolution.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/material_model/phase_field_fault/material_geometry.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/material_model/phase_field_fault/profile_transport.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/reconstructed_fault/manager.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/material_model/rheology/fault_friction.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/reconstructed_fault/surface_system.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/material_model/phase_field_fault/physical_stress.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/simulator/solver/reconstructed_fault_stokes.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/simulator/core.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "../../../../source/material_model/phase_field_fault/material_history.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md",
+      "target": "alternatives.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/discretization.md",
+      "target": "../MATURE_MOVING_FAULT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/discretization.md",
+      "target": "model.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/discretization.md",
+      "target": "geometry.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/discretization.md",
+      "target": "../../../../source/material_model/history/tensor_projection.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/discretization.md",
+      "target": "../../../../source/material_model/phase_field_fault/material_tensor_projection.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/discretization.md",
+      "target": "../../../../source/material_model/history/tensor_advection.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/discretization.md",
+      "target": "../../../../source/material_model/history/tensor_advection_distributed.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/discretization.md",
+      "target": "../../../../source/material_model/phase_field_fault/stress_evolution.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/discretization.md",
+      "target": "../../../../include/aspect/reconstructed_fault/objective_stress.h"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/discretization.md",
+      "target": "alternatives.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/geometry.md",
+      "target": "../MATURE_MOVING_FAULT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/geometry.md",
+      "target": "discretization.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/geometry.md",
+      "target": "mechanics.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/geometry.md",
+      "target": "../../../../source/material_model/phase_field_fault/material_geometry.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/geometry.md",
+      "target": "../../../../source/reconstructed_fault/manager.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/geometry.md",
+      "target": "../../../../source/material_model/phase_field_fault/profile_transport.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/geometry.md",
+      "target": "../../../../source/reconstructed_fault/utilities.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/geometry.md",
+      "target": "../FROZEN_FINITE_END_REPORT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/geometry.md",
+      "target": "../../../../source/material_model/phase_field_fault/dg_objective.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/geometry.md",
+      "target": "../../../../source/material_model/phase_field_fault/normalization.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md",
+      "target": "../MATURE_MOVING_FAULT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md",
+      "target": "mechanics.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md",
+      "target": "configuration.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md",
+      "target": "../../../../source/simulator/core.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md",
+      "target": "discretization.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md",
+      "target": "geometry.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md",
+      "target": "../../../../include/aspect/material_model/phase_field_fault/material_history_internal.h"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md",
+      "target": "../../../../include/aspect/material_model/phase_field_fault/fe_strain_internal.h"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md",
+      "target": "../../../../include/aspect/material_model/phase_field_fault/tensor_history_internal.h"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md",
+      "target": "../../../../source/material_model/phase_field_fault/dg_accepted.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md",
+      "target": "../../../../source/material_model/phase_field_fault/dg_transfer.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/mechanics.md",
+      "target": "../MATURE_MOVING_FAULT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/mechanics.md",
+      "target": "model.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/mechanics.md",
+      "target": "geometry.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/mechanics.md",
+      "target": "lifecycle.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/mechanics.md",
+      "target": "../../../../source/material_model/phase_field_fault/physical_stress.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/mechanics.md",
+      "target": "../../../../source/simulator/assemblers/reconstructed_fault_stokes.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/mechanics.md",
+      "target": "../../../../source/reconstructed_fault/surface_system.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/mechanics.md",
+      "target": "../../../../source/material_model/rheology/fault_friction.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/mechanics.md",
+      "target": "../../../../source/simulator/solver/reconstructed_fault_stokes.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/mechanics.md",
+      "target": "lifecycle.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/model.md",
+      "target": "../MATURE_MOVING_FAULT.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/model.md",
+      "target": "discretization.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/model.md",
+      "target": "geometry.md"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/model.md",
+      "target": "../../../../include/aspect/material_model/phase_field_fault/stress_law.h"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/model.md",
+      "target": "../../../../source/material_model/phase_field_fault/stress_reaction.cc"
+    },
+    {
+      "page": "doc/reconstructed_fault/particle_free/mature_moving_fault/model.md",
+      "target": "configuration.md#checks-and-outputs"
+    }
+  ],
+  "page_hashes": {
+    "doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md": "b0084aa9aa7da8069e0ea0bbd7be6b33b136ca9f8c6bc8d0ec79d2169ee90697",
+    "doc/reconstructed_fault/particle_free/mature_moving_fault/configuration.md": "169eee0842e671e7995105cfdc60a6d1833929778690e43629d4a8909982a95a",
+    "doc/reconstructed_fault/particle_free/mature_moving_fault/model.md": "9432672d1b4ed63a7dcb16c2f645e959c58794705969f8e559af2a5972008f5d",
+    "doc/reconstructed_fault/particle_free/mature_moving_fault/geometry.md": "8ce1376354f7861e6d7c43d898dd0611cf4dc3f23fcbabea6b9598f8f7cf918e",
+    "doc/reconstructed_fault/particle_free/mature_moving_fault/alternatives.md": "36cd8246afc1d94e14d44af2f97561da324acf32bbdd153d384925fbc6556bfc",
+    "doc/reconstructed_fault/particle_free/mature_moving_fault/discretization.md": "87009b7e76d5c5bbe2680777c4406ac8bcd677675f2596e0b8b75aab9f84383d",
+    "doc/reconstructed_fault/particle_free/mature_moving_fault/mechanics.md": "1b997c145302d74bc625ab2da068a6adb0617759c5776889dba229446d48e95b",
+    "doc/reconstructed_fault/particle_free/mature_moving_fault/lifecycle.md": "285a14baf7d0225bff85c5fc8aef2d923d9fc816f8cee4f424d86c4d7098b5bb"
+  }
+}

@@ -527,7 +527,6 @@ namespace aspect
         {
           return dg_material_transport && (material_variable_viscosity || material_direct_stress);
         }
-        bool material_reaction_solving = false;
         bool material_bounded_profile = false;
         bool material_trace_inflow = false;
         Functions::ParsedFunction<dim> material_viscosity_multiplier;
@@ -588,10 +587,13 @@ namespace aspect
         std::shared_ptr<DGMaterialReaction> dg_material_reaction;
         /** Construct an endpoint candidate from s.objective.tensor, current bulk
          * velocity and surface rates (m/s). The anchor and physical profile stay
-         * fixed. Return new tensors and Z; do not accept or bind the result. */
+         * fixed. Return new tensors and Z; do not accept or bind the result.
+         * publication_candidate labels energy observations only: false for an
+         * outer correction, true for the eventual accepted publication. */
         std::shared_ptr<FEStrainUpdate> make_material_reaction(const FEStrainState &s,
                                                                const LinearAlgebra::BlockVector &bulk,
-                                                               const std::vector<double> &rates) const;
+                                                               const std::vector<double> &rates,
+                                                               bool publication_candidate) const;
         /** Replace the outer-iteration projection correction from bulk and rates.
          * Return the global relative maximum change used by the existing solver
          * criterion. Invalidate stress observations, not the objective anchor.
@@ -615,7 +617,8 @@ namespace aspect
         void project_mature_reaction(const FEStrainState &s,
                                      const LinearAlgebra::BlockVector &bulk,
                                      FEStrainUpdate &update,
-                                     const MatureReactionField &field) const;
+                                     const MatureReactionField &field,
+                                     bool publication_candidate) const;
         /** Return projected physical endpoint minus the pointwise Maxwell endpoint
          * at x (Pa). A null correction gives zero. Borrow all arguments for the
          * call; no publication or anchor mutation occurs. */
@@ -648,16 +651,19 @@ namespace aspect
          * history identity, timestep number and dt. Moving material steps instead
          * install the transported/rotated anchor through rotate_material_history(). */
         void prepare_objective_dg_anchor();
-        /** Evaluate B=2*h*Z*S/I (Pa), or twice the localized slip rate (1/s)
-         * when Z is replaced by rates (m/s). h is the dimensionless profile
-         * compliance, I the normal integral (m), S is
-         * the symmetric slip tensor; cached may borrow a current fault projection.
-         * Direct stress uses this operator for slip forcing, not reconstruction. */
-        SymmetricTensor<2, dim> evaluate_mature_dg_memory(const Point<dim> &point,
-                                                          double phase,
-                                                          const std::vector<double> &Z,
-                                                          const std::vector<double> &I,
-                                                          const ReconstructedFaultUtilities::NormalProfileProjection *cached = nullptr) const;
+        /** Localize nodal surface values a as 2*h(phi)*a(xi)*S/I(xi).
+         * Both a and I use linear interpolation on the associated segment;
+         * S=shear_sense*sym(tangent outer normal) is in the spatial frame.
+         * Association/support use project_to_bulk_source (or cached); inactive
+         * support returns zero. I is the positive normal integral (m), h is
+         * dimensionless. Values Z in Pa m give stress memory in Pa; rates in
+         * m/s give twice the localized slip-rate tensor in 1/s. No constitutive
+         * interpretation or extra normalization is applied here. */
+        SymmetricTensor<2, dim> localize_surface_values(const Point<dim> &point,
+                                                        double phase,
+                                                        const std::vector<double> &surface_values,
+                                                        const std::vector<double> &I,
+                                                        const ReconstructedFaultUtilities::NormalProfileProjection *cached = nullptr) const;
         bool consistent_endpoint_phase = false;
         std::string fe_initial_phase_profile;
         unsigned int fe_bulk_normal_quadrature_points = 3;
