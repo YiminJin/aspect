@@ -16,7 +16,7 @@ namespace aspect
     {
       const FEStrainState &accepted;
       const LinearAlgebra::BlockVector &accepted_velocity;
-      double time,dt;
+      double time, dt;
       unsigned int step;
     };
 
@@ -28,9 +28,9 @@ namespace aspect
       std::shared_ptr<DGHistory> physical_stress;
       std::shared_ptr<DGHistory> separated_trial;
       std::shared_ptr<DGHistory> separated_total_memory;
-      unsigned int substeps=0;
-      bool energy_ledger=false;
-      double energy_before=0.,energy_advected=0.;
+      unsigned int substeps = 0;
+      bool energy_ledger = false;
+      double energy_before = 0., energy_advected = 0.;
     };
 
     /** Frozen projection-defect cache for one coupled outer iteration. Its
@@ -48,14 +48,14 @@ namespace aspect
      * bound to mechanics until final outer acceptance or rollback. */
     template<int dim> struct PhaseFieldFault<dim>::DGMaterialTrial
     {
-      std::shared_ptr<FEStrainState> accepted_history,candidate_history;
+      std::shared_ptr<FEStrainState> accepted_history, candidate_history;
       TransportedHistory transport;
       std::shared_ptr<ReconstructedFaultManager<dim>> manager;
-      std::vector<std::vector<double>> normalization,temperatures;
-      std::map<types::particle_index,std::vector<double>> particle_properties;
-      unsigned int step=0;
-      double dt=0.;
-      bool bound=false;
+      std::vector<std::vector<double>> normalization, temperatures;
+      std::map<types::particle_index, std::vector<double>> particle_properties;
+      unsigned int step = 0;
+      double dt = 0.;
+      bool bound = false;
     };
   }
 }

@@ -32,28 +32,28 @@ namespace aspect
     {
       struct FENormalIntegral
       {
-        double v=0.;
-        std::array<double,2> d {};
-        std::array<std::array<double,2>,2> h {};
+        double v = 0.;
+        std::array<double, 2> d {};
+        std::array<std::array<double, 2>, 2> h {};
       };
     }
     template<int dim> struct PhaseFieldFault<dim>::FENormalization
     {
       Vector<double> phase_values;
-      std::vector<double> values,action;
-      FullMatrix<double> derivative,derivative_scale;
+      std::vector<double> values, action;
+      FullMatrix<double> derivative, derivative_scale;
       std::vector<std::vector<internal::FENormalIntegral>> integrals;
-      bool admissible=true;
+      bool admissible = true;
     };
 
     template<int dim> struct PhaseFieldFault<dim>::FEStrainState
     {
       struct Ray
       {
-        std::array<types::global_dof_index,GeometryInfo<dim>::vertices_per_cell> dofs;
-        std::array<std::array<double,GeometryInfo<dim>::vertices_per_cell>,2> shape;
-        double length,lower;
-        template<class Archive> void serialize(Archive &archive,const unsigned int)
+        std::array<types::global_dof_index, GeometryInfo<dim>::vertices_per_cell> dofs;
+        std::array<std::array<double, GeometryInfo<dim>::vertices_per_cell>, 2> shape;
+        double length, lower;
+        template<class Archive> void serialize(Archive &archive, const unsigned int)
         {
           archive &dofs &shape &length &lower;
         }
@@ -61,17 +61,17 @@ namespace aspect
       struct Profile
       {
         unsigned int segment;
-        double xi,weight;
+        double xi, weight;
         std::vector<Ray> rays;
       };
       struct BulkPoint
       {
         CellId cell;
         Point<dim> x;
-        double weight,xi;
+        double weight, xi;
         unsigned int segment;
-        std::array<types::global_dof_index,GeometryInfo<dim>::vertices_per_cell> dofs;
-        std::array<double,GeometryInfo<dim>::vertices_per_cell> shape;
+        std::array<types::global_dof_index, GeometryInfo<dim>::vertices_per_cell> dofs;
+        std::array<double, GeometryInfo<dim>::vertices_per_cell> shape;
       };
       // The FE option's velocity block is authoritative d_R. In the fixed-profile
       // DG option that block stays zero: only the phase/geometry/Z/I data are
@@ -86,51 +86,51 @@ namespace aspect
       unsigned int objective_step = numbers::invalid_unsigned_int;
       // Z is slip memory in mature mode, independently of zero cohesive
       // traction. In the cohesive P2 option Z = I_h * tau_coh.
-      std::vector<double> Z,I;
-      double shear_sense=1.;
+      std::vector<double> Z, I;
+      double shear_sense = 1.;
       std::vector<Profile> profiles;
       std::vector<BulkPoint> bulk;
       FullMatrix<double> projection;
-      std::map<CellId,typename DoFHandler<dim>::active_cell_iterator> cells,evaluation_cells;
-      unsigned long long n_cells_global=0,n_particles_global=0;
-      std::map<types::particle_index,Point<dim>> particles;
+      std::map<CellId, typename DoFHandler<dim>::active_cell_iterator> cells, evaluation_cells;
+      unsigned long long n_cells_global = 0, n_particles_global = 0;
+      std::map<types::particle_index, Point<dim>> particles;
       std::vector<Point<dim>> vertices;
       std::vector<Point<dim>> mesh_vertices;
       // Derived point samples of the immutable FE anchor. This cache never
       // transfers samples back into d_R and is invalidated at publication.
-      mutable std::map<std::pair<CellId,std::array<double,dim>>,SymmetricTensor<2,dim>> stress_samples;
+      mutable std::map<std::pair<CellId, std::array<double, dim>>, SymmetricTensor<2, dim>> stress_samples;
       struct ParticleSamples;
       mutable std::shared_ptr<ParticleSamples> particle_samples;
       struct MechanicalSamples;
       mutable std::shared_ptr<MechanicalSamples> mechanical_samples;
       std::uint64_t geometry_version;
       types::global_dof_index n_dofs;
-      double m=0.,G=0.,eta=0.,initial_fracture=0.;
-      unsigned int committed_step=0;
-      std::uint64_t accepted_publications=0;
+      double m = 0., G = 0., eta = 0., initial_fracture = 0.;
+      unsigned int committed_step = 0;
+      std::uint64_t accepted_publications = 0;
       // Prescribed geometry commits are not physical Maxwell publications.
-      std::uint64_t geometry_publications=0;
+      std::uint64_t geometry_publications = 0;
     };
 
     template<int dim> struct PhaseFieldFault<dim>::FEStrainUpdate
     {
       LinearAlgebra::BlockVector displacement_history;
       std::shared_ptr<DGHistory> dg_history;
-      std::vector<double>Z,I;
+      std::vector<double>Z, I;
       // Only PF5 candidates use these publication preconditions.
       std::shared_ptr<const DGHistory> dg_parent;
-      std::vector<double> dg_cohesive,dg_rates;
-      unsigned int dg_step=0;
-      double dg_time=0.,dg_dt=0.;
+      std::vector<double> dg_cohesive, dg_rates;
+      unsigned int dg_step = 0;
+      double dg_time = 0., dg_dt = 0.;
     };
 
     template<int dim> struct DGGeometryUpdate
     {
-      std::shared_ptr<typename PhaseFieldFault<dim>::FEStrainState> incoming,next;
+      std::shared_ptr<typename PhaseFieldFault<dim>::FEStrainState> incoming, next;
       std::shared_ptr<ReconstructedFaultManager<dim>> manager;
-      std::vector<std::vector<double>> normalization,surface_temperatures;
+      std::vector<std::vector<double>> normalization, surface_temperatures;
       std::string parent_surface;
-      bool published=false,identity=false;
+      bool published = false, identity = false;
     };
 
 

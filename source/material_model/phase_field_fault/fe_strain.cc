@@ -45,140 +45,141 @@ namespace aspect
     {
       if (fe_initial_phase_profile.empty() && !uses_prescribed_dg_geometry() && !dg_material_transport)
         return false;
-      AssertThrow((consistent_endpoint_phase || dg_material_transport) && this->get_timestep_number()==0
+      AssertThrow((consistent_endpoint_phase || dg_material_transport) && this->get_timestep_number() == 0
                   && !this->get_parameters().resume_computation && !fe_strain_state,
                   ExcMessage("Shared profile is fresh pre-existing damage; history conversion is prohibited."));
       std::ifstream input(fe_initial_phase_profile);
-      AssertThrow(dg_material_transport || uses_prescribed_dg_geometry() || bool(input),ExcMessage("Cannot open FE initial phase profile."));
-      std::vector<std::pair<double,double>> data;
-      double y,value;
-      while (!dg_material_transport && !uses_prescribed_dg_geometry() && input>>y>>value)
+      AssertThrow(dg_material_transport || uses_prescribed_dg_geometry() || bool(input), ExcMessage("Cannot open FE initial phase profile."));
+      std::vector<std::pair<double, double>> data;
+      double y, value;
+      while (!dg_material_transport && !uses_prescribed_dg_geometry() && input >> y >> value)
         {
-          AssertThrow(std::isfinite(y) && value>=0. && value<1.
-                      && (data.empty() || y>data.back().first),ExcMessage("Invalid shared phase data."));
-          data.emplace_back(y,value);
+          AssertThrow(std::isfinite(y) && value >= 0. && value < 1.
+                      && (data.empty() || y > data.back().first), ExcMessage("Invalid shared phase data."));
+          data.emplace_back(y, value);
         }
-      AssertThrow(dg_material_transport || uses_prescribed_dg_geometry() || (input.eof() && data.size()>=2),ExcMessage("Malformed shared phase data."));
-      LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
-      owned=trial;
-      const auto component=this->introspection().variable("phase_field").first_component_index;
+      AssertThrow(dg_material_transport || uses_prescribed_dg_geometry() || (input.eof() && data.size() >= 2), ExcMessage("Malformed shared phase data."));
+      LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
+      owned = trial;
+      const auto component = this->introspection().variable("phase_field").first_component_index;
       std::vector<types::global_dof_index> indices(this->get_fe().n_dofs_per_cell());
-      for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+      for (const auto &cell : this->get_dof_handler().active_cell_iterators())
         if (!cell->is_artificial())
           {
             cell->get_dof_indices(indices);
-            for (unsigned int v=0; v<GeometryInfo<dim>::vertices_per_cell; ++v)
+            for (unsigned int v = 0; v < GeometryInfo<dim>::vertices_per_cell; ++v)
               {
-                const auto i=indices[this->get_fe().component_to_system_index(component,v)];
+                const auto i = indices[this->get_fe().component_to_system_index(component, v)];
                 if (!owned.locally_owned_elements().is_element(i))
                   continue;
-                if(uses_prescribed_dg_geometry() || dg_material_transport)
+                if (uses_prescribed_dg_geometry() || dg_material_transport)
                   {
-                    const double phi=dg_material_transport ? material_initial_phase.value(cell->vertex(v)) : prescribed_geometry_phase(cell->vertex(v));
-                    AssertThrow(std::isfinite(phi) && phi>=0. && phi<1.,ExcMessage("Inadmissible prescribed physical phase."));
-                    owned[i]=phi;
+                    const double phi = dg_material_transport ? material_initial_phase.value(cell->vertex(v)) : prescribed_geometry_phase(cell->vertex(v));
+                    AssertThrow(std::isfinite(phi) && phi >= 0. && phi < 1., ExcMessage("Inadmissible prescribed physical phase."));
+                    owned[i] = phi;
                     continue;
                   }
-                const double yy=cell->vertex(v)[1];
-                AssertThrow(yy>=data.front().first && yy<=data.back().first,
+                const double yy = cell->vertex(v)[1];
+                AssertThrow(yy >= data.front().first && yy <= data.back().first,
                             ExcMessage("Shared phase profile does not cover the domain."));
-                auto right=std::upper_bound(data.begin(),data.end(),yy,[](double x,const auto &p)
+                auto right = std::upper_bound(data.begin(), data.end(), yy, [](double x, const auto & p)
                 {
-                  return x<p.first;
+                  return x < p.first;
                 });
-                if (right==data.end())
-                  owned[i]=data.back().second;
-                else if (right==data.begin())
-                  owned[i]=right->second;
+                if (right == data.end())
+                  owned[i] = data.back().second;
+                else if (right == data.begin())
+                  owned[i] = right->second;
                 else
                   {
-                    const auto &left=*(right-1);
-                    const double t=(yy-left.first)/(right->first-left.first);
-                    owned[i]=(1-t)*left.second+t*right->second;
+                    const auto &left = *(right - 1);
+                    const double t = (yy - left.first) / (right->first - left.first);
+                    owned[i] = (1 - t) * left.second + t * right->second;
                   }
               }
           }
       owned.compress(VectorOperation::insert);
-      trial=owned;
-      this->get_pcout()<<"   Accepted supplied continuum phase seed; native particle H retained as diagnostic, unloaded independent histories constructed afterward."<<std::endl;
+      trial = owned;
+      this->get_pcout() << "   Accepted supplied continuum phase seed; native particle H retained as diagnostic, unloaded independent histories constructed afterward." << std::endl;
       return true;
     }
     template<int dim> Quadrature<dim> PhaseFieldFault<dim>::mechanical_quadrature() const
     {
-      if(bulk_cohesive_phase)
+      if (bulk_cohesive_phase)
         return QGauss<dim>(fe_bulk_normal_quadrature_points);
       // Explicit higher-order mature particle controls share the same rule.
       // The default (three) retains the native particle quadrature exactly.
       if (!uses_independent_bulk_history()
           && !(mature_frictional_fault && fe_bulk_normal_quadrature_points > 3))
         return this->introspection().quadratures.velocities;
-      AssertThrow(dim==2,ExcNotImplemented());
+      AssertThrow(dim == 2, ExcNotImplemented());
       // One tensor-product rule is used by every mature bulk operator, also
       // on dipping graded cells. Do not rotate P2's horizontal panel rule.
       if (mature_frictional_fault)
         return QGauss<dim>(std::max(fe_bulk_normal_quadrature_points,
-                                    this->get_fe().degree+1));
-      const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
-      const auto extent=box.get_extents();
-      auto cell=this->get_dof_handler().begin_active();
-      while (cell!=this->get_dof_handler().end() && !cell->is_locally_owned())
+                                    this->get_fe().degree + 1));
+      const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
+      const auto extent = box.get_extents();
+      auto cell = this->get_dof_handler().begin_active();
+      while (cell != this->get_dof_handler().end() && !cell->is_locally_owned())
         ++cell;
-      AssertThrow(cell!=this->get_dof_handler().end(),ExcMessage("Endpoint rank owns no bulk cells."));
-      const double dx=cell->vertex(1)[0]-cell->vertex(0)[0];
-      const double dy=cell->vertex(2)[1]-cell->vertex(0)[1];
-      unsigned int n=std::lround(extent[0]/dx);
-      const unsigned int ny=std::lround(extent[1]/dy);
-      const auto &faults=this->get_reconstructed_fault_manager().get_faults();
+      AssertThrow(cell != this->get_dof_handler().end(), ExcMessage("Endpoint rank owns no bulk cells."));
+      const double dx = cell->vertex(1)[0] - cell->vertex(0)[0];
+      const double dy = cell->vertex(2)[1] - cell->vertex(0)[1];
+      unsigned int n = std::lround(extent[0] / dx);
+      const unsigned int ny = std::lround(extent[1] / dy);
+      const auto &faults = this->get_reconstructed_fault_manager().get_faults();
       // A global topology test is identical on every rank and needs no
       // collective inside cell assembly. On local dyadic refinement use the
       // coarse-grid panel count conservatively on every reference cell. This
       // resolves every fixed-surface knot; extra subdivisions on children are
       // harmless. Preserve the previous rule exactly on uniform meshes.
-      const auto repetitions=box.get_repetitions();
-      const unsigned long long uniform_finest=static_cast<unsigned long long>(repetitions[0])*repetitions[1]
-        *(1ull<<(dim*(this->get_triangulation().n_global_levels()-1)));
-      const bool local=dg_accepted_history && consistent_endpoint_phase
-                       && uniform_finest!=this->get_triangulation().n_global_active_cells();
+      const auto repetitions = box.get_repetitions();
+      const unsigned long long uniform_finest = static_cast<unsigned long long>(repetitions[0]) * repetitions[1]
+                                                * (1ull << (dim * (this->get_triangulation().n_global_levels() - 1)));
+      const bool local = dg_accepted_history && consistent_endpoint_phase
+                         && uniform_finest != this->get_triangulation().n_global_active_cells();
       // Before initial geometry construction no mechanical assembly is allowed.
-      AssertThrow((local || n*ny==this->get_triangulation().n_global_active_cells()) && faults.size()==1,
+      AssertThrow((local || n * ny == this->get_triangulation().n_global_active_cells()) && faults.size() == 1,
                   ExcMessage("FE strain quadrature requires a uniform Cartesian grid and one fault."));
-      if(local)n=repetitions[0];
-      const unsigned int ns=faults[0].n_cells();
-      if(uses_prescribed_dg_geometry())
+      if (local)
+        n = repetitions[0];
+      const unsigned int ns = faults[0].n_cells();
+      if (uses_prescribed_dg_geometry())
         {
-          const double ds=faults[0].vertex(1)[0]-faults[0].vertex(0)[0];
-          const unsigned int panels=std::lround(dx/ds);
-          AssertThrow(panels>0 && std::abs(panels*ds-dx)<1e-13,
+          const double ds = faults[0].vertex(1)[0] - faults[0].vertex(0)[0];
+          const unsigned int panels = std::lround(dx / ds);
+          AssertThrow(panels > 0 && std::abs(panels * ds - dx) < 1e-13,
                       ExcMessage("Prescribed append quadrature requires fixed aligned uniform surface knots."));
-          if constexpr(dim==2)
-            return QAnisotropic<2>(QIterated<1>(QGauss<1>(8),panels),QGauss<1>(fe_bulk_normal_quadrature_points));
-          else AssertThrow(false,ExcNotImplemented());
+          if constexpr(dim == 2)
+            return QAnisotropic<2>(QIterated<1>(QGauss<1>(8), panels), QGauss<1>(fe_bulk_normal_quadrature_points));
+          else AssertThrow(false, ExcNotImplemented());
         }
-      const unsigned int panels=std::lcm(n,ns)/n;
+      const unsigned int panels = std::lcm(n, ns) / n;
       // One rule supplies mechanics, the slip map and its adjoint, and the
       // bulk part of the phase functional. Normalization/CPDI stay separate.
       // Resolve tangential polynomial products as well as sharp Q1 panels.
-      const unsigned int tangential_points = std::max(3u,this->get_fe().degree+1);
-      QIterated<1>x(QGauss<1>(tangential_points),panels);
+      const unsigned int tangential_points = std::max(3u, this->get_fe().degree + 1);
+      QIterated<1>x(QGauss<1>(tangential_points), panels);
       QGauss<1>y(fe_bulk_normal_quadrature_points);
       std::vector<Point<dim>>points;
       std::vector<double>weights;
-      for (unsigned int i=0; i<x.size(); ++i)
-        for (unsigned int j=0; j<y.size(); ++j)
+      for (unsigned int i = 0; i < x.size(); ++i)
+        for (unsigned int j = 0; j < y.size(); ++j)
           {
             Point<dim>p;
-            p[0]=x.point(i)[0];
-            p[1]=y.point(j)[0];
+            p[0] = x.point(i)[0];
+            p[1] = y.point(j)[0];
             points.push_back(p);
             weights.push_back(x.weight(i)*y.weight(j));
           }
-      return Quadrature<dim>(points,weights);
+      return Quadrature<dim>(points, weights);
     }
 
     template<int dim> const LinearAlgebra::BlockVector &
     PhaseFieldFault<dim>::accepted_fe_strain_state() const
     {
-      AssertThrow(fe_strain_state,ExcMessage("FE strain history has not been initialized."));
+      AssertThrow(fe_strain_state, ExcMessage("FE strain history has not been initialized."));
       return fe_strain_state->displacement_history;
     }
 
@@ -186,36 +187,36 @@ namespace aspect
     {
       AssertThrow(!benchmark_retained_stress && fe_strain_state,
                   ExcMessage("FE strain cannot consume an external stress override or missing accepted state."));
-      const auto &s=*fe_strain_state;
-      const auto &faults=this->get_reconstructed_fault_manager().get_faults();
-      AssertThrow(this->get_dof_handler().n_dofs()==s.n_dofs && faults.size()==1
-                  && faults[0].geometry_version()==s.geometry_version && faults[0].n_vertices()==s.vertices.size()
-                  && this->get_triangulation().n_global_active_cells()==s.n_cells_global,
+      const auto &s = *fe_strain_state;
+      const auto &faults = this->get_reconstructed_fault_manager().get_faults();
+      AssertThrow(this->get_dof_handler().n_dofs() == s.n_dofs && faults.size() == 1
+                  && faults[0].geometry_version() == s.geometry_version && faults[0].n_vertices() == s.vertices.size()
+                  && this->get_triangulation().n_global_active_cells() == s.n_cells_global,
                   ExcMessage("Accepted FE strain rejects mesh/geometry changes."));
-      for (unsigned int i=0; i<s.vertices.size(); ++i)
-        AssertThrow(faults[0].vertex(i)==s.vertices[i],ExcMessage("Accepted FE strain geometry changed."));
-      AssertThrow(this->get_triangulation().get_vertices()==s.mesh_vertices,
+      for (unsigned int i = 0; i < s.vertices.size(); ++i)
+        AssertThrow(faults[0].vertex(i) == s.vertices[i], ExcMessage("Accepted FE strain geometry changed."));
+      AssertThrow(this->get_triangulation().get_vertices() == s.mesh_vertices,
                   ExcMessage("Accepted FE strain rejects mesh motion."));
       if (mature_frictional_fault || dg_tensor_history)
         {
-          AssertThrow(this->get_reconstructed_fault_manager().get_shear_sense(0)==s.shear_sense,
+          AssertThrow(this->get_reconstructed_fault_manager().get_shear_sense(0) == s.shear_sense,
                       ExcMessage("Fixed-profile native history rejects slip orientation changes."));
           if (!consistent_endpoint_phase || uses_prescribed_dg_geometry())
             {
-              const unsigned int phase_block=this->introspection().variable("phase_field").block_index;
-              AssertThrow(s.displacement_history.block(phase_block)==this->get_solution().block(phase_block),
+              const unsigned int phase_block = this->introspection().variable("phase_field").block_index;
+              AssertThrow(s.displacement_history.block(phase_block) == this->get_solution().block(phase_block),
                           ExcMessage("Fixed-profile native history requires the unchanged accepted phase profile."));
-              AssertThrow(current_normalization_integrals.at(0)==s.I,
+              AssertThrow(current_normalization_integrals.at(0) == s.I,
                           ExcMessage("Fixed-profile native history requires unchanged normalization."));
             }
         }
-      const auto &particles=this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler();
-      AssertThrow(particles.n_global_particles()==s.n_particles_global,ExcMessage("Accepted FE strain rejects particle birth/deletion."));
-      unsigned int fixed_particles=1;
-      for (const auto &p:particles)
-        if (!s.particles.count(p.get_id()) || s.particles.at(p.get_id())!=p.get_location())
-          fixed_particles=0;
-      AssertThrow(Utilities::MPI::min(fixed_particles,this->get_mpi_communicator())==1,
+      const auto &particles = this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler();
+      AssertThrow(particles.n_global_particles() == s.n_particles_global, ExcMessage("Accepted FE strain rejects particle birth/deletion."));
+      unsigned int fixed_particles = 1;
+      for (const auto &p : particles)
+        if (!s.particles.count(p.get_id()) || s.particles.at(p.get_id()) != p.get_location())
+          fixed_particles = 0;
+      AssertThrow(Utilities::MPI::min(fixed_particles, this->get_mpi_communicator()) == 1,
                   ExcMessage("Accepted FE strain rejects history transport."));
     }
 
@@ -228,358 +229,360 @@ namespace aspect
           validate_fe_strain_restrictions();
           return;
         }
-      AssertThrow(((this->get_timestep_number()==0 && !this->get_parameters().resume_computation)
+      AssertThrow(((this->get_timestep_number() == 0 && !this->get_parameters().resume_computation)
                    || (restoring && dg_accepted_history && this->get_parameters().resume_computation)
                    || (transferring && dg_accepted_history && (consistent_endpoint_phase || jaumann_dg_stress)))
                   && Plugins::plugin_type_matches<GeometryModel::Box<dim>>(this->get_geometry_model())
                   && !benchmark_retained_stress
-                  && (mature_frictional_fault || normalization_surface_subdivisions==1),
+                  && (mature_frictional_fault || normalization_surface_subdivisions == 1),
                   ExcMessage("FE strain initializes only on a fresh fixed Cartesian Box without stress overrides."));
-      auto state=std::make_shared<FEStrainState>();
+      auto state = std::make_shared<FEStrainState>();
       state->displacement_history.reinit(this->get_solution());
-      state->displacement_history=0.;
-      const auto &intro=this->introspection();
-      const unsigned int b=intro.variable("phase_field").block_index;
-      state->displacement_history.block(b)=this->get_solution().block(b);
-      const auto phase_offset=state->displacement_history.get_block_indices().block_start(b);
+      state->displacement_history = 0.;
+      const auto &intro = this->introspection();
+      const unsigned int b = intro.variable("phase_field").block_index;
+      state->displacement_history.block(b) = this->get_solution().block(b);
+      const auto phase_offset = state->displacement_history.get_block_indices().block_start(b);
       if (!mature_frictional_fault)
-        for (auto i:state->displacement_history.block(b).locally_owned_elements())
-          if(this->get_current_constraints().is_constrained(phase_offset+i))
+        for (auto i : state->displacement_history.block(b).locally_owned_elements())
+          if (this->get_current_constraints().is_constrained(phase_offset + i))
             {
-              const auto *entries=this->get_current_constraints().get_constraint_entries(phase_offset+i);
-              double sum=0.;
-              bool admissible=dg_accepted_history && consistent_endpoint_phase && entries && !entries->empty()
-                              && this->get_current_constraints().get_inhomogeneity(phase_offset+i)==0.;
-              if(entries)for(const auto &entry:*entries)
+              const auto *entries = this->get_current_constraints().get_constraint_entries(phase_offset + i);
+              double sum = 0.;
+              bool admissible = dg_accepted_history && consistent_endpoint_phase && entries && !entries->empty()
+                                && this->get_current_constraints().get_inhomogeneity(phase_offset + i) == 0.;
+              if (entries)
+                for (const auto &entry : *entries)
                   {
-                    admissible=admissible && entry.first>=phase_offset
-                               && entry.first<phase_offset+state->displacement_history.block(b).size() && entry.second>=0.;
-                    sum+=entry.second;
+                    admissible = admissible && entry.first >= phase_offset
+                                 && entry.first < phase_offset + state->displacement_history.block(b).size() && entry.second >= 0.;
+                    sum += entry.second;
                   }
-              AssertThrow(admissible && std::abs(sum-1.)<=32*std::numeric_limits<double>::epsilon(),
+              AssertThrow(admissible && std::abs(sum - 1.) <= 32 * std::numeric_limits<double>::epsilon(),
                           ExcMessage("Native DG remap permits only convex homogeneous phase hanging-node constraints."));
             }
-      state->mesh_vertices=this->get_triangulation().get_vertices();
-      state->G=elastic_shear_moduli[0];
-      state->eta=reference_viscosities[0];
-      state->n_dofs=this->get_dof_handler().n_dofs();
-      state->n_cells_global=this->get_triangulation().n_global_active_cells();
-      const auto &fault=this->get_reconstructed_fault_manager().get_fault(0);
-      state->geometry_version=fault.geometry_version();
-      state->shear_sense=this->get_reconstructed_fault_manager().get_shear_sense(0);
-      const unsigned int ns=fault.n_cells();
-      for (unsigned int i=0; i<fault.n_vertices(); ++i)
+      state->mesh_vertices = this->get_triangulation().get_vertices();
+      state->G = elastic_shear_moduli[0];
+      state->eta = reference_viscosities[0];
+      state->n_dofs = this->get_dof_handler().n_dofs();
+      state->n_cells_global = this->get_triangulation().n_global_active_cells();
+      const auto &fault = this->get_reconstructed_fault_manager().get_fault(0);
+      state->geometry_version = fault.geometry_version();
+      state->shear_sense = this->get_reconstructed_fault_manager().get_shear_sense(0);
+      const unsigned int ns = fault.n_cells();
+      for (unsigned int i = 0; i < fault.n_vertices(); ++i)
         {
           if (!mature_frictional_fault && !uses_prescribed_dg_geometry())
-            AssertThrow(std::abs(fault.vertex(i)[0]-double(i)/ns)<1.e-13
-                        && fault.vertex(i)[1]==.5,ExcMessage("P2 FE strain requires a unit horizontal through-going fault."));
+            AssertThrow(std::abs(fault.vertex(i)[0] - double(i) / ns) < 1.e-13
+                        && fault.vertex(i)[1] == .5, ExcMessage("P2 FE strain requires a unit horizontal through-going fault."));
           state->vertices.push_back(fault.vertex(i));
         }
-      const auto &pm=this->get_phase_field_handler().get_associated_particle_manager();
-      const auto sp=pm.get_property_manager().get_data_info().get_position_by_field_name("maxwell stress");
-      state->n_particles_global=pm.get_particle_handler().n_global_particles();
-      for (const auto &p:pm.get_particle_handler())
+      const auto &pm = this->get_phase_field_handler().get_associated_particle_manager();
+      const auto sp = pm.get_property_manager().get_data_info().get_position_by_field_name("maxwell stress");
+      state->n_particles_global = pm.get_particle_handler().n_global_particles();
+      for (const auto &p : pm.get_particle_handler())
         {
-          for (unsigned int c=0; c<SymmetricTensor<2,dim>::n_independent_components; ++c)
-            AssertThrow(restoring || transferring || p.get_properties()[sp+c]==0.,ExcMessage("FE strain requires unloaded initial particle stress; no conversion is performed."));
-          state->particles[p.get_id()]=p.get_location();
+          for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
+            AssertThrow(restoring || transferring || p.get_properties()[sp + c] == 0., ExcMessage("FE strain requires unloaded initial particle stress; no conversion is performed."));
+          state->particles[p.get_id()] = p.get_location();
         }
       if (mature_frictional_fault)
         {
-          AssertThrow(this->get_reconstructed_fault_manager().get_faults().size()==1
-                      && ns>0,ExcMessage("Mature FE history requires one straight fault."));
-          Tensor<1,dim> tangent=fault.vertex(ns)-fault.vertex(0);
-          const double length=tangent.norm();
-          AssertThrow(std::isfinite(length) && length>0.,ExcMessage("Invalid mature fault length."));
-          tangent/=length;
-          for (const auto &vertex:state->vertices)
+          AssertThrow(this->get_reconstructed_fault_manager().get_faults().size() == 1
+                      && ns > 0, ExcMessage("Mature FE history requires one straight fault."));
+          Tensor<1, dim> tangent = fault.vertex(ns) - fault.vertex(0);
+          const double length = tangent.norm();
+          AssertThrow(std::isfinite(length) && length > 0., ExcMessage("Invalid mature fault length."));
+          tangent /= length;
+          for (const auto &vertex : state->vertices)
             {
-              const auto offset=vertex-fault.vertex(0);
-              AssertThrow(dg_material_transport || (offset-(offset*tangent)*tangent).norm()<=1.e-10*length,
+              const auto offset = vertex - fault.vertex(0);
+              AssertThrow(dg_material_transport || (offset - (offset * tangent)*tangent).norm() <= 1.e-10 * length,
                           ExcMessage("Mature FE history requires straight fixed geometry."));
             }
-          for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+          for (const auto &cell : this->get_dof_handler().active_cell_iterators())
             if (!cell->is_artificial())
               {
-                state->evaluation_cells.emplace(cell->id(),cell);
+                state->evaluation_cells.emplace(cell->id(), cell);
                 if (dg_tensor_history && cell->is_locally_owned())
                   {
-                    const auto vertices=this->get_mapping().get_vertices(cell);
-                    for (const unsigned int v:cell->vertex_indices())
-                      for (unsigned int d=0;d<dim;++d)
-                        AssertThrow(vertices.back()[d]>vertices.front()[d]
-                                    && vertices[v][d]==((v&(1u<<d))?vertices.back()[d]:vertices.front()[d]),
+                    const auto vertices = this->get_mapping().get_vertices(cell);
+                    for (const unsigned int v : cell->vertex_indices())
+                      for (unsigned int d = 0; d < dim; ++d)
+                        AssertThrow(vertices.back()[d] > vertices.front()[d]
+                                    && vertices[v][d] == ((v & (1u << d)) ? vertices.back()[d] : vertices.front()[d]),
                                     ExcMessage("Mature DG source requires affine Cartesian cells."));
-                    state->cells.emplace(cell->id(),cell);
+                    state->cells.emplace(cell->id(), cell);
                   }
               }
-          state->Z.assign(fault.n_vertices(),0.);
-          state->I=current_normalization_integrals.at(0);
-          AssertDimension(state->I.size(),state->Z.size());
-          for (const double I:state->I)
-            AssertThrow(std::isfinite(I) && I>0.,ExcMessage("Mature FE normalization is undefined."));
+          state->Z.assign(fault.n_vertices(), 0.);
+          state->I = current_normalization_integrals.at(0);
+          AssertDimension(state->I.size(), state->Z.size());
+          for (const double I : state->I)
+            AssertThrow(std::isfinite(I) && I > 0., ExcMessage("Mature FE normalization is undefined."));
           if (dg_tensor_history)
             initialize_dg_history(*state);
-          fe_strain_state=std::move(state);
+          fe_strain_state = std::move(state);
           validate_fe_strain_restrictions();
-          this->get_pcout()<<"   Accepted mature FE history: fixed geometry/mesh/particles, "
-                           <<"BP3 normalization retained; zero perturbation strain and slip memory."<<std::endl;
+          this->get_pcout() << "   Accepted mature FE history: fixed geometry/mesh/particles, "
+                            << "BP3 normalization retained; zero perturbation strain and slip memory." << std::endl;
           return;
         }
-      const auto fractions=std::vector<double>(elastic_shear_moduli.size(),1./elastic_shear_moduli.size());
-      state->m=(1./this->get_phase_field_handler().energetic_degradation(fractions,.5)-1.)/3.;
-      const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
-      const auto extent=box.get_extents(),origin=box.get_origin();
-      AssertThrow(extent[0]==1. && origin[0]==0. && extent[1]>0.
-                  && std::abs(origin[1]+extent[1]/2-.5)<1.e-13,
+      const auto fractions = std::vector<double>(elastic_shear_moduli.size(), 1. / elastic_shear_moduli.size());
+      state->m = (1. / this->get_phase_field_handler().energetic_degradation(fractions, .5) - 1.) / 3.;
+      const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
+      const auto extent = box.get_extents(), origin = box.get_origin();
+      AssertThrow(extent[0] == 1. && origin[0] == 0. && extent[1] > 0.
+                  && std::abs(origin[1] + extent[1] / 2 - .5) < 1.e-13,
                   ExcMessage("FE strain requires unit tangential width and a normal Box centered on y=0.5."));
       prepare_fe_normalization_geometry(*state);
-      const auto quad=mechanical_quadrature();
-      FEValues<dim>fe(this->get_mapping(),this->get_fe(),quad,update_values|update_quadrature_points|update_JxW_values);
+      const auto quad = mechanical_quadrature();
+      FEValues<dim>fe(this->get_mapping(), this->get_fe(), quad, update_values | update_quadrature_points | update_JxW_values);
       std::vector<types::global_dof_index>ids(this->get_fe().dofs_per_cell);
-      const auto pc=intro.variable("phase_field").first_component_index;
-      auto first=this->get_dof_handler().begin_active();
-      while (first!=this->get_dof_handler().end() && !first->is_locally_owned())
+      const auto pc = intro.variable("phase_field").first_component_index;
+      auto first = this->get_dof_handler().begin_active();
+      while (first != this->get_dof_handler().end() && !first->is_locally_owned())
         ++first;
-      AssertThrow(first!=this->get_dof_handler().end(),ExcMessage("Endpoint rank owns no bulk cells."));
-      std::array<double,dim> spacing {};
-      spacing[0]=first->vertex(1)[0]-first->vertex(0)[0];
-      spacing[1]=first->vertex(2)[1]-first->vertex(0)[1];
-      for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+      AssertThrow(first != this->get_dof_handler().end(), ExcMessage("Endpoint rank owns no bulk cells."));
+      std::array<double, dim> spacing {};
+      spacing[0] = first->vertex(1)[0] - first->vertex(0)[0];
+      spacing[1] = first->vertex(2)[1] - first->vertex(0)[1];
+      for (const auto &cell : this->get_dof_handler().active_cell_iterators())
         {
           if (cell->is_artificial())
             continue;
-          state->evaluation_cells.emplace(cell->id(),cell);
+          state->evaluation_cells.emplace(cell->id(), cell);
           if (!cell->is_locally_owned())
             continue;
           fe.reinit(cell);
           cell->get_dof_indices(ids);
-          state->cells.emplace(cell->id(),cell);
-          for (const auto v:cell->vertex_indices())
-            for (unsigned int d=0; d<dim; ++d)
+          state->cells.emplace(cell->id(), cell);
+          for (const auto v : cell->vertex_indices())
+            for (unsigned int d = 0; d < dim; ++d)
               {
-                const double width=cell->vertex(1u<<d)[d]-cell->vertex(0)[d];
-                const double expected=cell->vertex(0)[d]+((v>>d)&1u)*width;
-                const double coordinate=(cell->vertex(v)[d]-origin[d])/spacing[d];
+                const double width = cell->vertex(1u << d)[d] - cell->vertex(0)[d];
+                const double expected = cell->vertex(0)[d] + ((v >> d) & 1u) * width;
+                const double coordinate = (cell->vertex(v)[d] - origin[d]) / spacing[d];
                 AssertThrow((dg_accepted_history && consistent_endpoint_phase
-                             ? width>0. && std::abs(cell->vertex(v)[d]-expected)<1.e-13
-                             : std::abs(coordinate-std::round(coordinate))<1.e-12)
-                            && cell->vertex(v)[d]>=origin[d]
-                            && cell->vertex(v)[d]<=origin[d]+extent[d],
+                             ? width > 0. && std::abs(cell->vertex(v)[d] - expected) < 1.e-13
+                             : std::abs(coordinate - std::round(coordinate)) < 1.e-12)
+                            && cell->vertex(v)[d] >= origin[d]
+                            && cell->vertex(v)[d] <= origin[d] + extent[d],
                             ExcMessage("FE strain requires a fixed uniform Cartesian Box mesh."));
               }
           AssertThrow((dg_accepted_history && consistent_endpoint_phase)
-                      || (std::abs(cell->vertex(1)[0]-cell->vertex(0)[0]-spacing[0])<1.e-13
-                      && std::abs(cell->vertex(2)[1]-cell->vertex(0)[1]-spacing[1])<1.e-13),
+                      || (std::abs(cell->vertex(1)[0] - cell->vertex(0)[0] - spacing[0]) < 1.e-13
+                          && std::abs(cell->vertex(2)[1] - cell->vertex(0)[1] - spacing[1]) < 1.e-13),
                       ExcMessage("FE strain cell sizes must be uniform."));
-          if(dg_accepted_history && consistent_endpoint_phase)
+          if (dg_accepted_history && consistent_endpoint_phase)
             {
-              const unsigned int panels=quad.size()/fe_bulk_normal_quadrature_points/std::max(3u,this->get_fe().degree+1);
-              for(unsigned int j=1;j<ns;++j)
-                if(!uses_prescribed_dg_geometry() && double(j)/ns>cell->vertex(0)[0] && double(j)/ns<cell->vertex(1)[0])
+              const unsigned int panels = quad.size() / fe_bulk_normal_quadrature_points / std::max(3u, this->get_fe().degree + 1);
+              for (unsigned int j = 1; j < ns; ++j)
+                if (!uses_prescribed_dg_geometry() && double(j) / ns > cell->vertex(0)[0] && double(j) / ns < cell->vertex(1)[0])
                   {
-                    const double t=panels*(double(j)/ns-cell->vertex(0)[0])/(cell->vertex(1)[0]-cell->vertex(0)[0]);
-                    AssertThrow(std::abs(t-std::round(t))<1.e-12,ExcMessage("Physical quadrature must split fixed-surface knots."));
+                    const double t = panels * (double(j) / ns - cell->vertex(0)[0]) / (cell->vertex(1)[0] - cell->vertex(0)[0]);
+                    AssertThrow(std::abs(t - std::round(t)) < 1.e-12, ExcMessage("Physical quadrature must split fixed-surface knots."));
                   }
             }
-          for (unsigned int q=0; q<quad.size(); ++q)
+          for (unsigned int q = 0; q < quad.size(); ++q)
             {
               typename FEStrainState::BulkPoint p;
-              p.cell=cell->id();
-              p.x=fe.quadrature_point(q);
-              p.weight=fe.JxW(q);
+              p.cell = cell->id();
+              p.x = fe.quadrature_point(q);
+              p.weight = fe.JxW(q);
               if (consistent_endpoint_phase)
-                AssertThrow(this->get_gravity_model().gravity_vector(p.x).norm()==0.,
+                AssertThrow(this->get_gravity_model().gravity_vector(p.x).norm() == 0.,
                             ExcMessage("Endpoint reduced potential requires the unloaded verification fixture without body forces."));
-              p.segment=std::min(ns-1,static_cast<unsigned int>(p.x[0]*ns));
-              p.xi=p.x[0]*ns-p.segment;
-              if(uses_prescribed_dg_geometry())
+              p.segment = std::min(ns - 1, static_cast<unsigned int>(p.x[0] * ns));
+              p.xi = p.x[0] * ns - p.segment;
+              if (uses_prescribed_dg_geometry())
                 {
-                  const auto source=this->get_reconstructed_fault_manager().project_to_normal_profiles(p.x);
-                  p.segment=source.active ? source.segment_index:numbers::invalid_unsigned_int;
-                  p.xi=source.active ? source.xi:0.;
+                  const auto source = this->get_reconstructed_fault_manager().project_to_normal_profiles(p.x);
+                  p.segment = source.active ? source.segment_index : numbers::invalid_unsigned_int;
+                  p.xi = source.active ? source.xi : 0.;
                 }
-              for (unsigned int v=0; v<p.dofs.size(); ++v)
+              for (unsigned int v = 0; v < p.dofs.size(); ++v)
                 {
-                  const auto j=this->get_fe().component_to_system_index(pc,v);
-                  p.dofs[v]=ids[j]-phase_offset;
-                  p.shape[v]=fe.shape_value_component(j,q,pc);
+                  const auto j = this->get_fe().component_to_system_index(pc, v);
+                  p.dofs[v] = ids[j] - phase_offset;
+                  p.shape[v] = fe.shape_value_component(j, q, pc);
                 }
               state->bulk.push_back(p);
             }
         }
-      std::stable_sort(state->bulk.begin(),state->bulk.end(),
-                       [](const auto&a,const auto&b)
+      std::stable_sort(state->bulk.begin(), state->bulk.end(),
+                       [](const auto & a, const auto & b)
       {
-        return a.cell<b.cell;
+        return a.cell < b.cell;
       });
-      state->Z.assign(ns+1,0.);
-      state->I=current_normalization_integrals.at(0);
-      fe_strain_state=state;
+      state->Z.assign(ns + 1, 0.);
+      state->I = current_normalization_integrals.at(0);
+      fe_strain_state = state;
       validate_fe_strain_restrictions();
-      const auto initial=evaluate_fe_normalization(this->get_solution(),false);
-      AssertThrow(initial.admissible,ExcMessage("Initial FE strain normalization is undefined."));
+      const auto initial = evaluate_fe_normalization(this->get_solution(), false);
+      AssertThrow(initial.admissible, ExcMessage("Initial FE strain normalization is undefined."));
       if (uses_prescribed_dg_geometry() && transferring)
         {
           // Geometry rebuilding is fresh normalization construction, not an
           // assertion that the generic bootstrap integrator was the accepted
           // FE operator. Retain both results for the bounded comparison.
-          std::ofstream comparison(this->get_output_directory()+"geometry-normalization-bootstrap.csv",std::ios::app);
-          if(comparison.tellp()==0)comparison<<"tip,vertex,bootstrap,canonical_FE\n";
-          comparison<<std::setprecision(17);
-          for(unsigned int j=0;j<state->I.size();++j)
-            comparison<<state->vertices.back()[0]<<','<<j<<','<<state->I[j]<<','<<initial.values[j]<<'\n';
+          std::ofstream comparison(this->get_output_directory() + "geometry-normalization-bootstrap.csv", std::ios::app);
+          if (comparison.tellp() == 0)
+            comparison << "tip,vertex,bootstrap,canonical_FE\n";
+          comparison << std::setprecision(17);
+          for (unsigned int j = 0; j < state->I.size(); ++j)
+            comparison << state->vertices.back()[0] << ',' << j << ',' << state->I[j] << ',' << initial.values[j] << '\n';
         }
       if (!restoring && (!transferring || uses_prescribed_dg_geometry()))
         {
-          current_normalization_integrals[0]=initial.values;
-          state->I=initial.values;
-          if(!transferring)
+          current_normalization_integrals[0] = initial.values;
+          state->I = initial.values;
+          if (!transferring)
             {
               validate_cohesive_state_commit({state->Z});
               commit_cohesive_state({state->Z});
             }
         }
       else
-        for (unsigned int j=0; j<state->I.size(); ++j)
-          AssertThrow(std::abs(initial.values[j]-state->I[j])
-                      <=1.e-12*std::max(1.,std::abs(state->I[j])),
+        for (unsigned int j = 0; j < state->I.size(); ++j)
+          AssertThrow(std::abs(initial.values[j] - state->I[j])
+                      <= 1.e-12 * std::max(1., std::abs(state->I[j])),
                       ExcMessage("PF5 restored I_h disagrees with the fixed native profile."));
       if (dg_tensor_history)
         initialize_dg_history(*state);
-      this->get_pcout()<<std::setprecision(17)<<"   Accepted FE strain: G="<<state->G
-                       <<" eta="<<state->eta<<" lambda="<<state->eta/state->G<<" m="<<state->m
-                       <<" bulk QPs="<<state->bulk.size()<<" phase DoFs="<<state->displacement_history.block(b).size()<<'\n';
+      this->get_pcout() << std::setprecision(17) << "   Accepted FE strain: G=" << state->G
+                        << " eta=" << state->eta << " lambda=" << state->eta / state->G << " m=" << state->m
+                        << " bulk QPs=" << state->bulk.size() << " phase DoFs=" << state->displacement_history.block(b).size() << '\n';
     }
 
-    template<int dim> SymmetricTensor<2,dim> PhaseFieldFault<dim>::evaluate_fe_endpoint_stress(
-      const FEEndpointTrial &endpoint,const std::vector<double> &I,const CellId &cell,const Point<dim> &x) const
+    template<int dim> SymmetricTensor<2, dim> PhaseFieldFault<dim>::evaluate_fe_endpoint_stress(
+      const FEEndpointTrial &endpoint, const std::vector<double> &I, const CellId &cell, const Point<dim> &x) const
     {
       validate_fe_strain_restrictions();
       return dg_tensor_history
-             ? evaluate_dg_history_stress(*endpoint.dg_history,endpoint.Z,I,cell,x,nullptr,&endpoint.strain)
-             : evaluate_fe_strain_stress(endpoint.strain,endpoint.Z,I,cell,x);
+             ? evaluate_dg_history_stress(*endpoint.dg_history, endpoint.Z, I, cell, x, nullptr, &endpoint.strain)
+             : evaluate_fe_strain_stress(endpoint.strain, endpoint.Z, I, cell, x);
     }
 
-    template<int dim> SymmetricTensor<2,dim> PhaseFieldFault<dim>::retained_history_stress(
-      const CellId &id,const Point<dim> &x,const SymmetricTensor<2,dim> &legacy) const
+    template<int dim> SymmetricTensor<2, dim> PhaseFieldFault<dim>::retained_history_stress(
+      const CellId &id, const Point<dim> &x, const SymmetricTensor<2, dim> &legacy) const
     {
       if (!uses_independent_bulk_history())
-        return benchmark_retained_stress?benchmark_retained_stress(id,x):legacy;
-      AssertThrow(fe_strain_state && !benchmark_retained_stress,ExcMessage("FE strain needs its single accepted history."));
-      const auto &s=*fe_strain_state;
-      std::array<double,dim> coordinates;
-      for (unsigned int d=0; d<dim; ++d)
-        coordinates[d]=x[d];
-      const auto key=std::make_pair(id,coordinates);
-      const auto cached=s.stress_samples.find(key);
-      if (cached!=s.stress_samples.end())
+        return benchmark_retained_stress ? benchmark_retained_stress(id, x) : legacy;
+      AssertThrow(fe_strain_state && !benchmark_retained_stress, ExcMessage("FE strain needs its single accepted history."));
+      const auto &s = *fe_strain_state;
+      std::array<double, dim> coordinates;
+      for (unsigned int d = 0; d < dim; ++d)
+        coordinates[d] = x[d];
+      const auto key = std::make_pair(id, coordinates);
+      const auto cached = s.stress_samples.find(key);
+      if (cached != s.stress_samples.end())
         return cached->second;
       aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::history_cache_misses);
-      const bool incoming_objective=jaumann_dg_stress && s.committed_step!=this->get_timestep_number();
-      const auto history=incoming_objective ? s.objective_anchor : s.dg_history;
-      AssertThrow(!jaumann_dg_stress || history,ExcMessage("Objective DG mechanics requires its immutable per-attempt anchor."));
-      auto stress=dg_tensor_history
-                        ? evaluate_dg_history_stress(*history,s.Z,s.I,id,x)
-                        : evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,id,x);
-      if(incoming_objective && dg_material_reaction)
+      const bool incoming_objective = jaumann_dg_stress && s.committed_step != this->get_timestep_number();
+      const auto history = incoming_objective ? s.objective_anchor : s.dg_history;
+      AssertThrow(!jaumann_dg_stress || history, ExcMessage("Objective DG mechanics requires its immutable per-attempt anchor."));
+      auto stress = dg_tensor_history
+                    ? evaluate_dg_history_stress(*history, s.Z, s.I, id, x)
+                    : evaluate_fe_strain_stress(s.displacement_history, s.Z, s.I, id, x);
+      if (incoming_objective && dg_material_reaction)
         {
-          const double dt=this->get_timestep_number()>0 ? this->get_timestep() : initial_time_step;
-          const double beta=compute_maxwell_coefficients(material_viscosity(x,s.eta),s.G,dt).beta;
-          AssertThrow(beta>0.,ExcMessage("Material outer correction requires a resolved relaxation interval; reduce dt."));
-          stress+=material_reaction_correction(id,x)/beta;
+          const double dt = this->get_timestep_number() > 0 ? this->get_timestep() : initial_time_step;
+          const double beta = compute_maxwell_coefficients(material_viscosity(x, s.eta), s.G, dt).beta;
+          AssertThrow(beta > 0., ExcMessage("Material outer correction requires a resolved relaxation interval; reduce dt."));
+          stress += material_reaction_correction(id, x) / beta;
         }
-      s.stress_samples.emplace(key,stress);
+      s.stress_samples.emplace(key, stress);
       return stress;
     }
 
-    template<int dim> SymmetricTensor<2,dim> PhaseFieldFault<dim>::evaluate_fe_strain_stress(
-      const LinearAlgebra::BlockVector &state,const std::vector<double> &Znodes,
-      const std::vector<double> &Inodes,const CellId &id,const Point<dim> &x,double *evaluation_scale) const
+    template<int dim> SymmetricTensor<2, dim> PhaseFieldFault<dim>::evaluate_fe_strain_stress(
+      const LinearAlgebra::BlockVector &state, const std::vector<double> &Znodes,
+      const std::vector<double> &Inodes, const CellId &id, const Point<dim> &x, double *evaluation_scale) const
     {
-      const auto &s=*fe_strain_state;
-      const auto cell=s.evaluation_cells.at(id);
-      const auto unit=this->get_mapping().transform_real_to_unit_cell(cell,x);
-      FEValues<dim>fe(this->get_mapping(),this->get_fe(),Quadrature<dim>({unit}),update_values|update_gradients);
+      const auto &s = *fe_strain_state;
+      const auto cell = s.evaluation_cells.at(id);
+      const auto unit = this->get_mapping().transform_real_to_unit_cell(cell, x);
+      FEValues<dim>fe(this->get_mapping(), this->get_fe(), Quadrature<dim>({unit}), update_values | update_gradients);
       fe.reinit(cell);
-      std::vector<SymmetricTensor<2,dim>>R(1);
+      std::vector<SymmetricTensor<2, dim>>R(1);
       std::vector<double>phi(1);
-      fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(state,R);
-      fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(state,phi);
-      double profile_stress=0.;
-      SymmetricTensor<2,dim>S;
-      const auto &manager=this->get_reconstructed_fault_manager();
+      fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(state, R);
+      fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(state, phi);
+      double profile_stress = 0.;
+      SymmetricTensor<2, dim>S;
+      const auto &manager = this->get_reconstructed_fault_manager();
       if (mature_frictional_fault)
         {
           // The identical bulk-source map supplies mechanics and particle
           // publication, including constant endpoint continuation. It does
           // not admit additional particles to surface projection.
-          const auto source=manager.project_to_bulk_source(x);
+          const auto source = manager.project_to_bulk_source(x);
           if (source.active)
             {
-              const auto &fault=manager.get_fault(source.fault_index);
-              const auto j=source.segment_index;
-              const double t=source.xi;
-              const double Z=(1-t)*Znodes.at(j)+t*Znodes.at(j+1);
-              const double I=(1-t)*Inodes.at(j)+t*Inodes.at(j+1);
-              AssertThrow(std::isfinite(Z) && std::isfinite(I) && I>0.,
+              const auto &fault = manager.get_fault(source.fault_index);
+              const auto j = source.segment_index;
+              const double t = source.xi;
+              const double Z = (1 - t) * Znodes.at(j) + t * Znodes.at(j + 1);
+              const double I = (1 - t) * Inodes.at(j) + t * Inodes.at(j + 1);
+              AssertThrow(std::isfinite(Z) && std::isfinite(I) && I > 0.,
                           ExcMessage("Mature FE stress requires finite slip memory and positive normalization."));
-              Tensor<1,dim> tangent=fault.vertex(j+1)-fault.vertex(j);
-              tangent/=tangent.norm();
-              Tensor<1,dim> normal;
-              normal[0]=-tangent[1];
-              normal[1]=tangent[0];
-              S=manager.get_shear_sense(source.fault_index)*symmetrize(outer_product(tangent,normal));
-              const auto localization=evaluate_reconstructed_fault_localization(
-                                        source.fault_index,j,t,phi[0],phi[0],"mature FE stress");
-              profile_stress=2*Z*localization.current_h/I;
+              Tensor<1, dim> tangent = fault.vertex(j + 1) - fault.vertex(j);
+              tangent /= tangent.norm();
+              Tensor<1, dim> normal;
+              normal[0] = -tangent[1];
+              normal[1] = tangent[0];
+              S = manager.get_shear_sense(source.fault_index) * symmetrize(outer_product(tangent, normal));
+              const auto localization = evaluate_reconstructed_fault_localization(
+                                          source.fault_index, j, t, phi[0], phi[0], "mature FE stress");
+              profile_stress = 2 * Z * localization.current_h / I;
             }
         }
       else
         {
-          const auto ns=Znodes.size()-1;
-          const auto j=std::min<unsigned int>(ns-1,x[0]*ns);
-          const double t=x[0]*ns-j;
-          const double Z=(1-t)*Znodes[j]+t*Znodes[j+1],I=(1-t)*Inodes[j]+t*Inodes[j+1];
-          const double h=s.m*phi[0]*(1+phi[0])/std::pow(1-phi[0],2);
-          S[0][1]=.5*manager.get_shear_sense(0);
-          profile_stress=2*Z*h/I;
+          const auto ns = Znodes.size() - 1;
+          const auto j = std::min<unsigned int>(ns - 1, x[0] * ns);
+          const double t = x[0] * ns - j;
+          const double Z = (1 - t) * Znodes[j] + t * Znodes[j + 1], I = (1 - t) * Inodes[j] + t * Inodes[j + 1];
+          const double h = s.m * phi[0] * (1 + phi[0]) / std::pow(1 - phi[0], 2);
+          S[0][1] = .5 * manager.get_shear_sense(0);
+          profile_stress = 2 * Z * h / I;
         }
       if (evaluation_scale)
         {
           // Bound differentiation before cancellation of nearby FE values.
           // A constant d_R can have a tiny gradient with O(1) coefficients.
           Vector<double> values(this->get_fe().dofs_per_cell);
-          cell->get_dof_values(state,values);
-          double strain_scale=0.;
-          for (unsigned int i=0; i<values.size(); ++i)
-            if (this->get_fe().system_to_component_index(i).first<dim)
-              strain_scale+=std::abs(values[i])
-                            *fe[this->introspection().extractors.velocities].symmetric_gradient(i,0).norm();
-          *evaluation_scale=2*s.G*strain_scale+std::abs(profile_stress)*S.norm();
+          cell->get_dof_values(state, values);
+          double strain_scale = 0.;
+          for (unsigned int i = 0; i < values.size(); ++i)
+            if (this->get_fe().system_to_component_index(i).first < dim)
+              strain_scale += std::abs(values[i])
+                              * fe[this->introspection().extractors.velocities].symmetric_gradient(i, 0).norm();
+          *evaluation_scale = 2 * s.G * strain_scale + std::abs(profile_stress) * S.norm();
         }
-      return 2*s.G*Utilities::Tensors::consistent_deviator(R[0])-profile_stress*S;
+      return 2 * s.G * Utilities::Tensors::consistent_deviator(R[0]) - profile_stress * S;
     }
 
     template <int dim>
     void PhaseFieldFault<dim>::update_fe_strain_trial(
-      const LinearAlgebra::BlockVector &bulk,const MaxwellCoefficients &coefficients,
+      const LinearAlgebra::BlockVector &bulk, const MaxwellCoefficients &coefficients,
       LinearAlgebra::BlockVector &trial) const
     {
       AssertThrow(!dg_tensor_history,
                   ExcMessage("DG history cannot use the displacement-history recurrence."));
-      const auto &s=*fe_strain_state;
-      LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
-      owned=s.displacement_history;
-      LinearAlgebra::BlockVector owned_bulk(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
-      owned_bulk=bulk;
-      const unsigned int velocity_block=this->introspection().block_indices.velocities;
-      owned.block(velocity_block)*=coefficients.beta;
-      owned.block(velocity_block).add(coefficients.eta_ve/s.G,owned_bulk.block(velocity_block));
-      const unsigned int phase_block=this->introspection().variable("phase_field").block_index;
-      owned.block(phase_block)=bulk.block(phase_block);
+      const auto &s = *fe_strain_state;
+      LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
+      owned = s.displacement_history;
+      LinearAlgebra::BlockVector owned_bulk(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
+      owned_bulk = bulk;
+      const unsigned int velocity_block = this->introspection().block_indices.velocities;
+      owned.block(velocity_block) *= coefficients.beta;
+      owned.block(velocity_block).add(coefficients.eta_ve / s.G, owned_bulk.block(velocity_block));
+      const unsigned int phase_block = this->introspection().variable("phase_field").block_index;
+      owned.block(phase_block) = bulk.block(phase_block);
       trial.reinit(s.displacement_history);
-      trial=owned;
+      trial = owned;
     }
 
     template<int dim> std::shared_ptr<typename PhaseFieldFault<dim>::FEStrainUpdate>
@@ -588,46 +591,46 @@ namespace aspect
                                                    const std::shared_ptr<DGHistory> &transported) const
     {
       validate_fe_strain_restrictions();
-      const auto &s=*fe_strain_state;
-      AssertThrow(s.committed_step!=this->get_timestep_number(),ExcMessage("FE strain cannot commit twice in a physical step."));
-      if(uses_projected_material_reaction())
+      const auto &s = *fe_strain_state;
+      AssertThrow(s.committed_step != this->get_timestep_number(), ExcMessage("FE strain cannot commit twice in a physical step."));
+      if (uses_projected_material_reaction())
         {
-          AssertThrow(dg_material_reaction && !transported,ExcMessage("Missing converged coupled material reaction."));
-          return make_material_reaction(*fe_strain_state,bulk,this->get_reconstructed_fault_manager().get_slip_rate(0));
+          AssertThrow(dg_material_reaction && !transported, ExcMessage("Missing converged coupled material reaction."));
+          return make_material_reaction(*fe_strain_state, bulk, this->get_reconstructed_fault_manager().get_slip_rate(0));
         }
-      const auto c=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
-      auto update=std::make_shared<FEStrainUpdate>();
+      const auto c = compute_maxwell_coefficients(s.eta, s.G, this->get_timestep());
+      auto update = std::make_shared<FEStrainUpdate>();
       if (dg_tensor_history)
         {
           // The shared vector holds only the fixed phase anchor in DG mode.
           // The independent tensor is projected from the native FE source.
-          update->displacement_history=s.displacement_history;
+          update->displacement_history = s.displacement_history;
           if (consistent_endpoint_phase)
-            update->displacement_history.block(this->introspection().variable("phase_field").block_index)=bulk.block(this->introspection().variable("phase_field").block_index);
-          AssertThrow(!transported || (dg_accepted_history && transported->space==s.dg_history->space),
+            update->displacement_history.block(this->introspection().variable("phase_field").block_index) = bulk.block(this->introspection().variable("phase_field").block_index);
+          AssertThrow(!transported || (dg_accepted_history && transported->space == s.dg_history->space),
                       ExcMessage("Only PF5 may supply an independently transported native candidate."));
-          const auto incoming=jaumann_dg_stress ? s.objective_anchor : s.dg_history;
-          AssertThrow(incoming,ExcMessage("Missing independent DG publication anchor."));
-          update->dg_history=transported ? transported : make_dg_history_trial(*incoming,bulk,c,true);
+          const auto incoming = jaumann_dg_stress ? s.objective_anchor : s.dg_history;
+          AssertThrow(incoming, ExcMessage("Missing independent DG publication anchor."));
+          update->dg_history = transported ? transported : make_dg_history_trial(*incoming, bulk, c, true);
         }
       else
-        update_fe_strain_trial(bulk,c,update->displacement_history);
-      update->I=current_normalization_integrals.at(0);
+        update_fe_strain_trial(bulk, c, update->displacement_history);
+      update->I = current_normalization_integrals.at(0);
       update->Z.resize(s.Z.size());
-      const auto &V=this->get_reconstructed_fault_manager().get_slip_rate(0);
-      for (unsigned int j=0; j<s.Z.size(); ++j)
+      const auto &V = this->get_reconstructed_fault_manager().get_slip_rate(0);
+      for (unsigned int j = 0; j < s.Z.size(); ++j)
         {
-          const double expected=c.beta*s.Z[j]+c.eta_ve*V[j];
+          const double expected = c.beta * s.Z[j] + c.eta_ve * V[j];
           if (mature_frictional_fault)
             {
-              AssertThrow(tractions.at(0).at(j)==0.,
+              AssertThrow(tractions.at(0).at(j) == 0.,
                           ExcMessage("Mature cohesive traction must remain zero independently of slip memory."));
-              update->Z[j]=expected;
+              update->Z[j] = expected;
             }
           else
-            update->Z[j]=tractions.at(0).at(j)*update->I[j];
-          AssertThrow(std::isfinite(update->Z[j]) && std::abs(update->Z[j]-expected)
-                      <=64*std::numeric_limits<double>::epsilon()*std::max({1.,std::abs(expected),std::abs(update->Z[j])}),
+            update->Z[j] = tractions.at(0).at(j) * update->I[j];
+          AssertThrow(std::isfinite(update->Z[j]) && std::abs(update->Z[j] - expected)
+                      <= 64 * std::numeric_limits<double>::epsilon()*std::max({1., std::abs(expected), std::abs(update->Z[j])}),
                       ExcMessage("FE strain surface history and accepted Maxwell state disagree."));
         }
       AssertThrow(std::isfinite(update->displacement_history.linfty_norm()),
@@ -635,35 +638,35 @@ namespace aspect
       return update;
     }
 
-    template<int dim> SymmetricTensor<2,dim> PhaseFieldFault<dim>::candidate_fe_strain_stress(
-      const std::shared_ptr<FEStrainUpdate> &update,const CellId &id,const Point<dim> &x,double *evaluation_scale) const
+    template<int dim> SymmetricTensor<2, dim> PhaseFieldFault<dim>::candidate_fe_strain_stress(
+      const std::shared_ptr<FEStrainUpdate> &update, const CellId &id, const Point<dim> &x, double *evaluation_scale) const
     {
-      double current_scale=0.;
+      double current_scale = 0.;
       // prepare_fe_strain_commit copies this phase block verbatim in the
       // stationary mature route. Use the shared fixed-phase point layout;
       // evolving endpoint trials still evaluate their supplied phase vector.
-      const auto *phase=uses_stationary_mature_dg_optimizations() ? nullptr : &update->displacement_history;
-      const auto stress=dg_tensor_history
-                        ? evaluate_dg_history_stress(*update->dg_history,update->Z,update->I,id,x,&current_scale,phase)
-                        : evaluate_fe_strain_stress(update->displacement_history,update->Z,update->I,id,x,&current_scale);
+      const auto *phase = uses_stationary_mature_dg_optimizations() ? nullptr : &update->displacement_history;
+      const auto stress = dg_tensor_history
+                          ? evaluate_dg_history_stress(*update->dg_history, update->Z, update->I, id, x, &current_scale, phase)
+                          : evaluate_fe_strain_stress(update->displacement_history, update->Z, update->I, id, x, &current_scale);
       if (evaluation_scale)
         {
-          double old_scale=0.;
-          const auto &s=*fe_strain_state;
+          double old_scale = 0.;
+          const auto &s = *fe_strain_state;
           if (dg_tensor_history)
-            evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,id,x,&old_scale);
+            evaluate_dg_history_stress(*s.dg_history, s.Z, s.I, id, x, &old_scale);
           else
-            evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,id,x,&old_scale);
-          const auto c=compute_maxwell_coefficients(material_viscosity(x,s.eta),s.G,this->get_timestep());
+            evaluate_fe_strain_stress(s.displacement_history, s.Z, s.I, id, x, &old_scale);
+          const auto c = compute_maxwell_coefficients(material_viscosity(x, s.eta), s.G, this->get_timestep());
           // History/localization evaluation only. A small resulting strain
           // does not bound differentiation of cancelling velocity terms; DG
           // source projection/differentiation has a separate operand bound.
-          *evaluation_scale=2*(current_scale+c.beta*old_scale);
+          *evaluation_scale = 2 * (current_scale + c.beta * old_scale);
         }
       return stress;
     }
 
-    template<int dim> void PhaseFieldFault<dim>::validate_fe_strain_publication(double error,double bound)
+    template<int dim> void PhaseFieldFault<dim>::validate_fe_strain_publication(double error, double bound)
     {
       AssertThrow(std::isfinite(error) && std::isfinite(bound) && error <= bound,
                   ExcMessage("Accepted FE strain does not reproduce the native Maxwell publication."));
@@ -680,7 +683,7 @@ namespace aspect
       fe_strain_state->stress_samples.clear();
       fe_strain_state->objective_anchor.reset();
       fe_strain_state->objective_parent.reset();
-      fe_strain_state->committed_step=this->get_timestep_number();
+      fe_strain_state->committed_step = this->get_timestep_number();
       if (dg_accepted_history || (dg_tensor_history && mature_frictional_fault))
         ++fe_strain_state->accepted_publications;
     }
@@ -688,12 +691,12 @@ namespace aspect
 
   template<int dim> Quadrature<dim> fault_mechanical_quadrature(const SimulatorAccess<dim> &sim)
   {
-    return fault_mechanical_quadrature(sim.get_material_model(),sim.introspection().quadratures.velocities);
+    return fault_mechanical_quadrature(sim.get_material_model(), sim.introspection().quadratures.velocities);
   }
   template<int dim> Quadrature<dim> fault_mechanical_quadrature(
-    const MaterialModel::Interface<dim> &material,const Quadrature<dim> &native)
+    const MaterialModel::Interface<dim> &material, const Quadrature<dim> &native)
   {
-    if (const auto *m=dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&material))
+    if (const auto *m = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&material))
       return m->mechanical_quadrature();
     return native;
   }
@@ -720,6 +723,6 @@ namespace aspect
   }
   template Quadrature<2> fault_mechanical_quadrature(const SimulatorAccess<2> &);
   template Quadrature<3> fault_mechanical_quadrature(const SimulatorAccess<3> &);
-  template Quadrature<2> fault_mechanical_quadrature(const MaterialModel::Interface<2> &,const Quadrature<2> &);
-  template Quadrature<3> fault_mechanical_quadrature(const MaterialModel::Interface<3> &,const Quadrature<3> &);
+  template Quadrature<2> fault_mechanical_quadrature(const MaterialModel::Interface<2> &, const Quadrature<2> &);
+  template Quadrature<3> fault_mechanical_quadrature(const MaterialModel::Interface<3> &, const Quadrature<3> &);
 }

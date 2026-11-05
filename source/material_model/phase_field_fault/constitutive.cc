@@ -62,11 +62,11 @@ namespace aspect
                              const std::string &property_name)
     {
       AssertThrow(fault.property_value_is_initialized(segment, position)
-                  && fault.property_value_is_initialized(segment+1, position),
+                  && fault.property_value_is_initialized(segment + 1, position),
                   ExcMessage("Reconstructed-fault property <" + property_name
                              + "> is uninitialized at a constitutive evaluation point."));
-      return (1.0-xi) * fault.get_properties(segment)[position]
-             + xi * fault.get_properties(segment+1)[position];
+      return (1.0 - xi) * fault.get_properties(segment)[position]
+             + xi * fault.get_properties(segment + 1)[position];
     }
   }
 
@@ -86,58 +86,59 @@ namespace aspect
     }
 
     template <int dim>
-    SymmetricTensor<2,dim>
+    SymmetricTensor<2, dim>
     PhaseFieldFault<dim>::
     compute_maxwell_stress(
       const MaxwellCoefficients &coefficients,
-      const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
-      const SymmetricTensor<2,dim> &old_stress)
+      const SymmetricTensor<2, dim> &effective_bulk_strain_rate,
+      const SymmetricTensor<2, dim> &old_stress)
     {
       return 2.0 * coefficients.eta_ve * effective_bulk_strain_rate
              + coefficients.beta * old_stress;
     }
 
     template <int dim>
-    SymmetricTensor<2,dim>
+    SymmetricTensor<2, dim>
     PhaseFieldFault<dim>::rotate_maxwell_history(
-      const SymmetricTensor<2,dim> &stress,const Tensor<2,dim> &gradient,const double dt) const
+      const SymmetricTensor<2, dim> &stress, const Tensor<2, dim> &gradient, const double dt) const
     {
-      if (!jaumann_particle_stress) return stress;
-      if constexpr (dim==2)
-        return ReconstructedFaultUtilities::rotate_plane_strain_stress(stress,gradient,dt);
-      AssertThrow(false,ExcMessage("Jaumann particle stress is restricted to 2D plane strain."));
+      if (!jaumann_particle_stress)
+        return stress;
+      if constexpr (dim == 2)
+        return ReconstructedFaultUtilities::rotate_plane_strain_stress(stress, gradient, dt);
+      AssertThrow(false, ExcMessage("Jaumann particle stress is restricted to 2D plane strain."));
       return stress;
     }
 
     template <int dim>
-    SymmetricTensor<2,dim>
+    SymmetricTensor<2, dim>
     PhaseFieldFault<dim>::evaluate_frozen_maxwell_stress(
-      const double temperature,const std::vector<double> &composition,
-      const SymmetricTensor<2,dim> &old_stress) const
+      const double temperature, const std::vector<double> &composition,
+      const SymmetricTensor<2, dim> &old_stress) const
     {
-      return evaluate_frozen_maxwell_stress(temperature,composition,old_stress,nullptr);
+      return evaluate_frozen_maxwell_stress(temperature, composition, old_stress, nullptr);
     }
 
     template <int dim>
-    SymmetricTensor<2,dim>
+    SymmetricTensor<2, dim>
     PhaseFieldFault<dim>::evaluate_frozen_maxwell_stress(
       const double temperature,
       const std::vector<double> &composition,
-      const SymmetricTensor<2,dim> &old_stress,
-      const Tensor<2,dim> *history_gradient,const Point<dim> *position) const
+      const SymmetricTensor<2, dim> &old_stress,
+      const Tensor<2, dim> *history_gradient, const Point<dim> *position) const
     {
       const auto fractions = MaterialUtilities::compute_only_composition_fractions(
                                composition, this->introspection().chemical_composition_field_indices());
-      AssertThrow(!dg_material_transport || position,ExcMessage("Material Maxwell coefficients require a bulk location."));
-      const double eta = position ? material_viscosity(*position,compute_creep_viscosity(fractions, temperature))
-                                 : compute_creep_viscosity(fractions, temperature);
+      AssertThrow(!dg_material_transport || position, ExcMessage("Material Maxwell coefficients require a bulk location."));
+      const double eta = position ? material_viscosity(*position, compute_creep_viscosity(fractions, temperature))
+                         : compute_creep_viscosity(fractions, temperature);
       const double G = compute_elastic_shear_modulus(fractions);
       const double dt = this->get_timestep_number() > 0
                         ? this->get_timestep() : initial_time_step;
       AssertThrow(!jaumann_particle_stress || history_gradient,
                   ExcMessage("Jaumann stress evaluation requires the accepted velocity gradient."));
       return compute_maxwell_coefficients(eta, G, dt).beta
-             * (jaumann_particle_stress ? rotate_maxwell_history(old_stress,*history_gradient,dt) : old_stress);
+             * (jaumann_particle_stress ? rotate_maxwell_history(old_stress, *history_gradient, dt) : old_stress);
     }
 
     template <int dim>
@@ -145,13 +146,13 @@ namespace aspect
     PhaseFieldFault<dim>::evaluate_reconstructed_fault_point(
       const ReconstructedFaultPointInputs &inputs) const
     {
-      return evaluate_reconstructed_fault_point(inputs,false);
+      return evaluate_reconstructed_fault_point(inputs, false);
     }
 
     template <int dim>
     typename PhaseFieldFault<dim>::ReconstructedFaultPointResponse
     PhaseFieldFault<dim>::evaluate_reconstructed_fault_point(
-      const ReconstructedFaultPointInputs &inputs,const bool accepted_snapshot) const
+      const ReconstructedFaultPointInputs &inputs, const bool accepted_snapshot) const
     {
       AssertThrow(!accepted_snapshot || uses_prescribed_dg_geometry(),
                   ExcMessage("Zero-interval observation is restricted to prescribed frozen geometry."));
@@ -173,17 +174,17 @@ namespace aspect
           inputs.phase_field, inputs.previous_phase_field,
           "surface residual");
 
-      const double eta = material_viscosity(inputs.position,compute_creep_viscosity(inputs.bulk_material_fractions,
-                                                 inputs.temperature));
+      const double eta = material_viscosity(inputs.position, compute_creep_viscosity(inputs.bulk_material_fractions,
+                                                                                     inputs.temperature));
       const double G = compute_elastic_shear_modulus(inputs.bulk_material_fractions);
       const double time_step = accepted_snapshot ? 0. : (this->get_timestep_number() > 0
-                                ? this->get_timestep()
-                                : initial_time_step);
+                                                         ? this->get_timestep()
+                                                         : initial_time_step);
       const MaxwellCoefficients bulk_coefficients =
         compute_maxwell_coefficients(eta, G, time_step);
-      const double surface_eta = material_surface_viscosity(inputs.fault_index,inputs.segment_index,inputs.xi,compute_creep_viscosity(
-                                   localization.surface_material_fractions,
-                                   localization.surface_temperature));
+      const double surface_eta = material_surface_viscosity(inputs.fault_index, inputs.segment_index, inputs.xi, compute_creep_viscosity(
+                                                              localization.surface_material_fractions,
+                                                              localization.surface_temperature));
       const double surface_G = compute_elastic_shear_modulus(localization.surface_material_fractions);
       const MaxwellCoefficients surface_coefficients =
         compute_maxwell_coefficients(surface_eta, surface_G, time_step);
@@ -193,19 +194,19 @@ namespace aspect
       CohesiveResponse cohesive;
       if (accepted_snapshot)
         {
-          AssertThrow(localization.current_I_h==localization.previous_I_h
-                      && localization.current_h==localization.previous_h,
+          AssertThrow(localization.current_I_h == localization.previous_I_h
+                      && localization.current_h == localization.previous_h,
                       ExcMessage("Accepted observation requires unchanged phase and normalization."));
-          cohesive.cohesive_traction=localization.previous_cohesive_traction;
-          cohesive.localization_factor=localization.current_h/localization.current_I_h;
-          cohesive.history_correction=0.;
-          cohesive.crack_strain_rate=0.;
+          cohesive.cohesive_traction = localization.previous_cohesive_traction;
+          cohesive.localization_factor = localization.current_h / localization.current_I_h;
+          cohesive.history_correction = 0.;
+          cohesive.crack_strain_rate = 0.;
         }
       else
-        cohesive=compute_cohesive_response(
-          surface_coefficients,localization.current_I_h,localization.previous_I_h,
-          localization.previous_cohesive_traction,inputs.slip_rate,
-          localization.current_h,localization.previous_h,mature_frictional_fault);
+        cohesive = compute_cohesive_response(
+                     surface_coefficients, localization.current_I_h, localization.previous_I_h,
+                     localization.previous_cohesive_traction, inputs.slip_rate,
+                     localization.current_h, localization.previous_h, mature_frictional_fault);
 
       // Inputs carry raw FE symmetric gradients; accepted old stress already
       // is a 3D deviatoric block and must not be deviated a second time.
@@ -215,15 +216,15 @@ namespace aspect
       AssertThrow(!jaumann_particle_stress || accepted_snapshot || inputs.has_history_velocity_gradient,
                   ExcMessage("Jaumann surface evaluation requires the accepted velocity gradient."));
       const auto old_stress = jaumann_particle_stress && !accepted_snapshot
-        ? rotate_maxwell_history(inputs.old_maxwell_stress,inputs.history_velocity_gradient,time_step)
-        : inputs.old_maxwell_stress;
-      const SymmetricTensor<2,dim> coefficients = compute_maxwell_stress(
-                                                    bulk_coefficients, strain_rate, old_stress);
-      const SymmetricTensor<2,dim> stress_without_current_slip =
+                              ? rotate_maxwell_history(inputs.old_maxwell_stress, inputs.history_velocity_gradient, time_step)
+                              : inputs.old_maxwell_stress;
+      const SymmetricTensor<2, dim> coefficients = compute_maxwell_stress(
+                                                     bulk_coefficients, strain_rate, old_stress);
+      const SymmetricTensor<2, dim> stress_without_current_slip =
         coefficients
         - 2.0 * bulk_coefficients.eta_ve * cohesive.history_correction
         * inputs.slip_tensor;
-      const SymmetricTensor<2,dim> stress =
+      const SymmetricTensor<2, dim> stress =
         stress_without_current_slip
         - 2.0 * bulk_coefficients.eta_ve * cohesive.localization_factor
         * inputs.slip_rate * inputs.slip_tensor;
@@ -266,7 +267,7 @@ namespace aspect
 
       const double surface_resistance = cohesive.cohesive_traction;
       const double cohesive_tangent = mature_frictional_fault ? 0.0
-                                      : surface_coefficients.eta_ve/localization.current_I_h;
+                                      : surface_coefficients.eta_ve / localization.current_I_h;
       ReconstructedFaultPointResponse response;
       response.stress = stress;
       if (inputs.capture_stress_components)
@@ -279,7 +280,7 @@ namespace aspect
           response.stress_components[1] = 2.0 * bulk_coefficients.eta_ve * strain_rate;
           response.stress_components[2] =
             -2.0 * bulk_coefficients.eta_ve * cohesive.history_correction * inputs.slip_tensor
-            -2.0 * bulk_coefficients.eta_ve * cohesive.localization_factor
+            - 2.0 * bulk_coefficients.eta_ve * cohesive.localization_factor
             * inputs.slip_rate * inputs.slip_tensor;
         }
       response.normalization_integral = localization.current_I_h;
@@ -297,7 +298,7 @@ namespace aspect
         2.0 * bulk_coefficients.eta_ve * cohesive.localization_factor
         * (inputs.slip_tensor * inputs.slip_tensor)
         + cohesive_tangent
-        + sigma_n*dmu_dV
+        + sigma_n * dmu_dV
         + damping;
       response.eta_ve = bulk_coefficients.eta_ve;
       response.localization_factor = cohesive.localization_factor;
@@ -313,7 +314,7 @@ namespace aspect
     PhaseFieldFault<dim>::evaluate_cohesive_surface_resistance(
       const unsigned int f, const unsigned int s, const double xi, const double rate) const
     {
-      return evaluate_cohesive_surface_resistance(f,s,xi,rate,false);
+      return evaluate_cohesive_surface_resistance(f, s, xi, rate, false);
     }
 
     template <int dim>
@@ -325,20 +326,20 @@ namespace aspect
       AssertThrow(cohesive_work_measure && use_adiabatic_pressure_in_fault_friction,
                   ExcMessage("Surface resistance requires prescribed normal pressure."));
       const auto &fault = this->get_reconstructed_fault_manager().get_fault(f);
-      const auto l = evaluate_reconstructed_fault_localization(f,s,xi,0.,0.,"surface resistance");
+      const auto l = evaluate_reconstructed_fault_localization(f, s, xi, 0., 0., "surface resistance");
       ReconstructedFaultPointInputs in;
-      in.fault_index=f;
-      in.segment_index=s;
-      in.xi=xi;
-      in.slip_rate=rate;
-      in.position=(1.-xi)*fault.vertex(s)+xi*fault.vertex(s+1);
-      in.phase_field=in.previous_phase_field=0.;
-      in.temperature=l.surface_temperature;
-      in.bulk_material_fractions=l.surface_material_fractions;
-      in.dynamic_pressure=0.;
+      in.fault_index = f;
+      in.segment_index = s;
+      in.xi = xi;
+      in.slip_rate = rate;
+      in.position = (1. - xi) * fault.vertex(s) + xi * fault.vertex(s + 1);
+      in.phase_field = in.previous_phase_field = 0.;
+      in.temperature = l.surface_temperature;
+      in.bulk_material_fractions = l.surface_material_fractions;
+      in.dynamic_pressure = 0.;
       // With h=0 and zero bulk tensors the returned derivative contains only
       // q, friction and damping. These quantities do not depend on local phi.
-      return evaluate_reconstructed_fault_point(in,accepted_snapshot);
+      return evaluate_reconstructed_fault_point(in, accepted_snapshot);
     }
 
     template <int dim>
@@ -352,17 +353,17 @@ namespace aspect
           inputs.phase_field, inputs.previous_phase_field,
           "bulk residual");
 
-      const double eta = material_viscosity(inputs.position,compute_creep_viscosity(inputs.bulk_material_fractions,
-                                                 inputs.temperature));
+      const double eta = material_viscosity(inputs.position, compute_creep_viscosity(inputs.bulk_material_fractions,
+                                                                                     inputs.temperature));
       const double G = compute_elastic_shear_modulus(inputs.bulk_material_fractions);
       const double time_step = (this->get_timestep_number() > 0
                                 ? this->get_timestep()
                                 : initial_time_step);
       const MaxwellCoefficients bulk_coefficients =
         compute_maxwell_coefficients(eta, G, time_step);
-      const double surface_eta = material_surface_viscosity(inputs.fault_index,inputs.segment_index,inputs.xi,compute_creep_viscosity(
-                                   localization.surface_material_fractions,
-                                   localization.surface_temperature));
+      const double surface_eta = material_surface_viscosity(inputs.fault_index, inputs.segment_index, inputs.xi, compute_creep_viscosity(
+                                                              localization.surface_material_fractions,
+                                                              localization.surface_temperature));
       const double surface_G = compute_elastic_shear_modulus(localization.surface_material_fractions);
       const MaxwellCoefficients surface_coefficients =
         compute_maxwell_coefficients(surface_eta, surface_G, time_step);
@@ -402,17 +403,17 @@ namespace aspect
                                  "previous h is inadmissible healing."));
           return time_step * current_cohesive_traction
                  * current_cohesive_traction
-                 / (2.0*surface_coefficients.eta_ve);
+                 / (2.0 * surface_coefficients.eta_ve);
         }
 
       // This factorization is algebraically the finite-step cohesive-work
       // expression and avoids squaring two nearly equal large terms directly.
-      const double a = current_cohesive_traction/current_degradation;
+      const double a = current_cohesive_traction / current_degradation;
       const double b = surface_coefficients.beta * previous_h
                        * previous_cohesive_traction
-                       / (1.0-current_degradation);
-      const double candidate = time_step*(a-b)*(a+b)
-                               / (2.0*surface_coefficients.eta_ve);
+                       / (1.0 - current_degradation);
+      const double candidate = time_step * (a - b) * (a + b)
+                               / (2.0 * surface_coefficients.eta_ve);
       AssertThrow(std::isfinite(candidate),
                   ExcMessage("The finite-step cohesive-work update is non-finite."));
       return candidate;
@@ -428,8 +429,8 @@ namespace aspect
                   && std::isfinite(degradation) && degradation > 0.0
                   && degradation <= 1.0 && std::isfinite(cohesive_traction),
                   ExcMessage("Recoverable phase driving requires G>0, 0<g<=1 and finite traction."));
-      const double effective_traction = cohesive_traction/degradation;
-      const double energy = effective_traction*effective_traction/(2.0*shear_modulus);
+      const double effective_traction = cohesive_traction / degradation;
+      const double energy = effective_traction * effective_traction / (2.0 * shear_modulus);
       AssertThrow(std::isfinite(energy), ExcMessage("Nonfinite recoverable phase driving energy."));
       return energy;
     }
@@ -473,8 +474,8 @@ namespace aspect
       AssertDimension(current_fault_surface_temperatures[fault_index].size(),
                       fault.n_vertices());
       response.surface_temperature =
-        (1.0-xi) * current_fault_surface_temperatures[fault_index][segment_index]
-        + xi * current_fault_surface_temperatures[fault_index][segment_index+1];
+        (1.0 - xi) * current_fault_surface_temperatures[fault_index][segment_index]
+        + xi * current_fault_surface_temperatures[fault_index][segment_index + 1];
       const unsigned int previous_I_h_position =
         fault_manager.get_property_information()[
           fault_property_indices.previous_normalization_integral].position;
@@ -482,8 +483,8 @@ namespace aspect
         fault_manager.get_property_information()[
           fault_property_indices.cohesive_traction].position;
       response.current_I_h =
-        (1.0-xi) * current_normalization_integrals[fault_index][segment_index]
-        + xi * current_normalization_integrals[fault_index][segment_index+1];
+        (1.0 - xi) * current_normalization_integrals[fault_index][segment_index]
+        + xi * current_normalization_integrals[fault_index][segment_index + 1];
       response.previous_I_h = interpolate_fault_scalar(
                                 fault, segment_index, xi, previous_I_h_position,
                                 "phase field fault previous I h");
@@ -496,10 +497,10 @@ namespace aspect
           // Z is the Q1 internal variable. Multiplying interpolated q and I
           // would introduce a spurious quadratic field and lose this history.
           const auto left = fault.get_properties(segment_index);
-          const auto right = fault.get_properties(segment_index+1);
+          const auto right = fault.get_properties(segment_index + 1);
           response.previous_cohesive_traction =
-            ((1.-xi)*left[previous_I_h_position]*left[cohesive_position]
-             + xi*right[previous_I_h_position]*right[cohesive_position])
+            ((1. - xi) * left[previous_I_h_position] * left[cohesive_position]
+             + xi * right[previous_I_h_position] * right[cohesive_position])
             / response.previous_I_h;
         }
 
@@ -541,20 +542,20 @@ namespace aspect
       const auto &faults = this->get_reconstructed_fault_manager().get_faults();
       AssertDimension(rates.size(), faults.size());
       std::vector<std::vector<double>> result(faults.size());
-      for (unsigned int f=0; f<faults.size(); ++f)
+      for (unsigned int f = 0; f < faults.size(); ++f)
         {
           AssertDimension(rates[f].size(), faults[f].n_vertices());
           result[f].resize(faults[f].n_vertices());
-          for (unsigned int j=0; j<faults[f].n_vertices(); ++j)
+          for (unsigned int j = 0; j < faults[f].n_vertices(); ++j)
             {
-              const unsigned int segment = std::min(j, faults[f].n_cells()-1);
+              const unsigned int segment = std::min(j, faults[f].n_cells() - 1);
               const auto l = evaluate_reconstructed_fault_localization(
-                               f, segment, j-segment, 0., 0., "surface history");
+                               f, segment, j - segment, 0., 0., "surface history");
               const auto c = compute_maxwell_coefficients(
-                               material_surface_viscosity(f,segment,j-segment,compute_creep_viscosity(l.surface_material_fractions,l.surface_temperature)),
-                               compute_elastic_shear_modulus(l.surface_material_fractions),time_step);
-              result[f][j] = compute_cohesive_response(c,l.current_I_h,l.previous_I_h,
-                                                       l.previous_cohesive_traction,rates[f][j],0.,0.,mature_frictional_fault).cohesive_traction;
+                               material_surface_viscosity(f, segment, j - segment, compute_creep_viscosity(l.surface_material_fractions, l.surface_temperature)),
+                               compute_elastic_shear_modulus(l.surface_material_fractions), time_step);
+              result[f][j] = compute_cohesive_response(c, l.current_I_h, l.previous_I_h,
+                                                       l.previous_cohesive_traction, rates[f][j], 0., 0., mature_frictional_fault).cohesive_traction;
             }
         }
       return result;
@@ -593,15 +594,15 @@ namespace aspect
         mature ? 0.0 : (coefficients.eta_ve * slip_rate
                         + coefficients.beta * previous_I_h * previous_cohesive_traction)
         / current_I_h;
-      response.localization_factor = current_h/current_I_h;
+      response.localization_factor = current_h / current_I_h;
       if (mature)
         AssertThrow(previous_cohesive_traction == 0.0
                     && current_h == previous_h && current_I_h == previous_I_h,
                     ExcMessage("Mature friction requires zero cohesive history and a fixed profile."));
       response.history_correction = current_h == previous_h && current_I_h == previous_I_h
                                     ? 0.0
-                                    : coefficients.beta * previous_cohesive_traction/coefficients.eta_ve
-                                    * (current_h * previous_I_h/current_I_h - previous_h);
+                                    : coefficients.beta * previous_cohesive_traction / coefficients.eta_ve
+                                    * (current_h * previous_I_h / current_I_h - previous_h);
       response.crack_strain_rate =
         response.localization_factor * slip_rate + response.history_correction;
 

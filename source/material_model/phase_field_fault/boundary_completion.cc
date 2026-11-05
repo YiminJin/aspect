@@ -62,7 +62,7 @@ namespace aspect
       const auto &box
         = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>> (this->get_geometry_model ());
       const double tolerance = ReconstructedFaultUtilities::boundary_contact_tolerance (faces);
-      const auto uniform = [] (const auto &values)
+      const auto uniform = [] (const auto & values)
       {
         return std::all_of (values.begin (), values.end (),
                             [&] (const double x)
@@ -166,7 +166,7 @@ namespace aspect
                            : std::abs (h - data.spacing[d]) <= tolerance)
                           && std::abs ((face.cell_lower[d] - data.lattice_origin[d]) / h
                                        - std::round ((face.cell_lower[d] - data.lattice_origin[d]) / h))
-                             <= tolerance / h,
+                          <= tolerance / h,
                           ExcMessage ("Nonuniform or misaligned boundary ghost-Q1 lattice at fault "
                                       + std::to_string (contact.fault_index)
                                       + "; exterior mesh data are required."));
@@ -175,24 +175,28 @@ namespace aspect
                       for (const auto &point : face.vertices)
                         {
                           Point<dim> lower;
-                          Tensor<1,dim> fraction;
-                          for (unsigned int d=0; d<dim; ++d)
+                          Tensor<1, dim> fraction;
+                          for (unsigned int d = 0; d < dim; ++d)
                             {
-                              lower[d]=data.lattice_origin[d]+data.spacing[d]
-                                *std::floor((point[d]-data.lattice_origin[d])/data.spacing[d]);
-                              fraction[d]=(point[d]-lower[d])/data.spacing[d];
+                              lower[d] = data.lattice_origin[d] + data.spacing[d]
+                                         * std::floor((point[d] - data.lattice_origin[d]) / data.spacing[d]);
+                              fraction[d] = (point[d] - lower[d]) / data.spacing[d];
                             }
-                          double expected=0.;
-                          for (unsigned int v=0; v<GeometryInfo<dim>::vertices_per_cell; ++v)
+                          double expected = 0.;
+                          for (unsigned int v = 0; v < GeometryInfo<dim>::vertices_per_cell; ++v)
                             {
-                              auto node=lower;
-                              double weight=1.;
-                              for (unsigned int d=0; d<dim; ++d)
-                                if (v & (1u<<d)) { node[d]+=data.spacing[d]; weight*=fraction[d]; }
-                                else weight*=1.-fraction[d];
-                              expected+=weight*data.profile->value(std::abs((node-contact.position)*contact.normal));
+                              auto node = lower;
+                              double weight = 1.;
+                              for (unsigned int d = 0; d < dim; ++d)
+                                if (v & (1u << d))
+                                  {
+                                    node[d] += data.spacing[d];
+                                    weight *= fraction[d];
+                                  }
+                                else weight *= 1. - fraction[d];
+                              expected += weight * data.profile->value(std::abs((node - contact.position) * contact.normal));
                             }
-                          AssertThrow(std::abs(benchmark_phase_reference->value(point)-expected)<=2e-11,
+                          AssertThrow(std::abs(benchmark_phase_reference->value(point) - expected) <= 2e-11,
                                       ExcMessage("Explicit phase reference does not match its exterior Q1 trace."));
                         }
                   }
@@ -432,7 +436,7 @@ namespace aspect
                 };
                 // The legacy BP3 ghost-Q1 table uses cell-edge cuts and an 8-point
                 // rule versus two half panels at this fixed verification accuracy.
-                const auto integrate = [&] (auto &&self, const double a, const double b,
+                const auto integrate = [&] (auto && self, const double a, const double b,
                                             const unsigned int depth) -> double
                 {
                   const double low = panel (a, b), mid = .5 * (a + b),

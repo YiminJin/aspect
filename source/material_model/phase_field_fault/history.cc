@@ -184,16 +184,16 @@ namespace aspect
 
     template <int dim>
     std::map<types::particle_index, std::vector<double>>
-                                                      interpolate_surface_chemical_compositions(
-                                                        ReconstructedFaultManager<dim> &fault_manager,
-                                                        const std::vector<unsigned int> &property_indices)
+    interpolate_surface_chemical_compositions(
+      ReconstructedFaultManager<dim> &fault_manager,
+      const std::vector<unsigned int> &property_indices)
     {
       std::map<types::particle_index, std::vector<double>> compositions;
       for (unsigned int c = 0; c < property_indices.size(); ++c)
         {
           const std::map<types::particle_index, std::vector<double>> values =
-                                                                    fault_manager.interpolate_property_at_particle_projections(
-                                                                      property_indices[c]);
+            fault_manager.interpolate_property_at_particle_projections(
+              property_indices[c]);
 
           if (c == 0)
             for (const auto &particle : values)
@@ -228,7 +228,7 @@ namespace aspect
       if (!this->get_parameters().reconstruct_faults)
         return;
       if (surface_cohesive_history)
-        for (unsigned int c=0; c<elastic_shear_moduli.size(); ++c)
+        for (unsigned int c = 0; c < elastic_shear_moduli.size(); ++c)
           AssertThrow(elastic_shear_moduli[c] == elastic_shear_moduli[0]
                       && reference_viscosities[c] == reference_viscosities[0]
                       && thermal_viscosity_exponents[c] == 0.,
@@ -262,7 +262,7 @@ namespace aspect
         AssertThrow(this->get_reconstructed_fault_manager().has_property(
                       "Jaumann projected DGQ2 residual Lie v1") == jaumann_dg_stress,
                     ExcMessage("Objective DG law/residual schema mismatch; checkpoint conversion is forbidden."));
-        AssertThrow(this->get_reconstructed_fault_manager().has_property("Jaumann DG material transaction v1")==dg_material_transport,
+        AssertThrow(this->get_reconstructed_fault_manager().has_property("Jaumann DG material transaction v1") == dg_material_transport,
                     ExcMessage("Material history transport law mismatch; checkpoint conversion is forbidden."));
         AssertThrow(this->get_reconstructed_fault_manager().has_property(
                       "homogeneous mesh data v1") == homogeneous_mesh_data,
@@ -356,20 +356,20 @@ namespace aspect
       if (jaumann_particle_stress)
         fault_manager.register_property("Jaumann total material spin lagged Lie v1", 1);
       if (jaumann_dg_stress)
-        fault_manager.register_property("Jaumann projected DGQ2 residual Lie v1",1);
+        fault_manager.register_property("Jaumann projected DGQ2 residual Lie v1", 1);
       if (dg_material_transport)
-        fault_manager.register_property("Jaumann DG material transaction v1",1);
-      this->get_pcout()<<"   Reconstructed-fault stress rotation: "
-        <<(jaumann_particle_stress ? "Jaumann total material spin; accepted-gradient lag; finite rotation then exponential Maxwell/source (Lie v1); stationary particle stress."
-                                    : (jaumann_dg_stress ? "Jaumann total material spin; accepted-gradient lag; complete projected DGQ2 trial/residual Lie v1."
-                                                          : "legacy component rate."))<<std::endl;
+        fault_manager.register_property("Jaumann DG material transaction v1", 1);
+      this->get_pcout() << "   Reconstructed-fault stress rotation: "
+                        << (jaumann_particle_stress ? "Jaumann total material spin; accepted-gradient lag; finite rotation then exponential Maxwell/source (Lie v1); stationary particle stress."
+                            : (jaumann_dg_stress ? "Jaumann total material spin; accepted-gradient lag; complete projected DGQ2 trial/residual Lie v1."
+                               : "legacy component rate.")) << std::endl;
     }
 
     template <int dim>
     void
     PhaseFieldFault<dim>::prepare_reconstructed_fault_mechanical_solve()
     {
-      AssertThrow(!uses_prescribed_dg_geometry(),ExcMessage("Finite-tip prescribed DG geometry admits transfer and frozen sampling only; mechanical/phase evolution remains unqualified."));
+      AssertThrow(!uses_prescribed_dg_geometry(), ExcMessage("Finite-tip prescribed DG geometry admits transfer and frozen sampling only; mechanical/phase evolution remains unqualified."));
       TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: Property preparation");
       TimerOutput::Scope timer(*performance_timer, "Fault: Property preparation");
       AssertThrow(dim == 2, ExcNotImplemented());
@@ -389,13 +389,13 @@ namespace aspect
         {
           const auto position = fault_manager.get_property_information()[
                                   fault_manager.get_property_index("mature fault reference geometry")].position;
-          for (unsigned int f=0; f<faults.size(); ++f)
-            for (unsigned int v=0; v<faults[f].n_vertices(); ++v)
-              for (unsigned int d=0; d<dim; ++d)
+          for (unsigned int f = 0; f < faults.size(); ++f)
+            for (unsigned int v = 0; v < faults[f].n_vertices(); ++v)
+              for (unsigned int d = 0; d < dim; ++d)
                 {
-                  if (fresh_timestep_zero && !faults[f].property_value_is_initialized(v,position+d))
-                    fault_manager.get_fault(f).get_properties(v)[position+d]=faults[f].vertex(v)[d];
-                  AssertThrow(dg_material_transport || faults[f].get_properties(v)[position+d]==faults[f].vertex(v)[d],
+                  if (fresh_timestep_zero && !faults[f].property_value_is_initialized(v, position + d))
+                    fault_manager.get_fault(f).get_properties(v)[position + d] = faults[f].vertex(v)[d];
+                  AssertThrow(dg_material_transport || faults[f].get_properties(v)[position + d] == faults[f].vertex(v)[d],
                               ExcMessage("Mature frictional faults require fixed reconstructed geometry."));
                 }
         }
@@ -419,7 +419,8 @@ namespace aspect
         compute_normalization_integrals();
       compute_fault_surface_temperatures();
       prepare_fe_strain_history();
-      if (jaumann_dg_stress) prepare_objective_dg_anchor();
+      if (jaumann_dg_stress)
+        prepare_objective_dg_anchor();
 
       // Rate-and-state friction needs one complete positive Theta field. On a
       // fresh model it is projected from the user-mapped particle field;
@@ -613,8 +614,8 @@ namespace aspect
     {
       std::vector<Point<dim>> points;
       std::shared_ptr<Utilities::MPI::RemotePointEvaluation<dim>> point_cache;
-      std::vector<Tensor<2,dim>> velocity_gradients;
-      std::vector<Tensor<2,dim>> history_velocity_gradients;
+      std::vector<Tensor<2, dim>> velocity_gradients;
+      std::vector<Tensor<2, dim>> history_velocity_gradients;
       std::vector<double> temperatures;
       std::vector<double> phase_fields;
       std::vector<double> previous_phase_fields;
@@ -625,11 +626,11 @@ namespace aspect
     {
       struct ParticleCandidate
       {
-        SymmetricTensor<2,dim> stress;
+        SymmetricTensor<2, dim> stress;
         double crack_driving_force;
         // Operands of the independent Maxwell check, retained only for this
         // prepublication call (never persistent or fed back into mechanics).
-        SymmetricTensor<2,dim> incoming_stress, effective_rate;
+        SymmetricTensor<2, dim> incoming_stress, effective_rate;
         MaxwellCoefficients coefficients {};
       };
       std::map<types::particle_index, double> cohesive_samples;
@@ -690,7 +691,7 @@ namespace aspect
             + property->second.second);
         }
 
-      TimerOutput::Scope commit_timer(this->get_computing_timer(),"Native history candidate/check");
+      TimerOutput::Scope commit_timer(this->get_computing_timer(), "Native history candidate/check");
       HistorySamples samples;
       sample_accepted_history(accepted_bulk_state, samples);
 
@@ -699,136 +700,143 @@ namespace aspect
                                  chemical_positions, candidates);
       validate_history_candidates(candidates);
       std::shared_ptr<FEStrainUpdate> fe_update;
-      double fe_publication_error=0.,fe_publication_bound=0.,fe_publication_net_bound=0.,fe_publication_ratio=0.;
-      unsigned int old_allowance_failures=0;
+      double fe_publication_error = 0., fe_publication_bound = 0., fe_publication_net_bound = 0., fe_publication_ratio = 0.;
+      unsigned int old_allowance_failures = 0;
       std::string fe_publication_failure;
       if (uses_independent_bulk_history())
         try
           {
-            fe_update=prepare_fe_strain_commit(accepted_bulk_state, candidates.cohesive_nodal_values);
-            unsigned int particle_index=0;
+            fe_update = prepare_fe_strain_commit(accepted_bulk_state, candidates.cohesive_nodal_values);
+            unsigned int particle_index = 0;
             for (const auto &particle : particle_manager.get_particle_handler())
               {
                 auto &candidate = candidates.particle_candidates.at(particle.get_id());
-                double evaluation_scale=0.;
+                double evaluation_scale = 0.;
                 const auto stress = candidate_fe_strain_stress(
-                                      fe_update, particle.get_surrounding_cell()->id(), particle.get_location(),&evaluation_scale);
-                const auto difference=stress-candidate.stress;
-                const double error=dg_tensor_history ? std::sqrt(std::pow(difference.norm(),2)+std::pow(trace(difference),2)) : difference.norm();
-                double bound=128*std::numeric_limits<double>::epsilon()
-                             *std::max(1.,evaluation_scale);
-                if (error>bound)++old_allowance_failures;
+                                      fe_update, particle.get_surrounding_cell()->id(), particle.get_location(), &evaluation_scale);
+                const auto difference = stress - candidate.stress;
+                const double error = dg_tensor_history ? std::sqrt(std::pow(difference.norm(), 2) + std::pow(trace(difference), 2)) : difference.norm();
+                double bound = 128 * std::numeric_limits<double>::epsilon()
+                               * std::max(1., evaluation_scale);
+                if (error > bound)
+                  ++old_allowance_failures;
                 if (dg_tensor_history && !uses_projected_material_reaction())
-                  bound+=dg_source_publication_allowance(*fe_update->dg_history,particle.get_surrounding_cell()->id(),particle.get_location());
-                fe_publication_ratio=std::max(fe_publication_ratio,error/bound);
-                fe_publication_error=std::max(fe_publication_error,error);
-                fe_publication_bound=std::max(fe_publication_bound,bound);
-                fe_publication_net_bound=std::max(fe_publication_net_bound,
-                                                  128*std::numeric_limits<double>::epsilon()*std::max({1.,stress.norm(),candidate.stress.norm()}));
-                if (error>bound && dg_tensor_history)
+                  bound += dg_source_publication_allowance(*fe_update->dg_history, particle.get_surrounding_cell()->id(), particle.get_location());
+                fe_publication_ratio = std::max(fe_publication_ratio, error / bound);
+                fe_publication_error = std::max(fe_publication_error, error);
+                fe_publication_bound = std::max(fe_publication_bound, bound);
+                fe_publication_net_bound = std::max(fe_publication_net_bound,
+                                                    128 * std::numeric_limits<double>::epsilon() * std::max({1., stress.norm(), candidate.stress.norm()}));
+                if (error > bound && dg_tensor_history)
                   {
                     // Failure-only replay data, captured before either terminal
                     // publisher. Preserve the actual remote-point gradient and
                     // all local FE/DG operands rather than re-solving mechanics.
-                    const auto &s=*fe_strain_state;
-                    const auto id=particle.get_surrounding_cell()->id();
-                    const auto cell=s.evaluation_cells.at(id);
-                    const auto dg_cell=s.dg_history->space->cells.at(id);
-                    const auto unit=this->get_mapping().transform_real_to_unit_cell(cell,particle.get_location());
-                    std::ofstream out(this->get_output_directory()+"publication-failure.csv");
-                    out<<std::setprecision(17)<<"key,i,j,k,value\n";
-                    const auto put=[&](const std::string &key,int i,int j,int k,double value)
+                    const auto &s = *fe_strain_state;
+                    const auto id = particle.get_surrounding_cell()->id();
+                    const auto cell = s.evaluation_cells.at(id);
+                    const auto dg_cell = s.dg_history->space->cells.at(id);
+                    const auto unit = this->get_mapping().transform_real_to_unit_cell(cell, particle.get_location());
+                    std::ofstream out(this->get_output_directory() + "publication-failure.csv");
+                    out << std::setprecision(17) << "key,i,j,k,value\n";
+                    const auto put = [&](const std::string & key, int i, int j, int k, double value)
                     {
-                      out<<key<<','<<i<<','<<j<<','<<k<<','<<value<<'\n';
+                      out << key << ',' << i << ',' << j << ',' << k << ',' << value << '\n';
                     };
-                    put("step",0,0,0,this->get_timestep_number());
-                    put("time",0,0,0,this->get_time());
-                    put("dt",0,0,0,time_step);
-                    put("particle",0,0,0,particle.get_id());
+                    put("step", 0, 0, 0, this->get_timestep_number());
+                    put("time", 0, 0, 0, this->get_time());
+                    put("dt", 0, 0, 0, time_step);
+                    put("particle", 0, 0, 0, particle.get_id());
                     // Keep the archived replay key below, but record its trace
                     // convention: DG now samples this explicit CellId.
-                    put("matching_cell_gradient_trace",0,0,0,dg_tensor_history);
-                    put("error",0,0,0,error);
-                    put("bound",0,0,0,bound);
-                    put("ratio",0,0,0,error/bound);
-                    put("G",0,0,0,s.G);
-                    put("eta",0,0,0,s.eta);
-                    put("m",0,0,0,s.m);
-                    put("beta",0,0,0,candidate.coefficients.beta);
-                    put("kappa",0,0,0,candidate.coefficients.eta_ve);
-                    put("phase",0,0,0,samples.phase_fields[particle_index]);
-                    put("old_phase",0,0,0,samples.previous_phase_fields[particle_index]);
-                    for (unsigned int d=0; d<dim; ++d)
+                    put("matching_cell_gradient_trace", 0, 0, 0, dg_tensor_history);
+                    put("error", 0, 0, 0, error);
+                    put("bound", 0, 0, 0, bound);
+                    put("ratio", 0, 0, 0, error / bound);
+                    put("G", 0, 0, 0, s.G);
+                    put("eta", 0, 0, 0, s.eta);
+                    put("m", 0, 0, 0, s.m);
+                    put("beta", 0, 0, 0, candidate.coefficients.beta);
+                    put("kappa", 0, 0, 0, candidate.coefficients.eta_ve);
+                    put("phase", 0, 0, 0, samples.phase_fields[particle_index]);
+                    put("old_phase", 0, 0, 0, samples.previous_phase_fields[particle_index]);
+                    for (unsigned int d = 0; d < dim; ++d)
                       {
-                        put("point",d,0,0,particle.get_location()[d]);
-                        put("sample_point",d,0,0,samples.points[particle_index][d]);
-                        put("unit",d,0,0,unit[d]);
-                        put("particle_unit",d,0,0,particle.get_reference_location()[d]);
-                        for (unsigned int e=0; e<dim; ++e)put("remote_gradient",d,e,0,samples.velocity_gradients[particle_index][d][e]);
+                        put("point", d, 0, 0, particle.get_location()[d]);
+                        put("sample_point", d, 0, 0, samples.points[particle_index][d]);
+                        put("unit", d, 0, 0, unit[d]);
+                        put("particle_unit", d, 0, 0, particle.get_reference_location()[d]);
+                        for (unsigned int e = 0; e < dim; ++e)
+                          put("remote_gradient", d, e, 0, samples.velocity_gradients[particle_index][d][e]);
                       }
-                    for (unsigned int c=0; c<SymmetricTensor<2,dim>::n_independent_components; ++c)
+                    for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
                       {
-                        const auto ij=SymmetricTensor<2,dim>::unrolled_to_component_indices(c);
-                        put("dg_stress",c,0,0,stress[ij]);
-                        put("maxwell_stress",c,0,0,candidate.stress[ij]);
-                        put("incoming_stress",c,0,0,candidate.incoming_stress[ij]);
-                        put("effective_rate",c,0,0,candidate.effective_rate[ij]);
+                        const auto ij = SymmetricTensor<2, dim>::unrolled_to_component_indices(c);
+                        put("dg_stress", c, 0, 0, stress[ij]);
+                        put("maxwell_stress", c, 0, 0, candidate.stress[ij]);
+                        put("incoming_stress", c, 0, 0, candidate.incoming_stress[ij]);
+                        put("effective_rate", c, 0, 0, candidate.effective_rate[ij]);
                       }
-                    for (unsigned int j=0; j<s.Z.size(); ++j)
+                    for (unsigned int j = 0; j < s.Z.size(); ++j)
                       {
-                        put("old_Z",j,0,0,s.Z[j]);
-                        put("new_Z",j,0,0,fe_update->Z[j]);
-                        put("old_I",j,0,0,s.I[j]);
-                        put("new_I",j,0,0,fe_update->I[j]);
-                        put("V",j,0,0,this->get_reconstructed_fault_manager().get_slip_rate(0)[j]);
+                        put("old_Z", j, 0, 0, s.Z[j]);
+                        put("new_Z", j, 0, 0, fe_update->Z[j]);
+                        put("old_I", j, 0, 0, s.I[j]);
+                        put("new_I", j, 0, 0, fe_update->I[j]);
+                        put("V", j, 0, 0, this->get_reconstructed_fault_manager().get_slip_rate(0)[j]);
                       }
-                    std::vector<types::global_dof_index> native_indices(this->get_fe().n_dofs_per_cell()),dg_indices(s.dg_history->space->element.n_dofs_per_cell());
+                    std::vector<types::global_dof_index> native_indices(this->get_fe().n_dofs_per_cell()), dg_indices(s.dg_history->space->element.n_dofs_per_cell());
                     cell->get_dof_indices(native_indices);
                     dg_cell->get_dof_indices(dg_indices);
-                    for (unsigned int i=0; i<native_indices.size(); ++i)
+                    for (unsigned int i = 0; i < native_indices.size(); ++i)
                       {
-                        const auto component=this->get_fe().system_to_component_index(i).first;
-                        put("native_component",i,0,0,component);
-                        put("native_coefficient",i,0,0,accepted_bulk_state[native_indices[i]]);
-                        put("old_anchor",i,0,0,s.displacement_history[native_indices[i]]);
-                        put("new_anchor",i,0,0,fe_update->displacement_history[native_indices[i]]);
-                        const auto base=this->get_fe().system_to_base_index(i);
-                        const auto support=this->get_fe().base_element(base.first.first).get_unit_support_points()[base.second];
-                        for (unsigned int d=0; d<dim; ++d)put("native_support",i,d,0,support[d]);
+                        const auto component = this->get_fe().system_to_component_index(i).first;
+                        put("native_component", i, 0, 0, component);
+                        put("native_coefficient", i, 0, 0, accepted_bulk_state[native_indices[i]]);
+                        put("old_anchor", i, 0, 0, s.displacement_history[native_indices[i]]);
+                        put("new_anchor", i, 0, 0, fe_update->displacement_history[native_indices[i]]);
+                        const auto base = this->get_fe().system_to_base_index(i);
+                        const auto support = this->get_fe().base_element(base.first.first).get_unit_support_points()[base.second];
+                        for (unsigned int d = 0; d < dim; ++d)
+                          put("native_support", i, d, 0, support[d]);
                       }
-                    for (unsigned int i=0; i<dg_indices.size(); ++i)
-                      for (unsigned int c=0; c<s.dg_history->coefficients.size(); ++c)
+                    for (unsigned int i = 0; i < dg_indices.size(); ++i)
+                      for (unsigned int c = 0; c < s.dg_history->coefficients.size(); ++c)
                         {
-                          put("old_T",i,c,0,s.dg_history->coefficients[c][dg_indices[i]]);
-                          put("new_T",i,c,0,fe_update->dg_history->coefficients[c][dg_indices[i]]);
+                          put("old_T", i, c, 0, s.dg_history->coefficients[c][dg_indices[i]]);
+                          put("new_T", i, c, 0, fe_update->dg_history->coefficients[c][dg_indices[i]]);
                         }
-                    for (unsigned int v=0; v<GeometryInfo<dim>::vertices_per_cell; ++v)
-                      for (unsigned int d=0; d<dim; ++d)put("vertex",v,d,0,cell->vertex(v)[d]);
-                    auto points=QGauss<dim>(3).get_points();
-                    points.insert(points.begin(),unit);
-                    auto weights=QGauss<dim>(3).get_weights();
-                    weights.insert(weights.begin(),0.);
-                    const Quadrature<dim> quad(points,weights);
-                    FEValues<dim> native(this->get_mapping(),this->get_fe(),quad,update_values|update_gradients|update_JxW_values);
-                    FEValues<dim> dg(this->get_mapping(),s.dg_history->space->element,quad,update_values);
+                    for (unsigned int v = 0; v < GeometryInfo<dim>::vertices_per_cell; ++v)
+                      for (unsigned int d = 0; d < dim; ++d)
+                        put("vertex", v, d, 0, cell->vertex(v)[d]);
+                    auto points = QGauss<dim>(3).get_points();
+                    points.insert(points.begin(), unit);
+                    auto weights = QGauss<dim>(3).get_weights();
+                    weights.insert(weights.begin(), 0.);
+                    const Quadrature<dim> quad(points, weights);
+                    FEValues<dim> native(this->get_mapping(), this->get_fe(), quad, update_values | update_gradients | update_JxW_values);
+                    FEValues<dim> dg(this->get_mapping(), s.dg_history->space->element, quad, update_values);
                     native.reinit(cell);
                     dg.reinit(dg_cell);
-                    for (unsigned int q=0; q<quad.size(); ++q)
+                    for (unsigned int q = 0; q < quad.size(); ++q)
                       {
-                        put("JxW",q,0,0,native.JxW(q));
-                        for (unsigned int d=0; d<dim; ++d)put("quadrature",q,d,0,quad.point(q)[d]);
-                        for (unsigned int i=0; i<native_indices.size(); ++i)
+                        put("JxW", q, 0, 0, native.JxW(q));
+                        for (unsigned int d = 0; d < dim; ++d)
+                          put("quadrature", q, d, 0, quad.point(q)[d]);
+                        for (unsigned int i = 0; i < native_indices.size(); ++i)
                           {
-                            const auto c=this->get_fe().system_to_component_index(i).first;
-                            put("native_value",q,i,0,native.shape_value_component(i,q,c));
-                            for (unsigned int d=0; d<dim; ++d)put("native_gradient",q,i,d,native.shape_grad_component(i,q,c)[d]);
+                            const auto c = this->get_fe().system_to_component_index(i).first;
+                            put("native_value", q, i, 0, native.shape_value_component(i, q, c));
+                            for (unsigned int d = 0; d < dim; ++d)
+                              put("native_gradient", q, i, d, native.shape_grad_component(i, q, c)[d]);
                           }
-                        for (unsigned int i=0; i<dg_indices.size(); ++i)put("dg_value",q,i,0,dg.shape_value(i,q));
+                        for (unsigned int i = 0; i < dg_indices.size(); ++i)
+                          put("dg_value", q, i, 0, dg.shape_value(i, q));
                       }
                     out.close();
-                    this->get_pcout()<<std::setprecision(17)<<"   Publication mismatch: particle="<<particle.get_id()<<" CellId="<<id.to_string()<<" point="<<particle.get_location()<<" unit="<<unit<<" error="<<error<<" bound="<<bound<<" ratio="<<error/bound<<" DG="<<stress<<" Maxwell="<<candidate.stress<<std::endl;
+                    this->get_pcout() << std::setprecision(17) << "   Publication mismatch: particle=" << particle.get_id() << " CellId=" << id.to_string() << " point=" << particle.get_location() << " unit=" << unit << " error=" << error << " bound=" << bound << " ratio=" << error / bound << " DG=" << stress << " Maxwell=" << candidate.stress << std::endl;
                   }
-                validate_fe_strain_publication(error,bound);
+                validate_fe_strain_publication(error, bound);
                 // Publish a sample of the single staged FE state, not a second
                 // independently evolving particle history. Difference is roundoff.
                 candidate.stress = stress;
@@ -837,25 +845,25 @@ namespace aspect
           }
         catch (const std::exception &exception)
           {
-            fe_publication_failure=exception.what();
+            fe_publication_failure = exception.what();
           }
       if (uses_independent_bulk_history())
         {
           // No rank may publish while another rejects a local FE sample.
-          throw_if_history_error(fe_publication_failure,this->get_mpi_communicator());
-          fe_publication_error=Utilities::MPI::max(fe_publication_error,this->get_mpi_communicator());
-          fe_publication_bound=Utilities::MPI::max(fe_publication_bound,this->get_mpi_communicator());
-          fe_publication_net_bound=Utilities::MPI::max(fe_publication_net_bound,this->get_mpi_communicator());
-          fe_publication_ratio=Utilities::MPI::max(fe_publication_ratio,this->get_mpi_communicator());
-          old_allowance_failures=Utilities::MPI::sum(old_allowance_failures,this->get_mpi_communicator());
+          throw_if_history_error(fe_publication_failure, this->get_mpi_communicator());
+          fe_publication_error = Utilities::MPI::max(fe_publication_error, this->get_mpi_communicator());
+          fe_publication_bound = Utilities::MPI::max(fe_publication_bound, this->get_mpi_communicator());
+          fe_publication_net_bound = Utilities::MPI::max(fe_publication_net_bound, this->get_mpi_communicator());
+          fe_publication_ratio = Utilities::MPI::max(fe_publication_ratio, this->get_mpi_communicator());
+          old_allowance_failures = Utilities::MPI::sum(old_allowance_failures, this->get_mpi_communicator());
         }
       if (fe_update)
-        this->get_pcout()<<std::setprecision(17)
-                         <<(dg_tensor_history ? "   DG Maxwell publication: error=" : "   FE Maxwell publication: error=")<<fe_publication_error
-                         <<" evaluation allowance="<<fe_publication_bound
-                         <<" net-stress allowance="<<fe_publication_net_bound
-                         <<" maximum error/allowance="<<fe_publication_ratio
-                         <<" old allowance failures="<<old_allowance_failures<<'\n';
+        this->get_pcout() << std::setprecision(17)
+                          << (dg_tensor_history ? "   DG Maxwell publication: error=" : "   FE Maxwell publication: error=") << fe_publication_error
+                          << " evaluation allowance=" << fe_publication_bound
+                          << " net-stress allowance=" << fe_publication_net_bound
+                          << " maximum error/allowance=" << fe_publication_ratio
+                          << " old allowance failures=" << old_allowance_failures << '\n';
       publish_history_candidates(candidates, stress_position, H_position);
       if (fe_update)
         publish_fe_strain_commit(fe_update);
@@ -865,44 +873,44 @@ namespace aspect
     void PhaseFieldFault<dim>::commit_dg_accepted_step(const std::shared_ptr<FEStrainUpdate> &update)
     {
       validate_fe_strain_restrictions();
-      AssertThrow(dg_accepted_history && !mature_frictional_fault && update && update->dg_parent==fe_strain_state->dg_history
-                  && update->dg_step==this->get_timestep_number()
-                  && update->dg_step!=fe_strain_state->committed_step
-                  && update->dg_dt==this->get_timestep()
-                  && update->dg_time+update->dg_dt==this->get_time()
-                  && update->dg_rates==this->get_reconstructed_fault_manager().get_slip_rate(0),
+      AssertThrow(dg_accepted_history && !mature_frictional_fault && update && update->dg_parent == fe_strain_state->dg_history
+                  && update->dg_step == this->get_timestep_number()
+                  && update->dg_step != fe_strain_state->committed_step
+                  && update->dg_dt == this->get_timestep()
+                  && update->dg_time + update->dg_dt == this->get_time()
+                  && update->dg_rates == this->get_reconstructed_fault_manager().get_slip_rate(0),
                   ExcMessage("PF5 rejects stale/repeated or changed-context history publication."));
-      AssertThrow(update->dg_history && update->dg_history->space==fe_strain_state->dg_history->space
-                  && update->I==fe_strain_state->I && update->Z.size()==fe_strain_state->Z.size()
-                  && update->dg_cohesive.size()==update->Z.size(),ExcMessage("PF5 staged history layout changed."));
-      for (const auto &component:update->dg_history->coefficients)
-        for (const auto i:component.locally_owned_elements())
-          AssertThrow(std::isfinite(component[i]),ExcMessage("Nonfinite PF5 DG candidate."));
-      for (unsigned int j=0; j<update->Z.size(); ++j)
-        AssertThrow(std::isfinite(update->Z[j]) && update->Z[j]>=0.
-                    && std::abs(update->Z[j]-update->dg_cohesive[j]*update->I[j])
-                    <=64*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(update->Z[j])),
+      AssertThrow(update->dg_history && update->dg_history->space == fe_strain_state->dg_history->space
+                  && update->I == fe_strain_state->I && update->Z.size() == fe_strain_state->Z.size()
+                  && update->dg_cohesive.size() == update->Z.size(), ExcMessage("PF5 staged history layout changed."));
+      for (const auto &component : update->dg_history->coefficients)
+        for (const auto i : component.locally_owned_elements())
+          AssertThrow(std::isfinite(component[i]), ExcMessage("Nonfinite PF5 DG candidate."));
+      for (unsigned int j = 0; j < update->Z.size(); ++j)
+        AssertThrow(std::isfinite(update->Z[j]) && update->Z[j] >= 0.
+                    && std::abs(update->Z[j] - update->dg_cohesive[j]*update->I[j])
+                    <= 64 * std::numeric_limits<double>::epsilon()*std::max(1., std::abs(update->Z[j])),
                     ExcMessage("PF5 staged surface histories disagree."));
       HistoryCandidates candidates;
-      candidates.cohesive_nodal_values= {update->dg_cohesive};
-      auto &manager=this->get_phase_field_handler().get_associated_particle_manager();
-      const auto &info=manager.get_property_manager().get_data_info();
-      const unsigned int stress_position=info.get_position_by_field_name("maxwell stress");
-      const unsigned int H_position=info.get_position_by_field_name("crack_driving_force");
+      candidates.cohesive_nodal_values = {update->dg_cohesive};
+      auto &manager = this->get_phase_field_handler().get_associated_particle_manager();
+      const auto &info = manager.get_property_manager().get_data_info();
+      const unsigned int stress_position = info.get_position_by_field_name("maxwell stress");
+      const unsigned int H_position = info.get_position_by_field_name("crack_driving_force");
       // H is frozen by the existing Evolve phase field=false law. Particle
       // stresses are derived samples of the candidate, never incoming history.
-      for (const auto &particle:manager.get_particle_handler())
+      for (const auto &particle : manager.get_particle_handler())
         {
           typename HistoryCandidates::ParticleCandidate sample;
-          sample.stress=candidate_fe_strain_stress(update,particle.get_surrounding_cell()->id(),particle.get_location());
-          sample.crack_driving_force=particle.get_properties()[H_position];
+          sample.stress = candidate_fe_strain_stress(update, particle.get_surrounding_cell()->id(), particle.get_location());
+          sample.crack_driving_force = particle.get_properties()[H_position];
           AssertThrow(std::isfinite(sample.stress.norm()) && std::isfinite(sample.crack_driving_force)
-                      && sample.crack_driving_force>=0.,ExcMessage("Nonfinite PF5 publication candidate."));
-          candidates.particle_candidates.emplace(particle.get_id(),sample);
+                      && sample.crack_driving_force >= 0., ExcMessage("Nonfinite PF5 publication candidate."));
+          candidates.particle_candidates.emplace(particle.get_id(), sample);
         }
       validate_history_candidates(candidates);
       // Every allocation, reconstruction and validity check precedes writes.
-      publish_history_candidates(candidates,stress_position,H_position);
+      publish_history_candidates(candidates, stress_position, H_position);
       publish_fe_strain_commit(update);
     }
 
@@ -923,29 +931,32 @@ namespace aspect
 
       // Bulk samples use the accepted solution, whereas the surface state is
       // interpolated from the frozen reconstructed-fault Q1 fields.
-      TimerOutput::Scope timer(this->get_computing_timer(),"DG independent history sampling");
-      const bool stationary=uses_stationary_mature_dg_optimizations();
-      auto *cache=stationary ? &fe_strain_state->particle_samples : nullptr;
-      const auto generation=fault_manager.get_stokes_qp_cache_diagnostics().rebuild_count;
-      const bool reuse=stationary && Utilities::MPI::min(static_cast<unsigned int>(
-        bool(*cache) && (*cache)->geometry==generation && (*cache)->points==points),this->get_mpi_communicator());
-      if(reuse)samples.point_cache=(*cache)->lookup;
+      TimerOutput::Scope timer(this->get_computing_timer(), "DG independent history sampling");
+      const bool stationary = uses_stationary_mature_dg_optimizations();
+      auto *cache = stationary ? &fe_strain_state->particle_samples : nullptr;
+      const auto generation = fault_manager.get_stokes_qp_cache_diagnostics().rebuild_count;
+      const bool reuse = stationary && Utilities::MPI::min(static_cast<unsigned int>(
+                                                             bool(*cache) && (*cache)->geometry == generation && (*cache)->points == points), this->get_mpi_communicator());
+      if (reuse)
+        samples.point_cache = (*cache)->lookup;
       else
         {
-          samples.point_cache=std::make_shared<Utilities::MPI::RemotePointEvaluation<dim>>();
-          samples.point_cache->reinit(this->get_phase_field_handler().get_grid_cache(),points);
+          samples.point_cache = std::make_shared<Utilities::MPI::RemotePointEvaluation<dim>>();
+          samples.point_cache->reinit(this->get_phase_field_handler().get_grid_cache(), points);
           aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::lookup_builds);
-          if(stationary)
+          if (stationary)
             {
-              *cache=std::make_shared<typename FEStrainState::ParticleSamples>();
-              (*cache)->points=points;(*cache)->geometry=generation;(*cache)->lookup=samples.point_cache;
+              *cache = std::make_shared<typename FEStrainState::ParticleSamples>();
+              (*cache)->points = points;
+              (*cache)->geometry = generation;
+              (*cache)->lookup = samples.point_cache;
             }
         }
-      auto &point_cache=*samples.point_cache;
+      auto &point_cache = *samples.point_cache;
       if (jaumann_particle_stress)
         samples.history_velocity_gradients = VectorTools::point_gradients<dim>(
-          point_cache,this->get_dof_handler(),this->get_old_solution(),
-          VectorTools::EvaluationFlags::avg,this->introspection().component_indices.velocities[0]);
+                                               point_cache, this->get_dof_handler(), this->get_old_solution(),
+                                               VectorTools::EvaluationFlags::avg, this->introspection().component_indices.velocities[0]);
       if (!dg_tensor_history)
         samples.velocity_gradients = VectorTools::point_gradients<dim>(
                                        point_cache, this->get_dof_handler(), accepted_bulk_state,
@@ -960,65 +971,72 @@ namespace aspect
               // DG traces are owned by the particle's CellId. A continuous FE
               // velocity has discontinuous gradients at cell faces: averaging
               // matching cells is not the source polynomial in that cell.
-              const auto &particles=this->get_phase_field_handler()
-                                    .get_associated_particle_manager().get_particle_handler();
-              unsigned int i=0;
-              if(stationary)
+              const auto &particles = this->get_phase_field_handler()
+                                      .get_associated_particle_manager().get_particle_handler();
+              unsigned int i = 0;
+              if (stationary)
                 {
-                  std::map<CellId,typename FEStrainState::ParticleSamples::Cell> cells;
-                  for(const auto &particle:particles)
+                  std::map<CellId, typename FEStrainState::ParticleSamples::Cell> cells;
+                  for (const auto &particle : particles)
                     {
-                      AssertThrow(i<associations.size() && particle.get_id()==associations[i].particle_id && particle.get_location()==points[i],
+                      AssertThrow(i < associations.size() && particle.get_id() == associations[i].particle_id && particle.get_location() == points[i],
                                   ExcMessage("DG publication requires matching particle/association ownership."));
-                      const auto id=particle.get_surrounding_cell()->id();
-                      if(!reuse)
+                      const auto id = particle.get_surrounding_cell()->id();
+                      if (!reuse)
                         {
-                          auto &cell=cells[id];cell.id=id;cell.indices.push_back(i);
-                          cell.units.push_back(this->get_mapping().transform_real_to_unit_cell(fe_strain_state->evaluation_cells.at(id),points[i]));
+                          auto &cell = cells[id];
+                          cell.id = id;
+                          cell.indices.push_back(i);
+                          cell.units.push_back(this->get_mapping().transform_real_to_unit_cell(fe_strain_state->evaluation_cells.at(id), points[i]));
                         }
                       ++i;
                     }
-                  if(!reuse)for(auto &cell:cells)(*cache)->cells.push_back(std::move(cell.second));
-                  for(const auto &group:(*cache)->cells)
+                  if (!reuse)
+                    for (auto &cell : cells)
+                      (*cache)->cells.push_back(std::move(cell.second));
+                  for (const auto &group : (*cache)->cells)
                     {
-                      FEValues<dim> fe(this->get_mapping(),this->get_fe(),Quadrature<dim>(group.units),update_gradients);
+                      FEValues<dim> fe(this->get_mapping(), this->get_fe(), Quadrature<dim>(group.units), update_gradients);
                       aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::native_fevalues);
                       fe.reinit(fe_strain_state->evaluation_cells.at(group.id));
-                      std::vector<Tensor<2,dim>> gradient(group.units.size());
-                      fe[this->introspection().extractors.velocities].get_function_gradients(accepted_bulk_state,gradient);
+                      std::vector<Tensor<2, dim>> gradient(group.units.size());
+                      fe[this->introspection().extractors.velocities].get_function_gradients(accepted_bulk_state, gradient);
                       std::vector<Point<dim>> physical;
-                      for(unsigned int q=0;q<group.indices.size();++q)
-                        {samples.velocity_gradients[group.indices[q]]=gradient[q];physical.push_back(points[group.indices[q]]);}
-                      prepare_dg_point_samples(group.id,physical);
+                      for (unsigned int q = 0; q < group.indices.size(); ++q)
+                        {
+                          samples.velocity_gradients[group.indices[q]] = gradient[q];
+                          physical.push_back(points[group.indices[q]]);
+                        }
+                      prepare_dg_point_samples(group.id, physical);
                     }
                 }
               else
                 {
-              for (const auto &particle:particles)
-                {
-                  AssertThrow(i<associations.size() && particle.get_id()==associations[i].particle_id
-                              && particle.get_location()==points[i],
-                              ExcMessage("DG publication requires matching particle/association ownership."));
-                  const auto cell=fe_strain_state->evaluation_cells.at(particle.get_surrounding_cell()->id());
-                  const auto unit=this->get_mapping().transform_real_to_unit_cell(cell,points[i]);
-                  aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::native_fevalues);
-                  FEValues<dim> fe(this->get_mapping(),this->get_fe(),Quadrature<dim>({unit}),update_gradients);
-                  fe.reinit(cell);
-                  std::vector<Tensor<2,dim>> gradient(1);
-                  fe[this->introspection().extractors.velocities].get_function_gradients(accepted_bulk_state,gradient);
-                  samples.velocity_gradients[i++]=gradient[0];
-                }
+                  for (const auto &particle : particles)
+                    {
+                      AssertThrow(i < associations.size() && particle.get_id() == associations[i].particle_id
+                                  && particle.get_location() == points[i],
+                                  ExcMessage("DG publication requires matching particle/association ownership."));
+                      const auto cell = fe_strain_state->evaluation_cells.at(particle.get_surrounding_cell()->id());
+                      const auto unit = this->get_mapping().transform_real_to_unit_cell(cell, points[i]);
+                      aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::native_fevalues);
+                      FEValues<dim> fe(this->get_mapping(), this->get_fe(), Quadrature<dim>({unit}), update_gradients);
+                      fe.reinit(cell);
+                      std::vector<Tensor<2, dim>> gradient(1);
+                      fe[this->introspection().extractors.velocities].get_function_gradients(accepted_bulk_state, gradient);
+                      samples.velocity_gradients[i++] = gradient[0];
+                    }
 
                 }
-              AssertThrow(i==associations.size(),ExcMessage("DG particle sample count mismatch."));
+              AssertThrow(i == associations.size(), ExcMessage("DG particle sample count mismatch."));
             }
           catch (const std::exception &error)
             {
-              sampling_error="DG matching-cell sampling failed: "+std::string(error.what());
+              sampling_error = "DG matching-cell sampling failed: " + std::string(error.what());
             }
           // Reach consensus before any rank enters the remaining collective
           // point evaluations, and before either terminal publisher can run.
-          throw_if_history_error(sampling_error,this->get_mpi_communicator());
+          throw_if_history_error(sampling_error, this->get_mpi_communicator());
         }
       samples.temperatures = VectorTools::point_values<1>(
                                point_cache, this->get_dof_handler(), accepted_bulk_state,
@@ -1067,15 +1085,15 @@ namespace aspect
 
       if (std::getenv("ASPECT_STRESS_CYCLE_TRACE"))
         diagnostics.open_stress_cycle(this->get_output_directory(),
-                                      this->get_timestep_number(), this->get_mpi_communicator(),jaumann_particle_stress);
+                                      this->get_timestep_number(), this->get_mpi_communicator(), jaumann_particle_stress);
       if (std::getenv("ASPECT_FAULT_SOURCE_HISTORY_DIAGNOSTIC"))
         diagnostics.open_source_history(this->get_output_directory(),
-                                        this->get_timestep_number(), this->get_mpi_communicator(),jaumann_particle_stress);
+                                        this->get_timestep_number(), this->get_mpi_communicator(), jaumann_particle_stress);
 
       if (nodal_cohesive_history)
         {
           std::vector<std::vector<double>> rates(faults.size());
-          for (unsigned int f=0; f<faults.size(); ++f)
+          for (unsigned int f = 0; f < faults.size(); ++f)
             rates[f] = fault_manager.get_slip_rate(f);
           cohesive_values = compute_surface_cohesive_candidates(time_step, rates);
         }
@@ -1101,9 +1119,9 @@ namespace aspect
                       previous_phase_fields[particle_index], "history commit");
                   const MaxwellCoefficients surface_coefficients =
                     compute_maxwell_coefficients(
-                      material_surface_viscosity(association.fault_index,association.segment_index,association.xi,compute_creep_viscosity(
-                        localization.surface_material_fractions,
-                        localization.surface_temperature)),
+                      material_surface_viscosity(association.fault_index, association.segment_index, association.xi, compute_creep_viscosity(
+                                                   localization.surface_material_fractions,
+                                                   localization.surface_temperature)),
                       compute_elastic_shear_modulus(localization.surface_material_fractions),
                       time_step);
                   const double slip_rate = fault_manager.interpolate_slip_rate(
@@ -1198,13 +1216,13 @@ namespace aspect
                     }
                 }
               const ArrayView<const double> properties = particle.get_properties();
-              SymmetricTensor<2,dim> old_stress;
+              SymmetricTensor<2, dim> old_stress;
               if (!uses_independent_bulk_history())
                 for (unsigned int component = 0;
-                     component < SymmetricTensor<2,dim>::n_independent_components;
+                     component < SymmetricTensor<2, dim>::n_independent_components;
                      ++component)
-                  old_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(
-                               component)] = properties[stress_position+component];
+                  old_stress[SymmetricTensor<2, dim>::unrolled_to_component_indices(
+                               component)] = properties[stress_position + component];
               old_stress = retained_history_stress(
                              particle.get_surrounding_cell()->id(), particle.get_location(), old_stress);
 
@@ -1218,30 +1236,30 @@ namespace aspect
                 bulk_fractions = MaterialUtilities::compute_composition_fractions(bulk_compositions);
               const MaxwellCoefficients bulk_coefficients =
                 compute_maxwell_coefficients(
-                  material_viscosity(particle.get_location(),compute_creep_viscosity(bulk_fractions,
-                                          temperatures[particle_index])),
+                  material_viscosity(particle.get_location(), compute_creep_viscosity(bulk_fractions,
+                                                                                      temperatures[particle_index])),
                   compute_elastic_shear_modulus(bulk_fractions),
                   time_step);
 
-              SymmetricTensor<2,dim> effective_strain_rate =
+              SymmetricTensor<2, dim> effective_strain_rate =
                 symmetrize(velocity_gradients[particle_index]);
               if (uses_deviatoric_strain_rate())
                 effective_strain_rate = Utilities::Tensors::consistent_deviator(effective_strain_rate);
-              SymmetricTensor<2,dim> continued_crack;
-              double continued_chi=0., continued_V=0.;
+              SymmetricTensor<2, dim> continued_crack;
+              double continued_chi = 0., continued_V = 0.;
               double new_H = properties[H_position];
               if (association.active)
                 {
                   const ReconstructedFault<dim> &fault =
                     faults[association.fault_index];
-                  Tensor<1,dim> tangent =
-                    fault.vertex(association.segment_index+1)
+                  Tensor<1, dim> tangent =
+                    fault.vertex(association.segment_index + 1)
                     - fault.vertex(association.segment_index);
                   tangent /= tangent.norm();
-                  Tensor<1,dim> normal;
+                  Tensor<1, dim> normal;
                   normal[0] = -tangent[1];
                   normal[1] = tangent[0];
-                  const SymmetricTensor<2,dim> slip_tensor =
+                  const SymmetricTensor<2, dim> slip_tensor =
                     this->get_reconstructed_fault_manager().get_shear_sense(association.fault_index)
                     * symmetrize(outer_product(tangent, normal));
 
@@ -1252,9 +1270,9 @@ namespace aspect
                       previous_phase_fields[particle_index], "history commit");
                   const MaxwellCoefficients surface_coefficients =
                     compute_maxwell_coefficients(
-                      material_surface_viscosity(association.fault_index,association.segment_index,association.xi,compute_creep_viscosity(
-                        localization.surface_material_fractions,
-                        localization.surface_temperature)),
+                      material_surface_viscosity(association.fault_index, association.segment_index, association.xi, compute_creep_viscosity(
+                                                   localization.surface_material_fractions,
+                                                   localization.surface_temperature)),
                       compute_elastic_shear_modulus(localization.surface_material_fractions),
                       time_step);
                   const double slip_rate = fault_manager.interpolate_slip_rate(
@@ -1265,12 +1283,12 @@ namespace aspect
                                                       localization.previous_I_h,
                                                       localization.previous_cohesive_traction, slip_rate,
                                                       localization.current_h, localization.previous_h, mature_frictional_fault);
-                  effective_strain_rate -= cohesive.crack_strain_rate*slip_tensor;
+                  effective_strain_rate -= cohesive.crack_strain_rate * slip_tensor;
                   if (!associations[particle_index].active)
                     {
-                      continued_crack=cohesive.crack_strain_rate*slip_tensor;
-                      continued_chi=cohesive.localization_factor;
-                      continued_V=slip_rate;
+                      continued_crack = cohesive.crack_strain_rate * slip_tensor;
+                      continued_chi = cohesive.localization_factor;
+                      continued_V = slip_rate;
                     }
 
                   AssertThrow(std::isfinite(new_H) && new_H >= 0.0,
@@ -1282,10 +1300,10 @@ namespace aspect
                       const double xi = association.xi;
                       const double projected_traction = surface_cohesive_history
                                                         ? cohesive.cohesive_traction
-                                                        : (1.0-xi) * cohesive_values[
+                                                        : (1.0 - xi) * cohesive_values[
                                                           association.fault_index][association.segment_index]
                                                         + xi * cohesive_values[
-                                                          association.fault_index][association.segment_index+1];
+                                                          association.fault_index][association.segment_index + 1];
                       const double H_candidate =
                         recoverable_phase_history
                         ? compute_recoverable_phase_driving_force(
@@ -1302,16 +1320,16 @@ namespace aspect
 
               ParticleCandidate candidate;
               const auto rotated_history = jaumann_particle_stress
-                ? rotate_maxwell_history(old_stress,samples.history_velocity_gradients.at(particle_index),time_step)
-                : old_stress;
+                                           ? rotate_maxwell_history(old_stress, samples.history_velocity_gradients.at(particle_index), time_step)
+                                           : old_stress;
               const double spin_angle = jaumann_particle_stress
-                ? .5*time_step*(samples.history_velocity_gradients[particle_index][1][0]
-                                 -samples.history_velocity_gradients[particle_index][0][1]) : 0.;
+                                        ? .5 * time_step * (samples.history_velocity_gradients[particle_index][1][0]
+                                                            - samples.history_velocity_gradients[particle_index][0][1]) : 0.;
               candidate.stress = compute_maxwell_stress(
                                    bulk_coefficients, effective_strain_rate, rotated_history);
-              candidate.incoming_stress=rotated_history;
-              candidate.effective_rate=effective_strain_rate;
-              candidate.coefficients=bulk_coefficients;
+              candidate.incoming_stress = rotated_history;
+              candidate.effective_rate = effective_strain_rate;
+              candidate.coefficients = bulk_coefficients;
               candidate.crack_driving_force = new_H;
               AssertThrow(std::isfinite(candidate.stress.norm())
                           && std::isfinite(candidate.crack_driving_force)
@@ -1326,13 +1344,13 @@ namespace aspect
                   particle_index, particle, points[particle_index],
                   bulk_coefficients.beta, bulk_coefficients.eta_ve,
                   velocity_gradients[particle_index], old_stress,
-                  effective_strain_rate, candidate.stress,spin_angle,&rotated_history);
+                  effective_strain_rate, candidate.stress, spin_angle, &rotated_history);
               if (diagnostics.source_history_is_open() && association.active && !associations[particle_index].active)
                 diagnostics.record_source_history(
                   particle, phase_fields[particle_index], continued_chi, continued_V,
                   bulk_coefficients.eta_ve, bulk_coefficients.beta,
                   velocity_gradients[particle_index], continued_crack,
-                  old_stress, candidate.stress,spin_angle,&rotated_history);
+                  old_stress, candidate.stress, spin_angle, &rotated_history);
               ++particle_index;
             }
         }
@@ -1357,9 +1375,9 @@ namespace aspect
       unsigned int local_valid =
         particle_candidates.size() == particle_handler.n_locally_owned_particles()
         ? 1u : 0u;
-      for (const auto &particle:particle_handler)
-        if (particle_candidates.find(particle.get_id())==particle_candidates.end())
-          local_valid=0;
+      for (const auto &particle : particle_handler)
+        if (particle_candidates.find(particle.get_id()) == particle_candidates.end())
+          local_valid = 0;
       AssertThrow(Utilities::MPI::min(local_valid, this->get_mpi_communicator()) == 1,
                   ExcMessage("Stage-J history candidates are incomplete."));
 
@@ -1412,11 +1430,11 @@ namespace aspect
             particle_candidates.find(particle.get_id())->second;
           ArrayView<double> properties = particle.get_properties();
           for (unsigned int component = 0;
-               component < SymmetricTensor<2,dim>::n_independent_components;
+               component < SymmetricTensor<2, dim>::n_independent_components;
                ++component)
-            properties[stress_position+component] =
+            properties[stress_position + component] =
               candidate.stress[
-                SymmetricTensor<2,dim>::unrolled_to_component_indices(component)];
+                SymmetricTensor<2, dim>::unrolled_to_component_indices(component)];
           properties[H_position] = candidate.crack_driving_force;
         }
     }
@@ -1570,12 +1588,12 @@ namespace aspect
           // solving a projection whose right-hand side is identically zero.
           fault_manager.get_locally_owned_particle_fault_associations();
           std::vector<std::vector<double>> zero_traction(faults.size());
-          for (unsigned int f=0; f<faults.size(); ++f)
-            zero_traction[f].assign(faults[f].n_vertices(),0.);
+          for (unsigned int f = 0; f < faults.size(); ++f)
+            zero_traction[f].assign(faults[f].n_vertices(), 0.);
           initial_cohesive_projection_diagnostics.clear();
           validate_cohesive_state_commit(zero_traction);
           commit_cohesive_state(zero_traction);
-          this->get_pcout()<<"   Initial cohesive traction set directly to zero; normalization and associations prepared."<<std::endl;
+          this->get_pcout() << "   Initial cohesive traction set directly to zero; normalization and associations prepared." << std::endl;
           return;
         }
       const auto projection = fault_manager.project_particle_scalar(
@@ -1663,9 +1681,9 @@ namespace aspect
       AssertDimension(fault_property_indices.chemical_compositions.size(),
                       chemical_field_indices.size());
       const std::map<types::particle_index, std::vector<double>> surface_compositions =
-                                                                interpolate_surface_chemical_compositions(
-                                                                  this->get_reconstructed_fault_manager(),
-                                                                  fault_property_indices.chemical_compositions);
+        interpolate_surface_chemical_compositions(
+          this->get_reconstructed_fault_manager(),
+          fault_property_indices.chemical_compositions);
 
       std::map<types::particle_index, double> particle_q;
       std::string local_error;
@@ -1701,7 +1719,7 @@ namespace aspect
             {
               const double degradation = phase_field_handler.energetic_degradation(
                                            material_fractions, phi);
-              q = degradation * std::sqrt(2.0*G*H);
+              q = degradation * std::sqrt(2.0 * G * H);
               if (!std::isfinite(q) && local_error.empty())
                 local_error = "Initial cohesive q is non-finite at particle "
                               + Utilities::int_to_string(particle.get_id()) + ".";

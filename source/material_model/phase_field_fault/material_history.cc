@@ -14,31 +14,33 @@ namespace aspect
   namespace MaterialModel
   {
     template<int dim> double PhaseFieldFault<dim>::material_viscosity(
-      const Point<dim> &x,const double reference) const
+      const Point<dim> &x, const double reference) const
     {
-      if (!dg_material_transport)return reference;
-      const double multiplier=material_viscosity_multiplier.value(x);
-      AssertThrow(std::isfinite(multiplier) && multiplier>0.,
+      if (!dg_material_transport)
+        return reference;
+      const double multiplier = material_viscosity_multiplier.value(x);
+      AssertThrow(std::isfinite(multiplier) && multiplier > 0.,
                   ExcMessage("Material viscosity multiplier must be finite and positive."));
-      return reference*multiplier;
+      return reference * multiplier;
     }
 
     template<int dim> void PhaseFieldFault<dim>::finish_dg_material_step(const bool accept) noexcept
     {
       dg_material_reaction.reset();
-      material_reaction_solving=false;
-      if (!dg_material_trial)return;
-      auto &trial=*dg_material_trial;
+      material_reaction_solving = false;
+      if (!dg_material_trial)
+        return;
+      auto &trial = *dg_material_trial;
       if (!accept && trial.bound)
         {
           this->get_reconstructed_fault_manager().swap_prescribed_geometry(*trial.manager);
-          fe_strain_state=trial.accepted_history;
+          fe_strain_state = trial.accepted_history;
           invalidate_normalization_cache();
           current_normalization_integrals.swap(trial.normalization);
           current_fault_surface_temperatures.swap(trial.temperatures);
-          for (auto &p:this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler())
+          for (auto &p : this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler())
             std::copy(trial.particle_properties.at(p.get_id()).begin(),
-            trial.particle_properties.at(p.get_id()).end(),p.get_properties().begin());
+            trial.particle_properties.at(p.get_id()).end(), p.get_properties().begin());
           fe_strain_state->stress_samples.clear();
           fe_strain_state->mechanical_samples.reset();
         }
@@ -46,16 +48,17 @@ namespace aspect
     }
 
     template<int dim> double PhaseFieldFault<dim>::material_surface_viscosity(
-      unsigned int f,unsigned int j,double xi,double reference) const
+      unsigned int f, unsigned int j, double xi, double reference) const
     {
-      if (!dg_material_transport)return reference;
-      const auto &fault=this->get_reconstructed_fault_manager().get_fault(f);
-      return material_viscosity(fault.vertex(j)+xi*(fault.vertex(j+1)-fault.vertex(j)),reference);
+      if (!dg_material_transport)
+        return reference;
+      const auto &fault = this->get_reconstructed_fault_manager().get_fault(f);
+      return material_viscosity(fault.vertex(j) + xi * (fault.vertex(j + 1) - fault.vertex(j)), reference);
     }
 
     template<int dim> typename PhaseFieldFault<dim>::MaterialHistoryInputs
     PhaseFieldFault<dim>::prepare_material_history(
-      const LinearAlgebra::BlockVector &accepted_velocity,const double time,const double dt)
+      const LinearAlgebra::BlockVector &accepted_velocity, const double time, const double dt)
     {
       AssertThrow(!(material_bounded_profile || material_trace_inflow)
                   || this->get_reconstructed_fault_manager().uses_full_normal_cross_section(),
@@ -72,41 +75,41 @@ namespace aspect
           compute_normalization_integrals();
         }
       validate_fe_strain_restrictions();
-      AssertThrow(dt>0. && std::isfinite(dt),ExcMessage("Invalid material step interval."));
+      AssertThrow(dt > 0. && std::isfinite(dt), ExcMessage("Invalid material step interval."));
       material_viscosity_multiplier.set_time(time);
-      auto transaction=std::make_shared<DGMaterialTrial>();
-      transaction->accepted_history=fe_strain_state;
-      transaction->step=this->get_timestep_number();
-      transaction->dt=dt;
-      transaction->normalization=current_normalization_integrals;
-      transaction->temperatures=current_fault_surface_temperatures;
-      for (const auto &p:this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler())
-        transaction->particle_properties.emplace(p.get_id(),std::vector<double>(p.get_properties().begin(),p.get_properties().end()));
-      dg_material_trial=transaction;
-      return {*transaction->accepted_history,accepted_velocity,time,dt,transaction->step};
+      auto transaction = std::make_shared<DGMaterialTrial>();
+      transaction->accepted_history = fe_strain_state;
+      transaction->step = this->get_timestep_number();
+      transaction->dt = dt;
+      transaction->normalization = current_normalization_integrals;
+      transaction->temperatures = current_fault_surface_temperatures;
+      for (const auto &p : this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler())
+        transaction->particle_properties.emplace(p.get_id(), std::vector<double>(p.get_properties().begin(), p.get_properties().end()));
+      dg_material_trial = transaction;
+      return {*transaction->accepted_history, accepted_velocity, time, dt, transaction->step};
     }
 
     template<int dim> std::shared_ptr<typename PhaseFieldFault<dim>::DGTransport>
     PhaseFieldFault<dim>::make_dg_transport(const LinearAlgebra::BlockVector &velocity,
-                                            const unsigned int order,const bool relax) const
+                                            const unsigned int order, const bool relax) const
     {
       validate_fe_strain_restrictions();
       AssertThrow(jaumann_dg_stress || (dg_tensor_history && !consistent_endpoint_phase),
                   ExcMessage("Tensor transport requires objective history or the retained PF4 control."));
-      return DGTransport::assemble(*this,*fe_strain_state->dg_history,fe_strain_state->cells,
-                                   velocity,order,relax ? fe_strain_state->G/fe_strain_state->eta : 0.,jaumann_dg_stress);
+      return DGTransport::assemble(*this, *fe_strain_state->dg_history, fe_strain_state->cells,
+                                   velocity, order, relax ? fe_strain_state->G / fe_strain_state->eta : 0., jaumann_dg_stress);
     }
     template<int dim> std::shared_ptr<typename PhaseFieldFault<dim>::DGHistory>
-    PhaseFieldFault<dim>::project_dg_transport_field(const DGTransport &op,const DGField &field,
-                                                     double time,unsigned int order) const
+    PhaseFieldFault<dim>::project_dg_transport_field(const DGTransport &op, const DGField &field,
+                                                     double time, unsigned int order) const
     {
-      return DGTransport::project(*this,op,field,time,order);
+      return DGTransport::project(*this, op, field, time, order);
     }
     template<int dim> std::shared_ptr<typename PhaseFieldFault<dim>::DGHistory>
-    PhaseFieldFault<dim>::advance_dg_transport(const DGTransport &op,const DGHistory &history,
-                                               const DGField &inflow,const DGField &source,double time,double dt) const
+    PhaseFieldFault<dim>::advance_dg_transport(const DGTransport &op, const DGHistory &history,
+                                               const DGField &inflow, const DGField &source, double time, double dt) const
     {
-      return DGTransport::advance(*this,op,history,inflow,source,time,dt);
+      return DGTransport::advance(*this, op, history, inflow, source, time, dt);
     }
 #define INSTANTIATE(dim) \
   template double PhaseFieldFault<dim>::material_viscosity(const Point<dim> &,double) const; \

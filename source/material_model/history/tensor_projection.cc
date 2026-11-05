@@ -10,10 +10,10 @@ namespace aspect
     {
       template <int dim>
       std::shared_ptr<TensorHistory<dim>>
-                                       TensorHistory<dim>::project (
-                                         const SimulatorAccess<dim> &context,const TensorHistory &incoming,const Cells &cells,
-                                         const LinearAlgebra::BlockVector &profile,const LinearAlgebra::BlockVector &accepted_velocity,
-                                         const unsigned int order,const MaterialField &field)
+      TensorHistory<dim>::project (
+        const SimulatorAccess<dim> &context, const TensorHistory &incoming, const Cells &cells,
+        const LinearAlgebra::BlockVector &profile, const LinearAlgebra::BlockVector &accepted_velocity,
+        const unsigned int order, const MaterialField &field)
       {
         const auto &space = *incoming.space;
         const auto comm = context.get_mpi_communicator ();
@@ -66,8 +66,8 @@ namespace aspect
                       mass (i, j) += w * dg.shape_value (j, q);
                     for (unsigned c = 0; c < rhs.size (); ++c)
                       rhs[c][i] += w
-                                   * value[SymmetricTensor<
-                                           2, dim>::unrolled_to_component_indices (c)];
+                                   * value[SymmetricTensor <
+                                           2, dim >::unrolled_to_component_indices (c)];
                   }
               }
             mass.gauss_jordan ();

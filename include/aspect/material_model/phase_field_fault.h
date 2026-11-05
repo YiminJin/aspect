@@ -120,13 +120,13 @@ namespace aspect
           double dynamic_pressure = numbers::signaling_nan<double>();
 
           std::vector<double> bulk_material_fractions;
-          SymmetricTensor<2,dim> strain_rate;
-          SymmetricTensor<2,dim> old_maxwell_stress;
+          SymmetricTensor<2, dim> strain_rate;
+          SymmetricTensor<2, dim> old_maxwell_stress;
           /** Accepted velocity gradient for the explicitly lagged spin only. */
-          Tensor<2,dim> history_velocity_gradient;
+          Tensor<2, dim> history_velocity_gradient;
           bool has_history_velocity_gradient = false;
-          SymmetricTensor<2,dim> slip_tensor;
-          SymmetricTensor<2,dim> normal_tensor;
+          SymmetricTensor<2, dim> slip_tensor;
+          SymmetricTensor<2, dim> normal_tensor;
           /** Output only; never changes the constitutive evaluation. */
           bool capture_stress_components = false;
         };
@@ -135,9 +135,9 @@ namespace aspect
         struct ReconstructedFaultPointResponse
         {
           /** Current stress from this evaluation, before history publication. */
-          SymmetricTensor<2,dim> stress;
+          SymmetricTensor<2, dim> stress;
           /** Optional beta*tau_old, 2*eta_ve*strain, and crack-strain terms. */
-          std::array<SymmetricTensor<2,dim>,3> stress_components;
+          std::array<SymmetricTensor<2, dim>, 3> stress_components;
           /** Diagnostic coefficients from the same constitutive evaluation. */
           double stress_time_step = 0., stress_beta = 0.;
           double normalization_integral;
@@ -185,7 +185,7 @@ namespace aspect
         /** Read-only zero-interval observation, restricted to the prescribed
          * frozen-geometry diagnostic. No source, relaxation or publication. */
         ReconstructedFaultPointResponse evaluate_reconstructed_fault_point(
-          const ReconstructedFaultPointInputs &inputs,bool accepted_snapshot) const;
+          const ReconstructedFaultPointInputs &inputs, bool accepted_snapshot) const;
 
         /** Select a manager-owned two-component Q1 field (shear, compressive
          * normal) of fixed background tractions. Invalid index disables it.
@@ -197,7 +197,7 @@ namespace aspect
 
         /** Fixed background at a surface coordinate. An optional three-component
          * correction (a,b,d) subtracts a(s)+b(s)/d(s), without Q1 reprojection. */
-        std::pair<double,double> reconstructed_fault_background_tractions(
+        std::pair<double, double> reconstructed_fault_background_tractions(
           unsigned int fault, unsigned int segment, double xi) const;
 
         /** Explicit constitutive selection, never inferred from a frozen phase. */
@@ -214,7 +214,7 @@ namespace aspect
         ReconstructedFaultPointResponse evaluate_cohesive_surface_resistance(
           unsigned int fault, unsigned int segment, double xi, double rate) const;
         ReconstructedFaultPointResponse evaluate_cohesive_surface_resistance(
-          unsigned int fault,unsigned int segment,double xi,double rate,bool accepted_snapshot) const;
+          unsigned int fault, unsigned int segment, double xi, double rate, bool accepted_snapshot) const;
 
         /** Select immutable, geometry-checked outside-profile integrals for a
          * frozen mature through-boundary benchmark. Applied before the existing
@@ -229,32 +229,44 @@ namespace aspect
 
         /** Frozen beta*tau_old at any bulk point, independent of fault support.
          * Composition contains all compositional fields in introspection order. */
-        SymmetricTensor<2,dim>
+        SymmetricTensor<2, dim>
         evaluate_frozen_maxwell_stress(const double temperature,
                                        const std::vector<double> &composition,
-                                      const SymmetricTensor<2,dim> &old_stress) const;
-        SymmetricTensor<2,dim>
+                                       const SymmetricTensor<2, dim> &old_stress) const;
+        SymmetricTensor<2, dim>
         evaluate_frozen_maxwell_stress(const double temperature,
-                                      const std::vector<double> &composition,
-                                      const SymmetricTensor<2,dim> &old_stress,
-                                      const Tensor<2,dim> *history_gradient,
-                                      const Point<dim> *position = nullptr) const;
+                                       const std::vector<double> &composition,
+                                       const SymmetricTensor<2, dim> &old_stress,
+                                       const Tensor<2, dim> *history_gradient,
+                                       const Point<dim> *position = nullptr) const;
 
-        bool uses_jaumann_particle_stress() const { return jaumann_particle_stress; }
-        bool uses_direct_material_stress() const { return material_direct_stress; }
-        bool uses_jaumann_dg_stress() const { return jaumann_dg_stress; }
-        bool uses_transported_mature_history() const { return dg_material_transport; }
+        bool uses_jaumann_particle_stress() const
+        {
+          return jaumann_particle_stress;
+        }
+        bool uses_direct_material_stress() const
+        {
+          return material_direct_stress;
+        }
+        bool uses_jaumann_dg_stress() const
+        {
+          return jaumann_dg_stress;
+        }
+        bool uses_transported_mature_history() const
+        {
+          return dg_material_transport;
+        }
         /** Lie substep from immutable physical history; the subsequent Maxwell
          * source uses the existing exponential coefficients and endpoint rate. */
-        SymmetricTensor<2,dim> rotate_maxwell_history(
-          const SymmetricTensor<2,dim> &,const Tensor<2,dim> &,double dt) const;
+        SymmetricTensor<2, dim> rotate_maxwell_history(
+          const SymmetricTensor<2, dim> &, const Tensor<2, dim> &, double dt) const;
 
         /** Default-off, fixed-mesh benchmark hook. Returns unrelaxed retained
          * stress in the specified cell trace, never an additional RHS force.
          * The plugin owns storage and may publish it only after acceptance.
          * Not serialized and not supported by the particle-domain surface rule.
          */
-        std::function<SymmetricTensor<2,dim>(const CellId &, const Point<dim> &)>
+        std::function<SymmetricTensor<2, dim>(const CellId &, const Point<dim> &)>
         benchmark_retained_stress;
 
         /** Default-off fresh serial frozen-mature benchmark input. The caller
@@ -266,7 +278,7 @@ namespace aspect
         struct BenchmarkPhaseReference
         {
           std::function<double(const Point<dim> &)> value;
-          Tensor<1,dim> exterior_spacing;
+          Tensor<1, dim> exterior_spacing;
         };
         std::shared_ptr<const BenchmarkPhaseReference> benchmark_phase_reference;
 
@@ -326,7 +338,10 @@ namespace aspect
         }
         /** Selected serial fixed-direction bulk cohesive experiment. The
          * reconstructed surface is not a constitutive support restriction. */
-        bool uses_bulk_cohesive_phase() const { return bulk_cohesive_phase; }
+        bool uses_bulk_cohesive_phase() const
+        {
+          return bulk_cohesive_phase;
+        }
         /** Restricted PF2 tensor history; fixed localization and no transport. */
         bool uses_dg_tensor_history() const
         {
@@ -360,7 +375,7 @@ namespace aspect
          * The reference switch changes algorithms only in this qualified scope. */
         bool uses_stationary_mature_dg_optimizations() const
         {
-          return dim==2 && !jaumann_dg_stress && stationary_mature_dg_optimizations && dg_accepted_history
+          return dim == 2 && !jaumann_dg_stress && stationary_mature_dg_optimizations && dg_accepted_history
                  && dg_tensor_history && homogeneous_mesh_data
                  && mature_frictional_fault && !consistent_endpoint_phase
                  && !use_adiabatic_pressure_in_fault_friction;
@@ -371,14 +386,14 @@ namespace aspect
         Quadrature<dim> mechanical_quadrature() const;
 
         /** One authoritative incoming stress for all mechanical consumers. */
-        SymmetricTensor<2,dim> retained_history_stress(
+        SymmetricTensor<2, dim> retained_history_stress(
           const CellId &, const Point<dim> &,
-          const SymmetricTensor<2,dim> &particle_representation) const;
+          const SymmetricTensor<2, dim> &particle_representation) const;
 
         /** Accepted DG stress at the known mechanical QP layout. Geometry and
          * phase are fixed; values refresh when the accepted history changes. */
-        const std::vector<SymmetricTensor<2,dim>> &retained_dg_qp_stress(
-          const CellId &,const Quadrature<dim> &,const std::vector<Point<dim>> &) const;
+        const std::vector<SymmetricTensor<2, dim>> &retained_dg_qp_stress(
+          const CellId &, const Quadrature<dim> &, const std::vector<Point<dim>> &) const;
 
         struct FEPhaseEnergy
         {
@@ -409,9 +424,9 @@ namespace aspect
         FEPhaseEnergy evaluate_fe_endpoint_energy(const LinearAlgebra::BlockVector &,
                                                   const FEEndpointTrial &,
                                                   const std::vector<double> *phase_direction = nullptr) const;
-        SymmetricTensor<2,dim> evaluate_fe_endpoint_stress(const FEEndpointTrial &,
-                                                           const std::vector<double> &normalization,
-                                                           const CellId &,const Point<dim> &) const;
+        SymmetricTensor<2, dim> evaluate_fe_endpoint_stress(const FEEndpointTrial &,
+                                                            const std::vector<double> &normalization,
+                                                            const CellId &, const Point<dim> &) const;
 
         /** Directional derivative of the actual normalization pullback and
          * elastic phase gradient. Optional mechanical directions differentiate
@@ -443,11 +458,14 @@ namespace aspect
         /** Bounded prescribed geometry diagnostic: no physical time stepping.
          * Explicit setup only, before initialization; no production parameter. */
         void enable_prescribed_dg_geometry(const std::function<double(const Point<dim> &)> &);
-        bool uses_prescribed_dg_geometry() const {return bool(prescribed_geometry_phase);}
+        bool uses_prescribed_dg_geometry() const
+        {
+          return bool(prescribed_geometry_phase);
+        }
         void initialize_prescribed_dg_geometry();
         std::shared_ptr<DGGeometryUpdate<dim>> prepare_dg_geometry_append(
-          const std::vector<Point<dim>> &,const std::vector<double> &,
-          const std::vector<std::vector<double>> &,const std::vector<double> &);
+          const std::vector<Point<dim>> &, const std::vector<double> &,
+          const std::vector<std::vector<double>> &, const std::vector<double> &);
 
       private:
         friend class internal::PhaseFieldFaultTestAccess<dim>;
@@ -458,7 +476,7 @@ namespace aspect
         struct FEStrainState;
         struct BulkCohesiveState;
         struct BulkCohesiveArchive;
-        bool bulk_cohesive_phase=false;
+        bool bulk_cohesive_phase = false;
         std::shared_ptr<BulkCohesiveState> bulk_cohesive_state;
         std::shared_ptr<BulkCohesiveArchive> bulk_cohesive_archive;
         void initialize_bulk_cohesive_history(const LinearAlgebra::BlockVector &);
@@ -487,7 +505,9 @@ namespace aspect
         bool material_variable_viscosity = false;
         bool material_direct_stress = false;
         bool uses_projected_material_reaction() const
-        { return dg_material_transport && (material_variable_viscosity || material_direct_stress); }
+        {
+          return dg_material_transport && (material_variable_viscosity || material_direct_stress);
+        }
         bool material_reaction_solving = false;
         bool material_bounded_profile = false;
         bool material_trace_inflow = false;
@@ -498,32 +518,32 @@ namespace aspect
         std::shared_ptr<DGMaterialTrial> dg_material_trial;
         struct MaterialHistoryInputs;
         struct TransportedHistory;
-        MaterialHistoryInputs prepare_material_history(const LinearAlgebra::BlockVector &,double,double);
+        MaterialHistoryInputs prepare_material_history(const LinearAlgebra::BlockVector &, double, double);
         void transport_material_history(const MaterialHistoryInputs &);
-        void stage_material_geometry(const MaterialHistoryInputs &,LinearAlgebra::BlockVector &,LinearAlgebra::BlockVector &);
+        void stage_material_geometry(const MaterialHistoryInputs &, LinearAlgebra::BlockVector &, LinearAlgebra::BlockVector &);
         void rotate_material_history(const MaterialHistoryInputs &);
-        double mature_tensor_energy(const DGHistory &,const FEStrainState &) const;
+        double mature_tensor_energy(const DGHistory &, const FEStrainState &) const;
         void finish_dg_material_step(bool) noexcept;
         LinearAlgebra::BlockVector transport_material_profile(const MaterialHistoryInputs &) const;
-        double material_viscosity(const Point<dim> &,double) const;
-        double material_surface_viscosity(unsigned int,unsigned int,double,double) const;
+        double material_viscosity(const Point<dim> &, double) const;
+        double material_surface_viscosity(unsigned int, unsigned int, double, double) const;
         struct DGMaterialReaction;
         std::shared_ptr<DGMaterialReaction> dg_material_reaction;
         std::shared_ptr<FEStrainUpdate> make_material_reaction(
-          const FEStrainState &,const LinearAlgebra::BlockVector &,const std::vector<double> &) const;
-        double refresh_material_reaction(const LinearAlgebra::BlockVector &,const std::vector<double> &);
-        SymmetricTensor<2,dim> material_reaction_correction(const CellId &,const Point<dim> &) const;
-        using MatureReactionField = std::function<std::array<SymmetricTensor<2,dim>,2>(
-          const Point<dim> &,double,const SymmetricTensor<2,dim> &,
-          const SymmetricTensor<2,dim> &,const SymmetricTensor<2,dim> &)>;
-        void project_mature_reaction(const FEStrainState &,const LinearAlgebra::BlockVector &,
-                                    FEStrainUpdate &,const MatureReactionField &) const;
-        SymmetricTensor<2,dim> evaluate_material_projection_correction(
-          const DGMaterialReaction *,const FEStrainState &,const CellId &,const Point<dim> &) const;
+          const FEStrainState &, const LinearAlgebra::BlockVector &, const std::vector<double> &) const;
+        double refresh_material_reaction(const LinearAlgebra::BlockVector &, const std::vector<double> &);
+        SymmetricTensor<2, dim> material_reaction_correction(const CellId &, const Point<dim> &) const;
+        using MatureReactionField = std::function<std::array<SymmetricTensor<2, dim>, 2>(
+                                      const Point<dim> &, double, const SymmetricTensor<2, dim> &,
+                                      const SymmetricTensor<2, dim> &, const SymmetricTensor<2, dim> &)>;
+        void project_mature_reaction(const FEStrainState &, const LinearAlgebra::BlockVector &,
+                                     FEStrainUpdate &, const MatureReactionField &) const;
+        SymmetricTensor<2, dim> evaluate_material_projection_correction(
+          const DGMaterialReaction *, const FEStrainState &, const CellId &, const Point<dim> &) const;
 
         void prepare_objective_dg_anchor();
-        SymmetricTensor<2,dim> evaluate_mature_dg_memory(
-          const Point<dim> &,double,const std::vector<double> &,const std::vector<double> &,
+        SymmetricTensor<2, dim> evaluate_mature_dg_memory(
+          const Point<dim> &, double, const std::vector<double> &, const std::vector<double> &,
           const ReconstructedFaultUtilities::NormalProfileProjection * = nullptr) const;
         bool consistent_endpoint_phase = false;
         std::string fe_initial_phase_profile;
@@ -535,43 +555,43 @@ namespace aspect
         std::shared_ptr<DGHistory> make_dg_history_trial(
           const LinearAlgebra::BlockVector &, const MaxwellCoefficients &) const;
         std::shared_ptr<DGHistory> make_dg_history_trial(
-          const DGHistory &,const LinearAlgebra::BlockVector &,const MaxwellCoefficients &,
-          bool estimate_source_roundoff = false,bool reference = false) const;
+          const DGHistory &, const LinearAlgebra::BlockVector &, const MaxwellCoefficients &,
+          bool estimate_source_roundoff = false, bool reference = false) const;
         /** Prescribed PF5 Strang candidate; closed boundaries and uniform V/Z. */
         std::shared_ptr<FEStrainUpdate> prepare_dg_accepted_step(
-          const DGTransport &,const LinearAlgebra::BlockVector &,double time) const;
+          const DGTransport &, const LinearAlgebra::BlockVector &, double time) const;
         void commit_dg_accepted_step(const std::shared_ptr<FEStrainUpdate> &);
         /** Raw independent coefficients: T for separated history, tau for direct.
          * Physical reconstruction belongs to evaluate_dg_history_stress below. */
-        std::vector<SymmetricTensor<2,dim>> evaluate_history_tensor(
-                                           const DGHistory &, const CellId &, const Quadrature<dim> &) const;
-        void prepare_dg_point_samples(const CellId &,const std::vector<Point<dim>> &) const;
-        SymmetricTensor<2,dim> physical_history_stress(
-          const FEStrainState &,const DGHistory &,const std::vector<double> &,
-          const std::vector<double> &,const CellId &,const Point<dim> &,
-          double * = nullptr,const LinearAlgebra::BlockVector * = nullptr) const;
+        std::vector<SymmetricTensor<2, dim>> evaluate_history_tensor(
+          const DGHistory &, const CellId &, const Quadrature<dim> &) const;
+        void prepare_dg_point_samples(const CellId &, const std::vector<Point<dim>> &) const;
+        SymmetricTensor<2, dim> physical_history_stress(
+          const FEStrainState &, const DGHistory &, const std::vector<double> &,
+          const std::vector<double> &, const CellId &, const Point<dim> &,
+          double * = nullptr, const LinearAlgebra::BlockVector * = nullptr) const;
 
         /** Physical stress access shared by mechanics, traction and observers.
          * Direct returns tau; separated reconstructs T-R-B with supplied Z/I. */
-        SymmetricTensor<2,dim> evaluate_dg_history_stress(
+        SymmetricTensor<2, dim> evaluate_dg_history_stress(
           const DGHistory &, const std::vector<double> &, const std::vector<double> &,
           const CellId &, const Point<dim> &, double *evaluation_scale = nullptr,
           const LinearAlgebra::BlockVector *phase_trial = nullptr) const;
         /** Forward error from native Q2 differentiation and DG source projection. */
-        double dg_source_publication_allowance(const DGHistory &,const CellId &,const Point<dim> &) const;
-        static void validate_fe_strain_publication(double error,double bound);
+        double dg_source_publication_allowance(const DGHistory &, const CellId &, const Point<dim> &) const;
+        static void validate_fe_strain_publication(double error, double bound);
         /** Restricted PF4 noncommitting operators. Native fixed Q2 velocity,
          * upwind material advection and explicit prescribed source/inflow.
          * Relaxation, when selected, uses the existing G/eta. No spin. */
-        using DGField = std::function<SymmetricTensor<2,dim>(const Point<dim> &,double)>;
+        using DGField = std::function<SymmetricTensor<2, dim>(const Point<dim> &, double)>;
         std::shared_ptr<DGTransport> make_dg_transport(
-          const LinearAlgebra::BlockVector &,unsigned int quadrature_order,
+          const LinearAlgebra::BlockVector &, unsigned int quadrature_order,
           bool include_relaxation) const;
         std::shared_ptr<DGHistory> project_dg_transport_field(
-          const DGTransport &,const DGField &,double time,unsigned int quadrature_order) const;
+          const DGTransport &, const DGField &, double time, unsigned int quadrature_order) const;
         std::shared_ptr<DGHistory> advance_dg_transport(
-          const DGTransport &,const DGHistory &,const DGField &inflow,
-          const DGField &source,double time,double dt) const;
+          const DGTransport &, const DGHistory &, const DGField &inflow,
+          const DGField &source, double time, double dt) const;
         /** Build fixed normal rays and their consistent surface projection once. */
         void prepare_fe_normalization_geometry(FEStrainState &);
         /** Values only unless dense derivatives or a directional action is requested.
@@ -602,10 +622,10 @@ namespace aspect
           const std::vector<std::vector<double>> &tractions,
           const std::shared_ptr<DGHistory> &transported = nullptr) const;
         void publish_fe_strain_commit(const std::shared_ptr<FEStrainUpdate> &) noexcept;
-        SymmetricTensor<2,dim> candidate_fe_strain_stress(
+        SymmetricTensor<2, dim> candidate_fe_strain_stress(
           const std::shared_ptr<FEStrainUpdate> &, const CellId &, const Point<dim> &,
           double *evaluation_scale = nullptr) const;
-        SymmetricTensor<2,dim> evaluate_fe_strain_stress(
+        SymmetricTensor<2, dim> evaluate_fe_strain_stress(
           const LinearAlgebra::BlockVector &, const std::vector<double> &,
           const std::vector<double> &, const CellId &, const Point<dim> &,
           double *evaluation_scale = nullptr) const;
@@ -632,10 +652,10 @@ namespace aspect
          * Apply the non-rotational time-discrete Maxwell law to an effective
          * bulk strain rate.
          */
-        static SymmetricTensor<2,dim>
+        static SymmetricTensor<2, dim>
         compute_maxwell_stress(const MaxwellCoefficients &coefficients,
-                               const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
-                               const SymmetricTensor<2,dim> &old_stress);
+                               const SymmetricTensor<2, dim> &effective_bulk_strain_rate,
+                               const SymmetricTensor<2, dim> &old_stress);
         /**
          * @}
          */
@@ -671,7 +691,7 @@ namespace aspect
          * No particle transfer and no history writes occur here.
          */
         std::vector<std::vector<double>> compute_surface_cohesive_candidates(
-                                        const double time_step, const std::vector<std::vector<double>> &rates) const;
+          const double time_step, const std::vector<std::vector<double>> &rates) const;
 
         /** Surface mixture and cohesive-profile values shared by surface and bulk points. */
         struct LocalizationResponse
@@ -788,7 +808,7 @@ namespace aspect
           double xi = numbers::signaling_nan<double>();
           double surface_weight = numbers::signaling_nan<double>();
           Point<dim> origin;
-          Tensor<1,dim> normal;
+          Tensor<1, dim> normal;
           std::vector<double> material_fractions;
         };
 
@@ -855,7 +875,7 @@ namespace aspect
         {
           std::unique_ptr<PhaseField::PhaseFieldProfile> profile;
           Point<dim> lattice_origin;
-          Tensor<1,dim> spacing;
+          Tensor<1, dim> spacing;
           double extent = 0.;
         };
         std::vector<BoundaryContinuation> boundary_continuations;
@@ -896,7 +916,7 @@ namespace aspect
         struct NormalizationCellGeometry
         {
           /** Distances to the physical boundary along the positive and negative normal. */
-          std::vector<std::array<double,2>> ends;
+          std::vector<std::array<double, 2>> ends;
           unsigned long long candidates = 0;
           unsigned long long rebuilt = 0;
           unsigned long long reused = 0;
@@ -1077,13 +1097,13 @@ namespace aspect
           {
             double lower, upper, diameter;
             Point<dim> reference_origin;
-            Tensor<1,dim> reference_direction;
+            Tensor<1, dim> reference_direction;
             std::array<types::global_dof_index, GeometryInfo<dim>::vertices_per_cell> phase_dofs;
           };
           struct Profile
           {
             Point<dim> origin;
-            Tensor<1,dim> normal;
+            Tensor<1, dim> normal;
             std::vector<Interval> intervals;
           };
           bool mesh_changed = true;
@@ -1113,7 +1133,10 @@ namespace aspect
 
         /** Default-preserving experimental bulk point law. This is separate
          * from mature/surface constitutive modes and cannot convert histories. */
-        enum class BulkFlowRule { scalar, fixed_tensor, radial_tensor, coulomb_fixed_phase };
+        enum class BulkFlowRule
+        {
+          scalar, fixed_tensor, radial_tensor, coulomb_fixed_phase
+        };
         BulkFlowRule bulk_flow_rule = BulkFlowRule::scalar;
         /**
          * @}
@@ -1128,7 +1151,7 @@ namespace aspect
   Quadrature<dim> fault_mechanical_quadrature(const SimulatorAccess<dim> &);
   template <int dim>
   Quadrature<dim> fault_mechanical_quadrature(
-    const MaterialModel::Interface<dim> &,const Quadrature<dim> &);
+    const MaterialModel::Interface<dim> &, const Quadrature<dim> &);
 }
 
 #endif
