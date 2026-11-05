@@ -1,6 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/simulator.h>
 #include <aspect/phase_field.h>
 #include <aspect/geometry_model/box.h>
@@ -24,7 +25,7 @@ namespace aspect { namespace MaterialModel
     const std::function<double(const Point<dim> &)> &phase)
   {
     AssertThrow(dim==2 && phase && !fe_strain_state && homogeneous_mesh_data
-                && dg_accepted_history && dg_trial_stress_history && consistent_endpoint_phase
+                && dg_accepted_history && dg_tensor_history && consistent_endpoint_phase
                 && !mature_frictional_fault && !fault_friction.has_state_variable()
                 && this->get_parameters().nonlinear_solver==Parameters<dim>::NonlinearSolver::no_Advection_no_Stokes
                 && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
@@ -153,12 +154,12 @@ namespace aspect { namespace MaterialModel
               for(unsigned int i=0;i<9;++i)
                 {
                   const auto component=SymmetricTensor<2,dim>::unrolled_to_component_indices(c);
-                  owned[c][ids[i]]=old->dg_history->trial_stress[c][old_ids[i]]
+                  owned[c][ids[i]]=old->dg_history->coefficients[c][old_ids[i]]
                                   +(component[0]==0 && component[1]==1 ? coefficients[i] : 0.);
                 }
           }
         for(unsigned int c=0;c<owned.size();++c)
-          {owned[c].compress(VectorOperation::insert);next.dg_history->trial_stress[c]=owned[c];}
+          {owned[c].compress(VectorOperation::insert);next.dg_history->coefficients[c]=owned[c];}
         update->next=fe_strain_state;
         update->normalization=current_normalization_integrals;
         update->surface_temperatures=current_fault_surface_temperatures;

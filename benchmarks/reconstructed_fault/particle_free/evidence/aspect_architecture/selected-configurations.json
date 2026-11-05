@@ -1,0 +1,51 @@
+{
+  "dc": {
+    "Material stress representation": "direct physical stress",
+    "Material profile transport": "bounded MacCormack",
+    "Material tensor inflow": "accepted trace",
+    "Stress rotation": "Jaumann DG material Lie",
+    "Bulk history representation": "DG trial stress"
+  },
+  "sc": {
+    "Material stress representation": "separated",
+    "Material profile transport": "bounded MacCormack",
+    "Material tensor inflow": "accepted trace",
+    "Stress rotation": "Jaumann DG material Lie",
+    "Bulk history representation": "DG trial stress"
+  },
+  "dl": {
+    "Material stress representation": "direct physical stress",
+    "Material profile transport": "bounded MacCormack",
+    "Material tensor inflow": "accepted trace",
+    "Stress rotation": "Jaumann DG material Lie",
+    "Bulk history representation": "DG trial stress"
+  },
+  "sl": {
+    "Material stress representation": "separated",
+    "Material profile transport": "bounded MacCormack",
+    "Material tensor inflow": "accepted trace",
+    "Stress rotation": "Jaumann DG material Lie",
+    "Bulk history representation": "DG trial stress"
+  },
+  "default": {
+    "Material stress representation": "separated",
+    "Material profile transport": "Q1 remap",
+    "Material tensor inflow": "zero",
+    "Stress rotation": "Jaumann DG material Lie",
+    "Bulk history representation": "DG trial stress"
+  },
+  "reject": {
+    "Material stress representation": "direct physical stress",
+    "Material profile transport": "bounded MacCormack",
+    "Material tensor inflow": "accepted trace",
+    "Stress rotation": "Jaumann DG material Lie",
+    "Bulk history representation": "DG trial stress"
+  },
+  "restart4": {
+    "Material stress representation": "direct physical stress",
+    "Material profile transport": "bounded MacCormack",
+    "Material tensor inflow": "accepted trace",
+    "Stress rotation": "Jaumann DG material Lie",
+    "Bulk history representation": "DG trial stress"
+  }
+}

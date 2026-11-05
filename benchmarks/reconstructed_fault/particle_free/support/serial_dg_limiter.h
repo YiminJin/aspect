@@ -2,7 +2,8 @@
 #ifndef ASPECT_BENCHMARK_SERIAL_DG_LIMITER_H
 #define ASPECT_BENCHMARK_SERIAL_DG_LIMITER_H
 #include "../../../../tests/phase_field_fault_test_access.h"
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <set>
 
 namespace aspect

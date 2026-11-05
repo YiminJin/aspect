@@ -1,6 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
@@ -132,12 +133,12 @@ namespace aspect
                       values.push_back(s.displacement_history[entry.second->vertex_dof_index(v,pc)]);
                     }
                   s.dg_history->space->cells.at(entry.first)->get_dof_indices(indices);
-                  for(const auto &component:s.dg_history->trial_stress)
+                  for(const auto &component:s.dg_history->coefficients)
                     for(const auto i:indices)values.push_back(component[i]);
                   if (jaumann_dg_stress && !material_direct_stress)
                     {
                       AssertThrow(s.dg_history->residual,ExcMessage("Objective checkpoint lacks residual history."));
-                      for (const auto &component:s.dg_history->residual->trial_stress)
+                      for (const auto &component:s.dg_history->residual->coefficients)
                         for (const auto i:indices) values.push_back(component[i]);
                     }
                 }
@@ -170,7 +171,7 @@ namespace aspect
                 {
                   p.cells.push_back(entry.first.to_string());
                   entry.second->get_dof_indices(indices);
-                  for (const auto &component:s.dg_history->trial_stress)
+                  for (const auto &component:s.dg_history->coefficients)
                     for (const auto i:indices) p.coefficients.push_back(component[i]);
                 }
             }
@@ -278,12 +279,12 @@ namespace aspect
                   && Utilities::MPI::sum(matching_cells,this->get_mpi_communicator())==p.cells.size(),
                   ExcMessage("DG checkpoint physical mesh/phase anchor or CellId ownership mismatch."));
       for(unsigned int c=0;c<owned.size();++c)
-        {owned[c].compress(VectorOperation::insert);s.dg_history->trial_stress[c]=owned[c];}
+        {owned[c].compress(VectorOperation::insert);s.dg_history->coefficients[c]=owned[c];}
       if (jaumann_dg_stress && !material_direct_stress)
         {
           AssertThrow(s.dg_history->residual,ExcMessage("Missing restored DG residual owner."));
           for (unsigned int c=0;c<residual_owned.size();++c)
-            {residual_owned[c].compress(VectorOperation::insert);s.dg_history->residual->trial_stress[c]=residual_owned[c];}
+            {residual_owned[c].compress(VectorOperation::insert);s.dg_history->residual->coefficients[c]=residual_owned[c];}
           s.objective_anchor.reset();s.objective_parent.reset();
         }
       for (unsigned int j=0; j<p.I.size(); ++j)

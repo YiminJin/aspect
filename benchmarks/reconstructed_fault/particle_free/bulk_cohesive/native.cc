@@ -73,7 +73,7 @@ namespace aspect
       std::vector<double> dg_local_phase_record()const
       {
         const auto &s=*model().bulk_cohesive_state;std::vector<double> v;
-        for(const auto &field:s.tensor->trial_stress)for(unsigned int i=0;i<field.size();++i)v.push_back(field[i]);
+        for(const auto &field:s.tensor->coefficients)for(unsigned int i=0;i<field.size();++i)v.push_back(field[i]);
         for(const auto &entry:s.history)for(const auto &h:entry.second)
           {v.push_back(h.a);v.push_back(h.signed_shear);v.push_back(h.absolute_shear);v.push_back(h.q);v.push_back(h.rate);}
         v.insert(v.end(),s.phase.begin(),s.phase.end());
@@ -85,7 +85,7 @@ namespace aspect
         auto v=dg_local_phase_record();const auto &s=*model().bulk_cohesive_state;
         const auto &memory=s.native_history.block(this->introspection().block_indices.velocities);
         for(unsigned int i=0;i<memory.size();++i)v.push_back(memory[i]);
-        for(const auto &field:s.native_projection->trial_stress)
+        for(const auto &field:s.native_projection->coefficients)
           for(unsigned int i=0;i<field.size();++i)v.push_back(field[i]);
         return v;
       }
@@ -135,8 +135,8 @@ namespace aspect
         for(const auto &cell:this->get_dof_handler().active_cell_iterators())
           {
             fe.reinit(cell);fe[this->introspection().extractors.velocities].get_function_values(s.native_history,A);
-            const auto dg=m.evaluate_dg_trial_tensor(*s.tensor,cell->id(),nodes);
-            const auto projection=m.evaluate_dg_trial_tensor(*s.native_projection,cell->id(),nodes);
+            const auto dg=m.evaluate_history_tensor(*s.tensor,cell->id(),nodes);
+            const auto projection=m.evaluate_history_tensor(*s.native_projection,cell->id(),nodes);
             for(unsigned int q=0;q<nodes.size();++q)
               coefficients<<cell->id()<<','<<nodes.point(q)[0]<<','<<nodes.point(q)[1]<<','<<A[q][0]<<','<<A[q][1]<<','
                           <<dg[q][0][0]<<','<<dg[q][1][1]<<','<<dg[q][0][1]<<','<<projection[q][0][0]<<','<<projection[q][1][1]<<','<<projection[q][0][1]<<'\n';
@@ -153,8 +153,8 @@ namespace aspect
             bad.tensor=std::make_shared<typename Model::DGHistory>(*s.tensor);
             const auto id=s.native_cells.begin()->first;
             std::vector<types::global_dof_index> ids(9);s.tensor->space->cells.at(id)->get_dof_indices(ids);
-            bad.tensor->trial_stress[0][ids[0]]+=.01;
-            bad.tensor->trial_stress[0].compress(VectorOperation::insert);
+            bad.tensor->coefficients[0][ids[0]]+=.01;
+            bad.tensor->coefficients[0].compress(VectorOperation::insert);
             std::vector<BC::Tensor> expected;
             for(const auto &T:s.evaluate_tensor(m,id,points))
               {BC::Tensor t;t[0][0]=T[0][0];t[1][1]=T[1][1];t[2][2]=-T[0][0]-T[1][1];t[0][1]=T[0][1];expected.push_back(t);}
@@ -270,7 +270,7 @@ namespace aspect
           {
             fe.reinit(cell);fe[FEValuesExtractors::Scalar(pc)].get_function_values(sim().solution,phi);
             const auto T=s.evaluate_tensor(m,cell->id(),quad);
-            const auto polynomial=m.evaluate_dg_trial_tensor(*s.tensor,cell->id(),quad);
+            const auto polynomial=m.evaluate_history_tensor(*s.tensor,cell->id(),quad);
             for(unsigned int q=0;q<quad.size();++q)
               {
                 const auto &h=s.history.at(cell->id())[q];BC::Response r;

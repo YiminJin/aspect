@@ -39,7 +39,7 @@
                 Tensor a;
                 for(unsigned c=0;c<3;++c)
                   for(unsigned i=0;i<9;++i)
-                    a[Tensor::unrolled_to_component_indices(c)]+=h.trial_stress[c][ids[i]]*space.element.shape_value(i,unit);
+                    a[Tensor::unrolled_to_component_indices(c)]+=h.coefficients[c][ids[i]]*space.element.shape_value(i,unit);
                 return a;
               };
             for(unsigned kind=0;kind<3;++kind)
@@ -68,7 +68,7 @@
                         for(const auto &block:op->blocks)
                           for(unsigned i=0;i<block.rows.size();++i)
                             for(unsigned j=0;j<block.columns.size();++j)
-                              rows[c][block.rows[i]]+=block.values(i,j)*h.trial_stress[c][block.columns[j]];
+                              rows[c][block.rows[i]]+=block.values(i,j)*h.coefficients[c][block.columns[j]];
                         for(const auto &load:op->inflow)
                           {
                             const auto a=inflow(load.point,time);
@@ -76,8 +76,8 @@
                               rows[c][load.indices[i]]+=load.weights[i]*a[Tensor::unrolled_to_component_indices(c)];
                           }
                         rows[c].compress(VectorOperation::insert);
-                        rhs.trial_stress[c].reinit(space.dofs.locally_owned_dofs(),space.relevant,comm);
-                        rhs.trial_stress[c]=rows[c];
+                        rhs.coefficients[c].reinit(space.dofs.locally_owned_dofs(),space.relevant,comm);
+                        rhs.coefficients[c]=rows[c];
                       }
                     const QGauss<dim> rule(8);const QGauss<1> face(8);
                     FEValues<dim> fe(this->get_mapping(),space.element,rule,update_quadrature_points|update_JxW_values);
@@ -85,8 +85,8 @@
                     for(const auto &entry:op->cells)
                       {
                         const auto cell=space.cells.at(entry.id);fe.reinit(cell);
-                        const auto a=model.evaluate_dg_trial_tensor(h,entry.id,rule);
-                        const auto da=model.evaluate_dg_trial_tensor(rhs,entry.id,rule);
+                        const auto a=model.evaluate_history_tensor(h,entry.id,rule);
+                        const auto da=model.evaluate_history_tensor(rhs,entry.id,rule);
                         for(unsigned q=0;q<rule.size();++q)
                           {
                             result[0]+=fe.JxW(q)*dot3(a[q],a[q])/(4*G);
@@ -142,7 +142,7 @@
                     for(const auto &entry:op->cells)
                       {
                         fe.reinit(space.cells.at(entry.id));
-                        const auto actual=model.evaluate_dg_trial_tensor(*h,entry.id,rule);
+                        const auto actual=model.evaluate_history_tensor(*h,entry.id,rule);
                         for(unsigned q=0;q<rule.size();++q)
                           {
                             const auto x=fe.quadrature_point(q);const auto extended=exact(x,finish);

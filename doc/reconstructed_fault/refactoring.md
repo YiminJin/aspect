@@ -641,20 +641,25 @@ separately from a mechanics solve and resource-limited attempts. The historical
 unbuffered 45-degree failure does not block qualified 60-degree completion. Stop
 for review before server execution, another cleanup section, or R7.
 
-## Stress-history module boundary update — 4 November 2026
+## Current stress-history architecture — 4 November 2026
 
-Behavior-preserving consolidation is documented in
-[particle_free/STRESS_HISTORY_CONSOLIDATION_REPORT.md](particle_free/STRESS_HISTORY_CONSOLIDATION_REPORT.md).
-`dg_stress_access.cc` supplies common physical stress observations (direct tau
-or separated T−R−B) and stationary caches. `dg_history.cc` retains initial/source
-projection; `dg_material_projection.cc` owns material integration only.
-`dg_material.cc` retains the geometry/history preparation transaction and
-existing transport/rotation ordering; `dg_material_reaction.cc` retains coupled
-reaction and `dg_accepted.cc` retains checkpoint/publication ownership. Cohesive
-formed-side histories remain separate. The incoming-gradient spin lag,
-quadrature, schemas and criteria are unchanged. The solver's optional affine
-residual audit now lives in `solver/reconstructed_fault_affine_audit.h`;
-mechanics and acceptance stay in the same solver. Serial limiter/statistics and
-standalone spatial relaxation are benchmark support, with checker-only reference
-setup/snapshots in `tests/phase_field_fault_test_access.h`. Smooth serial PF5
-transport remains supported. Rebuild matching DSOs after internal API changes.
+Follow [the selected instructions](particle_free/CODEX_ASPECT_ARCHITECTURE_REFACTOR.txt)
+and [current guide](particle_free/MATURE_MOVING_FAULT.md). The ordinary simulator
+timestep and solver schemes own ordering and acceptance; coupled Stokes owns
+projection-consistency iteration. The rejected mature timestep driver, its
+rollback enum/helper and shared executor are removed. Do not reintroduce them
+under another name, callback or pipeline. The existing coupled mechanical solver
+is retained; this does not undo its earlier M5 boundary above.
+
+Material components own constitutive/localization responses and history lifetime;
+independent `HistoryDiscretization::TensorHistory`/`TensorAdvection` own numerical
+coefficients, FE space and advection/projection. Reconstructed-fault infrastructure
+owns geometry/support mapping and generic properties without interpreting friction.
+Direct tau uses neutral coefficient storage and common physical-stress access;
+separated remains default. Cohesive physical histories remain distinct.
+
+Preserve single publication/rollback, final converged slip guess, accepted-gradient
+spin lag, quadrature, checkpoint meanings and acceptance criteria. Rebuild matching
+checkers after internal ABI changes. Prior consolidation and mature-step reports
+remain historical evidence; [architecture report](particle_free/ASPECT_ARCHITECTURE_REPORT.md)
+records this source and verification. No scientific campaign is selected.

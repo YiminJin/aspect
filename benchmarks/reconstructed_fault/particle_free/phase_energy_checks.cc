@@ -70,7 +70,7 @@ namespace aspect
           for (const auto &entry:s.cells)
             {
               const auto &cell=entry.second;
-              const auto stress=model.evaluate_dg_trial_tensor(*s.dg_history,entry.first,samples);
+              const auto stress=model.evaluate_history_tensor(*s.dg_history,entry.first,samples);
               cells << c << ',' << cell->vertex(0)[0] << ',' << cell->vertex(0)[1] << ','
                     << cell->vertex(1)[0]-cell->vertex(0)[0] << ',' << cell->vertex(2)[1]-cell->vertex(0)[1];
               for (const auto v:cell->vertex_indices())
@@ -180,7 +180,7 @@ namespace aspect
                 std::vector<SymmetricTensor<2,dim>> tensors;
                 for (const auto &cell:scratch->cells)
                   {
-                    const auto values=model.evaluate_dg_trial_tensor(*scratch->dg_history,cell.first,quad);
+                    const auto values=model.evaluate_history_tensor(*scratch->dg_history,cell.first,quad);
                     tensors.insert(tensors.end(),values.begin(),values.end());
                   }
                 unsigned int point=0;
@@ -207,7 +207,7 @@ namespace aspect
         {
           auto &sim=const_cast<Simulator<dim>&>(this->get_simulator());
           auto &model=Plugins::get_plugin_as_type<Model>(*sim.material_model);
-          AssertThrow(dim==2 && model.uses_dg_trial_stress_history() && this->get_timestep_number()==0,
+          AssertThrow(dim==2 && model.uses_dg_tensor_history() && this->get_timestep_number()==0,
                       ExcMessage("PF3 requires the fresh restricted DG fixture."));
           block=this->introspection().variable("phase_field").block_index;
           const auto old_time=sim.time,old_dt=sim.time_step;

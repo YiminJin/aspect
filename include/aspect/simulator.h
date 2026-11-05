@@ -458,6 +458,7 @@ namespace aspect
        */
       void solve_timestep ();
 
+
       /**
        * This function implements one scheme for the various
        * steps necessary to assemble and solve the nonlinear problem.

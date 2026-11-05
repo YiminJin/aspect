@@ -2,7 +2,8 @@
 #include <aspect/postprocess/interface.h>
 #include <aspect/simulator.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/particle/manager.h>
 #include <aspect/particle/integrator/rk_2.h>
 #include <aspect/particle/particle_domain.h>
@@ -559,7 +560,7 @@ namespace aspect
           const auto saved_I=Access::current_normalization_integrals(model);
           const auto saved_step=model.fe_strain_state->committed_step;
           const auto saved_publications=model.fe_strain_state->accepted_publications;
-          const auto saved_dg=model.uses_dg_trial_stress_history()
+          const auto saved_dg=model.uses_dg_tensor_history()
             ? std::make_shared<typename Model::DGHistory>(*model.fe_strain_state->dg_history) : nullptr;
           const auto saved_V=manager.get_timestep_committed_slip_rate(0);
           const auto saved_pressure=sim.last_pressure_normalization_adjustment;
@@ -633,9 +634,9 @@ namespace aspect
               unchanged &= data.size()==saved.size() && std::memcmp(data.data(),saved.data(),data.size()*sizeof(double))==0;
             }
           unchanged=unchanged && model.fe_strain_state->accepted_publications==saved_publications;
-          if(saved_dg)for(unsigned int c=0;c<saved_dg->trial_stress.size();++c)
-            for(const auto i:saved_dg->trial_stress[c].locally_owned_elements())
-              unchanged=unchanged && model.fe_strain_state->dg_history->trial_stress[c][i]==saved_dg->trial_stress[c][i];
+          if(saved_dg)for(unsigned int c=0;c<saved_dg->coefficients.size();++c)
+            for(const auto i:saved_dg->coefficients[c].locally_owned_elements())
+              unchanged=unchanged && model.fe_strain_state->dg_history->coefficients[c][i]==saved_dg->coefficients[c][i];
           AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(unchanged),comm)==1,
                       ExcMessage("Rejected candidate changed an accepted history."));
           manager.rollback_slip_rate_nonlinear_solve();
@@ -924,9 +925,9 @@ namespace aspect
                 && model.fe_strain_state->committed_step+1==step
                 && manager.get_timestep_committed_slip_rate(0)==incoming_rates
                 && manager.get_slip_rate(0)==incoming_rates;
-              for(unsigned int c=0;c<incoming_dg_snapshot->trial_stress.size();++c)
-                for(const auto i:incoming_dg_snapshot->trial_stress[c].locally_owned_elements())
-                  same=same && model.fe_strain_state->dg_history->trial_stress[c][i]==incoming_dg_snapshot->trial_stress[c][i];
+              for(unsigned int c=0;c<incoming_dg_snapshot->coefficients.size();++c)
+                for(const auto i:incoming_dg_snapshot->coefficients[c].locally_owned_elements())
+                  same=same && model.fe_strain_state->dg_history->coefficients[c][i]==incoming_dg_snapshot->coefficients[c][i];
               for(unsigned int j=0;j<fault.n_vertices();++j)
                 {
                   const auto values=fault.get_properties(j);
@@ -1126,11 +1127,11 @@ namespace aspect
           // mass/inverse and roundoff caching against the unchanged reference
           // arithmetic on the SAME manufactured native Q2 velocity and history.
           auto incoming=*model.fe_strain_state->dg_history;
-          for(unsigned int c=0;c<incoming.trial_stress.size();++c)
+          for(unsigned int c=0;c<incoming.coefficients.size();++c)
             {
               LinearAlgebra::Vector owned(incoming.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
               for(const auto i:owned.locally_owned_elements())owned[i]=100.*std::sin(.13*(i+1+17*c));
-              owned.compress(VectorOperation::insert);incoming.trial_stress[c]=owned;
+              owned.compress(VectorOperation::insert);incoming.coefficients[c]=owned;
             }
           BV bulk(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());bulk=this->get_solution();
           for(const auto i:bulk.block(0).locally_owned_elements())bulk.block(0)[i]=1e-9*(std::cos(.07*i)+.2*std::sin(.3*i));
@@ -1141,10 +1142,10 @@ namespace aspect
           const auto reference=model.make_dg_history_trial(incoming,ghost,coefficients,true,true);
           const auto optimized=model.make_dg_history_trial(incoming,ghost,coefficients,true,false);
           double source_error=0.,bound_error=0.;
-          for(unsigned int c=0;c<incoming.trial_stress.size();++c)
+          for(unsigned int c=0;c<incoming.coefficients.size();++c)
             {
               LinearAlgebra::Vector difference(incoming.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
-              for(const auto i:difference.locally_owned_elements())difference[i]=reference->trial_stress[c][i]-optimized->trial_stress[c][i];
+              for(const auto i:difference.locally_owned_elements())difference[i]=reference->coefficients[c][i]-optimized->coefficients[c][i];
               difference.compress(VectorOperation::insert);source_error=std::max(source_error,difference.linfty_norm());
             }
           for(const auto &entry:reference->source_roundoff)
@@ -1600,7 +1601,7 @@ namespace aspect
                 {
                   const auto &s = *model.fe_strain_state;
                   double new_scale = 0.,old_scale = 0.;
-                  if (model.uses_dg_trial_stress_history())
+                  if (model.uses_dg_tensor_history())
                     {
                       actual=model.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,CellId(q.cell),q.position,&new_scale);
                       model.evaluate_dg_history_stress(*incoming_dg,incoming_Z,initial_I,CellId(q.cell),q.position,&old_scale);
@@ -1615,7 +1616,7 @@ namespace aspect
               ++diagnostic_index;
               const double error = (actual-expected).norm();
               const double bound = 128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)
-                                   +(step && model.uses_dg_trial_stress_history()
+                                   +(step && model.uses_dg_tensor_history()
                                      ? model.dg_source_publication_allowance(*model.fe_strain_state->dg_history,
                                                                             CellId(q.cell),q.position) : 0.);
               if (error > bound)
@@ -1707,7 +1708,7 @@ namespace aspect
                 {
                   const auto &s = *model.fe_strain_state;
                   double new_scale = 0.,old_scale = 0.;
-                  if (model.uses_dg_trial_stress_history())
+                  if (model.uses_dg_tensor_history())
                     {
                       model.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,a.cell,a.position,&new_scale);
                       model.evaluate_dg_history_stress(*incoming_dg,incoming_Z,initial_I,a.cell,a.position,&old_scale);
@@ -1743,7 +1744,7 @@ namespace aspect
                 }
               const double error = (published.at(a.id)-expected).norm();
               const double bound = 128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)
-                                   +(step && model.uses_dg_trial_stress_history()
+                                   +(step && model.uses_dg_tensor_history()
                                      ? model.dg_source_publication_allowance(*model.fe_strain_state->dg_history,a.cell,a.position) : 0.);
               AssertThrow(error <= bound, ExcMessage("7B published particle sample has an incorrect Maxwell increment."));
               stress_error = std::max(stress_error,error);
@@ -1933,7 +1934,7 @@ namespace aspect
                   }
                   AssertThrow(bool(out),ExcMessage("Cannot export authoritative stress."));
                 }
-              if (model.uses_dg_trial_stress_history())
+              if (model.uses_dg_tensor_history())
                 {
                   const auto &history=*model.fe_strain_state->dg_history;
                   if(step==0)
@@ -1952,8 +1953,8 @@ namespace aspect
                       {
                         cell->get_dof_indices(indices);
                         for (unsigned int j=0;j<indices.size();++j)
-                          coefficients_file<<cell->id()<<','<<j<<','<<history.trial_stress[0][indices[j]]<<','
-                            <<history.trial_stress[1][indices[j]]<<','<<history.trial_stress[2][indices[j]]<<'\n';
+                          coefficients_file<<cell->id()<<','<<j<<','<<history.coefficients[0][indices[j]]<<','
+                            <<history.coefficients[1][indices[j]]<<','<<history.coefficients[2][indices[j]]<<'\n';
                       }
                 }
             }

@@ -1,0 +1,31 @@
+source/material_model/history/tensor_advection.cc
+
+source/material_model/history/tensor_advection_distributed.cc
+
+source/material_model/history/tensor_projection.cc
+
+source/material_model/phase_field_fault/material_history.cc
+
+source/material_model/phase_field_fault/material_geometry.cc
+
+source/material_model/phase_field_fault/stress_evolution.cc
+
+source/material_model/phase_field_fault/stress_reaction.cc
+source/material_model/phase_field_fault/stress_reaction.cc: In instantiation of ‘[01m[Kstd::shared_ptr<aspect::MaterialModel::PhaseFieldFault<dim>::FEStrainUpdate> aspect::MaterialModel::PhaseFieldFault<dim>::make_material_reaction(const FEStrainState&, const aspect::LinearAlgebra::BlockVector&, const std::vector<double>&) const [with int dim = 2; aspect::LinearAlgebra::BlockVector = dealii::TrilinosWrappers::MPI::BlockVector][m[K’:
+[01m[Ksource/material_model/phase_field_fault/stress_reaction.cc:209:5:[m[K   required from here
+[01m[Ksource/material_model/phase_field_fault/stress_reaction.cc:46:11:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<dealii::SymmetricTensor<2, 2>, 2>::_Type[m[K’ {aka ‘[01m[Kdealii::SymmetricTensor<2, 2> [2][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+   46 |           [01;35m[K}[m[K;
+      |           [01;35m[K^[m[K
+[01m[Ksource/material_model/phase_field_fault/stress_reaction.cc:51:9:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<dealii::SymmetricTensor<2, 2>, 2>::_Type[m[K’ {aka ‘[01m[Kdealii::SymmetricTensor<2, 2> [2][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+   51 |         [01;35m[K}[m[K;
+      |         [01;35m[K^[m[K
+source/material_model/phase_field_fault/stress_reaction.cc: In instantiation of ‘[01m[Kstd::shared_ptr<aspect::MaterialModel::PhaseFieldFault<dim>::FEStrainUpdate> aspect::MaterialModel::PhaseFieldFault<dim>::make_material_reaction(const FEStrainState&, const aspect::LinearAlgebra::BlockVector&, const std::vector<double>&) const [with int dim = 3; aspect::LinearAlgebra::BlockVector = dealii::TrilinosWrappers::MPI::BlockVector][m[K’:
+[01m[Ksource/material_model/phase_field_fault/stress_reaction.cc:209:5:[m[K   required from here
+[01m[Ksource/material_model/phase_field_fault/stress_reaction.cc:46:11:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<dealii::SymmetricTensor<2, 3>, 2>::_Type[m[K’ {aka ‘[01m[Kdealii::SymmetricTensor<2, 3> [2][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+   46 |           [01;35m[K}[m[K;
+      |           [01;35m[K^[m[K
+[01m[Ksource/material_model/phase_field_fault/stress_reaction.cc:51:9:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<dealii::SymmetricTensor<2, 3>, 2>::_Type[m[K’ {aka ‘[01m[Kdealii::SymmetricTensor<2, 3> [2][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+   51 |         [01;35m[K}[m[K;
+      |         [01;35m[K^[m[K
+
+source/reconstructed_fault/manager.cc

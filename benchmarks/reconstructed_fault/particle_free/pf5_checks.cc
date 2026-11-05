@@ -5,7 +5,8 @@
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
 #include <aspect/reconstructed_fault/manager.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include "transport_method_fields.h"
 #include <deal.II/numerics/vector_tools_interpolate.h>
@@ -85,9 +86,9 @@ namespace aspect
         bool equal(const std::shared_ptr<Update> &a,const std::shared_ptr<Update> &b) const
         {
           if (a->Z!=b->Z || a->I!=b->I || a->dg_cohesive!=b->dg_cohesive) return false;
-          for (unsigned int c=0; c<a->dg_history->trial_stress.size(); ++c)
+          for (unsigned int c=0; c<a->dg_history->coefficients.size(); ++c)
             for (unsigned int i=0; i<a->dg_history->space->dofs.n_dofs(); ++i)
-              if (a->dg_history->trial_stress[c][i]!=b->dg_history->trial_stress[c][i]) return false;
+              if (a->dg_history->coefficients[c][i]!=b->dg_history->coefficients[c][i]) return false;
           return true;
         }
         void field(Model &m,const std::string &name) const
@@ -96,7 +97,7 @@ namespace aspect
           out<<"i,xx,yy,xy\n";
           const auto &h=*m.fe_strain_state->dg_history;
           for (unsigned int i=0; i<h.space->dofs.n_dofs(); ++i)
-            out<<i<<','<<h.trial_stress[0][i]<<','<<h.trial_stress[1][i]<<','<<h.trial_stress[2][i]<<'\n';
+            out<<i<<','<<h.coefficients[0][i]<<','<<h.coefficients[1][i]<<','<<h.coefficients[2][i]<<'\n';
         }
         void geometry(Model &m,const Transport &op) const
         {
@@ -303,8 +304,8 @@ namespace aspect
               for (unsigned int comp=0; comp<3; ++comp)
                 for (unsigned int i=0; i<op->space->dofs.n_dofs(); ++i)
                   {
-                    relax_error=std::max(relax_error,std::abs(pure->dg_history->trial_stress[comp][i]-c.beta*m.fe_strain_state->dg_history->trial_stress[comp][i]));
-                    source_error=std::max(source_error,std::abs(native->dg_history->trial_stress[comp][i]-full->trial_stress[comp][i]));
+                    relax_error=std::max(relax_error,std::abs(pure->dg_history->coefficients[comp][i]-c.beta*m.fe_strain_state->dg_history->coefficients[comp][i]));
+                    source_error=std::max(source_error,std::abs(native->dg_history->coefficients[comp][i]-full->coefficients[comp][i]));
                   }
               control<<relax_error<<','<<source_error<<'\n';
               check("relaxation and source once",relax_error<1.e-10 && source_error<1.e-9);
@@ -331,7 +332,7 @@ namespace aspect
                   check("discarded larger interval",unchanged(anchor,persistent(m)));
                   check("retry identical",equal(trial,m.prepare_dg_accepted_step(*op,v,t)));
                   auto invalid=m.prepare_dg_accepted_step(*op,v,t);
-                  invalid->dg_history->trial_stress[0][0]=std::numeric_limits<double>::quiet_NaN();
+                  invalid->dg_history->coefficients[0][0]=std::numeric_limits<double>::quiet_NaN();
                   bool failed=false;
                   try
                     {

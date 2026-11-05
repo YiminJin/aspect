@@ -53,7 +53,7 @@ namespace aspect { namespace MaterialModel
     const PhaseFieldFault<dim> &model)
   {
     native_projection=std::make_shared<DGHistory>();native_projection->space=tensor->space;
-    for(auto &field:native_projection->trial_stress)
+    for(auto &field:native_projection->coefficients)
       field.reinit(tensor->space->dofs.locally_owned_dofs(),model.get_mpi_communicator());
     const QGauss<dim> quadrature(3);
     FEValues<dim> fe(model.get_mapping(),model.get_fe(),quadrature,update_gradients);
@@ -77,17 +77,17 @@ namespace aspect { namespace MaterialModel
           }
         mass.gauss_jordan();
         for(unsigned int c=0;c<3;++c)
-          {Vector<double> value(9);mass.vmult(value,rhs[c]);for(unsigned int i=0;i<9;++i)native_projection->trial_stress[c][ids[i]]=value[i];}
+          {Vector<double> value(9);mass.vmult(value,rhs[c]);for(unsigned int i=0;i<9;++i)native_projection->coefficients[c][ids[i]]=value[i];}
       }
-    for(auto &field:native_projection->trial_stress)field.compress(VectorOperation::insert);
+    for(auto &field:native_projection->coefficients)field.compress(VectorOperation::insert);
   }
 
   template<int dim> std::vector<SymmetricTensor<2,dim>>
   PhaseFieldFault<dim>::BulkCohesiveState::evaluate_tensor(
     const PhaseFieldFault<dim> &model,const CellId &id,const Quadrature<dim> &quadrature)const
   {
-    auto result=model.evaluate_dg_trial_tensor(*tensor,id,quadrature);
-    const auto projected=model.evaluate_dg_trial_tensor(*native_projection,id,quadrature);
+    auto result=model.evaluate_history_tensor(*tensor,id,quadrature);
+    const auto projected=model.evaluate_history_tensor(*native_projection,id,quadrature);
     FEValues<dim> fe(model.get_mapping(),model.get_fe(),quadrature,update_gradients);
     fe.reinit(native_cells.at(id));
     const auto gradient=memory_strain<dim>(fe,native_history,model.introspection().component_indices.velocities,native_cells.at(id));
@@ -112,8 +112,8 @@ namespace aspect { namespace MaterialModel
       {
         const auto unit=quadrature.point(worst);
         const auto point=model.get_mapping().transform_unit_to_real_cell(native_cells.at(id),unit);
-        const auto dg=model.evaluate_dg_trial_tensor(*tensor,id,quadrature);
-        const auto projection=model.evaluate_dg_trial_tensor(*native_projection,id,quadrature);
+        const auto dg=model.evaluate_history_tensor(*tensor,id,quadrature);
+        const auto projection=model.evaluate_history_tensor(*native_projection,id,quadrature);
         std::ofstream out(model.get_output_directory()+"bulk-source-consistency-failure.csv");
         out<<std::setprecision(17)<<"step,time,cell,q,u,v,x,y,error,bound,ratio,Txx,Tyy,Tzz,Txy,expected_xx,expected_yy,expected_zz,expected_xy,DGxx,DGyy,DGxy,projection_xx,projection_yy,projection_xy\n";
         out<<step<<','<<time<<','<<id<<','<<worst<<','<<unit[0]<<','<<unit[1]<<','<<point[0]<<','<<point[1]<<','<<maximum<<",1e-12,"<<maximum/1e-12<<','
@@ -155,7 +155,7 @@ namespace aspect { namespace MaterialModel
     s->quadrature=fe_bulk_normal_quadrature_points;
     s->tensor=std::make_shared<DGHistory>();
     s->tensor->space=std::make_shared<typename DGHistory::Space>(this->get_triangulation());
-    for(auto &component:s->tensor->trial_stress)
+    for(auto &component:s->tensor->coefficients)
       {component.reinit(s->tensor->space->dofs.locally_owned_dofs(),this->get_mpi_communicator());component=0.;}
     s->native_history.reinit(initial);s->native_history=0.;
     const unsigned int nq=mechanical_quadrature().size();
@@ -192,7 +192,7 @@ namespace aspect { namespace MaterialModel
             for(const auto v:cell->vertex_indices())
               {for(unsigned int d=0;d<dim;++d)values.push_back(cell->vertex(v)[d]);values.push_back(s.phase[cell->vertex_dof_index(v,pc)-po]);}
             s.tensor->space->cells.at(entry.first)->get_dof_indices(dg_ids);
-            for(const auto &field:s.tensor->trial_stress)for(const auto i:dg_ids)values.push_back(field[i]);
+            for(const auto &field:s.tensor->coefficients)for(const auto i:dg_ids)values.push_back(field[i]);
             cell->get_dof_indices(ids);
             for(unsigned int i=0;i<ids.size();++i)
               if(this->get_fe().system_to_component_index(i).first<dim)values.push_back(s.native_history[ids[i]]);
@@ -262,7 +262,7 @@ namespace aspect { namespace MaterialModel
             if(cell->is_locally_owned())
               {
                 s.tensor->space->cells.at(cell->id())->get_dof_indices(dg_ids);
-                for(auto &field:s.tensor->trial_stress)for(const auto i:dg_ids)field[i]=a.local[k++];
+                for(auto &field:s.tensor->coefficients)for(const auto i:dg_ids)field[i]=a.local[k++];
               }
             else k+=27;
             cell->get_dof_indices(ids);
@@ -286,7 +286,7 @@ namespace aspect { namespace MaterialModel
           }
         (void)nv;
         AssertDimension(covered.size(),owned.block(this->introspection().block_indices.velocities).locally_owned_size());
-        for(auto &field:s.tensor->trial_stress)field.compress(VectorOperation::insert);
+        for(auto &field:s.tensor->coefficients)field.compress(VectorOperation::insert);
         owned.compress(VectorOperation::insert);s.native_history=owned;s.rebuild_native_projection(*this);
         s.step=a.step;s.time=a.time;s.publications=a.publications;
         AssertThrow(s.step+1==this->get_timestep_number(),ExcMessage("Bulk restart endpoint clock mismatch."));
@@ -299,9 +299,9 @@ namespace aspect { namespace MaterialModel
                 && a.phase==std::vector<double>(s.phase.begin(),s.phase.end()),
                 ExcMessage("Bulk restart changed mesh, quadrature, coefficients or physical phase."));
     const unsigned int n=s.tensor->space->dofs.n_dofs();
-    AssertDimension(a.tensor.size(),s.tensor->trial_stress.size()*n);
+    AssertDimension(a.tensor.size(),s.tensor->coefficients.size()*n);
     unsigned int offset=0;
-    for(auto &field:s.tensor->trial_stress)
+    for(auto &field:s.tensor->coefficients)
       {for(unsigned int i=0;i<n;++i)field[i]=a.tensor[offset++];field.compress(VectorOperation::insert);}
     auto &velocity=s.native_history.block(this->introspection().block_indices.velocities);
     AssertDimension(a.native.size(),velocity.size());

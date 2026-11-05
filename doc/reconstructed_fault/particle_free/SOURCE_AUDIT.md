@@ -1,4 +1,20 @@
-# Stress-history consolidation audit — 4 November 2026
+> **Current selection complete, 4 November 2026:** the ASPECT architecture refactor removes the rejected dedicated mature driver. Ordinary simulator/solver schemes own advancement and acceptance; tensor discretization, material laws and geometry have explicit boundaries. All 183170 unit assertions and seven moving controls pass; stationary/non-fault outputs and retained serial numerical results match their baselines. See [current guide](MATURE_MOVING_FAULT.md) and [report](ASPECT_ARCHITECTURE_REPORT.md). Defaults, checkpoint meanings and 51 protected artifacts are preserved. Scientific campaigns remain paused; this is not new physical or production qualification.
+
+## Current architecture audit
+
+The final source/binary inventory and all 51 protected hashes are recorded in
+[final provenance](../../../benchmarks/reconstructed_fault/particle_free/evidence/aspect_architecture/final-provenance.json).
+`solve_timestep` and solver schemes retain ordering/publication; coupled Stokes
+owns projection iteration. Independent `TensorHistory`/`TensorAdvection` own
+coefficients and spatial kernels, while material components retain constitutive
+responses and accepted/candidate lifetime. The manager owns the material
+coordinate/support map and generic surface property storage. The removed special
+driver/executor has no remaining source declarations, dispatch or instantiations.
+See [the report](ASPECT_ARCHITECTURE_REPORT.md) for the disposition of helpers,
+checker rebuilds, measured equivalence and retained failed launch/build evidence.
+This supersedes historical file locations below without changing their evidence.
+
+## Historical record: Stress-history consolidation audit — 4 November 2026
 
 Baseline `e4b74c556` preserves the tested direct tensor and final publication fix.
 The subsequent caller audit and implementation are recorded in

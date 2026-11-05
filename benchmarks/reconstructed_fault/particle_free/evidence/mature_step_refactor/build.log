@@ -1,0 +1,370 @@
+-- GLOB mismatch!
+The following files were added:
+  +/home/ein/repository/aspect-pf-rsf-particle-free/include/aspect/material_model/phase_field_fault/mature_material_internal.h
+  +/home/ein/repository/aspect-pf-rsf-particle-free/include/aspect/reconstructed_fault/mature_stress_law.h
+-- GLOB mismatch!
+The following files were added:
+  +/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/dg_material_geometry.cc
+  +/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/dg_material_rotation.cc
+  +/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/dg_material_transport.cc
+  +/home/ein/repository/aspect-pf-rsf-particle-free/source/simulator/solver/mature_material_step.cc
+-- 
+-- ====================================================
+-- ===== Configuring ASPECT 3.1.0-pre
+-- ====================================================
+-- 
+-- Setting up ASPECT for Release mode.
+-- 
+-- ===== Configuring external libraries ===============
+-- Found deal.II version 9.6.2 at '/opt/dealii/9.6-local/lib/cmake/deal.II'
+-- Using ASPECT_WITH_ZLIB = 'ON'
+-- Using ASPECT_WITH_PYTHON = 'OFF'
+-- Using ASPECT_WITH_LIBDAP = 'OFF'
+-- Using ASPECT_WITH_FASTSCAPE = 'OFF'
+-- Using ASPECT_WITH_NETCDF = 'ON'
+--   NETCDF_INCLUDE_DIR: /usr/include
+--   NETCDF_LIBRARY: /usr/lib/libnetcdf.so
+--   NETCDF_VERSION: 4.9.3
+-- Using ASPECT_WITH_WORLD_BUILDER = 'ON'
+-- Using World Builder version 1.0.0 found at /home/ein/repository/aspect-pf-rsf-particle-free/contrib/world_builder.
+-- 
+-- ===== Setting up Geodynamic World Builder version 1.0.0 in Release mode
+-- Building the Geodynamic World Builder version 1.0.0 in Release mode
+-- Using Floating Point Exceptions if in Debug mode.
+-- Did not find Fortran support or it has been requested to be disabled. Disabling Fortran wrapper and tests.
+-- Could NOT find SWIG (missing: SWIG_EXECUTABLE SWIG_DIR) 
+-- SWIG was not found, disabling python wrapper compilation.
+-- MPI found.
+-- Using MPI found in: /usr/include
+-- Python was disabled by cmake options.
+-- Enabling the use of ZLIB.
+-- Combining source files into unity build.
+-- 
+-- Using ASPECT_WITH_VORO = 'ON'
+--   VORO_INCLUDE_DIR: /home/ein/local/voro++/0.4.6/include/voro++
+--   VORO_LIBRARY: /home/ein/local/voro++/0.4.6/lib/libvoro++.a
+-- Query git repository information.
+-- Enabling dynamic loading of plugins from the input file
+-- Enabling checking of compatible deal.II library when loading plugins
+-- 
+-- ===== Configuring ASPECT build targets =============
+-- Linking ASPECT against zlib
+-- Linking ASPECT against NetCDF
+-- Linking ASPECT against WorldBuilder
+-- Linking ASPECT against voro++
+-- Linking ASPECT against dlopen
+-- Precompiling common header files.
+-- Combining source files into unity build.
+-- Writing externally readable configuration information
+-- Writing configuration details into detailed.log...
+-- 
+-- ===== Configuring ASPECT documentation =============
+-- Finding .prm files
+-- Finding image files
+-- Setting up build information
+-- 
+-- 
+-- Run   $ make info  to print a detailed help message
+-- 
+-- Configuring done (0.4s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+[  5%] Built target WorldBuilderRelease
+[  7%] Building CXX object CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx.gch
+[ 13%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_0_cxx.cxx.o
+[ 13%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_12_cxx.cxx.o
+[ 13%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_10_cxx.cxx.o
+[ 13%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_11_cxx.cxx.o
+[ 14%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_13_cxx.cxx.o
+[ 15%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_14_cxx.cxx.o
+[ 17%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_15_cxx.cxx.o
+[ 18%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_16_cxx.cxx.o
+[ 20%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_17_cxx.cxx.o
+[ 21%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_18_cxx.cxx.o
+[ 23%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_19_cxx.cxx.o
+[ 24%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_1_cxx.cxx.o
+[ 26%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_20_cxx.cxx.o
+[ 27%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_21_cxx.cxx.o
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/Unity/unity_21_cxx.cxx:10[m[K:
+/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/dg_material_reaction.cc: In instantiation of ‘[01m[Kstd::shared_ptr<aspect::MaterialModel::PhaseFieldFault<dim>::FEStrainUpdate> aspect::MaterialModel::PhaseFieldFault<dim>::make_material_reaction(const FEStrainState&, const aspect::LinearAlgebra::BlockVector&, const std::vector<double>&) const [with int dim = 2; aspect::LinearAlgebra::BlockVector = dealii::TrilinosWrappers::MPI::BlockVector][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/dg_material_reaction.cc:209:5:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/dg_material_reaction.cc:45:11:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<dealii::SymmetricTensor<2, 2>, 2>::_Type[m[K’ {aka ‘[01m[Kdealii::SymmetricTensor<2, 2> [2][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+   45 |           [01;35m[K}[m[K;
+      |           [01;35m[K^[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/dg_material_reaction.cc:51:9:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<dealii::SymmetricTensor<2, 2>, 2>::_Type[m[K’ {aka ‘[01m[Kdealii::SymmetricTensor<2, 2> [2][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+   51 |         [01;35m[K}[m[K;
+      |         [01;35m[K^[m[K
+/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/dg_material_reaction.cc: In instantiation of ‘[01m[Kstd::shared_ptr<aspect::MaterialModel::PhaseFieldFault<dim>::FEStrainUpdate> aspect::MaterialModel::PhaseFieldFault<dim>::make_material_reaction(const FEStrainState&, const aspect::LinearAlgebra::BlockVector&, const std::vector<double>&) const [with int dim = 3; aspect::LinearAlgebra::BlockVector = dealii::TrilinosWrappers::MPI::BlockVector][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/dg_material_reaction.cc:209:5:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/dg_material_reaction.cc:45:11:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<dealii::SymmetricTensor<2, 3>, 2>::_Type[m[K’ {aka ‘[01m[Kdealii::SymmetricTensor<2, 3> [2][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+   45 |           [01;35m[K}[m[K;
+      |           [01;35m[K^[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/dg_material_reaction.cc:51:9:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<dealii::SymmetricTensor<2, 3>, 2>::_Type[m[K’ {aka ‘[01m[Kdealii::SymmetricTensor<2, 3> [2][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+   51 |         [01;35m[K}[m[K;
+      |         [01;35m[K^[m[K
+[ 28%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_22_cxx.cxx.o
+In file included from [01m[K/opt/gcc/12.4.0/include/c++/12.4.0/string:50[m[K,
+                 from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/include/aspect/citation_info.h:24[m[K,
+                 from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/include/aspect/global.h:26[m[K,
+                 from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx:5[m[K,
+                 from [01m[K<command-line>[m[K:
+In static member function ‘[01m[Kstatic _Up* std::__copy_move<_IsMove, true, std::random_access_iterator_tag>::__copy_m(_Tp*, _Tp*, _Up*) [with _Tp = const aspect::ReconstructedFaultUtilities::DomainQuadraturePoint; _Up = aspect::ReconstructedFaultUtilities::DomainQuadraturePoint; bool _IsMove = false][m[K’,
+    inlined from ‘[01m[K_OI std::__copy_move_a2(_II, _II, _OI) [with bool _IsMove = false; _II = const aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*; _OI = aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*][m[K’ at [01m[K/opt/gcc/12.4.0/include/c++/12.4.0/bits/stl_algobase.h:501:30[m[K,
+    inlined from ‘[01m[K_OI std::__copy_move_a1(_II, _II, _OI) [with bool _IsMove = false; _II = const aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*; _OI = aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*][m[K’ at [01m[K/opt/gcc/12.4.0/include/c++/12.4.0/bits/stl_algobase.h:528:42[m[K,
+    inlined from ‘[01m[K_OI std::__copy_move_a(_II, _II, _OI) [with bool _IsMove = false; _II = const aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*; _OI = aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*][m[K’ at [01m[K/opt/gcc/12.4.0/include/c++/12.4.0/bits/stl_algobase.h:535:31[m[K,
+    inlined from ‘[01m[K_OI std::copy(_II, _II, _OI) [with _II = const aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*; _OI = aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*][m[K’ at [01m[K/opt/gcc/12.4.0/include/c++/12.4.0/bits/stl_algobase.h:626:7[m[K,
+    inlined from ‘[01m[Kstatic _ForwardIterator std::__uninitialized_copy<true>::__uninit_copy(_InputIterator, _InputIterator, _ForwardIterator) [with _InputIterator = const aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*; _ForwardIterator = aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*][m[K’ at [01m[K/opt/gcc/12.4.0/include/c++/12.4.0/bits/stl_uninitialized.h:147:27[m[K,
+    inlined from ‘[01m[K_ForwardIterator std::uninitialized_copy(_InputIterator, _InputIterator, _ForwardIterator) [with _InputIterator = const aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*; _ForwardIterator = aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*][m[K’ at [01m[K/opt/gcc/12.4.0/include/c++/12.4.0/bits/stl_uninitialized.h:185:15[m[K,
+    inlined from ‘[01m[K_ForwardIterator std::__uninitialized_copy_a(_InputIterator, _InputIterator, _ForwardIterator, allocator<_Tp>&) [with _InputIterator = const aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*; _ForwardIterator = aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*; _Tp = aspect::ReconstructedFaultUtilities::DomainQuadraturePoint][m[K’ at [01m[K/opt/gcc/12.4.0/include/c++/12.4.0/bits/stl_uninitialized.h:372:37[m[K,
+    inlined from ‘[01m[Kvoid std::vector<_Tp, _Alloc>::_M_assign_aux(_ForwardIterator, _ForwardIterator, std::forward_iterator_tag) [with _ForwardIterator = const aspect::ReconstructedFaultUtilities::DomainQuadraturePoint*; _Tp = aspect::ReconstructedFaultUtilities::DomainQuadraturePoint; _Alloc = std::allocator<aspect::ReconstructedFaultUtilities::DomainQuadraturePoint>][m[K’ at [01m[K/opt/gcc/12.4.0/include/c++/12.4.0/bits/vector.tcc:339:35[m[K,
+    inlined from ‘[01m[Kstd::vector<_Tp, _Alloc>& std::vector<_Tp, _Alloc>::operator=(std::initializer_list<_Tp>) [with _Tp = aspect::ReconstructedFaultUtilities::DomainQuadraturePoint; _Alloc = std::allocator<aspect::ReconstructedFaultUtilities::DomainQuadraturePoint>][m[K’ at [01m[K/opt/gcc/12.4.0/include/c++/12.4.0/bits/stl_vector.h:787:21[m[K,
+    inlined from ‘[01m[Kvoid ____C_A_T_C_H____T_E_S_T____66()[m[K’ at [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/unit_tests/particles.cc:215:63[m[K:
+[01m[K/opt/gcc/12.4.0/include/c++/12.4.0/bits/stl_algobase.h:434:30:[m[K [01;35m[Kwarning: [m[K‘[01m[Kvoid* __builtin_memcpy(void*, const void*, long unsigned int)[m[K’ forming offset 24 is out of the bounds [0, 24] of object ‘[01m[K<anonymous>[m[K’ with type ‘[01m[Kconst aspect::ReconstructedFaultUtilities::DomainQuadraturePoint [1][m[K’ [[01;35m[K-Warray-bounds[m[K]
+  434 |             [01;35m[K__builtin_memmove(__result, __first, sizeof(_Tp) * _Num)[m[K;
+      |             [01;35m[K~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/Unity/unity_1_cxx.cxx:13[m[K:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/unit_tests/particles.cc:[m[K In function ‘[01m[Kvoid ____C_A_T_C_H____T_E_S_T____66()[m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/unit_tests/particles.cc:215:63:[m[K [01;36m[Knote: [m[K‘[01m[K<anonymous>[m[K’ declared here
+  215 |                   quadrature={{s,coordinate-s,domain.volume()}[01;36m[K}[m[K;
+      |                                                               [01;36m[K^[m[K
+[ 30%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_23_cxx.cxx.o
+[ 31%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_24_cxx.cxx.o
+[ 33%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_25_cxx.cxx.o
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/Unity/unity_25_cxx.cxx:10[m[K:
+/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/rheology/fault_friction.cc: In instantiation of ‘[01m[Kdouble aspect::MaterialModel::Rheology::FaultFriction<dim>::update_state(const std::vector<double>&, double, double, double) const [with int dim = 2][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/rheology/fault_friction.cc:454:7:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/rheology/fault_friction.cc:54:47:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kvolume_fractions[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+   54 |       update_state([01;35m[Kconst std::vector<double> &volume_fractions[m[K,
+      |                    [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~[m[K
+/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/rheology/fault_friction.cc: In instantiation of ‘[01m[Kdouble aspect::MaterialModel::Rheology::FaultFriction<dim>::update_state(const std::vector<double>&, double, double, double) const [with int dim = 3][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/rheology/fault_friction.cc:454:7:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/rheology/fault_friction.cc:54:47:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kvolume_fractions[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+[ 34%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_26_cxx.cxx.o
+[ 36%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_27_cxx.cxx.o
+[ 37%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_28_cxx.cxx.o
+[ 39%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_29_cxx.cxx.o
+[ 40%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_2_cxx.cxx.o
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/Unity/unity_2_cxx.cxx:10[m[K:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/unit_tests/reconstructed_fault.cc:[m[K In function ‘[01m[Kvoid ____C_A_T_C_H____T_E_S_T____52()[m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/unit_tests/reconstructed_fault.cc:868:19:[m[K [01;35m[Kwarning: [m[Kloop variable ‘[01m[Kendpoints[m[K’ creates a copy from type ‘[01m[Kconst std::pair<double, double>[m[K’ [[01;35m[K-Wrange-loop-construct[m[K]
+  868 |   for (const auto [01;35m[Kendpoints[m[K:std::vector<std::pair<double,double>>{
+      |                   [01;35m[K^~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/unit_tests/reconstructed_fault.cc:868:19:[m[K [01;36m[Knote: [m[Kuse reference type to prevent copying
+  868 |   for (const auto [01;36m[Kendpoints[m[K:std::vector<std::pair<double,double>>{
+      |                   [01;36m[K^~~~~~~~~[m[K
+      |                   [32m[K&[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/unit_tests/reconstructed_fault.cc:[m[K In function ‘[01m[Kvoid ____C_A_T_C_H____T_E_S_T____98()[m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/unit_tests/reconstructed_fault.cc:1548:19:[m[K [01;35m[Kwarning: [m[Kloop variable ‘[01m[Kactive[m[K’ creates a copy from type ‘[01m[Kconst std::vector<bool>[m[K’ [[01;35m[K-Wrange-loop-construct[m[K]
+ 1548 |   for (const auto [01;35m[Kactive[m[K:{std::vector<bool>{false,false,false,false,false},
+      |                   [01;35m[K^~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/unit_tests/reconstructed_fault.cc:1548:19:[m[K [01;36m[Knote: [m[Kuse reference type to prevent copying
+ 1548 |   for (const auto [01;36m[Kactive[m[K:{std::vector<bool>{false,false,false,false,false},
+      |                   [01;36m[K^~~~~~[m[K
+      |                   [32m[K&[m[K
+[ 42%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_30_cxx.cxx.o
+[ 43%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_31_cxx.cxx.o
+[ 44%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_32_cxx.cxx.o
+[ 46%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_33_cxx.cxx.o
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/Unity/unity_33_cxx.cxx:25[m[K:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/particle/particle_domain.cc:[m[K In member function ‘[01m[Kvoid aspect::Particle::internal::VoronoiCell<dim>::reinit(dealii::types::particle_index, const std::vector<double>&, const std::vector<int>&, const std::vector<int>&, const dealii::BoundingBox<spacedim>&) [with int dim = 3; dealii::types::particle_index = unsigned int][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/particle/particle_domain.cc:705:59:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kparticle_index_[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+  705 |       VoronoiCell<3>::reinit([01;35m[Kconst types::particle_index  particle_index_[m[K,
+      |                              [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/particle/particle_domain.cc:706:59:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kvoro_vertices[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+  706 |                              [01;35m[Kconst std::vector<double>   &voro_vertices[m[K,
+      |                              [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/particle/particle_domain.cc:707:59:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kvoro_faces[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+  707 |                              [01;35m[Kconst std::vector<int>      &voro_faces[m[K,
+      |                              [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/particle/particle_domain.cc:708:59:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kvoro_neighbors[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+  708 |                              [01;35m[Kconst std::vector<int>      &voro_neighbors[m[K,
+      |                              [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/particle/particle_domain.cc:709:59:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kbounding_box[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+  709 |                              [01;35m[Kconst BoundingBox<3>        &bounding_box[m[K)
+      |                              [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~[m[K
+[ 47%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_34_cxx.cxx.o
+[ 49%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_35_cxx.cxx.o
+[ 50%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_36_cxx.cxx.o
+[ 52%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_37_cxx.cxx.o
+[ 53%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_38_cxx.cxx.o
+In file included from [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Fetch_Op.hpp:30[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Generic.hpp:13[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Atomic_Ref.hpp:14[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics.hpp:12[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Atomics_Desul_Wrapper.hpp:28[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Atomic.hpp:50[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_Atomic_View.hpp:20[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_ViewMapping.hpp:32[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_View.hpp:489[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Parallel.hpp:31[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_MemoryPool.hpp:26[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_TaskScheduler.hpp:34[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Serial.hpp:36[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/decl/Kokkos_Declare_SERIAL.hpp:21[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/KokkosCore_Config_DeclareBackend.hpp:22[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Core.hpp:45[m[K,
+                 from [01m[K/opt/dealii/9.6-local/include/deal.II/base/exceptions.h:25[m[K,
+                 from [01m[K/opt/dealii/9.6-local/include/deal.II/base/array_view.h:20[m[K,
+                 from [01m[K/opt/dealii/9.6-local/include/deal.II/base/mpi.h:20[m[K,
+                 from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/include/aspect/global.h:28[m[K,
+                 from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx:5[m[K,
+                 from [01m[K<command-line>[m[K:
+In function ‘[01m[KT desul::Impl::host_atomic_fetch_oper(const Oper&, T*, dont_deduce_this_parameter_t<const T>, MemoryOrder, desul::MemoryScopeCaller) [with Oper = sub_operator<int, const int>; T = int; MemoryOrder = desul::MemoryOrderRelaxed][m[K’,
+    inlined from ‘[01m[KT desul::Impl::host_atomic_fetch_sub(T*, T, MemoryOrder, MemoryScope) [with T = int; MemoryOrder = desul::MemoryOrderRelaxed; MemoryScope = desul::MemoryScopeCaller][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Fetch_Op_Generic.hpp:40:1[m[K,
+    inlined from ‘[01m[KT desul::atomic_fetch_sub(T*, T, MemoryOrder, MemoryScope) [with T = int; MemoryOrder = MemoryOrderRelaxed; MemoryScope = MemoryScopeCaller][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Generic.hpp:54:3[m[K,
+    inlined from ‘[01m[KT Kokkos::atomic_fetch_sub(T*, desul::Impl::dont_deduce_this_parameter_t<const T>) [with T = int][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Atomics_Desul_Wrapper.hpp:85:125[m[K,
+    inlined from ‘[01m[Kvoid Kokkos::Impl::HostSharedPtr<T>::cleanup() [with T = Kokkos::Impl::SerialInternal][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_HostSharedPtr.hpp:120:5[m[K,
+    inlined from ‘[01m[KKokkos::Impl::HostSharedPtr<T>::~HostSharedPtr() [with T = Kokkos::Impl::SerialInternal][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_HostSharedPtr.hpp:92:45[m[K,
+    inlined from ‘[01m[KKokkos::Serial::~Serial()[m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Serial.hpp:87:7[m[K,
+    inlined from ‘[01m[KKokkos::RangePolicy<Kokkos::Serial, Kokkos::IndexType<unsigned int> >::~RangePolicy()[m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_ExecPolicy.hpp:67:7[m[K,
+    inlined from ‘[01m[Kvoid Kokkos::parallel_for(const std::string&, const ExecPolicy&, const FunctorType&) [with ExecPolicy = RangePolicy<Serial, IndexType<unsigned int> >; FunctorType = dealii::internal::set_initial_guess<double, dealii::MemorySpace::Host>(dealii::LinearAlgebra::distributed::Vector<double>&)::<lambda(dealii::types::global_dof_index)>; Enable = void][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Parallel.hpp:147:1[m[K:
+[01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Fetch_Op_ScopeCaller.hpp:44:1:[m[K [01;35m[Kwarning: [m[Kpointer used after ‘[01m[Kvoid operator delete(void*, std::size_t)[m[K’ [[01;35m[K-Wuse-after-free[m[K]
+   44 | [01;35m[KDESUL_IMPL_ATOMIC_FETCH_OPER[m[K(DESUL_IMPL_HOST_FUNCTION, host)
+      | [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+In file included from [01m[K/opt/dealii/9.6-local/include/deal.II/base/numbers.h:27[m[K,
+                 from [01m[K/opt/dealii/9.6-local/include/deal.II/base/config.h:608[m[K,
+                 from [01m[K/opt/dealii/9.6-local/include/deal.II/base/mpi.h:18[m[K:
+In member function ‘[01m[Kvoid Kokkos::Impl::HostSharedPtr<T>::cleanup() [with T = Kokkos::Impl::SerialInternal][m[K’,
+    inlined from ‘[01m[KKokkos::Impl::HostSharedPtr<T>::~HostSharedPtr() [with T = Kokkos::Impl::SerialInternal][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_HostSharedPtr.hpp:92:45[m[K,
+    inlined from ‘[01m[KKokkos::Serial::~Serial()[m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Serial.hpp:87:7[m[K,
+    inlined from ‘[01m[KKokkos::RangePolicy<Kokkos::Serial, Kokkos::IndexType<unsigned int> >::~RangePolicy()[m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_ExecPolicy.hpp:67:7[m[K,
+    inlined from ‘[01m[KKokkos::Impl::ParallelFor<dealii::internal::set_initial_guess<double, dealii::MemorySpace::Host>(dealii::LinearAlgebra::distributed::Vector<double>&)::<lambda(dealii::types::global_dof_index)>, Kokkos::RangePolicy<Kokkos::Serial, Kokkos::IndexType<unsigned int> >, Kokkos::Serial>::~ParallelFor()[m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Serial/Kokkos_Serial_Parallel_Range.hpp:26:7[m[K,
+    inlined from ‘[01m[Kvoid Kokkos::parallel_for(const std::string&, const ExecPolicy&, const FunctorType&) [with ExecPolicy = RangePolicy<Serial, IndexType<unsigned int> >; FunctorType = dealii::internal::set_initial_guess<double, dealii::MemorySpace::Host>(dealii::LinearAlgebra::distributed::Vector<double>&)::<lambda(dealii::types::global_dof_index)>; Enable = void][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Parallel.hpp:147:1[m[K:
+[01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_HostSharedPtr.hpp:120:5:[m[K [01;36m[Knote: [m[Kcall to ‘[01m[Kvoid operator delete(void*, std::size_t)[m[K’ here
+  120 |     [01;36m[KKOKKOS_IF_ON_HOST[m[K((
+      |     [01;36m[K^~~~~~~~~~~~~~~~~[m[K
+[ 55%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_39_cxx.cxx.o
+[ 56%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_3_cxx.cxx.o
+[ 57%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_40_cxx.cxx.o
+[ 59%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_41_cxx.cxx.o
+[ 60%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_42_cxx.cxx.o
+[ 62%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_43_cxx.cxx.o
+[ 63%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_44_cxx.cxx.o
+[ 65%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_45_cxx.cxx.o
+[ 66%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_46_cxx.cxx.o
+[ 68%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_47_cxx.cxx.o
+[ 69%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_48_cxx.cxx.o
+[ 71%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_49_cxx.cxx.o
+[ 72%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_4_cxx.cxx.o
+[ 73%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_50_cxx.cxx.o
+[ 75%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_51_cxx.cxx.o
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/Unity/unity_50_cxx.cxx:25[m[K:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_advance.cc:[m[K In member function ‘[01m[Kstd::shared_ptr<aspect::CohesiveInterface::System::Trial> aspect::CohesiveInterface::System::Implementation::trial(const State&, std::shared_ptr<Prepared>, const aspect::CohesiveInterface::System::Field&)[m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_advance.cc:78:69:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 3>::_Type[m[K’ {aka ‘[01m[Kdouble [3][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+   78 |           diagnostic[q] = { r.point[q].q, r.point[q].resistance, pn [01;35m[K}[m[K;
+      |                                                                     [01;35m[K^[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_advance.cc:78:69:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 3>::_Type[m[K’ {aka ‘[01m[Kdouble [3][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_advance.cc:78:69:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 3>::_Type[m[K’ {aka ‘[01m[Kdouble [3][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/Unity/unity_51_cxx.cxx:13[m[K:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_geometry.cc:[m[K In function ‘[01m[Kaspect::CohesiveInterface::{anonymous}::Interval aspect::CohesiveInterface::{anonymous}::operator*(Interval, Interval)[m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_geometry.cc:25:80:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 4>::_Type[m[K’ {aka ‘[01m[Kdouble [4][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+   25 |         const std::array<double,4> v = {a.lo*b.lo,a.lo*b.hi,a.hi*b.lo,a.hi*b.hi[01;35m[K}[m[K;
+      |                                                                                [01;35m[K^[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_geometry.cc:[m[K In lambda function:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_geometry.cc:78:111:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 4>::_Type[m[K’ {aka ‘[01m[Kdouble [4][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+   78 |                                              down(b.lower[1]-domain.lower[1]),down(domain.upper[1]-b.upper[1])[01;35m[K}[m[K;
+      |                                                                                                               [01;35m[K^[m[K
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/Unity/unity_51_cxx.cxx:16[m[K:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_initialization.cc:[m[K In member function ‘[01m[Kstd::shared_ptr<aspect::CohesiveInterface::System::Implementation::State> aspect::CohesiveInterface::System::Implementation::initialize_seed()[m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_initialization.cc:212:98:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 3>::_Type[m[K’ {aka ‘[01m[Kdouble [3][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+  212 |           diagnostics[i] = { traction, traction, law.p0 - 2 * law.G * .0003 * .41954981558863996 [01;35m[K}[m[K;
+      |                                                                                                  [01;35m[K^[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_initialization.cc:212:98:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 3>::_Type[m[K’ {aka ‘[01m[Kdouble [3][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_initialization.cc:212:98:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 3>::_Type[m[K’ {aka ‘[01m[Kdouble [3][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_initialization.cc:[m[K In member function ‘[01m[Kstd::shared_ptr<aspect::CohesiveInterface::System::Implementation::State> aspect::CohesiveInterface::System::Implementation::import(const aspect::CohesiveInterface::System::BulkSolve&)[m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_initialization.cc:346:55:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 3>::_Type[m[K’ {aka ‘[01m[Kdouble [3][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+  346 |           diagnostics[i] = { q, resistance[i], normal [01;35m[K}[m[K;
+      |                                                       [01;35m[K^[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_initialization.cc:346:55:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 3>::_Type[m[K’ {aka ‘[01m[Kdouble [3][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_initialization.cc:346:55:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 3>::_Type[m[K’ {aka ‘[01m[Kdouble [3][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_initialization.cc:353:91:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 2>::_Type[m[K’ {aka ‘[01m[Kdouble [2][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+  353 |           AffineMemory (system.get_fe ().n_components (), { affine.at (0), affine.at (1) }[01;35m[K)[m[K,
+      |                                                                                           [01;35m[K^[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_initialization.cc:353:91:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<double, 2>::_Type[m[K’ {aka ‘[01m[Kdouble [2][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/Unity/unity_51_cxx.cxx:22[m[K:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_mechanics.cc:[m[K In member function ‘[01m[Kstd::shared_ptr<aspect::CohesiveInterface::System::Implementation::Prepared> aspect::CohesiveInterface::System::Implementation::prepare(const State&, aspect::CohesiveInterface::Geometry, const aspect::CohesiveInterface::System::BulkSolve&)[m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_mechanics.cc:269:57:[m[K [01;35m[Kwarning: [m[Kthis ‘[01m[Kfor[m[K’ clause does not guard... [[01;35m[K-Wmisleading-indentation[m[K]
+  269 |               for(unsigned i=0;i<entry.second->m();++i){[01;35m[Kfor[m[K(unsigned j=0;j<entry.second->n();++j)
+      |                                                         [01;35m[K^~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_mechanics.cc:270:53:[m[K [01;36m[Knote: [m[K...this statement, but the latter is misleadingly indented as if it were guarded by the ‘[01m[Kfor[m[K’
+  270 |                 f<<(j?",":"")<<(*entry.second)(i,j);[01;36m[Kf[m[K<<'\n';}
+      |                                                     [01;36m[K^[m[K
+[ 76%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_52_cxx.cxx.o
+[ 78%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_53_cxx.cxx.o
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/Unity/unity_52_cxx.cxx:10[m[K:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_system.cc:[m[K In member function ‘[01m[Kaspect::CohesiveInterface::Geometry::Clearance aspect::CohesiveInterface::System::Implementation::protect_domain(const aspect::CohesiveInterface::Geometry&, unsigned int, const std::string&) const[m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/reconstructed_fault/cohesive_system.cc:233:86:[m[K [01;35m[Kwarning: [m[Kmissing braces around initializer for ‘[01m[Kstd::__array_traits<const char*, 4>::_Type[m[K’ {aka ‘[01m[Kconst char* [4][m[K’} [[01;35m[K-Wmissing-braces[m[K]
+  233 |           static const std::array<const char*,4> walls={"left","right","bottom","top"[01;35m[K}[m[K;
+      |                                                                                      [01;35m[K^[m[K
+[ 79%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_54_cxx.cxx.o
+[ 81%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_55_cxx.cxx.o
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/Unity/unity_54_cxx.cxx:10[m[K:
+/home/ein/repository/aspect-pf-rsf-particle-free/source/simulator/assemblers/reconstructed_fault_stokes.cc: In instantiation of ‘[01m[Kvoid aspect::Assemblers::ReconstructedFaultStokes<dim>::execute(aspect::internal::Assembly::Scratch::ScratchBase<dim>&, aspect::internal::Assembly::CopyData::CopyDataBase<dim>&) const [with int dim = 2][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/simulator/assemblers/reconstructed_fault_stokes.cc:612:5:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/simulator/assemblers/reconstructed_fault_stokes.cc:533:23:[m[K [01;35m[Kwarning: [m[Kunused variable ‘[01m[Kfield[m[K’ [[01;35m[K-Wunused-variable[m[K]
+  533 |       for (const auto [01;35m[Kfield[m[K : stress_composition_indices)
+      |                       [01;35m[K^~~~~[m[K
+/home/ein/repository/aspect-pf-rsf-particle-free/source/simulator/assemblers/reconstructed_fault_stokes.cc: In instantiation of ‘[01m[Kvoid aspect::Assemblers::ReconstructedFaultStokes<dim>::execute(aspect::internal::Assembly::Scratch::ScratchBase<dim>&, aspect::internal::Assembly::CopyData::CopyDataBase<dim>&) const [with int dim = 3][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/simulator/assemblers/reconstructed_fault_stokes.cc:612:5:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-particle-free/source/simulator/assemblers/reconstructed_fault_stokes.cc:533:23:[m[K [01;35m[Kwarning: [m[Kunused variable ‘[01m[Kfield[m[K’ [[01;35m[K-Wunused-variable[m[K]
+[ 82%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_56_cxx.cxx.o
+[ 84%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_57_cxx.cxx.o
+[ 85%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_58_cxx.cxx.o
+[ 86%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_59_cxx.cxx.o
+[ 88%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_5_cxx.cxx.o
+[ 89%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_60_cxx.cxx.o
+[ 91%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_6_cxx.cxx.o
+[ 92%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_7_cxx.cxx.o
+[ 94%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_8_cxx.cxx.o
+[ 95%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_9_cxx.cxx.o
+[ 97%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_61_cxx.cxx.o
+In file included from [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Fetch_Op.hpp:30[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Generic.hpp:13[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Atomic_Ref.hpp:14[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics.hpp:12[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Atomics_Desul_Wrapper.hpp:28[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Atomic.hpp:50[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_Atomic_View.hpp:20[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_ViewMapping.hpp:32[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_View.hpp:489[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Parallel.hpp:31[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_MemoryPool.hpp:26[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_TaskScheduler.hpp:34[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Serial.hpp:36[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/decl/Kokkos_Declare_SERIAL.hpp:21[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/KokkosCore_Config_DeclareBackend.hpp:22[m[K,
+                 from [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Core.hpp:45[m[K,
+                 from [01m[K/opt/dealii/9.6-local/include/deal.II/base/exceptions.h:25[m[K,
+                 from [01m[K/opt/dealii/9.6-local/include/deal.II/base/array_view.h:20[m[K,
+                 from [01m[K/opt/dealii/9.6-local/include/deal.II/base/mpi.h:20[m[K,
+                 from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/include/aspect/global.h:28[m[K,
+                 from [01m[K/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx:5[m[K,
+                 from [01m[K<command-line>[m[K:
+In function ‘[01m[KT desul::Impl::host_atomic_fetch_oper(const Oper&, T*, dont_deduce_this_parameter_t<const T>, MemoryOrder, desul::MemoryScopeCaller) [with Oper = sub_operator<int, const int>; T = int; MemoryOrder = desul::MemoryOrderRelaxed][m[K’,
+    inlined from ‘[01m[KT desul::Impl::host_atomic_fetch_sub(T*, T, MemoryOrder, MemoryScope) [with T = int; MemoryOrder = desul::MemoryOrderRelaxed; MemoryScope = desul::MemoryScopeCaller][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Fetch_Op_Generic.hpp:40:1[m[K,
+    inlined from ‘[01m[KT desul::atomic_fetch_sub(T*, T, MemoryOrder, MemoryScope) [with T = int; MemoryOrder = MemoryOrderRelaxed; MemoryScope = MemoryScopeCaller][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Generic.hpp:54:3[m[K,
+    inlined from ‘[01m[KT Kokkos::atomic_fetch_sub(T*, desul::Impl::dont_deduce_this_parameter_t<const T>) [with T = int][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Atomics_Desul_Wrapper.hpp:85:125[m[K,
+    inlined from ‘[01m[Kvoid Kokkos::Impl::HostSharedPtr<T>::cleanup() [with T = Kokkos::Impl::SerialInternal][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_HostSharedPtr.hpp:120:5[m[K,
+    inlined from ‘[01m[KKokkos::Impl::HostSharedPtr<T>::~HostSharedPtr() [with T = Kokkos::Impl::SerialInternal][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_HostSharedPtr.hpp:92:45[m[K,
+    inlined from ‘[01m[KKokkos::Serial::~Serial()[m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Serial.hpp:87:7[m[K,
+    inlined from ‘[01m[KKokkos::RangePolicy<Kokkos::Serial, Kokkos::IndexType<unsigned int> >::~RangePolicy()[m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_ExecPolicy.hpp:67:7[m[K,
+    inlined from ‘[01m[Kvoid Kokkos::parallel_for(const std::string&, const ExecPolicy&, const FunctorType&) [with ExecPolicy = RangePolicy<Serial, IndexType<unsigned int> >; FunctorType = dealii::internal::set_initial_guess<double, dealii::MemorySpace::Host>(dealii::LinearAlgebra::distributed::Vector<double>&)::<lambda(dealii::types::global_dof_index)>; Enable = void][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Parallel.hpp:147:1[m[K:
+[01m[K/opt/trilinos/14.2.0-local/include/desul/atomics/Fetch_Op_ScopeCaller.hpp:44:1:[m[K [01;35m[Kwarning: [m[Kpointer used after ‘[01m[Kvoid operator delete(void*, std::size_t)[m[K’ [[01;35m[K-Wuse-after-free[m[K]
+   44 | [01;35m[KDESUL_IMPL_ATOMIC_FETCH_OPER[m[K(DESUL_IMPL_HOST_FUNCTION, host)
+      | [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+In file included from [01m[K/opt/dealii/9.6-local/include/deal.II/base/numbers.h:27[m[K,
+                 from [01m[K/opt/dealii/9.6-local/include/deal.II/base/config.h:608[m[K,
+                 from [01m[K/opt/dealii/9.6-local/include/deal.II/base/mpi.h:18[m[K:
+In member function ‘[01m[Kvoid Kokkos::Impl::HostSharedPtr<T>::cleanup() [with T = Kokkos::Impl::SerialInternal][m[K’,
+    inlined from ‘[01m[KKokkos::Impl::HostSharedPtr<T>::~HostSharedPtr() [with T = Kokkos::Impl::SerialInternal][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_HostSharedPtr.hpp:92:45[m[K,
+    inlined from ‘[01m[KKokkos::Serial::~Serial()[m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Serial.hpp:87:7[m[K,
+    inlined from ‘[01m[KKokkos::RangePolicy<Kokkos::Serial, Kokkos::IndexType<unsigned int> >::~RangePolicy()[m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_ExecPolicy.hpp:67:7[m[K,
+    inlined from ‘[01m[KKokkos::Impl::ParallelFor<dealii::internal::set_initial_guess<double, dealii::MemorySpace::Host>(dealii::LinearAlgebra::distributed::Vector<double>&)::<lambda(dealii::types::global_dof_index)>, Kokkos::RangePolicy<Kokkos::Serial, Kokkos::IndexType<unsigned int> >, Kokkos::Serial>::~ParallelFor()[m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Serial/Kokkos_Serial_Parallel_Range.hpp:26:7[m[K,
+    inlined from ‘[01m[Kvoid Kokkos::parallel_for(const std::string&, const ExecPolicy&, const FunctorType&) [with ExecPolicy = RangePolicy<Serial, IndexType<unsigned int> >; FunctorType = dealii::internal::set_initial_guess<double, dealii::MemorySpace::Host>(dealii::LinearAlgebra::distributed::Vector<double>&)::<lambda(dealii::types::global_dof_index)>; Enable = void][m[K’ at [01m[K/opt/trilinos/14.2.0-local/include/Kokkos_Parallel.hpp:147:1[m[K:
+[01m[K/opt/trilinos/14.2.0-local/include/impl/Kokkos_HostSharedPtr.hpp:120:5:[m[K [01;36m[Knote: [m[Kcall to ‘[01m[Kvoid operator delete(void*, std::size_t)[m[K’ here
+  120 |     [01;36m[KKOKKOS_IF_ON_HOST[m[K((
+      |     [01;36m[K^~~~~~~~~~~~~~~~~[m[K
+[ 98%] Linking CXX executable aspect-release
+[ 98%] Built target aspect.exe.release
+[100%] Creating symlink from aspect.exe.release to './aspect'
+[100%] Built target aspect

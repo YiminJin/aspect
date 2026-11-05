@@ -20,7 +20,8 @@
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/material_model/phase_field_fault/history_diagnostics.h>
 #include <aspect/material_model/utilities.h>
 #include <aspect/phase_field.h>
@@ -346,7 +347,7 @@ namespace aspect
         fault_manager.register_property("unloaded cohesive initialization", 1);
       if (fe_strain_history)
         fault_manager.register_property("accepted FE strain history", 1);
-      if (dg_trial_stress_history)
+      if (dg_tensor_history)
         fault_manager.register_property("DG trial stress history", 1);
       if (dg_accepted_history)
         fault_manager.register_property("PF5 accepted DG history v1", 1);
@@ -713,18 +714,18 @@ namespace aspect
                 const auto stress = candidate_fe_strain_stress(
                                       fe_update, particle.get_surrounding_cell()->id(), particle.get_location(),&evaluation_scale);
                 const auto difference=stress-candidate.stress;
-                const double error=dg_trial_stress_history ? std::sqrt(std::pow(difference.norm(),2)+std::pow(trace(difference),2)) : difference.norm();
+                const double error=dg_tensor_history ? std::sqrt(std::pow(difference.norm(),2)+std::pow(trace(difference),2)) : difference.norm();
                 double bound=128*std::numeric_limits<double>::epsilon()
                              *std::max(1.,evaluation_scale);
                 if (error>bound)++old_allowance_failures;
-                if (dg_trial_stress_history && !uses_projected_material_reaction())
+                if (dg_tensor_history && !uses_projected_material_reaction())
                   bound+=dg_source_publication_allowance(*fe_update->dg_history,particle.get_surrounding_cell()->id(),particle.get_location());
                 fe_publication_ratio=std::max(fe_publication_ratio,error/bound);
                 fe_publication_error=std::max(fe_publication_error,error);
                 fe_publication_bound=std::max(fe_publication_bound,bound);
                 fe_publication_net_bound=std::max(fe_publication_net_bound,
                                                   128*std::numeric_limits<double>::epsilon()*std::max({1.,stress.norm(),candidate.stress.norm()}));
-                if (error>bound && dg_trial_stress_history)
+                if (error>bound && dg_tensor_history)
                   {
                     // Failure-only replay data, captured before either terminal
                     // publisher. Preserve the actual remote-point gradient and
@@ -746,7 +747,7 @@ namespace aspect
                     put("particle",0,0,0,particle.get_id());
                     // Keep the archived replay key below, but record its trace
                     // convention: DG now samples this explicit CellId.
-                    put("matching_cell_gradient_trace",0,0,0,dg_trial_stress_history);
+                    put("matching_cell_gradient_trace",0,0,0,dg_tensor_history);
                     put("error",0,0,0,error);
                     put("bound",0,0,0,bound);
                     put("ratio",0,0,0,error/bound);
@@ -796,10 +797,10 @@ namespace aspect
                         for (unsigned int d=0; d<dim; ++d)put("native_support",i,d,0,support[d]);
                       }
                     for (unsigned int i=0; i<dg_indices.size(); ++i)
-                      for (unsigned int c=0; c<s.dg_history->trial_stress.size(); ++c)
+                      for (unsigned int c=0; c<s.dg_history->coefficients.size(); ++c)
                         {
-                          put("old_T",i,c,0,s.dg_history->trial_stress[c][dg_indices[i]]);
-                          put("new_T",i,c,0,fe_update->dg_history->trial_stress[c][dg_indices[i]]);
+                          put("old_T",i,c,0,s.dg_history->coefficients[c][dg_indices[i]]);
+                          put("new_T",i,c,0,fe_update->dg_history->coefficients[c][dg_indices[i]]);
                         }
                     for (unsigned int v=0; v<GeometryInfo<dim>::vertices_per_cell; ++v)
                       for (unsigned int d=0; d<dim; ++d)put("vertex",v,d,0,cell->vertex(v)[d]);
@@ -850,7 +851,7 @@ namespace aspect
         }
       if (fe_update)
         this->get_pcout()<<std::setprecision(17)
-                         <<(dg_trial_stress_history ? "   DG Maxwell publication: error=" : "   FE Maxwell publication: error=")<<fe_publication_error
+                         <<(dg_tensor_history ? "   DG Maxwell publication: error=" : "   FE Maxwell publication: error=")<<fe_publication_error
                          <<" evaluation allowance="<<fe_publication_bound
                          <<" net-stress allowance="<<fe_publication_net_bound
                          <<" maximum error/allowance="<<fe_publication_ratio
@@ -874,7 +875,7 @@ namespace aspect
       AssertThrow(update->dg_history && update->dg_history->space==fe_strain_state->dg_history->space
                   && update->I==fe_strain_state->I && update->Z.size()==fe_strain_state->Z.size()
                   && update->dg_cohesive.size()==update->Z.size(),ExcMessage("PF5 staged history layout changed."));
-      for (const auto &component:update->dg_history->trial_stress)
+      for (const auto &component:update->dg_history->coefficients)
         for (const auto i:component.locally_owned_elements())
           AssertThrow(std::isfinite(component[i]),ExcMessage("Nonfinite PF5 DG candidate."));
       for (unsigned int j=0; j<update->Z.size(); ++j)
@@ -945,7 +946,7 @@ namespace aspect
         samples.history_velocity_gradients = VectorTools::point_gradients<dim>(
           point_cache,this->get_dof_handler(),this->get_old_solution(),
           VectorTools::EvaluationFlags::avg,this->introspection().component_indices.velocities[0]);
-      if (!dg_trial_stress_history)
+      if (!dg_tensor_history)
         samples.velocity_gradients = VectorTools::point_gradients<dim>(
                                        point_cache, this->get_dof_handler(), accepted_bulk_state,
                                        VectorTools::EvaluationFlags::avg,

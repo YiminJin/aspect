@@ -86,7 +86,7 @@ namespace aspect
       {
         const auto &s=*model().bulk_cohesive_state;std::vector<double> v;
         for(const auto *owner:{s.tensor.get(),s.native_projection.get()})
-          for(const auto &field:owner->trial_stress)for(unsigned int i=0;i<field.size();++i)v.push_back(field[i]);
+          for(const auto &field:owner->coefficients)for(unsigned int i=0;i<field.size();++i)v.push_back(field[i]);
         const auto &native=s.native_history.block(this->introspection().block_indices.velocities);
         v.insert(v.end(),native.begin(),native.end());
         for(const auto &entry:s.history)for(const auto &h:entry.second)

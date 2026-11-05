@@ -196,7 +196,7 @@ namespace aspect
         AssertThrow(faults[0].vertex(i)==s.vertices[i],ExcMessage("Accepted FE strain geometry changed."));
       AssertThrow(this->get_triangulation().get_vertices()==s.mesh_vertices,
                   ExcMessage("Accepted FE strain rejects mesh motion."));
-      if (mature_frictional_fault || dg_trial_stress_history)
+      if (mature_frictional_fault || dg_tensor_history)
         {
           AssertThrow(this->get_reconstructed_fault_manager().get_shear_sense(0)==s.shear_sense,
                       ExcMessage("Fixed-profile native history rejects slip orientation changes."));
@@ -302,7 +302,7 @@ namespace aspect
             if (!cell->is_artificial())
               {
                 state->evaluation_cells.emplace(cell->id(),cell);
-                if (dg_trial_stress_history && cell->is_locally_owned())
+                if (dg_tensor_history && cell->is_locally_owned())
                   {
                     const auto vertices=this->get_mapping().get_vertices(cell);
                     for (const unsigned int v:cell->vertex_indices())
@@ -318,7 +318,7 @@ namespace aspect
           AssertDimension(state->I.size(),state->Z.size());
           for (const double I:state->I)
             AssertThrow(std::isfinite(I) && I>0.,ExcMessage("Mature FE normalization is undefined."));
-          if (dg_trial_stress_history)
+          if (dg_tensor_history)
             initialize_dg_history(*state);
           fe_strain_state=std::move(state);
           validate_fe_strain_restrictions();
@@ -445,7 +445,7 @@ namespace aspect
           AssertThrow(std::abs(initial.values[j]-state->I[j])
                       <=1.e-12*std::max(1.,std::abs(state->I[j])),
                       ExcMessage("PF5 restored I_h disagrees with the fixed native profile."));
-      if (dg_trial_stress_history)
+      if (dg_tensor_history)
         initialize_dg_history(*state);
       this->get_pcout()<<std::setprecision(17)<<"   Accepted FE strain: G="<<state->G
                        <<" eta="<<state->eta<<" lambda="<<state->eta/state->G<<" m="<<state->m
@@ -456,7 +456,7 @@ namespace aspect
       const FEEndpointTrial &endpoint,const std::vector<double> &I,const CellId &cell,const Point<dim> &x) const
     {
       validate_fe_strain_restrictions();
-      return dg_trial_stress_history
+      return dg_tensor_history
              ? evaluate_dg_history_stress(*endpoint.dg_history,endpoint.Z,I,cell,x,nullptr,&endpoint.strain)
              : evaluate_fe_strain_stress(endpoint.strain,endpoint.Z,I,cell,x);
     }
@@ -479,7 +479,7 @@ namespace aspect
       const bool incoming_objective=jaumann_dg_stress && s.committed_step!=this->get_timestep_number();
       const auto history=incoming_objective ? s.objective_anchor : s.dg_history;
       AssertThrow(!jaumann_dg_stress || history,ExcMessage("Objective DG mechanics requires its immutable per-attempt anchor."));
-      auto stress=dg_trial_stress_history
+      auto stress=dg_tensor_history
                         ? evaluate_dg_history_stress(*history,s.Z,s.I,id,x)
                         : evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,id,x);
       if(incoming_objective && dg_material_reaction)
@@ -566,7 +566,7 @@ namespace aspect
       const LinearAlgebra::BlockVector &bulk,const MaxwellCoefficients &coefficients,
       LinearAlgebra::BlockVector &trial) const
     {
-      AssertThrow(!dg_trial_stress_history,
+      AssertThrow(!dg_tensor_history,
                   ExcMessage("DG history cannot use the displacement-history recurrence."));
       const auto &s=*fe_strain_state;
       LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
@@ -593,11 +593,11 @@ namespace aspect
       if(uses_projected_material_reaction())
         {
           AssertThrow(dg_material_reaction && !transported,ExcMessage("Missing converged coupled material reaction."));
-          return make_material_reaction(bulk,this->get_reconstructed_fault_manager().get_slip_rate(0));
+          return make_material_reaction(*fe_strain_state,bulk,this->get_reconstructed_fault_manager().get_slip_rate(0));
         }
       const auto c=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
       auto update=std::make_shared<FEStrainUpdate>();
-      if (dg_trial_stress_history)
+      if (dg_tensor_history)
         {
           // The shared vector holds only the fixed phase anchor in DG mode.
           // The independent tensor is projected from the native FE source.
@@ -643,14 +643,14 @@ namespace aspect
       // stationary mature route. Use the shared fixed-phase point layout;
       // evolving endpoint trials still evaluate their supplied phase vector.
       const auto *phase=uses_stationary_mature_dg_optimizations() ? nullptr : &update->displacement_history;
-      const auto stress=dg_trial_stress_history
+      const auto stress=dg_tensor_history
                         ? evaluate_dg_history_stress(*update->dg_history,update->Z,update->I,id,x,&current_scale,phase)
                         : evaluate_fe_strain_stress(update->displacement_history,update->Z,update->I,id,x,&current_scale);
       if (evaluation_scale)
         {
           double old_scale=0.;
           const auto &s=*fe_strain_state;
-          if (dg_trial_stress_history)
+          if (dg_tensor_history)
             evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,id,x,&old_scale);
           else
             evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,id,x,&old_scale);
@@ -673,7 +673,7 @@ namespace aspect
       const std::shared_ptr<FEStrainUpdate> &update) noexcept
     {
       fe_strain_state->displacement_history.swap(update->displacement_history);
-      if (dg_trial_stress_history)
+      if (dg_tensor_history)
         fe_strain_state->dg_history.swap(update->dg_history);
       fe_strain_state->Z.swap(update->Z);
       fe_strain_state->I.swap(update->I);
@@ -681,7 +681,7 @@ namespace aspect
       fe_strain_state->objective_anchor.reset();
       fe_strain_state->objective_parent.reset();
       fe_strain_state->committed_step=this->get_timestep_number();
-      if (dg_accepted_history || (dg_trial_stress_history && mature_frictional_fault))
+      if (dg_accepted_history || (dg_tensor_history && mature_frictional_fault))
         ++fe_strain_state->accepted_publications;
     }
   }

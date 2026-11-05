@@ -1,0 +1,52 @@
+{
+  "arguments": {
+    "label": "architecture-before-stationary",
+    "legacy": false,
+    "baseline": false,
+    "ranks": 2,
+    "steps": 1,
+    "restart": "None",
+    "reject": false,
+    "audit": false,
+    "schedule": "200000",
+    "seconds": 120,
+    "transport_check": false,
+    "refinement": 3,
+    "layered_check": false,
+    "transfer_check": false,
+    "spin": 0.0,
+    "cohesive_history": false,
+    "history_affine": false,
+    "history_level": 0,
+    "cohesive": false,
+    "cohesive_drive": 0.0,
+    "cohesive_dt": 0.000125,
+    "tip_airy": 0.0,
+    "signed_trace": false,
+    "probe_old_cohesive_import": false
+  },
+  "command": [
+    "/opt/openmpi/5.0.6/bin/mpirun",
+    "-n",
+    "2",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/architecture-before-stationary/input.prm"
+  ],
+  "runner_sha256": "75a57f91d0bdac3506433a8b4f9c28cfbb5e014c56949529404740af9585097c",
+  "source_revision": "a22214d57f3ce809b3b20c9883b853c96e04033f",
+  "core_sha256": "f127bd8a755702dca0f4a4d1a005c0c69f710d47e10b4290d37e6fadebcf5559",
+  "plugin_sha256": {
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "67740f8fa5a7ba645249ea4b3518195232499bbecacd15052e2f9d37b7fdb0e3",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "09def114b3280469295e1ad3c388ddb4c1aa5bd21cd25d445db3bad4c23d5d41"
+  },
+  "input_sha256": "e07db8d58a6ba8727cb811e73670fadd4dfa09f5f052cf0da7af83b3f2851cc7",
+  "runtime_environment": {
+    "OMP_PROC_BIND": "false",
+    "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "exit_code": 213,
+  "elapsed_s": 0.11410389500088058
+}

@@ -766,10 +766,13 @@ identities apply in their stated integration measure. This is an offline
 qualification result, not a change to P_h, history space, source support,
 constitutive rate or work assembly. Direct remains an opt-in reference.
 
-## Consolidated implementation locations — 4 November 2026
+## Current mature implementation entry points
 
-The equations/state ownership in this document are unchanged. See the current
-[module table](STRESS_HISTORY_CONSOLIDATION_REPORT.md#implemented-boundaries-and-caller-audit)
-for physical stress access, material projection, transport/rotation, transaction
-and benchmark/audit ownership. Earlier file locations are historical. No new
-constitutive, checkpoint, quadrature or convergence convention is selected.
+Use [MATURE_MOVING_FAULT.md](MATURE_MOVING_FAULT.md) for the authoritative
+code-level algorithm and state ownership. Ordinary `Simulator::solve_timestep`
+and solver schemes own ordering and acceptance. The coupled Stokes solver owns
+projection-consistency iteration. `HistoryDiscretization::TensorHistory` and
+`TensorAdvection` own tensor storage and spatial kernels; material and geometry
+components supply their laws/fields. The rejected special driver and generic
+executor are removed and must not be restored. No checkpoint or law conversion
+occurs. Historical formulation/state tables and physical equations remain valid.

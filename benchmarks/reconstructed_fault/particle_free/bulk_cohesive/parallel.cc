@@ -55,7 +55,7 @@ namespace aspect
       std::vector<double> persistent()const
       {
         const auto &s=*model().bulk_cohesive_state;std::vector<double> values;
-        for(const auto *p:{s.tensor.get(),s.native_projection.get()})for(const auto &v:p->trial_stress)
+        for(const auto *p:{s.tensor.get(),s.native_projection.get()})for(const auto &v:p->coefficients)
           for(const auto i:v.locally_owned_elements())values.push_back(v[i]);
         for(const auto &entry:s.history)for(const auto &h:entry.second)
           {for(double v:{h.a,h.signed_shear,h.absolute_shear,h.q,h.rate})values.push_back(v);
@@ -131,14 +131,14 @@ namespace aspect
             for(const auto v:cell->vertex_indices())local_positions[cell->vertex_dof_index(v,pc)-po]=cell->vertex(v);
             auto &record=local_records[key];
             s.tensor->space->cells.at(entry.first)->get_dof_indices(dgids);
-            for(const auto *p:{s.tensor.get(),s.native_projection.get()})for(const auto &v:p->trial_stress)for(const auto i:dgids)record.push_back(v[i]);
+            for(const auto *p:{s.tensor.get(),s.native_projection.get()})for(const auto &v:p->coefficients)for(const auto i:dgids)record.push_back(v[i]);
             for(unsigned int i=0;i<ids.size();++i)if(fe_element.system_to_component_index(i).first<dim)record.push_back(s.native_history[ids[i]]);
             for(const auto &h:s.history.at(entry.first))
               {for(double v:{h.a,h.signed_shear,h.absolute_shear,h.q,h.rate})record.push_back(v);
                if(s.tensor_flow()){for(const auto *t:{&h.A,&h.K,&h.Q,&h.W})for(unsigned int i=0;i<3;++i)for(unsigned int j=i;j<3;++j)record.push_back((*t)[i][j]);record.push_back(h.L);}}
             fe.reinit(cell);fe[FEValuesExtractors::Scalar(pc)].get_function_values(sim().solution,phi);
             fe[this->introspection().extractors.pressure].get_function_values(sim().solution,pressure);
-            const auto T=s.evaluate_tensor(m,entry.first,quad);const auto DG=m.evaluate_dg_trial_tensor(*s.tensor,entry.first,quad);
+            const auto T=s.evaluate_tensor(m,entry.first,quad);const auto DG=m.evaluate_history_tensor(*s.tensor,entry.first,quad);
             std::vector<bool> boundary_dof(ids.size(),false);
             std::set<types::global_dof_index> boundary_ids;
             if(detailed)for(const unsigned int face:cell->face_indices())

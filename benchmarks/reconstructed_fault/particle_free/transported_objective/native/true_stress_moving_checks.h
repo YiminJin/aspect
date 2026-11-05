@@ -26,7 +26,7 @@
             const auto id=cells.at({unsigned((x[0]+2)/h),unsigned((x[1]+2)/h)});const auto cell=space.cells.at(id);
             const auto u=this->get_mapping().transform_real_to_unit_cell(cell,x);
             std::vector<types::global_dof_index> ids(9);cell->get_dof_indices(ids);Tensor value;
-            for(unsigned c=0;c<3;++c)for(unsigned i=0;i<9;++i)value[Tensor::unrolled_to_component_indices(c)]+=history.trial_stress[c][ids[i]]*space.element.shape_value(i,u);
+            for(unsigned c=0;c<3;++c)for(unsigned i=0;i<9;++i)value[Tensor::unrolled_to_component_indices(c)]+=history.coefficients[c][ids[i]]*space.element.shape_value(i,u);
             return value;
           };
         const auto rotate=[](const Tensor &a,double angle)
@@ -66,13 +66,13 @@
                 s.objective_anchor=m.project_dg_transport_field(*op,[&](const Point<dim> &x,double)
                   {if constexpr(dim==2)return ReconstructedFaultUtilities::rotate_plane_strain_stress(sample(*history,x),gradient,dt);else return Tensor();},0.,8);
                 s.objective_anchor->representation=History::Representation::physical_stress;
-                history=m.make_material_reaction(bulk,std::vector<double>(s.Z.size(),0.))->dg_history;
+                history=m.make_material_reaction(*m.fe_strain_state,bulk,std::vector<double>(s.Z.size(),0.))->dg_history;
               }
             double error=0.,scale=0.,maximum=0.;const QGauss<dim> rule(12);
             FEValues<dim> fe(this->get_mapping(),space.element,rule,update_quadrature_points|update_JxW_values);
             const auto norm=[](const Tensor &a){return scalar_product(a,a)+trace(a)*trace(a);};
             for(const auto &cell:op->cells)
-              {fe.reinit(space.cells.at(cell.id));const auto values=m.evaluate_dg_trial_tensor(*history,cell.id,rule);
+              {fe.reinit(space.cells.at(cell.id));const auto values=m.evaluate_history_tensor(*history,cell.id,rule);
                for(unsigned q=0;q<rule.size();++q){const auto expected=exact(fe.quadrature_point(q),.2);error+=fe.JxW(q)*norm(values[q]-expected);scale+=fe.JxW(q)*norm(expected);maximum=std::max(maximum,std::sqrt(norm(values[q]-expected)));}}
             error=Utilities::MPI::sum(error,comm);scale=Utilities::MPI::sum(scale,comm);maximum=Utilities::MPI::max(maximum,comm);
             if(out.is_open())out<<n*n<<','<<dt<<",.2,"<<std::sqrt(error/scale)<<','<<maximum<<'\n';

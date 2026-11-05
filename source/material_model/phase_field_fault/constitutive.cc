@@ -217,10 +217,10 @@ namespace aspect
       const auto old_stress = jaumann_particle_stress && !accepted_snapshot
         ? rotate_maxwell_history(inputs.old_maxwell_stress,inputs.history_velocity_gradient,time_step)
         : inputs.old_maxwell_stress;
-      const SymmetricTensor<2,dim> trial_stress = compute_maxwell_stress(
+      const SymmetricTensor<2,dim> coefficients = compute_maxwell_stress(
                                                     bulk_coefficients, strain_rate, old_stress);
       const SymmetricTensor<2,dim> stress_without_current_slip =
-        trial_stress
+        coefficients
         - 2.0 * bulk_coefficients.eta_ve * cohesive.history_correction
         * inputs.slip_tensor;
       const SymmetricTensor<2,dim> stress =

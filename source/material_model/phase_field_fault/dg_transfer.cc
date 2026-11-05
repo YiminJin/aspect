@@ -1,6 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/reconstructed_fault/endpoint_mpi.h>
 #include <aspect/particle/manager.h>
 #include <aspect/phase_field.h>
@@ -108,9 +109,9 @@ namespace aspect
           AssertThrow(transfer->particles.emplace(p).second,ExcMessage("Duplicate accepted particle owner."));
       transfer->tensor=std::make_unique<parallel::distributed::SolutionTransfer<dim,LinearAlgebra::Vector>>(s.dg_history->space->dofs);
       std::vector<const LinearAlgebra::Vector *> fields;
-      for (const auto &component:s.dg_history->trial_stress) fields.push_back(&component);
+      for (const auto &component:s.dg_history->coefficients) fields.push_back(&component);
       if (s.dg_history->residual)
-        for (const auto &component:s.dg_history->residual->trial_stress) fields.push_back(&component);
+        for (const auto &component:s.dg_history->residual->coefficients) fields.push_back(&component);
       transfer->tensor->prepare_for_coarsening_and_refinement(fields);
       dg_transfer=std::move(transfer);
     }
@@ -149,8 +150,8 @@ namespace aspect
         {history->residual=std::make_shared<DGHistory>();history->residual->space=history->space;}
       for (unsigned int c=0; c<owned.size(); ++c)
         {
-          auto &target=c<components ? history->trial_stress[c]
-                                  : history->residual->trial_stress[c-components];
+          auto &target=c<components ? history->coefficients[c]
+                                  : history->residual->coefficients[c-components];
           target.reinit(space.dofs.locally_owned_dofs(),space.relevant,comm);
           target=owned[c];
         }

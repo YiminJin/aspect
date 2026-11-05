@@ -1,0 +1,7 @@
+[  7%] Building CXX object CMakeFiles/bp3_restore_150x50.dir/monitor.cc.o
+[ 15%] Building CXX object CMakeFiles/bp3_restore_150x50.dir/bp3.cc.o
+[ 23%] Building CXX object CMakeFiles/bp3_restore_150x50.dir/output.cc.o
+[ 30%] Building CXX object CMakeFiles/bp3_restore_150x50.dir/particle_initialization.cc.o
+[ 38%] Building CXX object CMakeFiles/bp3_restore_150x50.dir/work_audit.cc.o
+[ 46%] Linking CXX shared library libbp3_restore_150x50.release.so
+[100%] Built target bp3_restore_150x50

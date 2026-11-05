@@ -1,9 +1,11 @@
+#include <aspect/material_model/phase_field_fault/material_history_internal.h>
 #include "../../../../../tests/phase_field_fault_test_access.h"
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/reconstructed_fault/objective_stress.h>
 #include <aspect/particle/integrator/interface.h>
@@ -145,8 +147,8 @@ namespace aspect
           std::ofstream storage(stem+"-storage-rank"+std::to_string(rank)+".csv");
           const auto tensors=s.dg_history->residual ? 2u : 1u;
           storage<<"owned_tensor_coefficients,relevant_tensor_coefficients,surface_scalar_entries,tensor_vector_bytes,rank_peak_rss_kib,point_sample_cells,source_mass_cache_entries,accepted_stress_sample_entries,mechanical_cache_present,trial_anchor_present,trial_reaction_present\n";
-          std::size_t bytes=0;for(const auto &v:s.dg_history->trial_stress)bytes+=v.memory_consumption();
-          if(s.dg_history->residual)for(const auto &v:s.dg_history->residual->trial_stress)bytes+=v.memory_consumption();
+          std::size_t bytes=0;for(const auto &v:s.dg_history->coefficients)bytes+=v.memory_consumption();
+          if(s.dg_history->residual)for(const auto &v:s.dg_history->residual->coefficients)bytes+=v.memory_consumption();
           std::ifstream proc("/proc/self/status");std::string line;unsigned long peak=0;
           while(std::getline(proc,line))if(line.find("VmHWM:")==0){std::istringstream parser(line.substr(6));parser>>peak;}
           storage<<3*tensors*s.dg_history->space->dofs.locally_owned_dofs().n_elements()<<','
@@ -176,8 +178,8 @@ namespace aspect
 #ifdef MATERIAL_ENERGY_CHECKS
             fe[this->introspection().extractors.pressure].get_function_values(this->get_solution(),pressure);
 #endif
-            const auto T=m.evaluate_dg_trial_tensor(*s.dg_history,entry.first,rule);
-            const auto R=s.dg_history->residual ? m.evaluate_dg_trial_tensor(*s.dg_history->residual,entry.first,rule) : std::vector<SymmetricTensor<2,dim>>(rule.size());
+            const auto T=m.evaluate_history_tensor(*s.dg_history,entry.first,rule);
+            const auto R=s.dg_history->residual ? m.evaluate_history_tensor(*s.dg_history->residual,entry.first,rule) : std::vector<SymmetricTensor<2,dim>>(rule.size());
             for(unsigned q=0;q<rule.size();++q)
               {
                 const auto x=fe.quadrature_point(q);

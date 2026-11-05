@@ -23,6 +23,31 @@
             LinearAlgebra::BlockVector result(this->get_solution());result=owned;return result;
           };
         const auto bulk=velocity(1.);
+        // The projection's explicit profile and gradient must win over the
+        // model's currently bound accepted fields. Analytic constant output
+        // avoids using the production projection as its own reference.
+        auto projection_state=s;
+        LinearAlgebra::BlockVector explicit_fields(this->introspection().index_sets.system_partitioning,comm);
+        explicit_fields=velocity(2.);
+        explicit_fields.block(this->introspection().variable("phase_field").block_index)=.25;
+        projection_state.displacement_history=explicit_fields;
+        const auto explicit_velocity=velocity(2.);
+        const auto projected=Model::DGHistory::project(*this,*s.dg_history,projection_state.cells,
+          projection_state.displacement_history,explicit_velocity,std::max(8u,m.fe_bulk_normal_quadrature_points),
+          [](const auto &,const auto &,const auto &,double phase,const auto &gradient)
+          {Tensor value;value[0][0]=phase+gradient[0][0];value[1][1]=gradient[1][1];
+           value[0][1]=.5*(gradient[0][1]+gradient[1][0]);return value;});
+        Tensor reference;reference[0][0]=.31;reference[1][1]=-.06;reference[0][1]=.02;
+        double projection_error=0.;
+        for(const auto &cell:s.cells)
+          for(const auto &value:m.evaluate_history_tensor(*projected,cell.first,QGauss<dim>(3)))
+            projection_error=std::max(projection_error,(value-reference).norm());
+        projection_error=Utilities::MPI::max(projection_error,comm);
+        AssertThrow(projection_error<3e-12,ExcMessage("Material projection ignored its explicit profile/gradient inputs."));
+        if(Utilities::MPI::this_mpi_process(comm)==0)
+          {std::ofstream out(this->get_output_directory()+"mature-projection-inputs.csv");
+           out<<std::setprecision(17)<<"tensor_Linf,tolerance\n"<<projection_error<<",3e-12\n";}
+
         const auto op=m.make_dg_transport(bulk,8,false);
         const auto zero=[](const Point<dim> &,double){return Tensor();};
         auto anchor=m.project_dg_transport_field(*op,zero,0.,8);
@@ -31,25 +56,25 @@
         std::vector<double> rates(s.Z.size());
         for(unsigned j=0;j<rates.size();++j)rates[j]=.002*(1+.2*std::cos(s.vertices[j][0]));
         const double epsilon=1e-5,dt=m.initial_time_step;
-        auto candidate=m.make_material_reaction(bulk,rates);
+        auto candidate=m.make_material_reaction(*m.fe_strain_state,bulk,rates);
         for(auto &z:s.Z)z=1.;
-        const auto changed_diagnostic=m.make_material_reaction(bulk,rates);
+        const auto changed_diagnostic=m.make_material_reaction(*m.fe_strain_state,bulk,rates);
         double diagnostic_error=0.;
-        for(unsigned c=0;c<candidate->dg_history->trial_stress.size();++c)
-          for(const auto i:candidate->dg_history->trial_stress[c].locally_owned_elements())
-            diagnostic_error=std::max(diagnostic_error,std::abs(candidate->dg_history->trial_stress[c][i]-changed_diagnostic->dg_history->trial_stress[c][i]));
+        for(unsigned c=0;c<candidate->dg_history->coefficients.size();++c)
+          for(const auto i:candidate->dg_history->coefficients[c].locally_owned_elements())
+            diagnostic_error=std::max(diagnostic_error,std::abs(candidate->dg_history->coefficients[c][i]-changed_diagnostic->dg_history->coefficients[c][i]));
         AssertThrow(Utilities::MPI::max(diagnostic_error,comm)==0.,ExcMessage("Diagnostic Z changed direct reaction/mechanics."));
         s.Z.assign(s.Z.size(),0.);
         const auto perturbed_bulk=velocity(1.+epsilon);
-        auto cv=m.make_material_reaction(perturbed_bulk,rates);
+        auto cv=m.make_material_reaction(*m.fe_strain_state,perturbed_bulk,rates);
         auto perturbed_rates=rates;for(auto &v:perturbed_rates)v*=1.+epsilon;
-        auto cs=m.make_material_reaction(bulk,perturbed_rates);
+        auto cs=m.make_material_reaction(*m.fe_strain_state,bulk,perturbed_rates);
         // Same frozen geometry, coefficients, zero physical parent, v and V.
         // Only the history representation changes in this scratch calculation.
         anchor->representation=History::Representation::separated_trial;
         anchor->residual=m.project_dg_transport_field(*op,zero,0.,8);
         m.material_direct_stress=false;
-        auto separated=m.make_material_reaction(bulk,rates);
+        auto separated=m.make_material_reaction(*m.fe_strain_state,bulk,rates);
         m.material_direct_stress=true;
         anchor->representation=History::Representation::physical_stress;anchor->residual.reset();
         const auto dot=[](const Tensor &a,const Tensor &b){return scalar_product(a,b)+trace(a)*trace(b);};
@@ -65,11 +90,11 @@
               {
                 native.reinit(entry.second);
                 native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(s.displacement_history,phi);
-                const auto direct=m.evaluate_dg_trial_tensor(*candidate->dg_history,entry.first,rule);
-                const auto dv=m.evaluate_dg_trial_tensor(*cv->dg_history,entry.first,rule);
-                const auto ds=m.evaluate_dg_trial_tensor(*cs->dg_history,entry.first,rule);
-                const auto sepT=m.evaluate_dg_trial_tensor(*separated->dg_history,entry.first,rule);
-                const auto sepR=m.evaluate_dg_trial_tensor(*separated->dg_history->residual,entry.first,rule);
+                const auto direct=m.evaluate_history_tensor(*candidate->dg_history,entry.first,rule);
+                const auto dv=m.evaluate_history_tensor(*cv->dg_history,entry.first,rule);
+                const auto ds=m.evaluate_history_tensor(*cs->dg_history,entry.first,rule);
+                const auto sepT=m.evaluate_history_tensor(*separated->dg_history,entry.first,rule);
+                const auto sepR=m.evaluate_history_tensor(*separated->dg_history->residual,entry.first,rule);
                 // Independent higher-order projection of analytic B and local
                 // source, using the actual cell mass and Gauss8 below.
                 const QGauss<dim> qr(8);
@@ -149,14 +174,14 @@
                     for(unsigned k=0;k<substeps;++k)h=m.advance_dg_transport(*advection,*h,inflow,zero,step*dt+k*dt/substeps,dt/substeps);
                     const QGauss<dim> qr(3);
                     for(const auto &cell:advection->cells)
-                      for(const auto &v:m.evaluate_dg_trial_tensor(*h,cell.id,qr))maximum=std::max(maximum,(v-expected).norm());
+                      for(const auto &v:m.evaluate_history_tensor(*h,cell.id,qr))maximum=std::max(maximum,(v-expected).norm());
                     dealii::Tensor<2,dim> gradient;gradient[0][1]=forced ? -.07 : -.08;gradient[1][0]=forced ? .09 : .08;
                     if(forced){gradient[0][0]=.03;gradient[1][1]=-.03;}
                     SymmetricTensor<2,dim> rotated;
                     if constexpr(dim==2)rotated=ReconstructedFaultUtilities::rotate_plane_strain_stress(expected,gradient,dt);
                     s.objective_anchor=m.project_dg_transport_field(*advection,[&](const Point<dim> &,double){return rotated;},0.,8);
                     s.objective_anchor->representation=History::Representation::physical_stress;
-                    const auto update=m.make_material_reaction(flow,std::vector<double>(rates.size(),0.));
+                    const auto update=m.make_material_reaction(*m.fe_strain_state,flow,std::vector<double>(rates.size(),0.));
                     const double c=std::cos(.08*dt),sn=std::sin(.08*dt),beta=std::exp(-s.G*dt/s.eta),k=-s.eta*std::expm1(-s.G*dt/s.eta);
                     const auto old=expected;
                     expected[0][0]=beta*(c*c*old[0][0]+sn*sn*old[1][1]-2*c*sn*old[0][1]);
@@ -165,7 +190,7 @@
                     if(forced){expected[0][0]+=2*k*.03;expected[1][1]-=2*k*.03;expected[0][1]+=2*k*.01;}
                     h=update->dg_history;
                     for(const auto &cell:advection->cells)
-                      for(const auto &v:m.evaluate_dg_trial_tensor(*h,cell.id,qr))maximum=std::max(maximum,std::sqrt(dot(v-expected,v-expected)));
+                      for(const auto &v:m.evaluate_history_tensor(*h,cell.id,qr))maximum=std::max(maximum,std::sqrt(dot(v-expected,v-expected)));
                   }
               }
             maximum=Utilities::MPI::max(maximum,comm);

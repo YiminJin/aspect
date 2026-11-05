@@ -39,7 +39,7 @@ namespace aspect
     const bool constrained_phase=Utilities::MPI::max(hanging_phase,mpi_communicator)!=0;
     AssertThrow(!constrained_phase
                 || (dim==2 && Utilities::MPI::n_mpi_processes(mpi_communicator)==1
-                    && material.uses_dg_trial_stress_history() && material.uses_homogeneous_mesh_data()
+                    && material.uses_dg_tensor_history() && material.uses_homogeneous_mesh_data()
                     && geometry_model->get_periodic_boundary_pairs().empty()
                     && !material.is_mature_frictional_fault()),
                 ExcMessage("The bounded local DG remap does not admit coupled hanging-node phase evolution; constrained variations and obstacle KKT remain unqualified."));
@@ -756,7 +756,7 @@ namespace aspect
               if(!errors[rank].empty())
                 {pcout<<"   Coordinated endpoint prepublication failure: rank="<<rank<<std::endl;
                  throw std::runtime_error(errors[rank]);}
-            if(material.uses_dg_trial_stress_history())
+            if(material.uses_dg_tensor_history())
               {
                 AssertThrow(!pending_dg_endpoint_publication,ExcMessage("A DG endpoint is already pending."));
                 pending_dg_endpoint_publication=[this,slip=base.slip,bulk=base.bulk,step=timestep_number,

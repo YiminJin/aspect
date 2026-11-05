@@ -3,7 +3,8 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <deal.II/fe/fe_values.h>
 #include <aspect/time_stepping/interface.h>
@@ -68,7 +69,7 @@ namespace aspect { namespace Postprocess
               h.space->cells.at(entry.first)->get_dof_indices(ids);
               auto &row=local[entry.first.to_string()];
               for(unsigned int c=0;c<3;++c)for(const auto i:ids)
-                {row.push_back(h.trial_stress[c][i]);row.push_back(h.residual->trial_stress[c][i]);}
+                {row.push_back(h.coefficients[c][i]);row.push_back(h.residual->coefficients[c][i]);}
             }
           for(const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local))
             for(const auto &entry:part)AssertThrow(all.emplace(entry).second,ExcMessage("Duplicate physical tensor owner in AMR audit."));
@@ -94,8 +95,8 @@ namespace aspect { namespace Postprocess
       const auto &element=model.fe_strain_state->dg_history->space->element;
       for(const auto &entry:model.fe_strain_state->cells)
         {
-          const auto T=model.evaluate_dg_trial_tensor(*model.fe_strain_state->dg_history,entry.first,rule);
-          const auto R=model.evaluate_dg_trial_tensor(*model.fe_strain_state->dg_history->residual,entry.first,rule);
+          const auto T=model.evaluate_history_tensor(*model.fe_strain_state->dg_history,entry.first,rule);
+          const auto R=model.evaluate_history_tensor(*model.fe_strain_state->dg_history->residual,entry.first,rule);
           for(unsigned int q=0;q<rule.size();++q)
             {
               const auto x=this->get_mapping().transform_unit_to_real_cell(entry.second,rule.point(q));
@@ -173,7 +174,7 @@ namespace aspect { namespace Postprocess
           for(const auto &entry:model.fe_strain_state->cells)
             {
               fe.reinit(entry.second);
-              const auto actual=model.evaluate_dg_trial_tensor(*history,entry.first,rule);
+              const auto actual=model.evaluate_history_tensor(*history,entry.first,rule);
               for(unsigned int q=0;q<rule.size();++q)
                 {
                   const auto expected=exact(fe.quadrature_point(q),finish);
@@ -255,10 +256,10 @@ namespace aspect { namespace Postprocess
           fe[intro.extractors.velocities].get_function_gradients(lagged,gradients);
           fe[intro.extractors.velocities].get_function_symmetric_gradients(this->get_solution(),strains);
           fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(state.displacement_history,phase);
-          const auto T0=model.evaluate_dg_trial_tensor(*incoming,entry.first,rule);
-          const auto R0=model.evaluate_dg_trial_tensor(*incoming->residual,entry.first,rule);
-          const auto T1=model.evaluate_dg_trial_tensor(*state.dg_history,entry.first,rule);
-          const auto R1=model.evaluate_dg_trial_tensor(*state.dg_history->residual,entry.first,rule);
+          const auto T0=model.evaluate_history_tensor(*incoming,entry.first,rule);
+          const auto R0=model.evaluate_history_tensor(*incoming->residual,entry.first,rule);
+          const auto T1=model.evaluate_history_tensor(*state.dg_history,entry.first,rule);
+          const auto R1=model.evaluate_history_tensor(*state.dg_history->residual,entry.first,rule);
           std::array<Tensor,9> moments_T,moments_R;
           const double volume=entry.second->measure();
           for (unsigned q=0;q<rule.size();++q)
@@ -300,7 +301,7 @@ namespace aspect { namespace Postprocess
         {
           state.dg_history->space->cells.at(entry.first)->get_dof_indices(ids);
           for (unsigned int c=0;c<3;++c)for(unsigned int i=0;i<9;++i)
-            fields<<entry.first.to_string()<<','<<c<<','<<i<<','<<state.dg_history->trial_stress[c][ids[i]]<<','<<state.dg_history->residual->trial_stress[c][ids[i]]<<'\n';
+            fields<<entry.first.to_string()<<','<<c<<','<<i<<','<<state.dg_history->coefficients[c][ids[i]]<<','<<state.dg_history->residual->coefficients[c][ids[i]]<<'\n';
         }
       if(std::getenv("ASPECT_OBJECTIVE_DG_TRANSFER_CHECK") && this->get_timestep_number()==3)transfer_check();
       return {"DG objective checks","independent tensor/residual moments and publication passed"};

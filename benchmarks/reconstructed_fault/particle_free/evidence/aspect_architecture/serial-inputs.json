@@ -1,0 +1,12 @@
+[
+  {
+    "name": "limiter",
+    "baseline": "build-particle-free/stress-history-consolidation/limiter/input.prm",
+    "input": "build-particle-free/aspect-architecture/limiter/input.prm"
+  },
+  {
+    "name": "stabilization",
+    "baseline": "build-particle-free/stress-history-consolidation/stabilization/input.prm",
+    "input": "build-particle-free/aspect-architecture/stabilization/input.prm"
+  }
+]

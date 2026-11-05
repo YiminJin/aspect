@@ -3,7 +3,8 @@
 #include <aspect/postprocess/interface.h>
 #include <aspect/phase_field.h>
 #include <aspect/reconstructed_fault/manager.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include "../../../tests/phase_field_fault_test_access.h"
 #include "transport_method_fields.h"
@@ -51,7 +52,7 @@ namespace aspect
           auto out=output(label+".csv");
           out<<"i,xx,yy,xy\n";
           for (unsigned int i=0; i<h.space->dofs.n_dofs(); ++i)
-            out<<i<<','<<h.trial_stress[0][i]<<','<<h.trial_stress[1][i]<<','<<h.trial_stress[2][i]<<'\n';
+            out<<i<<','<<h.coefficients[0][i]<<','<<h.coefficients[1][i]<<','<<h.coefficients[2][i]<<'\n';
         }
       public:
         std::pair<std::string,std::string> execute(TableHandler &) override
@@ -108,7 +109,7 @@ namespace aspect
           for (const auto &entry:op->space->cells)
             {
               check.reinit(entry.second);
-              const auto values=model.evaluate_dg_trial_tensor(*initial,entry.first,check_rule);
+              const auto values=model.evaluate_history_tensor(*initial,entry.first,check_rule);
               for (unsigned int q=0; q<check_rule.size(); ++q)
                 source_error=std::max(source_error,(values[q]-exact(check.quadrature_point(q),0.)).norm());
             }

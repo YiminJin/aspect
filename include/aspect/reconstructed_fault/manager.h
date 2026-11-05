@@ -135,6 +135,12 @@ namespace aspect
       std::shared_ptr<ReconstructedFaultManager<dim>> stage_material_motion(
         const std::vector<std::vector<Point<dim>>> &vertices,
         const std::vector<std::vector<double>> &projection_half_widths) const;
+      /** First-order material map of existing labels and their normal supports.
+       * Velocity and its gradient are sampled by the caller at accepted labels.
+       * Generic properties are carried unchanged; no friction law is evaluated. */
+      std::shared_ptr<ReconstructedFaultManager<dim>> stage_material_motion(
+        double dt,const std::vector<std::vector<Tensor<1,dim>>> &velocity,
+        const std::vector<std::vector<Tensor<2,dim>>> &velocity_gradient) const;
       const std::vector<std::vector<double>> &get_projection_half_widths() const
       { return projection_half_widths; }
       /** Initial normal-coverage policy; moving widths remain accepted history. */

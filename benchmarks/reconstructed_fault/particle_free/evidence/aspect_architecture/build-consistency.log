@@ -1,0 +1,4 @@
+[  5%] Built target WorldBuilderRelease
+[ 98%] Built target aspect.exe.release
+[100%] Creating symlink from aspect.exe.release to './aspect'
+[100%] Built target aspect

@@ -4042,4 +4042,16 @@ measure. This result changes neither the history space nor source support or
 work assembly, and does not qualify cohesive physical tips. See
 \texttt{particle\_free/FROZEN\_FINITE\_END\_REPORT.md}.
 
+\paragraph{Current mature moving-fault implementation map.}
+The maintained code guide is
+\texttt{particle\_free/MATURE\_MOVING\_FAULT.md}. Ordinary simulator timestep and
+solver-scheme flow own ordering and acceptance; the coupled Stokes solver owns
+projection-consistency iteration. Tensor history discretization owns coefficients
+and spatial operators; material components supply constitutive laws, and geometry
+infrastructure owns the material coordinate/support map. There is no separate
+mature timestep driver or generic executor. Explicit fields and evaluators cross
+these boundaries. Equations, quadrature, checkpoint identities, incoming-gradient
+spin lag and acceptance criteria above are unchanged. Historical phase reports
+remain evidence, not current architectural directions.
+
 \end{document}

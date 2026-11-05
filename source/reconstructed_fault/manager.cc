@@ -930,6 +930,38 @@ namespace aspect
     return candidate;
   }
 
+  template<int dim>
+  std::shared_ptr<ReconstructedFaultManager<dim>> ReconstructedFaultManager<dim>::stage_material_motion(
+    const double dt,const std::vector<std::vector<Tensor<1,dim>>> &velocity,
+    const std::vector<std::vector<Tensor<2,dim>>> &velocity_gradient) const
+  {
+    AssertThrow(dim==2 && std::isfinite(dt) && dt>0.
+                && velocity.size()==reconstructed_faults.size()
+                && velocity_gradient.size()==velocity.size(),ExcMessage("Invalid material geometry map."));
+    std::vector<std::vector<Point<dim>>> vertices;
+    auto widths=projection_half_widths;
+    for(unsigned f=0;f<reconstructed_faults.size();++f)
+      {
+        const auto &old=reconstructed_faults[f].vertices;
+        AssertThrow(velocity[f].size()==old.size() && velocity_gradient[f].size()==old.size(),
+                    ExcMessage("Material geometry requires velocity and gradient at every accepted label."));
+        vertices.push_back(old);
+        for(unsigned i=0;i<old.size();++i)vertices[f][i]+=dt*velocity[f][i];
+        for(unsigned i=0;i<old.size();++i)
+          {
+            // Support normals are geometric covectors, not stress-spin vectors.
+            const unsigned left=i==0 ? 0 : i-1,right=std::min<unsigned>(i+1,old.size()-1);
+            auto tangent=old[right]-old[left];tangent/=tangent.norm();
+            Tensor<1,dim> normal;normal[0]=-tangent[1];normal[1]=tangent[0];
+            Tensor<2,dim> flow;for(unsigned d=0;d<dim;++d)flow[d][d]=1.;
+            flow+=dt*velocity_gradient[f][i];
+            AssertThrow(determinant(flow)>0.,ExcMessage("Material support map reversed orientation; reduce the physical timestep."));
+            widths[f][i]/=(transpose(invert(flow))*normal).norm();
+          }
+      }
+    return stage_material_motion(vertices,widths);
+  }
+
   template<int dim> void ReconstructedFaultManager<dim>::swap_prescribed_geometry(
     ReconstructedFaultManager<dim> &other) noexcept
   {
@@ -1477,6 +1509,7 @@ namespace aspect
     const std::vector<std::vector<double>> &, const std::vector<double> &); \
   template std::shared_ptr<ReconstructedFaultManager<dim>> ReconstructedFaultManager<dim>::clone_prescribed_geometry() const; \
   template std::shared_ptr<ReconstructedFaultManager<dim>> ReconstructedFaultManager<dim>::stage_material_motion(const std::vector<std::vector<Point<dim>>> &, const std::vector<std::vector<double>> &) const; \
+  template std::shared_ptr<ReconstructedFaultManager<dim>> ReconstructedFaultManager<dim>::stage_material_motion(double,const std::vector<std::vector<Tensor<1,dim>>> &,const std::vector<std::vector<Tensor<2,dim>>> &) const; \
   template void ReconstructedFaultManager<dim>::swap_prescribed_geometry(ReconstructedFaultManager<dim> &) noexcept; \
   template unsigned int ReconstructedFaultManager<dim>::register_property(const std::string &, const unsigned int); \
   template bool ReconstructedFaultManager<dim>::has_property(const std::string &) const; \

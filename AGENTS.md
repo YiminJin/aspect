@@ -187,3 +187,19 @@ Inspect callers, headers, and tests before changing interfaces.
   A transport-operator pass does not authorize moving curve/profile/surface
   publication or deformed cohesive shape work. Use the active Stage C report
   and task state for the current implementation/qualification boundary.
+
+## ASPECT architecture selection (2026-11-04)
+
+- Follow `particle_free/CODEX_ASPECT_ARCHITECTURE_REFACTOR.txt` and the maintained
+  `particle_free/MATURE_MOVING_FAULT.md` guide. The user rejected the dedicated
+  mature timestep driver. Do not restore it, its generic executor, or an equivalent
+  alternate pipeline. Ordinary simulator timestep/solver schemes own ordering and
+  acceptance; coupled Stokes owns projection-consistency iteration.
+- Keep material laws/history lifetime, tensor discretization/spatial operators,
+  geometry/generic surface storage and diagnostics under their actual owners.
+  Direct tau uses explicit representation and neutral coefficient storage; retain
+  separated defaults and compatibility/checkpoint meanings. Material evaluation
+  must not run a global solve, advance geometry or publish accepted state.
+- Preserve the tested final slip guess, single joint publication/rollback,
+  accepted-gradient spin lag, quadrature and criteria. Historical refactoring
+  reports remain evidence, not authority to recreate superseded architecture.

@@ -2,7 +2,8 @@
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/geometry_model/box.h>
 #include <aspect/phase_field.h>
@@ -193,7 +194,7 @@ namespace aspect
           unsigned int path_step=0;
           auto fe_reference=std::make_shared<typename Model::FEStrainState>(*model.fe_strain_state);
           std::ofstream paired;
-          if (model.uses_dg_trial_stress_history())
+          if (model.uses_dg_tensor_history())
             {
               paired.open(this->get_output_directory()+"paired-history-"+std::to_string(mode)+".csv");
               paired<<std::setprecision(17)<<"step,dt_over_lambda,stress_error_Pa,stress_scale_Pa,weak_error,weak_scale,source_roundoff_bound_Pa\n";
@@ -222,19 +223,19 @@ namespace aspect
                        : 1.e-9*(1.+.35*std::sin(2.3*j/(rates.size()-1)+.2*path_step));
             const auto incoming_Z=F::fe_slip_memory(model);
             const BV incoming(model.accepted_fe_strain_state());
-            const auto incoming_dg=model.uses_dg_trial_stress_history() ? MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model) : std::vector<double>();
+            const auto incoming_dg=model.uses_dg_tensor_history() ? MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model) : std::vector<double>();
             const auto coefficients=F::maxwell_coefficients(eta,G,sim.time_step);
             const auto candidate=F::prepared_fe_state(model,prescribed);
             std::shared_ptr<typename Model::FEStrainUpdate> fe_candidate;
             double paired_error=0.,paired_scale=1.,weak_error=0.,weak_scale=1.,source_bound=0.;
-            if (model.uses_dg_trial_stress_history())
+            if (model.uses_dg_tensor_history())
               {
                 const auto saved=model.fe_strain_state;
                 ReconstructedFaultSurfaceSystem<dim> probe(sim);
                 probe.enable_bulk_work_measure();
                 const ReconstructedFaultVector trial_rates{rates};
                 const auto dg_weak=probe.evaluate_surface_residual(prescribed,trial_rates);
-                model.dg_trial_stress_history=false;
+                model.dg_tensor_history=false;
                 model.fe_strain_history=true;
                 model.fe_strain_state=fe_reference;
                 try
@@ -255,10 +256,10 @@ namespace aspect
                   }
                 catch (...)
                   {
-                    model.fe_strain_state=saved;model.dg_trial_stress_history=true;model.fe_strain_history=false;
+                    model.fe_strain_state=saved;model.dg_tensor_history=true;model.fe_strain_history=false;
                     throw;
                   }
-                model.fe_strain_state=saved;model.dg_trial_stress_history=true;model.fe_strain_history=false;
+                model.fe_strain_state=saved;model.dg_tensor_history=true;model.fe_strain_history=false;
               }
             // A rejected candidate is entirely scratch. Retry the original
             // rates and prove that both accepted histories remained immutable.
@@ -275,7 +276,7 @@ namespace aspect
               }
             rates.front()=first_rate;
             AssertThrow(invalid_rejected && model.accepted_fe_strain_state()==incoming
-                        && (!model.uses_dg_trial_stress_history() || MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model)==incoming_dg)
+                        && (!model.uses_dg_tensor_history() || MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model)==incoming_dg)
                         && F::fe_slip_memory(model)==incoming_Z,ExcMessage("Rejected FE candidate changed accepted history."));
             double error=0.,allowance=0.,error_fraction=0.,trace_error=0.,trace_signal=0.,max_trace=0.;
             double slip_work=0.,bulk_form=0.;
@@ -332,7 +333,7 @@ namespace aspect
                   // allowance separate from history point evaluation, exactly
                   // as in the retained native publication check.
                   const double bound=128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)
-                    +(model.uses_dg_trial_stress_history()
+                    +(model.uses_dg_tensor_history()
                       ? model.dg_source_publication_allowance(*candidate->dg_history,cell->id(),x) : 0.);
                   error=std::max(error,(actual-expected).norm());
                   allowance=std::max(allowance,bound);
@@ -396,7 +397,7 @@ namespace aspect
                 check(dof_cell, {particle.get_location()},nullptr);
               }
             AssertThrow(model.accepted_fe_strain_state()==incoming && F::fe_slip_memory(model)==incoming_Z
-                        && (!model.uses_dg_trial_stress_history() || MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model)==incoming_dg),
+                        && (!model.uses_dg_tensor_history() || MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(model)==incoming_dg),
                         ExcMessage("Preparing FE trials advanced accepted history."));
             if (fe_candidate)
               {

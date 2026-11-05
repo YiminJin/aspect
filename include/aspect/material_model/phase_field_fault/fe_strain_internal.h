@@ -133,23 +133,6 @@ namespace aspect
       bool published=false,identity=false;
     };
 
-    template<int dim> struct PhaseFieldFault<dim>::DGMaterialReaction
-    {
-      LinearAlgebra::BlockVector bulk;
-      std::vector<double> rates;
-      std::shared_ptr<FEStrainUpdate> candidate;
-    };
-
-    template<int dim> struct PhaseFieldFault<dim>::DGMaterialTrial
-    {
-      std::shared_ptr<FEStrainState> incoming;
-      std::shared_ptr<ReconstructedFaultManager<dim>> manager;
-      std::vector<std::vector<double>> normalization,temperatures;
-      std::map<types::particle_index,std::vector<double>> particle_properties;
-      unsigned int step=0;
-      double dt=0.;
-      bool bound=false;
-    };
 
   }
 }

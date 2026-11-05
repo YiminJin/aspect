@@ -532,7 +532,7 @@ namespace aspect
         linearization=std::make_shared<Linearization>(linearization->with_surface_solve(*restricted));
       }
     typename MaterialModel::PhaseFieldFault<dim>::FEEndpointTrial endpoint;
-    if (material.uses_dg_trial_stress_history())
+    if (material.uses_dg_tensor_history())
       endpoint=material.make_fe_endpoint_trial(bulk,slip);
     else
       {endpoint.strain.reinit(endpoint_strain);endpoint.strain=endpoint_strain;endpoint.Z=endpoint_Z;}
@@ -655,23 +655,30 @@ namespace aspect
         try
           {
             bool converged=false;
-            for(unsigned outer=0;outer<24;++outer)
+            for (unsigned outer=0; outer<24; ++outer)
               {
                 solve_reconstructed_fault_stokes(false,&rates,false);
                 const double error=phase_field_fault.refresh_material_reaction(solution,rates.at(0));
                 pcout<<std::setprecision(17)<<"   Material projected reaction: outer="<<outer
                      <<" correction relative change="<<error<<std::endl;
-                if(error<=128*std::numeric_limits<double>::epsilon())
-                  {converged=true;break;}
+                if (error<=128*std::numeric_limits<double>::epsilon())
+                  {
+                    converged=true;
+                    break;
+                  }
               }
             AssertThrow(converged,ExcMessage("Coupled projected material reaction did not converge; no history published."));
             // Re-enter the unchanged final residual/KKT gate with the converged
             // frozen correction. This call only stages outer publication.
             solve_reconstructed_fault_stokes(true,&rates,false);
             phase_field_fault.material_reaction_solving=false;
-            return;
           }
-        catch(...){phase_field_fault.material_reaction_solving=false;throw;}
+        catch (...)
+          {
+            phase_field_fault.material_reaction_solving=false;
+            throw;
+          }
+        return;
       }
     AssertThrow(!reuse_endpoint_bulk_preconditioner
                 || (!publish_history && phase_field_fault.uses_consistent_endpoint_phase()
@@ -1164,7 +1171,7 @@ namespace aspect
                 // not become the accepted anchor when the timestep manager
                 // subsequently requests rejection/cutback.
                 if (timestep_number>0 && phase_field_fault.is_mature_frictional_fault()
-                    && (phase_field_fault.uses_dg_trial_stress_history()
+                    && (phase_field_fault.uses_dg_tensor_history()
                         || phase_field_fault.uses_jaumann_particle_stress()))
                   {
                     AssertThrow(!pending_dg_endpoint_publication,ExcInternalError());

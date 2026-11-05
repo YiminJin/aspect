@@ -4,7 +4,8 @@
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/boundary_velocity/interface.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/phase_field.h>
 #include <aspect/utilities.h>
@@ -88,7 +89,7 @@ namespace aspect
           const auto pb=this->introspection().variable("phase_field").block_index;
           if (!entry_installed)
             {
-              check("fresh imported entry only",step==0 && m.uses_dg_trial_stress_history());
+              check("fresh imported entry only",step==0 && m.uses_dg_tensor_history());
               data.read(data_file);
               install(2);
               entry_installed=true;
@@ -137,7 +138,7 @@ namespace aspect
             {
               const auto &cell=entry.second;
               fe.reinit(cell);
-              const auto T=m.evaluate_dg_trial_tensor(*state.dg_history,entry.first,rule);
+              const auto T=m.evaluate_history_tensor(*state.dg_history,entry.first,rule);
               std::vector<Tensor<1,dim>> u(rule.size());
               fe[this->introspection().extractors.velocities].get_function_values(sim.solution,u);
               for (unsigned int q=0; q<rule.size(); ++q)
@@ -190,13 +191,13 @@ namespace aspect
           sim.solution=p;
           sim.current_linearization_point=p;
           auto state=std::make_shared<typename Model::FEStrainState>(*m.fe_strain_state);
-          state->displacement_history=m.uses_dg_trial_stress_history()?p:r;
+          state->displacement_history=m.uses_dg_tensor_history()?p:r;
           state->Z=data.Z[k];
           state->stress_samples.clear();
           state->committed_step=0;
           state->accepted_publications=0;
           m.fe_strain_state=state;
-          if (m.uses_dg_trial_stress_history())
+          if (m.uses_dg_tensor_history())
             {
               auto tensor=std::make_shared<typename Model::DGHistory>(*state->dg_history);
               std::vector<types::global_dof_index> indices(9);
@@ -208,10 +209,10 @@ namespace aspect
                   for (unsigned int q=0; q<9; ++q)
                     {
                       const auto x=this->get_mapping().transform_unit_to_real_cell(cell,support[q]);
-                      for (unsigned int c=0; c<3; ++c)tensor->trial_stress[c][indices[q]]=data.tensor(k,x,cell->center(),c);
+                      for (unsigned int c=0; c<3; ++c)tensor->coefficients[c][indices[q]]=data.tensor(k,x,cell->center(),c);
                     }
                 }
-              for (auto &component:tensor->trial_stress)component.compress(VectorOperation::insert);
+              for (auto &component:tensor->coefficients)component.compress(VectorOperation::insert);
               state->dg_history=tensor;
             }
           state->I=m.evaluate_fe_normalization(p,false).values;
@@ -226,7 +227,7 @@ namespace aspect
         std::vector<SymmetricTensor<2,dim>> tensor_values(const typename DoFHandler<dim>::active_cell_iterator &cell,
                                                           const Quadrature<dim> &rule,const typename Model::FEEndpointTrial &endpoint) const
         {
-          if (model().uses_dg_trial_stress_history())return model().evaluate_dg_trial_tensor(*endpoint.dg_history,cell->id(),rule);
+          if (model().uses_dg_tensor_history())return model().evaluate_history_tensor(*endpoint.dg_history,cell->id(),rule);
           FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_gradients);
           fe.reinit(cell);
           std::vector<SymmetricTensor<2,dim>> result(rule.size());
@@ -340,7 +341,7 @@ namespace aspect
             }
           std::vector<double> gc(gf.size(),0.);
           double cpdi=0.,allowance=0.;
-          if (!m.uses_dg_trial_stress_history())
+          if (!m.uses_dg_tensor_history())
             {
               check(prefix+"actual CPDI fracture admitted",this->get_phase_field_handler().evaluate_fe_fracture(sim.system_matrix,sim.system_rhs,sim.solution,cpdi,allowance));
               for (unsigned int i=0; i<gc.size(); ++i)gc[i]=-sim.system_rhs.block(pb)[i];
@@ -349,7 +350,7 @@ namespace aspect
           grad<<"i,x,y,phi,elastic,FE_fracture,CPDI_fracture\n";
           for (const auto &node:nodes)grad<<node.first<<','<<node.second[0]<<','<<node.second[1]<<','<<sim.solution.block(pb)[node.first]<<','<<energy.gradient[node.first]<<','<<gf[node.first]<<','<<gc[node.first]<<'\n';
           auto totals=output("energy.csv");
-          totals<<"bulk,cohesive,FE_fracture,CPDI_fracture,CPDI_available\n"<<energy.bulk<<','<<energy.cohesive<<','<<fracture<<','<<cpdi<<','<<(!m.uses_dg_trial_stress_history())<<'\n';
+          totals<<"bulk,cohesive,FE_fracture,CPDI_fracture,CPDI_available\n"<<energy.bulk<<','<<energy.cohesive<<','<<fracture<<','<<cpdi<<','<<(!m.uses_dg_tensor_history())<<'\n';
           auto surface=output("surface.csv");
           surface<<"i,x,I,Z,V\n";
           for (unsigned int j=0; j<I.size(); ++j)surface<<j<<','<<state.vertices[j][0]<<','<<I[j]<<','<<endpoint.Z[j]<<','<<(rates?(*rates)[0][j]:0.)<<'\n';
@@ -411,7 +412,7 @@ namespace aspect
           install(1);
           const auto Z=m.fe_strain_state->Z;
           const BV anchor(m.fe_strain_state->displacement_history);
-          const auto tensor=m.uses_dg_trial_stress_history()?MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m):std::vector<double>();
+          const auto tensor=m.uses_dg_tensor_history()?MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m):std::vector<double>();
           ReconstructedFaultVector rates;
           Access::mechanical_trial(sim,rates);
           check("phase frozen during native mechanical resolution",sim.solution.block(this->introspection().variable("phase_field").block_index)==anchor.block(this->introspection().variable("phase_field").block_index));
@@ -421,7 +422,7 @@ namespace aspect
           export_state(endpoint,&rates);
           auto residual=output("residual.csv");
           residual<<"bulk_norm,surface_RMS\n"<<defects.first<<','<<defects.second<<'\n';
-          check("incoming histories unchanged",m.fe_strain_state->Z==Z && m.fe_strain_state->displacement_history==anchor && (!m.uses_dg_trial_stress_history() || MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m)==tensor));
+          check("incoming histories unchanged",m.fe_strain_state->Z==Z && m.fe_strain_state->displacement_history==anchor && (!m.uses_dg_tensor_history() || MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m)==tensor));
           check("no diagnostic publication",m.fe_strain_state->accepted_publications==0 && m.fe_strain_state->committed_step==0);
           m.fe_strain_state=original;
           clock();

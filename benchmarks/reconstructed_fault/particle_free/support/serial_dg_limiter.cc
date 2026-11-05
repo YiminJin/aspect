@@ -597,7 +597,7 @@ namespace aspect
           rhs[c].reinit(n);
           for (unsigned int i=0; i<n; ++i)
             {
-              initial[c][i]=incoming.trial_stress[c][i];
+              initial[c][i]=incoming.coefficients[c][i];
               AssertThrow(std::isfinite(initial[c][i]),ExcMessage("Nonfinite incoming DG transport history."));
             }
         }
@@ -640,13 +640,13 @@ namespace aspect
       result->space=op.space;
       for (unsigned int c=0; c<stage2.size(); ++c)
         {
-          result->trial_stress[c].reinit(op.space->dofs.locally_owned_dofs(),op.space->relevant,context.get_mpi_communicator());
+          result->coefficients[c].reinit(op.space->dofs.locally_owned_dofs(),op.space->relevant,context.get_mpi_communicator());
           for (unsigned int i=0; i<n; ++i)
             {
               AssertThrow(std::isfinite(stage2[c][i]),ExcMessage("Nonfinite DG transport candidate."));
-              result->trial_stress[c][i]=stage2[c][i];
+              result->coefficients[c][i]=stage2[c][i];
             }
-          result->trial_stress[c].compress(VectorOperation::insert);
+          result->coefficients[c].compress(VectorOperation::insert);
         }
       return result;
     }

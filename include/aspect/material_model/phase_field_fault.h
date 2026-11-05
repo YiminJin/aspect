@@ -45,6 +45,11 @@ namespace aspect
   }
   namespace MaterialModel
   {
+    namespace HistoryDiscretization
+    {
+      template<int dim> struct TensorHistory;
+      template<int dim> struct TensorAdvection;
+    }
     template<int dim> struct DGGeometryUpdate;
     namespace internal
     {
@@ -58,7 +63,7 @@ namespace aspect
       public SimulatorAccess<dim>
     {
       private:
-        struct DGHistory;
+        using DGHistory = HistoryDiscretization::TensorHistory<dim>;
       public:
         /**
          * @name Material-model interface
@@ -323,14 +328,14 @@ namespace aspect
          * reconstructed surface is not a constitutive support restriction. */
         bool uses_bulk_cohesive_phase() const { return bulk_cohesive_phase; }
         /** Restricted PF2 tensor history; fixed localization and no transport. */
-        bool uses_dg_trial_stress_history() const
+        bool uses_dg_tensor_history() const
         {
-          return dg_trial_stress_history;
+          return dg_tensor_history;
         }
         /** Both native representations bypass all particle-stress input. */
         bool uses_independent_bulk_history() const
         {
-          return fe_strain_history || dg_trial_stress_history;
+          return fe_strain_history || dg_tensor_history;
         }
         /** Constitutive convention, independent of the authoritative history owner. */
         bool uses_deviatoric_strain_rate() const
@@ -356,7 +361,7 @@ namespace aspect
         bool uses_stationary_mature_dg_optimizations() const
         {
           return dim==2 && !jaumann_dg_stress && stationary_mature_dg_optimizations && dg_accepted_history
-                 && dg_trial_stress_history && homogeneous_mesh_data
+                 && dg_tensor_history && homogeneous_mesh_data
                  && mature_frictional_fault && !consistent_endpoint_phase
                  && !use_adiabatic_pressure_in_fault_friction;
         }
@@ -460,14 +465,14 @@ namespace aspect
         template<class Archive> void serialize_bulk_cohesive_history(Archive &);
         void restore_bulk_cohesive_history();
         struct FEStrainUpdate;
-        struct DGTransport;
+        using DGTransport = HistoryDiscretization::TensorAdvection<dim>;
         struct DGCheckpoint;
         struct DGTransfer;
         struct FENormalization;
         struct MaxwellCoefficients;
         std::shared_ptr<FEStrainState> fe_strain_state;
         bool fe_strain_history = false;
-        bool dg_trial_stress_history = false;
+        bool dg_tensor_history = false;
         bool dg_accepted_history = false;
         bool stationary_mature_dg_optimizations = true;
         std::shared_ptr<DGCheckpoint> dg_checkpoint;
@@ -491,23 +496,31 @@ namespace aspect
         std::string material_viscosity_identity;
         struct DGMaterialTrial;
         std::shared_ptr<DGMaterialTrial> dg_material_trial;
-        void begin_dg_material_step(LinearAlgebra::BlockVector &,LinearAlgebra::BlockVector &);
+        struct MaterialHistoryInputs;
+        struct TransportedHistory;
+        MaterialHistoryInputs prepare_material_history(const LinearAlgebra::BlockVector &,double,double);
+        void transport_material_history(const MaterialHistoryInputs &);
+        void stage_material_geometry(const MaterialHistoryInputs &,LinearAlgebra::BlockVector &,LinearAlgebra::BlockVector &);
+        void rotate_material_history(const MaterialHistoryInputs &);
+        double mature_tensor_energy(const DGHistory &,const FEStrainState &) const;
         void finish_dg_material_step(bool) noexcept;
-        LinearAlgebra::BlockVector transport_material_profile() const;
+        LinearAlgebra::BlockVector transport_material_profile(const MaterialHistoryInputs &) const;
         double material_viscosity(const Point<dim> &,double) const;
         double material_surface_viscosity(unsigned int,unsigned int,double,double) const;
         struct DGMaterialReaction;
         std::shared_ptr<DGMaterialReaction> dg_material_reaction;
         std::shared_ptr<FEStrainUpdate> make_material_reaction(
-          const LinearAlgebra::BlockVector &,const std::vector<double> &) const;
+          const FEStrainState &,const LinearAlgebra::BlockVector &,const std::vector<double> &) const;
         double refresh_material_reaction(const LinearAlgebra::BlockVector &,const std::vector<double> &);
         SymmetricTensor<2,dim> material_reaction_correction(const CellId &,const Point<dim> &) const;
-        /** Project a material tensor field with the current staged phase and
-         * accepted velocity gradient. Owns integration only, never publication. */
-        using DGMaterialField = std::function<SymmetricTensor<2,dim>(
-          const std::vector<types::global_dof_index> &,const Point<dim> &,
-          const Point<dim> &,double,const Tensor<2,dim> &)>;
-        std::shared_ptr<DGHistory> project_material_tensor(const DGHistory &,const DGMaterialField &) const;
+        using MatureReactionField = std::function<std::array<SymmetricTensor<2,dim>,2>(
+          const Point<dim> &,double,const SymmetricTensor<2,dim> &,
+          const SymmetricTensor<2,dim> &,const SymmetricTensor<2,dim> &)>;
+        void project_mature_reaction(const FEStrainState &,const LinearAlgebra::BlockVector &,
+                                    FEStrainUpdate &,const MatureReactionField &) const;
+        SymmetricTensor<2,dim> evaluate_material_projection_correction(
+          const DGMaterialReaction *,const FEStrainState &,const CellId &,const Point<dim> &) const;
+
         void prepare_objective_dg_anchor();
         SymmetricTensor<2,dim> evaluate_mature_dg_memory(
           const Point<dim> &,double,const std::vector<double> &,const std::vector<double> &,
@@ -530,9 +543,14 @@ namespace aspect
         void commit_dg_accepted_step(const std::shared_ptr<FEStrainUpdate> &);
         /** Raw independent coefficients: T for separated history, tau for direct.
          * Physical reconstruction belongs to evaluate_dg_history_stress below. */
-        std::vector<SymmetricTensor<2,dim>> evaluate_dg_trial_tensor(
+        std::vector<SymmetricTensor<2,dim>> evaluate_history_tensor(
                                            const DGHistory &, const CellId &, const Quadrature<dim> &) const;
         void prepare_dg_point_samples(const CellId &,const std::vector<Point<dim>> &) const;
+        SymmetricTensor<2,dim> physical_history_stress(
+          const FEStrainState &,const DGHistory &,const std::vector<double> &,
+          const std::vector<double> &,const CellId &,const Point<dim> &,
+          double * = nullptr,const LinearAlgebra::BlockVector * = nullptr) const;
+
         /** Physical stress access shared by mechanics, traction and observers.
          * Direct returns tau; separated reconstructs T-R-B with supplied Z/I. */
         SymmetricTensor<2,dim> evaluate_dg_history_stress(
@@ -549,11 +567,6 @@ namespace aspect
         std::shared_ptr<DGTransport> make_dg_transport(
           const LinearAlgebra::BlockVector &,unsigned int quadrature_order,
           bool include_relaxation) const;
-        std::shared_ptr<DGTransport> make_objective_dg_transport(
-          const LinearAlgebra::BlockVector &,unsigned int,bool) const;
-        std::shared_ptr<DGHistory> advance_objective_dg_transport(
-          const DGTransport &,const DGHistory &,const DGField &,const DGField &,
-          double,double) const;
         std::shared_ptr<DGHistory> project_dg_transport_field(
           const DGTransport &,const DGField &,double time,unsigned int quadrature_order) const;
         std::shared_ptr<DGHistory> advance_dg_transport(

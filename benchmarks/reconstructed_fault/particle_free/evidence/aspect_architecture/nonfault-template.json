@@ -1,0 +1,7 @@
+{
+  "template": "tests/simpler_box.prm",
+  "sha256": "6827733dd72c6c36dcc50a43e20e7e04045d33dbffae580081b572da69743770",
+  "refinement": 3,
+  "end": 0.02,
+  "max_dt": 0.01
+}

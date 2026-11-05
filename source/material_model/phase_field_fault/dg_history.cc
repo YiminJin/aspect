@@ -6,7 +6,8 @@
 */
 
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/phase_field.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/utilities.h>
@@ -34,14 +35,14 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::initialize_dg_history(FEStrainState &state) const
     {
-      AssertThrow(dg_trial_stress_history && dim==2 && this->get_parameters().stokes_velocity_degree==2
+      AssertThrow(dg_tensor_history && dim==2 && this->get_parameters().stokes_velocity_degree==2
                   && state.Z==std::vector<double>(state.Z.size(),0.),
                   ExcMessage("Independent DG history initializes only an unloaded seed."));
       auto history=std::make_shared<DGHistory>();
       history->representation=material_direct_stress ? DGHistory::Representation::physical_stress
                                                       : DGHistory::Representation::separated_trial;
       history->space=std::make_shared<typename DGHistory::Space>(this->get_triangulation());
-      for (auto &component : history->trial_stress)
+      for (auto &component : history->coefficients)
         {
           component.reinit(history->space->dofs.locally_owned_dofs(),history->space->relevant,
                            this->get_mpi_communicator());
@@ -51,7 +52,7 @@ namespace aspect
         {
           history->residual=std::make_shared<DGHistory>();
           history->residual->space=history->space;
-          for (auto &component:history->residual->trial_stress)
+          for (auto &component:history->residual->coefficients)
             {
               component.reinit(history->space->dofs.locally_owned_dofs(),history->space->relevant,this->get_mpi_communicator());
               component=0.;
@@ -83,7 +84,7 @@ namespace aspect
     {
       TimerOutput::Scope timer(this->get_computing_timer(),"DG native source/update");
       const auto &state=*fe_strain_state;
-      AssertThrow(dg_trial_stress_history && incoming.space==state.dg_history->space,
+      AssertThrow(dg_tensor_history && incoming.space==state.dg_history->space,
                   ExcMessage("Native DG source requires the accepted fixed space."));
       auto trial=std::make_shared<DGHistory>();
       trial->space=incoming.space;
@@ -259,7 +260,7 @@ namespace aspect
                       trial->source_roundoff.at(entry.first).projection[ij]=std::max(trial->source_roundoff.at(entry.first).projection[ij],std::nextafter(static_cast<double>(projection_error
                                                                                      *(1+4*n*std::numeric_limits<long double>::epsilon())),std::numeric_limits<double>::infinity()));
                     }
-                  const double value=coefficients.beta*incoming.trial_stress[c][indices[i]]
+                  const double value=coefficients.beta*incoming.coefficients[c][indices[i]]
                                      +2*coefficients.eta_ve*projected[i];
                   AssertThrow(std::isfinite(value),ExcMessage("Nonfinite DG trial-stress candidate."));
                   owned[c][indices[i]]=value;
@@ -269,9 +270,9 @@ namespace aspect
       for (unsigned int c=0; c<owned.size(); ++c)
         {
           owned[c].compress(VectorOperation::insert);
-          trial->trial_stress[c].reinit(space.dofs.locally_owned_dofs(),space.relevant,
+          trial->coefficients[c].reinit(space.dofs.locally_owned_dofs(),space.relevant,
                                         this->get_mpi_communicator());
-          trial->trial_stress[c]=owned[c];
+          trial->coefficients[c]=owned[c];
         }
       if (incoming.residual)
         {
@@ -282,10 +283,10 @@ namespace aspect
               LinearAlgebra::Vector scaled;
               scaled.reinit(incoming.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
               for (const auto i:scaled.locally_owned_elements())
-                scaled[i]=coefficients.beta*incoming.residual->trial_stress[c][i];
+                scaled[i]=coefficients.beta*incoming.residual->coefficients[c][i];
               scaled.compress(VectorOperation::insert);
-              auto &r=trial->residual->trial_stress[c];
-              r.reinit(incoming.residual->trial_stress[c]);
+              auto &r=trial->residual->coefficients[c];
+              r.reinit(incoming.residual->coefficients[c]);
               r=scaled;
             }
         }

@@ -637,7 +637,9 @@ namespace aspect
           AssertThrow(bulk_cohesive_phase || bulk_flow_rule==BulkFlowRule::scalar,
                       ExcMessage("Tensor flow is confined to the experimental bulk cohesive model."));
           fe_strain_history = prm.get("Bulk history representation") == "accepted FE strain";
-          dg_trial_stress_history = prm.get("Bulk history representation") == "DG trial stress";
+          // Legacy input spelling selects the DG space, not the stress meaning.
+          // Direct tau and separated T/R use the same numerical discretization.
+          dg_tensor_history = prm.get("Bulk history representation") == "DG trial stress";
           dg_accepted_history = prm.get_bool("Enable prescribed DG accepted history");
           consistent_particle_strain = prm.get("Particle stress strain convention") == "three dimensional deviator";
           jaumann_particle_stress = prm.get("Stress rotation") == "Jaumann lagged Lie";
@@ -808,7 +810,7 @@ namespace aspect
                       && this->get_parameters().nonlinear_solver==Parameters<dim>::NonlinearSolver::single_Advection_iterated_Newton_Stokes
                       && (bulk_flow_rule==BulkFlowRule::coulomb_fixed_phase ? !evolve_phase_field : evolve_phase_field)
                       && homogeneous_mesh_data && !mature_frictional_fault
-                      && dg_trial_stress_history && !fe_strain_history && !consistent_endpoint_phase
+                      && dg_tensor_history && !fe_strain_history && !consistent_endpoint_phase
                       && !dg_accepted_history && !fault_friction.has_state_variable(),
                       ExcMessage("Bulk cohesive experiment requires fixed-mesh 2-D Q2 mechanics, "
                                  "homogeneous mesh data and physical phase evolution (or explicitly fixed "
@@ -850,7 +852,7 @@ namespace aspect
           return;
         }
       AssertThrow(!jaumann_dg_stress || (dim==2 && mature_frictional_fault
-                  && dg_trial_stress_history && dg_accepted_history && !consistent_endpoint_phase
+                  && dg_tensor_history && dg_accepted_history && !consistent_endpoint_phase
                   && !evolve_phase_field && fe_bulk_normal_quadrature_points>=8
                   && !this->get_parameters().cohesive_rsf_propagation
                   && this->get_parameters().initial_adaptive_refinement==0),
@@ -882,7 +884,7 @@ namespace aspect
           prm.leave_subsection();
         }
       AssertThrow(!consistent_particle_strain || (dim == 2 && mature_frictional_fault && !evolve_phase_field
-                                                  && (!this->get_parameters().resume_computation || jaumann_particle_stress || (dg_trial_stress_history && dg_accepted_history))),
+                                                  && (!this->get_parameters().resume_computation || jaumann_particle_stress || (dg_tensor_history && dg_accepted_history))),
                   ExcMessage("Deviatoric particle stress requires frozen mature 2-D mechanics; restart is restricted to accepted DG samples."));
       if (uses_independent_bulk_history())
         {
@@ -937,10 +939,10 @@ namespace aspect
                       ExcMessage("Accepted FE strain prohibits particle replenishment/repartitioning."));
           prm.leave_subsection();
         }
-      AssertThrow(!dg_accepted_history || (dg_trial_stress_history
+      AssertThrow(!dg_accepted_history || (dg_tensor_history
                   && this->get_parameters().initial_adaptive_refinement==0),
                   ExcMessage("PF5 accepted history requires DG trial stress representation and no initial AMR."));
-      AssertThrow(!dg_trial_stress_history
+      AssertThrow(!dg_tensor_history
                   || ((mature_frictional_fault
                        ? (homogeneous_mesh_data && !evolve_phase_field && !consistent_endpoint_phase
                           && (dg_accepted_history || (!this->get_parameters().resume_computation
@@ -960,11 +962,11 @@ namespace aspect
                   ExcMessage("Shared FE initialization requires the fresh consistent-endpoint option."));
       if (homogeneous_mesh_data)
         {
-          AssertThrow((dg_trial_stress_history && dg_accepted_history && consistent_endpoint_phase
+          AssertThrow((dg_tensor_history && dg_accepted_history && consistent_endpoint_phase
                        && !fe_initial_phase_profile.empty())
                       || (mature_frictional_fault && uses_independent_bulk_history()
                           && !evolve_phase_field && !consistent_endpoint_phase
-                          && ((dg_trial_stress_history && dg_accepted_history)
+                          && ((dg_tensor_history && dg_accepted_history)
                               || (!this->get_parameters().resume_computation
                                   && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1))),
                       ExcMessage("Homogeneous mesh data requires accepted DG endpoint history with a prescribed seed, or frozen mature independent history with explicitly prescribed phase/state; MPI/restart require accepted DG."));

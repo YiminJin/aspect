@@ -1,0 +1,60 @@
+[ 12%] Building CXX object CMakeFiles/transported_material_native.dir/material_checks.cc.o
+[ 25%] Building CXX object CMakeFiles/transported_objective_native.dir/native_checks.cc.o
+[ 37%] Building CXX object CMakeFiles/transported_isolation_native.dir/material_checks.cc.o
+[ 50%] Building CXX object CMakeFiles/transported_material_energy.dir/material_checks.cc.o
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In member function ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:108:9: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+  108 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |         ^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:108:34: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+  108 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |                                  ^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In member function ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:108:9: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+  108 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |         ^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:108:34: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+  108 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |                                  ^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc: In member function ‘std::string aspect::Postprocess::MomentCycle<dim>::snapshot() const’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:108:9: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+  108 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |         ^~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:108:34: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+  108 |         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
+      |                                  ^~~
+In file included from /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:100:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:220:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:113:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 2>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 2> [4]’} [-Wmissing-braces]
+  113 |                     const std::array<Tensor,4> fields={2*k*D-k*slip,B,2*k*D,-k*slip};
+      |                                                ^~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:220:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:113:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 3>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 3> [4]’} [-Wmissing-braces]
+In file included from /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:100:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:220:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:113:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 2>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 2> [4]’} [-Wmissing-braces]
+  113 |                     const std::array<Tensor,4> fields={2*k*D-k*slip,B,2*k*D,-k*slip};
+      |                                                ^~~~~~
+In file included from /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:100:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:220:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:113:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 2>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 2> [4]’} [-Wmissing-braces]
+  113 |                     const std::array<Tensor,4> fields={2*k*D-k*slip,B,2*k*D,-k*slip};
+      |                                                ^~~~~~
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:220:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:113:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 3>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 3> [4]’} [-Wmissing-braces]
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h: In instantiation of ‘void aspect::Postprocess::MomentCycle<dim>::true_stress_checks() const [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/material_checks.cc:220:5:   required from here
+/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/transported_objective/native/true_stress_checks.h:113:48: warning: missing braces around initializer for ‘std::__array_traits<dealii::SymmetricTensor<2, 3>, 4>::_Type’ {aka ‘dealii::SymmetricTensor<2, 3> [4]’} [-Wmissing-braces]
+[ 62%] Linking CXX shared library libtransported_material_native.release.so
+[ 62%] Built target transported_material_native
+[ 75%] Linking CXX shared library libtransported_material_energy.release.so
+[ 75%] Built target transported_material_energy
+[ 87%] Linking CXX shared library libtransported_isolation_native.release.so
+[ 87%] Built target transported_isolation_native
+[100%] Linking CXX shared library libtransported_objective_native.release.so
+[100%] Built target transported_objective_native

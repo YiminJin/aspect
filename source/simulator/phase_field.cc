@@ -887,7 +887,7 @@ namespace aspect
       system_matrix.block(block_index, block_index) = 0;
     system_rhs.block(block_index) = 0;
 
-    if (total_energy && fault_material->uses_dg_trial_stress_history()
+    if (total_energy && fault_material->uses_dg_tensor_history()
         && (!omit_fe_elastic_energy || fault_material->uses_consistent_endpoint_phase()))
       {
         // PF3 uses fixed incoming history; PF6a requests this same FE fracture
@@ -1178,7 +1178,7 @@ namespace aspect
     const bool sparse=sparse_hessian!=nullptr;
     if(sparse)sparse_hessian->clear();
     const auto &material=Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
-    AssertThrow(((material.uses_dg_trial_stress_history() && material.has_fe_strain_history())
+    AssertThrow(((material.uses_dg_tensor_history() && material.has_fe_strain_history())
                  || material.uses_bulk_cohesive_phase())
                 && (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
                     || material.uses_consistent_endpoint_phase() || material.uses_bulk_cohesive_phase()),
@@ -1754,7 +1754,7 @@ namespace aspect
         solution.block(block_index)=prescribed.block(block_index);
         return;
       }
-    AssertThrow(!history_material || !history_material->uses_dg_trial_stress_history()
+    AssertThrow(!history_material || !history_material->uses_dg_tensor_history()
                 || this->get_timestep_number()==0,
                 ExcMessage("PF2 DG history supports initialization and fixed-profile mechanics only; "
                            "physical phase stepping is not implemented."));

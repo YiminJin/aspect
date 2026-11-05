@@ -13,7 +13,8 @@
 #define _aspect_tests_phase_field_fault_test_access_h
 
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 
 namespace aspect
 {
@@ -83,15 +84,15 @@ namespace aspect
 
           static std::vector<double> dg_history_values(const PhaseFieldFault<dim> &model)
           {
-            AssertThrow(model.dg_trial_stress_history && model.fe_strain_state && model.fe_strain_state->dg_history,
+            AssertThrow(model.dg_tensor_history && model.fe_strain_state && model.fe_strain_state->dg_history,
                         ExcMessage("Missing DG history for the diagnostic snapshot."));
             const auto &history=*model.fe_strain_state->dg_history;
             std::vector<double> values;
-            for (const auto &component : history.trial_stress)
+            for (const auto &component : history.coefficients)
               for (const auto i : component.locally_owned_elements())
                 values.push_back(component[i]);
             if (history.residual)
-              for (const auto &component:history.residual->trial_stress)
+              for (const auto &component:history.residual->coefficients)
                 for (const auto i:component.locally_owned_elements()) values.push_back(component[i]);
             return values;
           }

@@ -1,0 +1,138 @@
+[
+  {
+    "before": "mature-step-dl",
+    "after": "mature-step-restart4",
+    "steps": [
+      {
+        "time": 0.15000000000000002,
+        "bulk_Linf": 8.881784197001252e-16,
+        "surface_Linf": 7.105427357601002e-15,
+        "tensor_L2": 3.756466686669197e-16,
+        "work_traction_Linf": 3.789286592836838e-17,
+        "exported_values_bitwise": false
+      },
+      {
+        "time": 0.2,
+        "bulk_Linf": 2.4643373279509273e-15,
+        "surface_Linf": 1.0658141036401503e-14,
+        "tensor_L2": 5.92691884357764e-16,
+        "work_traction_Linf": 6.152847328855238e-17,
+        "exported_values_bitwise": false
+      }
+    ],
+    "before_iterations": [
+      32,
+      32,
+      32,
+      35,
+      34,
+      34,
+      34,
+      34,
+      34,
+      35,
+      34,
+      33,
+      35,
+      35,
+      33,
+      35,
+      35,
+      33,
+      35,
+      35,
+      33
+    ],
+    "after_iterations": [
+      35,
+      35,
+      33,
+      35,
+      35,
+      33
+    ],
+    "before_wall_s": 23.661027847001606,
+    "after_wall_s": 10.786432171000342
+  },
+  {
+    "before": "true-cutback-control",
+    "after": "mature-step-reject",
+    "steps": [
+      {
+        "time": 0.0,
+        "bulk_Linf": 1.0842021724855044e-19,
+        "surface_Linf": 5.421010862427522e-20,
+        "tensor_L2": 0.0,
+        "work_traction_Linf": 0.0,
+        "exported_values_bitwise": false
+      },
+      {
+        "time": 0.1,
+        "bulk_Linf": 5.645982813218264e-17,
+        "surface_Linf": 3.552713678800501e-15,
+        "tensor_L2": 1.3675722112220219e-17,
+        "work_traction_Linf": 2.0752307207730358e-19,
+        "exported_values_bitwise": false
+      },
+      {
+        "time": 0.15000000000000002,
+        "bulk_Linf": 8.881784197001252e-16,
+        "surface_Linf": 1.2434497875801753e-14,
+        "tensor_L2": 1.1372063982137128e-16,
+        "work_traction_Linf": 8.673617379884035e-18,
+        "exported_values_bitwise": false
+      },
+      {
+        "time": 0.2,
+        "bulk_Linf": 1.5761572141849076e-15,
+        "surface_Linf": 5.329070518200751e-15,
+        "tensor_L2": 4.608758787481947e-16,
+        "work_traction_Linf": 3.507394027990607e-17,
+        "exported_values_bitwise": false
+      }
+    ],
+    "before_iterations": [
+      31,
+      31,
+      31,
+      34,
+      34,
+      34,
+      34,
+      34,
+      34,
+      34,
+      33,
+      35,
+      35,
+      33,
+      35,
+      35,
+      33
+    ],
+    "after_iterations": [
+      31,
+      31,
+      31,
+      34,
+      34,
+      34,
+      34,
+      34,
+      34,
+      34,
+      33,
+      35,
+      35,
+      33,
+      35,
+      35,
+      33,
+      35,
+      35,
+      33
+    ],
+    "before_wall_s": 23.86398961699979,
+    "after_wall_s": 22.76952148900091
+  }
+]

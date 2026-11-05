@@ -1,0 +1,25 @@
+Test project /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native
+    Start 1: unit_tests
+1/1 Test #1: unit_tests .......................   Passed    7.93 sec
+
+100% tests passed out of 1
+
+Total Test time (real) =   7.93 sec
+
+
+---------------------------------------------------------------
+Completed running the minimal testsuite. Please check the test
+results above. If any test failed, run
+    ctest -V
+to get detailed error messages. Contact the ASPECT forum
+with that information if you need help.
+
+To run the complete testsuite, reconfigure your project with
+the option ASPECT_RUN_ALL_TESTS=ON or by running
+    make setup_tests
+Be aware that installing the 'numdiff' tools is strongly
+recommended before running the full testsuite. Even then, the
+output is likely different on your machine due to configuration
+differences, so do not expect all tests to succeed on your
+machine.
+---------------------------------------------------------------

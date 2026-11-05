@@ -1,4 +1,6 @@
-# Stress-history consolidation complete — 4 November 2026
+> **Current selection complete, 4 November 2026:** the ASPECT architecture refactor removes the rejected dedicated mature driver. Ordinary simulator/solver schemes own advancement and acceptance; tensor discretization, material laws and geometry have explicit boundaries. All 183170 unit assertions and seven moving controls pass; stationary/non-fault outputs and retained serial numerical results match their baselines. See [current guide](MATURE_MOVING_FAULT.md) and [report](ASPECT_ARCHITECTURE_REPORT.md). Defaults, checkpoint meanings and 51 protected artifacts are preserved. Scientific campaigns remain paused; this is not new physical or production qualification.
+
+## Historical record: Stress-history consolidation complete — 4 November 2026
 
 The tested direct-stress/publication baseline is preserved as `e4b74c556`,
 separately from the subsequent behavior-preserving restructuring. The local

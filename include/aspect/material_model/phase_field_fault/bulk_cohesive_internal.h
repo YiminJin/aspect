@@ -1,7 +1,8 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #ifndef ASPECT_MATERIAL_MODEL_BULK_COHESIVE_INTERNAL_H
 #define ASPECT_MATERIAL_MODEL_BULK_COHESIVE_INTERNAL_H
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_tensor.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_coulomb.h>

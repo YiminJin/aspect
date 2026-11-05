@@ -26,6 +26,7 @@
 #include <aspect/phase_field.h>
 #include <aspect/plugins.h>
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/phase_field_fault/material_history_internal.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/reconstructed_fault/cohesive_system.h>
@@ -45,7 +46,6 @@
 #include <aspect/simulator/assemblers/interface.h>
 #include <aspect/geometry_model/initial_topography_model/zero_topography.h>
 #include <aspect/material_model/rheology/elasticity.h>
-#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/time_stepping/repeat_on_nonlinear_fail.h>
 
 #include <deal.II/base/index_set.h>
@@ -1767,7 +1767,7 @@ namespace aspect
     AssertThrow(!parameters.cohesive_rsf_propagation,
                 ExcMessage("Native cohesive RSF pilot uses a fixed mesh; history transfer is not selected."));
     const auto *dg_model=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get());
-    const bool transfer_older=dg_model && dg_model->uses_dg_trial_stress_history() && dg_model->has_fe_strain_history();
+    const bool transfer_older=dg_model && dg_model->uses_dg_tensor_history() && dg_model->has_fe_strain_history();
     const bool native_dg_transfer=transfer_older && (dg_model->uses_consistent_endpoint_phase()
                                                    || dg_model->uses_jaumann_dg_stress());
     AssertThrow(!transfer_older || !pending_dg_endpoint_publication,
@@ -2020,7 +2020,7 @@ namespace aspect
         {
           // Endpoint active constraints still carry the old DoF numbering.
           // Rebuild them before constructing accepted history on the new mesh.
-          if (fault->uses_dg_trial_stress_history() && fault->has_fe_strain_history())
+          if (fault->uses_dg_tensor_history() && fault->has_fe_strain_history())
             compute_current_constraints();
           fault->finish_dg_history_transfer();
         }
@@ -2046,7 +2046,7 @@ namespace aspect
       && (endpoint_model->uses_bulk_cohesive_phase()
           || (parameters.reconstruct_faults && (endpoint_model->uses_consistent_endpoint_phase()
               || (endpoint_model->is_mature_frictional_fault()
-                  && (endpoint_model->uses_dg_trial_stress_history() || endpoint_model->uses_jaumann_particle_stress())))))));
+                  && (endpoint_model->uses_dg_tensor_history() || endpoint_model->uses_jaumann_particle_stress())))))));
     std::unique_ptr<LinearAlgebra::BlockVector> entry_solution,entry_linearization;
     std::unique_ptr<TableHandler> entry_statistics;
     const double entry_pressure=last_pressure_normalization_adjustment;
@@ -2065,7 +2065,13 @@ namespace aspect
     initialize_current_linearization_point();
     if(endpoint_model && endpoint_model->uses_transported_mature_history() && timestep_number>0)
       {
-        endpoint_model->begin_dg_material_step(solution,current_linearization_point);
+        // Accepted velocity supplies all transport and the lagged spin. These
+        // material operations prepare a candidate; only the ordinary timestep
+        // controller below can publish it.
+        const auto parent=endpoint_model->prepare_material_history(old_solution,time,time_step);
+        endpoint_model->transport_material_history(parent);
+        endpoint_model->stage_material_geometry(parent,solution,current_linearization_point);
+        endpoint_model->rotate_material_history(parent);
         reconstructed_fault_surface_system->invalidate_material_geometry();
         reconstructed_fault_stokes_coupling->invalidate_material_geometry();
         rebuild_stokes_matrix=rebuild_stokes_preconditioner=true;
@@ -2451,7 +2457,7 @@ namespace aspect
     if (parameters.resume_computation)
       if (const auto *fault=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
         if ((fault->uses_bulk_cohesive_phase()
-             || (fault->uses_dg_trial_stress_history() && fault->uses_consistent_endpoint_phase()))
+             || (fault->uses_dg_tensor_history() && fault->uses_consistent_endpoint_phase()))
             && time_stepping_manager.should_simulation_terminate_now())
           {
             // A completed native endpoint checkpoint stores the next-step

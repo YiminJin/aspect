@@ -1,7 +1,8 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include "../../../tests/phase_field_fault_test_access.h"
@@ -109,8 +110,8 @@ namespace aspect
           for (const auto &entry:a.space->cells)
             {
               fe.reinit(entry.second);
-              const auto va=model.evaluate_dg_trial_tensor(a,entry.first,rule);
-              const auto vb=model.evaluate_dg_trial_tensor(b,entry.first,rule);
+              const auto va=model.evaluate_history_tensor(a,entry.first,rule);
+              const auto vb=model.evaluate_history_tensor(b,entry.first,rule);
               for (unsigned int q=0; q<rule.size(); ++q) error+=fe.JxW(q)*full_norm_square(va[q]-vb[q]);
             }
           return std::sqrt(error);
@@ -125,7 +126,7 @@ namespace aspect
           for (const auto &entry:state.space->cells)
             {
               fe.reinit(entry.second);
-              const auto values=model.evaluate_dg_trial_tensor(state,entry.first,rule);
+              const auto values=model.evaluate_history_tensor(state,entry.first,rule);
               for (unsigned int q=0; q<rule.size(); ++q)
                 {
                   const auto reference=exact(fe.quadrature_point(q),final_time);
@@ -134,7 +135,7 @@ namespace aspect
                   reference_norm+=fe.JxW(q)*full_norm_square(reference);
                   maximum=std::max(maximum,std::sqrt(full_norm_square(values[q]-reference)));
                 }
-              for (const auto &value:model.evaluate_dg_trial_tensor(state,entry.first,extrema_rule))
+              for (const auto &value:model.evaluate_history_tensor(state,entry.first,extrema_rule))
                 {
                   minimum_xx=std::min(minimum_xx,value[0][0]);
                   maximum_xx=std::max(maximum_xx,value[0][0]);
@@ -146,7 +147,7 @@ namespace aspect
           auto coefficients=output("field-"+name+".csv");
           coefficients << "i,xx,yy,xy\n";
           for (unsigned int i=0; i<state.space->dofs.n_dofs(); ++i)
-            coefficients << i << ',' << state.trial_stress[0][i] << ',' << state.trial_stress[1][i] << ',' << state.trial_stress[2][i] << '\n';
+            coefficients << i << ',' << state.coefficients[0][i] << ',' << state.coefficients[1][i] << ',' << state.coefficients[2][i] << '\n';
         }
         void export_geometry(const Transport &op) const
         {
@@ -173,7 +174,7 @@ namespace aspect
           for (unsigned int c=0; c<result.size(); ++c)
             {
               result[c].reinit(state.space->dofs.n_dofs());
-              for (unsigned int i=0; i<result[c].size(); ++i) result[c][i]=state.trial_stress[c][i];
+              for (unsigned int i=0; i<result[c].size(); ++i) result[c][i]=state.coefficients[c][i];
             }
           return result;
         }
@@ -382,7 +383,7 @@ namespace aspect
             return basis(pulse(p[0],p[1]));
           };
           const auto input=model.project_dg_transport_field(op,smooth,0.,8);
-          const auto saved=input->trial_stress;
+          const auto saved=input->coefficients;
           for (const auto detector:
           {
             Limiter::Detector::fu_shu,Limiter::Detector::kxrcf
@@ -405,7 +406,7 @@ namespace aspect
               {
                 rejected=true;
               }
-            for (unsigned int c=0; c<saved.size(); ++c) unchanged &= saved[c]==input->trial_stress[c];
+            for (unsigned int c=0; c<saved.size(); ++c) unchanged &= saved[c]==input->coefficients[c];
             const double repeat=difference(model,*a,*b);
             lifecycle << (detector==Limiter::Detector::fu_shu?"fu_shu":"kxrcf") << ',' << repeat << ',' << rejected << ',' << unchanged << '\n';
             AssertThrow(repeat==0. && rejected && unchanged,ExcMessage("Limited trial lifecycle failed."));
@@ -441,7 +442,7 @@ namespace aspect
         {
           auto &sim=const_cast<Simulator<dim>&>(this->get_simulator());
           auto &model=Plugins::get_plugin_as_type<Model>(*sim.material_model);
-          AssertThrow(dim==2 && model.uses_dg_trial_stress_history() && this->get_timestep_number()==0,ExcMessage("Fresh PF4 DG fixture required."));
+          AssertThrow(dim==2 && model.uses_dg_tensor_history() && this->get_timestep_number()==0,ExcMessage("Fresh PF4 DG fixture required."));
           model.prepare_reconstructed_fault_mechanical_solve();
           const auto anchor=Access::dg_history_values(model);
           const BV phase_anchor(model.accepted_fe_strain_state());

@@ -266,7 +266,7 @@ namespace aspect
         // after both unpacking and the final ghost exchange have settled them.
         // Preserve the established unselected particle paths.
         const auto *fault=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
-        if (particle_domain_handler && fault && fault->uses_dg_trial_stress_history()
+        if (particle_domain_handler && fault && fault->uses_dg_tensor_history()
             && fault->uses_consistent_endpoint_phase() && fault->has_fe_strain_history())
           {
             if (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())>1)

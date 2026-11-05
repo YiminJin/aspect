@@ -1,0 +1,50 @@
+{
+  "arguments": {
+    "label": "mature-step-default",
+    "speed": 0.4,
+    "dt": 0.1,
+    "end": 0.4,
+    "initial_dt": 0.1,
+    "schedule": null,
+    "level": 4,
+    "profile_method": "Q1 remap",
+    "representation": "separated",
+    "inflow": "zero",
+    "shear": 0.01,
+    "support": "stationary profile",
+    "spacing": 0.1,
+    "eta": "1",
+    "reject": false,
+    "stage_energy": false,
+    "true_checks": false,
+    "audit": false,
+    "isolation": false,
+    "energy": false,
+    "entry_control": false,
+    "phase": ".35*exp(-((y-.3*x)/.22)^2)*(1+.2*cos(2*x))",
+    "ranks": 2,
+    "restart": "None",
+    "seconds": 120,
+    "requested_end": 0.4
+  },
+  "command": [
+    "/opt/openmpi/5.0.6/bin/mpirun",
+    "-n",
+    "2",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/material-runs/mature-step-default/input.prm"
+  ],
+  "core_sha256": "f127bd8a755702dca0f4a4d1a005c0c69f710d47e10b4290d37e6fadebcf5559",
+  "plugin_sha256": "98eb67a7ba671a3d50ac15b3490fc49a7cd7350b86816ed25d9d3d08265526e6",
+  "input_sha256": "1e20696d5aa04f2aeea9eea91a08553bd1efa654091c4624b9a1a47c97e9a677",
+  "runner_sha256": "55d27ba8eabbb6f0879d778594e1ff526fa4aae6ae5858e207ae1f9da35a1b63",
+  "head": "a22214d57f3ce809b3b20c9883b853c96e04033f",
+  "runtime_environment": {
+    "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "exit_code": 0,
+  "wall_s": 15.505651826000758
+}

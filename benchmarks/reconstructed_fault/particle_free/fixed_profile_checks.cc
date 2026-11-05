@@ -37,7 +37,7 @@ namespace aspect
           const auto saved_rates=rates;
           const BV anchor(model.accepted_fe_strain_state());
           const auto q_anchor=property("phase field fault cohesive traction");
-          const auto tensor_anchor=model.uses_dg_trial_stress_history() ? Access::dg_history_values(model) : std::vector<double>();
+          const auto tensor_anchor=model.uses_dg_tensor_history() ? Access::dg_history_values(model) : std::vector<double>();
           BV prescribed(sim.solution);
           struct Field : Function<dim>
           {
@@ -125,7 +125,7 @@ namespace aspect
           }
           AssertThrow(model.accepted_fe_strain_state()==anchor
                       && property("phase field fault cohesive traction")==q_anchor
-                      && (!model.uses_dg_trial_stress_history() || Access::dg_history_values(model)==tensor_anchor),
+                      && (!model.uses_dg_tensor_history() || Access::dg_history_values(model)==tensor_anchor),
                       ExcMessage("Source/candidate checks mutated accepted histories."));
           sim.timestep_number=saved_step;
           sim.time_step=saved_dt;
@@ -206,7 +206,7 @@ namespace aspect
           const auto pb=intro.block_indices.pressure;
           auto &surface=*sim.reconstructed_fault_surface_system;
           const BV saved_linearization(sim.current_linearization_point);
-          const auto tensor_anchor=model.uses_dg_trial_stress_history() ? Access::dg_history_values(model) : std::vector<double>();
+          const auto tensor_anchor=model.uses_dg_tensor_history() ? Access::dg_history_values(model) : std::vector<double>();
           // A zero-velocity/pressure probe exposes the nontrivial native frozen
           // history load; near-zero equilibrium residuals alone are insufficient.
           BV probe(mechanical_trial);
@@ -277,7 +277,7 @@ namespace aspect
           sim.current_linearization_point=saved_linearization;
           Access::clear_native_stress_samples(model);
           AssertThrow(load_error==0. && solve_error==0.
-                      && (!model.uses_dg_trial_stress_history() || Access::dg_history_values(model)==tensor_anchor),
+                      && (!model.uses_dg_tensor_history() || Access::dg_history_values(model)==tensor_anchor),
                       ExcMessage("Particle or mapped stress fed native loads/solve or changed DG history."));
 
           // Actual B/G work pair with independent surface coefficients and a Q2
@@ -349,7 +349,7 @@ namespace aspect
           const auto q=property("phase field fault cohesive traction");
           const auto previous_I=property("phase field fault previous I h");
           const auto rates=manager.get_timestep_committed_slip_rate(0);
-          const auto tensor=model.uses_dg_trial_stress_history() ? Access::dg_history_values(model) : std::vector<double>();
+          const auto tensor=model.uses_dg_tensor_history() ? Access::dg_history_values(model) : std::vector<double>();
           std::map<types::particle_index,std::vector<double>> properties;
           for (const auto &p : particles)
             properties[p.get_id()]= {p.get_properties().begin(),p.get_properties().end()};
@@ -373,7 +373,7 @@ namespace aspect
                       && property("phase field fault cohesive traction")==q
                       && property("phase field fault previous I h")==previous_I
                       && manager.get_timestep_committed_slip_rate(0)==rates
-                      && (!model.uses_dg_trial_stress_history() || Access::dg_history_values(model)==tensor),
+                      && (!model.uses_dg_tensor_history() || Access::dg_history_values(model)==tensor),
                       ExcMessage("Rejected mechanical step changed accepted native histories."));
           for (const auto &p : particles)
             AssertThrow(std::equal(properties.at(p.get_id()).begin(),properties.at(p.get_id()).end(),p.get_properties().begin()),
@@ -466,7 +466,7 @@ namespace aspect
           write_state(0,model,sim.solution,slip);
           representation_checks();
           source_checks(model,sim);
-          if (model.uses_dg_trial_stress_history())
+          if (model.uses_dg_tensor_history())
             {
               auto particle=this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler().begin();
               const auto position=particle->get_location();
@@ -553,12 +553,12 @@ namespace aspect
               AssertThrow(error<=1.e-10 && sim.solution.block(pb)==initial.block(pb)
                           && Access::current_normalization_integrals(model)==initial_I,
                           ExcMessage("Frozen cohesive path changed localization or violated Z recurrence."));
-              if (model.uses_dg_trial_stress_history())
+              if (model.uses_dg_tensor_history())
                 AssertThrow(model.accepted_fe_strain_state().block(this->introspection().block_indices.velocities).linfty_norm()==0.,
                             ExcMessage("DG history evolved the unused FE displacement anchor."));
               bool duplicate_rejected = false;
               const BV published(model.accepted_fe_strain_state());
-              const auto published_tensor=model.uses_dg_trial_stress_history() ? Access::dg_history_values(model) : std::vector<double>();
+              const auto published_tensor=model.uses_dg_tensor_history() ? Access::dg_history_values(model) : std::vector<double>();
               try
                 {
                   model.commit_reconstructed_fault_mechanical_history(sim.solution);
@@ -569,7 +569,7 @@ namespace aspect
                 }
               AssertThrow(duplicate_rejected && model.accepted_fe_strain_state()==published
                           && property("phase field fault cohesive traction")==q
-                          && (!model.uses_dg_trial_stress_history() || Access::dg_history_values(model)==published_tensor),
+                          && (!model.uses_dg_tensor_history() || Access::dg_history_values(model)==published_tensor),
                           ExcMessage("Duplicate publication was accepted or mutated history."));
               const double max_q = *std::max_element(q.begin(),q.end());
               AssertThrow(max_s>0. && max_q>0.,ExcMessage("Fixture did not develop physical cohesive storage."));

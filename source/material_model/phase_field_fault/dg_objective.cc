@@ -1,6 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/reconstructed_fault/objective_stress.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
@@ -54,7 +55,7 @@ namespace aspect
         {
           // Initialization and rollback prepare accepted observations outside a
           // material trial. A physical solve gets its rotated/advected anchor
-          // from begin_dg_material_step; do not rotate again on restoration.
+          // from rotate_material_history; do not rotate again on restoration.
           AssertThrow(!dg_material_trial,
                       ExcMessage("Direct material trial is missing its complete objective anchor."));
           state.objective_anchor=parent;
@@ -88,15 +89,15 @@ namespace aspect
           native[this->introspection().extractors.velocities].get_function_gradients(this->get_old_solution(),gradients);
           native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
             .get_function_values(state.displacement_history,phase);
-          const auto T=evaluate_dg_trial_tensor(*parent,entry.first,rule);
-          const auto R=evaluate_dg_trial_tensor(*parent->residual,entry.first,rule);
+          const auto T=evaluate_history_tensor(*parent,entry.first,rule);
+          const auto R=evaluate_history_tensor(*parent->residual,entry.first,rule);
           if constexpr (dim==2)
             if (std::all_of(gradients.begin(),gradients.end(),[](const auto &a){return a[1][0]==a[0][1];}))
               {
                 // Preserve the exact zero-spin identity, including nonzero R.
                 for (unsigned int c=0;c<components;++c)
                   for (const auto i:indices)
-                    {owned[c][i]=parent->trial_stress[c][i];owned[c+components][i]=parent->residual->trial_stress[c][i];}
+                    {owned[c][i]=parent->coefficients[c][i];owned[c+components][i]=parent->residual->coefficients[c][i];}
                 continue;
               }
           FullMatrix<double> mass(n,n);
@@ -137,10 +138,10 @@ namespace aspect
         {
           owned[c].compress(VectorOperation::insert);
           owned[c+components].compress(VectorOperation::insert);
-          anchor->trial_stress[c].reinit(parent->trial_stress[c]);
-          anchor->trial_stress[c]=owned[c];
-          anchor->residual->trial_stress[c].reinit(parent->residual->trial_stress[c]);
-          anchor->residual->trial_stress[c]=owned[c+components];
+          anchor->coefficients[c].reinit(parent->coefficients[c]);
+          anchor->coefficients[c]=owned[c];
+          anchor->residual->coefficients[c].reinit(parent->residual->coefficients[c]);
+          anchor->residual->coefficients[c]=owned[c+components];
         }
       state.objective_anchor=std::move(anchor);
       state.objective_parent=parent;

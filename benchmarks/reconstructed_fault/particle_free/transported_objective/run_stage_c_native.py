@@ -180,7 +180,7 @@ end
         assert plugins[0].stat().st_mtime_ns>=max(f.stat().st_mtime_ns for f in test_sources),'Rebuild the cohesive checker before using this source revision.'
     elif not args.legacy:
         test_sources=[ROOT/'benchmarks/reconstructed_fault/particle_free/transported_objective/native/native_checks.cc',
-                      ROOT/'include/aspect/material_model/phase_field_fault/dg_history_internal.h']
+                      ROOT/'include/aspect/material_model/history/tensor_history.h']
         assert plugins[-1].stat().st_mtime_ns>=max(f.stat().st_mtime_ns for f in test_sources),'Rebuild the mature DG checker before using this source revision.'
     sha=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
     (out/'runner.py').write_bytes(RUNNER_SOURCE)

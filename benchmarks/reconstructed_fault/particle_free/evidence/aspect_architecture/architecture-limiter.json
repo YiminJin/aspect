@@ -1,0 +1,20 @@
+{
+  "command": [
+    "env",
+    "LD_LIBRARY_PATH=/opt/openmpi/5.0.6/lib",
+    "/opt/openmpi/5.0.6/bin/mpirun",
+    "-n",
+    "1",
+    "build-particle-free/native/aspect-release",
+    "build-particle-free/aspect-architecture/limiter/input.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "exit_code": 0,
+  "seconds": 3.8705112259995076,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

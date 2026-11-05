@@ -7,7 +7,8 @@
 #include <aspect/particle/manager.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <deal.II/fe/fe_values.h>
 #include <fstream>
 #include <iomanip>
@@ -111,7 +112,7 @@ namespace aspect { namespace Postprocess
           const auto cell=entry.second;space.cells.at(entry.first)->get_dof_indices(ids);
           cells<<entry.first.to_string()<<','<<cell->vertex(0)[0]<<','<<cell->vertex(0)[1]<<','
             <<cell->vertex(1)[0]-cell->vertex(0)[0]<<','<<cell->vertex(2)[1]-cell->vertex(0)[1];
-          for(const auto &component:s.dg_history->trial_stress)for(auto i:ids)cells<<','<<component[i];
+          for(const auto &component:s.dg_history->coefficients)for(auto i:ids)cells<<','<<component[i];
           cells<<'\n';
           for(auto v:cell->vertex_indices())
             {auto i=cell->vertex_dof_index(v,pc);auto p=cell->vertex(v);nodes[{p[1],p[0]}]={sim().solution[i],s.displacement_history[i]};}
@@ -125,7 +126,7 @@ namespace aspect { namespace Postprocess
       const QGauss<dim> samples(3);
       for(const auto &entry:s.cells)
         {
-          const auto T=m.evaluate_dg_trial_tensor(*s.dg_history,entry.first,samples);
+          const auto T=m.evaluate_history_tensor(*s.dg_history,entry.first,samples);
           for(unsigned int q=0;q<samples.size();++q)
             {
               const auto x=this->get_mapping().transform_unit_to_real_cell(entry.second,samples.point(q));
@@ -168,7 +169,7 @@ namespace aspect { namespace Postprocess
       for(const auto &entry:s.cells)
         {space.cells.at(entry.first)->get_dof_indices(ids);for(unsigned int i=0;i<9;++i)
             {const auto x=this->get_mapping().transform_unit_to_real_cell(entry.second,space.element.get_unit_support_points()[i]);auto T=tensor(x);for(unsigned int c=0;c<3;++c)owned[c][ids[i]]=T[c];}}
-      for(unsigned int c=0;c<3;++c){owned[c].compress(VectorOperation::insert);s.dg_history->trial_stress[c]=owned[c];}
+      for(unsigned int c=0;c<3;++c){owned[c].compress(VectorOperation::insert);s.dg_history->coefficients[c]=owned[c];}
       const auto cp=manager.get_property_information()[m.fault_property_indices.cohesive_traction].position;
       const auto sp=manager.get_property_information()[slip_property].position;
       std::vector<double> rates(s.Z.size());
@@ -280,13 +281,13 @@ namespace aspect { namespace Postprocess
       gate("preparation exception rolls back native owners",same(parent,persistent()));
       const auto make=[&](){return m.prepare_dg_geometry_append(nodes,std::vector<double>(nodes.size(),.5),std::vector<std::vector<double>>(nodes.size(),std::vector<double>(width)),std::vector<double>(nodes.size()));};
       auto rejected=make();gate("prepare leaves all accepted owners unchanged",same(parent,persistent()));
-      const auto rejected_values=[&](){std::vector<double> a;for(const auto &field:rejected->next->dg_history->trial_stress)for(unsigned int i=0;i<field.size();++i)a.push_back(field[i]);return a;}();
+      const auto rejected_values=[&](){std::vector<double> a;for(const auto &field:rejected->next->dg_history->coefficients)for(unsigned int i=0;i<field.size();++i)a.push_back(field[i]);return a;}();
       // Inject an invalid acceptance precondition after complete preparation.
       // M5 must reject it before touching any actual owner or canonical cache.
       rejected->next->accepted_publications=1;
       gate("native rejected commit",rejects([&](){sim().commit_reconstructed_fault_geometry(rejected);}));
       gate("rejection preserves all native owners",same(parent,persistent()));rejected.reset();
-      auto retry=make();std::vector<double> retry_values;for(const auto &field:retry->next->dg_history->trial_stress)for(unsigned int i=0;i<field.size();++i)retry_values.push_back(field[i]);
+      auto retry=make();std::vector<double> retry_values;for(const auto &field:retry->next->dg_history->coefficients)for(unsigned int i=0;i<field.size();++i)retry_values.push_back(field[i]);
       gate("deterministic retry candidate",same(rejected_values,retry_values));
       gate("candidate phase obstacle exact",retry->next->displacement_history==incoming->displacement_history);
       sim().commit_reconstructed_fault_geometry(retry);

@@ -54,7 +54,7 @@ namespace aspect
                                                       const FEEndpointTrial &endpoint,
                                                       const std::vector<double> *phase_direction) const
     {
-      AssertThrow(!dg_trial_stress_history || endpoint.dg_history,
+      AssertThrow(!dg_tensor_history || endpoint.dg_history,
                   ExcMessage("A DG mechanical endpoint requires its explicit trial tensor."));
       return evaluate_fe_phase_energy_at(trial,false,false,endpoint.strain,endpoint.Z,phase_direction,endpoint.dg_history.get());
     }
@@ -67,7 +67,7 @@ namespace aspect
       const auto &s=*fe_strain_state;
       const auto c=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
       FEEndpointTrial endpoint;
-      if (dg_trial_stress_history)
+      if (dg_tensor_history)
         {
           endpoint.dg_history=make_dg_history_trial(bulk,c);
           endpoint.strain=s.displacement_history;
@@ -152,8 +152,8 @@ namespace aspect
       for (const auto &entry:s.cells)
         {
           fe.reinit(entry.second);
-          if (dg_trial_stress_history)
-            R=evaluate_dg_trial_tensor(endpoint_history ? *endpoint_history : *s.dg_history,entry.first,quad);
+          if (dg_tensor_history)
+            R=evaluate_history_tensor(endpoint_history ? *endpoint_history : *s.dg_history,entry.first,quad);
           else
             fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(strain,R);
           for (unsigned int q=0; q<quad.size(); ++q,++point)
@@ -162,7 +162,7 @@ namespace aspect
               AssertThrow(p.cell==entry.first,ExcInternalError());
               if(p.segment==numbers::invalid_unsigned_int)
                 {
-                  AssertThrow(uses_prescribed_dg_geometry() && dg_trial_stress_history,ExcInternalError());
+                  AssertThrow(uses_prescribed_dg_geometry() && dg_tensor_history,ExcInternalError());
                   const auto &tau=R[q];
                   const double energy=p.weight*((tau*tau)+std::pow(trace(tau),2))/(4*s.G);
                   result.bulk+=energy;bulk_energy+=energy;
@@ -179,13 +179,13 @@ namespace aspect
               const double hpp=s.m*(12/std::pow(1-phi,4)-6/std::pow(1-phi,3));
               // DG R[q] already is a full-3D deviatoric trial stress in Pa.
               // The FE owner instead supplies a raw zero-zz strain gradient.
-              const auto trial_tensor=dg_trial_stress_history ? R[q]
+              const auto trial_tensor=dg_tensor_history ? R[q]
                                       : 2*s.G*Utilities::Tensors::consistent_deviator(R[q]);
               const auto tau=trial_tensor-2*Z*h/I*S;
               result.bulk+=p.weight*((tau*tau)+std::pow(trace(tau),2))/(4*s.G);
               bulk_energy+=static_cast<long double>(p.weight)*((tau*tau)+std::pow(trace(tau),2))/(4*s.G);
               const double c=-Z/s.G*(tau*S);
-              const double trial_scale=dg_trial_stress_history ? std::abs(R[q]*S) : 2*s.G*std::abs(R[q]*S);
+              const double trial_scale=dg_tensor_history ? std::abs(R[q]*S) : 2*s.G*std::abs(R[q]*S);
               const double positive_c=std::abs(Z/s.G)*(trial_scale+std::abs(2*Z*h/I)*(S*S));
               const double a=2*Z*Z/s.G*(S*S);
               for (unsigned int v=0; v<p.dofs.size(); ++v)
@@ -265,7 +265,7 @@ namespace aspect
     {
       AssertThrow(!uses_prescribed_dg_geometry(),ExcMessage("Finite-tip geometry observation does not qualify phase actions/evolution."));
       TimerOutput::Scope timer(this->get_computing_timer(),"Fault: FE tangent pullback");
-      AssertThrow(!dg_trial_stress_history || endpoint.dg_history,
+      AssertThrow(!dg_tensor_history || endpoint.dg_history,
                   ExcMessage("A DG tangent requires its explicit endpoint tensor."));
       validate_fe_strain_restrictions();
       const auto &s=*fe_strain_state;
@@ -304,8 +304,8 @@ namespace aspect
         {
           fe.reinit(entry.second);
           cell_rhs=0.;
-          if (dg_trial_stress_history)
-            R=evaluate_dg_trial_tensor(*endpoint.dg_history,entry.first,quadrature);
+          if (dg_tensor_history)
+            R=evaluate_history_tensor(*endpoint.dg_history,entry.first,quadrature);
           else
             fe[intro.extractors.velocities].get_function_symmetric_gradients(endpoint.strain,R);
           if (velocity_direction)
@@ -329,7 +329,7 @@ namespace aspect
               const double hp=s.m*(4/std::pow(1-phi,3)-3/std::pow(1-phi,2));
               const double hpp=s.m*(12/std::pow(1-phi,4)-6/std::pow(1-phi,3));
               const double chi=h/ii,dchi=hp*dp/ii-h*di/(ii*ii);
-              const auto tau=(dg_trial_stress_history ? R[q] : 2*s.G*Utilities::Tensors::consistent_deviator(R[q]))-2*Z*chi*S;
+              const auto tau=(dg_tensor_history ? R[q] : 2*s.G*Utilities::Tensors::consistent_deviator(R[q]))-2*Z*chi*S;
               const auto dtau=(velocity_direction?2*coefficients.eta_ve*Utilities::Tensors::consistent_deviator(du[q]):SymmetricTensor<2,dim>())
                               -2*(dZ*chi+Z*dchi)*S;
               const double c=-Z/s.G*(tau*S),dc=-(dZ*(tau*S)+Z*(dtau*S))/s.G;

@@ -5,7 +5,8 @@
 #include <aspect/mesh_refinement/interface.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/reconstructed_fault/endpoint_mpi.h>
 #include <aspect/particle/manager.h>
 #include <aspect/particle/particle_domain.h>
@@ -182,7 +183,7 @@ namespace aspect
               {
                 entry.second->get_dof_indices(ids);
                 auto &v=local[entry.first.to_string()];
-                for (const auto &c:h.trial_stress)for (auto i:ids)v.push_back(c[i]);
+                for (const auto &c:h.coefficients)for (auto i:ids)v.push_back(c[i]);
               }
           for (const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local))
             for (const auto &p:part)AssertThrow(global.emplace(p).second,ExcMessage("Duplicate DG CellId owner."));
@@ -192,10 +193,10 @@ namespace aspect
         {
           auto &h=*model().fe_strain_state->dg_history;
           std::vector<types::global_dof_index> ids(9);
-          for (auto &c:h.trial_stress)
+          for (auto &c:h.coefficients)
             {
               LinearAlgebra::Vector owned(h.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
-              const unsigned int component=&c-&h.trial_stress[0];
+              const unsigned int component=&c-&h.coefficients[0];
               for (const auto &entry:h.space->cells)if (entry.second->is_locally_owned())
                   {
                     entry.second->get_dof_indices(ids);
@@ -267,7 +268,7 @@ namespace aspect
                     const FEValuesExtractors::Scalar p(pc);
                     fe[p].get_function_values(this->get_solution(),phi);
                     fe[p].get_function_values(s.displacement_history,lower);
-                    const auto T=m.evaluate_dg_trial_tensor(*s.dg_history,entry.first,Quadrature<dim>({u}))[0];
+                    const auto T=m.evaluate_history_tensor(*s.dg_history,entry.first,Quadrature<dim>({u}))[0];
                     const auto tau=m.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,entry.first,x);
                     local[std::to_string(ix)+"-"+std::to_string(iy)]= {x[0],x[1],phi[0],lower[0],T[0][0],T[1][1],T[0][1],tau[0][0],tau[1][1],tau[0][1]};
                   }
@@ -457,7 +458,7 @@ namespace aspect
           for (const auto &entry:s.cells)
             {
               const auto &cell=entry.second;
-              const auto stress=model.evaluate_dg_trial_tensor(endpoint ? *endpoint->dg_history : *s.dg_history,entry.first,samples);
+              const auto stress=model.evaluate_history_tensor(endpoint ? *endpoint->dg_history : *s.dg_history,entry.first,samples);
               cells << c << ',' << cell->vertex(0)[0] << ',' << cell->vertex(0)[1] << ','
                     << cell->vertex(1)[0]-cell->vertex(0)[0] << ',' << cell->vertex(2)[1]-cell->vertex(0)[1];
               for (const auto v:cell->vertex_indices())
@@ -523,7 +524,7 @@ namespace aspect
           const auto endpoint=m.make_fe_endpoint_trial(base,rates);
           const auto repeat=m.make_fe_endpoint_trial(base,rates);
           bool identical=endpoint.Z==repeat.Z;
-          for(unsigned int c=0;c<3;++c)identical=identical && endpoint.dg_history->trial_stress[c]==repeat.dg_history->trial_stress[c];
+          for(unsigned int c=0;c<3;++c)identical=identical && endpoint.dg_history->coefficients[c]==repeat.dg_history->coefficients[c];
           check("local repeated endpoint trials unpublished",identical && same(before,persistent()));
           const auto p=C.select(s_phase()),lower=C.select(accepted_phase());
           const auto f=this->get_phase_field_handler().evaluate_cell_fracture(base,true);
@@ -880,10 +881,10 @@ namespace aspect
               fe.reinit(cell);
               std::vector<Tensor<2,dim>> gradient(1);
               fe[this->introspection().extractors.velocities].get_function_gradients(bulk,gradient);
-              const auto incoming=m.evaluate_dg_trial_tensor(*m.fe_strain_state->dg_history,ids[i],Quadrature<dim>({unit}))[0];
+              const auto incoming=m.evaluate_history_tensor(*m.fe_strain_state->dg_history,ids[i],Quadrature<dim>({unit}))[0];
               const auto exact=c.beta*incoming+2*c.eta_ve*Utilities::Tensors::consistent_deviator(symmetrize(gradient[0]));
               const auto avg=c.beta*incoming+2*c.eta_ve*Utilities::Tensors::consistent_deviator(symmetrize(averages[i]));
-              const auto T=m.evaluate_dg_trial_tensor(*projected,ids[i],Quadrature<dim>({unit}))[0];
+              const auto T=m.evaluate_history_tensor(*projected,ids[i],Quadrature<dim>({unit}))[0];
               const double bound=m.dg_source_publication_allowance(*projected,ids[i],points[i])+128*std::numeric_limits<double>::epsilon()*std::max(1.,2*T.norm());
               const auto d=T-exact,wrong=T-avg;
               const double e=std::sqrt(std::pow(d.norm(),2)+std::pow(trace(d),2)),w=std::sqrt(std::pow(wrong.norm(),2)+std::pow(trace(wrong),2));

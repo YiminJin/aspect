@@ -1034,7 +1034,7 @@ namespace aspect
     const auto history_start=Clock::now();
     auto next=std::make_shared<BulkState>(*parent);
     next->tensor=std::make_shared<typename Model::DGHistory>();next->tensor->space=parent->tensor->space;
-    for(auto &field:next->tensor->trial_stress)
+    for(auto &field:next->tensor->coefficients)
       field.reinit(next->tensor->space->dofs.locally_owned_dofs(),mpi_communicator);
     // Independent DGQ2 T: actual Gauss3 mass/source projection, retaining all
     // nine coefficients. No projection of the nonlinear cohesive correction.
@@ -1047,7 +1047,7 @@ namespace aspect
       {
         source.reinit(cell);source[introspection.extractors.velocities].get_function_symmetric_gradients(x,increment);
         const auto dc=next->tensor->space->cells.at(cell->id());dg.reinit(dc);dc->get_dof_indices(dids);
-        const auto incoming=model.evaluate_dg_trial_tensor(*parent->tensor,cell->id(),source_quadrature);
+        const auto incoming=model.evaluate_history_tensor(*parent->tensor,cell->id(),source_quadrature);
         FullMatrix<double> mass_matrix(9,9);std::array<Vector<double>,3> rhs;for(auto &v:rhs)v.reinit(9);
         for(unsigned int q=0;q<source_quadrature.size();++q)
           {
@@ -1061,9 +1061,9 @@ namespace aspect
           }
         mass_matrix.gauss_jordan();
         for(unsigned int c=0;c<3;++c)
-          {Vector<double> value(9);mass_matrix.vmult(value,rhs[c]);for(unsigned int i=0;i<9;++i)next->tensor->trial_stress[c][dids[i]]=value[i];}
+          {Vector<double> value(9);mass_matrix.vmult(value,rhs[c]);for(unsigned int i=0;i<9;++i)next->tensor->coefficients[c][dids[i]]=value[i];}
       }
-    for(auto &field:next->tensor->trial_stress)field.compress(VectorOperation::insert);
+    for(auto &field:next->tensor->coefficients)field.compress(VectorOperation::insert);
     // Native FE memory retains precisely the part of the physical gradient
     // outside DGQ2 on a non-affine cell. Never feed a projected source into
     // the constitutive residual, tangent or energy. Both owners advance once.
@@ -1111,10 +1111,10 @@ namespace aspect
             vertices<<std::setprecision(17)<<"x,y\n";
             for(const auto v:cell->vertex_indices())vertices<<cell->vertex(v)[0]<<','<<cell->vertex(v)[1]<<'\n';
             const Quadrature<dim> points(next->tensor->space->element.get_unit_support_points());
-            const auto a=model.evaluate_dg_trial_tensor(*parent->tensor,entry.first,points);
-            const auto b=model.evaluate_dg_trial_tensor(*next->tensor,entry.first,points);
-            const auto c=model.evaluate_dg_trial_tensor(*parent->native_projection,entry.first,points);
-            const auto d=model.evaluate_dg_trial_tensor(*next->native_projection,entry.first,points);
+            const auto a=model.evaluate_history_tensor(*parent->tensor,entry.first,points);
+            const auto b=model.evaluate_history_tensor(*next->tensor,entry.first,points);
+            const auto c=model.evaluate_history_tensor(*parent->native_projection,entry.first,points);
+            const auto d=model.evaluate_history_tensor(*next->native_projection,entry.first,points);
             std::ofstream tensors(parameters.output_directory+"bulk-source-failure-tensors.csv");
             tensors<<std::setprecision(17)<<"u,v,old_DGxx,old_DGyy,old_DGxy,new_DGxx,new_DGyy,new_DGxy,old_Pxx,old_Pyy,old_Pxy,new_Pxx,new_Pyy,new_Pxy\n";
             for(unsigned int q=0;q<points.size();++q)

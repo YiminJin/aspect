@@ -1,7 +1,8 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include "../../../tests/phase_field_fault_test_access.h"
@@ -102,8 +103,8 @@ namespace aspect
           for (const auto &entry:a.space->cells)
             {
               fe.reinit(entry.second);
-              const auto va=model.evaluate_dg_trial_tensor(a,entry.first,rule);
-              const auto vb=model.evaluate_dg_trial_tensor(b,entry.first,rule);
+              const auto va=model.evaluate_history_tensor(a,entry.first,rule);
+              const auto vb=model.evaluate_history_tensor(b,entry.first,rule);
               for (unsigned int q=0; q<rule.size(); ++q) error+=fe.JxW(q)*full_norm_square(va[q]-vb[q]);
             }
           return std::sqrt(error);
@@ -118,7 +119,7 @@ namespace aspect
           for (const auto &entry:state.space->cells)
             {
               fe.reinit(entry.second);
-              const auto values=model.evaluate_dg_trial_tensor(state,entry.first,rule);
+              const auto values=model.evaluate_history_tensor(state,entry.first,rule);
               for (unsigned int q=0; q<rule.size(); ++q)
                 {
                   const auto reference=exact(fe.quadrature_point(q),final_time);
@@ -127,7 +128,7 @@ namespace aspect
                   reference_norm+=fe.JxW(q)*full_norm_square(reference);
                   maximum=std::max(maximum,std::sqrt(full_norm_square(values[q]-reference)));
                 }
-              for (const auto &value:model.evaluate_dg_trial_tensor(state,entry.first,extrema_rule))
+              for (const auto &value:model.evaluate_history_tensor(state,entry.first,extrema_rule))
                 {
                   minimum_xx=std::min(minimum_xx,value[0][0]);
                   maximum_xx=std::max(maximum_xx,value[0][0]);
@@ -139,7 +140,7 @@ namespace aspect
           auto coefficients=output("field-"+name+".csv");
           coefficients << "i,xx,yy,xy\n";
           for (unsigned int i=0; i<state.space->dofs.n_dofs(); ++i)
-            coefficients << i << ',' << state.trial_stress[0][i] << ',' << state.trial_stress[1][i] << ',' << state.trial_stress[2][i] << '\n';
+            coefficients << i << ',' << state.coefficients[0][i] << ',' << state.coefficients[1][i] << ',' << state.coefficients[2][i] << '\n';
         }
         void export_geometry(const Transport &op) const
         {
@@ -194,7 +195,7 @@ namespace aspect
           const auto a=model.advance_dg_transport(*op,*incoming,constant,zero,0.,.001);
           const auto b=model.advance_dg_transport(*op,*incoming,constant,zero,0.,.001);
           controls << "constant_error," << difference(model,*a,*incoming) << "\nrepeat_error," << difference(model,*a,*b) << '\n';
-          const auto snapshot=incoming->trial_stress;
+          const auto snapshot=incoming->coefficients;
           bool rejected=false;
           try
             {
@@ -208,7 +209,7 @@ namespace aspect
               rejected=true;
             }
           bool unchanged=true;
-          for (unsigned int c=0; c<snapshot.size(); ++c) unchanged &= snapshot[c]==incoming->trial_stress[c];
+          for (unsigned int c=0; c<snapshot.size(); ++c) unchanged &= snapshot[c]==incoming->coefficients[c];
           controls << "invalid_source_rejected," << rejected << "\nincoming_unchanged," << unchanged << '\n';
           AssertThrow(rejected && unchanged && difference(model,*a,*b)==0.,ExcMessage("PF4 trial lifecycle failed."));
           rejected=false;
@@ -228,7 +229,7 @@ namespace aspect
         {
           auto &sim=const_cast<Simulator<dim>&>(this->get_simulator());
           auto &model=Plugins::get_plugin_as_type<Model>(*sim.material_model);
-          AssertThrow(dim==2 && model.uses_dg_trial_stress_history() && this->get_timestep_number()==0,
+          AssertThrow(dim==2 && model.uses_dg_tensor_history() && this->get_timestep_number()==0,
                       ExcMessage("PF4 requires a fresh serial DG fixture."));
           model.prepare_reconstructed_fault_mechanical_solve();
           const auto anchor=Access::dg_history_values(model);
@@ -265,7 +266,7 @@ namespace aspect
             auto initial=output("initial-pulse.csv");
             initial << "i,xx,yy,xy\n";
             for (unsigned int i=0; i<pulse_initial->space->dofs.n_dofs(); ++i)
-              initial << i << ',' << pulse_initial->trial_stress[0][i] << ',' << pulse_initial->trial_stress[1][i] << ',' << pulse_initial->trial_stress[2][i] << '\n';
+              initial << i << ',' << pulse_initial->coefficients[0][i] << ',' << pulse_initial->coefficients[1][i] << ',' << pulse_initial->coefficients[2][i] << '\n';
           }
           const auto translated_final=evolve(model,*op,pulse_initial,translated,zero,steps);
           record(model,"pulse_translation",*translated_final,translated,steps);
@@ -346,7 +347,7 @@ namespace aspect
           };
           auto residual=evolve(model,*normal,model.project_dg_transport_field(*normal,zero,0.,8),normal_residual,normal_source,normal_steps);
           auto reconstructed=model.project_dg_transport_field(*normal,normal_cohesive,final_time,8);
-          for (unsigned int c=0; c<reconstructed->trial_stress.size(); ++c) reconstructed->trial_stress[c]-=residual->trial_stress[c];
+          for (unsigned int c=0; c<reconstructed->coefficients.size(); ++c) reconstructed->coefficients[c]-=residual->coefficients[c];
           record(model,"normal_residual",*reconstructed,normal_direct,normal_steps);
           const auto tangent_velocity=velocity([](const Point<dim> &)
           {
@@ -379,7 +380,7 @@ namespace aspect
           };
           residual=evolve(model,*tangent,model.project_dg_transport_field(*tangent,zero,0.,8),tangent_residual,tangent_source,tangent_steps);
           reconstructed=model.project_dg_transport_field(*tangent,tangent_cohesive,final_time,8);
-          for (unsigned int c=0; c<reconstructed->trial_stress.size(); ++c) reconstructed->trial_stress[c]-=residual->trial_stress[c];
+          for (unsigned int c=0; c<reconstructed->coefficients.size(); ++c) reconstructed->coefficients[c]-=residual->coefficients[c];
           record(model,"tangent_residual",*reconstructed,tangent_direct,tangent_steps);
           const auto moving_velocity=velocity([](const Point<dim> &)
           {

@@ -1,0 +1,52 @@
+{
+  "arguments": {
+    "label": "architecture-after-stationary",
+    "legacy": false,
+    "baseline": false,
+    "ranks": 2,
+    "steps": 1,
+    "restart": "None",
+    "reject": false,
+    "audit": false,
+    "schedule": "200000",
+    "seconds": 120,
+    "transport_check": false,
+    "refinement": 3,
+    "layered_check": false,
+    "transfer_check": false,
+    "spin": 0.0,
+    "cohesive_history": false,
+    "history_affine": false,
+    "history_level": 0,
+    "cohesive": false,
+    "cohesive_drive": 0.0,
+    "cohesive_dt": 0.000125,
+    "tip_airy": 0.0,
+    "signed_trace": false,
+    "probe_old_cohesive_import": false
+  },
+  "command": [
+    "/opt/openmpi/5.0.6/bin/mpirun",
+    "-n",
+    "2",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/runs/architecture-after-stationary/input.prm"
+  ],
+  "runner_sha256": "d21c6bbe83b34244bf001a05418c2155359980244a3d9d2106cfb2a3cfcaf9fe",
+  "source_revision": "a22214d57f3ce809b3b20c9883b853c96e04033f",
+  "core_sha256": "2e3de3ca6af2a36aefe8109a4f30a1912c5752db3b11b9f55f7eac8010945f90",
+  "plugin_sha256": {
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/bp3-plugin/libbp3_restore_150x50.release.so": "67740f8fa5a7ba645249ea4b3518195232499bbecacd15052e2f9d37b7fdb0e3",
+    "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/transported-objective/stage-c/checks/libtransported_objective_native.release.so": "98eb73eff1eeefa33330cd2538cae069debc61425323ed74c31660ec0395829b"
+  },
+  "input_sha256": "f4dcdf07765a7d82ae7d502da51f6f39f2b68b2062716e60d22c225846ad00c1",
+  "runtime_environment": {
+    "OMP_PROC_BIND": "false",
+    "LD_LIBRARY_PATH": "/opt/openmpi/5.0.6/lib",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "exit_code": 0,
+  "elapsed_s": 7.228551714997593
+}

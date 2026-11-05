@@ -5,7 +5,8 @@
 #include <aspect/postprocess/interface.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
-#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/history/tensor_history.h>
 #include "../../../tests/phase_field_fault_test_access.h"
 #include "../../../tests/phase_field_test_access.h"
 #include <deal.II/numerics/vector_tools_interpolate.h>
@@ -132,7 +133,7 @@ namespace aspect
           for (const auto &entry:s.cells)
             {
               const auto &cell=entry.second;
-              const auto stress=model.evaluate_dg_trial_tensor(endpoint ? *endpoint->dg_history : *s.dg_history,entry.first,samples);
+              const auto stress=model.evaluate_history_tensor(endpoint ? *endpoint->dg_history : *s.dg_history,entry.first,samples);
               cells << c << ',' << cell->vertex(0)[0] << ',' << cell->vertex(0)[1] << ','
                     << cell->vertex(1)[0]-cell->vertex(0)[0] << ',' << cell->vertex(2)[1]-cell->vertex(0)[1];
               for (const auto v:cell->vertex_indices())
@@ -196,8 +197,8 @@ namespace aspect
           const auto repeat=m.make_fe_endpoint_trial(base,V);
           double repeat_error=0.;
           for (unsigned int c=0; c<3; ++c)
-            for (unsigned int i=0; i<endpoint.dg_history->trial_stress[c].size(); ++i)
-              repeat_error=std::max(repeat_error,std::abs(endpoint.dg_history->trial_stress[c][i]-repeat.dg_history->trial_stress[c][i]));
+            for (unsigned int i=0; i<endpoint.dg_history->coefficients[c].size(); ++i)
+              repeat_error=std::max(repeat_error,std::abs(endpoint.dg_history->coefficients[c][i]-repeat.dg_history->coefficients[c][i]));
           check("repeated endpoint candidates",repeat_error==0. && endpoint.Z==repeat.Z);
           prefix="operators/";
           std::filesystem::create_directory(this->get_output_directory()+prefix);
@@ -385,14 +386,14 @@ namespace aspect
           const auto plain=m.make_dg_history_trial(*s.dg_history,affine,c);
           bool identical=true;
           for(unsigned int component=0;component<3;++component)
-            for(const auto i:plain->trial_stress[component].locally_owned_elements())
-              identical=identical && plain->trial_stress[component][i]==update->dg_history->trial_stress[component][i];
+            for(const auto i:plain->coefficients[component].locally_owned_elements())
+              identical=identical && plain->coefficients[component][i]==update->dg_history->coefficients[component][i];
           check("source bound requested only for publication",plain->source_roundoff.empty() && update->dg_history->source_roundoff.size()==s.cells.size());
           check("source bound leaves every DG coefficient identical",identical);
           double affine_error=0.;
           for(unsigned int component=0;component<3;++component)
-            for(const auto i:update->dg_history->trial_stress[component].locally_owned_elements())
-              affine_error=std::max(affine_error,std::abs(update->dg_history->trial_stress[component][i]-(component==2 ? .001*c.eta_ve : 0.)));
+            for(const auto i:update->dg_history->coefficients[component].locally_owned_elements())
+              affine_error=std::max(affine_error,std::abs(update->dg_history->coefficients[component][i]-(component==2 ? .001*c.eta_ve : 0.)));
           check("analytic affine sticking DG source",affine_error<1e-9);
           auto report=output("publication-controls.csv");
           report<<"probe,error,bound,ratio\n"<<"affine-source,"<<affine_error<<",1e-9,"<<affine_error/1e-9<<'\n';
@@ -410,7 +411,7 @@ namespace aspect
             for(unsigned int component=0;component<3;++component)
               {
                 typename Model::DGHistory incoming_copy(*s.dg_history);
-                incoming_copy.trial_stress[component].add(1.);
+                incoming_copy.coefficients[component].add(1.);
                 auto different=m.make_dg_history_trial(incoming_copy,sim.solution,c);
                 auto wrong=std::make_shared<typename Model::FEStrainUpdate>(*candidate);wrong->dg_history=different;
                 const auto delta=m.candidate_fe_strain_stress(wrong,id,point)-expected;
@@ -421,7 +422,7 @@ namespace aspect
                 check("inconsistent incoming tensor component "+std::to_string(component),rejected);
                 report<<"inconsistent-incoming-"<<component<<','<<error<<','<<bound<<','<<error/bound<<'\n';
               }
-            candidate->dg_history->trial_stress[2].add(1.);
+            candidate->dg_history->coefficients[2].add(1.);
             const auto inconsistent=m.candidate_fe_strain_stress(candidate,id,point);
             const double error=(inconsistent-expected).norm();
             report<<"inconsistent-staged-history,"<<error<<','<<bound<<','<<error/bound<<std::endl;
@@ -646,7 +647,7 @@ namespace aspect
               if(batch_snapshots)
                 {
                   const auto start=std::chrono::steady_clock::now();
-                  tensor=m.evaluate_dg_trial_tensor(*s.dg_history,entry.first,quad);
+                  tensor=m.evaluate_history_tensor(*s.dg_history,entry.first,quad);
                   batch_seconds+=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
                 }
               for (unsigned int q=0; q<quad.size(); ++q)

@@ -1,0 +1,208 @@
+TASK: Restore an ASPECT-style architecture for the phase-field fault extension
+Runner: 6.1-sol, xhigh reasoning effort
+
+PURPOSE AND AUTHORIZATION
+
+Carry out an architectural refactor of the phase-field fault extension. The goal
+is code that an ASPECT developer can understand, use, and modify through familiar
+module responsibilities and interfaces. The user should be able to connect the
+physical equations to the implementation and identify where to change a material
+law, history discretization, geometry operation, or coupling algorithm.
+
+Remove source/simulator/solver/mature_material_step.cc, its special timestep-driver
+entry points, and all machinery whose purpose is to support that driver. Do not
+recreate the same architecture under another filename, class, callback, or
+"generic" step executor. The ordinary simulator timestep and solver-scheme flow
+must remain the place where the simulation advances.
+
+This instruction supersedes the previous recommendation to expose the mature
+algorithm through a dedicated single-step driver. It authorizes implementation,
+including the interface and ownership changes needed to complete the refactor.
+Exercise judgment across the affected extension; do not limit the work to a
+literal file deletion or stop after producing an inventory or proposal. Make a
+brief architectural plan, then implement and verify it. Routine design decisions
+within this scope do not require another permission request.
+
+SOURCE OF TRUTH
+
+Work in the existing pf-rsf-particle-free worktree. The remote branch has not been
+updated with the latest refactor: inspect the actual local source and diff. The
+reported a22214d57 revision is historical context, not a reset target and not a
+complete identity for the latest dirty-source build. Preserve unrelated work and
+the incoming source/test baseline before changing it.
+
+Read AGENTS.md, the relevant architectural and scientific contracts, and these
+current reports: MATURE_STEP_REFACTOR_REPORT.md, MATURE_MOVING_FAULT.md,
+STRESS_HISTORY_CONSOLIDATION_REPORT.md, and DIRECT_TRUE_STRESS_REPORT.md. Use the
+current source to verify every API and caller. Reconcile obsolete architectural
+directions with this task; historical stage restrictions do not prohibit the
+structural changes selected here. Numerical and physical contracts remain in
+force.
+
+Use comparable working ASPECT components as architectural examples. Consult the
+repository's interfaces, plugin registration, simulator access, assembly, signals,
+and timestep lifecycle before introducing a mechanism. ASPECT's extension guide
+is a reference, not a promise that every required coupling hook already exists:
+https://aspect-documentation.readthedocs.io/en/latest/user/extending/index.html
+
+ARCHITECTURAL REQUIREMENTS
+
+1. Remove the dedicated driver and its supporting architecture completely.
+
+Trace its declarations, dispatch conditions, wrapper functions, callback plumbing,
+helper types, build entries, and tests. Remove the pieces that exist solely to
+support this special driver. Update current documentation and examples that make
+it the algorithm's entry point. Preserve historical reports as historical evidence.
+
+The necessary stress, geometry, projection, and acceptance operations still have
+to occur. Place them under the appropriate existing modules and their normal
+lifecycle. Review the recent helper headers and extracted functions by actual
+responsibility: useful computations and explicit dependencies may be incorporated
+into those modules, but driver-specific scaffolding must disappear. A blanket
+reset that also loses the direct-stress implementation or numerical fixes is not
+the requested solution.
+
+2. Establish real responsibility and ownership boundaries.
+
+Use the following responsibilities to guide the design; they do not prescribe a
+new class hierarchy or one source file per row:
+
+- Simulator and solver schemes: overall timestep ordering, solver dispatch, and
+  the decision to accept or reject an attempt.
+- Material model and its internal components: constitutive laws, material
+  parameters, localization semantics, physical history updates, and responses
+  needed by assembly and linearization.
+- History discretization: owned coefficients and FE infrastructure, transport,
+  projection, transfer, and well-defined accepted/candidate state access. Keep
+  numerical operations distinguishable from constitutive laws.
+- Reconstructed-fault infrastructure: geometry, associations, interpolation,
+  generic surface-property storage and persistence. The geometry manager must
+  not interpret a friction law simply because it stores that law's state.
+- Coupled solver and assemblers: bulk/surface equations, condensation, tangents,
+  nonlinear iteration, and the projection-consistency iteration where required.
+- Postprocessors and benchmark support: observations, audits, and reference-only
+  experiments, with no hidden ownership of physical advancement.
+
+Keep the actual global coupling in the solver layer. A material evaluation must
+not secretly run a global solve, advance geometry, or publish accepted history.
+Conversely, generic simulator code should not manipulate T/R/B, localization
+formulas, or private constitutive coefficients.
+
+Reuse the existing registration and extension mechanisms where appropriate.
+Where a core extension is necessary, make it small and specific to a reusable
+capability. Do not invent a plugin framework, universal transaction engine, or
+configurable pipeline. Do not route ordering-sensitive operations through an
+unrelated signal merely to avoid touching core code. Keep dependencies and the
+order of operations visible at their legitimate call sites.
+
+3. Refactor the connected implementation, including the dg_* organization.
+
+Review source/material_model/phase_field_fault/, source/reconstructed_fault/,
+and the affected simulator/solver and assembler interfaces together. Follow
+responsibilities across directory boundaries. Consolidate fragmented helpers,
+reduce unnecessary public methods and dependencies, and use private components
+where they provide an actual ownership or algorithm boundary.
+
+Merely moving methods of one oversized class into more files is insufficient.
+Equally, collecting everything into a large source file is insufficient. Choose
+names and file divisions that expose physical and numerical responsibilities.
+DG is a valid discretization name, but should not be the only explanation of
+what a component owns. Avoid reorganizing unrelated ASPECT subsystems.
+
+4. Make the direct physical-stress implementation understandable on its own.
+
+In direct mode the physical tensor history is tau. Its transport, rotation,
+reaction, and mechanical observation must be traceable without following T/R/B
+reconstruction. Distinguish accepted history, transported/rotated state, candidate
+stress, and derived caches. Eliminate misleading use of "trial_stress" for
+physical tau in the active internal interface; confine unavoidable legacy names
+to an explicit compatibility/serialization boundary.
+
+If the separated representation remains needed by existing configurations or
+comparisons, isolate its representation-specific calculations. Share genuinely
+common spatial operators and the coupled solver. Do not create another complete
+timestep implementation for either representation. Current numerical defaults
+and supported configurations are to remain unchanged in this structural task;
+their preservation does not require mixing their internal state semantics.
+
+The direct-stress guide and example must explicitly select
+Material stress representation = direct physical stress. Explain retained
+representations in a short separate comparison. Diagnostic Z must remain
+diagnostic in direct mode; the physical localized slip-rate source remains part
+of the constitutive law.
+
+5. Preserve the validated algorithm while changing its organization.
+
+Preserve transport/geometry/rotation/reaction ordering, accepted-velocity spin
+lag, coefficient sampling, projection and quadrature, friction/age conventions,
+the converged final slip guess, and nonlinear acceptance criteria. Preserve
+single publication of a joint bulk/surface/geometry candidate and restoration
+after rejection or failure. Trial evaluations must use the same accepted parent.
+
+Keep checkpoint identity and MPI ownership/collective semantics correct. Do not
+add checkpoint conversion. Maintain supported stationary and moving cases and
+the distinct cohesive history semantics. Removing the driver must not disable
+the moving-fault capability or introduce a second acceptance authority.
+
+This task does not select a new integrator, stress space, limiter, endpoint law,
+physical default, or solver tolerance. If a genuine numerical defect is exposed,
+identify it separately rather than disguising a behavior change as refactoring.
+
+WORKFLOW AND VERIFICATION
+
+Start with a compact responsibility/ownership map and a before/after call sketch
+in the task notes. Use this to guide implementation, not as a reason to stop for
+approval. Organize the changes into coherent reviewable portions, including
+driver removal, module/interface work, and documentation. Follow the existing
+commit/push policy; this instruction alone does not request a remote push.
+
+Preserve the current tested implementation as the comparison baseline. Reuse the
+existing bounded fixtures and declared comparison criteria. Cover direct and
+separated storage, constant and layered viscosity, the default configuration,
+rejection/retry, and restart using the existing short cases. Because the core
+dispatch is affected, include a relevant stationary fault case and an ordinary
+non-fault solver-scheme smoke check. Rebuild affected checker libraries with the
+core and run the relevant existing tests. Add tests only for concrete uncovered
+interface or lifecycle behavior.
+
+Compare physical stress/work traction and accepted surface/geometry state, as
+well as solver decisions and publication counts. Check the actual representation
+selected by each input. Do not require cross-rank bitwise equality or loosen
+criteria to accommodate an unexplained change. Report actual failures and skips.
+
+Use at most four local build workers/MPI ranks and run native simulations
+sequentially. No server jobs, event-length trajectories, or physical parameter
+sweeps. Once the relevant checks pass, finish the task instead of starting an
+additional verification campaign.
+
+DELIVERABLES AND COMPLETION CRITERIA
+
+Deliver the implemented refactor, one concise report, and one maintained reading
+guide. Update the active architecture/status instructions so a later agent does
+not restore the rejected driver pattern. Retain historical evidence without
+making it the current design specification.
+
+The report must show:
+- The removed driver and the disposition of its supporting pieces.
+- The resulting modules, state owners, and small cross-module interfaces.
+- Where the existing timestep calls transport, geometry updates, constitutive
+  evaluation, coupled solves, and acceptance/rejection.
+- The concrete verification results and any unresolved limitations.
+
+The guide must let the user answer these questions from the code:
+- Where is accepted tau stored, and where is its candidate computed?
+- Where would I change the material law or stress transport discretization?
+- Where would I change the friction law or fault-geometry operation?
+- How does a candidate stress enter the mechanical residual and tangent?
+- Which code accepts a step, and how are all affected states restored on failure?
+
+Use actual file/function links and a compact dependency/call diagram. Lead with
+the physical model and component responsibilities; explain implementation details
+where they become relevant. Keep legacy reconstruction out of the main direct-
+stress walkthrough.
+
+The task is complete when the special driver and its scaffolding are gone, the
+working physics is retained through normal module interfaces, the relevant checks
+pass, and the resulting code can be explained and modified through those
+interfaces. A smaller file count, another layer of wrappers, or passing tests
+alone does not establish that the architectural goal has been met.
