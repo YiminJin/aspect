@@ -4,21 +4,23 @@
 
 ## Physical equation
 
-For a mature frictional fault, the selected material law is
+For a mature frictional fault, the selected bulk-corotational material law is
 
 $$
- (\partial_t+v\cdot\nabla)\tau-W\tau+\tau W
+ (\partial_t+v\cdot\nabla)\tau-W_b\tau+\tau W_b
  +\frac{G}{\eta_b}\tau
  =2G\bigl(D_3(v)-\mathcal L[V]\bigr),\qquad
- W=\tfrac12(\nabla v-\nabla v^T).
+ W_b=\operatorname{skw}(\nabla v-J_f),\quad J_f=\chi\widetilde V(s\otimes n).
 $$
 
 Here $(\nabla v)_{ij}=\partial_j v_i$. The stress is the deviatoric physical
 stress, in the spatial frame; pressure is a separate mechanical unknown.
 $\mathcal L[V]=\chi\widetilde V\widetilde S$ connects this notation to the
 manuscript's extended fault rate and shear tensor. The material derivative uses
-bulk material velocity, not relative slip. The rate is total-material Jaumann:
-no localized-slip spin is subtracted. Direct storage removes the auxiliary
+the full material velocity. The explicit `bulk slip subtracted` selector removes
+only the regularized jump gradient from the constitutive spin. The retained
+`total material` default uses $W=\operatorname{skw}\nabla v$ and is a different
+constitutive law; historical total-spin results remain controls. Direct storage removes the auxiliary
 localization reconstruction $T-R-B$; it does **not** remove physical objective
 rotation. This is the small-strain Maxwell model with an objective stress rate,
 not a finite-strain hyperelastic model.
@@ -41,8 +43,8 @@ mean transported/rotated data fixed during the mechanical solve.
 |---|---|---|
 | $\tau_h$ | Pa; bulk DGQ2 coefficients | Accepted or endpoint spatial stress; `DGHistory::primary` in direct mode |
 | $v,\nabla v$ | m/s, 1/s; bulk native FE | Accepted $v^-$ drives transport/spin; current $v^+$ drives strain forcing |
-| $V$ | m/s; fault nodal scalar | Current private slip-rate iterate; signed shear orientation is in $S$ |
-| $D_3,W$ | 1/s; bulk quadrature | Endpoint strain, accepted spin respectively |
+| $V$ | m/s; fault nodal scalar | Committed accepted rate for spin; private endpoint iterate for reaction. Never $Z/\Delta t$ |
+| $D_3,W_b$ | 1/s; bulk quadrature | Endpoint strain, accepted spin respectively |
 | $\phi$ | dimensionless; continuous Q1 | Transported endpoint physical profile and irreversibility obstacle |
 | $h(\phi),I,\chi=h/I$ | 1, m, 1/m | Endpoint profile compliance, normal integral and localization |
 | $S$ | dimensionless; extended fault frame | `shear_sense*sym(tangent outer normal)` on the associated segment |
@@ -83,3 +85,23 @@ $\tau^+=e^{-G\Delta t/\eta_b}\tau^-$. A uniform tensor lies in DGQ2, so its
 projection is the same tensor up to roundoff. This checks the sign and units;
 it says nothing about a narrow finite-end localization source, whose projection
 is generally not exact. See the [analytical fixture](configuration.md#checks-and-outputs).
+
+## Spin closure and its limits
+
+The shared localization sample gives $2\operatorname{sym}J_f=2\mathcal L[V]$.
+It interpolates $V$ and $I$ separately before division, using the same active
+segment, signed tangent, normal and finite-end support as mechanics. Inactive
+support gives $J_f=0$. No viscous spin is inferred from Maxwell relaxation.
+For horizontal positive slip, $J_{01}=q$ and
+$\omega_b=(L_{10}-L_{01}+q)/2$; pure slip $L_{01}=q$ has zero bulk spin.
+Curvature and variations of slip generate regular gradients that remain:
+$v=H(\rho)j$ implies $L-J_f=H\nabla j$.
+
+Under an observer rotation, $J_f^*=QJ_fQ^T$ and
+$W_b^*=QW_bQ^T+\dot Q Q^T$. The spin correction is objective and does no
+stress work. With full 3-D contractions,
+$D_t[\tau:\tau/(4G)]+\tau:\tau/(2\eta_b)=\tau:D_3-\tau:D_f$.
+This selected small-elastic-strain closure is not an elastic polar rotation,
+a sharp-tip qualification, or a finite-strain hyperelastic law. Particle
+histories and evolving cohesive histories reject this selector because their
+kinematics and source rates have not been derived for it.

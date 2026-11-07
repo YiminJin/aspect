@@ -18,6 +18,11 @@ BUILD=ROOT/'build-particle-free/transported-objective/stage-c'
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--prescribed-spin-checks',action='store_true')
+    p.add_argument('--throughgoing',action='store_true')
+    p.add_argument('--core',type=Path);p.add_argument('--checker',type=Path)
+    p.add_argument('--constitutive-spin',choices=['total material','bulk slip subtracted'])
+    p.add_argument('--checkpoint-slot',choices=['latest','oldest'],default='latest')
     p.add_argument('label');p.add_argument('--speed',type=float,default=.4)
     p.add_argument('--dt',type=float,default=.1);p.add_argument('--end',type=float,default=.4)
     p.add_argument('--initial-dt',type=float,default=.1,help='Same initialization interval across temporal controls')
@@ -52,7 +57,7 @@ def main():
             a.end=min(a.end,clock)
     lock=(BUILD/'simulation.lock').open('a');fcntl.flock(lock,fcntl.LOCK_EX)
     out=BUILD/'material-runs'/a.label;out.mkdir(parents=True,exist_ok=False)
-    fault=out/'fault.txt';fault.write_text('-.8 -.24 .4\n.8 .24 .4\n')
+    fault=out/'fault.txt';fault.write_text('-2 0 .4\n2 0 .4\n' if a.throughgoing else '-.8 -.24 .4\n.8 .24 .4\n')
     binary=ROOT/'build-particle-free/native/aspect-release'
     plugin=BUILD/('checks/libtransported_isolation_native.release.so' if a.isolation else 'checks/libtransported_material_native.release.so')
     if a.energy:plugin=BUILD/'checks/libtransported_material_energy.release.so'
@@ -60,11 +65,18 @@ def main():
         assert a.profile_method=='Q1 remap' and a.inflow=='zero' and not a.restart and not a.energy and not a.isolation
         binary=BUILD/'controls/profile-entry-aspect-release'
         plugin=BUILD/'controls/profile-entry-libtransported_material_native.release.so'
+    if a.core:binary=a.core.resolve()
+    if a.checker:plugin=a.checker.resolve()
     restart='false'
     if a.restart:
         source=a.restart.resolve();assert source.is_relative_to((BUILD/'material-runs').resolve())
         assert (source/'output/restart').is_dir()
         shutil.copytree(source/'output/restart',out/'output/restart')
+        if a.checkpoint_slot=='oldest':
+            directory=out/'output/restart'
+            slots=sorted(directory.glob('[0-9][0-9]'),key=lambda p:(p/'resume.z').stat().st_mtime)
+            assert slots
+            (directory/'last_good_checkpoint.txt').write_text(str(int(slots[0].name)))
         restart='true'
     text=f'''set Dimension = 2
 set Additional shared libraries = {plugin}
@@ -162,6 +174,7 @@ subsection Material model
   set Enable prescribed DG accepted history = true
   set Use homogeneous mesh data = true
   set Stress rotation = Jaumann DG material Lie
+{('  set Constitutive spin = '+a.constitutive_spin) if a.constitutive_spin else ''}
   set Material profile transport = {a.profile_method}
   set Material tensor inflow = {a.inflow}
 {("  set Material stress representation = "+a.representation) if a.representation!="separated" else ""}
@@ -233,13 +246,14 @@ end
         text=text.replace(f'  set Material profile transport = {a.profile_method}\n','').replace(f'  set Material tensor inflow = {a.inflow}\n','')
     path=out/'input.prm';path.write_text(text)
     env=os.environ.copy();env.update(LD_LIBRARY_PATH='/opt/openmpi/5.0.6/lib',OMP_NUM_THREADS='1',DEAL_II_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1',OMP_PROC_BIND='false',OMPI_MCA_mpi_yield_when_idle='1')
+    if a.prescribed_spin_checks:env['ASPECT_PRESCRIBED_BULK_SPIN']='1'
     if a.audit:env['ASPECT_K1_FLOOR_AUDIT']='1'
     if a.true_checks:env['ASPECT_TRUE_STRESS_CHECKS']='1'
     if a.stage_energy:env['ASPECT_TRUE_STRESS_ENERGY']='1'
     command=['/opt/openmpi/5.0.6/bin/mpirun','-n',str(a.ranks),str(binary),str(path)]
     sha=lambda f:hashlib.sha256(f.read_bytes()).hexdigest()
     (out/'runner.py').write_bytes(Path(__file__).read_bytes())
-    record=dict(arguments=vars(a)|{'restart':str(a.restart)},command=command,core_sha256=sha(binary),plugin_sha256=sha(plugin),input_sha256=sha(path),runner_sha256=sha(out/'runner.py'),head=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),runtime_environment={k:v for k,v in env.items() if k.startswith('ASPECT_') or k in ['LD_LIBRARY_PATH','OMP_NUM_THREADS','DEAL_II_NUM_THREADS','OPENBLAS_NUM_THREADS']})
+    record=dict(arguments={k:str(v) if isinstance(v,Path) else v for k,v in vars(a).items()},command=command,core_sha256=sha(binary),plugin_sha256=sha(plugin),input_sha256=sha(path),runner_sha256=sha(out/'runner.py'),head=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),runtime_environment={k:v for k,v in env.items() if k.startswith('ASPECT_') or k in ['LD_LIBRARY_PATH','OMP_NUM_THREADS','DEAL_II_NUM_THREADS','OPENBLAS_NUM_THREADS']})
     start=time.perf_counter()
     with (out/'run.log').open('w') as log:
         run=subprocess.Popen(command,cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)

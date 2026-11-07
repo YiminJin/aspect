@@ -67,8 +67,8 @@ namespace aspect
       /** One cell-clipped normal-ray interval for exact Q1 endpoint integration. */
       struct Ray
       {
-        std::array<types::global_dof_index, GeometryInfo<dim>::vertices_per_cell> dofs;
-        std::array<std::array<double, GeometryInfo<dim>::vertices_per_cell>, 2> shape;
+        std::vector<types::global_dof_index> dofs;
+        std::array<std::vector<double>, 2> shape;
         double length; ///< Interval length (m).
         double lower; ///< Signed starting normal coordinate (m).
         template<class Archive> void serialize(Archive &archive, const unsigned int)
@@ -92,8 +92,8 @@ namespace aspect
         double weight; ///< Bulk integration measure (m^2 in 2-D).
         double xi; ///< Surface-segment coordinate.
         unsigned int segment;
-        std::array<types::global_dof_index, GeometryInfo<dim>::vertices_per_cell> dofs;
-        std::array<double, GeometryInfo<dim>::vertices_per_cell> shape;
+        std::vector<types::global_dof_index> dofs;
+        std::vector<double> shape;
       };
       /** Alternative bulk-history discretizations plus their shared FE profile. */
       struct BulkHistory

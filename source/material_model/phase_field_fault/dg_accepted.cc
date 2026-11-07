@@ -98,7 +98,8 @@ namespace aspect
             }
           dg_checkpoint = std::make_shared<DGCheckpoint>();
           auto &p = *dg_checkpoint;
-          p.version = dg_material_transport ? 7 : (jaumann_dg_stress ? 6 : (uses_prescribed_dg_geometry() ? 5 : (mature_frictional_fault ? 4 : (consistent_endpoint_phase ? 3 : 1))));
+          p.version = dg_material_transport ? 7 : (jaumann_dg_stress ? (constitutive_spin==ConstitutiveSpin::bulk_slip_subtracted ? 8 : 6) : (uses_prescribed_dg_geometry() ? 5 : (mature_frictional_fault ? 4 : (consistent_endpoint_phase ? 3 : 1))));
+          if (this->get_phase_field_handler().uses_dg_phase()) p.version=9;
           p.material_law = material_viscosity_identity;
           if (dg_material_transport && this->get_reconstructed_fault_manager().uses_full_normal_cross_section())
             p.material_law += "|association support:full normal cross-section";
@@ -129,11 +130,14 @@ namespace aspect
               for (const auto &entry : s.cells)
                 {
                   auto &values = local[entry.first.to_string()];
-                  for (const auto v : entry.second->vertex_indices())
+                  const auto &element=this->get_fe().base_element(this->get_fe().component_to_base_index(pc).first);
+                  std::vector<types::global_dof_index> native_indices(this->get_fe().n_dofs_per_cell());
+                  entry.second->get_dof_indices(native_indices);
+                  for (unsigned int v=0;v<element.n_dofs_per_cell();++v)
                     {
-                      for (unsigned int d = 0; d < dim; ++d)
-                        values.push_back(entry.second->vertex(v)[d]);
-                      values.push_back(s.bulk_history.native[entry.second->vertex_dof_index(v, pc)]);
+                      const auto point=p.version==9 ? this->get_mapping().transform_unit_to_real_cell(entry.second,element.get_unit_support_points()[v]) : entry.second->vertex(v);
+                      for (unsigned int d=0;d<dim;++d) values.push_back(point[d]);
+                      values.push_back(s.bulk_history.native[native_indices[this->get_fe().component_to_system_index(pc,v)]]);
                     }
                   s.bulk_history.tensor->primary.space->cells.at(entry.first)->get_dof_indices(indices);
                   for (const auto &component : s.bulk_history.tensor->primary.coefficients)
@@ -155,7 +159,7 @@ namespace aspect
                 {
                   p.cells.push_back(entry.first);
                   unsigned int offset = 0;
-                  for (unsigned int v = 0; v < GeometryInfo<dim>::vertices_per_cell; ++v)
+                  for (unsigned int v = 0; v < (p.version==9 ? 9u : GeometryInfo<dim>::vertices_per_cell); ++v)
                     {
                       Point<dim> x;
                       for (unsigned int d = 0; d < dim; ++d)
@@ -190,18 +194,22 @@ namespace aspect
       &p.quadrature &p.Z &p.I &p.phase &p.mesh &p.fault &p.cells &p.coefficients;
       if (p.version >= 2)
         archive &p.clock_step &p.clock_time &p.clock_dt;
-      if (p.version == 5 || p.version == 7)
+      if (p.version == 5 || p.version == 7 || p.version == 9)
         archive &p.geometry_publications;
       if (p.version >= 6)
         archive &p.residual_coefficients;
-      if (p.version == 7)
+      // Schema6 retains the old stationary total-spin meaning. Schema8 adds
+      // an explicit constitutive identity to stationary mature DG only.
+      if (p.version == 7 || p.version == 8 || p.version == 9)
         archive &p.material_law;
       const auto material_identity = material_viscosity_identity
                                      + ((dg_material_transport && this->get_reconstructed_fault_manager().uses_full_normal_cross_section())
                                         ? "|association support:full normal cross-section" : "");
-      AssertThrow((dg_material_transport ? (p.version == 7 && p.material_law == material_identity) : (jaumann_dg_stress ? p.version == 6 : (uses_prescribed_dg_geometry() ? p.version == 5 : (mature_frictional_fault ? p.version == 4 : (consistent_endpoint_phase ? (p.version == 2 || p.version == 3) : p.version == 1))))) && p.G == elastic_shear_moduli[0] && p.eta == reference_viscosities[0]
+      AssertThrow((this->get_phase_field_handler().uses_dg_phase()
+                   ? (p.version==9 && p.material_law==material_identity)
+                   : (dg_material_transport ? (p.version == 7 && p.material_law == material_identity) : (jaumann_dg_stress ? (constitutive_spin==ConstitutiveSpin::bulk_slip_subtracted ? (p.version == 8 && p.material_law == material_identity) : p.version == 6) : (uses_prescribed_dg_geometry() ? p.version == 5 : (mature_frictional_fault ? p.version == 4 : (consistent_endpoint_phase ? (p.version == 2 || p.version == 3) : p.version == 1)))))) && p.G == elastic_shear_moduli[0] && p.eta == reference_viscosities[0]
                   && p.quadrature == fe_bulk_normal_quadrature_points,
-                  ExcMessage("PF5 checkpoint version/material/quadrature mismatch."));
+                  ExcMessage("PF5 checkpoint version/material/quadrature mismatch. Constitutive spin is part of the material identity; no automatic law conversion."));
     }
 
     template <int dim>
@@ -237,7 +245,7 @@ namespace aspect
       const unsigned int block = this->introspection().variable("phase_field").block_index;
       const auto pc = this->introspection().variable("phase_field").first_component_index;
       if (p.version >= 3)
-        AssertThrow(p.phase.size() == 4 * p.cells.size() && p.mesh.size() == p.phase.size(),
+        AssertThrow(p.phase.size() == (p.version==9 ? 9u:4u) * p.cells.size() && p.mesh.size() == p.phase.size(),
                     ExcMessage("DG checkpoint physical phase/corner layout mismatch."));
       else
         {
@@ -264,13 +272,18 @@ namespace aspect
           if (native != s.cells.end())
             ++matching_cells;
           if (p.version >= 3 && native != s.cells.end())
-            for (const auto v : native->second->vertex_indices())
-              {
-                const unsigned int i = 4 * cell_number + v;
-                if (p.mesh[i] != native->second->vertex(v)
-                    || p.phase[i] != s.bulk_history.native[native->second->vertex_dof_index(v, pc)])
-                  matching_phase = 0;
-              }
+            {
+              const auto &element=this->get_fe().base_element(this->get_fe().component_to_base_index(pc).first);
+              std::vector<types::global_dof_index> native_indices(this->get_fe().n_dofs_per_cell());
+              native->second->get_dof_indices(native_indices);
+              for (unsigned int v=0;v<element.n_dofs_per_cell();++v)
+                {
+                  const unsigned int i=element.n_dofs_per_cell()*cell_number+v;
+                  const auto point=p.version==9 ? this->get_mapping().transform_unit_to_real_cell(native->second,element.get_unit_support_points()[v]) : native->second->vertex(v);
+                  if (p.mesh[i]!=point || p.phase[i]!=s.bulk_history.native[native_indices[this->get_fe().component_to_system_index(pc,v)]])
+                    matching_phase=0;
+                }
+            }
           const bool local = entry != s.bulk_history.tensor->primary.space->cells.end() && entry->second->is_locally_owned();
           if (local)
             entry->second->get_dof_indices(indices);

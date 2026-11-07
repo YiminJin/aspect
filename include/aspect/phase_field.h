@@ -27,6 +27,7 @@
 #include <aspect/material_model/interface.h>
 
 #include <deal.II/grid/grid_tools.h>
+#include <deal.II/base/mpi_remote_point_evaluation.h>
 #include <deal.II/lac/full_matrix.h>
 #include <deal.II/particles/particle_handler.h>
 
@@ -314,6 +315,24 @@ namespace aspect
                          LinearAlgebra::BlockVector       &system_rhs,
                          LinearAlgebra::BlockVector       &solution);
 
+      /** Whether phase is the persistent discontinuous native variable. */
+      bool uses_dg_phase() const
+      { return this->get_parameters().use_discontinuous_phase_discretization; }
+
+      /** Transport the physical phase block from the accepted parent with the
+       * supplied accepted velocity. Does not bind geometry or publish history. */
+      void transport_dg_phase(const LinearAlgebra::BlockVector &accepted,
+                              const LinearAlgebra::BlockVector &velocity,
+                              double time, double dt, LinearAlgebra::BlockVector &candidate) const;
+      /** Certify a fresh DG interpolant through mean-preserving scaling. */
+      void limit_dg_phase(LinearAlgebra::BlockVector &) const;
+
+      /** Native phase evaluation. DG points on faces use the cell with the
+       * lexicographically greatest lower corner, consistent with half-open
+       * normalization intervals. No averaging precedes nonlinear localization. */
+      std::vector<double> phase_point_values(const Utilities::MPI::RemotePointEvaluation<dim> &,
+                                             const LinearAlgebra::BlockVector &) const;
+
       bool uses_bound_constraints() const { return solver_parameters.use_bound_constraints; }
 
       /** Native CPDI fracture part for the restricted endpoint minimizer.
@@ -395,6 +414,10 @@ namespace aspect
       solve_phase_field_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
                                const LinearAlgebra::BlockVector       &system_rhs,
                                LinearAlgebra::BlockVector             &solution_vector) const;
+
+      CellFractureEnergy evaluate_dg_fracture(
+        const LinearAlgebra::BlockVector &, bool tangent,
+        std::map<std::pair<unsigned int,unsigned int>,double> *) const;
 
       void solve_bound_constrained_phase(LinearAlgebra::BlockSparseMatrix &matrix,
                                          LinearAlgebra::BlockVector &rhs,

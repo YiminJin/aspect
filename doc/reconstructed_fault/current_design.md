@@ -3225,7 +3225,9 @@ and remaining restrictions belong to
 
 Use L_ij=partial_j v_i, W=skew L and J_W[tau]=D_t tau+tau W−W tau. The selected
 spin is total material spin; the model has not selected an elastic/inelastic
-spin split. In particular do not subtract a localized slip spin. The diffuse
+spin split. In this retained total-spin control, do not subtract a localized slip spin.
+The separately selected mature bulk-corotational extension below is a different
+constitutive law. The diffuse
 native velocity gradient can contain that contribution, so width dependence
 must be measured and interpreted as a constitutive issue.
 
@@ -3450,6 +3452,20 @@ is a proposed frozen experiment, not an enabled algorithm. Energy projection
 identities must state their integration measure. Direct remains an opt-in
 reference and separated history remains default.
 
+### Frozen split-Q2 approximation evidence (2026-11-04)
+
+The separately selected [frozen split comparison](particle_free/FROZEN_SPLIT_Q2_REPORT.md)
+adds independent Cartesian Q2 restrictions only on polygons cut by the two
+finite localization-end lines. On the identical retained physical fixture,
+64² constant/layered tensor errors improve 78.36×/77.93× for 4.05% more history
+coefficients. Common-measure traction, energy, polynomial reproduction and
+quadrature checks pass. This is a benchmark approximation-space result;
+**native source, history space, mechanics and checkpoint meanings are unchanged**.
+It justifies a bounded fixed-geometry coupled direct-stress prototype next,
+not a production option. Moving-cut transfer/stability, matching work integration
+and joint rejection/restart require separate implementation and qualification.
+Do not treat these mature localization cuts as cohesive physical-tip conditions.
+
 ## Current mature moving-fault implementation
 
 The authoritative code-level guide is
@@ -3468,3 +3484,144 @@ tensor projection owns mass algebra; `localize_surface_values` expresses the
 common surface localization. See the
 [consolidation report](particle_free/STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md)
 for bounded verification and the linked guide for current entry points.
+
+
+### Prescribed physical exterior in mature material transport (5 November 2026)
+
+The opt-in `Material tensor inflow = prescribed exterior stress` supplies an
+explicit physical tensor through the existing `TensorAdvection` inflow callback.
+It currently requires direct physical-stress storage and the complete mature,
+growth-disabled material path with full-normal support. A single physical tensor
+does not determine independent separated exterior histories; that combination
+is rejected. Default zero and retained accepted-trace behavior are unchanged.
+
+The provider receives point, accepted-parent time, RK stage time and attempted
+physical interval. It supplies the exterior of the **pure transport** subproblem
+from the same accepted parent as the interior. Rotation and endpoint reaction
+then occur once under their existing owners. The callback applies to all locally
+incoming faces, including incoming portions of a traction boundary. It performs
+no collectives, mechanics, geometry changes or history publication. Missing
+providers fail before material preparation; provider exceptions do not publish.
+
+`Material exterior stress identity` is mandatory only for this option and is
+appended to the existing material checkpoint identity. Reattach the matching
+provider before resumed preparation; no old-to-new conversion is implied. The
+callback itself is not serialized. Providers must supply their complete law/
+reference identity and deterministic retry-safe evaluations. The benchmark-only
+homogeneous shear provider supports its declared uniform schedule and explicitly
+rejects adaptive/retried intervals outside that restriction.
+
+For the selected constant shear benchmark, exterior stress is the homogeneous
+**discrete** Maxwell/Jaumann parent state, constant through pure transport.
+Compatible top traction uses its current endpoint at p=0. Initial mechanics uses
+the separate .1-s constitutive interval while stored initial history stays zero.
+See [protocol](particle_free/EXTERIOR_STRESS_PROTOCOL.md) and the measured
+[report](particle_free/EXTERIOR_STRESS_REPORT.md). This does not select an exterior
+model for production BP3, cohesive interfaces or arbitrary material parameters.
+
+### Accepted-time layered benchmark exterior (5 November 2026)
+
+The benchmark-only `layered_background` plugin extends the exterior option to a
+stateful one-dimensional reference, without changing native mechanics or history
+representations. For constant G, eta(y)>0, v=(U+u(y),0), zero body force and fixed
+velocity difference Delta_u, rotate accepted tau_n with accepted gamma_n=du_n/dy
+for the attempted interval. With beta=exp(-G dt/eta), kappa=eta(1-beta), and
+b=beta*tau_bar_xy, set
+
+    q = (Delta_u + integral b/kappa dy) / integral 1/kappa dy
+    gamma_next = (q-b)/kappa
+    tau_next_xy = q
+    tau_next_xx,yy = beta*tau_bar_xx,yy
+    p_next = tau_next_yy + p_ref.
+
+Integrating gamma_next supplies boundary velocity; top total traction is
+(q,-p_ref). This has uniform shear stress and balances the normal-stress gradient
+through pressure. The actual interior velocity remains solved. Pure transport
+receives accepted tau_n(y), not this reacted endpoint. The reference is horizontal,
+so its own transport leaves its depth profile unchanged. Native transport still
+uses the coupled accepted velocity. Native rotation uses the selected accepted
+constitutive spin, including localized-slip subtraction when selected; the
+scalar reference does not prescribe either interior quantity.
+
+The plugin computes a candidate in the existing start_timestep signal, publishes
+it only in accepted-step postprocessing, and saves/restores accepted stress,
+gamma, time, step and identity through ordinary plugin serialization. Rejected
+attempts recompute from the same parent. Initialization uses .1 s to find initial
+gamma while retaining zero stored stress. Neither t/dt nor a uniform-step index
+formula determines the background. This convention applies to this benchmark;
+it is not a production exterior solver or a second material timestep pipeline.
+
+The layered p=tau_yy+p_ref choice differs from the earlier constant benchmark's
+p=0 pressure convention. Constant eta recovers its stress/velocity recurrence,
+not automatically its pressure-inclusive loading. See
+[layered protocol](particle_free/LAYERED_BULK_CAMPAIGN_PROTOCOL.md) and
+[qualification report](particle_free/LAYERED_BULK_CAMPAIGN_REPORT.md) for the
+implemented/verified boundary and the remaining scientific limits.
+
+
+## Selected mature bulk-corotational extension (5 November 2026)
+
+The earlier total-material-spin statements describe the retained default and
+historical evidence. The user-selected mature DG extension adds a separate
+`Constitutive spin = bulk slip subtracted` option. With $L_{ij}=\partial_jv_i$,
+$J_f=(h(\phi)\widetilde V/\widetilde I)(s\otimes n)$ and
+$W_b=\operatorname{skw}(L-J_f)$, it uses
+$D_t\tau-W_b\tau+\tau W_b+(G/\eta_b)\tau=2G(D_3-\operatorname{sym}J_f)$.
+This is a selected constitutive closure; symmetric forcing, advection by full
+material velocity, quadrature, SSPRK3 and endpoint reaction are unchanged.
+It does not apply automatically to particle or evolving cohesive histories.
+
+Accepted velocity, committed slip rate, phase, normalization and signed segment
+frame/support are sampled together before staging. Attempt-local CellId/Gauss
+angular rates drive both transported direct stress and separated T/M rotations;
+they are not advected or serialized. Stationary mature DG tests the selected
+spin in its exact-zero branch and uses the stable B rotation increment. Initial
+mechanics commits matching V/velocity without advancing histories. The ordinary
+simulator and coupled solver retain their existing ownership and gates.
+Checkpoint identity distinguishes the two laws and rejects conversion.
+See the maintained [model](particle_free/mature_moving_fault/model.md),
+[lifecycle](particle_free/mature_moving_fault/lifecycle.md), and
+[verification report](particle_free/BULK_SPIN_CORRECTION_REPORT.md).
+
+The corrected-law layered campaign adds finite-slip time/mesh comparisons and
+accepted-clock boundary, adaptive restart and rejection evidence. It does not
+remove the integrated material-balance defect of the bounded nodal profile
+remap, or qualify production/cohesive evolution. Its report owns measured
+sensitivities and cost; the selected constitutive equation remains unchanged.
+
+For mature deferred publication, timestep-manager update precedes endpoint
+publication. The existing logarithmic age predictor reads the earlier committed
+rate/age when proposing the next interval. Its parameter bounds that prediction,
+not the unknown endpoint age change. Accepted history remains behind the outer
+rejection gate; the layered campaign measures both prediction and actual change
+without reordering publication or adding a second controller.
+
+
+## Selected native DGQ2 phase framework (6 November 2026)
+
+Phase family is independent of tensor history: continuous Q1 remains the default,
+and ordinary native DGQ2 is selectable. One persistent phase block is consumed by
+transport, localization, mechanics, output and restart. Upwind DG advances
+`phi_t + div(phi v) = phi div(v)` with the full accepted material velocity,
+SSPRK3, a mean-admissible CFL and whole-cell mean-preserving bound scaling.
+There is no auxiliary DG-to-Q1 remap. Explicit half-open Cartesian traces precede
+nonlinear localization. Compact moving fixtures prescribe zero exterior phase.
+
+The supported fixed-fault cohesive endpoint can use the same DG space with SIPG
+fracture energy, its complete residual/tangent and unchanged recoverable mechanical
+energy/normalization adjoints. Bernstein coefficients of the lower and upper gaps
+define sufficient whole-cell constraints; the existing nonlinear endpoint owns
+final KKT and energy acceptance. The constrained quadratic kernel supplies a
+search subproblem, not a replacement physical equation. No time-mass term or
+post-equilibrium BP correction is introduced. Mature moving growth remains disabled;
+no moving-cohesive law is inferred from the manufactured composition test.
+
+The phase handler owns spatial operators; ordinary simulator/material transaction
+owners retain acceptance, rejection and publication. Fresh DG checkpoints identify
+phase space and all nine cell modes; historical Q1 checkpoints are not converted.
+Static nonmatching faces have operator evidence, while adaptive DG phase/obstacle
+transfer is explicitly rejected. The [phase contract and source map](particle_free/DGQ2_PHASE_FIELD_DESIGN.md)
+and [qualification report](particle_free/DGQ2_PHASE_FIELD_REPORT.md) distinguish
+implementation, native checks, coupled comparisons and remaining limitations.
+Stress transport, bulk-spin closure, endpoint forcing, physical coefficients,
+quadrature of stress and existing convergence criteria are unchanged.

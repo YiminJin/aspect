@@ -5,11 +5,20 @@
 
 ## Spaces and shared mass projection
 
-The supported fixture uses native continuous Q2 velocity, Q1 pressure and Q1
-phase on a fixed Cartesian mesh. Stress has its own scalar `FE_DGQ(2)` space
+The fixture uses native continuous Q2 velocity and Q1 pressure on a fixed
+Cartesian mesh. Phase defaults to continuous Q1; explicit native DGQ2 phase is
+implemented and undergoing the qualification recorded in the
+[phase report](../DGQ2_PHASE_FIELD_REPORT.md). Stress has its own scalar `FE_DGQ(2)` space
 for each independent in-plane component: nine coefficients per cell/component,
 without continuity constraints across faces. `TensorField` owns these vectors
 and a shared DoF space; it assigns no physical meaning or acceptance status.
+
+Cartesian admission permits coordinate roundoff from non-dyadic refinement:
+each expected vertex coordinate must agree within 16 machine epsilons times
+`max(abs(lo),abs(hi),hi-lo)`, with strictly positive cell widths. This does not
+permit physically skewed cells or change quadrature/solver tolerances. The
+[layered campaign](../LAYERED_BULK_CAMPAIGN_REPORT.md) records the measured
+roundoff defect, a distorted-cell rejection and unchanged coarse-grid results.
 
 For each cell $K$, basis $N_i$ and evaluated tensor component $f_c$, require
 $\int_K N_i((P_h f)_c-f_c)\,dx=0$. Thus
@@ -82,13 +91,33 @@ Zero tensor inflow is the default. Optional `accepted trace` snapshots the
 accepted interior trace at each boundary load point and freezes it throughout
 the substeps. It is a boundary model, not an exact general exterior solution.
 The bounded examples use compatible short translated compact fields. Neither
-choice changes the profile's separate pullback rule.
+choice changes the independently selected phase transport operator.
+
+## Native phase transport and growth
+
+The phase field has its own scalar operator; it is not a stress component or a
+pretend thermal/compositional field. With DG selected, `transport_material_profile`
+passes the accepted native phase and accepted full velocity to
+`PhaseFieldHandler::transport_dg_phase`. Upwind fluxes and the divergence source
+advance the material equation, using Lobatto5 weak transport, exact Q2 mass,
+SSPRK3, mean-admissible subcycling and whole-cell bound scaling. The compact
+mature fixture prescribes zero phase on every incoming boundary. It stores the
+result directly in the candidate native phase block, without projection to Q1.
+
+In the separate supported fixed-fault cohesive path, the phase handler supplies
+the SIPG fracture energy/residual/tangent and the endpoint solver adds the existing
+mechanical energy and normalization adjoint. Positive-basis gap constraints define
+the discrete obstacle; the phase equilibrium contains no invented time-mass term.
+The transport limiter is not a final correction to this equilibrium. The
+[operator contract and source map](../DGQ2_PHASE_FIELD_DESIGN.md) give equations,
+quadrature, trace choices and ownership. Static refined faces have operator tests;
+accepted DG phase AMR transfer is explicitly unsupported.
 
 ## Rotation and reaction ordering
 
 [transport_material_history / rotate_material_history](../../../../source/material_model/phase_field_fault/stress_evolution.cc)
 use the same accepted velocity supplied by `MaterialHistoryInputs`. Let $A_h$
-be completed advection and $Q=\exp(\Delta t W^-)$ the finite rotation:
+be completed advection and $Q=\exp(\Delta t W_b^-)$ the finite rotation:
 
 $$
  \bar\tau_h=P_h[Q A_h(\tau_h^-)Q^T],\qquad
@@ -96,7 +125,17 @@ $$
 $$
 
 Geometry/profile staging occurs between transport and rotation so subsequent
-localization/normalization reads candidate geometry. The finite 2-D rotation
+endpoint reaction localization/normalization reads candidate geometry. **Spin
+subtraction does not read that candidate.** `prepare_material_history` samples
+accepted velocity gradient, committed rate, phase, normalization and segment
+frame before staging. `AcceptedSpinSamples` stores unprojected angular rates by
+CellId and Gauss order, with accepted-parent/step identities. The projection
+callback receives CellId and quadrature index explicitly. Both direct stress
+and separated $T$ and $M=R+P_h B$ use the same frozen rates. The snapshot is
+Eulerian and is not advected. A retry forms a new angle from its actual interval;
+Newton changes no spin and adds no spin derivative to the Jacobian.
+
+The finite 2-D rotation
 in [objective_stress.h](../../../../include/aspect/reconstructed_fault/objective_stress.h)
 is exact for its frozen local spin. Spatially varying rotation followed by
 projection is not exact field transport, and the full accepted-gradient
@@ -110,3 +149,11 @@ an exact zero-spin coefficient-copy branch. Formed-side cohesive spaces and
 legacy geometry-only shear corrections likewise have different contracts.
 See [intentional alternatives](alternatives.md), rather than forcing these
 through the common moving-field interface.
+
+The stationary bulk-spin anchor uses the same accepted sampling and stable
+$QBQ^T-B$ increment for the residual. Its coefficient-copy shortcut tests the
+selected angular rates for exact zero, including the converse case of zero
+total spin with nonzero fault spin. Total-spin arithmetic retains its prior
+helper and shortcut. Native FE gradients need not cancel a nonpolynomial
+localized source exactly: that residual is a spatial error, not a reason to
+project or smooth either spin before subtraction.

@@ -18,6 +18,8 @@
 
 namespace aspect
 {
+  // Benchmark-only physical loading; the historical fixture remains the default.
+  namespace MaterialFixture { double background_shear=2.7; }
   namespace Particle { namespace Integrator
   {
     template<int dim> class MaterialSamples : public Interface<dim>
@@ -55,7 +57,7 @@ namespace aspect
             for(unsigned i=0;i<fault.n_vertices();++i)
               {
                 auto p=fault.get_properties(i);
-                p[t]=2.7+.15*std::cos(3*fault.vertex(i)[0]);p[t+1]=5.;
+                p[t]=MaterialFixture::background_shear+.15*std::cos(3*fault.vertex(i)[0]);p[t+1]=5.;
                 p[s]=10.+2.*std::sin(2*fault.vertex(i)[0]);
               }
             manager.initialize_slip_rate(0,std::vector<double>(fault.n_vertices(),.001));
@@ -98,6 +100,10 @@ namespace aspect
 #endif
       #include "true_stress_moving_checks.h"
       #include "true_stress_checks.h"
+#ifdef BULK_SPIN_CHECKS
+#include "bulk_spin_checks.h"
+#include "bulk_spin_prescribed.h"
+#endif
       std::string snapshot() const
       {
         const auto &m=Plugins::get_plugin_as_type<const Model>(this->get_material_model());
@@ -115,10 +121,35 @@ namespace aspect
         return o.str();
       }
     public:
+      static void declare_parameters(ParameterHandler &prm)
+      {
+        prm.enter_subsection("Postprocess");
+        prm.enter_subsection("Material transaction fixture");
+        prm.declare_entry("Initial background shear", "2.7", Patterns::Double(),
+                          "Constant part of the initial material-label shear loading in Pa; "
+                          "the retained .15*cos(3*x_initial) perturbation is added.");
+        prm.leave_subsection();
+        prm.leave_subsection();
+      }
+      void parse_parameters(ParameterHandler &prm) override
+      {
+        prm.enter_subsection("Postprocess");
+        prm.enter_subsection("Material transaction fixture");
+        MaterialFixture::background_shear=prm.get_double("Initial background shear");
+        prm.leave_subsection();
+        prm.leave_subsection();
+      }
       void initialize() override
       {
+#ifdef BULK_SPIN_CHECKS
+        this->get_signals().post_advection_solver.connect([this](const auto &,bool temperature,unsigned,const SolverControl &)
+          {if(temperature && this->get_timestep_number()>0)bulk_spin_checks();});
+#endif
         this->get_signals().start_timestep.connect([this](const auto &)
           {
+#ifdef BULK_SPIN_CHECKS
+            if(this->get_timestep_number()==1 && last_entry!=1 && std::getenv("ASPECT_PRESCRIBED_BULK_SPIN"))bulk_spin_prescribed();
+#endif
             const auto now=snapshot();
             if(last_entry==this->get_timestep_number())
               {
@@ -207,7 +238,7 @@ namespace aspect
             for(unsigned i=0;i<f.n_vertices();++i)surf<<i<<','<<f.vertex(i)[0]<<','<<f.vertex(i)[1]<<','<<f.get_properties(i)[age]<<','<<s.Z[i]<<','<<s.I[i]<<','<<manager.get_slip_rate(0)[i]<<','<<manager.get_projection_half_widths()[0][i]<<','<<m.material_viscosity(f.vertex(i),s.eta)<<'\n';
             std::ofstream metadata(this->get_output_directory()+"material-model.csv");
             const double mphi=(1./this->get_phase_field_handler().energetic_degradation(std::vector<double>{1.},.5)-1.)/3.;
-            metadata<<std::setprecision(17)<<"G,reference_eta,m,sense,Dc,direct\n"<<s.G<<','<<s.eta<<','<<mphi<<','<<manager.get_shear_sense(0)<<",.008,"<<m.material_direct_stress<<'\n';
+            metadata<<std::setprecision(17)<<"G,reference_eta,m,sense,Dc,direct,background_shear\n"<<s.G<<','<<s.eta<<','<<mphi<<','<<manager.get_shear_sense(0)<<",.008,"<<m.material_direct_stress<<','<<MaterialFixture::background_shear<<'\n';
             const auto summary_path=this->get_output_directory()+"material-summary.csv";
             const bool header=step==0 || !std::ifstream(summary_path).good();
             std::ofstream summary(summary_path,step==0 ? std::ios::out : std::ios::app);

@@ -7,6 +7,21 @@ namespace aspect
 {
   namespace MaterialModel
   {
+    /** Unprojected Eulerian angular rates from one coherent accepted parent.
+     * Fixed QGauss order and CellId keys match the native material projector.
+     * Never transported, changed by Newton, or serialized in a checkpoint. */
+    template <int dim>
+    struct PhaseFieldFault<dim>::AcceptedSpinSamples
+    {
+      std::weak_ptr<const DGHistory> parent;
+      const LinearAlgebra::BlockVector *velocity = nullptr;
+      unsigned int step = 0, quadrature_order = 0;
+      std::uint64_t geometry_version = 0;
+      std::vector<double> committed_rates;
+      std::map<CellId,std::vector<double>> angular_rates;
+      std::array<double,3> maximum {}, l2 {}; // total, fault, bulk (1/s)
+    };
+
     /**
      * Borrowed inputs for one ordinary simulator material-history attempt.
      * The accepted parent and old velocity outlive all synchronous preparation
@@ -86,6 +101,8 @@ namespace aspect
       std::shared_ptr<FEStrainState> candidate_history;
       /** Advected tensors and optional diagnostics for this attempt. */
       TransportedHistory transport;
+      /** Accepted bulk spin sampled before any live geometry/profile binding. */
+      std::shared_ptr<const AcceptedSpinSamples> accepted_spin;
       /**
        * Before binding: staged manager clone. After swap/binding: saved accepted
        * geometry, generic surface properties and rates, available for rollback.

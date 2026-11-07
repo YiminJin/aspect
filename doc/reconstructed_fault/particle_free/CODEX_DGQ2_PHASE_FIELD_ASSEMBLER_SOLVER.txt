@@ -1,0 +1,339 @@
+TASK: NATIVE DGQ2 PHASE-FIELD ADVECTION, ASSEMBLY AND CONSTRAINED SOLUTION
+For the existing local Codex thread, using Astra with high reasoning.
+6 November 2026. This replaces the previous recommendation to improve Q1
+MacCormack transport while retaining Q1 as the required phase representation.
+
+Complete the implementation and targeted verification below. Do not stop after
+an audit, design proposal, transport-only prototype, or recommendation for a
+future Helmholtz solver. This is a numerical implementation task, not a general
+refactoring task. Make routine implementation decisions and continue without
+repeated confirmation. Report a genuine unresolved scientific conflict rather
+than silently changing the model; continue independent authorized work.
+
+1. PURPOSE AND PRIORITIES
+=========================
+Apply the user's priorities in this order:
+  1. The scientific purpose and final examples in the paper.
+  2. Accuracy, stability and efficiency.
+  3. Reuse of ASPECT infrastructure wherever appropriate.
+  4. Readability and maintainability.
+
+The immediate paper targets are:
+  - A BP3 first-event calculation on a stationary pre-existing fault.
+  - A BP3-like experiment with a viscous lower crust and a fixed fault, and a
+    corresponding experiment in which the fault is transported across the mesh.
+Use the established project definitions of these examples. Do not invent final
+crustal parameters, loading, effective-pressure conventions or event criteria.
+Read the BP3 review and latest pilot mapping if present. The layered campaign is
+an algorithmic fixture, not the dimensional paper example: its velocity-
+strengthening friction does not test earthquake nucleation. Its U=0 case still
+moves/deforms the fault; it is not the planned fixed-fault control.
+
+The purpose of this task is one trustworthy phase representation and its
+advection/evolution operators, suitable for the moving-fault example and the
+model's phase-growth capability. Both transport and the constrained phase solve
+are in scope even though the immediate mature-fault comparisons disable growth.
+Do not let preservation of a CPDI-era implementation choice dictate the new
+discretization. Equally, do not expand this task into new fracture physics or a
+replacement mechanical/stress solver.
+
+2. START FROM THE ACTUAL COMPLETED CAMPAIGN
+==========================================
+Verify the working tree, branch pf-rsf-particle-free, local modifications,
+AGENTS.md, applicable design documents and actual build/plugin identities.
+Read LAYERED_BULK_CAMPAIGN_REPORT.md and its protocol/evidence index, the current
+moving-fault guide and linked discretization documents. Preserve manual work,
+completed results, protected binaries, checkpoints and failed evidence. The
+reviewed campaign used cf06525471ce89789f1ac10905dc79f3aac7562a plus local changes;
+HEAD alone was not its source/binary identity. Do not reset to that revision.
+
+Established facts to preserve:
+  - phi is currently continuous FE_Q(1). Transport uses nodal characteristic
+    interpolation, a MacCormack correction and donor-range clamping.
+  - Mature material transport runs before mechanics. evolve_phase_field()
+    bypasses phase assembly in this path; growth is explicitly disabled.
+  - Native cohesive phase-evolution paths exist separately. The selected mature
+    path does not already implement a general transported-and-growing fault.
+  - Positive-translation profile-integral error was 6.24% at h=.125, dt=.0125;
+    7.04% at the same h and dt=.00625; and 2.39% at h=1/12, dt=.00625.
+    The integrated divergence/boundary contribution was negligible. Smaller dt
+    and a wider domain did not remove the defect. Shape accuracy matters too.
+  - Layered exterior data, finite-slip bulk-spin effects and tested lifecycle
+    behavior have already been established. Reuse that evidence.
+
+Keep physical true-stress history tau, the existing independent DGQ2 stress
+solver, endpoint mechanical law, RSF law, full plane-strain convention and the
+selected bulk-slip-subtracted spin unchanged. New physical comparisons explicitly
+select the same direct-stress/bulk-spin/exterior conventions as the campaign.
+The coherent accepted parent supplies the lagged spin; the FULL material velocity
+advects phase and geometry. Do not derive an artificial bulk advection velocity.
+
+This instruction authorizes replacing Q1-specific phase assumptions. Historical
+Q1/fixed-profile admission checks describe the old implementation; they are not
+a requirement to retain Q1. Replace affected checks with accurate new admission
+rules and tests. Do not erase unrelated restrictions on constitutive physics.
+
+3. DELIVER ONE PERSISTENT DGQ2 PHASE FIELD
+========================================
+Make the phase field a first-class native FE variable with an explicit DGQ2
+selection. Follow ASPECT's existing family/degree parameter conventions; avoid
+duplicate settings and unexplained magic constants. Preserve deliberate access
+to the historical Q1 path and old inputs for comparison. New task fixtures must
+explicitly select DGQ2. Reject unsupported CPDI/DG combinations clearly.
+
+Transport, phase evolution, localization, mechanics and output must consume the
+same DG phase field. Do not transport an auxiliary DG copy and project it back
+to Q1 each step. Do not recover continuity through smoothing or fault-trace
+averaging that changes the effective field. This is ordinary background-mesh
+DGQ2, not a fault-split or cut-cell Q2 enrichment.
+
+Audit and update ALL affected assumptions, including initialization, local DoF
+enumeration, sparsity, constraints, quadrature, fracture-energy derivatives,
+normalization and its derivatives, boundary data, postprocessing and restart.
+Changing only FE_Q(1) to FE_DGQ(2) is not a solution. Iterate over phase-component
+DoFs, not mesh vertices. Ensure every DGQ2 mode enters residuals and tangents.
+Use native cell/face evaluation and an explicit consistent trace convention.
+In particular, handle a fault integration path coinciding with a mesh face
+deliberately; averaging phi and evaluating nonlinear h(phi) need not commute.
+
+4. ADVECTION AND THE BP LIMITER
+==============================
+With growth disabled the equation is material transport:
+    partial_t phi + v . grad(phi) = 0,
+or equivalently
+    partial_t phi + div(phi v) = phi div(v).
+Implement upwind DGQ2 with the correct material balance, boundary fluxes and
+constant-state preservation. Do not silently replace it with density transport.
+The native Stokes velocity is not guaranteed pointwise divergence-free. Derive
+the actual discrete balance, including any source and time-stage quadrature.
+
+Use a well-founded bound-preserving scaling limiter that retains each cell's
+quadrature-consistent mean:
+    phi_limited = mean_K(phi) + alpha_K * (phi - mean_K(phi)),
+    0 <= alpha_K <= 1.
+Do not clip nodal values or cell means, renormalize global phi, smooth the
+profile, or limit the derived localization chi instead of phi.
+
+The underlying update must keep cell means admissible. A scaling limiter cannot
+repair an inadmissible mean while preserving it. Establish the applicable CFL,
+quadrature and divergence-source conditions. SSPRK3 with limiting at the required
+stages is the preferred transport time integrator; use scalar infrastructure
+from existing implementations where appropriate. If transport subcycling is
+needed, keep the physical accepted step and accepted-velocity convention intact.
+An alternative time discretization requires a concrete accuracy/stability/cost
+justification, not convenience of copying a temperature BDF solve.
+
+Distinguish global physical bounds from aggressive donor extrema bounds. Avoid
+flattening resolved smooth peaks unnecessarily. Standard Q2 nodal bounds alone
+do not bound the polynomial everywhere. State and implement where bounds are
+guaranteed. Protect all phase evaluations used by volume mechanics, fluxes,
+normalization and fault integration; if a whole-cell guarantee is chosen, explain
+the construction and its accuracy implications. Preserve the actual constitutive
+admissible range; do not invent an epsilon cap to hide singular evaluations.
+
+5. DG PHASE ASSEMBLY AND THE CONSTRAINED SOLVE
+============================================
+Implement the native phase-gradient operator using symmetric interior penalty
+DG (SIPG): cell gradient terms, both consistency terms, jump penalties, and
+appropriate weak boundary terms. Retain the existing physical length scale,
+fracture coefficients, degradation/geometric functions and mechanical driving
+terms. Define penalty scaling with local size, degree and coefficient, and
+verify coercivity for the corresponding positive linear model problem.
+
+The phase equation is generally a nonlinear equilibrium/obstacle problem, not
+necessarily a linear Helmholtz equation. Do not insert the temperature equation's
+time-mass term, heat capacity or conductivity interpretation unless the selected
+phase formulation actually contains the corresponding physical/pseudo-time term.
+Preserve the project's selected recoverable-energy formulation; do not restore
+particle H as the governing history merely to make the solver simpler.
+
+Use the SAME SIPG discrete gradient energy in energy evaluation, residual,
+tangent and acceptance checks. Include the face terms in the energy, not just
+the matrix. Retain the localization/normalization variations required by the
+native mechanical-phase coupling and its work adjoint. Update those variations
+for the complete phase FE space; increasing phase degree is not permission to
+freeze I or omit nonlocal derivatives.
+
+For a material step, first transport the accepted profile to phi_adv. In a
+growth-enabled phase solve the immutable lower obstacle is phi_adv, with the
+existing physical upper bound. In a stationary case the obstacle is the accepted
+profile. Enforce the obstacle through a consistent constrained nonlinear solve,
+such as an appropriately generalized active-set/semismooth method. Specify the
+discrete admissible set: Q1-style coefficient inequalities do not automatically
+imply pointwise Q2 inequalities. Constraints at a chosen point set or in a
+positive basis need a clear interpretation and corresponding residual/KKT tests.
+
+Do not solve an unconstrained Helmholtz problem and then apply the ordinary BP
+limiter as the final phase update. This can violate phi >= phi_adv and invalidate
+the equilibrium residual and energy acceptance. The BP limiter belongs to the
+transport step; any correction within growth must be integrated into the
+constraint algorithm and followed by proper constrained convergence checks.
+Phase growth may physically change the cell averages and total phase integral.
+The advection conservation requirement must not be imposed on growth.
+
+Complete the DG constrained solver in supported phase-growth paths. Also verify
+the transport-then-constrained-solve composition using a manufactured phase
+problem with a moving obstacle. This does not authorize inventing a missing
+moving-cohesive constitutive law or removing unrelated maturity/growth guards.
+Clearly distinguish phase-operator capability from qualification of the entire
+coupled growing-fault model.
+
+6. REUSE ASPECT INFRASTRUCTURE AND KEEP OWNERSHIP CLEAR
+====================================================
+Inspect these actual entry points and their callers before changing interfaces:
+  source/simulator/phase_field.cc and include/aspect/phase_field.h
+  source/simulator/assemblers/advection.cc
+    AdvectionSystem, AdvectionSystemInteriorFace,
+    AdvectionSystemBoundaryFace
+  source/simulator/helper_functions.cc
+    apply_limiter_to_dg_solutions
+  source/simulator/solver.cc and solver_schemes.cc
+  source/simulator/core.cc
+  source/material_model/phase_field_fault/profile_transport.cc
+  source/material_model/phase_field_fault/material_geometry.cc
+  source/material_model/phase_field_fault/fe_phase_energy.cc
+  source/simulator/solver/reconstructed_fault_endpoint_phase.cc
+and the existing normalization, phase-constraint and bulk-cohesive consumers.
+
+Reuse native FE declarations, DoF handling, distributed vectors, constraints,
+cell/face assembly, boundary handling, linear solvers, preconditioners and output.
+Use the temperature DG assembler as the main reference for elliptic face terms.
+Factor small genuinely reusable scalar kernels when useful, preserving current
+temperature/composition behavior. Avoid pasting a second large advection solver
+or representing phase as a pretend temperature/compositional field to satisfy
+an API. Keep phase physics and obstacle ownership in the phase subsystem;
+material physics supplies its driving terms.
+
+ASPECT's current BP routine uses a finite sampling set and global constant
+bounds. Its current post-solve invocation changes the solved equation and disables
+that field's nonlinear residual contribution. Reuse sound numerical operations,
+not that policy for phase equilibrium. Verify mean admissibility and evaluation
+coverage rather than treating the existing implementation as a universal proof.
+
+Use scalable sparse assembly and existing iterative/preconditioning facilities.
+Audit replicated/dense phase structures before increasing the number of phase
+DoFs; do not blindly multiply an experimental dense production path. Small dense
+systems are acceptable as independent test references. Avoid broad unrelated
+infrastructure redesign or a new single-step driver/executor abstraction.
+
+Write ASPECT-style declarations, Doxygen comments and formatting. Explain the
+equations, field ownership, accepted/trial distinction, face signs, limiter
+guarantees and obstacle semantics where implemented. Organize functions/classes
+around these responsibilities; do not create one file per trivial helper or a
+single oversized driver. Prefer existing components where they remain coherent.
+
+7. ACCEPTANCE, RESTART AND SCOPE OF RELATED FIXES
+===============================================
+Transported phase, obstacle, geometry, normalization and mechanics must belong to
+the same candidate. Hold the accepted parent fixed throughout nonlinear trials;
+publish once after acceptance and restore everything on rejection. Invalidate
+normalization and geometry-dependent caches at the correct points.
+
+Support fresh DGQ2 checkpoints and rank-changing restart through native ASPECT
+mechanisms. Validate phase family/degree/representation on reload. Do not silently
+reinterpret a Q1 checkpoint as DGQ2 or convert old production histories. Preserve
+the historical Q1 restart behavior in its own supported configuration.
+
+The campaign also found an older-than-intended surface state in the adaptive
+timestep proposal. Keep this issue explicit. Use fixed accepted schedules for
+the principal old/new phase comparisons. Do not redesign event/adaptive policy
+as part of this task; fix accepted-state access needed by the new phase path,
+and do not claim that the old controller's predicted age bound is an endpoint
+acceptance guarantee. Keep any independent controller correction separate.
+
+8. EXECUTION AND VERIFICATION
+=============================
+Proceed through the following work in one task; these are not permission gates.
+First establish the operator design in a short note, implement the persistent
+DG field and both operators, run inexpensive checks, then the selected coupled
+comparisons. Adjust routine details in response to evidence rather than asking
+the user to choose implementation minutiae.
+
+A. Transport checks using the actual native operator
+  - Smooth translation in both directions over many cell crossings; deformation
+    or rotation with a known solution; nonzero-divergence material transport;
+    and a controlled nonzero inflow/outflow case.
+  - Use three inexpensive mesh levels and enough temporal control to separate
+    spatial and time errors. Keep physical profile width and travel fixed.
+  - Compare retained Q1 MacCormack, DGQ2 without limiting on a smooth admissible
+    control, and DGQ2+BP. Do not build a competing Q1-FCT production solver.
+  - Measure initialization error separately, balance residual, field norms,
+    peak/width/centroid, extrema, limiter activity, substeps, memory and runtime.
+    Use exact or independently computed references, not only implementation
+    replay. A correct integral with a badly smeared profile is insufficient.
+
+B. SIPG and obstacle checks using the actual phase assembler/solver
+  - Manufactured elliptic solutions: convergence, boundary terms, symmetry and
+    coercivity for the positive linear case; include face coupling and applicable
+    coefficient variation.
+  - Directional energy/residual/tangent checks including SIPG faces and the
+    coupled normalization contribution where supported.
+  - Known active/free obstacle regions, a nonconstant lower obstacle, no-growth
+    equilibrium, and a genuine phase increment. Demonstrate constrained residual
+    convergence and the intended admissibility guarantee, not just a small
+    unconstrained linear residual.
+  - Compose transport and growth with a moving manufactured obstacle. Verify
+    the material lower bound and distinguish physical growth from remapping.
+  - Exercise MPI interfaces and supported nonmatching/refined faces. Do not
+    silently advertise arbitrary AMR if transfer/constraint behavior is untested.
+
+C. Native integration and targeted physical comparisons
+  - Run a short supported native cohesive phase-growth integration check, in
+    addition to mature transport. Preserve and identify any previously documented
+    coupled cohesive failure; do not conceal it by changing physics/tolerances.
+    Operator tests alone must not be called full coupled growth qualification.
+  - Reuse the completed layered campaign inputs and matched exterior provider.
+    Keep G, eta(y), friction, loading, profile scales, 20 material labels and
+    terminal time T=.8 fixed. Start fresh with the chosen DG initialization and
+    quantify its initial representation difference from the old Q1 field.
+  - Run bulk-spin U=+2 at h=.125 with dt=.0125 and .00625; U=-2 at h=.125,
+    dt=.0125; and U=+2 at h=1/12, dt=.00625. These four cases provide direction,
+    timestep and spatial comparisons. Reuse old outputs; do not rerun the full
+    total-spin, wider-domain and adaptive campaign by default.
+  - Compare common-quadrature phase, localization, stresses, traction, V,
+    cumulative slip and age, with central/end regions retained. Use native DG
+    values rather than display-smoothed exports. Preserve the finite-domain
+    sensitivity in the interpretation; exact directional equality is not expected.
+  - Verify one short rejected/retried step against a matching accepted-schedule
+    control and a short DG checkpoint continuation across MPI rank counts.
+
+Run local builds/tests/heavy analysis sequentially, at most four workers/ranks.
+Do not submit server jobs or start production BP3 trajectories. Use a separate
+coherent candidate build and matching plugins. If a check exposes a real defect,
+repair it and repeat the affected checks, not every historical experiment.
+Do not queue expensive coupled cases while cheap operator checks are failing.
+
+9. COMPLETION AND REVIEWABLE DELIVERABLES
+=======================================
+Deliver implemented native DGQ2 transport AND SIPG constrained phase evolution,
+integrated into their supported paths, with the verification above. Do not call
+the task complete with BP applied only to transport while phase evolution still
+silently falls back to Q1/CPDI.
+
+Success means the discrete transport balance closes to the justified algebraic/
+quadrature accuracy, bounds and obstacle semantics are demonstrated, profile
+shape converges with resolution, and the coupled accuracy/cost changes are
+measured. Do not promise that switching FE family alone removes every error,
+or select a universal percentage threshold after seeing the results.
+
+Update MATURE_MOVING_FAULT.md and its linked discretization/algorithm documents
+to show the actual call order, separate transport from growth, define the DG
+space, fluxes, divergence treatment, BP conditions, SIPG energy, obstacle and
+publication lifecycle. Keep the overview short and put derivations/details in
+linked Markdown files. Include a compact source map so the user can trace each
+equation to its owning assembler/solver. State clearly what remains unqualified.
+
+Produce one concise DGQ2_PHASE_FIELD_REPORT.md with linked evidence: exact source
+and build identities, reproducible commands, numerical results, cost, changed
+APIs/parameters, remaining limitations, and the next decision for the paper
+examples. Use PNG plots and compact CSV/JSON data where useful. Explain any
+failure honestly; solver convergence and attractive plots are not accuracy proof.
+Follow the repository's commit/push policy; do not discard unrelated changes.
+
+Useful primary references (adapt principles to our actual material equation):
+  ASPECT discretization and DG limiter documentation:
+  https://aspect-documentation.readthedocs.io/en/latest/parameters/Discretization.html
+  deal.II step-74, SIPG assembly with FEInterfaceValues:
+  https://dealii.org/9.6.0/doxygen/deal.II/step_74.html
+  Zhang and Shu, high-order maximum-principle-satisfying schemes:
+  https://www.math.purdue.edu/~zhan1966/research/paper/maximum_principle.pdf

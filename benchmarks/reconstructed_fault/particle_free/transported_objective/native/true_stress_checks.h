@@ -33,7 +33,7 @@
         projection_state.bulk_history.native=explicit_fields;
         const auto explicit_velocity=velocity(2.);
         const auto projected=m.project_material_tensor(s.bulk_history.tensor->primary,projection_state,explicit_velocity,
-          [](const auto &,const auto &,const auto &,double phase,const auto &gradient)
+          [](const auto &,unsigned int,const auto &,const auto &,const auto &,double phase,const auto &gradient)
           {Tensor value;value[0][0]=phase+gradient[0][0];value[1][1]=gradient[1][1];
            value[0][1]=.5*(gradient[0][1]+gradient[1][0]);return value;});
         Tensor reference;reference[0][0]=.31;reference[1][1]=-.06;reference[0][1]=.02;

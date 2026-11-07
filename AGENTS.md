@@ -203,3 +203,22 @@ Inspect callers, headers, and tests before changing interfaces.
 - Preserve the tested final slip guess, single joint publication/rollback,
   accepted-gradient spin lag, quadrature and criteria. Historical refactoring
   reports remain evidence, not authority to recreate superseded architecture.
+
+
+## Selected mature bulk-spin closure (2026-11-05)
+
+- The user explicitly selected `CODEX_BULK_SPIN_CORRECTION_HANDOFF.txt`.
+  Mature particle-free DG may select `Constitutive spin = bulk slip subtracted`:
+  subtract the full localized rate dyad from the accepted velocity gradient
+  before forming the Jaumann-type spin. Keep total-material spin as the default
+  and historical control; this is a constitutive change, not a variable rename.
+- Use committed accepted V, phase, normalization, signed segment frame and
+  support with accepted velocity. Freeze pointwise Eulerian quadrature spin
+  before geometry/profile binding; never use Z/dt, endpoint/Newton rates, or
+  advect the spin snapshot. Preserve endpoint forcing and transport velocity.
+- Apply the same spin to direct stress and both separated transported histories;
+  stationary zero-spin shortcuts test the selected spin. Unsupported particle
+  and cohesive combinations reject the selector. Enforce checkpoint law identity;
+  do not resume total-spin trajectories under bulk spin or relabel old evidence.
+- The stopped layered campaign remains stopped. Consult
+  `particle_free/BULK_SPIN_CORRECTION_REPORT.md` for bounded evidence and limits.

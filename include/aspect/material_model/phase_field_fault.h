@@ -227,6 +227,19 @@ namespace aspect
          */
         void set_boundary_normalization_completion_file(const std::string &path);
 
+        /** Physical exterior stress for the pure transport subproblem, before
+         * this attempt's rotation and reaction. Arguments are spatial point,
+         * accepted-parent time, RK stage time and attempted physical interval
+         * (seconds). The provider must be deterministic, retry-safe and perform
+         * no MPI collectives; it is evaluated on every locally incoming face.
+         * Restricted to direct physical-stress material transport. Reattach on
+         * restart with the same declared checkpoint identity; no conversion. */
+        using ExteriorStress = std::function<SymmetricTensor<2, dim>(
+          const Point<dim> &, double, double, double)>;
+        void set_material_exterior_stress(const std::string &identity,
+                                         const ExteriorStress &provider);
+
+
         ReconstructedFaultBulkPointResponse
         evaluate_reconstructed_fault_bulk_point(
           const ReconstructedFaultBulkPointInputs &inputs) const;
@@ -520,6 +533,12 @@ namespace aspect
         bool consistent_particle_strain = false;
         bool jaumann_particle_stress = false;
         bool jaumann_dg_stress = false;
+        /** Constitutive spin is independent of storage and Lie integration. */
+        enum class ConstitutiveSpin { total_material, bulk_slip_subtracted };
+        ConstitutiveSpin constitutive_spin = ConstitutiveSpin::total_material;
+        struct AcceptedSpinSamples;
+        std::shared_ptr<const AcceptedSpinSamples> sample_accepted_bulk_spin(
+          const FEStrainState &accepted, const LinearAlgebra::BlockVector &accepted_velocity, double dt) const;
         bool dg_material_transport = false;
         bool material_variable_viscosity = false;
         bool material_direct_stress = false;
@@ -529,6 +548,9 @@ namespace aspect
         }
         bool material_bounded_profile = false;
         bool material_trace_inflow = false;
+        bool material_prescribed_inflow = false;
+        std::string material_exterior_identity;
+        ExteriorStress material_exterior_stress;
         Functions::ParsedFunction<dim> material_viscosity_multiplier;
         Functions::ParsedFunction<dim> material_initial_phase;
         std::string material_viscosity_identity;
@@ -628,11 +650,12 @@ namespace aspect
                                                                         const Point<dim> &x) const;
 
         /**
-         * Material tensor evaluator. Arguments: tensor DoF indices, reference
+         * Material tensor evaluator. Arguments: cell/quadrature key, tensor DoF indices, reference
          * coordinate, spatial point (m), Q1 phase and accepted velocity gradient
          * (1/s). Return one spatial-frame tensor in Pa, before mass projection.
          */
         using MaterialTensorField = std::function<SymmetricTensor<2, dim>(
+                                      const CellId &cell, unsigned int quadrature_index,
                                       const std::vector<types::global_dof_index> &indices,
                                       const Point<dim> &unit_point, const Point<dim> &point,
                                       double phase, const Tensor<2, dim> &accepted_gradient)>;
@@ -651,6 +674,25 @@ namespace aspect
          * history identity, timestep number and dt. Moving material steps instead
          * install the transported/rotated anchor through rotate_material_history(). */
         void prepare_objective_dg_anchor();
+        /** Value-only sample of the live source context at evaluation time.
+         * Owns frame/weights and association identity, not mutable manager data.
+         * Accepted spin samples are constructed before the manager is staged. */
+        struct MatureLocalizationSample
+        {
+          bool active = false;
+          unsigned int fault = numbers::invalid_unsigned_int;
+          unsigned int segment = numbers::invalid_unsigned_int;
+          std::uint64_t geometry_version = 0;
+          double xi = 0., h = 0., normalization = 0., shear_sense = 0.;
+          Tensor<1,dim> tangent, normal;
+          double interpolate(const std::vector<double> &values) const;
+          SymmetricTensor<2,dim> twice_symmetric(const std::vector<double> &values) const;
+          Tensor<2,dim> slip_gradient(const std::vector<double> &rates) const;
+        };
+        MatureLocalizationSample sample_mature_localization(
+          const ReconstructedFaultManager<dim> &manager, const Point<dim> &point,
+          double phase, const std::vector<double> &I,
+          const ReconstructedFaultUtilities::NormalProfileProjection *cached = nullptr) const;
         /** Localize nodal surface values a as 2*h(phi)*a(xi)*S/I(xi).
          * Both a and I use linear interpolation on the associated segment;
          * S=shear_sense*sym(tangent outer normal) is in the spatial frame.
@@ -1266,7 +1308,7 @@ namespace aspect
             double lower, upper, diameter;
             Point<dim> reference_origin;
             Tensor<1, dim> reference_direction;
-            std::array<types::global_dof_index, GeometryInfo<dim>::vertices_per_cell> phase_dofs;
+            std::vector<types::global_dof_index> phase_dofs;
           };
           struct Profile
           {

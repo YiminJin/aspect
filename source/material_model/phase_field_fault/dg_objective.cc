@@ -1,5 +1,5 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
-#include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
+#include <aspect/material_model/phase_field_fault/material_history_internal.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/phase_field_fault/tensor_history_internal.h>
 #include <aspect/reconstructed_fault/objective_stress.h>
@@ -11,36 +11,74 @@ namespace aspect
   namespace MaterialModel
   {
     template <int dim>
+    double PhaseFieldFault<dim>::MatureLocalizationSample::interpolate(const std::vector<double> &values) const
+    {
+      if (!active) return 0.;
+      const double value = (1-xi)*values.at(segment)+xi*values.at(segment+1);
+      AssertThrow(std::isfinite(value), ExcMessage("Surface localization requires finite values."));
+      return value;
+    }
+
+    template <int dim>
+    SymmetricTensor<2,dim>
+    PhaseFieldFault<dim>::MatureLocalizationSample::twice_symmetric(const std::vector<double> &values) const
+    {
+      if (!active) return {};
+      const auto S = shear_sense*symmetrize(outer_product(tangent,normal));
+      // Preserve the retained mechanical source's multiplication order.
+      return (2*interpolate(values)*h/normalization)*S;
+    }
+
+    template <int dim>
+    Tensor<2,dim>
+    PhaseFieldFault<dim>::MatureLocalizationSample::slip_gradient(const std::vector<double> &rates) const
+    {
+      if (!active) return {};
+      return (h*interpolate(rates)/normalization)*outer_product(shear_sense*tangent,normal);
+    }
+
+    template <int dim>
+    typename PhaseFieldFault<dim>::MatureLocalizationSample
+    PhaseFieldFault<dim>::sample_mature_localization(
+      const ReconstructedFaultManager<dim> &manager, const Point<dim> &point,
+      const double phase, const std::vector<double> &I,
+      const ReconstructedFaultUtilities::NormalProfileProjection *cached) const
+    {
+      MatureLocalizationSample sample;
+      const auto source = cached ? *cached : manager.project_to_bulk_source(point);
+      if (!source.active) return sample;
+      sample.active = true;
+      sample.fault = source.fault_index;
+      sample.segment = source.segment_index;
+      sample.xi = source.xi;
+      const auto &fault = manager.get_fault(sample.fault);
+      sample.geometry_version = fault.geometry_version();
+      sample.normalization = (1-sample.xi)*I.at(sample.segment)+sample.xi*I.at(sample.segment+1);
+      AssertThrow(std::isfinite(sample.normalization) && sample.normalization>0.,
+                  ExcMessage("Surface localization requires positive finite native normalization."));
+      sample.tangent = fault.vertex(sample.segment+1)-fault.vertex(sample.segment);
+      sample.tangent /= sample.tangent.norm();
+      if constexpr (dim==2)
+        {
+          sample.normal[0] = -sample.tangent[1];
+          sample.normal[1] = sample.tangent[0];
+        }
+      else AssertThrow(false,ExcMessage("Objective DG history is restricted to plane strain."));
+      sample.shear_sense = manager.get_shear_sense(sample.fault);
+      sample.h = evaluate_reconstructed_fault_localization(sample.fault,sample.segment,
+                                                           sample.xi,phase,phase,"mature DG stress").current_h;
+      return sample;
+    }
+
+    template <int dim>
     SymmetricTensor<2, dim>
     PhaseFieldFault<dim>::localize_surface_values(
       const Point<dim> &point, const double phase, const std::vector<double> &surface_values,
       const std::vector<double> &I,
       const ReconstructedFaultUtilities::NormalProfileProjection *cached) const
     {
-      const auto &manager = this->get_reconstructed_fault_manager();
-      const auto source = cached ? *cached : manager.project_to_bulk_source(point);
-      if (!source.active)
-        return {};
-      const auto &fault = manager.get_fault(source.fault_index);
-      const auto j = source.segment_index;
-      const double xi = source.xi;
-      const double value = (1 - xi) * surface_values.at(j) + xi * surface_values.at(j + 1);
-      const double normalization = (1 - xi) * I.at(j) + xi * I.at(j + 1);
-      AssertThrow(std::isfinite(value) && std::isfinite(normalization) && normalization > 0.,
-                  ExcMessage("Surface localization requires finite values and positive native normalization."));
-      auto tangent = fault.vertex(j + 1) - fault.vertex(j);
-      tangent /= tangent.norm();
-      Tensor<1, dim> normal;
-      if constexpr (dim == 2)
-        {
-          normal[0] = -tangent[1];
-          normal[1] = tangent[0];
-        }
-      else AssertThrow(false, ExcMessage("Objective DG history is restricted to plane strain."));
-      const auto S = manager.get_shear_sense(source.fault_index) * symmetrize(outer_product(tangent, normal));
-      const auto localization = evaluate_reconstructed_fault_localization(
-                                  source.fault_index, j, xi, phase, phase, "mature DG stress");
-      return (2 * value * localization.current_h / normalization) * S;
+      return sample_mature_localization(this->get_reconstructed_fault_manager(),point,phase,I,cached)
+             .twice_symmetric(surface_values);
     }
 
     template <int dim>
@@ -55,6 +93,16 @@ namespace aspect
       if (state.objective.tensor && state.objective.parent.lock() == parent
           && state.objective.step == this->get_timestep_number() && state.objective.dt == dt)
         return;
+      if (constitutive_spin==ConstitutiveSpin::bulk_slip_subtracted && this->get_timestep_number()==0)
+        {
+          // Initial mechanics commits its converged velocity and V together,
+          // but advances no stress. Never sample a predictor/minimum initial V.
+          state.objective.tensor=parent;
+          state.objective.parent=parent;
+          state.objective.step=0;
+          state.objective.dt=dt;
+          return;
+        }
       if (material_direct_stress)
         {
           // Initialization and rollback prepare accepted observations outside a
@@ -68,6 +116,8 @@ namespace aspect
           state.objective.dt = dt;
           return;
         }
+      const auto spin=constitutive_spin==ConstitutiveSpin::bulk_slip_subtracted
+                      ? sample_accepted_bulk_spin(state,this->get_old_solution(),dt) : nullptr;
       TimerOutput::Scope timer(this->get_computing_timer(), "DG objective anchor");
       auto anchor = std::make_shared<DGHistory>();
       anchor->primary.space = parent->primary.space;
@@ -97,10 +147,15 @@ namespace aspect
           const auto T = evaluate_history_tensor(*parent, entry.first, rule);
           const auto R = evaluate_history_tensor(*parent->residual, entry.first, rule);
           if constexpr (dim == 2)
-            if (std::all_of(gradients.begin(), gradients.end(), [](const auto & a)
+            if (spin ? std::all_of(spin->angular_rates.at(entry.first).begin(),spin->angular_rates.at(entry.first).end(),
+                                   [](double omega)
             {
-              return a[1][0] == a[0][1];
-              }))
+              return omega==0.;
+            })
+        : std::all_of(gradients.begin(), gradients.end(), [](const auto &a)
+        {
+          return a[1][0]==a[0][1];
+          }))
           {
             // Preserve the exact zero-spin identity, including nonzero R.
             for (unsigned int c = 0; c < components; ++c)
@@ -121,10 +176,19 @@ namespace aspect
               SymmetricTensor<2, dim> rotated_T, rotated_R;
               if constexpr (dim == 2)
                 {
-                  rotated_T = ReconstructedFaultUtilities::rotate_plane_strain_stress(T[q], gradients[q], dt);
-                  // Finite-step complete residual: not just rotation of R.
-                  rotated_R = ReconstructedFaultUtilities::rotate_plane_strain_stress(R[q], gradients[q], dt)
-                              + ReconstructedFaultUtilities::rotate_plane_strain_stress_increment(B, gradients[q], dt);
+                  if (spin)
+                    {
+                      const double omega=spin->angular_rates.at(entry.first).at(q);
+                      rotated_T=ReconstructedFaultUtilities::rotate_plane_strain_stress_with_spin(T[q],omega,dt);
+                      rotated_R=ReconstructedFaultUtilities::rotate_plane_strain_stress_with_spin(R[q],omega,dt)
+                                +ReconstructedFaultUtilities::rotate_plane_strain_stress_increment_with_spin(B,omega,dt);
+                    }
+                  else
+                    {
+                      rotated_T = ReconstructedFaultUtilities::rotate_plane_strain_stress(T[q], gradients[q], dt);
+                      rotated_R = ReconstructedFaultUtilities::rotate_plane_strain_stress(R[q], gradients[q], dt)
+                                  + ReconstructedFaultUtilities::rotate_plane_strain_stress_increment(B, gradients[q], dt);
+                    }
                 }
               else AssertThrow(false, ExcMessage("Objective DG history requires 2D plane strain."));
               for (unsigned int i = 0; i < n; ++i)
@@ -167,6 +231,8 @@ namespace aspect
     }
 
 #define INSTANTIATE(dim) \
+  template struct PhaseFieldFault<dim>::MatureLocalizationSample; \
+  template PhaseFieldFault<dim>::MatureLocalizationSample PhaseFieldFault<dim>::sample_mature_localization(const ReconstructedFaultManager<dim> &,const Point<dim> &,double,const std::vector<double> &,const ReconstructedFaultUtilities::NormalProfileProjection *) const; \
   template SymmetricTensor<2,dim> PhaseFieldFault<dim>::localize_surface_values(const Point<dim> &,double,const std::vector<double> &,const std::vector<double> &,const ReconstructedFaultUtilities::NormalProfileProjection *) const; \
   template void PhaseFieldFault<dim>::prepare_objective_dg_anchor();
     ASPECT_INSTANTIATE(INSTANTIATE)

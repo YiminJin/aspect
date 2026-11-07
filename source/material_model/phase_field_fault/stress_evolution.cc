@@ -35,7 +35,7 @@ namespace aspect
       std::shared_ptr<DGHistory> separated_memory;
       if (!material_direct_stress)
         {
-          separated_memory = project([&](const auto &, const auto &, const auto & x, const double phi, const auto &)
+          separated_memory = project([&](const auto &, unsigned int, const auto &, const auto &, const auto & x, const double phi, const auto &)
           {
             return localize_surface_values(x, phi, accepted.Z, accepted.I);
           });
@@ -92,8 +92,13 @@ namespace aspect
                 memory_inflow.emplace(load.point, separated_memory->primary.tensor_at(load.indices, unit));
             }
         }
-      const DGField primary_boundary = [&](const Point<dim> &x, double)
+      const DGField primary_boundary = [&](const Point<dim> &x, const double stage_time)
       {
+        // Native TensorAdvection invokes this on all incoming physical faces,
+        // including a locally incoming top. The provider supplies the transported
+        // parent exterior, not the rotated/reacted endpoint of this step.
+        if (material_prescribed_inflow)
+          return material_exterior_stress(x, input.end_time - dt, stage_time, dt);
         return material_trace_inflow ? primary_inflow.at(x) : SymmetricTensor<2, dim>();
       };
       const DGField memory_boundary = [&](const Point<dim> &x, double)
@@ -165,20 +170,33 @@ namespace aspect
                                                       input.accepted_velocity, field);
         return projected;
       };
-      // Accepted velocity supplies total material spin, lagged over this step.
-      // Rotate then mass-project the advected field on the staged profile. The
-      // resulting anchor must not be recomputed from a Newton velocity iterate.
-      auto anchor = project([&](const auto & ids, const auto & u, const auto &, double, const auto & gradient)
+      // Both representations consume the same frozen Eulerian accepted spin.
+      // Candidate phase/frame/rates must never enter the lagged subtraction.
+      const auto spin=dg_material_trial->accepted_spin;
+      if (constitutive_spin==ConstitutiveSpin::bulk_slip_subtracted)
+        AssertThrow(spin && spin->parent.lock()==accepted.bulk_history.tensor
+                    && spin->velocity==&input.accepted_velocity && spin->step==input.step
+                    && spin->quadrature_order==std::max(8u,fe_bulk_normal_quadrature_points),
+                    ExcMessage("Missing or mismatched accepted bulk-spin quadrature snapshot."));
+      const auto rotate=[&](const SymmetricTensor<2,dim> &tau,const CellId &cell,
+                            unsigned int q,const Tensor<2,dim> &gradient)
+      {
+        if constexpr(dim==2)
+          return spin ? ReconstructedFaultUtilities::rotate_plane_strain_stress_with_spin(tau,spin->angular_rates.at(cell).at(q),dt)
+                 : ReconstructedFaultUtilities::rotate_plane_strain_stress(tau,gradient,dt);
+        else return SymmetricTensor<2,dim>();
+      };
+      auto anchor = project([&](const auto & cell, unsigned int q, const auto & ids, const auto & u, const auto &, double, const auto & gradient)
       {
         if constexpr(dim == 2)
-          return ReconstructedFaultUtilities::rotate_plane_strain_stress(transported->primary.tensor_at(ids, u), gradient, dt);
+          return rotate(transported->primary.tensor_at(ids,u),cell,q,gradient);
         else return SymmetricTensor<2, dim>();
       });
       if (!material_direct_stress)
-        anchor->residual = project_material_tensor(accepted.bulk_history.tensor->primary, *candidate, input.accepted_velocity, [&](const auto & ids, const auto & u, const auto & x, double p, const auto & gradient)
+        anchor->residual = project_material_tensor(accepted.bulk_history.tensor->primary, *candidate, input.accepted_velocity, [&](const auto & cell, unsigned int q, const auto & ids, const auto & u, const auto & x, double p, const auto & gradient)
         {
           if constexpr(dim == 2)
-            return ReconstructedFaultUtilities::rotate_plane_strain_stress(separated_memory->primary.tensor_at(ids, u), gradient, dt)
+            return rotate(separated_memory->primary.tensor_at(ids,u),cell,q,gradient)
                    - localize_surface_values(x, p, candidate->Z, candidate->I);
           else return SymmetricTensor<2, dim>();
         });

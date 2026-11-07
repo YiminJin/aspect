@@ -1040,6 +1040,12 @@ namespace aspect
                          "Be careful if you choose 1 as the degree. The resulting element "
                          "is not stable and it may lead to artifacts in the solution. "
                          "Units: None.");
+      prm.declare_entry ("Phase polynomial degree", "1", Patterns::Integer(1),
+                         "Degree of the native phase variable. Supported selections are continuous Q1 and discontinuous Q2.");
+      prm.declare_entry ("Use discontinuous phase discretization", "false", Patterns::Bool(),
+                         "Use the native DG phase field for transport and SIPG constrained equilibrium. "
+                         "This requires Phase polynomial degree = 2 and mesh-based phase physics; CPDI is unsupported.");
+
       prm.declare_entry ("Temperature polynomial degree", "2",
                          Patterns::Integer (1),
                          "The polynomial degree to use for the temperature variable. "
@@ -1245,6 +1251,9 @@ namespace aspect
                            "is largely empirically decided -- it must be large enough to ensure "
                            "the bilinear form is coercive, but not so large as to penalize "
                            "discontinuity at all costs.");
+        prm.declare_entry ("Use limiter for discontinuous phase solution", "true", Patterns::Bool(),
+                           "Apply mean-preserving whole-cell bound scaling at DG phase SSPRK3 stages. "
+                           "Disable only for smooth operator controls. This never postprocesses phase equilibrium.");
         prm.declare_entry ("Use limiter for discontinuous temperature solution", "false",
                            Patterns::Bool (),
                            "Whether to apply the bound preserving limiter as a correction after computing "
@@ -1986,6 +1995,11 @@ namespace aspect
     prm.enter_subsection ("Discretization");
     {
       stokes_velocity_degree = prm.get_integer ("Stokes velocity polynomial degree");
+      phase_degree = prm.get_integer("Phase polynomial degree");
+      use_discontinuous_phase_discretization = prm.get_bool("Use discontinuous phase discretization");
+      AssertThrow((use_discontinuous_phase_discretization && phase_degree == 2)
+                  || (!use_discontinuous_phase_discretization && phase_degree == 1),
+                  ExcMessage("Native phase supports continuous Q1 or discontinuous Q2."));
       temperature_degree     = prm.get_integer ("Temperature polynomial degree");
       composition_degrees    = Utilities::possibly_extend_from_1_to_N (Utilities::string_to_unsigned_int(Utilities::split_string_list(prm.get("Composition polynomial degree"))),
                                                                        n_compositional_fields,
@@ -2031,6 +2045,7 @@ namespace aspect
         discontinuous_penalty               = prm.get_double ("Discontinuous penalty");
         use_limiter_for_discontinuous_temperature_solution
           = prm.get_bool("Use limiter for discontinuous temperature solution");
+        use_limiter_for_discontinuous_phase_solution = prm.get_bool("Use limiter for discontinuous phase solution");
         use_limiter_for_discontinuous_composition_solution
           = Utilities::possibly_extend_from_1_to_N(Utilities::string_to_bool
                                                    (Utilities::split_string_list(prm.get("Use limiter for discontinuous composition solution"))),

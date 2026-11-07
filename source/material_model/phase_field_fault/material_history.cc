@@ -14,6 +14,17 @@ namespace aspect
   namespace MaterialModel
   {
     template <int dim>
+    void
+    PhaseFieldFault<dim>::set_material_exterior_stress(
+      const std::string &identity, const ExteriorStress &provider)
+    {
+      AssertThrow(material_prescribed_inflow && material_direct_stress
+                  && !dg_material_trial && provider && identity == material_exterior_identity,
+                  ExcMessage("Exterior stress provider requires the selected direct-stress inflow, matching identity, and no live material trial."));
+      material_exterior_stress = provider;
+    }
+
+    template <int dim>
     double
     PhaseFieldFault<dim>::material_viscosity(
       const Point<dim> &x, const double reference) const
@@ -65,11 +76,72 @@ namespace aspect
     }
 
     template <int dim>
+    std::shared_ptr<const typename PhaseFieldFault<dim>::AcceptedSpinSamples>
+    PhaseFieldFault<dim>::sample_accepted_bulk_spin(
+      const FEStrainState &accepted, const LinearAlgebra::BlockVector &velocity, const double dt) const
+    {
+      const auto &manager = this->get_reconstructed_fault_manager();
+      AssertThrow(mature_frictional_fault && manager.get_faults().size()==1
+                  && manager.slip_rates_are_initialized() && this->get_timestep_number()>0,
+                  ExcMessage("Bulk spin requires one mature fault and the converged initialized committed rates."));
+      auto samples = std::make_shared<AcceptedSpinSamples>();
+      samples->parent = accepted.bulk_history.tensor;
+      samples->velocity = &velocity;
+      samples->step = this->get_timestep_number();
+      samples->geometry_version = manager.get_fault(0).geometry_version();
+      samples->quadrature_order = std::max(8u,fe_bulk_normal_quadrature_points);
+      samples->committed_rates = manager.get_timestep_committed_slip_rate(0);
+      const QGauss<dim> rule(samples->quadrature_order);
+      FEValues<dim> values(this->get_mapping(),this->get_fe(),rule,
+                           update_values|update_gradients|update_quadrature_points|update_JxW_values);
+      std::vector<Tensor<2,dim>> gradients(rule.size());
+      std::vector<double> phase(rule.size());
+      for (const auto &cell:accepted.cells)
+        {
+          values.reinit(cell.second);
+          values[this->introspection().extractors.velocities].get_function_gradients(velocity,gradients);
+          values[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
+          .get_function_values(accepted.bulk_history.native,phase);
+          auto &rates=samples->angular_rates[cell.first];
+          rates.resize(rule.size());
+          for (unsigned int q=0; q<rule.size(); ++q)
+            {
+              const auto sample=sample_mature_localization(manager,values.quadrature_point(q),phase[q],accepted.I);
+              const auto slip=sample.slip_gradient(samples->committed_rates);
+              if constexpr (dim==2)
+                {
+                  const double total=ReconstructedFaultUtilities::plane_strain_angular_rate(gradients[q]);
+                  const double fault=ReconstructedFaultUtilities::plane_strain_angular_rate(slip);
+                  // Subtract native pointwise full gradients before rotation.
+                  rates[q]=ReconstructedFaultUtilities::plane_strain_angular_rate(gradients[q]-slip);
+                  const std::array<double,3> spin= {{total,fault,rates[q]}};
+                  for (unsigned int k=0; k<3; ++k)
+                    {
+                      samples->maximum[k]=std::max(samples->maximum[k],std::abs(spin[k]));
+                      samples->l2[k]+=values.JxW(q)*spin[k]*spin[k];
+                    }
+                }
+              else AssertThrow(false,ExcMessage("Bulk spin requires plane strain."));
+            }
+        }
+      for (unsigned int k=0; k<3; ++k)
+        {
+          samples->maximum[k]=Utilities::MPI::max(samples->maximum[k],this->get_mpi_communicator());
+          samples->l2[k]=std::sqrt(Utilities::MPI::sum(samples->l2[k],this->get_mpi_communicator()));
+        }
+      this->get_pcout()<<std::setprecision(17)<<"   Accepted bulk spin: step="<<samples->step
+                       <<" total_max="<<samples->maximum[0]<<" fault_max="<<samples->maximum[1]<<" bulk_max="<<samples->maximum[2]
+                       <<" total_l2="<<samples->l2[0]<<" fault_l2="<<samples->l2[1]<<" bulk_l2="<<samples->l2[2]
+                       <<" dt_bulk_max="<<dt*samples->maximum[2]<<std::endl;
+      return samples;
+    }
+
+    template <int dim>
     typename PhaseFieldFault<dim>::MaterialHistoryInputs
     PhaseFieldFault<dim>::prepare_material_history(
       const LinearAlgebra::BlockVector &accepted_velocity, const double time, const double dt)
     {
-      AssertThrow(!(material_bounded_profile || material_trace_inflow)
+      AssertThrow(!(material_bounded_profile || material_trace_inflow || material_prescribed_inflow)
                   || this->get_reconstructed_fault_manager().uses_full_normal_cross_section(),
                   ExcMessage("The selected material profile/inflow extension requires Association support = full normal cross-section. "
                              "Stationary seed support can clip the independently supplied/transported Q1 profile while normalization includes its tails."));
@@ -84,6 +156,8 @@ namespace aspect
           compute_normalization_integrals();
         }
       validate_fe_strain_restrictions();
+      AssertThrow(!material_prescribed_inflow || material_exterior_stress,
+                  ExcMessage("Prescribed exterior stress provider is missing; attach it before material preparation, including after restart."));
       AssertThrow(dt > 0. && std::isfinite(dt), ExcMessage("Invalid material step interval."));
       material_viscosity_multiplier.set_time(time);
       // Capture the accepted parent before transport or geometry binding. These
@@ -94,6 +168,8 @@ namespace aspect
       transaction->dt = dt;
       transaction->normalization = current_normalization_integrals;
       transaction->temperatures = current_fault_surface_temperatures;
+      if (constitutive_spin==ConstitutiveSpin::bulk_slip_subtracted)
+        transaction->accepted_spin=sample_accepted_bulk_spin(*transaction->accepted_history,accepted_velocity,dt);
       for (const auto &p : this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler())
         transaction->particle_properties.emplace(p.get_id(), std::vector<double>(p.get_properties().begin(), p.get_properties().end()));
       dg_material_trial = transaction;
@@ -132,6 +208,8 @@ namespace aspect
       return result;
     }
 #define INSTANTIATE(dim) \
+  template std::shared_ptr<const PhaseFieldFault<dim>::AcceptedSpinSamples> PhaseFieldFault<dim>::sample_accepted_bulk_spin(const FEStrainState &,const LinearAlgebra::BlockVector &,double) const; \
+  template void PhaseFieldFault<dim>::set_material_exterior_stress(const std::string &,const ExteriorStress &); \
   template double PhaseFieldFault<dim>::material_viscosity(const Point<dim> &,double) const; \
   template double PhaseFieldFault<dim>::material_surface_viscosity(unsigned int,unsigned int,double,double) const; \
   template PhaseFieldFault<dim>::MaterialHistoryInputs PhaseFieldFault<dim>::prepare_material_history(const LinearAlgebra::BlockVector &,double,double); \

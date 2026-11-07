@@ -288,6 +288,18 @@ namespace aspect
     Utilities::create_directory(checkpoint_path, mpi_communicator, true);
 
     const unsigned int my_id = Utilities::MPI::this_mpi_process (mpi_communicator);
+    // Native phase-space identity is checked before solution deserialization.
+    // Absence denotes historical Q1; old binary archives retain their layout.
+    unsigned int phase_metadata_ok=1;
+    if (my_id==0)
+      {
+        std::ofstream metadata(checkpoint_path+"phase-space.txt");
+        metadata << (parameters.enable_phase_field && parameters.use_discontinuous_phase_discretization
+                     ? "DGQ2 native phase v1" : "Q1 historical phase") << '\n';
+        phase_metadata_ok=bool(metadata);
+      }
+    AssertThrow(Utilities::MPI::min(phase_metadata_ok,mpi_communicator)==1,
+                ExcMessage("Could not write native phase checkpoint identity."));
 
     // save Triangulation and Solution vectors:
     {
@@ -460,6 +472,18 @@ namespace aspect
     // Then start with the actual deserialization.
 
     const std::string checkpoint_path = parameters.output_directory + "restart/" + Utilities::int_to_string(last_checkpoint_id, 2) + "/";
+
+    std::string phase_identity="Q1 historical phase";
+    if (Utilities::MPI::this_mpi_process(mpi_communicator)==0)
+      {
+        std::ifstream metadata(checkpoint_path+"phase-space.txt");
+        if (metadata) std::getline(metadata,phase_identity);
+      }
+    phase_identity=Utilities::MPI::broadcast(mpi_communicator,phase_identity,0);
+    const std::string expected_phase=parameters.enable_phase_field && parameters.use_discontinuous_phase_discretization
+                                     ? "DGQ2 native phase v1" : "Q1 historical phase";
+    AssertThrow(phase_identity==expected_phase,
+                ExcMessage("Checkpoint phase family/degree/representation mismatch. Q1/DGQ2 conversion is not supported."));
 
     // First check existence of the two restart files
     AssertThrow (Utilities::fexists(checkpoint_path + "mesh", mpi_communicator),

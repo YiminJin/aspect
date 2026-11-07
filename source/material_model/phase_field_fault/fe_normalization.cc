@@ -170,6 +170,8 @@ namespace aspect
               ray.length = cell.upper - cell.lower;
               ray.lower = cell.lower;
               covered += ray.length;
+              ray.dofs.resize(cell.phase_dofs.size());
+              for (auto &shape:ray.shape) shape.resize(ray.dofs.size());
               for (unsigned int v = 0; v < ray.dofs.size(); ++v)
                 {
                   ray.dofs[v] = cell.phase_dofs[v] - offset;
@@ -182,7 +184,27 @@ namespace aspect
                       ray.shape[end][v] = shape;
                     }
                 }
-              p.rays.push_back(ray);
+              if (this->get_phase_field_handler().uses_dg_phase())
+                {
+                  // Native Q2 ray: differentiate the same pointwise nonlinear
+                  // quadrature used by the energy, retaining all nine modes.
+                  // Equal endpoint shapes let the existing two-endpoint jet
+                  // represent one weighted h(phi) sample exactly.
+                  const QGauss<1> rule(12);
+                  const auto component=intro.variable("phase_field").first_component_index;
+                  const auto &element=this->get_fe().base_element(this->get_fe().component_to_base_index(component).first);
+                  for (unsigned int q=0;q<rule.size();++q)
+                    {
+                      auto point=ray;
+                      point.lower=cell.lower+ray.length*rule.point(q)[0];
+                      point.length=ray.length*rule.weight(q);
+                      const auto unit=cell.reference_origin+point.lower*cell.reference_direction;
+                      for (unsigned int v=0;v<point.dofs.size();++v)
+                        point.shape[0][v]=point.shape[1][v]=element.shape_value(v,unit);
+                      p.rays.push_back(std::move(point));
+                    }
+                }
+              else p.rays.push_back(ray);
             }
           state.profiles.push_back(p);
         }

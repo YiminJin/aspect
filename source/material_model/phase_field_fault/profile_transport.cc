@@ -18,6 +18,12 @@ namespace aspect
       const double dt = input.dt;
       LinearAlgebra::BlockVector result(this->introspection().index_sets.system_partitioning, comm);
       result = old.bulk_history.native;
+      if (this->get_phase_field_handler().uses_dg_phase())
+        {
+          this->get_phase_field_handler().transport_dg_phase(old.bulk_history.native,input.accepted_velocity,
+                                                            input.end_time-dt,dt,result);
+          return result;
+        }
       std::map<types::global_dof_index, Point<dim>> locations;
       for (const auto &entry : old.cells)
         for (const auto vertex : entry.second->vertex_indices())

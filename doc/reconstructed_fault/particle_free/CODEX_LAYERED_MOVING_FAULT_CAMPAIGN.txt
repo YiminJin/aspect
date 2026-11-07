@@ -1,0 +1,258 @@
+NEXT TASK: COUPLED LAYERED-VISCOSITY FAULT MOTION AND PRACTICAL TIMESTEPS
+Revised after BULK_SPIN_CORRECTION_REPORT.md, 5 November 2026.
+This revision supersedes the earlier total-spin campaign instructions.
+
+Purpose
+=======
+Complete one integrated implementation-and-experiment task that advances the
+mature moving-fault model toward the planned BP3-like lower-crust experiment.
+Do not finish with another recommendation to run one smaller timestep. Connect
+the corrected spin to consistent boundaries, finish the layered background,
+run the coupled fault through several cells in both directions, and determine
+a usable timestep policy. Finish with results and a concrete next scientific
+decision, not another diagnostic-only handoff.
+
+Read BULK_SPIN_CORRECTION_REPORT.md and its selected handoff, then the exterior
+report/protocol, the current moving-fault guide and actual working-tree changes.
+The baseline was cf06525471ce89789f1ac10905dc79f3aac7562a plus changes. The new
+bulk-spin binary and matched checker differ from both the protected canonical
+binary and the earlier exterior candidate. Build/use one coherent candidate
+containing both features and matching plugins. Preserve partial layered L0
+results, failed evidence and reusable provider code; identify why L0 stopped
+from its actual log rather than assuming interruption or a constitutive defect.
+
+All new scientific cases explicitly select:
+  Material stress representation = direct physical stress
+  Constitutive spin = bulk slip subtracted
+  Material tensor inflow = prescribed exterior stress
+with compatible background loading and the retained Jaumann DG material Lie
+integrator. Total material spin is still the default; verify the resolved input
+and diagnostics rather than assuming the new law is active. Start fresh under
+the new law. Do not resume or convert total-spin checkpoints.
+
+The selected constitutive spin is W_b=skw(grad(v)-J_f), where J_f uses the same
+localized instantaneous slip rate as the symmetric source. All its inputs are
+from the coherent accepted parent. Advection and geometry motion still use the
+full material velocity. Preserve this law and its implemented lifecycle.
+
+Evidence that motivates this task
+================================
+The historical TOTAL-SPIN compatible/exterior campaign found whole-domain stress
+differences decrease from 0.60781% to 0.30606% under timestep halving. Endpoint
+energy remainders decrease 6.2206%, 3.1592%, 1.5916%. Cumulative-slip differences
+remain 7.05% centrally and 8.62% at the ends for dt .025 versus .0125, much larger
+than the corresponding 32-to-64 mesh differences (0.204% and 0.0545%). These are
+pairwise sensitivities, not known exact errors. The original zero-top shear
+problem is not a qualified reference: explicit inflow reduces its peak from
+58.8 to 7.93 Pa but leaves substantial corner response.
+
+The bulk-spin correction has already passed substantial independent local and
+lifecycle checks. Its weak-slip coupled comparisons cover only .1 s, about
+1e-4 m accumulated slip, and an accumulated sampled-max slip-spin estimate below
+1.8e-4 rad. They do not establish that the constitutive change is unimportant
+at larger slip. Their accepted-trace/zero-top setup is not the consistent
+exterior reference to extend into a long campaign.
+
+1. Connect the corrected law to the consistent boundary setup
+===========================================================
+Run one fresh corrected homogeneous compatible/exterior case at 32-squared,
+dt=.0125, t_end=.4 as an integration check and bridge to the retained exterior
+data. Its matched old-law case is a constitutive comparison, NOT a timestep
+refinement reference. Verify that the previously identified boundary mechanism
+is controlled under the corrected law. Do not rerun the entire homogeneous
+matrix or all ten correction fixtures by default.
+
+The earlier instruction to append a corrected dt=.00625 result to old-law
+coarser results is superseded: a time-convergence pair must use the same law,
+initialization and boundary model. Put the principal refinement effort into
+the layered coupled campaign below. Reuse any completed homogeneous results
+only if their exact law and setup match. Do not change the endpoint scheme,
+incoming-age convention or stress solver to accelerate this task.
+
+2. Construct an equilibrated layered background, with minimal benchmark code
+===========================================================================
+Use a smooth positive depth-dependent viscosity eta(y), constant G, and a
+dipping mature fault that samples both sides of the transition. A viscosity
+contrast of ten is a reasonable first qualification case. Choose the physical
+transition width once and resolve it; do not shrink it with h. Choose duration
+so lower-layer relaxation is appreciable while the upper layer retains memory.
+Keep the present friction parameters and growth disabled to isolate this work.
+This is an algorithmic layered benchmark, not yet the final crustal parameter set.
+
+Do NOT insert eta(y) into the homogeneous constant-shear formula while keeping
+the old affine velocities and claiming a consistent layered reference. For a
+one-dimensional background v=(U+u(y,t),0), zero body force requires spatially
+constant shear stress, and pressure must balance the varying normal stress.
+
+An economical background construction follows directly from the existing split
+law. Verify the conventions against the current code before implementing it:
+
+  Given accepted background tau_n(y) and shear gradient gamma_n(y)=du_n/dy,
+  rotate with the existing accepted-spin convention for the attempted dt:
+      tau_bar(y) = Q_n(y) tau_n(y) Q_n(y)^T.
+  Let beta(y)=exp(-G*dt/eta(y)) and
+      kappa(y)=eta(y)*(1-exp(-G*dt/eta(y))).
+  Prescribe a fixed horizontal velocity difference Delta_u from bottom to top.
+  With b(y)=beta(y)*tau_bar_xy(y), the endpoint constant shear traction is
+      q = [Delta_u + integral b(y)/kappa(y) dy]
+                        / [integral 1/kappa(y) dy].
+  Then gamma_next(y)=[q-b(y)]/kappa(y), and integrate gamma_next from the
+  prescribed bottom velocity to obtain the background velocity profile.
+  The normal components follow the same local rotation/relaxation law since
+  the background normal strain rates vanish. Set
+      p_next(y)=tau_yy_next(y)+p_ref,
+  so top traction is (q,-p_ref).
+
+This is a scalar quadrature calculation for benchmark boundary data, not a new
+production mechanical solver. No fault contribution belongs in this exterior
+reference: J_f=0 there, so bulk spin equals total spin. The prior layered
+background construction therefore remains applicable after the correction.
+Reuse and finish its interrupted implementation rather than replacing it.
+With constant eta it must reduce to the existing homogeneous split
+background. Check the integrated velocity difference, constant shear traction,
+normal-force balance, and reference quadrature accuracy before the campaign.
+Do not replace the actual coupled ASPECT velocity with this prescribed field
+inside the physical fault runs.
+
+During pure transport, supply tau_n(y) at incoming faces: background motion is
+horizontal, so its unreacted parent field is unchanged during that substep.
+Supply the endpoint background velocity and traction to the mechanical boundary
+plugins. Initial mechanics must retain the actual .1-s initialization convention
+and zero accepted stored stress; its velocity profile need not be affine when
+eta varies. Do not count initialization as a published physical stress step.
+Pressure is not generally zero throughout the layered background even if p_ref=0.
+
+Support the actual accepted timestep sequence rather than t/dt or an integer
+step formula. A rejected attempt must not advance background history. Keep
+candidate evaluation separate from accepted publication, and restore the same
+background on restart through existing plugin/lifecycle facilities. Keep these
+reference-specific details in the benchmark plugin. Reuse the existing physical
+stress callback; do not introduce a generic single-step driver, new execution
+framework or additional production history representation.
+
+3. Run a substantial coupled translation campaign
+================================================
+Use the same stratification, initial fault, initial stress, RSF state, mechanical
+shear loading and physical duration for three cases:
+  L0: no added uniform horizontal translation;
+  L+: positive uniform horizontal translation;
+  L-: negative uniform horizontal translation of the same magnitude.
+
+All three use the ordinary coupled mechanics and material motion. L0 is NOT
+literally a frozen fault: fault-induced and imposed shear flow can still move
+and deform it. Keep that distinction explicit. The requested frozen-fault
+application is a separate physical control, not a name for U=0. If a compatible
+existing stationary geometry/profile path is available, include that control
+as an additional case and state exactly what is fixed. Do not silently switch
+constitutive/history algorithms to obtain it.
+
+Choose |U| and lateral domain width so the moving fault and its profile traverse
+at least roughly eight coarse-cell widths, while the full localization support
+stays comfortably inside the domain. For scale, |U|=2.5, T=.4 and h=.125 gives
+one metre, or eight cells, of added translation. Widening the present box must
+preserve physical cell size, profile width and depth resolution. Account for
+the additional shear and fault-induced motion when assessing boundary clearance.
+These values are a practical starting point, not a required physical model.
+
+Hold the surface material-label discretization fixed for bulk/time comparisons.
+Run L0, L+ and L- at one common resolved timestep, then one timestep halving and
+one bulk-mesh refinement for a representative moving case. Refine the opposite
+direction too only if its behavior differs materially. Reuse the homogeneous
+integration evidence to avoid a redundant full Cartesian product of runs.
+
+Include ONE informative bulk-spin/total-spin paired comparison in this same
+campaign. Use the same physical initialization and loading in both laws, and
+run both at the representative timestep and its halved value. Reuse the
+corrected cases already needed for the campaign. Do not repeat separated-mode
+comparisons: those algebraic/lifecycle checks are already complete.
+
+The paired case should reach appreciable localized slip while nonzero stress
+is present. Select duration/loading from a physical scale estimate, aiming for
+an integrated slip-spin exposure of order .1 rad or more over part of the
+resolved slipping band; .1-.5 rad is a useful diagnostic range, not a mandatory
+observed stress difference or a production-accuracy threshold. Prefer extending
+the loaded evolution to shrinking the fault profile. Adjust the domain and
+translation speed consistently if a longer duration requires more clearance.
+Freeze the chosen physical parameters across both laws and all refinements.
+Do not tune coefficients until a dramatic old/new difference appears, impose
+the coupled fault's V externally, or force an RSF instability for this test.
+If the intended loading gives smaller exposure, report that outcome and its
+physical reason rather than claiming a strong-slip comparison was performed.
+
+Use the actual localized chi=h(phi)/I, not the nominal phase length, to quantify
+spin exposure. Report omega, omega_f and omega_b in the slipping band; both
+the sum of dt*sampled_max(abs(omega_f)) and exposure along selected material
+trajectories/labels; local stress components and principal direction where
+well-defined; and pressure-inclusive fault tractions. Explain that the sum of
+sampled maxima is an envelope, not a continuum supremum or one trajectory's
+rotation. A stress-weighted rotation-tendency diagnostic can distinguish small
+spin from small/rotation-insensitive stress. Uniform translation speed does not
+create a velocity gradient and cannot replace substantial relative fault slip.
+
+Compare the old/new constitutive difference with each law's own timestep
+sensitivity and the representative mesh comparison. Add an old-law mesh control
+only if needed to resolve a spatially sensitive difference. Stress orientation
+and traction can change without a
+direct change in elastic energy under the rotation operation; energy alone
+is insufficient to judge this correction.
+
+Compare trajectories, V(label,t), cumulative slip, age, pressure-inclusive
+normal traction, work-adjoint shear traction, bulk stress, profile/localization
+measures, energy terms, and nonlinear/linear cost. Display fields after undoing
+the imposed U*t shift, alongside histories on the same material labels.
+
+Adding U is Galilean-neutral to the local constitutive law and eta(y), but finite
+fixed boundaries are not automatically transformed into the same physical
+problem. Thus L0/L+/L- differences cannot all be called numerical advection
+error, and equality is not an acceptance requirement. If directional differences
+exceed the measured discretization differences, address the most likely cause
+within this task; use one enlarged-domain comparison when boundary influence is
+the plausible cause. Do not start a new chain of isolated reports for each symptom.
+
+4. Demonstrate usable variable timesteps and restart
+==================================================
+For one moving layered case, use ASPECT's existing timestep controls, including
+relevant slip/age limits, with a cap informed by the uniform-step results.
+Compare its complete histories and cost with the resolved uniform-step case.
+Do not invent a second time integrator or a new controller framework. If the
+solution does not naturally vary dt, include a bounded nonuniform schedule as
+an explicit schedule-handling check and do not call it adaptive accuracy proof.
+
+Restart that case from an intermediate checkpoint and compare its continuation
+with the uninterrupted trajectory, preferably changing rank count. Unlike the
+previous reload-and-one-step probe, this must compare the same physical times
+and accepted steps. Exercise one rejected attempt or equivalent targeted
+transaction check for the new stateful boundary reference. These checks are
+needed because the layered background now has history. The bulk-spin report
+already verifies corrected-spin MPI, same-law restart and rejection: reuse that
+evidence, and concentrate new lifecycle checks on its integration with the
+stateful layered boundary provider. Do not rerun unrelated campaigns.
+
+5. Completion criteria and deliverables
+======================================
+Finish the implemented boundary reference, coupled run matrix and assessment
+in this assignment. Fix concrete defects encountered within that scope and
+rerun affected cases. Preserve the native DGQ2/SSPRK3 transport, true stress,
+accepted BULK-spin rotation and existing endpoint law. Keep split-Q2 offline.
+Do not add damping, clipping, profile smoothing or tolerance relaxation to
+produce a better plot. Do not reopen native compositional-field migration.
+
+Report a defensible practical timestep/cost range and whether the layered
+advected problem is ready for a BP3-like pilot. Track absolute errors/sensitivities
+as well as relative ones; do not impose an unexplained universal 1% gate or claim
+that every diagnostic must have the same order. If the report establishes a
+concrete obstacle, identify the mechanism and the necessary fix, not just the
+next smaller dt. No claim of general cohesive growth, AMR, arbitrary material
+transport or full BP3 production qualification follows from this bounded task.
+
+Provide reproducible inputs/runners, compact figures (including an animation of
+the curve/profile crossing cells), comparison tables, and concise documentation
+of the layered background, initialization and accepted-time ownership. Keep
+core changes small and commented in ASPECT style. Produce a clean source/build
+identity for the candidate. State clearly which results used that candidate.
+
+Connect the outcome to the planned fixed-fault and advected-fault lower-crust
+examples: explain what carries over and what actual BP3 boundary/loading setup
+still needs changing. Prepare the next pilot inputs or a concrete parameter
+mapping where justified; do not submit server jobs or resume production runs.
+All local builds and runs use at most four workers/ranks, sequentially.

@@ -57,7 +57,7 @@ namespace aspect
     // change the map, so a base-class cast alone is insufficient here.
     template <int dim>
     std::pair<bool, BoundingBox<dim>>
-    normalization_search_enclosure(const GridTools::Cache<dim> &grid)
+    normalization_search_enclosure(const GridTools::Cache<dim> &grid, const bool coordinate_roundoff=false)
     {
       const auto &mapping = grid.get_mapping();
       bool supported = typeid(mapping) == typeid(MappingCartesian<dim>)
@@ -88,7 +88,10 @@ namespace aspect
               for (unsigned int v = 0; v < vertices.size(); ++v)
                 for (unsigned int d = 0; d < dim; ++d)
                   if (!(hi[d] > lo[d])
-                      || vertices[v][d] != ((v & (1u << d)) ? hi[d] : lo[d]))
+                      || (coordinate_roundoff
+                          ? std::abs(vertices[v][d]-((v & (1u << d)) ? hi[d] : lo[d]))
+                            >16*std::numeric_limits<double>::epsilon()*std::max({std::abs(lo[d]),std::abs(hi[d]),hi[d]-lo[d]})
+                          : vertices[v][d] != ((v & (1u << d)) ? hi[d] : lo[d])))
                     supported = false;
               if (!supported)
                 break;
@@ -787,7 +790,7 @@ namespace aspect
           cache.supported = dim == 2 && !this->get_parameters().mesh_deformation_enabled
                             && Plugins::plugin_type_matches<GeometryModel::Box<dim>>(this->get_geometry_model());
           if (cache.supported)
-            cache.supported = normalization_search_enclosure(grid).first;
+            cache.supported = normalization_search_enclosure(grid,this->get_phase_field_handler().uses_dg_phase()).first;
           if (cache.supported)
             {
               Point<dim> lower, upper;
@@ -900,7 +903,8 @@ namespace aspect
                 &tria, entry.second->level(), entry.second->index(), &this->get_dof_handler());
               std::vector<types::global_dof_index> dofs(fe.n_dofs_per_cell());
               cell->get_dof_indices(dofs);
-              for (unsigned int v = 0; v < GeometryInfo<dim>::vertices_per_cell; ++v)
+              interval.phase_dofs.resize(fe.base_element(fe.component_to_base_index(component).first).n_dofs_per_cell());
+              for (unsigned int v = 0; v < interval.phase_dofs.size(); ++v)
                 interval.phase_dofs[v] = dofs[fe.component_to_system_index(component, v)];
               traversal.intervals.push_back(interval);
             }
@@ -970,7 +974,7 @@ namespace aspect
                         if (!(right > left))
                           continue;
                         local[totals.size() + index] += right - left;
-                        std::array<double, GeometryInfo<dim>::vertices_per_cell> phase;
+                        std::vector<double> phase(cell.phase_dofs.size());
                         for (unsigned int v = 0; v < phase.size(); ++v)
                           phase[v] = this->get_solution()[cell.phase_dofs[v]];
                         const auto phase_at = [&](const double z)
@@ -979,10 +983,20 @@ namespace aspect
                           double value = 0.;
                           for (unsigned int v = 0; v < phase.size(); ++v)
                             {
-                              double shape = 1.;
-                              for (unsigned int d = 0; d < dim; ++d)
-                                shape *= (v & (1u << d)) ? unit[d] : 1. - unit[d];
-                              value += shape * phase[v];
+                              if (this->get_phase_field_handler().uses_dg_phase())
+                                {
+                                  const auto &system=this->get_fe();
+                                  const auto component=this->introspection().variable("phase_field").first_component_index;
+                                  const auto &element=system.base_element(system.component_to_base_index(component).first);
+                                  value += element.shape_value(v,unit)*phase[v];
+                                }
+                              else
+                                {
+                                  double shape=1.;
+                                  for (unsigned int d=0;d<dim;++d)
+                                    shape*=(v & (1u<<d)) ? unit[d]:1.-unit[d];
+                                  value+=shape*phase[v];
+                                }
                             }
                           return value;
                         };
@@ -993,6 +1007,7 @@ namespace aspect
                         const double a = 2.*(f0 + f1 - 2.*fm), b = f1 - f0 - a;
                         const auto roots = boost::math::tools::quadratic_roots(a, b, f0);
                         std::vector<double> cuts {left, right};
+                        if (!this->get_phase_field_handler().uses_dg_phase())
                         for (const double root :
                         {
                           roots.first, roots.second
@@ -1594,14 +1609,8 @@ namespace aspect
       const auto &batch = normalization_point_lookups.get(phase_field_handler.get_grid_cache(), points);
       const auto &cache = *batch.lookup;
       lookup_timer.stop();
-      const unsigned int phase_field_component =
-        this->introspection().variable("phase_field").first_component_index;
       const std::vector<double> phase_field_values =
-        VectorTools::point_values<1>(cache,
-                                     this->get_dof_handler(),
-                                     this->get_solution(),
-                                     VectorTools::EvaluationFlags::avg,
-                                     phase_field_component);
+        phase_field_handler.phase_point_values(cache,this->get_solution());
 
       const std::vector<double> cell_diameters =
         cache.template evaluate_and_process<double>(

@@ -14,7 +14,8 @@ accepted parent: tau-, phi-, geometry-, age-, slip-, Z-, accepted velocity v-
 
 ONCE PER ATTEMPT (new dt on retry):
   prepare_material_history(v-, endpoint_time, dt)
-      retain accepted parent and rollback data; return immutable borrowed inputs
+      retain accepted parent and rollback data; sample accepted bulk spin
+      return immutable borrowed inputs
   transport_material_history(inputs)
       advect tau- -> transport.physical_stress
   stage_material_geometry(inputs, solution, linearization)
@@ -98,6 +99,16 @@ restores bulk solution bookkeeping and closes the material transaction. The
 outer solver now has no recursion flag requiring a separate exception reset.
 A retry prepares from the accepted parent with its new interval.
 
+`TimeStepping::Manager::update()` selects the next interval and the current
+accept/reject decision **before** the pending callback publishes. The existing
+reconstructed-fault age predictor therefore reads the earlier committed age
+and rate, not the just-completed endpoint. For an uninterrupted moving DG run,
+step n's proposal uses surface n-2 (surface zero for the first two intervals).
+Its logarithmic state-change setting bounds that prediction, not the actual
+endpoint age change. The layered campaign measures both in
+`check_layered_timestep.py`; neither a passed predictor nor nonlinear convergence
+is an endpoint accuracy guarantee. Publication remains behind the rejection gate.
+
 Timestep zero follows existing initialization, not material transport or an
 extra rotation. Nonpublishing endpoint-phase/benchmark calls retain their scratch
 contract and return private rates. The stationary objective branch can reuse its
@@ -112,6 +123,32 @@ state, representation, law/integrator, profile/support and material inputs.
 Direct and separated histories are not automatically converted. Internal names,
 callback arguments and solver decomposition do not change packet order or
 checkpoint meanings. Caches, borrowed views, advected scratch, correction
-iterates and pending callbacks are rebuilt rather than serialized. The bounded
+iterates, accepted-spin quadrature scratch and pending callbacks are rebuilt rather than serialized. The bounded
 verification includes a fresh two-rank prefix restarted on four ranks; this is
 local lifecycle evidence, not permission to resume production with changed laws.
+
+## Constitutive-spin identity
+
+`Constitutive spin = total material` remains the default and retains old
+checkpoint semantics. Moving schema7 bulk-spin packets append the versioned
+`constitutive spin:bulk slip subtracted v1` identity to their material-law string.
+Stationary total spin keeps schema6; stationary bulk spin uses schema8 with
+an explicit material-law identity. Cross-law loading is refused in either
+direction; there is no production checkpoint conversion.
+
+At timestep zero the new selector takes the accepted parent without rotation.
+The converged initial coupled solve commits its slip rates when it publishes
+its accepted velocity; it advances no physical stress history. The first
+physical attempt therefore samples that matched pair, not the initial minimum
+rate or predictor. `DGMaterialTrial` owns the immutable spin snapshot and drops
+it on acceptance or rollback; it never becomes an independent physical history.
+
+Native DGQ2 phase uses the existing material transaction. Transport returns a
+candidate phase/obstacle from the immutable accepted parent; staged geometry,
+normalization, surface histories and mechanics consume it before the same joint
+publication or rollback. Phase assembly does not publish material history.
+DG checkpoints carry native phase-space metadata and material schema9, including
+all nine phase modes per cell; rank-changing restart preserves the space. Missing
+phase-space metadata denotes historical Q1, not permission to reinterpret it as DG.
+Adaptive DG phase/obstacle transfer is explicitly rejected. The
+[phase report](../DGQ2_PHASE_FIELD_REPORT.md) tracks lifecycle qualification.

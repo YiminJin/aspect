@@ -1,4 +1,188 @@
-> **Current selection complete, 4 November 2026:** stress consolidation and linked developer guide on `d7e4adbe99126f8c9faf9f35c657e287f2c29cea`. Shared `localize_surface_values`, one single/multiple-field mass projector, and explicit solver-owned outer/inner mechanics replace misleading names, duplicated algebra and hidden recursion. Full units and bounded moving, stationary, non-fault, analytical and rejection/restart controls pass; seven matched moving controls are bitwise identical. See [report](STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md) and [guide](MATURE_MOVING_FAULT.md). All 63 protected artifacts remain unchanged. Defaults, physics and checkpoint meanings are retained; scientific campaigns remain paused.
+> **Native DGQ2 phase implementation and available evidence, 6 November 2026:** phase-space selection,
+> upwind material transport, whole-cell bounds, SIPG fracture and Bernstein
+> obstacle coordinates are implemented. Native fixed-fault cohesive growth
+> and derivative checks pass. DG rollback/restart and historical-Q1 regression
+> pass. Both positive coupled timesteps completed; reverse/finer-mesh and
+> remaining tests are deferred at the user’s request. Final comparisons/figures
+> use the completed trajectories only; all 1,020 protected artifacts and the
+> frozen candidate source/plugin identities match their recorded hashes.
+> [Design/source map](DGQ2_PHASE_FIELD_DESIGN.md), [report](DGQ2_PHASE_FIELD_REPORT.md).
+> Historical audit statements below describe their own retained Q1 baselines.
+
+> **Completed, 6 November 2026 — corrected-spin layered campaign:** the direction/time/law/mesh, adaptive, 4→2-rank restart, provider rejection and wider-domain comparisons are complete. The finite-slip law effect persists; profile mass error remains 7.26% on the adaptive coarse mesh and 2.39% on the finer uniform mesh. Widening the box changes mechanics but leaves the remapping mass defect essentially unchanged. See [report](LAYERED_BULK_CAMPAIGN_REPORT.md), [closeout handoff](LAYERED_BULK_CAMPAIGN_RESUME.md) and [figures/evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/layered_bulk_campaign/README.md). Native/default laws and protected binaries are preserved; no production/server run or checkpoint conversion. Next proposed work is material-equation-consistent bounded profile transport, not another timestep-only sweep. No campaign run remains active.
+
+## Current campaign implementation audit
+
+- `layered_background/`: benchmark-only scalar equilibrated Maxwell reference,
+  compatible velocity/top traction and accepted/candidate state. Transport callback
+  reads unreacted accepted stress; save/load identifies the accepted clock and
+  reference law. The coupled solver still computes interior mechanics and slip.
+- `run_layered_campaign.py` / `run_layered_bulk_matrix.py`: explicit coherent
+  candidate, spin law, physical inputs, rank/time bounds, unique outputs and
+  exclusive native-run lock. Defaults and historical trajectories remain intact.
+- `native/material_checks.cc`: selected initial label shear is metadata as well
+  as a fixture input, avoiding a reducer silently assuming historical 2.7 Pa.
+- `source/material_model/phase_field_fault/fe_strain.cc`: only mature-DG Cartesian
+  corner admission changes in this campaign. Roundoff-scaled coordinate comparison
+  replaces bitwise equality. Maximum measured legitimate mismatch 1.78e-15m;
+  sheared cells still reject. Fresh candidate passes 183390 unit assertions and a
+  bitwise two-step coarse regression; canonical/original candidates are preserved.
+- `layered_fields.py`, `assess_layered_campaign.py`, `compare_layered_bulk.py`:
+  rectangular fields, actual mesh spacing, pressure-inclusive/induced/work tractions,
+  full accepted histories and union-of-cell-partitions bulk quadrature. Independent
+  discontinuous-Q2 quadrature check reaches 4.45e-16. Previous unsplit reductions
+  and the corrected JSON-list indexing failure remain recorded.
+- `compare_layered_law_mesh.py`: evaluates mesh sensitivity of the constitutive
+  difference using all four matched fine/coarse bulk/total runs, rather than
+  comparing unrelated relative-error denominators.
+- `check_layered_timestep.py`: audits the existing pre-publication schedule using
+  accepted nodal CSVs. `core.cc` calls timestep-manager update before the mature
+  pending callback; `reconstructed_fault.cc` reads committed V/age. Actual endpoint
+  state changes need not satisfy the prediction bound. No lifecycle/controller
+  reorder or solver tolerance change was made.
+- `profile_transport.cc`: nodal MacCormack interpolation and donor-range bounds
+  have no integral material-balance enforcement. The measured mass defect is not
+  physical divergence or open-boundary flux. This is a qualification limitation,
+  not permission for global renormalization, smoothing or a density-transport law.
+
+See the [campaign report](LAYERED_BULK_CAMPAIGN_REPORT.md) for measured results and
+candidate hashes. All selected comparisons are complete. The 217-step adaptive
+case, 58-state 4→2-rank continuation and bitwise provider rejection control pass.
+The 128x32 wider-domain control separates physical boundary sensitivity from the
+remapping mass defect. Serial analysis entry points now set BLAS/OpenMP limits
+before NumPy import; this changes no native numerical method.
+
+## Historical evidence — prior selections, not current execution instructions
+
+> **Current selection complete, 5 November 2026 — mature bulk-spin correction:** `Constitutive spin = bulk slip subtracted` now uses the coherent accepted localized slip-rate dyad in moving direct/separated histories and the stationary DG anchor. Total spin remains the default/control. All 183390 unit assertions pass; bounded constant/layered comparisons, native anisotropic-stress checks, MPI, rejection/retry and same-/cross-law restart checks pass. Pure-slip artificial rotation is removed; coupled timestep and finite-end errors remain measurable. See [BULK_SPIN_CORRECTION_REPORT.md](BULK_SPIN_CORRECTION_REPORT.md) and its source/binary/input evidence. This is local implementation/verification and a bounded physical comparison, **not production readiness**. The stopped layered campaign stays stopped; no server job or checkpoint conversion occurred. Next proposed experiment: a fresh compatible-boundary layered case with a timestep pair, explicitly selecting the corrected law.
+
+The new audit traces the shared signed localization sample, pointwise accepted
+spin snapshot, both transported representations, stationary stable residual
+increment, initialization commit and checkpoint law identity. Native quadrature
+reference errors are near roundoff, total-spin control exports are bitwise
+unchanged, and corrected direct/separated finite-space differences are reported
+rather than removed. Source/binary identities are in `bulk_spin/manifest.json`;
+the configured executable banner is not assumed to identify current source.
+
+> **Current selection complete, 5 November 2026:** prescribed exterior stress is implemented for direct mature material transport through the existing boundary callback, using the transported parent before native rotation/reaction. All five selected coupled runs pass (104 physical steps, zero retries). At 32²/.025, prescribed inflow lowers the original zero-top peak 58.8→7.93Pa; compatible loading gives 2.34Pa. Compatible temporal energy remainder decreases 6.22%→3.16%→1.59%, and 64² gives 1.591%. Latest cumulative-slip time sensitivity remains 7.05%/8.62% central/ends versus .204%/.0545% under mesh refinement. All 183170 unit assertions, split/initialization controls and provider/checkpoint guards pass. The new core/checker are under `stage-c/exterior-stress/`; retained binaries and prior evidence remain intact. See [report](EXTERIOR_STRESS_REPORT.md), [protocol](EXTERIOR_STRESS_PROTOCOL.md) and [evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/exterior_stress/README.md). The frozen audit stays deferred. Next proposed test is one 32²/.00625 cumulative-slip time check with the same boundary model and labels; it was not run. Production/cohesive limits and inherited cleanup losses remain.
+
+## Prescribed exterior-stress implementation audit
+
+The selected core change is four files: public `ExteriorStress` callback and
+setter in `phase_field_fault.h`, selection/identity parsing in
+`phase_field_fault.cc`, attachment/preparation guards in `material_history.cc`,
+and the boundary callback branch in `stress_evolution.cc`. `TensorAdvection`,
+DGQ2/SSPRK3, accepted-gradient rotation, reaction projection, coupled Stokes,
+geometry/profile/surface transport, transaction publication and archive layout
+are unchanged. The existing material-law checkpoint string adds the declared
+exterior identity only when this new option is selected. Zero/trace identities
+remain unchanged. Physical exterior currently requires direct storage.
+
+The callback explicitly receives parent time, stage time and attempted dt.
+Pure transport uses the homogeneous parent stress; it never supplies the reacted
+endpoint. Native inflow quadrature handles every incoming face, including top.
+The benchmark provider and compatible traction share a complex homogeneous
+recurrence independently checked by real-component iteration. Step0 uses its
+separate .1-s mechanical interval but publishes no stress; first transported
+exterior is zero. Benchmark parameters/pressure reference and uniform schedule
+are checked explicitly. The function has no physical-state publication or
+collectives. It is reattached on resume rather than serialized.
+
+The new executable/checker are under `stage-c/exterior-stress/`; the retained
+native executable is restored byte-for-byte. Existing private-layout checker
+DSOs must not be mixed with the new core. All 183170 unit assertions pass.
+Provider-selection failures and checkpoint-law mismatch are tested. A matching
+4-to-2-rank resume performs one .025-s lifecycle step, separate from the five-run
+comparison; the native resume loop checks termination after that first step.
+A provider CSV-header fix affects logging only; the earlier DSO/source and guard
+logs are preserved. No solver or numerical workaround was introduced.
+
+See [protocol](EXTERIOR_STRESS_PROTOCOL.md) and [measured report](EXTERIOR_STRESS_REPORT.md)
+for the crossed original/compatible-top controls and temporal/spatial sensitivities.
+The earlier proposed frozen mechanical audit is deferred by the current user
+selection. Production BP3, cohesive history and unresolved cohesive failures
+remain distinct from this mature constant-viscosity benchmark.
+
+> **Previous selection complete, 5 November 2026:** frozen original non-affine corner velocity replay, nine manufactured transport controls on 32² with identical RK substeps and four MPI ranks. Exact exterior reproduces stress within 9.16e-15; exact-parent temporal lag converges first order, while numerical-parent inflow retains 1.37% box/16.5% corner error. Severe coupled stress amplification is not reproduced by this smooth frozen-velocity control. Native source/defaults/binaries and 994 prior evidence files remain unchanged. See [report](CORNER_REPLAY_REPORT.md), [protocol](CORNER_REPLAY_PROTOCOL.md) and [evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/corner_replay/README.md). Next proposed work is a frozen-parent mechanical corner residual/reaction audit, without material advancement. Production, broader Stage C and cohesive limits remain; inherited cleanup losses are unchanged.
+
+## Non-affine corner replay audit
+
+`corner_replay/corner_replay.cc` is a separate benchmark DSO using the existing
+public `TensorField` and distributed `TensorAdvection` interfaces. The saved
+continuous Q2 velocity is reconstructed from exported Gauss3 values; its
+analytic derivatives are checked against the independent saved gradients and
+native FE interpolation. Replicated small velocity input belongs only to this
+benchmark, not production state. The operator receives explicit immutable
+velocity, source and exterior callbacks. Every macro step captures one numerical
+parent; every candidate is a fresh scratch field. No physical history is borrowed.
+
+The full plane-strain energy check includes manufactured source and pointwise
+divergence work. q8 flux signs match native assembly. The exact source/reference
+has the same polynomial history as the retained affine reference, allowing an
+independent total-energy cross-check. `prepare_corner_replay.py` verifies prior
+hashes before creating input; runner records four-rank identity and refuses
+output overwrite; analysis separates lag-only from numerical-parent feedback.
+The accepted host solution and mesh are checked unchanged. One init-only run
+passes nine controls/84 macro records. No native API, ownership, solver,
+representation, constitutive rate or serialization change occurred. Existing
+native unit/lifecycle checks remain applicable; this experiment establishes no
+new coupled or production qualification. See [report](CORNER_REPLAY_REPORT.md).
+
+> **Previous selection complete, 5 November 2026:** prescribed-flow corner isolation reproduces exact-inflow DGQ2/SSPRK3 references within 8.1e-15, while held trace retains a boundary-model bias. Two compatible-top-traction coupled controls reduce whole-domain timestep stress difference from 22.36% to .608% and endpoint energy remainder from 6.22% to 3.16% under halving. This changes physical loading and slip; it does not validate the original free-top problem or generic held inflow. Native source/defaults/binaries, 63 protected artifacts and all original shear outputs remain unchanged. See [report](CORNER_ISOLATION_REPORT.md), [protocol](CORNER_ISOLATION_PROTOCOL.md) and [evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/corner_isolation/README.md). Next proposed work is prescribed replay of the original non-affine corner velocity to separate inflow feedback from mixed-boundary mechanics.
+
+## Corner isolation audit
+
+The new benchmark `corner_inflow` DSO is built separately and links the unchanged
+public `TensorAdvection`/`TensorField` operators, native finite-rotation helper
+and endpoint stress law. Its independent complex characteristic/recurrence
+reference supplies exact split inflow. Scratch fields own separate numerical
+spaces; they neither borrow nor publish material history. The ordinary ASPECT
+traction plugin supplies a uniform discrete-background top load only when that
+benchmark is selected. Native solver and material interfaces are unchanged.
+
+`run_corner_isolation.py` records exact inputs/identities and retains the original
+representable-clock rule. Analysis records both numerical and boundary-model
+errors, pressure-inclusive traction, actual mechanical work, signed/absolute
+energy, and changed-loading responses. Failed ghost-vector-norm and extra-ulp
+setup attempts remain in evidence; the corrected physical prefix is bitwise
+identical. The result does not select a new production exterior boundary model.
+
+> **Previous selection complete, 4 November 2026:** four bounded sheared moving-fault runs on `cf0652547`, ordinary DGQ2/SSPRK3, 18 fixed material labels and four MPI ranks sequentially. All 44 steps publish once without retries; measured label spin is 5.25–5.58 degrees clockwise. Near-fault stress/shear/slip show useful temporal refinement, but whole-domain stress and energy fail to converge: 99.86% of the smallest-dt pair's squared stress difference is in the upper-left boundary corner. Pressure-inclusive normal traction and cumulative-slip accuracy remain open. Native source, binaries and 63 protected artifacts are unchanged. See [report](SHEARED_MOVING_FAULT_REPORT.md), [protocol](SHEARED_MOVING_FAULT_PROTOCOL.md) and [evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/sheared_moving_fault/README.md). Next proposed work is a focused boundary/corner control, not another sweep or production run.
+
+## Sheared moving-fault comparison audit
+
+`run_material_native.py` and its pressure/stage-energy checker are unchanged.
+`assess_sheared_moving_fault.py` uses explicit physical-stress access from saved
+DGQ2 coefficients and own-curve material-label quadrature; it includes pressure
+in normal traction and keeps weak mechanical work nonzero. Initial temporal
+states match bitwise. Regional masks/measure are common across temporal pairs;
+cell-split surface integration and q8/q12 bulk sensitivity are recorded.
+The optional `--boundary-only` reduction localizes failed global refinement in
+saved final states; it launches no simulation. Plotting and provenance helpers
+read these same four cases. No mature/cohesive owner, storage representation,
+transaction, solver, checkpoint or native operator interface changed.
+
+The upper-left mixed mechanical/inflow corner dominates whole-domain differences;
+these runs do not establish which boundary or discrete operation is responsible.
+Successful native acceptance and local first-order trends do not qualify global
+stress/energy. The report preserves both positive and failed evidence.
+
+> **Previous scientific selection complete, 4 November 2026:** frozen locally split Q2 at the finite mature localization ends, on `cf06525471ce89789f1ac10905dc79f3aac7562a`. The unchanged common fixture gives 78.36×/77.93× lower 64² tensor error for 4.05% extra physical-stress coefficients; work traction and energy comparisons improve with all reference screens passing. This supports a bounded coupled direct-stress prototype, which is not implemented here. Native source/defaults/binaries/checkpoints and all 63 protected artifacts are unchanged. See [report](FROZEN_SPLIT_Q2_REPORT.md), [protocol](FROZEN_SPLIT_Q2_PROTOCOL.md) and [evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/frozen_split_q2/README.md). No rotation rechecks, native evolution or server campaign ran; broader Stage C and cohesive limits remain.
+
+## Frozen split-space audit (preceding selection)
+
+Benchmark `compare_frozen_split_q2.py` implements `SplitQ2` with one independent
+Cartesian Q2 polynomial per end-cut polygon, scaled to that polygon's bounding
+box. Only cut pieces use full equilibrated mass matrices. Common-field evaluation,
+Q1/label/window integration and uncut coefficients are reused from the retained
+finite-end comparison. `audit_frozen_split_q2.py` verifies non-cut invariance and
+one-sided endpoint traces; `plot_frozen_split_q2.py` reads saved results. Native
+`TensorField`, mechanics, material state and serialization have not changed.
+The detailed [comparison](FROZEN_SPLIT_Q2_REPORT.md) distinguishes benchmark
+implementation, frozen accuracy evidence and the still-unimplemented coupled
+extension. Numerical conditioning evidence does not qualify moving-cut advection.
+
+> **Previous selection complete, 4 November 2026:** stress consolidation and linked developer guide on `d7e4adbe99126f8c9faf9f35c657e287f2c29cea`. Shared `localize_surface_values`, one single/multiple-field mass projector, and explicit solver-owned outer/inner mechanics replace misleading names, duplicated algebra and hidden recursion. Full units and bounded moving, stationary, non-fault, analytical and rejection/restart controls pass; seven matched moving controls are bitwise identical. See [report](STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md) and [guide](MATURE_MOVING_FAULT.md). All 63 protected artifacts remain unchanged. Defaults, physics and checkpoint meanings are retained; scientific campaigns remain paused.
 
 > **Previous selection complete, 4 November 2026:** fault-code readability and ownership refactoring on `47c2aae3be15d3ff60aab2a818c2f6e179077702`. Numerical `TensorField` is separate from material representation/residual and fault observations; material projection receives explicit inputs. All 183170 unit assertions, seven matched moving controls, stationary/serial/non-fault controls, analytic source checks and old/new checkpoint controls pass. Matched moving results are bitwise identical; new 2→4-rank restart agrees within 8.9e−16 bulk / 1.1e−14 surface. AStyle 2.04 is idempotent over all 44 primary files; all 57 protected hashes are unchanged. See [report](CODE_READABILITY_REPORT.md), [current guide](MATURE_MOVING_FAULT.md) and [provenance](../../../benchmarks/reconstructed_fault/particle_free/evidence/code_readability/final-provenance.json). Scientific campaigns remain paused; no new physical or production qualification.
 

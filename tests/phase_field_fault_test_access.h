@@ -30,6 +30,9 @@ namespace aspect
           using DGHistory=typename PhaseFieldFault<dim>::DGHistory;
           using DGTransport=typename PhaseFieldFault<dim>::DGTransport;
           using DGField=typename PhaseFieldFault<dim>::DGField;
+          using MatureLocalizationSample=typename PhaseFieldFault<dim>::MatureLocalizationSample;
+          static const auto &fe_normalization_state(const PhaseFieldFault<dim> &model)
+          { return *model.fe_strain_state; }
           static const auto &native_cells(const PhaseFieldFault<dim> &model)
           { return model.fe_strain_state->cells; }
           using PointSample = typename PhaseFieldFault<dim>::NormalizationPointSample;
@@ -54,6 +57,13 @@ namespace aspect
                         && result.action.empty(),ExcMessage("Normalization-only request prepared derivatives."));
             return result.values;
           }
+
+          /** DG phase derivative check: same quadrature and nonlocal projection
+           * used by native endpoint mechanics, with no publication. */
+          static auto fe_normalization_derivatives(
+            const PhaseFieldFault<dim> &model,const LinearAlgebra::BlockVector &trial,
+            const std::vector<double> &direction)
+          { return model.evaluate_fe_normalization(trial,true,&direction); }
 
           static auto normalization_cache_status(const PhaseFieldFault<dim> &model)
           {

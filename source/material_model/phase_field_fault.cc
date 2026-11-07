@@ -480,8 +480,14 @@ namespace aspect
                             "fault tangents. The legacy particle default is unchanged. The new "
                             "selection currently requires fresh frozen mature 2-D runs; restart "
                             "conversion is not supported. Accepted FE strain always uses the deviator.");
+          prm.declare_entry("Constitutive spin", "total material",
+                            Patterns::Selection("total material|bulk slip subtracted"),
+                            "Constitutive spin for mature DG objective stress. Total material retains the existing Jaumann law. "
+                            "Bulk slip subtracted removes the localized nonsymmetric fault slip gradient from the accepted "
+                            "velocity gradient before finite rotation. This changes the constitutive law, not transport or its Lie integrator.");
           prm.declare_entry("Stress rotation", "legacy", Patterns::Selection("legacy|Jaumann lagged Lie|Jaumann DG Lie|Jaumann DG material Lie"),
-                            "Experimental total-material Jaumann spin from the accepted velocity gradient. "
+                            "Experimental finite rotation from the accepted state, using the selected Constitutive spin "
+                            "(total material by default). "
                             "Finite rotation precedes the existing exponential Maxwell/source substep; "
                             "the complete method is first order. Restricted to fixed-mesh frozen mature "
                             "particle stress with matched constant G/eta, the 3D deviator and stationary BP3 samples. "
@@ -499,10 +505,16 @@ namespace aspect
                             "Material Q1 profile and obstacle transport. The optional MacCormack "
                             "correction is limited to accepted donor-cell extrema; growth remains disabled.");
           prm.declare_entry("Material tensor inflow", "zero",
-                            Patterns::Selection("zero|accepted trace"),
+                            Patterns::Selection("zero|accepted trace|prescribed exterior stress"),
                             "Exterior T and R+B during the split advection stage: zero history or "
                             "constant-normal continuation of their accepted boundary traces. "
-                            "The latter freezes the exterior history during advection, before reaction.");
+                            "Accepted trace freezes the numerical boundary history before reaction. "
+                            "Prescribed exterior stress requires direct physical stress and an attached "
+                            "provider of the pure-transport exterior, before rotation and reaction.");
+          prm.declare_entry("Material exterior stress identity", "", Patterns::Anything(),
+                            "Nonempty physical/provider identity for prescribed exterior stress. "
+                            "Includes all exterior law and reference parameters; checked on restart. "
+                            "Must be empty for the retained zero/accepted-trace options.");
           prm.enter_subsection("Material viscosity multiplier");
           Functions::ParsedFunction<dim>::declare_parameters(prm, 1);
           prm.declare_entry("Function expression", "1", Patterns::Anything(),
@@ -648,6 +660,8 @@ namespace aspect
           dg_tensor_history = prm.get("Bulk history representation") == "DG trial stress";
           dg_accepted_history = prm.get_bool("Enable prescribed DG accepted history");
           consistent_particle_strain = prm.get("Particle stress strain convention") == "three dimensional deviator";
+          constitutive_spin = prm.get("Constitutive spin")=="bulk slip subtracted"
+                              ? ConstitutiveSpin::bulk_slip_subtracted : ConstitutiveSpin::total_material;
           jaumann_particle_stress = prm.get("Stress rotation") == "Jaumann lagged Lie";
           dg_material_transport = prm.get("Stress rotation") == "Jaumann DG material Lie";
           material_direct_stress = prm.get("Material stress representation") == "direct physical stress";
@@ -655,7 +669,13 @@ namespace aspect
                       ExcMessage("Direct physical stress requires Jaumann DG material Lie."));
           material_bounded_profile = prm.get("Material profile transport") == "bounded MacCormack";
           material_trace_inflow = prm.get("Material tensor inflow") == "accepted trace";
-          AssertThrow(dg_material_transport || (!material_bounded_profile && !material_trace_inflow),
+          material_prescribed_inflow = prm.get("Material tensor inflow") == "prescribed exterior stress";
+          material_exterior_identity = prm.get("Material exterior stress identity");
+          AssertThrow(material_prescribed_inflow == !material_exterior_identity.empty(),
+                      ExcMessage("Prescribed exterior stress requires a nonempty provider identity; other inflow options require an empty identity."));
+          AssertThrow(!material_prescribed_inflow || material_direct_stress,
+                      ExcMessage("Prescribed physical exterior stress currently requires direct physical stress; separated exterior histories are not specified."));
+          AssertThrow(dg_material_transport || (!material_bounded_profile && !material_trace_inflow && !material_prescribed_inflow),
                       ExcMessage("Material profile/inflow selections require Jaumann DG material Lie."));
           jaumann_dg_stress = dg_material_transport || prm.get("Stress rotation") == "Jaumann DG Lie";
           prm.enter_subsection("Material viscosity multiplier");
@@ -670,11 +690,18 @@ namespace aspect
           material_viscosity_identity += "|initial phase:" + prm.get("Function expression") + "|" + prm.get("Function constants") + "|" + prm.get("Variable names");
           prm.leave_subsection();
           // Preserve the existing schema7 identity for the retained default.
-          if (material_bounded_profile || material_trace_inflow)
+          if (material_bounded_profile || material_trace_inflow || material_prescribed_inflow)
             material_viscosity_identity += "|profile transport:" + prm.get("Material profile transport")
                                            + "|tensor inflow:" + prm.get("Material tensor inflow");
+          if (material_prescribed_inflow)
+            material_viscosity_identity += "|exterior stress:" + material_exterior_identity;
           if (material_direct_stress)
             material_viscosity_identity += "|stress representation:direct physical stress";
+          if (constitutive_spin==ConstitutiveSpin::bulk_slip_subtracted)
+            material_viscosity_identity += "|constitutive spin:bulk slip subtracted v1";
+          if (this->get_parameters().use_discontinuous_phase_discretization)
+            material_viscosity_identity += this->get_parameters().use_limiter_for_discontinuous_phase_solution
+                                          ? "|phase:DGQ2 material SSPRK3 BP v1" : "|phase:DGQ2 material SSPRK3 unlimited v1";
           fe_bulk_normal_quadrature_points = prm.get_integer("FE bulk normal quadrature points");
           consistent_endpoint_phase = prm.get_bool("Consistent endpoint phase solve");
           fe_initial_phase_profile = prm.get("FE initial phase profile file");
@@ -684,6 +711,10 @@ namespace aspect
           unloaded_cohesive_initialization = prm.get("Initial cohesive state") == "unloaded";
           surface_cohesive_history = prm.get("Cohesive history representation") == "surface elastic slip";
           mature_frictional_fault = prm.get("Fault constitutive mode") == "mature frictional";
+          AssertThrow(constitutive_spin==ConstitutiveSpin::total_material
+                      || (dim==2 && mature_frictional_fault && dg_tensor_history && dg_accepted_history
+                          && jaumann_dg_stress && !evolve_phase_field && !consistent_endpoint_phase),
+                      ExcMessage("Bulk slip-subtracted spin requires growth-disabled mature accepted DG objective history; particle and cohesive kinematics are unsupported."));
           AssertThrow(!jaumann_particle_stress || mature_frictional_fault,
                       ExcMessage("Jaumann lagged Lie is confined to the mature physical particle-stress branch; cohesive histories are unsupported."));
           AssertThrow(!(recoverable_phase_history || unloaded_cohesive_initialization || surface_cohesive_history)

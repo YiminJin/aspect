@@ -34,6 +34,7 @@
 #include <deal.II/dofs/dof_tools.h>
 #include <deal.II/numerics/vector_tools.h>
 #include <deal.II/fe/fe_q.h>
+#include <deal.II/fe/fe_dgq.h>
 #include <deal.II/lac/solver_cg.h>
 
 #include <iomanip>
@@ -686,8 +687,14 @@ namespace aspect
   PhaseFieldHandler<dim>::
   edit_finite_element_variables(std::vector<VariableDeclaration<dim>> &variables)
   {
+    const auto &parameters = this->get_parameters();
+    std::shared_ptr<FiniteElement<dim>> element;
+    if (parameters.use_discontinuous_phase_discretization)
+      element = std::make_shared<FE_DGQ<dim>>(parameters.phase_degree);
+    else
+      element = std::make_shared<FE_Q<dim>>(parameters.phase_degree);
     variables.push_back(VariableDeclaration<dim>("phase_field",
-                                                 std::make_shared<FE_Q<dim>>(1), 
+                                                 element,
                                                  1, 
                                                  1));
   }
@@ -718,6 +725,9 @@ namespace aspect
 
     const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
     const bool mesh_data = fault && fault->uses_homogeneous_mesh_data();
+    AssertThrow(!uses_dg_phase() || (mesh_data && fault && !fault->uses_bulk_cohesive_phase()
+                                    && (fault->uses_transported_mature_history() || fault->uses_consistent_endpoint_phase())),
+                ExcMessage("DG phase requires native mesh data and transported mature or consistent-endpoint phase physics; CPDI and the separate bulk-cohesive prototype are unsupported."));
     if (mesh_data)
       AssertThrow(!particle_manager->particle_domains_requested(),
                   ExcMessage("Homogeneous mesh data uses diagnostic particles without domains."));
@@ -894,6 +904,30 @@ namespace aspect
         // block separately from its explicit mechanical endpoint energy.
         // No CPDI/domain, particle H/composition or projected stress enters.
         // Its trials never replace the accepted phase, tensor or surface Z.
+        if (uses_dg_phase())
+          {
+            AssertThrow(omit_fe_elastic_energy && fault_material->uses_consistent_endpoint_phase(),
+                        ExcMessage("DG phase growth uses the native consistent-endpoint solver and its full normalization adjoint."));
+            std::map<std::pair<unsigned int,unsigned int>,double> tangent;
+            const auto fracture=evaluate_dg_fracture(current_solution,assemble_system_jacobian,&tangent);
+            double scale_squared=0.;
+            for (const auto i:system_rhs.block(block_index).locally_owned_elements())
+              {
+                system_rhs.block(block_index)[i]=-fracture.gradient[i];
+                scale_squared+=fracture.roundoff_scale[i]*fracture.roundoff_scale[i];
+              }
+            if (assemble_system_jacobian)
+              for (const auto &entry:tangent)
+                if (system_rhs.block(block_index).locally_owned_elements().is_element(entry.first.first))
+                  system_matrix.block(block_index,block_index).add(entry.first.first,entry.first.second,entry.second);
+            system_rhs.compress(VectorOperation::insert);
+            if (assemble_system_jacobian) system_matrix.compress(VectorOperation::add);
+            if (energy) *energy=fracture.energy;
+            if (residual_roundoff_allowance)
+              *residual_roundoff_allowance=8*std::numeric_limits<double>::epsilon()
+                                           *std::sqrt(Utilities::MPI::sum(scale_squared,this->get_mpi_communicator()));
+            return true;
+          }
         typename MaterialModel::PhaseFieldFault<dim>::FEPhaseEnergy elastic;
         if (!omit_fe_elastic_energy)
           elastic=fault_material->evaluate_fe_phase_energy(current_solution,assemble_system_jacobian);
@@ -1175,6 +1209,7 @@ namespace aspect
     const LinearAlgebra::BlockVector &trial,const bool tangent,
     std::map<std::pair<unsigned int,unsigned int>,double> *sparse_hessian) const
   {
+    if (uses_dg_phase()) return evaluate_dg_fracture(trial,tangent,sparse_hessian);
     const bool sparse=sparse_hessian!=nullptr;
     if(sparse)sparse_hessian->clear();
     const auto &material=Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
@@ -1937,6 +1972,19 @@ namespace aspect
   PhaseFieldHandler<dim>::
   make_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &sp)
   {
+    if (uses_dg_phase())
+      {
+        Table<2,DoFTools::Coupling> coupling(this->introspection().n_components,
+                                           this->introspection().n_components);
+        coupling.fill(DoFTools::none);
+        const auto c = this->introspection().variable("phase_field").first_component_index;
+        coupling[c][c] = DoFTools::always;
+        DoFTools::make_flux_sparsity_pattern(this->get_dof_handler(), sp,
+                                            this->get_current_constraints(), false,
+                                            coupling, coupling,
+                                            Utilities::MPI::this_mpi_process(this->get_mpi_communicator()));
+        return;
+      }
     const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
     if (fault && fault->uses_independent_bulk_history() && !fault->is_mature_frictional_fault()
         && !fault->uses_consistent_endpoint_phase() && !fault->uses_bulk_cohesive_phase())

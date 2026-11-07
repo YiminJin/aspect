@@ -1,0 +1,32 @@
+# Native fixed-fault cohesive consistent-endpoint check. No new growth physics.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/pf6a-common.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/dgq2-phase/operators/libdg_native_phase_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/dgq2-phase/growth01
+set End time = 0.53125
+subsection Discretization
+ set Use discontinuous phase discretization = true
+ set Phase polynomial degree = 2
+end
+subsection Material model
+ subsection Phase field fault
+  set Use homogeneous mesh data = true
+ end
+end
+subsection Compositional fields
+ set Compositional field methods = static, static, static, static
+ set Mapped particle properties =
+end
+subsection Particles
+ set Generate particle domains = false
+ set Generate CPDI data for particle domains = false
+ set Generate face data for particle domains = false
+ set List of particle properties = crack driving force, maxwell stress
+end
+subsection Solver parameters
+ subsection Phase field solver parameters
+  set Endpoint translation preconditioner = false
+ end
+end
+subsection Postprocess
+ set List of postprocessors = particles, DG native phase checks
+end

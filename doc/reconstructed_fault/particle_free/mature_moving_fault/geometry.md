@@ -26,13 +26,13 @@ memory; relative fault slip $V$ does not advect them. There is no birth,
 resampling, tangential redistribution or AMR in this admitted calculation.
 
 The private manager is swapped into the live geometry only after staging. The
-candidate Q1 profile is bound with it, normalization and surface temperature are
+candidate native phase profile is bound with it, normalization and surface temperature are
 rebuilt, and old geometry is retained for rollback. Binding exposes a coherent
 candidate to mechanics; it is not acceptance.
 
 ## Profile and material irreversibility
 
-[transport_material_profile](../../../../source/material_model/phase_field_fault/profile_transport.cc)
+For the historical continuous Q1 selection, [transport_material_profile](../../../../source/material_model/phase_field_fault/profile_transport.cc)
 visits owned Q1 vertices $x_i$ and pulls back the accepted field:
 $\phi_F(x_i)=\phi_h^-(x_i-\Delta t v^-(x_i))$. The default is this `Q1 remap`.
 Remote-point averaging handles points shared by cells. Missing departure
@@ -57,6 +57,16 @@ maximum with the old field would leave a damage trail and is deliberately not
 taken. The optional profile/inflow extension requires `full normal cross-section`
 association; stationary seed support could clip a separately transported profile
 whose tails still contribute to normalization.
+
+The nodal pullback and independent donor-range clamp do not enforce the
+integrated material-transport balance
+$d\int\phi\,dx/dt=\int\phi\nabla\!\cdot v\,dx-\int_{\partial\Omega}\phi v\!\cdot n\,ds$.
+Bounds and the transported obstacle therefore do not establish conservation
+when the physical divergence and boundary terms vanish. The
+[layered campaign](../LAYERED_BULK_CAMPAIGN_REPORT.md) measures 7.04% profile-mass
+growth on its coarse small-timestep case and 2.39% on the refined mesh, with
+substantial stress/slip sensitivity. This remains a profile-discretization
+limitation; the campaign preserves the operator while assessing its accuracy.
 
 ## Actual association and extension
 
@@ -101,3 +111,10 @@ backend, surface subdivisions eight and existing integration tolerances.
 and native sampling use the matching geometry/profile data. The same shape
 functions and measures must be used in the mechanical work adjoint: replacing
 association, normalization or support in just one consumer breaks this contract.
+
+For native DGQ2 phase, the same profile entry delegates to the phase handler's
+material DG operator. All nine scalar modes per cell enter phase sampling and
+normalization. A point shared by cells selects the lexicographically greatest
+lower-corner cell (the half-open Cartesian trace convention) before nonlinear
+localization is evaluated; it does not average phase traces. Cell-clipped normal
+rays use that same convention. See the [DG phase contract](../DGQ2_PHASE_FIELD_DESIGN.md).

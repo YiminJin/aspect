@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(corner_inflow)
+add_library(corner_inflow SHARED corner_inflow.cc)
+ASPECT_SETUP_PLUGIN(corner_inflow)
+target_compile_options(corner_inflow PRIVATE -fno-finite-math-only -ffp-contract=off)

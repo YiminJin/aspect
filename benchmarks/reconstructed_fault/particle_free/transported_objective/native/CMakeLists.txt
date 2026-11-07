@@ -16,3 +16,8 @@ add_library(transported_isolation_native SHARED material_checks.cc)
 ASPECT_SETUP_PLUGIN(transported_isolation_native)
 target_compile_definitions(transported_isolation_native PRIVATE MATERIAL_ISOLATION_CHECKS)
 target_compile_options(transported_isolation_native PRIVATE -fno-finite-math-only -ffp-contract=off)
+
+add_library(transported_bulk_spin SHARED material_checks.cc)
+ASPECT_SETUP_PLUGIN(transported_bulk_spin)
+target_compile_definitions(transported_bulk_spin PRIVATE MATERIAL_ENERGY_CHECKS BULK_SPIN_CHECKS)
+target_compile_options(transported_bulk_spin PRIVATE -fno-finite-math-only -ffp-contract=off)

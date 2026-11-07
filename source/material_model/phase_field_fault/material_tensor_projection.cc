@@ -36,7 +36,7 @@ namespace aspect
         native[FEValuesExtractors::Scalar(phase_component)]
         .get_function_values(profile_state.bulk_history.native, phase);
         for (unsigned int q = 0; q < quadrature.size(); ++q)
-          values[q] = evaluate_tensor(indices, quadrature.point(q),
+          values[q] = evaluate_tensor(cell_id, q, indices, quadrature.point(q),
                                       target_values.quadrature_point(q), phase[q], gradients[q]);
       };
       return TensorField::project(*this, prototype, profile_state.cells,

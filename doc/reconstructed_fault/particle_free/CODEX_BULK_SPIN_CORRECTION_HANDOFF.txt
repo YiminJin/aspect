@@ -1,0 +1,409 @@
+CODEX TASK: isolate bulk spin from regularized mature-fault slip
+Prepared 5 November 2026
+Repository: https://github.com/YiminJin/aspect/tree/pf-rsf-particle-free
+Source reviewed: cf06525471ce89789f1ac10905dc79f3aac7562a
+
+1. Selected task and expected result
+
+Implement, integrate, and verify a bulk-corotational stress update for the
+particle-free mature frictional-fault model. The localized fault slip is to
+be removed from BOTH the symmetric and antisymmetric parts of the velocity
+gradient. This task explicitly selects a constitutive change. Earlier rules
+to preserve total-material Jaumann spin do not prohibit this selected change.
+Do not stop at another audit or a standalone utility: complete the native
+history lifecycle, bounded coupled comparisons, restart checks, documentation,
+and a clear recommendation for using the corrected model.
+
+The selected interpretation is that the diffuse fault represents localized
+relative slip, while the stress history represents the surrounding Maxwell
+material. Pure tangential translation of two fault walls must not rotate that
+bulk stress merely because the velocity jump is smeared over a finite width.
+This is a kinematic/constitutive closure for the present small-elastic-strain,
+objective Maxwell model, not a universal theorem for every shear-band model
+or a replacement by finite-strain hyperelasticity.
+
+Scope: mature particle-free DG stress, moving direct physical stress and the
+retained separated representation, plus the stationary mature DG objective
+anchor so selection does not silently fall back to total spin in that path.
+Keep the existing native spatial projection and accepted-gradient Lie ordering.
+Preserve the ordinary ASPECT timestep/solver ownership introduced by refactoring.
+The particle-history and evolving cohesive paths need an explicit applicability
+audit, but do not silently apply the mature formula to them. Their source rates
+and kinematics differ; reject this new selector for unsupported combinations.
+
+Retain the existing total-spin mode as an explicitly identified comparison.
+Activate bulk spin in the new fixtures and maintained examples for this task.
+Do not relabel old spin-enabled trajectories as corrected results. No server
+submission, long physical campaign, or production-checkpoint conversion is
+part of this task. Complete the native fix and bounded evidence locally.
+
+2. Kinematic derivation and selected continuum law
+
+Convention: L_ij = partial_j v_i, sym(A)=(A+A^T)/2,
+skw(A)=(A-A^T)/2, D_t=partial_t+v.grad. All physical stresses are spatial
+3-D deviatoric tensors represented under the existing plane-strain convention.
+
+For a piecewise smooth velocity with jump [v]=V s across a fault with normal n,
+the distributional gradient consists of the regular gradient plus
+
+    [v] tensor n * delta_fault.
+
+Regularize that jump term with the EXISTING localized fault-rate operator:
+
+    J_f(x) = chi(x) V_tilde(x) [s_tilde(x) tensor n_tilde(x)],
+    chi = h(phi)/I_tilde,
+    s = shear_sense * tangent,
+    S = sym(s tensor n).
+
+Here J_f has units 1/s and is a full, nonsymmetric rank-two tensor. It is a
+rate field, not the gradient of accumulated slip and not a stored history.
+Define
+
+    L_b = grad(v) - J_f,
+    D_f = sym(J_f) = chi V_tilde S,
+    W_f = skw(J_f) = chi V_tilde (s tensor n - n tensor s)/2,
+    W_b = skw(L_b) = W - W_f.
+
+Because s.n=0, J_f is trace-free, and the existing symmetric bulk forcing is
+unchanged:
+
+    dev3(sym(L_b)) = D_3(v) - D_f.
+
+Use the following physical stress equation:
+
+    D_t tau - W_b tau + tau W_b + (G/eta_b) tau
+        = 2G [D_3(v) - D_f].
+
+Call this a bulk-corotational or bulk-spin Jaumann-type rate. The ordinary
+total-velocity Jaumann rate uses W; changing its spin changes the constitutive
+law even though the numerical rotation algorithm is reused.
+
+Do not subtract a viscous strain rate from W. A symmetric Maxwell relaxation
+rate does not determine a further spin. Do not call W_b an exact finite-strain
+elastic polar-rotation rate; that would require additional distortion state.
+
+Objectivity check: for an observer rotation Q(t),
+
+    L* = Q L Q^T + Omega,  Omega=dot(Q) Q^T,
+    J_f* = Q J_f Q^T,
+    W_b* = Q W_b Q^T + Omega.
+
+Thus the selected bulk-corotational stress rate transforms objectively. The
+observer angular velocity is retained; it is not removed with the slip spin.
+
+Energy check, for the constant G already used by this model:
+
+    E = tau:tau/(4G),
+    D_t E + tau:tau/(2 eta_b) = tau:D_3(v) - tau:D_f.
+
+The rotation term has zero contraction with tau. The correction introduces no
+new dissipative term. This continuum identity does not eliminate DG projection
+losses, transport errors, or time-splitting errors; account for them separately.
+
+For curved faults, the singular jump contribution remains [v] tensor n locally.
+Use the same local segment frame and support as the current symmetric source.
+Do not remove all gradients caused by slip. Tangential changes in V, curvature,
+and spatially varying extensions also generate regular gradients, which remain
+in L_b. For v=H(rho) j(x), chi=H'(rho), n=grad(rho), j=V s, the independent
+manufactured reference is
+
+    grad(v) = j tensor [chi n] + H grad(j),
+    L_b = H grad(j).
+
+No global continuous 'bulk velocity' is required: L_b can be an incompatible
+distortion rate. Do not construct v_b by subtracting a guessed slip velocity,
+replace stress advection by v_b, differentiate the existing symmetric S to
+invent a spin, or add curvature terms to J_f without changing the kinematics.
+This closure preserves the current finite-width localization. It does not by
+itself prove a general sharp-interface limit or repair existing tip errors.
+
+3. Exact match to current source conventions
+
+At the reviewed revision, localize_surface_values in
+source/material_model/phase_field_fault/dg_objective.cc returns
+
+    2 h(phi) a_tilde / I_tilde * S.
+
+With a=V this is 2 D_f, NOT J_f and NOT D_f. With a=Z it is the auxiliary
+stress correction B, with stress units. Do not use Z, Z/dt, or a difference
+of Z as the instantaneous slip rate.
+
+Refactor the existing evaluator enough to share one association/localization
+sample between symmetric source and nonsymmetric slip-gradient evaluation.
+Keep arithmetic/call semantics for the total-spin control as stable as possible.
+The shared sample must carry the relevant fault/segment identity, active flag,
+xi, signed local frame, h(phi), and normalization, with explicit state ownership.
+It may return scalar weights/frame data or the tensor; avoid creating a second
+geometry or normalization implementation.
+
+For segment j and its current state's xi:
+
+    V_tilde = (1-xi) V_j + xi V_(j+1),
+    I_tilde = (1-xi) I_j + xi I_(j+1),
+    q = h(phi) V_tilde / I_tilde,
+    J_f = q outer_product(shear_sense*tangent, normal).
+
+Interpolate V and I separately, then divide, exactly as existing mechanics does.
+Do not interpolate V/I instead. Use the same actual association and activation
+rules; there is no new endpoint-clamping closest-point map, continuation past
+physical tips, normalization floor, phase threshold, or cap. Inactive source
+means J_f=0. Respect existing unsupported multi-fault restrictions rather than
+silently selecting/summing branches not admitted by mechanics.
+
+The symmetric consistency test is
+
+    2 sym(J_f) == existing localize_surface_values(V)
+
+at matched points/states, to roundoff. Derive W_f from the full dyad. The
+symmetric tensor alone does not uniquely determine its antisymmetric partner.
+
+For the 2-D rotation helper define
+
+    omega_b = 0.5 * [(L_10-J_f,10) - (L_01-J_f,01)],
+    alpha_b = dt * omega_b,
+    Q_b = [[cos(alpha_b), -sin(alpha_b)],
+           [sin(alpha_b),  cos(alpha_b)]].
+
+For tangent=(1,0), normal=(0,1), shear_sense=+1:
+J_f,01=q and omega_b=(L_10-L_01+q)/2. Pure slip L_01=q gives zero.
+This sign and factor of two must be independently tested.
+
+4. Numerical update: freeze a coherent accepted bulk spin
+
+Use the existing first-order accepted-state Lie discretization. At the beginning
+of an attempt from accepted time t_n, before geometry/profile staging or mutable
+Newton rates, freeze the following coherent state:
+
+    v_h^n, committed V_f^n, phi_h^n, I_f^n,
+    accepted fault geometry, shear sense, association support/version.
+
+At each bulk rotation quadrature point x_q on the fixed mesh compute
+
+    L_q^n = grad(v_h^n)(x_q),
+    J_f,q^n = h(phi_h^n(x_q))/I_tilde^n(x_q)
+              * V_tilde^n(x_q) * [s^n(x_q) tensor n^n(x_q)],
+    omega_b,q^n = axial(skw(L_q^n-J_f,q^n)).
+
+Retain these unprojected quadrature values as attempt-local data keyed by cell,
+quadrature identity/order, and accepted-state identity. In 2-D one scalar per
+point suffices. Compute before the live manager is swapped to candidate geometry.
+Do not cache alpha independently of dt: a retry can change dt. Recompute or
+validate/reuse omega from the same accepted parent and form alpha with retry dt.
+If another evaluation path uses different points, explicitly evaluate against
+an immutable accepted source context rather than reading candidate global data.
+
+This snapshot is Eulerian omega_b^n(x), frozen over the interval, consistent with
+the currently accepted-gradient Lie scheme. Do not additionally advect the spin
+snapshot after advecting stress. A characteristic/midpoint treatment would be a
+separate integrator change. Matching all subtraction inputs is essential even
+though the whole method remains first-order accurate in time.
+
+The specific trap is that rotate_material_history currently runs AFTER
+stage_material_geometry and project_material_tensor reads the candidate profile
+with the accepted velocity gradient. That is harmless for total spin, which did
+not use phi, but is wrong for the new lagged subtraction. Merely inserting a call
+to the current live localize_surface_values into that callback mixes states.
+
+Then complete the existing native step:
+
+    tau_adv = A_h(v_h^n, dt) tau_h^n,
+    tau_bar = P_h[Q_b^n tau_adv (Q_b^n)^T],
+    beta(x) = exp(-G dt/eta_b(x,t_(n+1))),
+    kappa(x) = -eta_b(x,t_(n+1)) expm1(-G dt/eta_b(x,t_(n+1))),
+    tau_h^(n+1) = P_h[ beta tau_bar
+                       + 2 kappa (D_3(v_h^(n+1))-D_f^(n+1)) ].
+
+A_h remains the current componentwise DG stress transport with full material
+velocity. P_h remains the existing quadrature-defined DG mass projection.
+Geometry/profile staging stays in its existing place. Endpoint D_f uses endpoint
+geometry/profile/normalization and the current private slip-rate iterate, as it
+already does. Freeze tau_bar throughout the coupled solve; outer iterations
+repeat reaction, not transport or rotation. No new spin derivative belongs in
+the current Newton Jacobian because both accepted v and accepted V are fixed.
+Do not accidentally introduce W_b(v^(n+1),V^(n+1)) into this lagged scheme.
+
+Keep native pointwise subtraction before the finite rotation; do not independently
+smooth/project W_f, L, or omega to force cancellation. A discrepancy between native
+FE grad(v_h) and nonpolynomial J_f is a spatial resolution error to measure.
+Cancellation is exact in matched manufactured fields and convergent in resolved
+FE fields, not guaranteed to roundoff for an arbitrary coarse fault profile.
+
+5. Native ownership, separated control, and state lifecycle
+
+Relevant source map (verify names against the actual working tree):
+
+- include/aspect/reconstructed_fault/objective_stress.h:
+  finite rotation and stable rotation increment. Add a clearly named angular-
+  rate/skew-input primitive or a thin wrapper; preserve legacy helper semantics.
+- source/material_model/phase_field_fault/dg_objective.cc:
+  existing localization and stationary DG anchor, including zero-spin fast path.
+- source/material_model/phase_field_fault/material_history.cc and
+  include/aspect/material_model/phase_field_fault/material_history_internal.h:
+  create/own/clear immutable accepted spin sampling in the material attempt.
+- source/material_model/phase_field_fault/material_tensor_projection.cc and
+  stress_evolution.cc: consume sampled bulk spin without candidate-state leakage.
+- source/material_model/phase_field_fault/material_geometry.cc:
+  manager swap and profile staging boundary; retain this lifecycle ordering.
+- source/material_model/phase_field_fault/stress_reaction.cc and
+  include/aspect/material_model/phase_field_fault/stress_law.h:
+  retain symmetric endpoint source; enforce shared localization conventions.
+- include/aspect/reconstructed_fault/manager.h and
+  source/reconstructed_fault/manager_slip_rate.cc:
+  get_timestep_committed_slip_rate provides the persistent rate;
+  get_slip_rate can return mutable trial/current Newton data and is unsuitable
+  as the implicit source of the lagged correction.
+- source/material_model/phase_field_fault.cc and dg_accepted.cc:
+  parameter selection, admissibility, logging and checkpoint identity.
+- source/simulator/core.cc:
+  existing prepare -> transport -> stage geometry -> rotate sequence.
+  Keep material computation under its proper owner; no dedicated alternate driver.
+
+For moving separated histories, the existing transport of T and M=R+P_h B
+must use the SAME Q_b for both transported tensors. Rebuild the residual using
+the existing candidate B subtraction. Do not rotate only T or only R. With
+stationary B the unprojected identity is
+
+    T_bar = Q_b T Q_b^T,
+    R_bar = Q_b R Q_b^T + (Q_b B Q_b^T-B),
+    T_bar-R_bar-B = Q_b (T-R-B) Q_b^T.
+
+Use the existing stable increment for Q_b B Q_b^T-B. Retain the current discrete
+projection semantics and report finite-space differences; do not claim pointwise
+direct/separated equivalence where their retained projections differ.
+
+The stationary zero-spin shortcut must test the SELECTED bulk spin, not merely
+L_10==L_01. Pure slip has nonzero total spin but zero bulk spin. Conversely,
+zero total spin with nonzero fault spin must not bypass the correction. Use an
+exact-zero branch or existing justified criterion; introduce no arbitrary cutoff.
+
+Initialization must establish that accepted velocity and committed slip refer
+to the same initialized mechanical state. Audit when the converged initial V
+is committed; do not silently use the first predictor, V_min, or zero because
+accepted rates are not yet ready. Do not advance histories during initialization
+merely to manufacture a spin snapshot.
+
+On acceptance publish converged endpoint velocity, rates, profile, geometry and
+histories once through the existing transaction. On rejection restore all parent
+state and discard candidate spin/rotation data. No scratch rotation cache belongs
+in physical checkpoint state. Restart must recover enough committed state to
+recompute it and validate a stable constitutive-spin identifier.
+
+Provide one explicit spin selection, preferably an enum separate from the already
+existing representation/integrator selector, with total-material and bulk-slip-
+subtracted meanings. Retain old parameter spellings and old checkpoint meaning;
+missing old metadata means total spin. The new examples explicitly select bulk
+spin. New-law checkpoints must not be silently read under total spin, or vice
+versa. Preserve old-format reading through a versioned compatibility path if
+the archive layout changes. Follow existing project commit/push policy.
+
+Geometry motion and profile advection still use their existing physical velocity
+and normal-covector rules. Do not rotate fault normals by W_b, rotate scalar age,
+change the pressure convention, or turn the auxiliary Z memory into a new force.
+Plane-strain zz=-xx-yy and full 3-D energy contractions remain unchanged.
+
+6. Verification: one completed implementation and comparison package
+
+Use independent references, rather than tests that call the same helper twice.
+Integrate the following checks into the existing test/fixture infrastructure.
+Use bounded local runs, normally at most four build workers. Extend existing
+tests where they already cover a requirement, rather than duplicating a suite.
+
+A. Source identity and orientation.
+   Test 2 sym(J_f) against the existing mechanical source at matched states;
+   arbitrary segment angles, both shear senses, varying V and I, inactive points,
+   and accepted support near finite ends. Check ratio-of-interpolants explicitly.
+   Compare with a componentwise independent dyad/rotation formula. In compatible
+   algebraic cases expect errors near roundoff relative to the operands.
+
+B. Pure localized slip with nonzero anisotropic initial stress.
+   Prescribe grad(v)=J_f, first with representable constant data, then with a smooth
+   resolved profile. Bulk spin and symmetric bulk forcing vanish. At fixed material
+   points without transport effects, tau(t)=exp(-Gt/eta) tau(0); at eta=infinity
+   it is constant. Use a representable uniform stress or account for transport
+   independently. Repeat fixed accumulated slip over several widths. The old
+   total-spin control must reproduce alpha=-delta/(2w); the new control must
+   remove that systematic rotation. For FE profiles report h/width refinement
+   and absolute residual spin, not an unexplained tolerance relative to huge
+   cancelling total/fault terms. Do not require exact cancellation on unresolved
+   nonpolynomial fields.
+
+C. Slip plus genuine rotation and no-slip limits.
+   Prescribe grad(v)=Omega+J_f. Recover W_b=Omega and the independent stress
+   solution exp(-Gt/eta) Q(t) tau(0) Q(t)^T. Include arbitrary orientations/signs,
+   the zero-total-spin/nonzero-fault-spin case, V=0, and inactive support.
+   Check plane-strain norm/trace and continuum rotation work. No-slip should
+   reduce to the retained total-spin results within the existing arithmetic
+   contract. No-fault/default regressions remain unchanged.
+
+D. Moving profile and time-level isolation.
+   Construct a translating slip profile for which grad(v^n)=J_f^n at sampling
+   points. Verify omega_b^n=0 before and after candidate geometry binding, and
+   after perturbing private Newton rates. Rejection with a different retry dt
+   must reproduce a fresh attempt from the same accepted state. A test that
+   would pass even if endpoint phi/I/frame were used is insufficient.
+
+E. Curved/varying-slip kinematics and observer covariance.
+   Use independently differentiated v=H(rho) j(x) to verify the residual
+   H grad(j), including its nonzero spin. This shows that genuine regular
+   gradients have not been erased. Keep this analytical/local test separate
+   from native curved-geometry capabilities not yet admitted by the model.
+   Test the observer transformation of L, J_f and W_b; for the full Lie scheme
+   report temporal convergence under time-dependent superposed rotation rather
+   than claiming exact discrete covariance.
+
+F. Bounded native mechanics and lifecycle.
+   Run a prescribed-slip native fixture and short fully coupled mature RSF
+   cases, including constant and layered viscosity, a translating fault, direct
+   and separated histories, and a small time-refinement pair. Use nonzero
+   stress so rotation is observable. Report tau components, shear/normal
+   tractions, V, state, energy terms, total/fault/bulk spin, and nonlinear work.
+   Include serial/MPI consistency, a same-law restart (preferably with changed
+   MPI rank count), forced rejection/retry, and incompatible-law restart refusal.
+   Confirm stationary DG uses the same law and exact-zero shortcut correctly.
+   Rebuild matching checker DSOs after state-layout changes.
+
+Diagnostics should report max/L2 total spin, fault spin, bulk spin and dt*bulk
+spin, plus expected residual for manufactured cases. Where parent data should
+be identical, check parent/geometry/profile/rate identity. Keep diagnostics
+compact. Physical differences from total spin are expected and are not reasons
+to tune friction, viscosity, normalization, filtering, or solver tolerances.
+
+Existing tests of total-spin rigid rotation, simple shear and width sensitivity
+remain useful legacy controls. A passing correction test establishes the chosen
+kinematic property; it does not establish event accuracy or a sharp-tip limit.
+If a known finite-end spatial error dominates a coupled run, measure it separately
+and finish independent spin checks; do not disguise it with extra smoothing.
+
+7. Deliverables and completion
+
+- Implemented native bulk-spin option, integrated into both mature DG
+  representations and stationary/moving supported lifecycles.
+- Shared localization semantics, coherent accepted-state sampling, explicit
+  constitutive identity, and rollback/restart behavior.
+- Updated model.md, discretization.md, lifecycle/configuration documentation,
+  current STATUS and the relevant AGENTS.md scientific convention. Preserve
+  historical reports as historical evidence, not current total-spin authority.
+- One BULK_SPIN_CORRECTION_REPORT.md with source/binary/input identities,
+  concise derivation, concrete changed paths, quantitative tests, old/new paired
+  results, limitations, and the selected inputs for subsequent experiments.
+- Compact PNG/CSV evidence where it helps assess the correction, reproducible
+  commands, and a complete reusable input for a subsequent server run. Do not
+  submit that run as part of this task.
+
+Finish the implementation and bounded native comparison without waiting for
+another selection of each routine stage. If current source differs from the
+reviewed revision, adapt to its actual ownership rather than restoring old
+architecture. Report actual scientific conflicts precisely; missing historical
+outputs are not a reason to abandon the independent tests above.
+
+References for the derivation, not automatic changes to the model:
+- Reviewed repository model and source at the commit above.
+- Kim, Cervera, Wu and Chiumenti (2021), Materials 14, 2040, section 2.2:
+  https://doi.org/10.3390/ma14082040
+  Regularized jump kinematics motivates the dyadic slip-rate contribution.
+- NEML crystal-plasticity theory illustrates why spin splitting requires
+  explicit kinematic assumptions; it is NOT a derivation of this fault model:
+  https://github.com/Argonne-National-Laboratory/neml/blob/main/doc/sphinx/crystal_plasticity.rst
+
+The bulk-spin closure and the native algorithm specified here are the selected
+proposal for this task, not results already implemented or verified in ASPECT.

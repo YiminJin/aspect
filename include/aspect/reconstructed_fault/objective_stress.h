@@ -9,6 +9,45 @@ namespace aspect
 {
   namespace ReconstructedFaultUtilities
   {
+    /** Angular rate of a full spatial distortion gradient in plane strain. */
+    inline double plane_strain_angular_rate(const dealii::Tensor<2,2> &gradient)
+    {
+      return .5*(gradient[1][0]-gradient[0][1]);
+    }
+
+    /** Finite rotation with an explicitly selected, frozen angular rate (1/s).
+     * Constitutive selection and time-level ownership belong to the caller. */
+    inline dealii::SymmetricTensor<2,2>
+    rotate_plane_strain_stress_with_spin(const dealii::SymmetricTensor<2,2> &stress,
+                                         const double angular_rate, const double dt)
+    {
+      const double angle = dt*angular_rate;
+      AssertThrow(std::isfinite(angle), dealii::ExcMessage("Nonfinite bulk rotation angle."));
+      if (angle == 0.) return stress;
+      dealii::Tensor<2,2> rotation;
+      rotation[0][0] = rotation[1][1] = std::cos(angle);
+      rotation[1][0] = std::sin(angle);
+      rotation[0][1] = -rotation[1][0];
+      return dealii::symmetrize(rotation*dealii::Tensor<2,2>(stress)*dealii::transpose(rotation));
+    }
+
+    /** Stable Q A Q^T-A for an explicitly selected angular rate. */
+    inline dealii::SymmetricTensor<2,2>
+    rotate_plane_strain_stress_increment_with_spin(const dealii::SymmetricTensor<2,2> &stress,
+                                                   const double angular_rate, const double dt)
+    {
+      const double angle=dt*angular_rate;
+      AssertThrow(std::isfinite(angle),dealii::ExcMessage("Nonfinite bulk rotation angle."));
+      const double sine=std::sin(angle),cosine=std::cos(angle);
+      const double dc=-2*sine*sine,ss=2*sine*cosine;
+      const double difference=.5*(stress[0][0]-stress[1][1]);
+      dealii::SymmetricTensor<2,2> change;
+      change[0][0]=dc*difference-ss*stress[0][1];
+      change[1][1]=-change[0][0];
+      change[0][1]=ss*difference+dc*stress[0][1];
+      return change;
+    }
+
     /** Frozen total-material Jaumann rotation, with L_ij = d v_i / d x_j.
      * The input is the in-plane block of a spatial, full-3D deviatoric tensor;
      * zz = -xx-yy is unchanged by this plane-strain rotation. This operation
@@ -16,8 +55,8 @@ namespace aspect
      */
     inline dealii::SymmetricTensor<2,2>
     rotate_plane_strain_stress(const dealii::SymmetricTensor<2,2> &stress,
-                              const dealii::Tensor<2,2> &velocity_gradient,
-                              const double dt)
+                               const dealii::Tensor<2,2> &velocity_gradient,
+                               const double dt)
     {
       const double angle = .5*dt*(velocity_gradient[1][0]-velocity_gradient[0][1]);
       AssertThrow(std::isfinite(angle), dealii::ExcMessage("Nonfinite Jaumann rotation angle."));
@@ -34,8 +73,8 @@ namespace aspect
      * history tensors when the accepted spin angle is very small. */
     inline dealii::SymmetricTensor<2,2>
     rotate_plane_strain_stress_increment(const dealii::SymmetricTensor<2,2> &stress,
-                                        const dealii::Tensor<2,2> &velocity_gradient,
-                                        const double dt)
+                                         const dealii::Tensor<2,2> &velocity_gradient,
+                                         const double dt)
     {
       const double angle=.5*dt*(velocity_gradient[1][0]-velocity_gradient[0][1]);
       AssertThrow(std::isfinite(angle),dealii::ExcMessage("Nonfinite Jaumann rotation angle."));

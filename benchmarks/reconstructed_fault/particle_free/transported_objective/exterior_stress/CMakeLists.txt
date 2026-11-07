@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(exterior_stress)
+add_library(exterior_stress SHARED exterior_stress.cc)
+ASPECT_SETUP_PLUGIN(exterior_stress)
+target_compile_options(exterior_stress PRIVATE -fno-finite-math-only -ffp-contract=off)

@@ -769,6 +769,10 @@ namespace aspect
     bool                           use_discontinuous_temperature_discretization;
     std::vector<bool>              use_discontinuous_composition_discretization;
     bool                           have_discontinuous_composition_discretization;
+    /** Native phase family/degree; Q1 remains the historical default. */
+    bool                           use_discontinuous_phase_discretization;
+    unsigned int                   phase_degree;
+    bool                           use_limiter_for_discontinuous_phase_solution;
     unsigned int                   temperature_degree;
     std::vector<unsigned int>      composition_degrees;
     unsigned int                   max_composition_degree;

@@ -1048,14 +1048,9 @@ namespace aspect
                                point_cache, this->get_dof_handler(), accepted_bulk_state,
                                VectorTools::EvaluationFlags::avg,
                                this->introspection().component_indices.temperature);
-      const unsigned int phase_field_component =
-        this->introspection().variable("phase_field").first_component_index;
-      samples.phase_fields = VectorTools::point_values<1>(
-                               point_cache, this->get_dof_handler(), accepted_bulk_state,
-                               VectorTools::EvaluationFlags::avg, phase_field_component);
-      samples.previous_phase_fields = VectorTools::point_values<1>(
-                                        point_cache, this->get_dof_handler(), uses_independent_bulk_history() ? accepted_fe_strain_state() : this->get_old_solution(),
-                                        VectorTools::EvaluationFlags::avg, phase_field_component);
+      samples.phase_fields = this->get_phase_field_handler().phase_point_values(point_cache,accepted_bulk_state);
+      samples.previous_phase_fields = this->get_phase_field_handler().phase_point_values(
+        point_cache,uses_independent_bulk_history() ? accepted_fe_strain_state() : this->get_old_solution());
     }
 
     template <int dim>
@@ -1647,14 +1642,8 @@ namespace aspect
 
       Utilities::MPI::RemotePointEvaluation<dim> point_cache;
       point_cache.reinit(phase_field_handler.get_grid_cache(), particle_positions);
-      const unsigned int phase_field_component =
-        this->introspection().variable("phase_field").first_component_index;
       const std::vector<double> phase_field_values =
-        VectorTools::point_values<1>(point_cache,
-                                     this->get_dof_handler(),
-                                     this->get_solution(),
-                                     VectorTools::EvaluationFlags::avg,
-                                     phase_field_component);
+        phase_field_handler.phase_point_values(point_cache,this->get_solution());
       double local_minimum_phi = std::numeric_limits<double>::max();
       double local_maximum_phi = -std::numeric_limits<double>::max();
       bool local_nonfinite_phi = false;

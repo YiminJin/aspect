@@ -435,3 +435,154 @@ TEST_CASE("Objective DG residual finite rotation keeps tiny-spin memory incremen
   const auto finite=aspect::ReconstructedFaultUtilities::rotate_plane_strain_stress_increment(b,rigid_gradient(finite_angle),1.);
   CHECK(std::sqrt(plane_norm_square(finite-(rotation_reference(b,finite_angle)-b)))<1024.);
 }
+
+TEST_CASE("Bulk spin uses the signed slip dyad and ratio of interpolants", "[bulk_spin]")
+{
+  using namespace aspect::ReconstructedFaultUtilities;
+  for (double angle : {0.,.37,1.9}) for (double sense : {-1.,1.})
+    {
+      MaxwellAccess::MatureLocalizationSample sample;
+      sample.active=true;sample.segment=0;sample.xi=.31;sample.h=2.7;
+      sample.tangent[0]=std::cos(angle);sample.tangent[1]=std::sin(angle);
+      sample.normal[0]=-std::sin(angle);sample.normal[1]=std::cos(angle);sample.shear_sense=sense;
+      const std::vector<double> rates={.13,.71},I={.2,1.3};
+      sample.normalization=(1-sample.xi)*I[0]+sample.xi*I[1];
+      const double q=sample.h*((1-sample.xi)*rates[0]+sample.xi*rates[1])/sample.normalization;
+      const auto J=sample.slip_gradient(rates);
+      for(unsigned i=0;i<2;++i)for(unsigned j=0;j<2;++j)
+        CHECK(J[i][j]==Approx(q*sense*sample.tangent[i]*sample.normal[j]).margin(2e-15));
+      CHECK((2*symmetrize(J)-sample.twice_symmetric(rates)).norm()<3e-15);
+      CHECK(std::abs(q-sample.h*((1-sample.xi)*rates[0]/I[0]+sample.xi*rates[1]/I[1]))>.01);
+      CHECK(std::abs(trace(J))<1e-15);
+      CHECK(plane_strain_angular_rate(J)==Approx(-sense*q/2).margin(1e-15));
+      sample.active=false;
+      CHECK(sample.slip_gradient({}).norm()==0.);
+      CHECK(sample.twice_symmetric({}).norm()==0.);
+    }
+}
+
+TEST_CASE("Bulk-corotational pure slip removes width-dependent stress rotation", "[bulk_spin]")
+{
+  using namespace aspect::ReconstructedFaultUtilities;
+  PlaneStress initial;initial[0][0]=7.;initial[1][1]=-2.;initial[0][1]=1.3;
+  const double end=.4,slip=.3,G=2.,eta=5.;
+  for(double width : {.05,.1,.4}) for(double sense : {-1.,1.}) for(double orientation : {0.,.71})
+    {
+      dealii::Tensor<1,2> t,n;t[0]=std::cos(orientation);t[1]=std::sin(orientation);n[0]=-t[1];n[1]=t[0];
+      const auto J=(sense*slip/(width*end))*outer_product(t,n);
+      for(double genuine_spin : {0.,.63})
+        {
+          const auto L=J+rigid_gradient(genuine_spin);
+          const auto bulk=L-J;
+          CHECK(symmetrize(bulk).norm()<1e-14);
+          const auto actual=std::exp(-G*end/eta)*rotate_plane_strain_stress_with_spin(initial,plane_strain_angular_rate(bulk),end);
+          const auto reference=std::exp(-G*end/eta)*rotation_reference(initial,genuine_spin*end);
+          CHECK(std::sqrt(plane_norm_square(actual-reference))<1e-13);
+          CHECK(std::abs(trace(actual)-std::exp(-G*end/eta)*trace(initial))<1e-14);
+          const auto W=rigid_gradient(plane_strain_angular_rate(bulk));
+          CHECK(std::abs(scalar_product(initial,symmetrize(W*dealii::Tensor<2,2>(initial)-dealii::Tensor<2,2>(initial)*W)))<1e-13);
+        }
+      const auto legacy=rotate_plane_strain_stress(initial,J,end);
+      CHECK(std::sqrt(plane_norm_square(legacy-rotation_reference(initial,-sense*slip/(2*width))))<1e-13);
+      CHECK(rotate_plane_strain_stress_with_spin(initial,plane_strain_angular_rate(J-J),end)==initial);
+      // Zero total spin with nonzero fault spin must rotate the bulk tensor.
+      CHECK(std::sqrt(plane_norm_square(rotate_plane_strain_stress_with_spin(initial,plane_strain_angular_rate(-J),end)
+                                       -rotation_reference(initial,sense*slip/(2*width))))<1e-13);
+    }
+  for(double omega : {0.,.3,-1.7})
+    CHECK((rotate_plane_strain_stress_with_spin(initial,omega,.1)-rotate_plane_strain_stress(initial,rigid_gradient(omega),.1)).norm()<1e-14);
+}
+
+TEST_CASE("Bulk spin retains regular curved varying-slip gradients and observer spin", "[bulk_spin]")
+{
+  using namespace aspect::ReconstructedFaultUtilities;
+  const double width=.23;
+  auto velocity=[&](dealii::Point<2> x)
+  {
+    double r=x.norm(),V=.4+.1*x[0]-.07*x[1],H=.5*(1+std::tanh((r-1)/width));
+    dealii::Tensor<1,2> v;v[0]=-H*V*x[1]/r;v[1]=H*V*x[0]/r;return v;
+  };
+  for(auto x : {dealii::Point<2>(.8,.7),dealii::Point<2>(-.6,.9)})
+    {
+      const double r=x.norm(),V=.4+.1*x[0]-.07*x[1],H=.5*(1+std::tanh((r-1)/width));
+      const double chi=.5/width/std::pow(std::cosh((r-1)/width),2);
+      dealii::Tensor<1,2> n,t;n[0]=x[0]/r;n[1]=x[1]/r;t[0]=-n[1];t[1]=n[0];
+      PlaneGradient grad_j;
+      for(unsigned j=0;j<2;++j)
+        {
+          double dv=j==0 ? .1 : -.07;
+          grad_j[0][j]=dv*t[0]+V*(-(j==1 ? 1./r : 0.)+x[1]*x[j]/(r*r*r));
+          grad_j[1][j]=dv*t[1]+V*((j==0 ? 1./r : 0.)-x[0]*x[j]/(r*r*r));
+        }
+      PlaneGradient L;
+      for(unsigned j=0;j<2;++j){auto plus=x,minus=x;plus[j]+=1e-5;minus[j]-=1e-5;const auto d=(velocity(plus)-velocity(minus))/(2e-5);for(unsigned i=0;i<2;++i)L[i][j]=d[i];}
+      const auto J=chi*V*outer_product(t,n);
+      CHECK((L-J-H*grad_j).norm()<2e-9);
+      CHECK(std::abs(plane_strain_angular_rate(H*grad_j))>.01);
+      PlaneGradient Q;const double angle=.67;Q[0][0]=Q[1][1]=std::cos(angle);Q[1][0]=std::sin(angle);Q[0][1]=-Q[1][0];
+      const auto omega=rigid_gradient(.83),star_L=Q*L*transpose(Q)+omega,star_J=Q*J*transpose(Q);
+      CHECK(std::abs(plane_strain_angular_rate(star_L-star_J)-plane_strain_angular_rate(L-J)-.83)<1e-14);
+    }
+}
+
+TEST_CASE("Accepted bulk-spin Lie scheme converges under time-dependent observer rotation", "[bulk_spin]")
+{
+  using namespace aspect::ReconstructedFaultUtilities;
+  PlaneStress initial;initial[0][0]=3.;initial[1][1]=-1.;initial[0][1]=.4;
+  double previous=0.;
+  for(unsigned steps : {10u,20u,40u,80u})
+    {
+      const double end=.8,dt=end/steps;auto stress=initial;
+      for(unsigned k=0;k<steps;++k)
+        {
+          const double time=k*dt,angle=.3*std::sin(time)+.2*time*time,observer=.3*std::cos(time)+.4*time;
+          PlaneGradient Q;Q[0][0]=Q[1][1]=std::cos(angle);Q[1][0]=std::sin(angle);Q[0][1]=-Q[1][0];
+          PlaneGradient J;J[0][1]=4.;const auto L=rigid_gradient(.4)+J;
+          const auto starL=Q*L*transpose(Q)+rigid_gradient(observer),starJ=Q*J*transpose(Q);
+          stress=std::exp(-.7*dt)*rotate_plane_strain_stress_with_spin(stress,plane_strain_angular_rate(starL-starJ),dt);
+        }
+      const auto reference=std::exp(-.7*end)*rotation_reference(initial,.4*end+.3*std::sin(end)+.2*end*end);
+      const double error=std::sqrt(plane_norm_square(stress-reference));
+      if(previous>0.)CHECK(error/previous<.53);
+      CHECK(error>0.);previous=error;
+      std::cout<<"Bulk spin observer Lie: steps="<<steps<<", error="<<error<<'\n';
+    }
+}
+
+TEST_CASE("Resolved Q2 slip gradients converge to smooth jump spin", "[bulk_spin]")
+{
+  // Interpolate v(y)=V/2*tanh(y/w) with Q2 nodal values; differentiate
+  // that interpolant, independently of J01=V/(2w)*sech(y/w)^2.
+  for(const double width:{.1,.2,.4})
+    {
+      const double V=.3;
+      double previous=1e30;
+      for(const unsigned per_width:{4u,8u,16u,32u})
+        {
+          const double h=width/per_width;
+          double error2=0.,maximum=0.;
+          const dealii::QGauss<1> quadrature(8);
+          for(int cell=-int(4*per_width);cell<int(4*per_width);++cell)
+            {
+              const double y0=cell*h;
+              const double v0=.5*V*std::tanh(y0/width);
+              const double vm=.5*V*std::tanh((y0+.5*h)/width);
+              const double v1=.5*V*std::tanh((y0+h)/width);
+              for(unsigned q=0;q<quadrature.size();++q)
+                {
+                  const double u=quadrature.point(q)[0],y=y0+u*h;
+                  const double derivative=((4*u-3)*v0+(4-8*u)*vm+(4*u-1)*v1)/h;
+                  const double exact=.5*V/width/std::pow(std::cosh(y/width),2);
+                  const double omega=.5*(exact-derivative);
+                  error2+=h*quadrature.weight(q)*omega*omega;
+                  maximum=std::max(maximum,std::abs(omega));
+                }
+            }
+          const double error=std::sqrt(error2);
+          REQUIRE(error<previous*.27);
+          std::cout<<"Bulk spin Q2 profile: width="<<width<<", h/width="<<1./per_width
+                   <<", residual_L2="<<error<<", residual_Linf="<<maximum<<'\n';
+          previous=error;
+        }
+    }
+}

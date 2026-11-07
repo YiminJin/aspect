@@ -46,6 +46,9 @@ namespace aspect
       coarsened = Utilities::MPI::sum(coarsened, comm);
       if (!refined && !coarsened)
         return;
+      AssertThrow(!this->get_phase_field_handler().uses_dg_phase(),
+                  ExcMessage("Native DGQ2 phase currently supports fixed meshes and rank-changing restart, "
+                             "but not adaptive phase/obstacle transfer."));
       AssertThrow(!refined || !coarsened,
                   ExcMessage("Native DG endpoint transfer currently separates refinement from coarsening."));
       if (coarsened)

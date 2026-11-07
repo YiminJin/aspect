@@ -1,0 +1,262 @@
+TASK: Consolidate the direct-stress implementation and write a linked developer guide
+
+PURPOSE
+
+Implement the three improvements below and substantially improve the explanation
+of the current algorithm. The user wants to recognize a compact mathematical
+method in the source and understand how to modify it. Reduce duplicated numerical
+work, misleading names, and hidden control flow. More classes or more functions
+are not the objective; a clear responsibility can justify a function, whereas a
+wrapper that only adds navigation cannot.
+
+This is an authorized implementation/documentation task. Inspect the current
+worktree, make a brief plan, and carry the work through without stopping for
+approval of routine choices. The reviewed baseline is
+d7e4adbe99126f8c9faf9f35c657e287f2c29cea on pf-rsf-particle-free. Verify actual
+local changes; do not reset to this reference. Read AGENTS.md, relevant scientific
+and architecture contracts, CODE_READABILITY_REPORT.md, and the maintained
+MATURE_MOVING_FAULT.md. Preserve unrelated work and existing evidence.
+
+PART 1: THREE CONNECTED CODE IMPROVEMENTS
+
+1. Give localization and tensor samples their actual meanings.
+
+evaluate_mature_dg_memory currently localizes supplied surface values. With Z it
+produces a stress-like memory field; with slip rates it produces twice the
+localized slip-rate tensor. Calling both operations "memory" obscures the direct
+tau path. Rename the existing operation to express its shared localization role,
+and name its arguments accordingly. Choose a concise name consistent with nearby
+ASPECT code. Document the exact interpolation/localization expression, factor of
+two, frame, normalization, and the units implied by the supplied surface values.
+
+Update declarations, definitions, callers, tests, comments, and current guides.
+Do not introduce a new wrapper for every call or change the interpolation,
+geometry association, support, or normalization policy. Keep genuinely different
+constitutive interpretations at their material call sites.
+
+In project_mature_reaction and related direct/shared code, replace local names
+such as T that actually mean either physical tau or auxiliary T with clear names
+such as anchor_values. Keep T/R terminology where the separated law actually
+uses those quantities. The direct update must read naturally as physical stress
+plus strain-rate forcing minus localized slip-rate forcing.
+
+2. Use one implementation of the common tensor mass-projection algebra.
+
+TensorField::project in source/material_model/history/tensor_projection.cc and
+project_mature_reaction in source/material_model/phase_field_fault/stress_reaction.cc
+currently duplicate cell mass assembly, RHS accumulation, local inversion, and
+coefficient publication. Consolidate that common numerical work. Material-side
+code should provide evaluated fields and retain constitutive sampling/meaning.
+
+Support the existing single-field and multiple-field uses without independently
+rebuilding the same cell mass matrix for each separated tensor. A straightforward
+shared kernel or a small extension of the existing projector is sufficient;
+do not invent a projection framework or an additional chain of adapters.
+
+Preserve quadrature, whole-product projection, component ordering, locally owned
+cell selection, accumulation order where practical, ghost-vector construction,
+and collective participation. Retain the pre/post projection energy diagnostics
+and their existing observational meaning. Cell evaluators must not introduce
+MPI collectives. Respect the current supported dimensions and discretizations;
+this task does not enable new spaces or change quadrature.
+
+Inspect nearby projection implementations for straightforward reuse, but do not
+force distinct native-source roundoff calculations or formed-side spaces through
+an interface that changes their mathematics. Explain any intentionally separate
+projection algorithm. Keep the useful boundary between material field sampling
+and numerical mass projection.
+
+3. Make outer and inner mechanical iterations explicit.
+
+solve_reconstructed_fault_stokes currently calls itself recursively to implement
+the projection-consistency iteration, using material_reaction_solving stored in
+the material model as a recursion guard. Replace this with explicit solver-owned
+outer control calling a clearly identified inner mechanical solve. Reuse the
+existing inner solver body; do not duplicate it.
+
+Remove the material-owned recursion-control flag and its guard plumbing. Inspect
+all uses first, including diagnostic labels and history preparation/publication.
+Preserve any real behavior through appropriate explicit inputs or existing state;
+do not simply delete dependent conditions or move the same hidden global flag to
+another class. The material may retain its actual projected-response data, but
+must not own the solver's recursion mode.
+
+Preserve these concrete behaviors:
+- Every reaction candidate starts from the same transported/rotated anchor.
+- The projection correction is fixed during one inner mechanical solve and
+  refreshed between outer iterations.
+- Direct mode still uses the correction where currently required, including
+  constant-viscosity cases; preserve separated-mode activation rules.
+- Keep the current convergence measure, 24-iteration limit, and tolerance.
+- Carry the converged private slip-rate iterate into the terminal solve.
+- The final residual/KKT checks and candidate staging occur in their existing
+  order; the ordinary timestep controller still decides acceptance and publishes
+  the joint state once.
+- Initialization, non-publishing calls, other solver callers, reuse options,
+  rejected attempts, and exceptions retain their contracts.
+
+This is a refactor inside the coupled solver. Do not restore a special mature
+timestep driver, step executor, callback pipeline, or new solver framework.
+Document the explicit call sequence and the lifetime of its temporary data.
+
+PART 2: A DETAILED, LINKED GUIDE
+
+Use Markdown as the maintained source format. Keep
+doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md as a short landing
+page so existing links continue to work. Place linked topic pages in a nearby
+subdirectory, for example mature_moving_fault/. Adjust names if repository
+conventions suggest a better location.
+
+JSON is not the prose documentation format. HTML may be generated from the same
+sources through existing documentation tools if useful and straightforward, but
+is optional. Do not maintain a second hand-written HTML manual or add a website,
+JavaScript application, renderer, or build-system dependency for this task.
+The Markdown must remain useful directly in the repository without a build.
+
+The landing page should explain the purpose, the supported configuration, the
+small number of mathematical stages, and two reading routes: understand the
+algorithm, or find code to modify. Keep it short enough to scan. Link to the
+detail pages rather than reproducing them. Include a compact current revision
+context and clear links to validation evidence and unresolved limitations.
+
+Organize the detailed content approximately as follows. These are topic
+boundaries, not a requirement to create a page for each function:
+
+A. Model and variables
+   Explain the physical equation, its assumptions, and the step to the endpoint
+   update. Define tau, material velocity, slip rate, strain rate, spin, phase,
+   localization, Maxwell coefficients, and the relevant surface state. Give
+   units, location (bulk or fault), time level, and tensor/frame conventions.
+   Explain full 3-D plane strain and the relation eta_ve=kappa. Distinguish the
+   auxiliary localization bookkeeping removed from the direct formulation from
+   the retained physical Jaumann rotation. Use minimal notation and connect it
+   to manuscript notation without proposing a new constitutive derivation.
+
+B. Discrete stress update
+   Explain the FE spaces and which coefficients are actually stored. Derive the
+   cell mass/RHS projection from the weak form and show where the shared kernel
+   performs it. Explain why projecting the complete product matters. Describe
+   upwind transport, SSPRK3 stages, substeps, inflow choices, and objective
+   rotation in enough detail to follow their code. Identify accepted versus
+   current velocities, coefficient sampling, quadrature, and the actual splitting
+   order. Explain the distinction between an exact local rotation and the full
+   discrete update, including projection and splitting errors.
+
+C. Geometry, profile, and localization
+   Explain how material labels/vertices move, how support widths/normals change,
+   and how the Q1 profile and irreversibility obstacle are transported. Distinguish
+   material motion from relative fault slip. Describe the actual bulk-to-fault
+   association, surface interpolation, normalization, and extension used by the
+   code. Do not replace the implemented geometry with an assumed nearest-point
+   construction. Explain default versus optional profile/inflow handling and the
+   current treatment/limitations of finite ends. Link mathematical operations
+   directly to the geometry, profile, and localization routines.
+
+D. Coupled mechanical solve
+   Show how candidate physical stress enters the bulk and surface residuals,
+   friction response, and the implemented linearization. Explain what the inner
+   solve holds fixed, what the projection correction contains, and how the outer
+   loop updates it. State explicitly which tangent is local and which coupling
+   is resolved by the outer iteration; do not describe the whole procedure as an
+   exact monolithic Newton solve without evidence. Explain why the projection
+   correction can be needed even with constant viscosity, the stopping measure,
+   and the final solve with the converged slip guess. Include the new actual
+   function sequence and compact pseudocode.
+
+E. State and lifecycle
+   Trace one attempted step from accepted tau through transport, rotation,
+   candidate stress, and acceptance. Provide a table of actual owners/members,
+   readers/writers, lifetime, and whether each item is physical history, scratch,
+   or a cache. Explain staged geometry binding, bulk/surface synchronization,
+   initialization, rejection/retry, exceptions, restart, and cache invalidation.
+   Explain when copying a state copies vectors versus shares data. Put MPI and
+   threading details beside the operations they affect, without obscuring the
+   physical narrative.
+
+F. Configuration, code navigation, and retained alternatives
+   Provide a complete small direct-stress example and a clear layered-viscosity
+   variant using existing bounded fixtures. Give actual commands and explain the
+   expected outputs. Ensure these examples are reproducible from maintained
+   inputs and do not depend silently on a developer's old output directory.
+   Distinguish an input fragment from a complete runnable file. Explicitly set
+   Material stress representation = direct physical stress and explain the
+   legacy DG trial stress parameter spelling.
+
+   Supply an equation-to-code map and a short "where to change..." table for the
+   material law, friction, transport, geometry, projection, and nonlinear solver.
+   Explain which modules a direct-mode reader can initially skip. Keep the
+   separated T/R/B comparison and native/cohesive/reference distinctions in a
+   clearly optional section or additional reference page if needed. State actual
+   defaults, support limits, and validation status; the direct guide must not
+   imply that all retained modes have the same physical meaning.
+
+DEPTH AND NAVIGATION REQUIREMENTS
+
+The current guide mostly names operations. The revised pages must explain how
+the operations work and why they appear. For each important stage connect:
+physical quantity/equation -> discrete operation -> actual function(s) -> data
+read/written -> result available to the next stage.
+
+Include one coherent direct-mode step trace with consistent symbols and actual
+source names, linking to these chapters. It may be documentation pseudocode;
+it is not a request to implement another executable driver. Show exactly what is
+repeated during inner/outer iterations and what is computed once per attempt.
+Use a small worked example or an existing analytical fixture where it clarifies
+projection or state evolution. Label illustrative calculations and do not invent
+measured results.
+
+Use relative links between pages and to source files, with actual symbol names.
+Give each page a link back to the overview and relevant next/prerequisite links.
+Keep the hierarchy shallow. Use stable section headings and compact tables or
+diagrams where they clarify dependencies, iteration, or ownership. Avoid a giant
+call graph. Explain abbreviations at their first meaningful use.
+
+Do not duplicate entire derivations or state tables across pages, split a
+coherent explanation into many tiny fragments, or replace detailed reasoning
+with lists of filenames. No word-count quota is needed: the main algorithm must
+remain compact while implementation details are accessible on demand. Current
+source and scientific contracts govern descriptions; historical reports remain
+evidence at their revisions. Distinguish implementation from the ideal/generic
+model and record genuine discrepancies instead of documenting an aspiration as
+current behavior.
+
+VERIFICATION AND DELIVERY
+
+Preserve governing equations, stress/frame conventions, defaults, quadrature,
+physical parameters, solver tolerances, checkpoint identity, and the converged
+publication behavior. Maintain ASPECT formatting and meaningful in-source
+comments. Do not change algorithms to make this refactor's comparisons pass.
+
+Keep the three changes reviewable in the diff or commits. Rebuild affected code
+and matching checker libraries. Reuse relevant unit/analytical checks and the
+existing bounded direct/separated constant/layered, default, rejection/retry,
+restart, and stationary controls. Include an ordinary non-fault dispatch check
+where the solver integration is affected. Check solver decisions, final slip
+iterate, publication counts, physical stress/work traction, and accepted states.
+For the shared projector, exercise both one and multiple tensor fields and a
+spatially varying source/coefficient using existing independent references;
+add a small test only for a real uncovered interface contract.
+
+Validate the documentation's relative links, source symbols, configuration
+selectors, and commands. Reuse a bounded regression as the documented runnable
+example where possible. Inspect representative rendered equations/tables through
+the repository's supported documentation tooling when available, and report any
+rendering limitation honestly. Do not claim that an example was run if it was
+only inspected. Do not create a new documentation framework to perform checks.
+
+Use at most four build workers/MPI ranks and run native cases sequentially.
+No server jobs, event-length trajectories, or new scientific campaign. Once
+relevant checks pass, finish rather than broadening verification indefinitely.
+Follow the existing commit/push policy; this instruction does not itself request
+a remote push.
+
+Deliver the implemented changes, the linked guide with its preserved landing
+page, and one concise report: what changed, actual tests/results, documentation
+entry point, intentional remaining distinctions, and limitations. Update active
+status/source-map references to the current names. Do not reorganize historical
+reports or the whole project documentation tree.
+
+Completion means that the three identified issues are addressed and the user
+can follow one direct-stress step from equations to code without deciphering
+historical formulations or hidden solver recursion. Passing tests and adding
+more pages alone do not establish that outcome.

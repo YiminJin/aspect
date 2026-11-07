@@ -69,19 +69,22 @@ namespace aspect
         if (!cell->is_artificial())
           {
             cell->get_dof_indices(indices);
-            for (unsigned int v = 0; v < GeometryInfo<dim>::vertices_per_cell; ++v)
+            const auto &phase_element=this->get_fe().base_element(this->get_fe().component_to_base_index(component).first);
+            for (unsigned int v = 0; v < phase_element.n_dofs_per_cell(); ++v)
               {
+                const Point<dim> point=this->get_phase_field_handler().uses_dg_phase()
+                                       ? this->get_mapping().transform_unit_to_real_cell(cell,phase_element.get_unit_support_points()[v]) : cell->vertex(v);
                 const auto i = indices[this->get_fe().component_to_system_index(component, v)];
                 if (!owned.locally_owned_elements().is_element(i))
                   continue;
                 if (uses_prescribed_dg_geometry() || dg_material_transport)
                   {
-                    const double phi = dg_material_transport ? material_initial_phase.value(cell->vertex(v)) : prescribed_geometry_phase(cell->vertex(v));
+                    const double phi = dg_material_transport ? material_initial_phase.value(point) : prescribed_geometry_phase(point);
                     AssertThrow(std::isfinite(phi) && phi >= 0. && phi < 1., ExcMessage("Inadmissible prescribed physical phase."));
                     owned[i] = phi;
                     continue;
                   }
-                const double yy = cell->vertex(v)[1];
+                const double yy = point[1];
                 AssertThrow(yy >= data.front().first && yy <= data.back().first,
                             ExcMessage("Shared phase profile does not cover the domain."));
                 auto right = std::upper_bound(data.begin(), data.end(), yy, [](double x, const auto & p)
@@ -101,6 +104,8 @@ namespace aspect
               }
           }
       owned.compress(VectorOperation::insert);
+      if (this->get_phase_field_handler().uses_dg_phase())
+        this->get_phase_field_handler().limit_dg_phase(owned);
       trial = owned;
       this->get_pcout() << "   Accepted supplied continuum phase seed; native particle H retained as diagnostic, unloaded independent histories constructed afterward." << std::endl;
       return true;
@@ -317,9 +322,17 @@ namespace aspect
                     const auto vertices = this->get_mapping().get_vertices(cell);
                     for (const unsigned int v : cell->vertex_indices())
                       for (unsigned int d = 0; d < dim; ++d)
-                        AssertThrow(vertices.back()[d] > vertices.front()[d]
-                                    && vertices[v][d] == ((v & (1u << d)) ? vertices.back()[d] : vertices.front()[d]),
-                                    ExcMessage("Mature DG source requires affine Cartesian cells."));
+                        {
+                          const double lo = vertices.front()[d], hi = vertices.back()[d];
+                          // Refining a Cartesian grid with non-dyadic coarse
+                          // coordinates can round equivalent vertex coordinates
+                          // differently. Admit that roundoff, not a distorted cell.
+                          const double scale = std::max({std::abs(lo), std::abs(hi), hi-lo});
+                          const double roundoff = 16. * std::numeric_limits<double>::epsilon() * scale;
+                          AssertThrow(hi > lo
+                                      && std::abs(vertices[v][d] - ((v & (1u << d)) ? hi : lo)) <= roundoff,
+                                      ExcMessage("Mature DG source requires affine Cartesian cells (up to coordinate roundoff)."));
+                        }
                     state->cells.emplace(cell->id(), cell);
                   }
               }
@@ -409,6 +422,8 @@ namespace aspect
                   p.segment = source.active ? source.segment_index : numbers::invalid_unsigned_int;
                   p.xi = source.active ? source.xi : 0.;
                 }
+              const auto nphase=this->get_fe().base_element(this->get_fe().component_to_base_index(pc).first).n_dofs_per_cell();
+              p.dofs.resize(nphase);p.shape.resize(nphase);
               for (unsigned int v = 0; v < p.dofs.size(); ++v)
                 {
                   const auto j = this->get_fe().component_to_system_index(pc, v);

@@ -3,6 +3,7 @@
 #include <aspect/simulator.h>
 #include <aspect/geometry_model/interface.h>
 #include <aspect/phase_field.h>
+#include <aspect/phase_field/obstacle.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
@@ -12,6 +13,8 @@
 #include <aspect/particle/manager.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/lac/trilinos_solver.h>
+#include <deal.II/lac/trilinos_sparsity_pattern.h>
+#include <deal.II/lac/trilinos_precondition.h>
 #include <deal.II/lac/lapack_full_matrix.h>
 #include <cmath>
 #include <iomanip>
@@ -62,10 +65,18 @@ namespace aspect
                 ExcMessage("Endpoint minimization requires the selected box and previous-physical-phase bounds."));
     const double scale=material.get_critical_energy_release_rates()[0]/((8./3.)*phase.get_length_scale());
     const unsigned int physical_size=anchor.block(b).size();
-    const internal::EndpointPhaseConstraints phase_coordinates(current_constraints,phase_offset,physical_size);
+    internal::EndpointPhaseConstraints phase_coordinates(current_constraints,phase_offset,physical_size);
+    const bool dg_phase=phase.uses_dg_phase();
+    if (dg_phase)
+      {
+        phase_coordinates.set_discontinuous_q2(dof_handler,introspection.variable("phase_field").first_component_index,
+                                               phase_offset,mpi_communicator);
+        AssertThrow(!settings.endpoint_translation_preconditioner,
+                    ExcMessage("The nodal translation preconditioner is not defined for DG Bernstein phase coordinates."));
+      }
     const unsigned int n=phase_coordinates.size();
     IndexSet phase_partition=introspection.index_sets.system_partitioning[b];
-    if (!phase_coordinates.identity())
+    if (!phase_coordinates.identity() && !dg_phase)
       {
         phase_partition=IndexSet(n);
         phase_partition.add_range(0,n);
@@ -78,18 +89,21 @@ namespace aspect
     double fracture_anchor=0.,fracture_arithmetic=0.;
     LinearAlgebra::SparseMatrix restricted_search_matrix;
     std::unique_ptr<TrilinosWrappers::SolverDirect> search_preconditioner;
+    std::unique_ptr<LinearAlgebra::PreconditionAMG> dg_search_preconditioner;
     std::vector<bool> contact(n),previous_contact(n);
     bool preconditioner_ready=false;
     std::vector<Point<dim>> points(n);
     const auto physical_lower=internal::endpoint_values(anchor.block(b),mpi_communicator);
     lower=phase_coordinates.select(physical_lower);x=lower;
-    AssertThrow(phase_coordinates.expand(lower)==physical_lower,
+    Vector<double> lower_roundtrip(phase_coordinates.expand(lower));lower_roundtrip-=physical_lower;
+    AssertThrow(dg_phase ? lower_roundtrip.linfty_norm()<=128*std::numeric_limits<double>::epsilon() : lower_roundtrip.linfty_norm()==0.,
                 ExcMessage("The accepted physical phase must satisfy its native hanging constraints exactly."));
     if(initial_trial)
       {
       const auto full_guess=internal::endpoint_values(initial_trial->block(b),mpi_communicator);
       x=phase_coordinates.select(full_guess);
-      AssertThrow(phase_coordinates.expand(x)==full_guess,
+      Vector<double> guess_roundtrip(phase_coordinates.expand(x));guess_roundtrip-=full_guess;
+      AssertThrow(dg_phase ? guess_roundtrip.linfty_norm()<=128*std::numeric_limits<double>::epsilon() : guess_roundtrip.linfty_norm()==0.,
                   ExcMessage("Endpoint starting phase violates native hanging constraints."));
       for(unsigned int i=0;i<n;++i)
         {
@@ -105,13 +119,24 @@ namespace aspect
       if(cell->is_locally_owned())
       {
       cell->get_dof_indices(local_indices);
-      for(unsigned int v=0;v<GeometryInfo<dim>::vertices_per_cell;++v)
+      const auto &phase_element=finite_element.base_element(finite_element.component_to_base_index(component).first);
+      for(unsigned int v=0;v<phase_element.n_dofs_per_cell();++v)
         {
           const auto global=local_indices[finite_element.component_to_system_index(component,v)];
           const auto i=global-anchor.get_block_indices().block_start(b);
           counts[i]+=1.;
-          for(unsigned int d=0;d<dim;++d)coordinates[dim*i+d]+=cell->vertex(v)[d];
-          physical_mass[i]+=cell->measure()/GeometryInfo<dim>::vertices_per_cell;
+          const auto point=dg_phase ? mapping->transform_unit_to_real_cell(cell,phase_element.get_unit_support_points()[v]) : cell->vertex(v);
+          for(unsigned int d=0;d<dim;++d)coordinates[dim*i+d]+=point[d];
+          if (dg_phase)
+            {
+              // Integral of nodal tensor Q2 basis: Simpson weights; E^T then
+              // yields the positive Bernstein row sums cell_volume/9.
+              double weight=1.;
+              for (unsigned int d=0;d<dim;++d)
+                weight*=phase_element.get_unit_support_points()[v][d]==.5 ? 2./3.:1./6.;
+              physical_mass[i]+=cell->measure()*weight;
+            }
+          else physical_mass[i]+=cell->measure()/GeometryInfo<dim>::vertices_per_cell;
         }
       }
     internal::endpoint_sum(coordinates,mpi_communicator);internal::endpoint_sum(counts,mpi_communicator);
@@ -132,6 +157,33 @@ namespace aspect
     {
       const auto physical_phase=phase_coordinates.expand(phi);
       Vector<double> derivative(physical_size);
+      if (dg_phase)
+        {
+          // A cellwise Q2 normal-derivative direction. Shared physical support
+          // points carry independent traces; a global coordinate lookup would
+          // silently identify these modes. This is one stability probe, not a
+          // certificate for every possible perturbation of a DG field.
+          const auto &element=finite_element.base_element(finite_element.component_to_base_index(component).first);
+          FEValues<dim> values(*mapping,element,Quadrature<dim>(element.get_unit_support_points()),update_gradients);
+          std::vector<double> local_derivative(physical_size,0.);
+          for (const auto &cell:dof_handler.active_cell_iterators()) if (cell->is_locally_owned())
+            {
+              cell->get_dof_indices(local_indices);
+              values.reinit(typename Triangulation<dim>::cell_iterator(cell));
+              for (unsigned int i=0;i<element.n_dofs_per_cell();++i)
+                {
+                  const auto row=local_indices[finite_element.component_to_system_index(component,i)]-phase_offset;
+                  for (unsigned int j=0;j<element.n_dofs_per_cell();++j)
+                    {
+                      const auto column=local_indices[finite_element.component_to_system_index(component,j)]-phase_offset;
+                      local_derivative[row]-=values.shape_grad(j,i)[1]*physical_phase[column];
+                    }
+                }
+            }
+          internal::endpoint_sum(local_derivative,mpi_communicator);
+          std::copy(local_derivative.begin(),local_derivative.end(),derivative.begin());
+          return phase_coordinates.select(derivative);
+        }
       for (unsigned int i=0; i<physical_size; ++i)
         {
           auto node=phase_nodes.find({physical_points[i][0],physical_points[i][1]});
@@ -171,7 +223,7 @@ namespace aspect
       owned=solution;
       for(unsigned int i=0;i<n;++i)
         {
-          AssertThrow(phi[i]>=0 && phi[i]<1.,ExcMessage("Undefined endpoint trial normalization."));
+          AssertThrow(phi[i]>=lower[i] && phi[i]<1.,ExcMessage("Undefined endpoint trial normalization."));
 
         }
       internal::endpoint_assign(owned.block(b),phase_coordinates.expand(phi));
@@ -259,7 +311,7 @@ namespace aspect
           AssertThrow(current_base!=nullptr,ExcInternalError());
           const auto base_phase=phase_coordinates.select(internal::endpoint_values(current_base->bulk.block(b),mpi_communicator));
           for(unsigned int i=0;i<n;++i)
-            AssertThrow(phi[i]==base_phase[i],ExcMessage("Tangent base differs from the explicit trial."));
+            AssertThrow(dg_phase ? std::abs(phi[i]-base_phase[i])<=128*std::numeric_limits<double>::epsilon() : phi[i]==base_phase[i],ExcMessage("Tangent base differs from the explicit trial."));
           if(!linearized_action)
             {
               const auto endpoint=material.make_fe_endpoint_trial(current_base->bulk,current_base->slip);
@@ -278,7 +330,10 @@ namespace aspect
       // and acceptance. Independent half-spacing actions quantify its error.
       double eps=relative/direction.linfty_norm();
       for(unsigned int i=0;i<n;++i)if(direction[i]!=0.)
-        eps=std::min(eps,.25*std::min(phi[i],1.-phi[i])/std::abs(direction[i]));
+        // Bernstein coefficients of an admissible lower polynomial can
+        // be negative. Feasibility here is the positive lower-gap coefficient,
+        // not the absolute coefficient value.
+        eps=std::min(eps,.25*std::min(dg_phase ? phi[i]-lower[i] : phi[i],1.-phi[i])/std::abs(direction[i]));
       AssertThrow(eps>0. && std::isfinite(eps),ExcMessage("No arithmetic room for endpoint tangent action."));
       pcout<<"   Endpoint tangent amplitude="<<eps*direction.linfty_norm()<<std::endl;
       Vector<double> plus(phi),minus(phi);plus.add(eps,direction);minus.add(-eps,direction);
@@ -306,6 +361,38 @@ namespace aspect
             search_matrix.copy_from(system_matrix.block(b,b));
             for(const auto i:phase_partition)search_matrix.add(i,i,scale*mass[i]);
             search_matrix.compress(VectorOperation::add);
+          }
+        else if (dg_phase)
+          {
+            // Sparse cell-local coordinate pullback, including neighboring-face
+            // blocks. No dense production phase matrix is formed.
+            std::map<std::pair<unsigned int,unsigned int>,double> physical_hessian,reduced;
+            const auto fracture=phase.evaluate_cell_fracture(solution,true,&physical_hessian);
+            fracture_anchor=fracture.energy;
+            fracture_gradient=phase_coordinates.transpose(Vector<double>(fracture.gradient.begin(),fracture.gradient.end()));
+            const auto positive=phase_coordinates.transpose(Vector<double>(fracture.roundoff_scale.begin(),fracture.roundoff_scale.end()));
+            fracture_arithmetic=8*std::numeric_limits<double>::epsilon()*positive.l2_norm();
+            for (const auto &entry:physical_hessian)
+              for (const auto &a:phase_coordinates.weights()[entry.first.first])
+                for (const auto &b:phase_coordinates.weights()[entry.first.second])
+                  reduced[{a.first,b.first}]+=a.second*entry.second*b.second;
+            TrilinosWrappers::SparsityPattern graph(phase_partition,phase_partition,mpi_communicator);
+            for (const auto &entry:reduced)
+              if (phase_partition.is_element(entry.first.first)) graph.add(entry.first.first,entry.first.second);
+            graph.compress();fracture_matrix.reinit(graph);search_matrix.reinit(graph);
+            for (const auto &entry:reduced)
+              if (phase_partition.is_element(entry.first.first))
+                {
+                  fracture_matrix.set(entry.first.first,entry.first.second,entry.second);
+                  search_matrix.set(entry.first.first,entry.first.second,entry.second);
+                }
+            search_matrix.compress(VectorOperation::insert);
+            for (unsigned int i=0;i<n;++i)
+              {
+                diagonal[i]=std::abs(reduced[{i,i}])/scale+mass[i];
+                if (phase_partition.is_element(i)) search_matrix.add(i,i,scale*mass[i]);
+              }
+            fracture_matrix.compress(VectorOperation::insert);search_matrix.compress(VectorOperation::add);
           }
         else
           {
@@ -360,9 +447,19 @@ namespace aspect
             // fracture search operator. Exact application avoids spending
             // many expensive mechanical tangent actions on AMG error in an
             // anisotropic mesh. It is not the physical reduced Hessian.
-            search_preconditioner=std::make_unique<TrilinosWrappers::SolverDirect>();
-            search_preconditioner->initialize(restricted_search_matrix);
-            pcout<<"   Endpoint phase Amesos factor: ranks="<<Utilities::MPI::n_mpi_processes(mpi_communicator)
+            if (dg_phase)
+              {
+                dg_search_preconditioner=std::make_unique<LinearAlgebra::PreconditionAMG>();
+                typename LinearAlgebra::PreconditionAMG::AdditionalData data;
+                data.elliptic=true;data.higher_order_elements=true;data.smoother_sweeps=2;
+                dg_search_preconditioner->initialize(restricted_search_matrix,data);
+              }
+            else
+              {
+                search_preconditioner=std::make_unique<TrilinosWrappers::SolverDirect>();
+                search_preconditioner->initialize(restricted_search_matrix);
+              }
+            pcout<<(dg_phase ? "   Endpoint phase AMG setup: ranks=" : "   Endpoint phase Amesos factor: ranks=")<<Utilities::MPI::n_mpi_processes(mpi_communicator)
                  <<", seconds="<<std::chrono::duration<double>(std::chrono::steady_clock::now()-factor_started).count()<<std::endl;
             previous_contact=contact;preconditioner_ready=true;
           };
@@ -376,7 +473,8 @@ namespace aspect
             ++search_inverse_calls;
             LinearAlgebra::Vector src(phase_partition,mpi_communicator),dst(src);
             internal::endpoint_assign(src,r);
-            search_preconditioner->vmult(dst,src);
+            if (dg_phase) dg_search_preconditioner->vmult(dst,src);
+            else search_preconditioner->vmult(dst,src);
             z=internal::endpoint_values(dst,mpi_communicator);z*=scale;
           };
         Evaluation base=evaluate(x);
@@ -521,6 +619,26 @@ namespace aspect
             Vector<double> bound_step(n);
             for(unsigned int i=0;i<n;++i)bound_step[i]=lower[i]-x[i];
             for(unsigned int i=0;i<n;++i)contact[i]=base.gradient[i]>=0.;
+            if (dg_phase)
+              {
+                LinearAlgebra::Vector current(phase_partition,mpi_communicator),load(current),lo(current),hi(current),candidate(current);
+                internal::endpoint_assign(current,x);search_matrix.vmult(load,current);
+                for (const auto i:phase_partition)
+                  {load[i]-=scale*base.gradient[i];lo[i]=lower[i];hi[i]=1.;}
+                load.compress(VectorOperation::insert);lo.compress(VectorOperation::insert);hi.compress(VectorOperation::insert);
+                candidate=current;
+                const double accuracy=scale*(settings.linear_solver_tolerance*base.gradient.l2_norm()+base.allowance);
+                const auto check=PhaseField::solve_obstacle(search_matrix,load,lo,hi,candidate,
+                                                           introspection.index_sets.system_relevant_partitioning[b],mpi_communicator,
+                                                           accuracy,settings.max_linear_solver_iterations,settings.max_linear_solver_iterations);
+                obstacle_step=internal::endpoint_values(candidate,mpi_communicator);obstacle_step-=x;
+                obstacle_ready=obstacle_step.linfty_norm()>0. && base.gradient*obstacle_step<0.;
+                for (unsigned int i=0;i<n;++i) contact[i]=(x[i]+obstacle_step[i]==lower[i]);
+                factor_preconditioner();
+                pcout<<"   DG phase obstacle search: KKT="<<check.residual<<", iterations="<<check.iterations
+                     <<", linear iterations="<<check.linear_iterations<<std::endl;
+              }
+            else
             for(unsigned int k=0;k<settings.max_linear_solver_iterations;++k)
               {
                 factor_preconditioner();
@@ -737,7 +855,7 @@ namespace aspect
         const auto selected_phase=internal::endpoint_values(base.bulk.block(b),mpi_communicator);
         AssertThrow(selected_phase==phase_coordinates.expand(x),ExcMessage("Selected phase is not the native master expansion."));
         for(unsigned int i=0;i<physical_size;++i)
-          AssertThrow(selected_phase[i]>=physical_lower[i] && selected_phase[i]<1.,
+          AssertThrow(selected_phase[i]>=physical_lower[i]-(dg_phase ? 128*std::numeric_limits<double>::epsilon():0.) && selected_phase[i]<1.,
                       ExcMessage("Selected endpoint violates the physical phase obstacle."));
         solution=base.bulk;current_linearization_point=base.bulk;
         last_pressure_normalization_adjustment=base.pressure_adjustment;
