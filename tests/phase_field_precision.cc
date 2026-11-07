@@ -16,7 +16,7 @@ namespace aspect
           // components are DG. Verify by the inverse FE map and support point,
           // independently of the component-to-system lookup in production.
           const auto &fe=this->get_dof_handler().get_fe();
-          const auto component=this->introspection().variable("phase_field").first_component_index;
+          const auto component=this->introspection().phase_field().first_component_index;
           const auto &vertex_dofs=internal::PhaseFieldTestAccess<dim>::vertex_dofs(handler);
           std::vector<types::global_dof_index> local_dofs(fe.dofs_per_cell);
           for (const auto &cell:this->get_dof_handler().active_cell_iterators())
@@ -38,7 +38,7 @@ namespace aspect
               }
           auto &pm=handler.get_associated_particle_manager();
           const auto Hindex=pm.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
-          const auto block=this->introspection().variable("phase_field").block_index;
+          const auto block=this->introspection().phase_field().block_index;
           const auto comm=this->get_mpi_communicator();
           const auto before=K3::fingerprint(*this);
           const double E=internal::PhaseFieldTestAccess<dim>::single_material_coefficients(handler,0,0).second;

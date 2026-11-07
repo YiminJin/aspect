@@ -191,7 +191,7 @@ namespace aspect
           const auto rule=m.mechanical_quadrature();
           FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_values|update_quadrature_points|update_JxW_values);
           std::vector<double> phase(rule.size()),shear(s.Z.size()),normal(s.Z.size());
-          const auto pc=this->introspection().variable("phase_field").first_component_index;
+          const auto pc=this->introspection().phase_field().first_component_index;
           auto &mutable_manager=this->get_reconstructed_fault_manager();
           mutable_manager.prepare_stokes_qp_projection_cache();
           unsigned int k=0;

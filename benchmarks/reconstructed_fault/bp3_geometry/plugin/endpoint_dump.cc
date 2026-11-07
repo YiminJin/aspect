@@ -22,7 +22,7 @@ namespace aspect { namespace Postprocess {
         if(cell->is_locally_owned())
           {
             fe.reinit(cell);
-            fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(this->get_solution(),phi);
+            fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(this->get_solution(),phi);
             const auto &a=manager.get_stokes_qp_fault_associations(cell->id(),quad,fe.get_quadrature_points());
             for (unsigned int q=0;q<quad.size();++q)
               out<<cell->id().to_string()<<','<<q<<','<<a[q].position[0]<<','<<a[q].position[1]<<','<<phi[q]<<','<<a[q].active<<','<<a[q].segment_index<<','<<a[q].xi<<','<<a[q].tangent[0]<<','<<a[q].tangent[1]<<'\n';

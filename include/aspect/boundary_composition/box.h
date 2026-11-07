@@ -50,6 +50,10 @@ namespace aspect
                                      const Point<dim> &position,
                                      const unsigned int compositional_field) const override;
 
+        double boundary_composition_at_time(types::boundary_id boundary, const Point<dim> &point,
+                                              unsigned int field, double) const override
+        { return boundary_composition(boundary, point, field); }
+
         /**
          * This function performs some basic sanity checks on the parameter
          * values previously read from the input file.

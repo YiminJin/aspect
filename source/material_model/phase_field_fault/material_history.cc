@@ -55,9 +55,10 @@ namespace aspect
           invalidate_normalization_cache();
           current_normalization_integrals.swap(trial.normalization);
           current_fault_surface_temperatures.swap(trial.temperatures);
-          for (auto &p : this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler())
-            std::copy(trial.particle_properties.at(p.get_id()).begin(),
-            trial.particle_properties.at(p.get_id()).end(), p.get_properties().begin());
+          if (this->get_phase_field_handler().has_associated_particle_manager())
+            for (auto &p : this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler())
+              std::copy(trial.particle_properties.at(p.get_id()).begin(),
+              trial.particle_properties.at(p.get_id()).end(), p.get_properties().begin());
           fe_strain_state->observations.stress.clear();
           fe_strain_state->observations.mechanics.reset();
         }
@@ -100,7 +101,7 @@ namespace aspect
         {
           values.reinit(cell.second);
           values[this->introspection().extractors.velocities].get_function_gradients(velocity,gradients);
-          values[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
+          values[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)]
           .get_function_values(accepted.bulk_history.native,phase);
           auto &rates=samples->angular_rates[cell.first];
           rates.resize(rule.size());
@@ -132,7 +133,7 @@ namespace aspect
       this->get_pcout()<<std::setprecision(17)<<"   Accepted bulk spin: step="<<samples->step
                        <<" total_max="<<samples->maximum[0]<<" fault_max="<<samples->maximum[1]<<" bulk_max="<<samples->maximum[2]
                        <<" total_l2="<<samples->l2[0]<<" fault_l2="<<samples->l2[1]<<" bulk_l2="<<samples->l2[2]
-                       <<" dt_bulk_max="<<dt*samples->maximum[2]<<std::endl;
+                       <<" dt_bulk_max="<<dt *samples->maximum[2]<<std::endl;
       return samples;
     }
 
@@ -170,8 +171,9 @@ namespace aspect
       transaction->temperatures = current_fault_surface_temperatures;
       if (constitutive_spin==ConstitutiveSpin::bulk_slip_subtracted)
         transaction->accepted_spin=sample_accepted_bulk_spin(*transaction->accepted_history,accepted_velocity,dt);
-      for (const auto &p : this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler())
-        transaction->particle_properties.emplace(p.get_id(), std::vector<double>(p.get_properties().begin(), p.get_properties().end()));
+      if (this->get_phase_field_handler().has_associated_particle_manager())
+        for (const auto &p : this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler())
+          transaction->particle_properties.emplace(p.get_id(), std::vector<double>(p.get_properties().begin(), p.get_properties().end()));
       dg_material_trial = transaction;
       return {*transaction->accepted_history, accepted_velocity, time, dt, transaction->step};
     }

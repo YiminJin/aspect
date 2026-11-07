@@ -99,7 +99,8 @@ namespace aspect
             for (unsigned int c=0; c<this->n_compositional_fields(); ++c)
               solution_names.push_back (this->introspection().name_for_compositional_index(c));
 
-            if (this->get_parameters().enable_phase_field)
+            if (this->get_parameters().enable_phase_field
+                && !this->introspection().composition_type_exists(CompositionalFieldDescription::phase_field))
               solution_names.emplace_back("phase_field");
 
             return solution_names;
@@ -124,7 +125,8 @@ namespace aspect
             for (unsigned int c=0; c<this->n_compositional_fields(); ++c)
               interpretation.push_back (DataComponentInterpretation::component_is_scalar);
 
-            if (this->get_parameters().enable_phase_field)
+            if (this->get_parameters().enable_phase_field
+                && !this->introspection().composition_type_exists(CompositionalFieldDescription::phase_field))
               interpretation.push_back(DataComponentInterpretation::component_is_scalar);
 
             return interpretation;
@@ -163,7 +165,8 @@ namespace aspect
             for (unsigned int c=0; c<this->n_compositional_fields(); ++c)
               solution_units.emplace_back(""); // we don't know here
 
-            if (this->get_parameters().enable_phase_field)
+            if (this->get_parameters().enable_phase_field
+                && !this->introspection().composition_type_exists(CompositionalFieldDescription::phase_field))
               solution_units.emplace_back(""); // phase field is dimensionless
 
             return solution_units;

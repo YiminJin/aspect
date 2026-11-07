@@ -126,7 +126,7 @@ namespace aspect
           for (const auto &cell:this->get_dof_handler().active_cell_iterators())
             {
               fe.reinit(cell);
-              fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
+              fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)]
               .get_function_values(phase_anchor,phase);
               const auto &associations=manager.get_stokes_qp_fault_associations(cell->id(),rule,fe.get_quadrature_points());
               for (unsigned int q=0; q<rule.size(); ++q)
@@ -165,7 +165,7 @@ namespace aspect
             for (const auto &cell:this->get_dof_handler().active_cell_iterators())
               {
                 fe.reinit(cell);
-                fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(phase_anchor,phase);
+                fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(phase_anchor,phase);
                 const auto &associations=manager.get_stokes_qp_fault_associations(cell->id(),rule,fe.get_quadrature_points());
                 for (unsigned int q=0; q<rule.size(); ++q)
                   if (associations[q].active)

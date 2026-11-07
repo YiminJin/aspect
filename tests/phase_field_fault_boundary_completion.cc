@@ -34,7 +34,7 @@ namespace aspect
       };
       const auto profile = sim.get_phase_field_handler ().get_phase_field_profiles (.6);
       const auto &fe = sim.get_fe ();
-      const auto component = sim.introspection ().variable ("phase_field").first_component_index;
+      const auto component = sim.introspection ().phase_field().first_component_index;
       std::vector<types::global_dof_index> dofs (fe.n_dofs_per_cell ());
       for (const auto &cell : sim.get_dof_handler ().active_cell_iterators ())
         if (!cell->is_artificial ())

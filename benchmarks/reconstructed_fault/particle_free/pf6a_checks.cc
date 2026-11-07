@@ -88,7 +88,7 @@ namespace aspect
         {
           d1=0.;
           d2=0.;
-          const auto pc=this->introspection().variable("phase_field").first_component_index;
+          const auto pc=this->introspection().phase_field().first_component_index;
           for (const auto &cell:this->get_dof_handler().active_cell_iterators())
             for (const auto v:cell->vertex_indices())
               {
@@ -122,7 +122,7 @@ namespace aspect
                               const typename Model::FEEndpointTrial *endpoint=nullptr) const
         {
           const auto &s=*model.fe_strain_state;
-          const auto component=this->introspection().variable("phase_field").first_component_index;
+          const auto component=this->introspection().phase_field().first_component_index;
           const auto offset=phase.get_block_indices().block_start(block);
           std::map<types::global_dof_index,Point<dim>> nodes;
           auto cells=output("cells.csv"),tensor=output("tensor.csv");
@@ -494,7 +494,7 @@ namespace aspect
               }
             attempt_step=this->get_timestep_number();attempt_snapshot=persistent();
             attempt_time=this->get_time();attempt_dt=this->get_timestep();
-            block=this->introspection().variable("phase_field").block_index;
+            block=this->introspection().phase_field().block_index;
             if(publication_checks && !publication_checked)publication_control();
             if (diagnostics && !operators_done && this->get_time()>=.25)
               {
@@ -533,7 +533,7 @@ namespace aspect
           auto &m=model();
           auto &sim=simulator();
           const auto step=this->get_timestep_number();
-          block=this->introspection().variable("phase_field").block_index;
+          block=this->introspection().phase_field().block_index;
           if (!archive_pairs_file.empty())
             {
               const auto before=persistent();
@@ -642,7 +642,7 @@ namespace aspect
             {
               physical.reinit(entry.second);
               std::vector<double> phi(quad.size());
-              physical[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(state,phi);
+              physical[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(state,phi);
               std::vector<SymmetricTensor<2,dim>> tensor;
               if(batch_snapshots)
                 {

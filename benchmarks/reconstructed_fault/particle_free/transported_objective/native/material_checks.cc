@@ -112,7 +112,7 @@ namespace aspect
         std::ostringstream o;o<<std::setprecision(17)<<s.accepted_publications<<' '<<s.geometry_publications<<' '<<s.geometry_version;
         for(auto v:MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m))o<<' '<<v;
         for(auto v:s.Z)o<<' '<<v;for(auto v:s.I)o<<' '<<v;
-        const auto block=this->introspection().variable("phase_field").block_index;
+        const auto block=this->introspection().phase_field().block_index;
         for(auto i:s.bulk_history.native.block(block).locally_owned_elements())o<<' '<<s.bulk_history.native.block(block)[i];
         const auto &f=this->get_reconstructed_fault_manager().get_fault(0);
         for(unsigned i=0;i<f.n_vertices();++i)
@@ -166,6 +166,7 @@ namespace aspect
         const auto &s=*m.fe_strain_state;
         AssertThrow(!m.dg_material_trial,ExcMessage("Material trial remained live after acceptance."));
         const auto step=this->get_timestep_number();
+        if (step==0) this->get_pcout()<<"   Native integration: particle managers="<<this->n_particle_managers()<<", chemical fields="<<this->introspection().n_chemical_composition_fields()<<std::endl;
 #ifdef MATERIAL_ISOLATION_CHECKS
         if(step==0)boundary_profile_checks();
 #endif
@@ -203,7 +204,7 @@ namespace aspect
         for(const auto &entry:s.cells)
           {
             fe.reinit(entry.second);
-            fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(s.bulk_history.native,phase);
+            fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(s.bulk_history.native,phase);
             fe[this->introspection().extractors.velocities].get_function_values(this->get_solution(),velocity);
             fe[this->introspection().extractors.velocities].get_function_gradients(this->get_solution(),gradients);
 #ifdef MATERIAL_ENERGY_CHECKS

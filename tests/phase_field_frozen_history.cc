@@ -13,7 +13,7 @@ namespace aspect
         std::pair<std::string,std::string> execute(TableHandler &) override
         {
           const auto &handler = this->get_phase_field_handler();
-          const unsigned int b = this->introspection().variable("phase_field").block_index;
+          const unsigned int b = this->introspection().phase_field().block_index;
           auto &matrix = const_cast<LinearAlgebra::BlockSparseMatrix &>(this->get_system_matrix());
           auto &rhs = const_cast<LinearAlgebra::BlockVector &>(this->get_system_rhs());
           LinearAlgebra::BlockVector probe(this->get_solution());

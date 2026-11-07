@@ -74,7 +74,7 @@ namespace aspect
         {
           endpoint.dg_history = make_dg_history_trial(bulk, c);
           endpoint.strain = s.bulk_history.native;
-          endpoint.strain.block(this->introspection().variable("phase_field").block_index) = bulk.block(this->introspection().variable("phase_field").block_index);
+          endpoint.strain.block(this->introspection().phase_field().block_index) = bulk.block(this->introspection().phase_field().block_index);
         }
       else
         update_fe_strain_trial(bulk, c, endpoint.strain);
@@ -117,7 +117,7 @@ namespace aspect
       const auto &s = *fe_strain_state;
       FEPhaseEnergy result;
       long double bulk_energy = 0., cohesive_energy = 0.;
-      const unsigned int pb = this->introspection().variable("phase_field").block_index;
+      const unsigned int pb = this->introspection().phase_field().block_index;
       const unsigned int n = trial.block(pb).size(), ns = Z_reference.size();
       AssertDimension(ns, s.Z.size());
       const auto normalization = evaluate_fe_normalization(trial, true, phase_direction);
@@ -276,7 +276,7 @@ namespace aspect
       validate_fe_strain_restrictions();
       const auto &s = *fe_strain_state;
       const auto &intro = this->introspection();
-      const unsigned int pb = intro.variable("phase_field").block_index;
+      const unsigned int pb = intro.phase_field().block_index;
       const unsigned int n = trial.block(pb).size(), ns = s.Z.size();
       AssertDimension(direction.size(), n);
       AssertThrow((velocity_direction == nullptr) == (slip_direction == nullptr), ExcInternalError());

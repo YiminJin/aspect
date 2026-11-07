@@ -1,5 +1,6 @@
 /* Native DG phase diagnostics. No solve, publication or accepted-state mutation. */
 #include <aspect/postprocess/interface.h>
+#include <aspect/initial_composition/interface.h>
 #include <aspect/simulator_access.h>
 #include <aspect/phase_field.h>
 #include <aspect/phase_field/dg_operator.h>
@@ -26,10 +27,11 @@ namespace aspect
           using Access=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>;
           const auto &model=Plugins::get_plugin_as_type<const Model>(this->get_material_model());
           const auto &handler=this->get_phase_field_handler();
+          if (this->get_timestep_number()==0) this->get_pcout()<<"   Native integration: particle managers="<<this->n_particle_managers()<<", chemical fields="<<this->introspection().n_chemical_composition_fields()<<std::endl;
           AssertThrow(handler.uses_dg_phase(),ExcMessage("Native phase checks require DGQ2."));
           const auto comm=this->get_mpi_communicator();
-          const auto b=this->introspection().variable("phase_field").block_index;
-          const auto c=this->introspection().variable("phase_field").first_component_index;
+          const auto b=this->introspection().phase_field().block_index;
+          const auto c=this->introspection().phase_field().first_component_index;
           const auto &sets=this->introspection().index_sets;
           LinearAlgebra::BlockVector owned(sets.system_partitioning,comm),base(this->get_solution());
           owned=this->get_solution();
@@ -180,5 +182,44 @@ namespace aspect
         }
     };
     ASPECT_REGISTER_POSTPROCESSOR(DGPhaseChecks,"DG native phase checks","Noncommitting DG phase derivative and trace diagnostics.")
+  }
+}
+
+namespace aspect
+{
+  namespace InitialComposition
+  {
+    /** Reuse the retained growth seed as initial composition data; the native
+     * phase owner performs the same interpolation and all-mode limiting. */
+    template <int dim>
+    class NativePhaseSeed : public Interface<dim>, public SimulatorAccess<dim>
+    {
+      public:
+        void initialize() override
+        {
+          const auto text = Utilities::read_and_distribute_file_content(
+            Utilities::expand_ASPECT_SOURCE_DIR("$ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/pf6a-initial-phase.txt"),
+            this->get_mpi_communicator());
+          std::istringstream input(text);
+          double y, value;
+          while (input >> y >> value) data.emplace_back(y,value);
+          AssertThrow(data.size() > 1, ExcMessage("Missing retained native growth seed."));
+        }
+        double initial_composition(const Point<dim> &point, const unsigned int field) const override
+        {
+          if (this->introspection().get_composition_descriptions()[field].type != CompositionalFieldDescription::phase_field) return 0.;
+          const double y = point[1];
+          AssertThrow(y >= data.front().first && y <= data.back().first, ExcMessage("Seed does not cover native phase point."));
+          auto right = std::upper_bound(data.begin(),data.end(),y,[](double y,const auto &entry) {return y < entry.first;});
+          if (right == data.begin()) return right->second;
+          if (right == data.end()) return data.back().second;
+          const auto &left = *(right-1);
+          const double fraction = (y-left.first)/(right->first-left.first);
+          return (1.-fraction)*left.second+fraction*right->second;
+        }
+      private:
+        std::vector<std::pair<double,double>> data;
+    };
+    ASPECT_REGISTER_INITIAL_COMPOSITION_MODEL(NativePhaseSeed,"native phase seed","Retained fixed-fault growth seed as initial composition data.")
   }
 }

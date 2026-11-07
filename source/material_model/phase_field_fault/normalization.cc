@@ -57,7 +57,7 @@ namespace aspect
     // change the map, so a base-class cast alone is insufficient here.
     template <int dim>
     std::pair<bool, BoundingBox<dim>>
-    normalization_search_enclosure(const GridTools::Cache<dim> &grid, const bool coordinate_roundoff=false)
+                                   normalization_search_enclosure(const GridTools::Cache<dim> &grid, const bool coordinate_roundoff=false)
     {
       const auto &mapping = grid.get_mapping();
       bool supported = typeid(mapping) == typeid(MappingCartesian<dim>)
@@ -90,7 +90,7 @@ namespace aspect
                   if (!(hi[d] > lo[d])
                       || (coordinate_roundoff
                           ? std::abs(vertices[v][d]-((v & (1u << d)) ? hi[d] : lo[d]))
-                            >16*std::numeric_limits<double>::epsilon()*std::max({std::abs(lo[d]),std::abs(hi[d]),hi[d]-lo[d]})
+                          >16*std::numeric_limits<double>::epsilon()*std::max({std::abs(lo[d]),std::abs(hi[d]),hi[d]-lo[d]})
                           : vertices[v][d] != ((v & (1u << d)) ? hi[d] : lo[d])))
                     supported = false;
               if (!supported)
@@ -201,7 +201,7 @@ namespace aspect
       // Exact owned-entry comparison detects even nonstandard noncommitting
       // substitutions. No distributed point requests or integration occur on a
       // hit. deal.II's lookup readiness supplies the mesh-lifetime check.
-      const unsigned int phase_block = this->introspection().variable("phase_field").block_index;
+      const unsigned int phase_block = this->introspection().phase_field().block_index;
       const auto &owned_indices = this->introspection().index_sets.system_partitioning[phase_block];
       std::vector<double> phase_values;
       phase_values.reserve(owned_indices.n_elements());
@@ -831,7 +831,8 @@ namespace aspect
           if (profile.normal[d] == 0.)
             {
               if (profile.origin[d] < bounds.first[d] || profile.origin[d] > bounds.second[d]
-                  || (profile.origin[d] == bounds.second[d]
+                  || (!this->get_phase_field_handler().uses_dg_phase()
+                      && profile.origin[d] == bounds.second[d]
                       && bounds.second[d] != cache.physical_box.get_boundary_points().second[d]))
                 return std::make_pair(0., 0.);
             }
@@ -847,7 +848,7 @@ namespace aspect
         return std::make_pair(lo, hi);
       };
       const auto &tree = grid.get_locally_owned_cell_bounding_boxes_rtree();
-      const unsigned int component = this->introspection().variable("phase_field").first_component_index;
+      const unsigned int component = this->introspection().phase_field().first_component_index;
       const auto &fe = this->get_fe();
       const unsigned int old_size = cache.profiles.size();
       cache.profiles.resize(profiles.size());
@@ -889,6 +890,7 @@ namespace aspect
               if (!(range.second > range.first))
                 continue;
               typename NormalizationCellCache::Interval interval;
+              interval.cell_id = entry.second->id().to_string();
               interval.lower = range.first;
               interval.upper = range.second;
               const auto &bounds = entry.first.get_boundary_points();
@@ -907,6 +909,47 @@ namespace aspect
               for (unsigned int v = 0; v < interval.phase_dofs.size(); ++v)
                 interval.phase_dofs[v] = dofs[fe.component_to_system_index(component, v)];
               traversal.intervals.push_back(interval);
+            }
+          if (this->get_phase_field_handler().uses_dg_phase())
+            {
+              // A ray along an interior face sees two valid DG traces. Resolve
+              // every positive-length overlap by the same persistent CellId
+              // ordering as point observations, independent of MPI partition.
+              using Range = std::tuple<double, double, std::string>;
+              std::vector<Range> local_ranges, ranges;
+              for (const auto &interval : traversal.intervals)
+                local_ranges.emplace_back(interval.lower, interval.upper, interval.cell_id);
+              for (const auto &part : Utilities::MPI::all_gather(communicator, local_ranges))
+                ranges.insert(ranges.end(), part.begin(), part.end());
+              auto original = std::move(traversal.intervals);
+              traversal.intervals.clear();
+              for (const auto &interval : original)
+                {
+                  std::vector<double> cuts {interval.lower, interval.upper};
+                  for (const auto &range : ranges)
+                    for (const double end :
+                    {
+                      std::get<0>(range), std::get<1>(range)
+                      })
+                  if (end > interval.lower && end < interval.upper) cuts.push_back(end);
+                  std::sort(cuts.begin(), cuts.end());
+                  cuts.erase(std::unique(cuts.begin(), cuts.end()), cuts.end());
+                  for (unsigned int i = 1; i < cuts.size(); ++i)
+                    {
+                      const double middle = .5 * (cuts[i-1] + cuts[i]);
+                      bool selected = true;
+                      for (const auto &range : ranges)
+                        if (std::get<0>(range) < middle && middle < std::get<1>(range)
+                            && std::get<2>(range) > interval.cell_id) selected = false;
+                      if (selected)
+                        {
+                          auto piece = interval;
+                          piece.lower = cuts[i-1];
+                          piece.upper = cuts[i];
+                          traversal.intervals.push_back(std::move(piece));
+                        }
+                    }
+                }
             }
           std::sort(traversal.intervals.begin(), traversal.intervals.end(),
                     [](const auto & a, const auto & b)
@@ -986,14 +1029,14 @@ namespace aspect
                               if (this->get_phase_field_handler().uses_dg_phase())
                                 {
                                   const auto &system=this->get_fe();
-                                  const auto component=this->introspection().variable("phase_field").first_component_index;
+                                  const auto component=this->introspection().phase_field().first_component_index;
                                   const auto &element=system.base_element(system.component_to_base_index(component).first);
                                   value += element.shape_value(v,unit)*phase[v];
                                 }
                               else
                                 {
                                   double shape=1.;
-                                  for (unsigned int d=0;d<dim;++d)
+                                  for (unsigned int d=0; d<dim; ++d)
                                     shape*=(v & (1u<<d)) ? unit[d]:1.-unit[d];
                                   value+=shape*phase[v];
                                 }
@@ -1008,10 +1051,10 @@ namespace aspect
                         const auto roots = boost::math::tools::quadratic_roots(a, b, f0);
                         std::vector<double> cuts {left, right};
                         if (!this->get_phase_field_handler().uses_dg_phase())
-                        for (const double root :
-                        {
-                          roots.first, roots.second
-                        })
+                          for (const double root :
+                          {
+                            roots.first, roots.second
+                          })
                         if (root > 0. && root < 1.)
                           cuts.push_back(left + root * (right - left));
                         std::sort(cuts.begin(), cuts.end());

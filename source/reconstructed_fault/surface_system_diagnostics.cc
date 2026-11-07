@@ -130,7 +130,7 @@ namespace aspect
         std::vector<Tensor<2,dim>> gradients(n);
         std::vector<Tensor<2,dim>> history_gradients(n);
         std::vector<std::vector<double>> fields(intro.n_compositional_fields,std::vector<double>(n));
-        line_fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(bulk_state,phi);
+        line_fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(bulk_state,phi);
         line_fe[intro.extractors.temperature].get_function_values(bulk_state,temp);
         line_fe[intro.extractors.pressure].get_function_values(bulk_state,p);
         line_fe[intro.extractors.velocities].get_function_symmetric_gradients(bulk_state,eps);

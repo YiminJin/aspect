@@ -132,7 +132,7 @@ namespace aspect
         if (cell->is_locally_owned())
           {
             fe.reinit(cell);const auto &a=manager.get_stokes_qp_fault_associations(cell->id(),quad,fe.get_quadrature_points());
-            fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(working,phi);
+            fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(working,phi);
             fe[intro.extractors.temperature].get_function_values(working,temp);
             fe[intro.extractors.pressure].get_function_values(working,pressure);
             fe[intro.extractors.velocities].get_function_symmetric_gradients(working,eps);
@@ -168,7 +168,7 @@ namespace aspect
       Utilities::MPI::RemotePointEvaluation<dim> cache;
       cache.reinit(sim.get_phase_field_handler().get_grid_cache(),points);
       const auto gradients=VectorTools::point_gradients<dim>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.component_indices.velocities[0]);
-      const auto ph=VectorTools::point_values<1>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.variable("phase_field").first_component_index);
+      const auto ph=VectorTools::point_values<1>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.phase_field().first_component_index);
       const auto T=VectorTools::point_values<1>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.component_indices.temperature);
       const auto p=VectorTools::point_values<1>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.component_indices.pressure);
       std::vector<std::vector<double>> comps(intro.n_compositional_fields);

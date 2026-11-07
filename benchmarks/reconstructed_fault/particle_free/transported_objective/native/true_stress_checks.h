@@ -29,7 +29,7 @@
         auto projection_state=s;
         LinearAlgebra::BlockVector explicit_fields(this->introspection().index_sets.system_partitioning,comm);
         explicit_fields=velocity(2.);
-        explicit_fields.block(this->introspection().variable("phase_field").block_index)=.25;
+        explicit_fields.block(this->introspection().phase_field().block_index)=.25;
         projection_state.bulk_history.native=explicit_fields;
         const auto explicit_velocity=velocity(2.);
         const auto projected=m.project_material_tensor(s.bulk_history.tensor->primary,projection_state,explicit_velocity,
@@ -88,7 +88,7 @@
             for(const auto &entry:s.cells)
               {
                 native.reinit(entry.second);
-                native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(s.bulk_history.native,phi);
+                native[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(s.bulk_history.native,phi);
                 const auto direct=m.evaluate_history_tensor(*candidate->bulk_history.tensor,entry.first,rule);
                 const auto dv=m.evaluate_history_tensor(*cv->bulk_history.tensor,entry.first,rule);
                 const auto ds=m.evaluate_history_tensor(*cs->bulk_history.tensor,entry.first,rule);
@@ -100,7 +100,7 @@
                 FEValues<dim> massfe(this->get_mapping(),op->space->element,qr,update_values|update_JxW_values|update_quadrature_points);
                 FEValues<dim> phasefe(this->get_mapping(),this->get_fe(),qr,update_values);
                 massfe.reinit(op->space->cells.at(entry.first));phasefe.reinit(entry.second);
-                std::vector<double> p(qr.size());phasefe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(s.bulk_history.native,p);
+                std::vector<double> p(qr.size());phasefe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(s.bulk_history.native,p);
                 FullMatrix<double> M(9,9);std::array<Vector<double>,12> rhs;
                 for(auto &r:rhs)r.reinit(9);
                 for(unsigned q=0;q<qr.size();++q)

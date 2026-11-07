@@ -173,7 +173,8 @@ namespace aspect
         fem_melt_field,
         fem_darcy_field,
         prescribed_field,
-        prescribed_field_with_diffusion
+        prescribed_field_with_diffusion,
+        native_phase
       };
     };
 

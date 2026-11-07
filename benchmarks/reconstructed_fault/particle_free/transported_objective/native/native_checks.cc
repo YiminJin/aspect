@@ -255,7 +255,7 @@ namespace aspect { namespace Postprocess
           fe.reinit(entry.second);dg.reinit(incoming->primary.space->cells.at(entry.first));
           fe[intro.extractors.velocities].get_function_gradients(lagged,gradients);
           fe[intro.extractors.velocities].get_function_symmetric_gradients(this->get_solution(),strains);
-          fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(state.bulk_history.native,phase);
+          fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(state.bulk_history.native,phase);
           const auto T0=model.evaluate_history_tensor(*incoming,entry.first,rule);
           const auto R0=model.evaluate_history_tensor(*incoming->residual,entry.first,rule);
           const auto T1=model.evaluate_history_tensor(*state.bulk_history.tensor,entry.first,rule);

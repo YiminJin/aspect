@@ -449,7 +449,7 @@ namespace aspect
               particle_sums[c]+=v; particle_sums[c+4]+=v*v;
             }
         for (auto &v:particle_sums) v=Utilities::MPI::sum(v,comm);
-        const auto phase_block=this->introspection().variable("phase_field").block_index;
+        const auto phase_block=this->introspection().phase_field().block_index;
         // The published solution is ghosted. A global norm must count each
         // owned coefficient once, rather than call Epetra Norm2 on overlap maps.
         double phase_squared=0.;

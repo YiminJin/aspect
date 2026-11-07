@@ -18,6 +18,7 @@
   <http://www.gnu.org/licenses/>.
 */
 
+#include <aspect/simulator/assemblers/scalar_dg.h>
 #include <aspect/simulator/assemblers/advection.h>
 
 #include <aspect/melt.h>
@@ -972,21 +973,12 @@ namespace aspect
                   for (unsigned int j=0; j<advection_dofs_per_cell; ++j)
                     {
                       data.local_matrix(i,j)
-                      += (- time_step *  conductivity
-                          * scratch.face_grad_phi_field[i]
-                          * scratch.face_finite_element_values->normal_vector(q)
-                          * scratch.face_phi_field[j]
-
-                          - time_step *  conductivity
-                          * scratch.face_grad_phi_field[j]
-                          * scratch.face_finite_element_values->normal_vector(q)
-                          * scratch.face_phi_field[i]
-
-                          + time_step
-                          * (density_c_P + latent_heat_LHS)
-                          * penalty
-                          * scratch.face_phi_field[i]
-                          * scratch.face_phi_field[j]
+                      += (time_step * scalar_symmetric_penalty(
+                            scratch.face_phi_field[i],
+                            conductivity * (scratch.face_grad_phi_field[i] * scratch.face_finite_element_values->normal_vector(q)),
+                            scratch.face_phi_field[j],
+                            conductivity * (scratch.face_grad_phi_field[j] * scratch.face_finite_element_values->normal_vector(q)),
+                            (density_c_P + latent_heat_LHS) * penalty)
 
                           + (inflow
                              ?

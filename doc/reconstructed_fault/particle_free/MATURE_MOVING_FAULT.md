@@ -16,12 +16,16 @@ mechanics with a projected-stress correction. The ordinary timestep controller
 then accepts the joint candidate or restores its parent. There is no separate
 mature timestep driver.
 
-Phase is independently selectable: historical continuous Q1 remains the default;
-the new native DGQ2 path uses material upwind transport with SSPRK3 and whole-cell
-bound scaling. Stress remains ordinary DGQ2. See the [phase operator contract](DGQ2_PHASE_FIELD_DESIGN.md)
-and [current qualification report](DGQ2_PHASE_FIELD_REPORT.md). The separate fixed-fault
-cohesive endpoint can use DGQ2 SIPG constrained growth; mature moving growth remains
-disabled. No post-growth transport limiter is applied.
+Native phase is now one semantic composition named `phase_field`; ordinary
+composition family/degree and initial/boundary data configure it. DGQ2 uses
+material upwind transport with SSPRK3 and whole-cell bounds; native Q1 remains
+a deliberate comparison. Legacy CPDI keeps its separate Q1 owner. Stress remains
+ordinary DGQ2. See the [current phase contract](DGQ2_PHASE_FIELD_DESIGN.md) and
+[integration report](NATIVE_PHASE_INTEGRATION_REPORT.md). Native initialization,
+publication and restart no longer require a particle manager. The separate
+fixed-fault cohesive endpoint retains SIPG constrained growth; mature moving
+growth remains disabled. Mapped scalar phase support does not remove the
+Cartesian admission of coupled stress/history operators.
 
 ## Two reading routes
 
@@ -37,7 +41,10 @@ explain what a direct-mode reader can initially skip.
 
 ## Revision and evidence
 
-Current implementation: the consolidation on reviewed baseline
+Current phase integration uses reviewed baseline
+`e4291922732a4f238c7bfb5b07ef82eb3964a9c5`; its [report](NATIVE_PHASE_INTEGRATION_REPORT.md)
+records the tested working-source/binary identities. The stress architecture
+descends from the consolidation on
 `d7e4adbe99126f8c9faf9f35c657e287f2c29cea`, 4 November 2026.
 [Consolidation report](STRESS_CONSOLIDATION_DOCUMENTATION_REPORT.md) records exact
 source/binary identities and bounded verification. The scientific contracts are
@@ -111,8 +118,9 @@ corrected-law convergence evidence.
 The completed time/mesh/law comparisons show a persistent finite-slip effect;
 the adaptive reference, rank-changing restart and provider rejection checks pass.
 The existing age predictor runs before mature publication and is not an endpoint
-change bound; see [lifecycle](mature_moving_fault/lifecycle.md). The principal
-advected-profile limitation is its missing integrated material balance, described
-in [geometry](mature_moving_fault/geometry.md). These local results do not qualify
+change bound; see [lifecycle](mature_moving_fault/lifecycle.md). Those retained Q1
+comparisons lack an integrated material balance, as described in
+[geometry](mature_moving_fault/geometry.md). Native DGQ2 now supplies that discrete
+balance, without establishing independent coupled energy/slip accuracy. These local results do not qualify
 an advected BP3-like production trajectory. The campaign report owns measured
 sensitivities and cost; this guide owns the current algorithm and state meanings.

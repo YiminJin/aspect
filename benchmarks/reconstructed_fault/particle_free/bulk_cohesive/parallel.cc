@@ -82,7 +82,7 @@ namespace aspect
         const PhaseField::DegradationFunction g(1.,parameters[1]);
         const PhaseField::PhaseFieldProfile profile(a,g,.6);
         LinearAlgebra::BlockVector owned;owned.reinit(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());owned=sim().solution;
-        const auto pc=this->introspection().variable("phase_field").first_component_index;
+        const auto pc=this->introspection().phase_field().first_component_index;
         const auto &partition=this->get_dof_handler().locally_owned_dofs();
         for(const auto &cell:this->get_dof_handler().active_cell_iterators())if(!cell->is_artificial())for(const auto v:cell->vertex_indices())
           {const auto i=cell->vertex_dof_index(v,pc);if(partition.is_element(i)){const auto x=cell->vertex(v);owned[i]=initial_phase(x,profile,parameters[2]);}}
@@ -108,8 +108,8 @@ namespace aspect
         namespace BC=MaterialModel::BulkCohesive;
         const auto comm=this->get_mpi_communicator();const auto &m=model();const auto &s=*m.bulk_cohesive_state;
         const auto label=Utilities::int_to_string(s.step,4);const auto &fe_element=this->get_fe();
-        const auto pc=this->introspection().variable("phase_field").first_component_index;
-        const auto po=sim().solution.get_block_indices().block_start(this->introspection().variable("phase_field").block_index);
+        const auto pc=this->introspection().phase_field().first_component_index;
+        const auto po=sim().solution.get_block_indices().block_start(this->introspection().phase_field().block_index);
         const auto nv=sim().solution.block(this->introspection().block_indices.velocities).size();
         const auto constraints=BC::global_constraints(this->get_current_constraints(),comm);
         std::map<unsigned int,Point<dim>> positions,local_positions;

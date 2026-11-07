@@ -57,7 +57,7 @@ namespace aspect
           AssertThrow(converged_solves == step+1, ExcInternalError());
           const auto &intro = this->introspection();
           const auto &fe = this->get_fe();
-          const unsigned int phase = intro.variable("phase_field").first_component_index;
+          const unsigned int phase = intro.phase_field().first_component_index;
           std::vector<types::global_dof_index> indices(fe.dofs_per_cell);
           for (const auto &cell : this->get_dof_handler().active_cell_iterators())
             if (cell->is_locally_owned())

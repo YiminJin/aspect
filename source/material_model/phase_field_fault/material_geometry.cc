@@ -16,12 +16,12 @@ namespace aspect
     template <int dim>
     void
     PhaseFieldFault<dim>::stage_material_geometry(
-      const MaterialHistoryInputs &input, LinearAlgebra::BlockVector &bulk, LinearAlgebra::BlockVector &linear)
+      const MaterialHistoryInputs &input, const LinearAlgebra::BlockVector &phase_owned, LinearAlgebra::BlockVector &bulk, LinearAlgebra::BlockVector &linear)
     {
       const auto &old = input.accepted;
       auto transaction = dg_material_trial;
       auto &manager = this->get_reconstructed_fault_manager();
-      const auto phase_block = this->introspection().variable("phase_field").block_index;
+      const auto phase_block = this->introspection().phase_field().block_index;
       const auto velocity_component = this->introspection().component_indices.velocities[0];
       // Label-following vertices retain all surface histories; V is not their
       // velocity. The same accepted FE field supplies bulk, curve and profile.
@@ -32,7 +32,6 @@ namespace aspect
       const auto velocity = VectorTools::point_values<dim>(lookup, this->get_dof_handler(), input.accepted_velocity, VectorTools::EvaluationFlags::avg, velocity_component);
       const auto curve_gradients = VectorTools::point_gradients<dim>(lookup, this->get_dof_handler(), input.accepted_velocity, VectorTools::EvaluationFlags::avg, velocity_component);
       transaction->manager = manager.stage_material_motion(input.dt, {velocity}, {curve_gradients});
-      const auto phase_owned = transport_material_profile(input);
       auto next = std::make_shared<FEStrainState>(old);
       next->bulk_history.native = phase_owned;
       next->vertices = transaction->manager->get_fault(0).get_vertices();
@@ -58,7 +57,7 @@ namespace aspect
       compute_fault_surface_temperatures();
     }
 #define INSTANTIATE(dim) \
-  template void PhaseFieldFault<dim>::stage_material_geometry(const MaterialHistoryInputs &,LinearAlgebra::BlockVector &,LinearAlgebra::BlockVector &);
+  template void PhaseFieldFault<dim>::stage_material_geometry(const MaterialHistoryInputs &,const LinearAlgebra::BlockVector &,LinearAlgebra::BlockVector &,LinearAlgebra::BlockVector &);
     ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE
   }

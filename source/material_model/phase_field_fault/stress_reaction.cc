@@ -91,7 +91,7 @@ namespace aspect
       {
         native.reinit(state.cells.at(id));
         native[this->introspection().extractors.velocities].get_function_symmetric_gradients(bulk, strain);
-        native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(state.bulk_history.native, phase);
+        native[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(state.bulk_history.native, phase);
         const auto anchor_values = evaluate_history_tensor(anchor, id, rule);
         const auto residual_values = anchor.residual ? evaluate_history_tensor(*anchor.residual, id, rule)
                                      : std::vector<SymmetricTensor<2, dim>>(rule.size());
@@ -151,7 +151,7 @@ namespace aspect
       std::vector<SymmetricTensor<2, dim>> strain(1);
       std::vector<double> phi(1);
       fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(r.bulk, strain);
-      fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(state.bulk_history.native, phi);
+      fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(state.bulk_history.native, phi);
       const double dt = this->get_timestep_number() > 0 ? this->get_timestep() : initial_time_step;
       const auto coefficients = compute_maxwell_coefficients(material_viscosity(x, state.eta), state.G, dt);
       const auto physical = physical_history_stress(state, *r.candidate->bulk_history.tensor, r.candidate->Z, state.I, id, x);

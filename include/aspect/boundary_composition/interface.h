@@ -72,6 +72,14 @@ namespace aspect
         boundary_composition (const types::boundary_id boundary_indicator,
                               const Point<dim> &position,
                               const unsigned int compositional_field) const = 0;
+        /** Explicit-stage boundary evaluation. Plugins must opt in rather
+         * than silently evaluate time-dependent data at the physical endpoint. */
+        virtual double boundary_composition_at_time(types::boundary_id, const Point<dim> &,
+                                                     unsigned int, double) const
+        {
+          AssertThrow(false, ExcMessage("This boundary composition plugin does not support explicit stage times."));
+          return 0.;
+        }
     };
 
     /**
@@ -108,6 +116,10 @@ namespace aspect
         boundary_composition (const types::boundary_id boundary_indicator,
                               const Point<dim> &position,
                               const unsigned int compositional_field) const;
+
+        /** Combine the registered models at an explicit SSP stage time. */
+        double boundary_composition_at_time(types::boundary_id, const Point<dim> &,
+                                              unsigned int, double) const;
 
         /**
          * A function that is used to register boundary composition objects in such

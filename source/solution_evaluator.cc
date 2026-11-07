@@ -277,7 +277,7 @@ namespace aspect
 
     if (simulator_access.get_parameters().enable_phase_field)
       {
-        phase_field_component_index = simulator_access.introspection().variable("phase_field").first_component_index;
+        phase_field_component_index = simulator_access.introspection().phase_field().first_component_index;
         phase_field = std::make_unique<FEPointEvaluation<1, dim>>(mapping_info,
                                                                   simulator_access.get_fe(),
                                                                   phase_field_component_index);

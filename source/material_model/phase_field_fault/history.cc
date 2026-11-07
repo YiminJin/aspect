@@ -184,16 +184,16 @@ namespace aspect
 
     template <int dim>
     std::map<types::particle_index, std::vector<double>>
-    interpolate_surface_chemical_compositions(
-      ReconstructedFaultManager<dim> &fault_manager,
-      const std::vector<unsigned int> &property_indices)
+                                                      interpolate_surface_chemical_compositions(
+                                                        ReconstructedFaultManager<dim> &fault_manager,
+                                                        const std::vector<unsigned int> &property_indices)
     {
       std::map<types::particle_index, std::vector<double>> compositions;
       for (unsigned int c = 0; c < property_indices.size(); ++c)
         {
           const std::map<types::particle_index, std::vector<double>> values =
-            fault_manager.interpolate_property_at_particle_projections(
-              property_indices[c]);
+                                                                    fault_manager.interpolate_property_at_particle_projections(
+                                                                      property_indices[c]);
 
           if (c == 0)
             for (const auto &particle : values)
@@ -666,6 +666,39 @@ namespace aspect
                   ExcMessage("Later-time reconstructed-fault history requires a "
                              "positive timestep."));
 
+      if (homogeneous_mesh_data)
+        {
+          auto &manager = this->get_reconstructed_fault_manager();
+          std::vector<std::vector<double>> rates(manager.get_faults().size());
+          for (unsigned int f = 0; f < rates.size(); ++f) rates[f] = manager.get_slip_rate(f);
+          HistoryCandidates candidates;
+          candidates.cohesive_nodal_values = compute_surface_cohesive_candidates(time_step, rates);
+          compute_surface_state_candidates(time_step, candidates.state_candidates);
+          validate_cohesive_state_commit(candidates.cohesive_nodal_values);
+          const auto update = prepare_fe_strain_commit(accepted_bulk_state, candidates.cohesive_nodal_values);
+          unsigned int stress_position = numbers::invalid_unsigned_int;
+          unsigned int H_position = numbers::invalid_unsigned_int;
+          if (this->get_phase_field_handler().has_associated_particle_manager())
+            {
+              auto &particles = this->get_phase_field_handler().get_associated_particle_manager();
+              const auto &info = particles.get_property_manager().get_data_info();
+              stress_position = info.get_position_by_field_name("maxwell stress");
+              H_position = info.get_position_by_field_name("crack_driving_force");
+              for (const auto &particle : particles.get_particle_handler())
+                {
+                  typename HistoryCandidates::ParticleCandidate sample;
+                  sample.stress = candidate_fe_strain_stress(update, particle.get_surrounding_cell()->id(), particle.get_location());
+                  sample.crack_driving_force = particle.get_properties()[H_position];
+                  candidates.particle_candidates.emplace(particle.get_id(), sample);
+                }
+            }
+          // Physical publication uses only FE/surface candidates. Optional
+          // particles sample that candidate and never supply a constitutive parent.
+          publish_history_candidates(candidates, stress_position, H_position);
+          publish_fe_strain_commit(update);
+          return;
+        }
+
       Particle::Manager<dim> &particle_manager =
         this->get_phase_field_handler().get_associated_particle_manager();
       const auto &property_manager = particle_manager.get_property_manager();
@@ -1050,7 +1083,54 @@ namespace aspect
                                this->introspection().component_indices.temperature);
       samples.phase_fields = this->get_phase_field_handler().phase_point_values(point_cache,accepted_bulk_state);
       samples.previous_phase_fields = this->get_phase_field_handler().phase_point_values(
-        point_cache,uses_independent_bulk_history() ? accepted_fe_strain_state() : this->get_old_solution());
+                                        point_cache,uses_independent_bulk_history() ? accepted_fe_strain_state() : this->get_old_solution());
+    }
+
+    template <int dim>
+    void PhaseFieldFault<dim>::compute_surface_state_candidates(
+      const double time_step, std::vector<std::vector<double>> &state_candidates) const
+    {
+      const auto &fault_manager = this->get_reconstructed_fault_manager();
+      const auto &faults = fault_manager.get_faults();
+      if (fault_friction.has_state_variable())
+        {
+          state_candidates.resize(faults.size());
+          const unsigned int state_position =
+            fault_manager.get_property_information()[
+              fault_property_indices.state].position;
+          for (unsigned int fault = 0; fault < faults.size(); ++fault)
+            {
+              state_candidates[fault].resize(faults[fault].n_vertices());
+              for (unsigned int vertex = 0;
+                   vertex < faults[fault].n_vertices(); ++vertex)
+                {
+                  // Construct the surface mixture at the same Q1 vertex used
+                  // by friction. Dc is global in the current aging law.
+                  std::vector<double> surface_compositions(
+                    fault_property_indices.chemical_compositions.size());
+                  for (unsigned int c = 0; c < surface_compositions.size(); ++c)
+                    {
+                      const auto &property = fault_manager.get_property_information()[
+                                               fault_property_indices.chemical_compositions[c]];
+                      surface_compositions[c] =
+                        faults[fault].get_properties(vertex)[property.position];
+                    }
+                  const std::vector<double> surface_fractions =
+                    MaterialUtilities::compute_composition_fractions(
+                      surface_compositions);
+                  state_candidates[fault][vertex] = fault_friction.update_state(
+                                                      surface_fractions,
+                                                      fault_manager.get_slip_rate(fault)[vertex],
+                                                      faults[fault].get_properties(vertex)[state_position],
+                                                      time_step);
+                  AssertThrow(std::isfinite(state_candidates[fault][vertex])
+                              && state_candidates[fault][vertex] > 0.0,
+                              ExcMessage("The accepted rate-and-state history is "
+                                         "inadmissible."));
+                }
+            }
+        }
+
     }
 
     template <int dim>
@@ -1155,44 +1235,7 @@ namespace aspect
 
       try
         {
-          if (fault_friction.has_state_variable())
-            {
-              state_candidates.resize(faults.size());
-              const unsigned int state_position =
-                fault_manager.get_property_information()[
-                  fault_property_indices.state].position;
-              for (unsigned int fault = 0; fault < faults.size(); ++fault)
-                {
-                  state_candidates[fault].resize(faults[fault].n_vertices());
-                  for (unsigned int vertex = 0;
-                       vertex < faults[fault].n_vertices(); ++vertex)
-                    {
-                      // Construct the surface mixture at the same Q1 vertex used
-                      // by friction. Dc is global in the current aging law.
-                      std::vector<double> surface_compositions(
-                        fault_property_indices.chemical_compositions.size());
-                      for (unsigned int c = 0; c < surface_compositions.size(); ++c)
-                        {
-                          const auto &property = fault_manager.get_property_information()[
-                                                   fault_property_indices.chemical_compositions[c]];
-                          surface_compositions[c] =
-                            faults[fault].get_properties(vertex)[property.position];
-                        }
-                      const std::vector<double> surface_fractions =
-                        MaterialUtilities::compute_composition_fractions(
-                          surface_compositions);
-                      state_candidates[fault][vertex] = fault_friction.update_state(
-                                                          surface_fractions,
-                                                          fault_manager.get_slip_rate(fault)[vertex],
-                                                          faults[fault].get_properties(vertex)[state_position],
-                                                          time_step);
-                      AssertThrow(std::isfinite(state_candidates[fault][vertex])
-                                  && state_candidates[fault][vertex] > 0.0,
-                                  ExcMessage("The accepted rate-and-state history is "
-                                             "inadmissible."));
-                    }
-                }
-            }
+          compute_surface_state_candidates(time_step, state_candidates);
 
           // Re-evaluate the accepted local strain decomposition with projected
           // Q1 traction for H. Bulk and surface coefficients deliberately use
@@ -1405,8 +1448,6 @@ namespace aspect
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
       const auto &faults = fault_manager.get_faults();
-      auto &particle_handler = this->get_phase_field_handler()
-                               .get_associated_particle_manager().get_particle_handler();
       using ParticleCandidate = typename HistoryCandidates::ParticleCandidate;
       const auto &particle_candidates = candidates.particle_candidates;
       const auto &cohesive_values = candidates.cohesive_nodal_values;
@@ -1425,6 +1466,9 @@ namespace aspect
                 = state_candidates[fault][vertex];
         }
 
+      if (!this->get_phase_field_handler().has_associated_particle_manager())
+        return;
+      auto &particle_handler = this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler();
       for (auto &particle : particle_handler)
         {
           const ParticleCandidate &candidate =
@@ -1676,9 +1720,9 @@ namespace aspect
       AssertDimension(fault_property_indices.chemical_compositions.size(),
                       chemical_field_indices.size());
       const std::map<types::particle_index, std::vector<double>> surface_compositions =
-        interpolate_surface_chemical_compositions(
-          this->get_reconstructed_fault_manager(),
-          fault_property_indices.chemical_compositions);
+                                                                interpolate_surface_chemical_compositions(
+                                                                  this->get_reconstructed_fault_manager(),
+                                                                  fault_property_indices.chemical_compositions);
 
       std::map<types::particle_index, double> particle_q;
       std::string local_error;

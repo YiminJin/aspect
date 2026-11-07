@@ -308,7 +308,7 @@ namespace aspect
           Utilities::MPI::RemotePointEvaluation<dim> cache;
           cache.reinit(this->get_phase_field_handler().get_grid_cache(), points);
           const auto gradients = VectorTools::point_gradients<dim>(cache, this->get_dof_handler(), this->get_solution(), VectorTools::EvaluationFlags::avg, intro.component_indices.velocities[0]);
-          const auto phases = VectorTools::point_values<1>(cache, this->get_dof_handler(), this->get_solution(), VectorTools::EvaluationFlags::avg, intro.variable("phase_field").first_component_index);
+          const auto phases = VectorTools::point_values<1>(cache, this->get_dof_handler(), this->get_solution(), VectorTools::EvaluationFlags::avg, intro.phase_field().first_component_index);
           using Cache = Utilities::MPI::RemotePointEvaluation<dim>;
           const auto traces = cache.template evaluate_and_process<SymmetricTensor<2, dim>>(
                                 [&](const ArrayView<SymmetricTensor<2, dim>> &out, const typename Cache::CellData & cells)
@@ -357,7 +357,7 @@ namespace aspect
           std::vector<SymmetricTensor<2, dim>> strain(1);
           std::vector<double> phi(1);
           fe[intro.extractors.velocities].get_function_symmetric_gradients(this->get_solution(), strain);
-          fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(this->get_solution(), phi);
+          fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(this->get_solution(), phi);
           const auto host = expected(a.position, strain[0], phi[0]);
           auto &pm = const_cast<Particle::Manager<dim> &>(this->get_phase_field_handler().get_associated_particle_manager());
           const auto position = pm.get_property_manager().get_data_info().get_position_by_field_name("maxwell stress");
@@ -847,7 +847,7 @@ namespace aspect
                     FEValues<dim> fe(this->get_mapping(),this->get_fe(),Quadrature<dim>(units),update_values);
                     fe.reinit(cell);
                     std::vector<double> phi(units.size());
-                    fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(this->get_solution(),phi);
+                    fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(this->get_solution(),phi);
                     for (unsigned int q=0; q<radii.size(); ++q) write(s,radii[q],false,phi[q]);
                   }
               // Evaluate the same prescribed exterior Q1 lattice used by
@@ -914,7 +914,7 @@ namespace aspect
           const auto &info = pm.get_property_manager().get_data_info();
           const auto stress_position = info.get_position_by_field_name("maxwell stress");
           const auto H_position = info.get_position_by_field_name("crack_driving_force");
-          const auto phase_block = this->introspection().variable("phase_field").block_index;
+          const auto phase_block = this->introspection().phase_field().block_index;
           if (lifecycle && incoming_step==step)
             {
               bool same=model.fe_strain_state->bulk_history.tensor==incoming_dg
@@ -1162,7 +1162,7 @@ namespace aspect
           for(const auto &entry:model.fe_strain_state->cells)
             {
               fe.reinit(entry.second);std::vector<double> phase(quadrature.size());
-              fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(model.fe_strain_state->bulk_history.native,phase);
+              fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(model.fe_strain_state->bulk_history.native,phase);
               if(*std::max_element(phase.begin(),phase.end())==0.)continue;
               const auto center=entry.second->center();const double s=BP3::down_dip(center[0],center[1])/BP3::geometry().length;
               const unsigned int bin=s<.2 ? 0 : (s>.8 ? 2 : 1);
@@ -1439,7 +1439,7 @@ namespace aspect
             AssertThrow(model.fe_strain_state->committed_step==step && model.fe_strain_state->accepted_publications==step,
                         ExcMessage("Mature DG did not publish exactly once per accepted positive step."));
           const auto &intro = this->introspection();
-          const auto phase_block = intro.variable("phase_field").block_index;
+          const auto phase_block = intro.phase_field().block_index;
           AssertThrow(this->get_solution().block(phase_block) == initial_phase.block(phase_block)
                       && Access::current_normalization_integrals(model).at(0) == initial_I,
                       ExcMessage("7B accepted profile changed."));
@@ -1670,7 +1670,7 @@ namespace aspect
               sampled_gradients=VectorTools::point_gradients<dim>(particle_cache,this->get_dof_handler(),this->get_solution(),
                                                                   VectorTools::EvaluationFlags::avg,intro.component_indices.velocities[0]);
               sampled_phase=VectorTools::point_values<1>(particle_cache,this->get_dof_handler(),this->get_solution(),
-                                                         VectorTools::EvaluationFlags::avg,intro.variable("phase_field").first_component_index);
+                                                         VectorTools::EvaluationFlags::avg,intro.phase_field().first_component_index);
             }
           unsigned int particle_index=0, multiple_traces=0;
           double host_difference=0, host_difference_sum=0;
@@ -1684,7 +1684,7 @@ namespace aspect
               std::vector<SymmetricTensor<2,dim> > strain(1);
               std::vector<double> phi(1);
               fe[intro.extractors.velocities].get_function_symmetric_gradients(this->get_solution(),strain);
-              fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(this->get_solution(),phi);
+              fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(this->get_solution(),phi);
               const auto source = manager.project_to_bulk_source(a.position);
               double chiV = 0.;
               SymmetricTensor<2,dim> S;
@@ -1818,7 +1818,7 @@ namespace aspect
                   std::array<std::vector<double>,SymmetricTensor<2,dim>::n_independent_components> old;
                   fe[intro.extractors.pressure].get_function_values(working,p);
                   fe[intro.extractors.velocities].get_function_symmetric_gradients(working,strain);
-                  fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(working,phi);
+                  fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(working,phi);
                   if (!model.uses_independent_bulk_history())
                     for (unsigned int c=0; c<old.size(); ++c)
                       {
@@ -1891,7 +1891,7 @@ namespace aspect
                     fe.reinit(cell);
                     fe[intro.extractors.pressure].get_function_values(working,pressure);
                     fe[intro.extractors.velocities].get_function_symmetric_gradients(working,strain);
-                    fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(working,phase);
+                    fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(working,phase);
                     if(model.uses_stationary_mature_dg_optimizations())
                       model.prepare_dg_point_samples(cell->id(),common ? physical->physical : fe.get_quadrature_points());
                     if (!model.uses_independent_bulk_history())
@@ -1974,7 +1974,7 @@ namespace aspect
                     for (unsigned int j=0; j<indices.size(); ++j)
                       {
                         const auto c=fe.system_to_component_index(j).first;
-                        if ((c<dim || c==intro.component_indices.pressure || c==intro.variable("phase_field").first_component_index)
+                        if ((c<dim || c==intro.component_indices.pressure || c==intro.phase_field().first_component_index)
                             && this->get_dof_handler().locally_owned_dofs().is_element(indices[j])
                             && written.insert(indices[j]).second)
                           {

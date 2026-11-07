@@ -179,7 +179,7 @@ namespace aspect
           const auto &intro = this->introspection();
           const auto &fe = this->get_fe();
           const auto &solution = this->get_solution();
-          const unsigned int phi_component = intro.variable("phase_field").first_component_index;
+          const unsigned int phi_component = intro.phase_field().first_component_index;
           const FEValuesExtractors::Scalar phi_extractor(phi_component);
           auto &manager = this->get_reconstructed_fault_manager();
           const auto &model = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(

@@ -24,7 +24,7 @@ namespace aspect
           auto &solution = const_cast<LinearAlgebra::BlockVector &>(this->get_solution());
           const LinearAlgebra::BlockVector saved_solution(solution);
           const auto saved_fault = manager.get_fault(0);
-          const unsigned int block = this->introspection().variable("phase_field").block_index;
+          const unsigned int block = this->introspection().phase_field().block_index;
           const auto calculate = [&]() { return Access::compute_normalization_integrals(model); };
           const auto status = [&]() { return Access::normalization_cache_status(model); };
           const auto restore = [&]()
@@ -60,7 +60,7 @@ namespace aspect
                   LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,
                                                    this->get_mpi_communicator());
                   owned=saved_solution;
-                  const unsigned int component=this->introspection().variable("phase_field").first_component_index;
+                  const unsigned int component=this->introspection().phase_field().first_component_index;
                   std::vector<types::global_dof_index> dofs(this->get_fe().n_dofs_per_cell());
                   for (const auto &cell : this->get_dof_handler().active_cell_iterators())
                     if (cell->is_locally_owned())

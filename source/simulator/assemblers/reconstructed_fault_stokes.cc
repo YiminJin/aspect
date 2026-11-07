@@ -72,7 +72,7 @@ namespace aspect
       fe_values[introspection.extractors.temperature].get_function_values(
         bulk_state, temperature);
       const FEValuesExtractors::Scalar phase_field_extractor(
-        introspection.variable("phase_field").first_component_index);
+        introspection.phase_field().first_component_index);
       fe_values[phase_field_extractor].get_function_values(bulk_state, phase_field);
       fe_values[phase_field_extractor].get_function_values(
         phase_field_fault.uses_independent_bulk_history() ? phase_field_fault.accepted_fe_strain_state() : simulator.get_old_solution(), previous_phase_field);

@@ -33,6 +33,8 @@
 
 namespace aspect
 {
+  struct AdvectionField;
+  namespace Assemblers { template <int dim> class Manager; template <int dim> class Interface; }
   namespace internal
   {
     template <int dim> class PhaseFieldTestAccess;
@@ -90,6 +92,7 @@ namespace aspect
 
   namespace PhaseField
   {
+    template <int dim> class DGOperator;
     /**
      * The geometric function $\alpha(\phi)$ in the generic form of the crack
      * surface density functional.
@@ -307,6 +310,10 @@ namespace aspect
 
       void initialize();
 
+      /** Select native physics in the simulator-owned composition assembler slot. */
+      void set_assemblers(Assemblers::Manager<dim> &);
+      bool is_phase(const AdvectionField &) const;
+
       void
       make_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &sp);
 
@@ -328,8 +335,8 @@ namespace aspect
       void limit_dg_phase(LinearAlgebra::BlockVector &) const;
 
       /** Native phase evaluation. DG points on faces use the cell with the
-       * lexicographically greatest lower corner, consistent with half-open
-       * normalization intervals. No averaging precedes nonlinear localization. */
+       * lexicographically greatest persistent CellId, consistent with
+       * the normalization interval ownership rule. No averaging precedes nonlinear localization. */
       std::vector<double> phase_point_values(const Utilities::MPI::RemotePointEvaluation<dim> &,
                                              const LinearAlgebra::BlockVector &) const;
 
@@ -378,6 +385,9 @@ namespace aspect
 
       std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>>
       get_phase_field_profiles(const double core_phase_field) const;
+
+      /** Optional diagnostic particles on the native route; mandatory for CPDI. */
+      bool has_associated_particle_manager() const { return particle_manager != nullptr; }
 
       const Particle::Manager<dim> &get_associated_particle_manager() const;
 
@@ -430,6 +440,15 @@ namespace aspect
                                          const LinearAlgebra::BlockVector *lower_bound = nullptr) const;
 
       void initialize_phase_guess(LinearAlgebra::BlockVector &state) const;
+
+      /** Static-mesh operators are rebuilt only after FE layout or mesh changes. */
+      PhaseField::DGOperator<dim> &native_operator(const LinearAlgebra::BlockVector &) const;
+      mutable std::shared_ptr<PhaseField::DGOperator<dim>> native_spatial_operator;
+      mutable std::shared_ptr<LinearAlgebra::SparseMatrix> native_fracture_matrix;
+      mutable double native_fracture_coefficient = -1.;
+      mutable double native_fracture_penalty = -1.;
+
+      const Assemblers::Interface<dim> *transport_cell_assembler = nullptr;
 
       PhaseField::SolverParameters solver_parameters;
 

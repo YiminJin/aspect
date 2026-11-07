@@ -96,7 +96,7 @@ namespace aspect
         static const PhaseField::GeometricFunction a(.15625,1.,8./3.);
         static const PhaseField::DegradationFunction g(1.,128.);
         static const PhaseField::PhaseFieldProfile profile(a,g,.6);
-        const auto component=this->introspection().variable("phase_field").first_component_index;
+        const auto component=this->introspection().phase_field().first_component_index;
         for(const auto &cell:this->get_dof_handler().active_cell_iterators())for(auto v:cell->vertex_indices())
           {const auto x=cell->vertex(v);sim().solution[cell->vertex_dof_index(v,component)]=profile.value(std::hypot(std::max(0.,x[0]-.5),x[1]-.5));}
         this->get_current_constraints().distribute(sim().solution);
@@ -222,8 +222,8 @@ namespace aspect
         namespace BC=MaterialModel::BulkCohesive;
         const auto &m=model();const auto &s=*m.bulk_cohesive_state;
         const std::string label=Utilities::int_to_string(this->get_timestep_number(),4);
-        const auto pb=this->introspection().variable("phase_field").block_index;
-        const auto pc=this->introspection().variable("phase_field").first_component_index;
+        const auto pb=this->introspection().phase_field().block_index;
+        const auto pc=this->introspection().phase_field().first_component_index;
         const auto po=sim().solution.get_block_indices().block_start(pb);
         auto nodes=output("phase-"+label+".csv");nodes<<"dof,x,y,phi\n";
         std::map<unsigned int,Point<dim>> positions;

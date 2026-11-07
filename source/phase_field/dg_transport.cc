@@ -1,5 +1,9 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/phase_field/dg_operator.h>
+#include <aspect/phase_field/mapped_face.h>
+#include <aspect/phase_field/assemblers.h>
+#include <deal.II/fe/mapping_q1.h>
+#include <deal.II/fe/mapping_cartesian.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/dofs/dof_tools.h>
@@ -21,20 +25,14 @@ namespace aspect
                   ExcMessage("DG phase operators require a two-dimensional discontinuous Q2 field."));
       for (unsigned int i = 0; i < element.n_dofs_per_cell(); ++i)
         local_indices.push_back(dofs.get_fe().component_to_system_index(component, i));
+      AssertThrow(dynamic_cast<const MappingQ1<dim> *>(&mapping) != nullptr
+                  || dynamic_cast<const MappingCartesian<dim> *>(&mapping) != nullptr,
+                  ExcMessage("Native phase currently supports static bilinear MappingQ1 meshes."));
       const QGaussLobatto<dim> rule(4);
       FEValues<dim> fe(mapping, element, rule, update_values | update_JxW_values);
       for (const auto &cell : dofs.active_cell_iterators())
         if (cell->is_locally_owned())
           {
-            for (const auto v : cell->vertex_indices())
-              for (unsigned int d = 0; d < dim; ++d)
-                {
-                  const double lo = cell->vertex(0)[d], hi = cell->vertex(1u << d)[d];
-                  const double expected = (v & (1u << d)) ? hi : lo;
-                  AssertThrow(hi > lo && std::abs(cell->vertex(v)[d] - expected)
-                              <= 16 * std::numeric_limits<double>::epsilon()*std::max({std::abs(lo), std::abs(hi), hi - lo}),
-                              ExcMessage("DG phase requires affine Cartesian cells."));
-                }
             Cell data;
             data.iterator = cell;
             data.indices = indices(cell);
@@ -69,14 +67,15 @@ namespace aspect
     }
 
     template <int dim>
-    void DGOperator<dim>::assemble_transport(const Velocity &velocity)
+    void DGOperator<dim>::assemble_transport(const Velocity &velocity, const Assemblers::Interface<dim> *cell_assembler)
     {
       blocks.clear();
       boundary.clear();
       sources.clear();
       mean_rate = 0.;
       const QGaussLobatto<dim> rule(5);
-      const QGaussLobatto<1> face_rule(5);
+      const QGaussLobatto<dim-1> face_rule(5);
+      MappedFaceScratch<dim> face_scratch(mapping, element, face_rule);
       FEValues<dim> fe(mapping, element, rule, update_values | update_gradients | update_JxW_values | update_quadrature_points);
       for (const auto &cell : cells)
         {
@@ -88,18 +87,10 @@ namespace aspect
           velocity(native, fe.get_quadrature_points(), speed, divergence);
           FullMatrix<double> self(n, n);
           double face_loss = 0.;
+          const double minimum_jacobian = minimum_cell_jacobian(mapping, element, native);
           double minimum_divergence = *std::min_element(divergence.begin(), divergence.end());
           for (unsigned int q = 0; q < rule.size(); ++q)
             {
-              double loss = -divergence[q];
-              for (unsigned int d = 0; d < dim; ++d)
-                {
-                  const double x = rule.point(q)[d];
-                  if (x == 0. || x == 1.)
-                    loss += std::max(0., (x == 0. ? -1. : 1.) * speed[q][d])
-                            / ((native->vertex(1u << d)[d] - native->vertex(0)[d]) * face_rule.weight(0));
-                }
-              mean_rate = std::max(mean_rate, loss);
               SourceSample sample;
               sample.indices = cell.indices;
               sample.weight = fe.JxW(q) * divergence[q];
@@ -107,12 +98,19 @@ namespace aspect
               for (unsigned int i = 0; i < n; ++i)
                 {
                   sample.shape[i] = fe.shape_value(i, q);
-                  for (unsigned int j = 0; j < n; ++j)
-                    self(i, j) += fe.JxW(q) * fe.shape_value(j, q)
-                                  * (speed[q] * fe.shape_grad(i, q) + divergence[q] * fe.shape_value(i, q));
+
                 }
               sources.push_back(std::move(sample));
             }
+          if (cell_assembler)
+            {
+              internal::Assembly::Scratch::PhaseTransport<dim> scratch(fe, speed, divergence);
+              internal::Assembly::CopyData::PhaseTransport<dim> copy(self);
+              scratch.cell = native;
+              cell_assembler->execute(scratch, copy);
+            }
+          else
+            Assemblers::assemble_phase_transport_cell(fe, speed, divergence, self);
           for (const auto f : native->face_indices())
             {
               AssertThrow(!native->has_periodic_neighbor(f), ExcMessage("DG phase currently requires explicit exterior data, not periodic faces."));
@@ -123,35 +121,29 @@ namespace aspect
                   neighbors.push_back(native->neighbor_child_on_subface(f, s));
               else neighbors.push_back(native->neighbor(f));
               double maximum_outflow = 0.;
-              for (const auto &neighbor : neighbors)
+              for (unsigned int patch = 0; patch < neighbors.size(); ++patch)
                 {
+                  const auto &neighbor = neighbors[patch];
                   const bool interior = !native->at_boundary(f);
-                  const unsigned int axis = f / 2, tangent = 1 - axis;
-                  double lo = native->vertex(0)[tangent], hi = native->vertex(1u << tangent)[tangent];
+                  const auto &face = face_scratch.reinit(native, f,
+                                                         neighbors.size() > 1 ? patch : numbers::invalid_unsigned_int);
+                  const auto &physical = face.get_quadrature_points();
+                  std::vector<Point<dim>> unit;
+                  for (const auto &point : physical)
+                    unit.push_back(mapping.transform_real_to_unit_cell(native, point));
                   if (interior)
-                    {
-                      AssertThrow(!neighbor->is_artificial(), ExcMessage("DG phase needs readable face neighbors."));
-                      lo = std::max(lo, neighbor->vertex(0)[tangent]);
-                      hi = std::min(hi, neighbor->vertex(1u << tangent)[tangent]);
-                    }
-                  std::vector<Point<dim>> physical, unit;
-                  for (unsigned int q = 0; q < face_rule.size(); ++q)
-                    {
-                      Point<dim> x;
-                      x[axis] = native->vertex((f % 2) * (1u << axis))[axis];
-                      x[tangent] = lo + (hi - lo) * face_rule.point(q)[0];
-                      physical.push_back(x);
-                      unit.push_back(mapping.transform_real_to_unit_cell(native, x));
-                    }
+                    AssertThrow(!neighbor->is_artificial(), ExcMessage("DG phase needs readable face neighbors."));
                   std::vector<Tensor<1, dim>> face_speed(physical.size());
                   std::vector<double> unused(physical.size());
                   velocity(native, physical, face_speed, unused);
                   FullMatrix<double> coupling(n, n);
                   for (unsigned int q = 0; q < physical.size(); ++q)
                     {
-                      const double vn = (f % 2 ? 1. : -1.) * face_speed[q][axis];
-                      maximum_outflow = std::max(maximum_outflow, vn);
-                      const double weight = (hi - lo) * face_rule.weight(q);
+                      const double vn = face_speed[q] * face.normal_vector(q);
+                      const double weight = face.JxW(q);
+                      // Undo the subface reference scaling when bounding a full face.
+                      const double surface_jacobian = weight / face_rule.weight(q) * neighbors.size();
+                      maximum_outflow = std::max(maximum_outflow, vn * surface_jacobian);
                       const auto exterior = interior ? mapping.transform_real_to_unit_cell(neighbor, physical[q]) : Point<dim>();
                       Vector<double> load(n), mass_load(n), trace(n);
                       for (unsigned int i = 0; i < n; ++i)
@@ -165,7 +157,7 @@ namespace aspect
                       if (!interior)
                         {
                           cell.inverse_mass.vmult(mass_load, load);
-                          boundary.push_back({physical[q], cell.indices, std::move(mass_load), std::move(trace), weight * vn});
+                          boundary.push_back({native->face(f)->boundary_id(), physical[q], cell.indices, std::move(mass_load), std::move(trace), weight * vn});
                         }
                     }
                   if (interior)
@@ -175,14 +167,11 @@ namespace aspect
                       blocks.push_back({cell.indices, indices(neighbor), std::move(product)});
                     }
                 }
-              // For a nonnegative Q2 polynomial, exact Lobatto3 integration
-              // in the normal direction bounds its face integral by 6/h times
-              // its cell integral. This remains true when the face is split
-              // into nonmatching patches, whose quadrature integrates phi
-              // exactly. Together with the minimum volume divergence it bounds
-              // the Euler mean and the complementary upper-gap mean. Retain
-              // the (often stricter) aligned Lobatto5 nodal condition above.
-              face_loss += 6.*maximum_outflow / (native->vertex(1u << (f / 2))[f / 2] - native->vertex(0)[f / 2]);
+              // A nonnegative reference Q2 polynomial satisfies the exact
+              // Lobatto3 trace bound int_face(phi) <= 6 int_cell(phi).
+              // Weight by max(J_face v.n+)/min(J_cell). This also bounds
+              // split-face quadrature and the complementary upper-gap loss.
+              face_loss += 6. * maximum_outflow / minimum_jacobian;
             }
           mean_rate = std::max(mean_rate, face_loss + std::max(0., -minimum_divergence));
           FullMatrix<double> product(n, n);
@@ -194,7 +183,7 @@ namespace aspect
 
     template <int dim>
     void DGOperator<dim>::evaluate(const LinearAlgebra::Vector &state, LinearAlgebra::Vector &rhs,
-                                   const Field &inflow, double time, double &source, double &flux) const
+                                   const BoundaryField &inflow, double time, double &source, double &flux) const
     {
       LinearAlgebra::Vector ghost(owned, relevant, communicator);
       ghost = state;
@@ -213,7 +202,7 @@ namespace aspect
           double value = 0.;
           if (load.flux_weight < 0.)
             {
-              value = inflow(load.point, time);
+              value = inflow(load.boundary_id, load.point, time);
               for (unsigned int i = 0; i < load.indices.size(); ++i)
                 rhs[load.indices[i]] += load.values[i] * value;
             }
@@ -274,6 +263,18 @@ namespace aspect
       const LinearAlgebra::Vector &accepted, LinearAlgebra::Vector &candidate, const Field &inflow,
       double time, double dt, double lower, double upper, bool limiting) const
     {
+      return transport(accepted, candidate,
+                       BoundaryField([&](types::boundary_id, const Point<dim> &point, double stage_time)
+      {
+        return inflow(point, stage_time);
+      }), time, dt, lower, upper, limiting);
+    }
+
+    template <int dim>
+    typename DGOperator<dim>::TransportStatistics DGOperator<dim>::transport(
+      const LinearAlgebra::Vector &accepted, LinearAlgebra::Vector &candidate, const BoundaryField &inflow,
+      double time, double dt, double lower, double upper, bool limiting) const
+    {
       AssertThrow(std::isfinite(dt) && dt > 0., ExcMessage("DG phase transport needs positive finite dt."));
       TransportStatistics stats;
       LinearAlgebra::Vector current(owned, communicator), start(owned, communicator), stage(owned, communicator), rhs(owned, communicator);
@@ -283,9 +284,9 @@ namespace aspect
       stats.substeps = std::max(1u, static_cast<unsigned int>(std::ceil(dt * mean_rate / .8)));
       AssertThrow(stats.substeps <= 65536, ExcMessage("DG phase transport exceeds its bounded subcycle budget."));
       const double ds = dt / stats.substeps;
-      const Field checked_inflow = [&](const Point<dim> &x, double t)
+      const BoundaryField checked_inflow = [&](types::boundary_id boundary, const Point<dim> &x, double t)
       {
-        const double value = inflow(x, t);
+        const double value = inflow(boundary, x, t);
         AssertThrow(std::isfinite(value) && (!limiting || (value >= lower && value <= upper)),
                     ExcMessage("DG phase exterior data violate physical bounds."));
         return value;

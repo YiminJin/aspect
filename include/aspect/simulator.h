@@ -1104,6 +1104,14 @@ namespace aspect
        * This function is implemented in
        * <code>source/simulator/assembly.cc</code>.
        */
+      /** Execute the explicit native phase method once from the accepted
+       * parent, before trial geometry binding. This does not publish history. */
+      void solve_native_phase_transport(const AdvectionField &,
+                                        const LinearAlgebra::BlockVector &accepted,
+                                        const LinearAlgebra::BlockVector &velocity,
+                                        double start_time, double dt,
+                                        LinearAlgebra::BlockVector &candidate);
+
       void set_assemblers ();
 
       /**

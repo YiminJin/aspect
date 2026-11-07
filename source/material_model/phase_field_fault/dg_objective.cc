@@ -142,7 +142,7 @@ namespace aspect
           dg.reinit(parent->primary.space->cells.at(entry.first));
           parent->primary.space->cells.at(entry.first)->get_dof_indices(indices);
           native[this->introspection().extractors.velocities].get_function_gradients(this->get_old_solution(), gradients);
-          native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
+          native[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)]
           .get_function_values(state.bulk_history.native, phase);
           const auto T = evaluate_history_tensor(*parent, entry.first, rule);
           const auto R = evaluate_history_tensor(*parent->residual, entry.first, rule);

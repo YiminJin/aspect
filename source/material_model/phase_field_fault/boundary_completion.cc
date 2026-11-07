@@ -246,7 +246,7 @@ namespace aspect
       // must match the same stationary profile used outside.
       const auto &fe = this->get_fe ();
       const unsigned int component
-        = this->introspection ().variable ("phase_field").first_component_index;
+        = this->introspection ().phase_field().first_component_index;
       const auto &constraints = this->get_current_constraints ();
       std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>> prescribed_profiles;
       std::vector<std::array<bool, 2>> extended (prescribed.size (), { { false, false } });

@@ -46,8 +46,8 @@ namespace aspect
     const auto seconds=[](const auto a){return std::chrono::duration<double>(Clock::now()-a).count();};
     const auto native_constraints=BC::global_constraints(current_constraints,mpi_communicator);
     const auto global_solution=BC::global_values(solution,mpi_communicator);
-    const auto pb=introspection.variable("phase_field").block_index;
-    const auto pc=introspection.variable("phase_field").first_component_index;
+    const auto pb=introspection.phase_field().block_index;
+    const auto pc=introspection.phase_field().first_component_index;
     const auto po=solution.get_block_indices().block_start(pb);
     const auto pressure_begin=solution.get_block_indices().block_start(introspection.block_indices.pressure);
     const auto pressure_end=pressure_begin+solution.block(introspection.block_indices.pressure).size();
@@ -1171,7 +1171,7 @@ namespace aspect
           }
         std::ofstream phase_out(parameters.output_directory+"phase-forces-"+Utilities::int_to_string(next->step,4)+".csv");
         phase_out<<std::setprecision(17)<<"dof,phi,obstacle,mass,fracture_gradient,mechanical_gradient,residual\n";
-        const auto offset=solution.get_block_indices().block_start(introspection.variable("phase_field").block_index);
+        const auto offset=solution.get_block_indices().block_start(introspection.phase_field().block_index);
         for(unsigned int i=0;i<next->phase.size();++i)
           phase_out<<i<<','<<next->phase[i]<<','<<parent->phase[i]<<','<<physical_mass[i]<<','<<accepted.fracture_gradient[i]<<','<<Kf*accepted.raw[offset+i]-accepted.fracture_gradient[i]<<','<<Kf*accepted.raw[offset+i]<<'\n';
         std::ofstream out(parameters.output_directory+"bulk-accepted.csv",std::ios::app);out<<std::setprecision(17);

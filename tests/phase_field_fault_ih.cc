@@ -202,7 +202,7 @@ namespace aspect
               this->get_dof_handler(),
               this->get_solution(),
               VectorTools::EvaluationFlags::avg,
-              this->introspection().variable("phase_field").first_component_index);
+              this->introspection().phase_field().first_component_index);
 
           constexpr double background_G = 1.e10;
           constexpr double rock_G = 4.e10;

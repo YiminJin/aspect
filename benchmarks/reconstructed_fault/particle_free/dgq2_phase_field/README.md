@@ -1,3 +1,30 @@
+> Current native integration: read the [composition/mapped-phase contract](../../../../doc/reconstructed_fault/particle_free/DGQ2_PHASE_FIELD_DESIGN.md)
+> and [bounded integration report](../../../../doc/reconstructed_fault/particle_free/NATIVE_PHASE_INTEGRATION_REPORT.md).
+> New core/plugins live under `build-particle-free/native-phase-integration/`.
+> The old `dgq2-phase/candidate` and commands below remain paired historical
+> evidence; do not replace its binary or use its old separate-block inputs with
+> the new layout. The full coupled matrix remains deferred.
+
+## Short integration inputs
+
+`prepare_integration_fixture.py LABEL` creates (but does not launch) a no-particle
+layered input from the retained short control. Options select `--kind growth`,
+`--end`, `--level`, `--q1`, `--reject`, `--schedule`, `--restart`/`--slot`, and
+`--inflow` (ordinary boundary-composition function). It registers only one phase
+composition, canonical Q1/DGQ2 settings and explicit boundary data. Always use a
+fresh label. Keep each new simulation/operator command below 600 seconds, total
+new simulation/operator runtime below 2700 seconds, and at most four ranks with
+one thread per rank. Builds and substantial tests run sequentially.
+
+The scalar operator accepts an optional final geometry argument: `cartesian`,
+`affine` (rotated/sheared) or `bilinear`. Its preceding arguments remain level,
+mode, limiter, physical interval, final time and static local-refinement flag.
+`sipg_energy_checks.h` independently integrates mapped energy from field traces
+and gradients, checking assembled energy, residual and tangent. The mapped tests
+do not enable mapped coupled tensor history.
+
+## Historical separate-block entries
+
 # Native DGQ2 phase checks
 
 Current closeout: the native checks and both positive coupled timesteps pass.

@@ -18,7 +18,7 @@ namespace aspect
       const auto &pm=handler.get_associated_particle_manager();
       const auto &constraints=sim.get_current_constraints();
       const auto &dofs=internal::PhaseFieldTestAccess<dim>::vertex_dofs(handler);
-      const auto block=sim.introspection().variable("phase_field").block_index;
+      const auto block=sim.introspection().phase_field().block_index;
       const auto H=pm.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
       const std::string prefix=sim.get_output_directory()+"audit"+std::to_string(step);
       LinearAlgebra::BlockSparseMatrix matrix,eval_matrix;

@@ -106,7 +106,7 @@ namespace aspect { namespace Postprocess
       cells<<'\n';
       const auto &space=*s.bulk_history.tensor->primary.space;std::vector<types::global_dof_index> ids(9);
       std::map<std::pair<double,double>,std::pair<double,double>> nodes;
-      const auto pc=this->introspection().variable("phase_field").first_component_index;
+      const auto pc=this->introspection().phase_field().first_component_index;
       for(const auto &entry:s.cells)
         {
           const auto cell=entry.second;space.cells.at(entry.first)->get_dof_indices(ids);
@@ -194,8 +194,8 @@ namespace aspect { namespace Postprocess
       export_state("old");
       const auto energy=m.evaluate_fe_phase_energy(sim().solution,false,false);
       const auto fracture=this->get_phase_field_handler().evaluate_cell_fracture(sim().solution,false);
-      const unsigned int pb=this->introspection().variable("phase_field").block_index;
-      const unsigned int pc=this->introspection().variable("phase_field").first_component_index;
+      const unsigned int pb=this->introspection().phase_field().block_index;
+      const unsigned int pc=this->introspection().phase_field().first_component_index;
       const auto offset=sim().solution.get_block_indices().block_start(pb);
       std::map<types::global_dof_index,Point<dim>> nodes;
       for(const auto &entry:s.cells)for(auto v:entry.second->vertex_indices())

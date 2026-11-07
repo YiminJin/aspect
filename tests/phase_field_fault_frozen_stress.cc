@@ -86,7 +86,7 @@ namespace aspect
                     std::vector<Tensor<2,dim>> gradients(quadrature.size());
                     values[intro.extractors.compositional_fields[2]].get_function_values(working,old_stress);
                     values[intro.extractors.velocities].get_function_gradients(working,gradients);
-                    values[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)]
+                    values[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)]
                       .get_function_values(working,phi);
                     Vector<double> expected(nc), increment=data.local_frozen_fault_rhs;
                     increment -= zero_history_rhs.at(cell->id());

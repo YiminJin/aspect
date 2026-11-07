@@ -45,6 +45,18 @@ namespace aspect
     bool
     PhaseFieldFault<dim>::initialize_fe_shared_phase(LinearAlgebra::BlockVector &trial) const
     {
+      if (this->introspection().composition_type_exists(CompositionalFieldDescription::phase_field))
+        {
+          AssertThrow(this->get_timestep_number() == 0 && !this->get_parameters().resume_computation
+                      && !fe_strain_state, ExcMessage("Native phase initialization is fresh-only."));
+          LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,
+                                           this->get_mpi_communicator());
+          owned = trial;
+          if (this->get_phase_field_handler().uses_dg_phase())
+            this->get_phase_field_handler().limit_dg_phase(owned);
+          trial = owned;
+          return true;
+        }
       if (fe_initial_phase_profile.empty() && !uses_prescribed_dg_geometry() && !dg_material_transport)
         return false;
       AssertThrow((consistent_endpoint_phase || dg_material_transport) && this->get_timestep_number() == 0
@@ -63,7 +75,7 @@ namespace aspect
       AssertThrow(dg_material_transport || uses_prescribed_dg_geometry() || (input.eof() && data.size() >= 2), ExcMessage("Malformed shared phase data."));
       LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
       owned = trial;
-      const auto component = this->introspection().variable("phase_field").first_component_index;
+      const auto component = this->introspection().phase_field().first_component_index;
       std::vector<types::global_dof_index> indices(this->get_fe().n_dofs_per_cell());
       for (const auto &cell : this->get_dof_handler().active_cell_iterators())
         if (!cell->is_artificial())
@@ -214,21 +226,24 @@ namespace aspect
                       ExcMessage("Fixed-profile native history rejects slip orientation changes."));
           if (!consistent_endpoint_phase || uses_prescribed_dg_geometry())
             {
-              const unsigned int phase_block = this->introspection().variable("phase_field").block_index;
+              const unsigned int phase_block = this->introspection().phase_field().block_index;
               AssertThrow(s.bulk_history.native.block(phase_block) == this->get_solution().block(phase_block),
                           ExcMessage("Fixed-profile native history requires the unchanged accepted phase profile."));
               AssertThrow(current_normalization_integrals.at(0) == s.I,
                           ExcMessage("Fixed-profile native history requires unchanged normalization."));
             }
         }
-      const auto &particles = this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler();
-      AssertThrow(particles.n_global_particles() == s.n_particles_global, ExcMessage("Accepted FE strain rejects particle birth/deletion."));
-      unsigned int fixed_particles = 1;
-      for (const auto &p : particles)
-        if (!s.particles.count(p.get_id()) || s.particles.at(p.get_id()) != p.get_location())
-          fixed_particles = 0;
-      AssertThrow(Utilities::MPI::min(fixed_particles, this->get_mpi_communicator()) == 1,
-                  ExcMessage("Accepted FE strain rejects history transport."));
+      if (!homogeneous_mesh_data)
+        {
+          const auto &particles = this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler();
+          AssertThrow(particles.n_global_particles() == s.n_particles_global, ExcMessage("Accepted FE strain rejects particle birth/deletion."));
+          unsigned int fixed_particles = 1;
+          for (const auto &p : particles)
+            if (!s.particles.count(p.get_id()) || s.particles.at(p.get_id()) != p.get_location())
+              fixed_particles = 0;
+          AssertThrow(Utilities::MPI::min(fixed_particles, this->get_mpi_communicator()) == 1,
+                      ExcMessage("Accepted FE strain rejects history transport."));
+        }
     }
 
     template <int dim>
@@ -253,7 +268,7 @@ namespace aspect
       state->bulk_history.native.reinit(this->get_solution());
       state->bulk_history.native = 0.;
       const auto &intro = this->introspection();
-      const unsigned int b = intro.variable("phase_field").block_index;
+      const unsigned int b = intro.phase_field().block_index;
       state->bulk_history.native.block(b) = this->get_solution().block(b);
       const auto phase_offset = state->bulk_history.native.get_block_indices().block_start(b);
       if (!mature_frictional_fault)
@@ -290,14 +305,17 @@ namespace aspect
                         && fault.vertex(i)[1] == .5, ExcMessage("P2 FE strain requires a unit horizontal through-going fault."));
           state->vertices.push_back(fault.vertex(i));
         }
-      const auto &pm = this->get_phase_field_handler().get_associated_particle_manager();
-      const auto sp = pm.get_property_manager().get_data_info().get_position_by_field_name("maxwell stress");
-      state->n_particles_global = pm.get_particle_handler().n_global_particles();
-      for (const auto &p : pm.get_particle_handler())
+      if (!homogeneous_mesh_data)
         {
-          for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-            AssertThrow(restoring || transferring || p.get_properties()[sp + c] == 0., ExcMessage("FE strain requires unloaded initial particle stress; no conversion is performed."));
-          state->particles[p.get_id()] = p.get_location();
+          const auto &pm = this->get_phase_field_handler().get_associated_particle_manager();
+          const auto sp = pm.get_property_manager().get_data_info().get_position_by_field_name("maxwell stress");
+          state->n_particles_global = pm.get_particle_handler().n_global_particles();
+          for (const auto &p : pm.get_particle_handler())
+            {
+              for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
+                AssertThrow(restoring || transferring || p.get_properties()[sp + c] == 0., ExcMessage("FE strain requires unloaded initial particle stress; no conversion is performed."));
+              state->particles[p.get_id()] = p.get_location();
+            }
         }
       if (mature_frictional_fault)
         {
@@ -360,7 +378,7 @@ namespace aspect
       const auto quad = mechanical_quadrature();
       FEValues<dim>fe(this->get_mapping(), this->get_fe(), quad, update_values | update_quadrature_points | update_JxW_values);
       std::vector<types::global_dof_index>ids(this->get_fe().dofs_per_cell);
-      const auto pc = intro.variable("phase_field").first_component_index;
+      const auto pc = intro.phase_field().first_component_index;
       auto first = this->get_dof_handler().begin_active();
       while (first != this->get_dof_handler().end() && !first->is_locally_owned())
         ++first;
@@ -423,7 +441,8 @@ namespace aspect
                   p.xi = source.active ? source.xi : 0.;
                 }
               const auto nphase=this->get_fe().base_element(this->get_fe().component_to_base_index(pc).first).n_dofs_per_cell();
-              p.dofs.resize(nphase);p.shape.resize(nphase);
+              p.dofs.resize(nphase);
+              p.shape.resize(nphase);
               for (unsigned int v = 0; v < p.dofs.size(); ++v)
                 {
                   const auto j = this->get_fe().component_to_system_index(pc, v);
@@ -537,7 +556,7 @@ namespace aspect
       std::vector<SymmetricTensor<2, dim>>R(1);
       std::vector<double>phi(1);
       fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(state, R);
-      fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(state, phi);
+      fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(state, phi);
       double profile_stress = 0.;
       SymmetricTensor<2, dim>S;
       const auto &manager = this->get_reconstructed_fault_manager();
@@ -609,7 +628,7 @@ namespace aspect
       const unsigned int velocity_block = this->introspection().block_indices.velocities;
       owned.block(velocity_block) *= coefficients.beta;
       owned.block(velocity_block).add(coefficients.eta_ve / s.G, owned_bulk.block(velocity_block));
-      const unsigned int phase_block = this->introspection().variable("phase_field").block_index;
+      const unsigned int phase_block = this->introspection().phase_field().block_index;
       owned.block(phase_block) = bulk.block(phase_block);
       trial.reinit(s.bulk_history.native);
       trial = owned;
@@ -637,7 +656,7 @@ namespace aspect
           // The independent tensor is projected from the native FE source.
           update->bulk_history.native = s.bulk_history.native;
           if (consistent_endpoint_phase)
-            update->bulk_history.native.block(this->introspection().variable("phase_field").block_index) = bulk.block(this->introspection().variable("phase_field").block_index);
+            update->bulk_history.native.block(this->introspection().phase_field().block_index) = bulk.block(this->introspection().phase_field().block_index);
           AssertThrow(!transported || (dg_accepted_history && transported->primary.space == s.bulk_history.tensor->primary.space),
                       ExcMessage("Only PF5 may supply an independently transported native candidate."));
           const auto incoming = jaumann_dg_stress ? s.objective.tensor : s.bulk_history.tensor;

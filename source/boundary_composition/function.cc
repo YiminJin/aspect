@@ -43,6 +43,28 @@ namespace aspect
 
 
     template <int dim>
+    double Function<dim>::boundary_composition_at_time(const types::boundary_id boundary,
+                                                       const Point<dim> &point,
+                                                       const unsigned int field, const double time) const
+    {
+      // The explicit stage traversal is serial within each MPI rank. Restore
+      // the endpoint clock even if the expression throws; no simulator clock changes.
+      const double saved = function->get_time();
+      function->set_time(this->convert_output_to_years() ? time / year_in_seconds : time);
+      try
+        {
+          const double value = boundary_composition(boundary, point, field);
+          function->set_time(saved);
+          return value;
+        }
+      catch (...)
+        {
+          function->set_time(saved);
+          throw;
+        }
+    }
+
+    template <int dim>
     void
     Function<dim>::update()
     {

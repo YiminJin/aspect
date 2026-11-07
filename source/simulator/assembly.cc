@@ -20,6 +20,7 @@
 
 
 #include <aspect/simulator.h>
+#include <aspect/phase_field.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/utilities.h>
 #include <aspect/simulator_access.h>
@@ -305,6 +306,8 @@ namespace aspect
       }
     else
       AssertThrow(false,ExcInternalError());
+
+    if (phase_field_handler) phase_field_handler->set_assemblers(*assemblers);
 
     if (introspection.composition_type_exists(CompositionalFieldDescription::entropy))
       Assemblers::set_assemblers_entropy_advection(SimulatorAccess<dim>(*this), *assemblers);

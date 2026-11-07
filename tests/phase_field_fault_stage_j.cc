@@ -198,7 +198,7 @@ namespace aspect
               old = this->get_old_solution();
               difference -= old;
               const unsigned int phase_block = this->introspection()
-                                               .variable("phase_field").block_index;
+                                               .phase_field().block_index;
               const double phase_change = difference.block(phase_block).l2_norm();
               AssertThrow(phase_change > 1.e-8,
                           ExcMessage("The feedback fixture did not evolve the phase field."));
@@ -227,7 +227,7 @@ namespace aspect
           const double expected = Utilities::MPI::sum(
             -dg*local_H_integral-240000.0*local_volume, this->get_mpi_communicator());
           LinearAlgebra::BlockVector probe(this->get_solution());
-          const unsigned int b = this->introspection().variable("phase_field").block_index;
+          const unsigned int b = this->introspection().phase_field().block_index;
           probe.block(b) = phi;
           auto &rhs = const_cast<LinearAlgebra::BlockVector &>(this->get_system_rhs());
           auto &matrix = const_cast<LinearAlgebra::BlockSparseMatrix &>(this->get_system_matrix());

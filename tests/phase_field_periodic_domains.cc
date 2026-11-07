@@ -19,7 +19,7 @@ namespace aspect
           const auto H_index=pm.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
           const auto &dofs=internal::PhaseFieldTestAccess<dim>::vertex_dofs(handler);
           const auto &vertices=this->get_triangulation().get_vertices();
-          const auto block=this->introspection().variable("phase_field").block_index;
+          const auto block=this->introspection().phase_field().block_index;
           const auto comm=this->get_mpi_communicator();
           constexpr double length=.25;
           unsigned int nx=0, ny=0, remote_faces=0;

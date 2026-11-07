@@ -1,3 +1,9 @@
+> Native phase inputs now require semantic composition registration and ordinary
+> initial/boundary composition data. The [migration example](../DGQ2_PHASE_FIELD_DESIGN.md#observation-migration-and-limits)
+> supersedes old separate-phase launch snippets below. Retained old binaries and
+> inputs remain paired evidence. `prepare_integration_fixture.py` creates short
+> no-particle inputs for the new build without launching a campaign.
+
 # Runnable examples and code navigation
 
 [Overview](../MATURE_MOVING_FAULT.md) · Prerequisite: [attempt lifecycle](lifecycle.md)
@@ -80,54 +86,53 @@ chooses direct physical stress. Without it, `separated` remains default.
 default; this example explicitly selects the qualified optional combination.
 Do not copy only this excerpt into a production restart.
 
-## Native DGQ2 phase option
+## Native phase composition
 
-The historical examples above retain continuous Q1. The independent stress
-space stays DGQ2 for both phase choices. To select the new persistent phase
-field, include these native settings in the complete input:
+The independent stress space stays DGQ2 for both phase choices. Register one
+physical phase composition in the complete supported native input:
 
 ```text
+subsection Compositional fields
+  set Number of fields = 1
+  set Names of fields = phase_field
+  set Types of fields = phase field
+  set Compositional field methods = phase field
+end
 subsection Discretization
-  set Use discontinuous phase discretization = true
-  set Phase polynomial degree = 2
+  set Composition polynomial degree = 2
+  set Use discontinuous composition discretization = true
   subsection Stabilization parameters
     set Use limiter for discontinuous phase solution = true
   end
 end
 ```
 
-The native implementation reuses `Discontinuous penalty` for SIPG. Whole-cell
-phase bounds, material SSPRK3 transport, explicit traces and constrained growth
-are described in [DG design](../DGQ2_PHASE_FIELD_DESIGN.md). The native moving
-fixture still disables growth. Q1 checkpoints cannot be loaded as DGQ2.
+Use ordinary initial/boundary composition models. Remove obsolete native private
+seed inputs and separate-phase selectors; conflicting family/degree settings
+reject. The native implementation reuses `Discontinuous penalty` for SIPG.
+The [phase contract](../DGQ2_PHASE_FIELD_DESIGN.md) owns mapped quadrature, bounds,
+stage-time inflow and constraints. The moving fixture disables growth. A Q1
+comparison uses composition degree 1 and family false. Legacy CPDI remains separate.
 
-The selected four-case layered comparison uses the separately preserved binary
-and matching checker/provider in `build-particle-free/dgq2-phase/candidate/`:
-
-```sh
-python3 benchmarks/reconstructed_fault/particle_free/dgq2_phase_field/run_coupled.py \
-  plus plus-half minus plus-fine
-```
-
-This is a multi-hour, four-rank **selected comparison**, not a quick smoke test.
-The launcher refuses to overwrite existing runs. To create a short fresh case
-with the same physical conventions, use a new label:
+For the current local build, prepare a short fresh fixture without launching:
 
 ```sh
-python3 benchmarks/reconstructed_fault/particle_free/transported_objective/run_layered_campaign.py dg-guide \
-  --candidate build-particle-free/dgq2-phase/candidate \
-  --phase-discretization DGQ2 --spin 'bulk slip subtracted' \
-  --background-shear 3.7 --translation 2 --halfwidth 6 \
-  --level 4 --dt .0125 --end .025 --ranks 4 --seconds 180
+python3 benchmarks/reconstructed_fault/particle_free/dgq2_phase_field/prepare_integration_fixture.py guide-new --end .025
 ```
 
-`--phase-discretization Q1` deliberately selects the historical control. The
-runner records exact executable/library/input hashes. Native operator tests and
-fixed-fault cohesive growth use the drivers in
-[`dgq2_phase_field/`](../../../../benchmarks/reconstructed_fault/particle_free/dgq2_phase_field/);
-[report](../DGQ2_PHASE_FIELD_REPORT.md) records their measured scope. Neither
-these fixtures nor the layered campaign specify the dimensional BP3-like crustal
-paper example.
+It writes `build-particle-free/transported-objective/stage-c/material-runs/layered-phase-integration-guide-new/input.prm`,
+using the preserved short fixture's physical inputs, with the new core/checker/
+provider under `build-particle-free/native-phase-integration/`. Use a fresh label;
+`--kind growth` prepares the fixed-fault case, `--q1` the native comparison.
+Native fixtures need no particles or freeze environment. New checkpoint identity
+rejects old separate-block layouts; do not substitute a new binary into an old run.
+
+The old `dgq2-phase/candidate/` remains paired with its historical launchers and
+inputs. The [original report](../DGQ2_PHASE_FIELD_REPORT.md) owns those results.
+Its multi-hour four-case matrix remains deferred; it is not a current launch
+instruction. The [integration report](../NATIVE_PHASE_INTEGRATION_REPORT.md)
+records bounded checks on the new layout. Neither fixture specifies the dimensional
+BP3-like crustal paper example.
 
 ## Checks and outputs
 

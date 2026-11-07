@@ -65,7 +65,7 @@ namespace aspect
           {
             fe.reinit(cell);
             const auto &associations=manager.get_stokes_qp_fault_associations(cell->id(),quad,fe.get_quadrature_points());
-            fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(lifted,phi);
+            fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(lifted,phi);
             fe[intro.extractors.temperature].get_function_values(lifted,temperature);
             for (unsigned int c=0;c<chemical.size();++c)
               fe[intro.extractors.compositional_fields[intro.chemical_composition_field_indices()[c]]].get_function_values(lifted,chemical[c]);

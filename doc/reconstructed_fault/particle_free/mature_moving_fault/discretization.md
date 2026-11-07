@@ -6,9 +6,11 @@
 ## Spaces and shared mass projection
 
 The fixture uses native continuous Q2 velocity and Q1 pressure on a fixed
-Cartesian mesh. Phase defaults to continuous Q1; explicit native DGQ2 phase is
-implemented and undergoing the qualification recorded in the
-[phase report](../DGQ2_PHASE_FIELD_REPORT.md). Stress has its own scalar `FE_DGQ(2)` space
+Cartesian mesh. Native phase uses a semantic composition with canonical
+composition FE settings: DGQ2 is the development selection, Q1 a comparison.
+Legacy CPDI retains separate Q1 storage. The [phase contract](../DGQ2_PHASE_FIELD_DESIGN.md)
+and [integration report](../NATIVE_PHASE_INTEGRATION_REPORT.md) describe mapped
+scalar assembly and the still-Cartesian coupled stress admission. Stress has its own scalar `FE_DGQ(2)` space
 for each independent in-plane component: nine coefficients per cell/component,
 without continuity constraints across faces. `TensorField` owns these vectors
 and a shared DoF space; it assigns no physical meaning or acceptance status.
@@ -95,10 +97,11 @@ choice changes the independently selected phase transport operator.
 
 ## Native phase transport and growth
 
-The phase field has its own scalar operator; it is not a stress component or a
-pretend thermal/compositional field. With DG selected, `transport_material_profile`
-passes the accepted native phase and accepted full velocity to
-`PhaseFieldHandler::transport_dg_phase`. Upwind fluxes and the divergence source
+The physical phase has its own scalar spatial operator in ordinary composition
+storage, with a special semantic type rather than chemical mixing. With DG
+selected, ordinary `solve_native_phase_transport` dispatch passes the accepted
+phase and full accepted velocity to `PhaseFieldHandler::transport_dg_phase`.
+The Q1 remapper no longer dispatches DG transport. Upwind fluxes and the divergence source
 advance the material equation, using Lobatto5 weak transport, exact Q2 mass,
 SSPRK3, mean-admissible subcycling and whole-cell bound scaling. The compact
 mature fixture prescribes zero phase on every incoming boundary. It stores the

@@ -64,13 +64,14 @@ namespace aspect
       density = 5,
       entropy = 6,
       generic = 7,
-      unspecified = 8
+      unspecified = 8,
+      phase_field = 9
     } type;
 
     /**
      * The number of different types defined in Type.
      */
-    constexpr static unsigned int n_types = 9;
+    constexpr static unsigned int n_types = 10;
 
     /**
      * This function translates an input string into the
@@ -96,6 +97,8 @@ namespace aspect
         return CompositionalFieldDescription::entropy;
       else if (input == "generic")
         return CompositionalFieldDescription::generic;
+      else if (input == "phase field")
+        return CompositionalFieldDescription::phase_field;
       else if (input == "unspecified")
         return CompositionalFieldDescription::unspecified;
       else
@@ -126,6 +129,27 @@ namespace aspect
   struct Introspection: public FEVariableCollection<dim>
   {
     public:
+      /** Non-owning indices of the single physical phase field. Native phase
+       * resolves its semantic composition; the separate variable is legacy Q1. */
+      struct PhaseFieldIndices
+      {
+        unsigned int first_component_index, block_index, base_index;
+      };
+
+      PhaseFieldIndices phase_field() const
+      {
+        const auto &fields = get_indices_for_fields_of_type(CompositionalFieldDescription::phase_field);
+        if (!fields.empty())
+          {
+            AssertThrow(fields.size() == 1, ExcMessage("Exactly one native phase composition is required."));
+            const unsigned int c = fields.front();
+            return {component_indices.compositional_fields[c], block_indices.compositional_fields[c],
+                    base_elements.compositional_fields[c]};
+          }
+        const auto &legacy = this->variable("phase_field");
+        return {legacy.first_component_index, legacy.block_index, legacy.base_index};
+      }
+
       /**
        * Constructor.
        */

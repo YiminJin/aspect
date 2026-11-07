@@ -132,7 +132,7 @@
     Utilities::MPI::RemotePointEvaluation<dim> cache;
     cache.reinit(this->get_phase_field_handler().get_grid_cache(),points);
     const auto phi=VectorTools::point_values<1>(cache,this->get_dof_handler(),this->get_solution(),
-                      VectorTools::EvaluationFlags::avg,this->introspection().variable("phase_field").first_component_index);
+                      VectorTools::EvaluationFlags::avg,this->introspection().phase_field().first_component_index);
     std::ofstream out(this->get_output_directory()+"study-fault-"+std::to_string(step)+".csv");
     out<<std::setprecision(17)<<"x,phi,q,V,slip\n";
     for(unsigned int i=0;i<points.size();++i){

@@ -247,7 +247,7 @@ namespace aspect
           auto &m=model();
           const auto &s=*m.fe_strain_state;
           Records local,global;
-          const auto pc=this->introspection().variable("phase_field").first_component_index;
+          const auto pc=this->introspection().phase_field().first_component_index;
           // Common points independent of the current mesh. None lies on a child
           // face for the two uniform meshes in this fixture.
           for (unsigned int ix=0; ix<8; ++ix)for (unsigned int iy=0; iy<128; ++iy)
@@ -333,7 +333,7 @@ namespace aspect
             }
           auto &m=model();
           const auto &s=*m.fe_strain_state;
-          const auto pc=this->introspection().variable("phase_field").first_component_index;
+          const auto pc=this->introspection().phase_field().first_component_index;
           Records nodal,all_nodal;
           for (const auto &entry:s.cells)for (const auto v:entry.second->vertex_indices())
               {
@@ -417,7 +417,7 @@ namespace aspect
             }
           const auto E=model().evaluate_fe_phase_energy(this->get_solution(),false);
           const auto F=this->get_phase_field_handler().evaluate_cell_fracture(this->get_solution(),true);
-          const unsigned int phase_block=this->introspection().variable("phase_field").block_index;
+          const unsigned int phase_block=this->introspection().phase_field().block_index;
           const auto phase_offset=s.bulk_history.native.get_block_indices().block_start(phase_block);
           std::map<types::global_dof_index,Point<dim>> local_phase_nodes,phase_nodes;
           for (const auto &entry:s.cells)for (const auto v:entry.second->vertex_indices())local_phase_nodes[entry.second->vertex_dof_index(v,pc)-phase_offset]=entry.second->vertex(v);
@@ -443,11 +443,11 @@ namespace aspect
                               const typename Model::FEEndpointTrial *endpoint=nullptr) const
         {
           auto &model=this->model();
-          const auto block=this->introspection().variable("phase_field").block_index;
+          const auto block=this->introspection().phase_field().block_index;
           std::filesystem::create_directories(this->get_output_directory()+directory);
           const auto output=[&](const std::string &name){std::ofstream f(this->get_output_directory()+directory+"/"+name);f<<std::setprecision(17);return f;};
           const auto &s=*model.fe_strain_state;
-          const auto component=this->introspection().variable("phase_field").first_component_index;
+          const auto component=this->introspection().phase_field().first_component_index;
           const auto offset=phase.get_block_indices().block_start(block);
           std::map<types::global_dof_index,Point<dim>> nodes;
           auto cells=output("cells.csv"),tensor=output("tensor.csv");
@@ -495,7 +495,7 @@ namespace aspect
                     << std::sqrt(coefficient.diffusion/(2*coefficient.reaction)) << '\n';
         }
 
-        unsigned int phase_block() const {return this->introspection().variable("phase_field").block_index;}
+        unsigned int phase_block() const {return this->introspection().phase_field().block_index;}
         Vector<double> s_phase() const {return aspect::internal::endpoint_values(this->get_solution().block(phase_block()),this->get_mpi_communicator());}
         Vector<double> accepted_phase() const {return aspect::internal::endpoint_values(model().fe_strain_state->bulk_history.native.block(phase_block()),this->get_mpi_communicator());}
         aspect::internal::EndpointPhaseConstraints master_coordinates() const
@@ -541,7 +541,7 @@ namespace aspect
           const auto g=C.transpose(endpoint_gradient(base,endpoint));
           std::vector<Point<dim>> points(C.physical_size());
           const auto offset=base.get_block_indices().block_start(phase_block());
-          const auto component=this->introspection().variable("phase_field").first_component_index;
+          const auto component=this->introspection().phase_field().first_component_index;
           for(const auto &cell:this->get_dof_handler().active_cell_iterators())for(const auto v:cell->vertex_indices())points[cell->vertex_dof_index(v,component)-offset]=cell->vertex(v);
           Vector<double> directions[2]={Vector<double>(C.size()),Vector<double>(C.size())};
           for(unsigned int i=0;i<C.size();++i)
@@ -929,8 +929,8 @@ namespace aspect
           const auto saved=s.solution,linear=s.current_linearization_point,old=s.old_solution,older=s.old_old_solution;
           progress("saved native vectors");
           const auto anchor=m.fe_strain_state->bulk_history.native;
-          const auto block=this->introspection().variable("phase_field").block_index;
-          const auto pc=this->introspection().variable("phase_field").first_component_index;
+          const auto block=this->introspection().phase_field().block_index;
+          const auto pc=this->introspection().phase_field().first_component_index;
           progress("saved anchor");
           BV perturbed(s.solution);
           LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
@@ -1021,8 +1021,8 @@ namespace aspect
           auto &m=model();
           const auto before=persistent();
           const auto &s=*m.fe_strain_state;
-          const auto b=this->introspection().variable("phase_field").block_index;
-          const auto pc=this->introspection().variable("phase_field").first_component_index;
+          const auto b=this->introspection().phase_field().block_index;
+          const auto pc=this->introspection().phase_field().first_component_index;
           const auto offset=this->get_solution().get_block_indices().block_start(b);
           const auto phase=aspect::internal::endpoint_values(s.bulk_history.native.block(b),this->get_mpi_communicator());
           std::vector<double> local(phase.size()),direction(phase.size());
@@ -1181,8 +1181,8 @@ namespace aspect
           const auto &s=sim();
           double error=0.;
           unsigned int count=0;
-          const auto offset=s.solution.get_block_indices().block_start(this->introspection().variable("phase_field").block_index);
-          const auto phase_size=model().fe_strain_state->bulk_history.native.block(this->introspection().variable("phase_field").block_index).size();
+          const auto offset=s.solution.get_block_indices().block_start(this->introspection().phase_field().block_index);
+          const auto phase_size=model().fe_strain_state->bulk_history.native.block(this->introspection().phase_field().block_index).size();
           const std::array<const BV *,4> fields= {{&s.solution,&s.old_solution,&s.old_old_solution,&model().fe_strain_state->bulk_history.native}};
           std::array<std::vector<double>,4> values;
           for (unsigned int k=0; k<fields.size(); ++k)

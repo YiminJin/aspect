@@ -45,7 +45,7 @@ namespace aspect
         out << std::setprecision(17) << header;
         return out;
       };
-      const unsigned int component = sim.introspection().variable("phase_field").first_component_index;
+      const unsigned int component = sim.introspection().phase_field().first_component_index;
       const auto &vertices = sim.get_triangulation().get_vertices();
       std::map<unsigned int, types::global_dof_index> vertex_dofs;
       auto cells = file("cells.csv", "v0,v1,v2,v3\n");

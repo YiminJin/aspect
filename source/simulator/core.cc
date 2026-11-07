@@ -992,6 +992,7 @@ namespace aspect
           case Parameters<dim>::AdvectionFieldMethod::fem_darcy_field:
           case Parameters<dim>::AdvectionFieldMethod::prescribed_field_with_diffusion:
             return true;
+          case Parameters<dim>::AdvectionFieldMethod::native_phase:
           case Parameters<dim>::AdvectionFieldMethod::particles:
           case Parameters<dim>::AdvectionFieldMethod::volume_of_fluid:
           case Parameters<dim>::AdvectionFieldMethod::static_field:
@@ -1151,7 +1152,7 @@ namespace aspect
     // If the phase field method is enabled, create a matrix block for the phase field system
     if (parameters.enable_phase_field)
       {
-        const unsigned int phase_field_block = introspection.variable("phase_field").first_component_index;
+        const unsigned int phase_field_block = introspection.phase_field().first_component_index;
         coupling[phase_field_block][phase_field_block] = DoFTools::always;
       }
 
@@ -2070,7 +2071,15 @@ namespace aspect
         // controller below can publish it.
         const auto parent=endpoint_model->prepare_material_history(old_solution,time,time_step);
         endpoint_model->transport_material_history(parent);
-        endpoint_model->stage_material_geometry(parent,solution,current_linearization_point);
+        LinearAlgebra::BlockVector transported_phase(introspection.index_sets.system_partitioning, mpi_communicator);
+        transported_phase = endpoint_model->accepted_fe_strain_state();
+        if (phase_field_handler->uses_dg_phase())
+          solve_native_phase_transport(AdvectionField::composition(introspection.find_composition_type(CompositionalFieldDescription::phase_field)),
+                                       endpoint_model->accepted_fe_strain_state(), old_solution, time-time_step, time_step,
+                                       transported_phase);
+        else
+          transported_phase = endpoint_model->transport_material_profile(parent);
+        endpoint_model->stage_material_geometry(parent,transported_phase,solution,current_linearization_point);
         endpoint_model->rotate_material_history(parent);
         reconstructed_fault_surface_system->invalidate_material_geometry();
         reconstructed_fault_stokes_coupling->invalidate_material_geometry();

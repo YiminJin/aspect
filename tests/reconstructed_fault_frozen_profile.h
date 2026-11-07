@@ -78,7 +78,7 @@ namespace aspect
         {
           load();
           const auto &fe=sim.get_fe();
-          const unsigned int phi=sim.introspection().variable("phase_field").first_component_index;
+          const unsigned int phi=sim.introspection().phase_field().first_component_index;
           std::vector<types::global_dof_index> dofs(fe.n_dofs_per_cell());
           for (const auto &cell:sim.get_dof_handler().active_cell_iterators())
             if (!cell->is_artificial())
@@ -139,7 +139,7 @@ namespace aspect
           using Access=MaterialModel::internal::PhaseFieldFaultTestAccess<dim>;
           const auto &ih=Access::current_normalization_integrals(model);
           const auto &fault=sim.get_reconstructed_fault_manager().get_fault(0);
-          const unsigned int phi=sim.introspection().variable("phase_field").first_component_index;
+          const unsigned int phi=sim.introspection().phase_field().first_component_index;
           const auto comm=sim.get_mpi_communicator();const auto rank=Utilities::MPI::this_mpi_process(comm);
           std::ofstream out;
           if (save)

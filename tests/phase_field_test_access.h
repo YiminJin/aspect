@@ -39,7 +39,7 @@ namespace aspect
             };
         }
         static void diagnostic_old_phase(Simulator<dim> &simulator,const LinearAlgebra::BlockVector &reference)
-        { simulator.old_solution.block(simulator.introspection.variable("phase_field").block_index)=reference.block(simulator.introspection.variable("phase_field").block_index); }
+        { simulator.old_solution.block(simulator.introspection.phase_field().block_index)=reference.block(simulator.introspection.phase_field().block_index); }
         static void complete_step(Simulator<dim> &simulator)
         { simulator.compute_current_constraints();simulator.solve_timestep(); }
         static void endpoint_failure_hook(Simulator<dim> &simulator,std::function<void()> hook)

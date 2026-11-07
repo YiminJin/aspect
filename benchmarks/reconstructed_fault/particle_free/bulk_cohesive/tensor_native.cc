@@ -102,7 +102,7 @@ namespace aspect
       {return a.size()==b.size() && std::memcmp(a.data(),b.data(),a.size()*sizeof(double))==0;}
       void initialize_phase()
       {
-        const auto pc=this->introspection().variable("phase_field").first_component_index;
+        const auto pc=this->introspection().phase_field().first_component_index;
         for(const auto &cell:this->get_dof_handler().active_cell_iterators())for(const auto vertex:cell->vertex_indices())
           sim().solution[cell->vertex_dof_index(vertex,pc)]=.2;
         this->get_current_constraints().distribute(sim().solution);
@@ -128,7 +128,7 @@ namespace aspect
         const auto rule=model().mechanical_quadrature();
         const auto &element=this->get_fe();
         FEValues<dim> fe(this->get_mapping(),element,rule,update_values|update_gradients|update_JxW_values|update_quadrature_points);
-        const auto pc=this->introspection().variable("phase_field").first_component_index;
+        const auto pc=this->introspection().phase_field().first_component_index;
         const auto label=Utilities::int_to_string(s.step,4);
         std::ofstream points(this->get_output_directory()+"history-"+label+".csv");
         points<<std::setprecision(17)<<"cell,q,x_m,y_m,JxW_m2,phi,Txx_Pa,Tyy_Pa,Tzz_Pa,Txy_Pa,tauxx_Pa,tauyy_Pa,tauzz_Pa,tauxy_Pa";

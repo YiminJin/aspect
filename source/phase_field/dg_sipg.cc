@@ -1,5 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/phase_field/dg_operator.h>
+#include <aspect/simulator/assemblers/scalar_dg.h>
+#include <aspect/phase_field/mapped_face.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/lac/trilinos_sparsity_pattern.h>
@@ -43,7 +45,8 @@ namespace aspect
       rhs = 0.;
       double constant = 0.;
       const QGauss<dim> volume_rule(5);
-      const QGauss<1> face_rule(5);
+      const QGauss<dim-1> face_rule(5);
+      MappedFaceScratch<dim> face_scratch(mapping, element, face_rule);
       FEValues<dim> volume(mapping, element, volume_rule,
                            update_values | update_gradients | update_JxW_values | update_quadrature_points);
       for (const auto &cell : cells)
@@ -71,30 +74,21 @@ namespace aspect
                 for (unsigned int s = 0; s < GeometryInfo<dim>::max_children_per_face; ++s)
                   neighbors.push_back(native->neighbor_child_on_subface(f, s));
               else neighbors.push_back(native->neighbor(f));
-              for (const auto &neighbor : neighbors)
+              for (unsigned int patch = 0; patch < neighbors.size(); ++patch)
                 {
-                  const unsigned int axis = f / 2, tangent = 1 - axis;
-                  double lo = native->vertex(0)[tangent], hi = native->vertex(1u << tangent)[tangent];
+                  const auto &neighbor = neighbors[patch];
+                  const auto &face = face_scratch.reinit(native, f,
+                                                         neighbors.size() > 1 ? patch : numbers::invalid_unsigned_int);
+                  const auto &points = face.get_quadrature_points();
+                  const double minimum_jacobian = minimum_cell_jacobian(mapping, element, native);
+                  const double neighbor_jacobian = interior ? minimum_cell_jacobian(mapping, element, neighbor) : minimum_jacobian;
+                  std::vector<Point<dim>> neighbor_unit;
                   if (interior)
                     {
                       AssertThrow(!neighbor->is_artificial(), ExcMessage("SIPG requires readable face neighbors."));
-                      lo = std::max(lo, neighbor->vertex(0)[tangent]);
-                      hi = std::min(hi, neighbor->vertex(1u << tangent)[tangent]);
+                      for (const auto &point : points)
+                        neighbor_unit.push_back(mapping.transform_real_to_unit_cell(neighbor, point));
                     }
-                  const double h = native->vertex(1u << axis)[axis] - native->vertex(0)[axis];
-                  const double hn = interior ? neighbor->vertex(1u << axis)[axis] - neighbor->vertex(0)[axis] : h;
-                  std::vector<Point<dim>> points, unit, neighbor_unit;
-                  for (unsigned int q = 0; q < face_rule.size(); ++q)
-                    {
-                      Point<dim> x;
-                      x[axis] = native->vertex((f % 2) * (1u << axis))[axis];
-                      x[tangent] = lo + (hi - lo) * face_rule.point(q)[0];
-                      points.push_back(x);
-                      unit.push_back(mapping.transform_real_to_unit_cell(native, x));
-                      if (interior) neighbor_unit.push_back(mapping.transform_real_to_unit_cell(neighbor, x));
-                    }
-                  FEValues<dim> face(mapping, element, Quadrature<dim>(unit), update_values | update_gradients);
-                  face.reinit(typename Triangulation<dim>::cell_iterator(native));
                   std::unique_ptr<FEValues<dim>> other;
                   if (interior)
                     {
@@ -105,25 +99,32 @@ namespace aspect
                   for (unsigned int q = 0; q < points.size(); ++q)
                     {
                       const double k = coefficient(points[q]);
-                      const double sigma = penalty * (element.degree + 1) * (element.degree + 1) * k / std::min(h, hn);
-                      const double w = (hi - lo) * face_rule.weight(q), normal = f % 2 ? 1. : -1.;
+                      const double surface_jacobian = face.JxW(q) / face_rule.weight(q);
+                      const double h_inverse = surface_jacobian * neighbors.size() / minimum_jacobian;
+                      // Fine cells see the full coarse neighbor face; its reference
+                      // face measure is twice the fine patch measure in 2-D.
+                      const double neighbor_scale = interior && native->neighbor_is_coarser(f) ? 2. : 1.;
+                      const double neighbor_h_inverse = surface_jacobian * neighbor_scale / neighbor_jacobian;
+                      const double sigma = penalty * (element.degree + 1) * (element.degree + 1)
+                                           * k * std::max(h_inverse, neighbor_h_inverse);
+                      const double w = face.JxW(q);
+                      const auto normal = face.normal_vector(q);
                       const double average = interior ? .5 : 1.;
                       const double g = interior ? 0. : dirichlet(points[q]);
                       if (!interior) constant += .5 * w * sigma * g * g;
                       for (unsigned int i = 0; i < n; ++i)
                         {
-                          const double vi = face.shape_value(i, q), di = normal * face.shape_grad(i, q)[axis];
+                          const double vi = face.shape_value(i, q), di = normal * face.shape_grad(i, q);
                           if (!interior) rhs[cell.indices[i]] += w * g * (sigma * vi - k * di);
                           for (unsigned int j = 0; j < n; ++j)
                             {
-                              const double vj = face.shape_value(j, q), dj = normal * face.shape_grad(j, q)[axis];
+                              const double vj = face.shape_value(j, q), dj = normal * face.shape_grad(j, q);
                               // Row on this cell: jump(test)=test. The adjacent
                               // rank/cell assembles its own rows, never this row.
-                              self(i, j) += w * (-average * k * (di * vj + dj * vi) + sigma * vi * vj);
+                              self(i, j) += w * Assemblers::scalar_symmetric_penalty(vi, average*k*di, vj, average*k*dj, sigma);
                               if (interior)
-                                coupling(i, j) += w * (.5 * k * di * other->shape_value(j, q)
-                                                       - .5 * k * normal * other->shape_grad(j, q)[axis] * vi
-                                                       - sigma * vi * other->shape_value(j, q));
+                                coupling(i, j) += w * Assemblers::scalar_symmetric_penalty(vi, .5*k*di,
+                                                                                           -other->shape_value(j,q), .5*k*(normal*other->shape_grad(j,q)), sigma);
                             }
                         }
                     }

@@ -5,6 +5,7 @@
 #include <deal.II/dofs/dof_tools.h>
 #include <deal.II/fe/fe_dgq.h>
 #include <deal.II/fe/mapping_q1.h>
+#include <deal.II/grid/grid_tools.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/lac/trilinos_precondition.h>
@@ -16,6 +17,7 @@
 
 using namespace aspect;
 #include "obstacle_checks.h"
+#include "sipg_energy_checks.h"
 int main(int argc,char **argv)
 {
   Utilities::MPI::MPI_InitFinalize mpi(argc,argv,1);
@@ -36,6 +38,24 @@ int main(int argc,char **argv)
             if (cell->is_locally_owned() && cell->center()[0]>0.) cell->set_refine_flag();
           mesh.execute_coarsening_and_refinement();
         }
+      const std::string geometry = argc>7 ? argv[7] : "cartesian";
+      if (geometry != "cartesian")
+        GridTools::transform([&](const Point<2> &p)
+        {
+          Point<2> q = p;
+          if (geometry == "affine")
+            {
+              q[0] = .9*p[0] - .25*p[1];
+              q[1] = .4*p[0] + 1.1*p[1];
+            }
+          else
+            {
+              AssertThrow(geometry == "bilinear", ExcMessage("Unknown mapped test geometry."));
+              q[0] += .08*p[0]*p[1];
+              q[1] += .06*p[0]*p[1];
+            }
+          return q;
+        }, mesh);
       FE_DGQ<2> element(2);MappingQ1<2> mapping;DoFHandler<2> dofs(mesh);dofs.distribute_dofs(element);
       IndexSet relevant;DoFTools::extract_locally_relevant_dofs(dofs,relevant);
       const auto owned=dofs.locally_owned_dofs();
@@ -49,7 +69,8 @@ int main(int argc,char **argv)
           const auto coefficient=[](const Point<2>&x){return 1.+.1*x[0];};
           aspect::LinearAlgebra::SparseMatrix matrix;op.reinit_matrix(matrix);
           aspect::LinearAlgebra::Vector rhs(owned,MPI_COMM_WORLD),solution(owned,MPI_COMM_WORLD),x(owned,MPI_COMM_WORLD),y(owned,MPI_COMM_WORLD),ax(owned,MPI_COMM_WORLD),ay(owned,MPI_COMM_WORLD);
-          op.assemble_sipg(matrix,rhs,coefficient,10.,exact);
+          const double boundary_constant=op.assemble_sipg(matrix,rhs,coefficient,10.,exact);
+          const auto energy_checks=check_sipg_energy(mapping,dofs,matrix,rhs,boundary_constant,coefficient,exact);
           const QGauss<2> rule(8);
           FEValues<2> fe(mapping,element,rule,update_values|update_quadrature_points|update_JxW_values);
           std::vector<types::global_dof_index> indices(element.n_dofs_per_cell());
@@ -106,6 +127,7 @@ int main(int argc,char **argv)
           AssertThrow(symmetry<2e-13 && positive>0.,ExcMessage("SIPG symmetry/coercivity check failed."));
           if (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)==0)
             std::cout<<std::setprecision(17)<<"{\"mode\":\"elliptic\",\"level\":"<<level<<",\"l2\":"<<error
+                     <<",\"energy_identity\":"<<energy_checks[0]<<",\"energy_residual\":"<<energy_checks[1]<<",\"energy_tangent\":"<<energy_checks[2]
                      <<",\"refined\":"<<refined<<",\"smallest_eigenvalue\":"<<smallest_eigenvalue<<",\"symmetry\":"<<symmetry<<",\"rayleigh_numerator\":"<<positive<<",\"iterations\":"<<control.last_step()<<"}\n";
           return 0;
         }

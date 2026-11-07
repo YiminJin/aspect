@@ -79,7 +79,7 @@ class P1BoundDiagnostic : public Interface<dim>, public SimulatorAccess<dim>
   metrics (const V &u, const V &rhs, const V &previous) const
   {
     Metrics m;
-    const auto b = this->introspection ().variable ("phase_field").block_index;
+    const auto b = this->introspection ().phase_field().block_index;
     for (auto i : u.block (b).locally_owned_elements ())
       {
         const double x = u.block (b)[i], r = rhs.block (b)[i];
@@ -144,7 +144,7 @@ class P1BoundDiagnostic : public Interface<dim>, public SimulatorAccess<dim>
   bounded (M &matrix, V &rhs, V &u, double &target) const
   {
     auto &handler = this->get_phase_field_handler ();
-    const auto b = this->introspection ().variable ("phase_field").block_index;
+    const auto b = this->introspection ().phase_field().block_index;
     V owned (rhs), update (rhs), trial (u);
     owned = u;
     for (auto i : owned.block (b).locally_owned_elements ())
@@ -392,7 +392,7 @@ public:
     for (const auto &p : particles)
       AssertThrow (p.get_properties ()[ci] == composition,
                    ExcMessage ("P1 reference requires uniform composition."));
-    const auto b = this->introspection ().variable ("phase_field").block_index;
+    const auto b = this->introspection ().phase_field().block_index;
     const auto &dofs = A::vertex_dofs (h);
     const auto &vertices = this->get_triangulation ().get_vertices ();
     const auto &faults

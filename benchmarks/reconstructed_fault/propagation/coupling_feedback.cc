@@ -125,7 +125,7 @@ public:
   for(const auto &cell:this->get_dof_handler().active_cell_iterators())if(cell->is_locally_owned()) {
    fe.reinit(cell);
    const auto &a=manager.get_stokes_qp_fault_associations(cell->id(),quad,fe.get_quadrature_points());
-   const FEValuesExtractors::Scalar phase(intro.variable("phase_field").first_component_index);
+   const FEValuesExtractors::Scalar phase(intro.phase_field().first_component_index);
    fe[phase].get_function_values(working,phi);fe[phase].get_function_values(this->get_old_solution(),oldphi);
    fe[intro.extractors.velocities].get_function_symmetric_gradients(working,strain);
    for(unsigned int c=0;c<compositions.size();++c)fe[intro.extractors.compositional_fields[c]].get_function_values(working,compositions[c]);

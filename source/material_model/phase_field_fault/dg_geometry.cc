@@ -155,7 +155,7 @@ namespace aspect
               dg.reinit(cell);
               fe.reinit(entry.second);
               cell->get_dof_indices(ids);
-              fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
+              fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)]
               .get_function_values(next.bulk_history.native, phi);
               FullMatrix<double> mass(9, 9);
               Vector<double> rhs(9), coefficients(9);

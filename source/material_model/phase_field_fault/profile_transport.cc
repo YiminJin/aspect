@@ -13,17 +13,13 @@ namespace aspect
     {
       const auto &old = input.accepted;
       const auto comm = this->get_mpi_communicator();
-      const auto component = this->introspection().variable("phase_field").first_component_index;
+      const auto component = this->introspection().phase_field().first_component_index;
       const auto velocity_component = this->introspection().component_indices.velocities[0];
       const double dt = input.dt;
       LinearAlgebra::BlockVector result(this->introspection().index_sets.system_partitioning, comm);
       result = old.bulk_history.native;
-      if (this->get_phase_field_handler().uses_dg_phase())
-        {
-          this->get_phase_field_handler().transport_dg_phase(old.bulk_history.native,input.accepted_velocity,
-                                                            input.end_time-dt,dt,result);
-          return result;
-        }
+      AssertThrow(!this->get_phase_field_handler().uses_dg_phase(),
+                  ExcMessage("Native DG transport belongs to the simulator field dispatch."));
       std::map<types::global_dof_index, Point<dim>> locations;
       for (const auto &entry : old.cells)
         for (const auto vertex : entry.second->vertex_indices())

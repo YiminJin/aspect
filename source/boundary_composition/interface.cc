@@ -174,6 +174,18 @@ namespace aspect
 
 
     template <int dim>
+    double Manager<dim>::boundary_composition_at_time(const types::boundary_id boundary,
+                                                      const Point<dim> &point,
+                                                      const unsigned int field, const double time) const
+    {
+      double value = 0.;
+      unsigned int i = 0;
+      for (const auto &plugin : this->plugin_objects)
+        value = model_operators[i++](value, plugin->boundary_composition_at_time(boundary, point, field, time));
+      return value;
+    }
+
+    template <int dim>
     const std::vector<std::string> &
     Manager<dim>::get_active_boundary_composition_names () const
     {

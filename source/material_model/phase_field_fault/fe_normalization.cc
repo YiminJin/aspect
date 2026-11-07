@@ -151,7 +151,7 @@ namespace aspect
       const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
       const auto extent = box.get_extents();
       const auto &intro = this->introspection();
-      const unsigned int b = intro.variable("phase_field").block_index;
+      const unsigned int b = intro.phase_field().block_index;
       const unsigned int ns = state.vertices.size() - 1;
       const auto profiles = build_owned_normalization_profiles(true);
       prepare_cell_normalization_geometry(profiles);
@@ -191,7 +191,7 @@ namespace aspect
                   // Equal endpoint shapes let the existing two-endpoint jet
                   // represent one weighted h(phi) sample exactly.
                   const QGauss<1> rule(12);
-                  const auto component=intro.variable("phase_field").first_component_index;
+                  const auto component=intro.phase_field().first_component_index;
                   const auto &element=this->get_fe().base_element(this->get_fe().component_to_base_index(component).first);
                   for (unsigned int q=0;q<rule.size();++q)
                     {
@@ -264,7 +264,7 @@ namespace aspect
                   && this->get_triangulation().n_global_active_cells() == s.n_cells_global
                   && this->get_triangulation().get_vertices() == s.mesh_vertices,
                   ExcMessage("FE normalization rejects changed mesh or fault geometry."));
-      const unsigned int pb = this->introspection().variable("phase_field").block_index;
+      const unsigned int pb = this->introspection().phase_field().block_index;
       const unsigned int n = trial.block(pb).size(), ns = s.vertices.size();
       FENormalization result;
       result.phase_values = aspect::internal::endpoint_values(trial.block(pb), this->get_mpi_communicator());

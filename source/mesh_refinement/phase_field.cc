@@ -45,7 +45,7 @@ namespace aspect
         this->get_material_model()).get_phase_field_activation_threshold();
 
       // Get the local dof indices of phase field
-      const auto &variable = this->introspection().variable("phase_field");
+      const auto &variable = this->introspection().phase_field();
       const unsigned int component_index = variable.first_component_index;
       const FiniteElement<dim> &base_fe = this->get_fe().base_element(variable.base_index);
       std::vector<unsigned int> local_dof_indices(base_fe.dofs_per_cell);

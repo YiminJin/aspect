@@ -90,7 +90,7 @@ namespace aspect
         const auto &handler = this->get_phase_field_handler();
         const auto &pm = handler.get_associated_particle_manager();
         const auto &dofs = Access::vertex_dofs(handler);
-        const unsigned int b = this->introspection().variable("phase_field").block_index;
+        const unsigned int b = this->introspection().phase_field().block_index;
         for (const auto i : state.block(b).locally_owned_elements())
           {
             const double phi = state.block(b)[i];
@@ -137,7 +137,7 @@ namespace aspect
           auto &pm=handler.get_associated_particle_manager();
           auto &particles=pm.get_particle_handler();
           const auto Hindex=pm.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
-          const auto b=this->introspection().variable("phase_field").block_index;
+          const auto b=this->introspection().phase_field().block_index;
           const auto &dofs=Access::vertex_dofs(handler);
           const auto &parameters=Access::parameters(handler);
           const auto comm=this->get_mpi_communicator();

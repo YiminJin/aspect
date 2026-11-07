@@ -575,6 +575,7 @@ namespace aspect
          * Update phase blocks in bulk and linear; retain rollback copies. The
          * bound state is still unaccepted and must be finished exactly once. */
         void stage_material_geometry(const MaterialHistoryInputs &input,
+                                     const LinearAlgebra::BlockVector &transported_phase,
                                      LinearAlgebra::BlockVector &bulk,
                                      LinearAlgebra::BlockVector &linear);
         /** Rotate transported tensors with the accepted velocity gradient and
@@ -938,6 +939,8 @@ namespace aspect
 
         /** Project cohesive samples before computing Theta and particle candidates.
          * Intermediate collective error checks stay at their existing boundaries. */
+        void compute_surface_state_candidates(double, std::vector<std::vector<double>> &) const;
+
         void compute_history_candidates(const HistorySamples &samples,
                                         const double time_step,
                                         const unsigned int stress_position,
@@ -1305,6 +1308,7 @@ namespace aspect
         {
           struct Interval
           {
+            std::string cell_id;
             double lower, upper, diameter;
             Point<dim> reference_origin;
             Tensor<1, dim> reference_direction;

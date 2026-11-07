@@ -187,7 +187,7 @@ namespace aspect
           prescribed=owned;
           // The control changes only velocity. Reapplying generic hanging
           // constraints must not perturb the immutable physical phase anchor.
-          const auto phase_block=this->introspection().variable("phase_field").block_index;
+          const auto phase_block=this->introspection().phase_field().block_index;
           prescribed.block(phase_block)=this->get_solution().block(phase_block);
           const auto [G,eta]=F::fe_material_coefficients(model);
           const double lambda=eta/G;
@@ -291,7 +291,7 @@ namespace aspect
               std::vector<SymmetricTensor<2,dim>> strain(points.size());
               std::vector<double> phase(points.size());
               fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(prescribed,strain);
-              fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
+              fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)]
               .get_function_values(prescribed,phase);
               for (unsigned int q=0; q<points.size(); ++q)
                 {

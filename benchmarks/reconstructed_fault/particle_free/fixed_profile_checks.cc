@@ -54,7 +54,7 @@ namespace aspect
           const auto I=Access::current_normalization_integrals(model).at(0);
           const auto quad=model.mechanical_quadrature();
           FEValues<dim> fe(this->get_mapping(),this->get_fe(),quad,update_values|update_quadrature_points|update_JxW_values);
-          const unsigned int pc=this->introspection().variable("phase_field").first_component_index;
+          const unsigned int pc=this->introspection().phase_field().first_component_index;
           std::vector<double> phi(quad.size());
           std::ofstream out(this->get_output_directory()+"source-checks-"+std::to_string(saved_step)+".csv");
           out << std::setprecision(17) << "dt_over_lambda,max_stress_error_Pa,scale_Pa,integrated_stress_error_Pa_m2\n";
@@ -316,7 +316,7 @@ namespace aspect
             if (cell->is_locally_owned())
               {
                 fe.reinit(cell);
-                fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(start,phi);
+                fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(start,phi);
                 fe[intro.extractors.velocities].get_function_symmetric_gradients(bubble,bubble_strain);
                 for (unsigned int q=0; q<quad.size(); ++q)
                   {
@@ -402,10 +402,10 @@ namespace aspect
           std::vector<Tensor<1,dim>> u(quad.size());
           std::vector<SymmetricTensor<2,dim>> strain(quad.size());
           std::vector<double> phi(quad.size()), pressure(quad.size());
-          const auto pc = intro.variable("phase_field").first_component_index;
+          const auto pc = intro.phase_field().first_component_index;
           if (step==0)
             {
-              const auto phase_block=intro.variable("phase_field").block_index;
+              const auto phase_block=intro.phase_field().block_index;
               std::ofstream seed(this->get_output_directory()+"accepted-phase.csv");
               seed << std::setprecision(17) << "index,phi\n";
               for (const auto i : state.block(phase_block).locally_owned_elements())
@@ -457,7 +457,7 @@ namespace aspect
           auto &model = Plugins::get_plugin_as_type<Model>(*sim.material_model);
           auto &manager = *sim.reconstructed_fault_manager;
           model.prepare_reconstructed_fault_mechanical_solve();
-          const unsigned int pb = this->introspection().variable("phase_field").block_index;
+          const unsigned int pb = this->introspection().phase_field().block_index;
           const BV initial(sim.solution);
           const auto initial_I = Access::current_normalization_integrals(model);
           const auto old_time = sim.time;

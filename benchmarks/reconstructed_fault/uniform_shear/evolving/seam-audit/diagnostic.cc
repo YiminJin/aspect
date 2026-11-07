@@ -66,7 +66,7 @@ namespace aspect
       auto &handler = const_cast<PhaseFieldHandler<dim>&>(sim.get_phase_field_handler());
       auto &pm = handler.get_associated_particle_manager();
       const auto H_index = pm.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
-      const auto block = sim.introspection().variable("phase_field").block_index;
+      const auto block = sim.introspection().phase_field().block_index;
       const auto &dofs = internal::PhaseFieldTestAccess<dim>::vertex_dofs(handler);
       const auto &vertices = sim.get_triangulation().get_vertices();
       const auto &constraints = sim.get_current_constraints();

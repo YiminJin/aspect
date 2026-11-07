@@ -66,7 +66,7 @@ namespace aspect
           {
             const auto profiles=this->get_phase_field_handler().get_phase_field_profiles(.6);
             const auto &fe=this->get_fe();
-            const auto phi=this->introspection().variable("phase_field").first_component_index;
+            const auto phi=this->introspection().phase_field().first_component_index;
             std::vector<types::global_dof_index> dofs(fe.n_dofs_per_cell());
             for (const auto &cell:this->get_dof_handler().active_cell_iterators())
               if (!cell->is_artificial())
@@ -127,7 +127,7 @@ namespace aspect
           for (auto *a:{&old,&published}) for (auto &v:*a) v.resize(quadrature.size());
           std::vector<double> phi(quadrature.size());
           std::vector<Tensor<2,dim>> gradient(quadrature.size());
-          const FEValuesExtractors::Scalar phase(intro.variable("phase_field").first_component_index);
+          const FEValuesExtractors::Scalar phase(intro.phase_field().first_component_index);
           for (const auto &cell:this->get_dof_handler().active_cell_iterators())
             if (cell->is_locally_owned())
               {

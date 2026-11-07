@@ -112,9 +112,10 @@ and native sampling use the matching geometry/profile data. The same shape
 functions and measures must be used in the mechanical work adjoint: replacing
 association, normalization or support in just one consumer breaks this contract.
 
-For native DGQ2 phase, the same profile entry delegates to the phase handler's
-material DG operator. All nine scalar modes per cell enter phase sampling and
-normalization. A point shared by cells selects the lexicographically greatest
-lower-corner cell (the half-open Cartesian trace convention) before nonlinear
-localization is evaluated; it does not average phase traces. Cell-clipped normal
-rays use that same convention. See the [DG phase contract](../DGQ2_PHASE_FIELD_DESIGN.md).
+For native DGQ2 phase, ordinary simulator field dispatch transports the semantic
+phase composition before `stage_material_geometry` receives and binds it. All
+nine scalar modes per cell enter sampling and derivatives. A shared DG point
+selects the lexicographically greatest persistent CellId before nonlinear
+localization; cell-clipped rays use the same rule. See the
+[phase contract](../DGQ2_PHASE_FIELD_DESIGN.md). Scalar mapped-mesh support does
+not remove the Cartesian restriction of coupled tensor history.

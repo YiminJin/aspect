@@ -184,7 +184,7 @@ namespace aspect
             const auto &a=manager.get_stokes_qp_fault_associations(cell->id(),quad,fe.get_quadrature_points());
             const auto *retained=model.uses_stationary_mature_dg_optimizations()
               ? &model.retained_dg_qp_stress(cell->id(),quad,fe.get_quadrature_points()) : nullptr;
-            fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(working,phi);
+            fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(working,phi);
             fe[intro.extractors.temperature].get_function_values(working,temp);
             fe[intro.extractors.pressure].get_function_values(working,pressure);
             fe[intro.extractors.velocities].get_function_symmetric_gradients(working,eps);
@@ -250,7 +250,7 @@ namespace aspect
           std::vector<Tensor<2,dim>> point_history_gradients(points.size());
           if (model.uses_jaumann_particle_stress())
             point_history_gradients=VectorTools::point_gradients<dim>(cache,sim.get_dof_handler(),sim.get_old_solution(),VectorTools::EvaluationFlags::avg,intro.component_indices.velocities[0]);
-          const auto ph=VectorTools::point_values<1>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.variable("phase_field").first_component_index);
+          const auto ph=VectorTools::point_values<1>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.phase_field().first_component_index);
           const auto T=VectorTools::point_values<1>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.component_indices.temperature);
           const auto p=VectorTools::point_values<1>(cache,sim.get_dof_handler(),working,VectorTools::EvaluationFlags::avg,intro.component_indices.pressure);
           std::vector<std::vector<double>> comps(intro.n_compositional_fields);

@@ -18,7 +18,7 @@ public:
   const auto I=F::current_normalization_integrals(m).at(0);const auto V=manager.get_timestep_committed_slip_rate(0);
   double H=0,maximum=0;
   for(const auto &p:pm.get_particle_handler())H+=p.get_properties()[hp]*pm.get_particle_domain_handler().get_particle_domain(p.get_local_index()).volume();
-  const auto b=this->introspection().variable("phase_field").block_index;
+  const auto b=this->introspection().phase_field().block_index;
   for(auto i:this->get_solution().block(b).locally_owned_elements())maximum=std::max(maximum,this->get_solution().block(b)[i]);
   const auto comm=this->get_mpi_communicator();H=Utilities::MPI::sum(H,comm);maximum=Utilities::MPI::max(maximum,comm);
   if(Utilities::MPI::this_mpi_process(comm)==0) {

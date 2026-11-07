@@ -36,6 +36,18 @@
 
 namespace aspect
 {
+  template <int dim>
+  void Simulator<dim>::solve_native_phase_transport(const AdvectionField &field,
+    const LinearAlgebra::BlockVector &accepted, const LinearAlgebra::BlockVector &velocity,
+    double start_time, double dt, LinearAlgebra::BlockVector &candidate)
+  {
+    AssertThrow(phase_field_handler && phase_field_handler->is_phase(field)
+                && field.advection_method(introspection) == Parameters<dim>::AdvectionFieldMethod::native_phase,
+                ExcMessage("Explicit phase stages require the native phase field method."));
+    phase_field_handler->transport_dg_phase(accepted, velocity, start_time, dt, candidate);
+  }
+
+
 
   namespace
   {
@@ -343,6 +355,11 @@ namespace aspect
 
               break;
             }
+
+            case Parameters<dim>::AdvectionFieldMethod::native_phase:
+              // Prepared once from the accepted parent at physical-step entry.
+              // Nonlinear composition sweeps must neither retransport nor limit it.
+              break;
 
             case Parameters<dim>::AdvectionFieldMethod::particles:
             {
@@ -961,7 +978,7 @@ namespace aspect
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
         if (phase_field_handler->uses_bound_constraints())
           {
-            const unsigned int phase_block = introspection.variable("phase_field").block_index;
+            const unsigned int phase_block = introspection.phase_field().block_index;
             current_linearization_point.block(phase_block) = solution.block(phase_block);
           }
         if (parameters.reconstruct_faults && timestep_number == 0)
@@ -1032,7 +1049,7 @@ namespace aspect
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
         if (phase_field_handler->uses_bound_constraints())
           {
-            const unsigned int phase_block = introspection.variable("phase_field").block_index;
+            const unsigned int phase_block = introspection.phase_field().block_index;
             current_linearization_point.block(phase_block) = solution.block(phase_block);
           }
         if (parameters.reconstruct_faults && timestep_number == 0)
@@ -1146,7 +1163,7 @@ namespace aspect
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
         if (phase_field_handler->uses_bound_constraints())
           {
-            const unsigned int phase_block = introspection.variable("phase_field").block_index;
+            const unsigned int phase_block = introspection.phase_field().block_index;
             current_linearization_point.block(phase_block) = solution.block(phase_block);
           }
         if (parameters.reconstruct_faults && timestep_number == 0)
@@ -1600,5 +1617,12 @@ namespace aspect
 
   ASPECT_INSTANTIATE(INSTANTIATE)
 
+#undef INSTANTIATE
+}
+
+namespace aspect
+{
+#define INSTANTIATE(dim) template void Simulator<dim>::solve_native_phase_transport(const AdvectionField &,const LinearAlgebra::BlockVector &,const LinearAlgebra::BlockVector &,double,double,LinearAlgebra::BlockVector &);
+ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE
 }

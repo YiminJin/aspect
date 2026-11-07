@@ -39,7 +39,7 @@ namespace aspect
         {
           BV owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
           owned=state;
-          const auto component=this->introspection().variable("phase_field").first_component_index;
+          const auto component=this->introspection().phase_field().first_component_index;
           for (const auto &cell:this->get_dof_handler().active_cell_iterators())
             if (cell->is_locally_owned())
               for (const auto v:cell->vertex_indices())
@@ -59,7 +59,7 @@ namespace aspect
         void export_reference(Model &model,const BV &phase,const BV &d1,const BV &d2) const
         {
           const auto &s=*model.fe_strain_state;
-          const auto component=this->introspection().variable("phase_field").first_component_index;
+          const auto component=this->introspection().phase_field().first_component_index;
           const auto offset=phase.get_block_indices().block_start(block);
           std::map<types::global_dof_index,Point<dim>> nodes;
           auto cells=output("cells.csv"),tensor=output("tensor.csv");
@@ -128,7 +128,7 @@ namespace aspect
           auto table=output("quadrature.csv"),loads=output("quadrature-loads.csv");
           table << "profile,order,energy,bulk,cohesive,fracture,I_min,I_max\n";
           loads << "profile,order,i,load\n";
-          const auto pc=this->introspection().variable("phase_field").first_component_index;
+          const auto pc=this->introspection().phase_field().first_component_index;
           const auto offset=interior.get_block_indices().block_start(block);
           for (const unsigned int order:
           {
@@ -209,7 +209,7 @@ namespace aspect
           auto &model=Plugins::get_plugin_as_type<Model>(*sim.material_model);
           AssertThrow(dim==2 && model.uses_dg_tensor_history() && this->get_timestep_number()==0,
                       ExcMessage("PF3 requires the fresh restricted DG fixture."));
-          block=this->introspection().variable("phase_field").block_index;
+          block=this->introspection().phase_field().block_index;
           const auto old_time=sim.time,old_dt=sim.time_step;
           model.prepare_reconstructed_fault_mechanical_solve();
           for (unsigned int step=1; step<=2; ++step)

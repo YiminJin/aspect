@@ -192,7 +192,7 @@ namespace aspect
           AssertThrow(s->background_pressure > 0. && !evolve_phase_field,
                       ExcMessage("Closed Coulomb requires positive background confinement and fixed phase."));
         }
-      const auto b = this->introspection().variable("phase_field").block_index;
+      const auto b = this->introspection().phase_field().block_index;
       s->phase = aspect::internal::endpoint_values(initial.block(b), this->get_mpi_communicator());
       for (unsigned int i = 0; i < s->phase.size(); ++i)
         BulkCohesive::compliance(s->phase[i], s->parameters.m);
@@ -241,8 +241,8 @@ namespace aspect
           record->signature = s.checkpoint_signature();
           std::map<std::string, std::vector<double>> local, global;
           std::vector<types::global_dof_index> ids(this->get_fe().n_dofs_per_cell()), dg_ids(9);
-          const auto pc = this->introspection().variable("phase_field").first_component_index;
-          const auto po = this->get_solution().get_block_indices().block_start(this->introspection().variable("phase_field").block_index);
+          const auto pc = this->introspection().phase_field().first_component_index;
+          const auto po = this->get_solution().get_block_indices().block_start(this->introspection().phase_field().block_index);
           for (const auto &entry : s.native_cells)
             {
               const auto cell = entry.second;
@@ -319,8 +319,8 @@ namespace aspect
           AssertThrow(a.quadrature == s.quadrature
                       && a.material == s.material_record(),
                       ExcMessage("Bulk restart changed quadrature or coefficients."));
-          const auto pc = this->introspection().variable("phase_field").first_component_index;
-          const auto po = this->get_solution().get_block_indices().block_start(this->introspection().variable("phase_field").block_index);
+          const auto pc = this->introspection().phase_field().first_component_index;
+          const auto po = this->get_solution().get_block_indices().block_start(this->introspection().phase_field().block_index);
           const unsigned int dpc = this->get_fe().n_dofs_per_cell(), nq = mechanical_quadrature().size();
           unsigned int velocity_dpc = 0;
           for (unsigned int i = 0; i < dpc; ++i)

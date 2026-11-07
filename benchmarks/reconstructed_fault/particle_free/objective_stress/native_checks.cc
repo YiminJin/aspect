@@ -69,7 +69,7 @@ namespace aspect
               fe[intro.extractors.velocities].get_function_gradients(this->get_solution(),current);
               fe[intro.extractors.velocities].get_function_gradients(this->get_old_solution(),lagged);
               fe[intro.extractors.pressure].get_function_values(this->get_solution(),pressure);
-              fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)]
+              fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)]
                 .get_function_values(this->get_solution(),phi);
               for (unsigned int c=0;c<3;++c)
                 fe[intro.extractors.compositional_fields[fields[c]]]
@@ -199,7 +199,7 @@ namespace aspect
         const auto gradient=VectorTools::point_gradients<dim>(cache,this->get_dof_handler(),this->get_solution(),
           VectorTools::EvaluationFlags::avg,intro.component_indices.velocities[0]);
         const auto phi=VectorTools::point_values<1>(cache,this->get_dof_handler(),this->get_solution(),
-          VectorTools::EvaluationFlags::avg,intro.variable("phase_field").first_component_index);
+          VectorTools::EvaluationFlags::avg,intro.phase_field().first_component_index);
         unsigned int k=0;
         for (const auto &p:pm.get_particle_handler())
           {

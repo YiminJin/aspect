@@ -73,7 +73,7 @@
                   {
                     const auto T=m.evaluate_history_tensor(*endpoint->bulk_history.tensor,cell.first,QGauss<dim>(3));
                     const auto R=endpoint->bulk_history.tensor->residual ? m.evaluate_history_tensor(*endpoint->bulk_history.tensor->residual,cell.first,QGauss<dim>(3)) : std::vector<Stress>(9);
-                    fe.reinit(cell.second);fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(m.fe_strain_state->bulk_history.native,phase);
+                    fe.reinit(cell.second);fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(m.fe_strain_state->bulk_history.native,phase);
                     for(unsigned q=0;q<9;++q)
                       {const auto B=old_direct ? Stress() : m.localize_surface_values(fe.quadrature_point(q),phase[q],endpoint->Z,endpoint->I);
                        const double defect=(T[q]-R[q]-B-beta*expected).norm();

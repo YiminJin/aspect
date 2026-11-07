@@ -330,6 +330,9 @@ namespace aspect
                                  + " is outside the acceptable phase-field range."));
       }
 
+    if (!phase_field_handler.has_associated_particle_manager())
+      return; // Prescribed native geometry needs no particle H initialization.
+
     Particle::Manager<dim> &particle_manager =
       phase_field_handler.get_associated_particle_manager();
     const auto &particle_data_info = particle_manager.get_property_manager().get_data_info();
@@ -642,7 +645,7 @@ namespace aspect
                             this->get_fe(), quadrature,
                             update_values | update_quadrature_points | update_JxW_values);
     const FEValuesExtractors::Scalar phase_field_component(
-      this->introspection().variable("phase_field").first_component_index);
+      this->introspection().phase_field().first_component_index);
     std::vector<double> phase_field_values(quadrature.size());
 
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())

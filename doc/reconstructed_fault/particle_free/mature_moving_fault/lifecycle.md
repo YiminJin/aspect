@@ -18,8 +18,10 @@ ONCE PER ATTEMPT (new dt on retry):
       return immutable borrowed inputs
   transport_material_history(inputs)
       advect tau- -> transport.physical_stress
-  stage_material_geometry(inputs, solution, linearization)
-      move labels/support, pull back phi-/obstacle, bind candidate, rebuild I+
+  solve_native_phase_transport(phase_field, phi-, v-, start_time, dt, phi_adv)
+      one SSPRK3 transport attempt through ordinary field dispatch (DGQ2)
+  stage_material_geometry(inputs, phi_adv, solution, linearization)
+      move labels/support, bind transported phase/obstacle, rebuild I+
   rotate_material_history(inputs)
       project Q * transported_tau * Q^T -> candidate.objective.tensor = tau_bar
 
@@ -151,4 +153,23 @@ DG checkpoints carry native phase-space metadata and material schema9, including
 all nine phase modes per cell; rank-changing restart preserves the space. Missing
 phase-space metadata denotes historical Q1, not permission to reinterpret it as DG.
 Adaptive DG phase/obstacle transfer is explicitly rejected. The
-[phase report](../DGQ2_PHASE_FIELD_REPORT.md) tracks lifecycle qualification.
+[integration report](../NATIVE_PHASE_INTEGRATION_REPORT.md) tracks current lifecycle qualification.
+
+## Native composition integration
+
+The accepted and staged phase blocks use the single semantic composition index;
+`Introspection::phase_field()` resolves that index without owning a vector.
+Ordinary initial composition supplies fresh phase. The generic composition loop
+skips the explicit native method, so neither Stokes outer iterations nor that
+loop transport it again. Q1 comparisons retain their separate remapping call.
+The immutable accepted snapshot is preserved through every retry.
+
+Native physical commit uses only FE and surface candidates. No particle manager,
+dummy H or particle-freeze setting is required. Optional diagnostic particles
+sample the candidate and their properties participate in existing rollback.
+Mass and constant fracture matrices are derived caches, invalidated by mesh/layout
+changes; they are not serialized physical histories. New checkpoints identify
+the composition index, family and degree before deserialization and reject old
+separate native phase blocks. See the [phase contract](../DGQ2_PHASE_FIELD_DESIGN.md)
+for migration and the [integration report](../NATIVE_PHASE_INTEGRATION_REPORT.md)
+for bounded lifecycle evidence.

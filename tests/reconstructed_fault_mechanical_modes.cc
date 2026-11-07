@@ -221,7 +221,7 @@ namespace aspect
                 fe.reinit(cell);
                 const auto &associations=manager.get_stokes_qp_fault_associations(cell->id(),quadrature,fe.get_quadrature_points());
                 const auto &working=sim.get_current_linearization_point();
-                fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(working,phi);
+                fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(working,phi);
                 fe[intro.extractors.temperature].get_function_values(working,temperature);
                 fe[intro.extractors.pressure].get_function_values(working,pressure);
                 fe[intro.extractors.velocities].get_function_symmetric_gradients(working,strain);

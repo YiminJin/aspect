@@ -27,7 +27,7 @@ template<int dim> class MomentCycle : public Interface<dim>, public SimulatorAcc
  double entry_energy=0,entry_kkt=0;
  std::map<types::particle_index,double> initial_H,last_H;
  const Model &model() const {return Plugins::get_plugin_as_type<const Model>(this->get_material_model());}
- unsigned int pb() const {return this->introspection().variable("phase_field").block_index;}
+ unsigned int pb() const {return this->introspection().phase_field().block_index;}
  std::vector<double> property(const std::string &name) const {
   const auto &m=this->get_reconstructed_fault_manager();const auto &f=m.get_fault(0);
   const auto info=m.get_property_information()[m.get_property_index(name)];
@@ -73,7 +73,7 @@ template<int dim> class MomentCycle : public Interface<dim>, public SimulatorAcc
    std::vector<double> direction(mechanical.gradient.size(),0.),Hd(direction);
    for(const auto &cell:this->get_dof_handler().active_cell_iterators()) {
     std::vector<types::global_dof_index> ids(this->get_fe().dofs_per_cell);cell->get_dof_indices(ids);
-    const auto first=this->introspection().variable("phase_field").first_component_index;
+    const auto first=this->introspection().phase_field().first_component_index;
     const auto offset=this->get_solution().get_block_indices().block_start(pb());
     for(const auto v:cell->vertex_indices()) {
      const auto i=ids[this->get_fe().component_to_system_index(first,v)]-offset;
@@ -199,7 +199,7 @@ template<int dim> class MomentCycle : public Interface<dim>, public SimulatorAcc
     for(const auto &cell:this->get_dof_handler().active_cell_iterators()) {
      fe.reinit(cell);fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(prescribed,epsilon);
      fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(accepted,anchor_R);
-     fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(prescribed,phi);
+     fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(prescribed,phi);
      for(unsigned int q=0;q<quad.size();++q) {
       const auto x=fe.quadrature_point(q);const unsigned int s=std::min(ns-1,static_cast<unsigned int>(ns*x[0]));const double xi=ns*x[0]-s;
       const double ii=(1-xi)*I[s]+xi*I[s+1],V=(1-xi)*rates[s]+xi*rates[s+1];
@@ -299,7 +299,7 @@ public:
   std::ofstream bulk;if(dump){bulk.open(this->get_output_directory()+"fe-bulk-"+std::to_string(step)+".csv");bulk<<std::setprecision(17)<<"x,y,w,tau_xx,tau_yy,tau_xy,epsilon_xx,epsilon_yy,epsilon_xy\n";}
   for(const auto &cell:this->get_dof_handler().active_cell_iterators()) {
    fe.reinit(cell);fe[intro.extractors.velocities].get_function_symmetric_gradients(state,r);fe[intro.extractors.velocities].get_function_symmetric_gradients(solution,strain);
-   const FEValuesExtractors::Scalar ph(intro.variable("phase_field").first_component_index);fe[ph].get_function_values(solution,phi);
+   const FEValuesExtractors::Scalar ph(intro.phase_field().first_component_index);fe[ph].get_function_values(solution,phi);
    if(step){fe[intro.extractors.velocities].get_function_symmetric_gradients(previous,oldr);fe[ph].get_function_values(previous,oldphi);}
    for(unsigned int j=0;j<quad.size();++j) {
     const auto p=fe.quadrature_point(j);const unsigned int s=std::min(ns-1,static_cast<unsigned int>(ns*p[0]));const double xi=ns*p[0]-s,w=fe.JxW(j);

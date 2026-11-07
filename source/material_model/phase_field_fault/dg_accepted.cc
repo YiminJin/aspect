@@ -90,7 +90,7 @@ namespace aspect
                       ExcMessage("PF5 checkpoints require an accepted history endpoint."));
           if (consistent_endpoint_phase || mature_frictional_fault)
             {
-              const unsigned int block = this->introspection().variable("phase_field").block_index;
+              const unsigned int block = this->introspection().phase_field().block_index;
               AssertThrow(this->get_solution() == this->get_old_solution()
                           && s.bulk_history.native.block(block) == this->get_solution().block(block)
                           && s.accepted_publications == s.committed_step,
@@ -119,14 +119,14 @@ namespace aspect
           p.fault = s.vertices;
           p.geometry = s.geometry_version;
           p.quadrature = fe_bulk_normal_quadrature_points;
-          const unsigned int block = this->introspection().variable("phase_field").block_index;
+          const unsigned int block = this->introspection().phase_field().block_index;
           std::vector<types::global_dof_index> indices(9);
           if (p.version >= 3)
             {
               // Only uniquely owned CellIds contribute. Physical phase values
               // and corners avoid partition-dependent native DoF numbering.
               std::map<std::string, std::vector<double>> local, global;
-              const auto pc = this->introspection().variable("phase_field").first_component_index;
+              const auto pc = this->introspection().phase_field().first_component_index;
               for (const auto &entry : s.cells)
                 {
                   auto &values = local[entry.first.to_string()];
@@ -242,8 +242,8 @@ namespace aspect
                   && s.shear_sense == p.sense && s.m == p.m
                   && p.Z.size() == s.Z.size() && p.I.size() == s.I.size(),
                   ExcMessage("PF5 restore rejects changed geometry/localization/orientation."));
-      const unsigned int block = this->introspection().variable("phase_field").block_index;
-      const auto pc = this->introspection().variable("phase_field").first_component_index;
+      const unsigned int block = this->introspection().phase_field().block_index;
+      const auto pc = this->introspection().phase_field().first_component_index;
       if (p.version >= 3)
         AssertThrow(p.phase.size() == (p.version==9 ? 9u:4u) * p.cells.size() && p.mesh.size() == p.phase.size(),
                     ExcMessage("DG checkpoint physical phase/corner layout mismatch."));

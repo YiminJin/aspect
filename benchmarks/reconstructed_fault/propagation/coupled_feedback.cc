@@ -39,7 +39,7 @@ protected:
     return faults.front().core_phase_field_values.front();
   }
   unsigned int b() const {
-    return this->introspection().variable("phase_field").block_index;
+    return this->introspection().phase_field().block_index;
   }
   auto &pm() const {
     return this->get_phase_field_handler().get_associated_particle_manager();
@@ -187,7 +187,7 @@ protected:
       const auto phi = VectorTools::point_values<1>(
           cache, this->get_dof_handler(), this->get_solution(),
           VectorTools::EvaluationFlags::avg,
-          this->introspection().variable("phase_field").first_component_index);
+          this->introspection().phase_field().first_component_index);
       std::vector<double> values(profiles.size(), 0.);
       unsigned int index = 0;
       for (unsigned int i = 0; i < profiles.size(); ++i)
@@ -392,7 +392,7 @@ public:
     Utilities::MPI::RemotePointEvaluation<dim> cache;
     cache.reinit(h.get_grid_cache(), sample_points);
     const auto component =
-        this->introspection().variable("phase_field").first_component_index;
+        this->introspection().phase_field().first_component_index;
     const auto native_phi = VectorTools::point_values<1>(
         cache, this->get_dof_handler(), state,
         VectorTools::EvaluationFlags::avg, component);
@@ -408,7 +408,7 @@ public:
     }
 
     const FEValuesExtractors::Scalar phase(
-        this->introspection().variable("phase_field").first_component_index);
+        this->introspection().phase_field().first_component_index);
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned()) {
         std::vector<Point<dim>> points;

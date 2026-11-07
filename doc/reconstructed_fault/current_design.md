@@ -3599,13 +3599,18 @@ without reordering publication or adding a second controller.
 
 ## Selected native DGQ2 phase framework (6 November 2026)
 
-Phase family is independent of tensor history: continuous Q1 remains the default,
-and ordinary native DGQ2 is selectable. One persistent phase block is consumed by
+Native phase is a semantic composition named `phase_field`, with type/method
+`phase field` and ordinary composition family/degree/initial/boundary data. It is
+excluded from chemical fractions and particle mapping. Legacy CPDI retains its
+separate Q1 field; native Q1 is an explicit comparison. One phase block is consumed by
 transport, localization, mechanics, output and restart. Upwind DG advances
 `phi_t + div(phi v) = phi div(v)` with the full accepted material velocity,
 SSPRK3, a mean-admissible CFL and whole-cell mean-preserving bound scaling.
-There is no auxiliary DG-to-Q1 remap. Explicit half-open Cartesian traces precede
-nonlinear localization. Compact moving fixtures prescribe zero exterior phase.
+There is no auxiliary DG-to-Q1 remap. Persistent CellId-selected one-sided traces precede nonlinear localization.
+Compact moving fixtures explicitly configure zero exterior phase through boundary
+composition data evaluated at SSP stage times. Mapped FE cell/face/subface assembly
+and a Jacobian-weighted trace bound support static bilinear quadrilaterals for
+scalar phase. Coupled stress remains guarded to Cartesian meshes.
 
 The supported fixed-fault cohesive endpoint can use the same DG space with SIPG
 fracture energy, its complete residual/tangent and unchanged recoverable mechanical
@@ -3616,12 +3621,15 @@ search subproblem, not a replacement physical equation. No time-mass term or
 post-equilibrium BP correction is introduced. Mature moving growth remains disabled;
 no moving-cohesive law is inferred from the manufactured composition test.
 
-The phase handler owns spatial operators; ordinary simulator/material transaction
-owners retain acceptance, rejection and publication. Fresh DG checkpoints identify
+The ordinary assembler manager owns the phase spatial cell assembler; the handler
+retains explicit stages, bounds and cached mass/SIPG operators. Ordinary simulator
+field dispatch transports phase once per attempt before geometry binding;
+simulator/material transaction owners retain acceptance, rejection and publication.
+Native physical history uses FE/surface data and needs zero particle managers. Fresh DG checkpoints identify
 phase space and all nine cell modes; historical Q1 checkpoints are not converted.
 Static nonmatching faces have operator evidence, while adaptive DG phase/obstacle
 transfer is explicitly rejected. The [phase contract and source map](particle_free/DGQ2_PHASE_FIELD_DESIGN.md)
-and [qualification report](particle_free/DGQ2_PHASE_FIELD_REPORT.md) distinguish
+and [integration report](particle_free/NATIVE_PHASE_INTEGRATION_REPORT.md) distinguish
 implementation, native checks, coupled comparisons and remaining limitations.
 Stress transport, bulk-spin closure, endpoint forcing, physical coefficients,
 quadrature of stress and existing convergence criteria are unchanged.

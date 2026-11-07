@@ -81,7 +81,7 @@ namespace aspect
     const unsigned int temperature_component =
       this->introspection().component_indices.temperature;
     const unsigned int phase_field_component =
-      this->introspection().variable("phase_field").first_component_index;
+      this->introspection().phase_field().first_component_index;
 
     TimerOutput::Scope sample_timer(*performance_timer, "Fault: Parent FE sampling");
     const auto velocity_gradients = VectorTools::point_gradients<dim>(

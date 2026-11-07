@@ -894,7 +894,8 @@ namespace aspect
                                      this->get_parameters().compositional_field_methods.end(),
                                      [](const auto method)
           {
-            return method == Parameters<dim>::AdvectionFieldMethod::static_field;
+            return method == Parameters<dim>::AdvectionFieldMethod::static_field
+                   || method == Parameters<dim>::AdvectionFieldMethod::native_phase;
           }),
           ExcMessage("Bulk experiment requires prescribed compression and static bulk fields."));
           prm.enter_subsection("Phase field model");
@@ -1016,7 +1017,8 @@ namespace aspect
       if (homogeneous_mesh_data)
         {
           AssertThrow((dg_tensor_history && dg_accepted_history && consistent_endpoint_phase
-                       && !fe_initial_phase_profile.empty())
+                       && (!fe_initial_phase_profile.empty()
+                           || this->introspection().composition_type_exists(CompositionalFieldDescription::phase_field)))
                       || (mature_frictional_fault && uses_independent_bulk_history()
                           && !evolve_phase_field && !consistent_endpoint_phase
                           && ((dg_tensor_history && dg_accepted_history)
@@ -1028,7 +1030,8 @@ namespace aspect
                                      this->get_parameters().compositional_field_methods.end(),
                                      [](const auto method)
           {
-            return method == Parameters<dim>::AdvectionFieldMethod::static_field;
+            return method == Parameters<dim>::AdvectionFieldMethod::static_field
+                   || method == Parameters<dim>::AdvectionFieldMethod::native_phase;
           }),
           ExcMessage("Homogeneous mesh data requires static bulk fields; particle material/stress mapping is prohibited."));
           prm.enter_subsection("Particles");

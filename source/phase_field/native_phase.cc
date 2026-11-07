@@ -1,5 +1,8 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/phase_field.h>
+#include <aspect/phase_field/assemblers.h>
+#include <aspect/advection_field.h>
+#include <aspect/boundary_composition/interface.h>
 #include <aspect/phase_field/dg_operator.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/numerics/vector_tools_evaluate.h>
@@ -8,15 +11,47 @@
 namespace aspect
 {
   template <int dim>
+  bool PhaseFieldHandler<dim>::is_phase(const AdvectionField &field) const
+  {
+    return !field.is_temperature()
+           && this->introspection().get_composition_descriptions()[field.compositional_variable].type
+           == CompositionalFieldDescription::phase_field;
+  }
+
+  template <int dim>
+  void PhaseFieldHandler<dim>::set_assemblers(Assemblers::Manager<dim> &assemblers)
+  {
+    transport_cell_assembler = nullptr;
+    if (!this->introspection().composition_type_exists(CompositionalFieldDescription::phase_field)) return;
+    const auto field = this->introspection().find_composition_type(CompositionalFieldDescription::phase_field);
+    auto &slot = assemblers.advection_system[field+1];
+    AssertThrow(slot.empty(), ExcMessage("Native phase must not also receive the implicit composition assemblers."));
+    slot.push_back(std::make_unique<Assemblers::PhaseTransport<dim>>());
+    transport_cell_assembler = slot.back().get();
+  }
+
+  template <int dim>
+  PhaseField::DGOperator<dim> &PhaseFieldHandler<dim>::native_operator(const LinearAlgebra::BlockVector &state) const
+  {
+    if (!native_spatial_operator)
+      {
+        const auto variable = this->introspection().phase_field();
+        const auto &sets = this->introspection().index_sets;
+        native_spatial_operator = std::make_shared<PhaseField::DGOperator<dim>>(
+                                    this->get_mapping(), this->get_dof_handler(), variable.first_component_index,
+                                    state.get_block_indices().block_start(variable.block_index),
+                                    sets.system_partitioning[variable.block_index], sets.system_relevant_partitioning[variable.block_index],
+                                    this->get_mpi_communicator());
+      }
+    return *native_spatial_operator;
+  }
+
+  template <int dim>
   void PhaseFieldHandler<dim>::limit_dg_phase(LinearAlgebra::BlockVector &state) const
   {
     AssertThrow(uses_dg_phase(), ExcMessage("DG phase limiter requires the native DG field."));
-    const auto &variable = this->introspection().variable("phase_field");
-    const auto &sets = this->introspection().index_sets;
-    PhaseField::DGOperator<dim> op(this->get_mapping(), this->get_dof_handler(), variable.first_component_index,
-                                   state.get_block_indices().block_start(variable.block_index),
-                                   sets.system_partitioning[variable.block_index], sets.system_relevant_partitioning[variable.block_index],
-                                   this->get_mpi_communicator());
+    const auto &variable = this->introspection().phase_field();
+    auto &op = native_operator(state);
     const auto &material = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>&>(this->get_material_model());
     const auto range = material.get_phase_field_range();
     typename PhaseField::DGOperator<dim>::TransportStatistics stats;
@@ -32,12 +67,9 @@ namespace aspect
   {
     TimerOutput::Scope timer(this->get_computing_timer(), "Phase: DG material transport");
     AssertThrow(uses_dg_phase(), ExcMessage("DG phase transport requires the native DG field."));
-    const auto &variable = this->introspection().variable("phase_field");
-    const auto &sets = this->introspection().index_sets;
-    PhaseField::DGOperator<dim> op(this->get_mapping(), this->get_dof_handler(), variable.first_component_index,
-                                   accepted.get_block_indices().block_start(variable.block_index),
-                                   sets.system_partitioning[variable.block_index], sets.system_relevant_partitioning[variable.block_index],
-                                   this->get_mpi_communicator());
+    const auto &variable = this->introspection().phase_field();
+    auto &op = native_operator(accepted);
+    AssertThrow(transport_cell_assembler, ExcMessage("Native phase assembler has not been registered."));
     op.assemble_transport([&](const auto & cell, const auto & points, auto & speed, auto & divergence)
     {
       std::vector<Point<dim>> unit;
@@ -48,16 +80,18 @@ namespace aspect
       std::vector<Tensor<2, dim>> gradients(points.size());
       fe[this->introspection().extractors.velocities].get_function_gradients(velocity, gradients);
       for (unsigned int q = 0; q < points.size(); ++q) divergence[q] = trace(gradients[q]);
-    });
+    }, transport_cell_assembler);
     const auto &material = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>&>(this->get_material_model());
     const auto range = material.get_phase_field_range();
-    // Compact-profile benchmark convention: zero exterior phase on every
-    // incoming face. Stress has its separate explicitly supplied exterior law.
+    const unsigned int field = this->introspection().find_composition_type(CompositionalFieldDescription::phase_field);
+    const auto &boundary = this->get_boundary_composition_manager();
     const auto stats = op.transport(accepted.block(variable.block_index), candidate.block(variable.block_index),
-                                    [](const Point<dim> &, double)
+                                    typename PhaseField::DGOperator<dim>::BoundaryField([&](types::boundary_id id, const Point<dim> &point, double stage_time)
     {
-      return 0.;
-    }, time, dt, range.first, range.second,
+      AssertThrow(boundary.get_fixed_composition_boundary_indicators().count(id),
+                  ExcMessage("Native phase inflow requires explicit Boundary composition model data on every incoming boundary."));
+      return boundary.boundary_composition_at_time(id, point, field, stage_time);
+    }), time, dt, range.first, range.second,
     this->get_parameters().use_limiter_for_discontinuous_phase_solution);
     this->get_pcout() << std::setprecision(17) << "   DG phase transport: substeps=" << stats.substeps
                       << ", limited cells=" << stats.limited_cells << ", minimum alpha=" << stats.minimum_alpha
@@ -70,10 +104,10 @@ namespace aspect
   std::vector<double> PhaseFieldHandler<dim>::phase_point_values(
     const Utilities::MPI::RemotePointEvaluation<dim> &lookup, const LinearAlgebra::BlockVector &state) const
   {
-    const auto c = this->introspection().variable("phase_field").first_component_index;
+    const auto c = this->introspection().phase_field().first_component_index;
     if (!uses_dg_phase())
       return VectorTools::point_values<1>(lookup, this->get_dof_handler(), state, VectorTools::EvaluationFlags::avg, c);
-    using Sample = Tensor < 1, dim + 1 >;
+    using Sample = std::pair<std::string, double>;
     const auto samples = lookup.template evaluate_and_process<Sample>(
                            [&](const ArrayView<Sample> &values, const auto & data)
     {
@@ -89,8 +123,7 @@ namespace aspect
           auto output = data.get_data_view(cell_index, values);
           for (unsigned int q = 0; q < phase.size(); ++q)
             {
-              output[q][dim] = phase[q];
-              for (unsigned int d = 0; d < dim; ++d) output[q][d] = cell->vertex(0)[d];
+              output[q] = {cell->id().to_string(), phase[q]};
             }
         }
     });
@@ -101,18 +134,16 @@ namespace aspect
         {
           unsigned int selected = ptr[i];
           for (unsigned int j = ptr[i] + 1; j < ptr[i + 1]; ++j)
-            for (unsigned int d = 0; d < dim; ++d)
-              if (samples[j][d] != samples[selected][d])
-                {
-                  if (samples[j][d] > samples[selected][d]) selected = j;
-                  break;
-                }
-          result[i] = samples[selected][dim];
+            if (samples[j].first > samples[selected].first) selected = j;
+          result[i] = samples[selected].second;
         }
     return result;
   }
 
 #define INSTANTIATE(dim) \
+  template PhaseField::DGOperator<dim> &PhaseFieldHandler<dim>::native_operator(const LinearAlgebra::BlockVector &) const; \
+  template bool PhaseFieldHandler<dim>::is_phase(const AdvectionField &) const; \
+  template void PhaseFieldHandler<dim>::set_assemblers(Assemblers::Manager<dim> &); \
   template std::vector<double> PhaseFieldHandler<dim>::phase_point_values(const Utilities::MPI::RemotePointEvaluation<dim> &,const LinearAlgebra::BlockVector &) const; \
   template void PhaseFieldHandler<dim>::limit_dg_phase(LinearAlgebra::BlockVector &) const; \
   template void PhaseFieldHandler<dim>::transport_dg_phase(const LinearAlgebra::BlockVector &,const LinearAlgebra::BlockVector &,double,double,LinearAlgebra::BlockVector &) const;

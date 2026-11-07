@@ -58,6 +58,9 @@ namespace aspect
          */
         void update () override;
 
+        double boundary_composition_at_time(types::boundary_id, const Point<dim> &,
+                                              unsigned int, double) const override;
+
         /**
          * Declare the parameters this class takes through input files.
          */

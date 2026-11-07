@@ -121,7 +121,7 @@ namespace aspect
         if (cell->is_locally_owned())
           {
             fe.reinit(cell);const auto &assoc=manager.get_stokes_qp_fault_associations(cell->id(),quad,fe.get_quadrature_points());
-            fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(base,phi);
+            fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(base,phi);
             fe[intro.extractors.temperature].get_function_values(base,temp);
             fe[intro.extractors.pressure].get_function_values(base,p);
             fe[intro.extractors.pressure].get_function_values(bulk_direction,delta_p);

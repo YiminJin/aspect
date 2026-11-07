@@ -264,7 +264,7 @@ namespace aspect::Postprocess
           fe[intro.extractors.velocities].get_function_gradients(this->get_solution(),gradients);
           fe[intro.extractors.velocities].get_function_values(this->get_solution(),velocities);
           fe[intro.extractors.pressure].get_function_values(this->get_solution(),pressure);
-          fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(this->get_solution(),phi);
+          fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(this->get_solution(),phi);
           const auto &associations=manager.get_stokes_qp_fault_associations(cell->id(),q,fe.get_quadrature_points());
           auto &T=current[cell->id()];T.resize(q.size());Tensor b0,b1;double m0=0,m1=0,m2=0.;
           for (unsigned int k=0;k<q.size();++k)

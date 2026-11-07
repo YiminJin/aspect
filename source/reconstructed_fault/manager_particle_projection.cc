@@ -110,6 +110,9 @@ namespace aspect
           != reconstructed_faults[fault].geometry_version())
         return false;
 
+    if (!this->get_phase_field_handler().has_associated_particle_manager())
+      return particle_association_cache.empty();
+
     const Particle::Manager<dim> &particle_manager =
       this->get_phase_field_handler().get_associated_particle_manager();
     const auto *material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
@@ -160,6 +163,21 @@ namespace aspect
     TimerOutput::Scope timer(*performance_timer, "Fault: Cache build total");
     ReconstructedFaultUtilities::DomainQuadratureStatistics quadrature_statistics;
     unsigned long long integration_points = 0;
+    if (!this->get_phase_field_handler().has_associated_particle_manager())
+      {
+        particle_association_cache.clear();
+        projection_systems.clear();
+        projection_systems_generation = 0;
+        particle_projection_diagnostics.clear();
+        cached_fault_geometry_versions.clear();
+        for (const auto &fault : reconstructed_faults)
+          cached_fault_geometry_versions.push_back(fault.geometry_version());
+        cached_projection_metadata_version = projection_metadata_version;
+        cached_domain_geometry_version = 0;
+        ++particle_association_generation;
+        particle_association_cache_valid = true;
+        return;
+      }
     Particle::Manager<dim> &particle_manager =
       this->get_phase_field_handler().get_associated_particle_manager();
     const auto *material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());

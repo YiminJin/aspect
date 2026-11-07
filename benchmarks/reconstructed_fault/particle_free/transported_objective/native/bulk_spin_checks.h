@@ -44,7 +44,7 @@
           {
             values.reinit(entry.second);
             values[this->introspection().extractors.velocities].get_function_gradients(*spin.velocity,gradients);
-            const auto phase=FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index);
+            const auto phase=FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index);
             values[phase].get_function_values(old.bulk_history.native,phi);
             values[phase].get_function_values(candidate.bulk_history.native,next_phi);
             auto &omega=reference[entry.first];omega.resize(rule.size());

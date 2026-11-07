@@ -673,6 +673,11 @@ namespace aspect
   {
     this->initialize_simulator(sim);
 
+    this->get_signals().pre_refinement_store_user_data.connect(
+      [this](auto &) { native_spatial_operator.reset(); native_fracture_matrix.reset(); });
+    this->get_signals().post_mesh_deformation.connect(
+      [this](const auto &) { native_spatial_operator.reset(); native_fracture_matrix.reset(); });
+
     this->get_signals().edit_finite_element_variables.connect(
       [&](std::vector<VariableDeclaration<dim>> &vars)
     {
@@ -688,6 +693,9 @@ namespace aspect
   edit_finite_element_variables(std::vector<VariableDeclaration<dim>> &variables)
   {
     const auto &parameters = this->get_parameters();
+    if (std::any_of(parameters.composition_descriptions.begin(), parameters.composition_descriptions.end(),
+                    [](const auto &field) { return field.type == CompositionalFieldDescription::phase_field; }))
+      return; // The ordinary composition declaration owns these DoFs.
     std::shared_ptr<FiniteElement<dim>> element;
     if (parameters.use_discontinuous_phase_discretization)
       element = std::make_shared<FE_DGQ<dim>>(parameters.phase_degree);
@@ -704,43 +712,37 @@ namespace aspect
   template <int dim>
   void PhaseFieldHandler<dim>::initialize()
   {
-    // Find the particle manager handling the crack driving force
-    AssertThrow(this->n_particle_managers() > 0,
-                ExcMessage("The phase field method requires particles to be included in the model. "
-                           "Please add 'particles' to the list of postprocessors."));
-
+    const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+    const bool mesh_data = fault && fault->uses_homogeneous_mesh_data();
+    const bool registered = this->introspection().composition_type_exists(CompositionalFieldDescription::phase_field);
+    AssertThrow(!mesh_data || registered,
+                ExcMessage("Native phase requires a composition named phase_field with Type and method phase field. Legacy CPDI retains the separate Q1 block."));
+    AssertThrow(!registered || mesh_data,
+                ExcMessage("The native phase composition requires mesh-based material data; CPDI uses the legacy Q1 path."));
+    AssertThrow(!uses_dg_phase() || (mesh_data && !fault->uses_bulk_cohesive_phase()
+                                    && (fault->uses_transported_mature_history() || fault->uses_consistent_endpoint_phase())),
+                ExcMessage("DG phase requires transported mature or fixed-fault consistent-endpoint physics."));
     for (unsigned int i = 0; i < this->n_particle_managers(); ++i)
       {
-        Particle::Manager<dim> &manager = this->get_particle_manager(i);
-        if (manager.get_property_manager().get_data_info().fieldname_exists("crack_driving_force"))
+        auto &manager = this->get_particle_manager(i);
+        if (manager.get_property_manager().get_data_info().fieldname_exists("crack_driving_force")
+            && (!mesh_data || manager.get_property_manager().get_data_info().fieldname_exists("maxwell stress")))
           {
             particle_manager = &manager;
             break;
           }
       }
-
-    AssertThrow(particle_manager != nullptr, 
-                ExcMessage("The phase field method requires one of the particle sets to include a "
-                           "particle property named 'crack_driving_force'."));
-
-    const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
-    const bool mesh_data = fault && fault->uses_homogeneous_mesh_data();
-    AssertThrow(!uses_dg_phase() || (mesh_data && fault && !fault->uses_bulk_cohesive_phase()
-                                    && (fault->uses_transported_mature_history() || fault->uses_consistent_endpoint_phase())),
-                ExcMessage("DG phase requires native mesh data and transported mature or consistent-endpoint phase physics; CPDI and the separate bulk-cohesive prototype are unsupported."));
-    if (mesh_data)
-      AssertThrow(!particle_manager->particle_domains_requested(),
-                  ExcMessage("Homogeneous mesh data uses diagnostic particles without domains."));
-    else
+    if (!mesh_data)
       {
-        AssertThrow(particle_manager->particle_domains_requested(),
-                    ExcMessage("The phase field method requires the particle manager to generate "
-                               "particle domains."));
-
-        AssertThrow(particle_manager->get_particle_domain_handler().cpdi_data_requested(),
-                    ExcMessage("The phase field method requires the particle domain handler to "
-                               "generate CPDI data."));
+        AssertThrow(particle_manager != nullptr,
+                    ExcMessage("Legacy CPDI requires particles with crack_driving_force."));
+        AssertThrow(particle_manager->particle_domains_requested()
+                    && particle_manager->get_particle_domain_handler().cpdi_data_requested(),
+                    ExcMessage("Legacy CPDI requires particle domains and CPDI data."));
       }
+    else if (particle_manager)
+      AssertThrow(!particle_manager->particle_domains_requested(),
+                  ExcMessage("Native diagnostic particles must not own CPDI domains."));
 
     const auto &advection_methods = this->get_parameters().compositional_field_methods;
     if (std::find(advection_methods.begin(), advection_methods.end(), 
@@ -892,7 +894,7 @@ namespace aspect
                               && fault_material->has_fe_strain_history();
 
     // Initialize the corresponding block of the system matrix and the system rhs
-    const unsigned int block_index = this->introspection().variable("phase_field").block_index;
+    const unsigned int block_index = this->introspection().phase_field().block_index;
     if (assemble_system_jacobian)
       system_matrix.block(block_index, block_index) = 0;
     system_rhs.block(block_index) = 0;
@@ -1220,7 +1222,7 @@ namespace aspect
                 ExcMessage("Cell fracture integration requires DG history; MPI requires the native endpoint."));
     for (const double coefficient:critical_energy_densities)
       AssertThrow(coefficient==critical_energy_densities[0],ExcMessage("PF3 requires homogeneous fracture coefficients."));
-    const auto &variable=this->introspection().variable("phase_field");
+    const auto &variable=this->introspection().phase_field();
     const unsigned int block=variable.block_index,component=variable.first_component_index;
     const auto offset=trial.get_block_indices().block_start(block);
     const unsigned int n=trial.block(block).size();
@@ -1322,7 +1324,7 @@ namespace aspect
                            LinearAlgebra::BlockVector             &solution_vector) const
   {
     TimerOutput::Scope timer(this->get_computing_timer(), "Phase: linear solve");
-    const auto &variable = this->introspection().variable("phase_field");
+    const auto &variable = this->introspection().phase_field();
     const unsigned int component_index = variable.first_component_index;
     const unsigned int block_index     = variable.block_index;
 
@@ -1395,7 +1397,7 @@ namespace aspect
     owned = state;
     const auto &faults = this->get_reconstructed_fault_manager().get_prescribed_faults();
     std::map<double, std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>>> profiles;
-    const unsigned int component = this->introspection().variable("phase_field").first_component_index;
+    const unsigned int component = this->introspection().phase_field().first_component_index;
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (!cell->is_artificial())
         for (unsigned int v=0; v<GeometryInfo<dim>::vertices_per_cell; ++v)
@@ -1435,7 +1437,7 @@ namespace aspect
     const LinearAlgebra::BlockVector *lower_bound) const
   {
     const auto comm = this->get_mpi_communicator();
-    const auto b = this->introspection().variable("phase_field").block_index;
+    const auto b = this->introspection().phase_field().block_index;
     const auto offset = state.get_block_indices().block_start(b);
     const auto range = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>&>(
       this->get_material_model()).get_phase_field_range();
@@ -1518,7 +1520,7 @@ namespace aspect
   {
     TimerOutput::Scope timer(this->get_computing_timer(), "Phase: bounded solve");
     const auto comm = this->get_mpi_communicator();
-    const auto b = this->introspection().variable("phase_field").block_index;
+    const auto b = this->introspection().phase_field().block_index;
     const auto offset = state.get_block_indices().block_start(b);
     const auto range = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>&>(
       this->get_material_model()).get_phase_field_range();
@@ -1740,7 +1742,7 @@ namespace aspect
                                              LinearAlgebra::BlockVector       &system_rhs,
                                              LinearAlgebra::BlockVector       &solution)
   {
-    const unsigned int block_index = this->introspection().variable("phase_field").block_index;
+    const unsigned int block_index = this->introspection().phase_field().block_index;
 
     const auto *history_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
     if (history_material && history_material->uses_transported_mature_history())
@@ -1977,7 +1979,7 @@ namespace aspect
         Table<2,DoFTools::Coupling> coupling(this->introspection().n_components,
                                            this->introspection().n_components);
         coupling.fill(DoFTools::none);
-        const auto c = this->introspection().variable("phase_field").first_component_index;
+        const auto c = this->introspection().phase_field().first_component_index;
         coupling[c][c] = DoFTools::always;
         DoFTools::make_flux_sparsity_pattern(this->get_dof_handler(), sp,
                                             this->get_current_constraints(), false,
@@ -1994,7 +1996,7 @@ namespace aspect
         // retains this same initial CPDI solve graph so its accepted seed does
         // not acquire a different arithmetic path through CG/AMG. DG does not
         // use this block for subsequent phase evolution.
-        const auto b=this->introspection().variable("phase_field").block_index;
+        const auto b=this->introspection().phase_field().block_index;
         for (unsigned int i=0; i<sp.block(b,b).n_rows(); ++i)
           for (unsigned int j=0; j<sp.block(b,b).n_cols(); ++j)
             sp.block(b,b).add(i,j);
@@ -2008,7 +2010,7 @@ namespace aspect
 
     const AffineConstraints<double> &current_constraints = this->get_current_constraints();
 
-    const unsigned int component_index = this->introspection().variable("phase_field").first_component_index;
+    const unsigned int component_index = this->introspection().phase_field().first_component_index;
 
     // Q1 component-local DoFs follow the vertices. A component index is not
     // a vertex-local DoF index: preceding DG components have no vertex DoFs.

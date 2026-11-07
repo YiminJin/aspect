@@ -31,7 +31,7 @@ namespace aspect
                   ExcMessage("DG transfer requires an accepted fixed-reference endpoint."));
       const auto &s = *fe_strain_state;
       const auto &comm = this->get_mpi_communicator();
-      const unsigned int block = this->introspection().variable("phase_field").block_index;
+      const unsigned int block = this->introspection().phase_field().block_index;
       AssertThrow(s.bulk_history.native.block(block) == this->get_solution().block(block),
                   ExcMessage("DG transfer rejects an unpublished physical phase trial."));
       unsigned long long refined = 0, coarsened = 0;
@@ -59,7 +59,7 @@ namespace aspect
           // because a coarsening family can straddle MPI ownership.
           const auto phase = aspect::internal::endpoint_values(s.bulk_history.native.block(block), comm);
           const auto offset = s.bulk_history.native.get_block_indices().block_start(block);
-          const auto pc = this->introspection().variable("phase_field").first_component_index;
+          const auto pc = this->introspection().phase_field().first_component_index;
           std::map<std::array<double, dim>, double> local, values;
           for (const auto &entry : s.cells)
             for (const auto v : entry.second->vertex_indices())

@@ -27,7 +27,7 @@ class ProductionIntegration : public Interface<dim>,
   std::vector<std::vector<double>> restored;
   std::vector<double> initial_properties;
   unsigned int b() const {
-    return this->introspection().variable("phase_field").block_index;
+    return this->introspection().phase_field().block_index;
   }
   auto &particles() const {
     return this->get_phase_field_handler()
@@ -316,7 +316,7 @@ class ProductionIntegration : public Interface<dim>,
                      update_values | update_quadrature_points |
                          update_JxW_values);
     const FEValuesExtractors::Scalar phase(
-        this->introspection().variable("phase_field").first_component_index);
+        this->introspection().phase_field().first_component_index);
     double missed_qp = 0, missed_particle = 0;
     double whole_source = 0, omitted_source = 0;
     const auto fractions =

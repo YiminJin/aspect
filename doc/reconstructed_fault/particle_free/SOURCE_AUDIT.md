@@ -1,3 +1,37 @@
+## Native phase integration audit — 6 November 2026
+
+- `CompositionalFieldDescription::phase_field` and `native_phase` method register
+  one nonchemical field. `Introspection::phase_field()` resolves its indices;
+  only the explicit legacy fallback looks up the separate variable. Current
+  source/tests/benchmarks migrated; archival `tmp/` PhaseFieldRSF is inactive.
+- `PhaseFieldHandler::set_assemblers` owns the phase slot through ASPECT's manager.
+  `PhaseTransport` uses scratch/copy bases; the shared scalar symmetric penalty
+  kernel is also exercised by the ordinary DG thermal boundary assembler.
+- `solve_native_phase_transport` is invoked once in ordinary timestep staging,
+  before `stage_material_geometry` receives the transported phase. The generic
+  composition loop skips it. Counts are 4 for the four-step control, 6 for five
+  accepted steps plus one rejected attempt, and 1 for the resumed final step.
+- `mapped_face.h`, `dg_transport.cc`, `dg_sipg.cc` use mapped points/normals/JxW,
+  subfaces and a Jacobian-based mean condition; no physical-axis overlap remains
+  in those operators. `native_phase.cc`/normal-ray clipping share persistent
+  CellId ownership. Native fracture coefficients remain homogeneous.
+- `history.cc` publishes FE/surface candidates without particles. Optional sample
+  backup/publication is conditional; initialization, normalization and observers
+  no longer manufacture H or a manager. Loaded fixed-fault growth agrees with
+  retained physical integrals/energy within 2.51e−14 / 1.39e−12.
+- Stable mass/SIPG matrices are cached and invalidated on mesh changes. Existing
+  replicated endpoint/nonlocal derivative reductions remain; no dense global
+  native DG Hessian or replacement timestep pipeline was introduced.
+- Composition-v2 checkpoint identity rejects separate-block archives before
+  deserialization. New rank-changing restart and rollback pass. No conversion.
+- Complete mapped coupled history remains blocked by the explicit Cartesian
+  `fe_strain.cc`/tensor-advection admission; scalar tests do not qualify it.
+
+The [report](NATIVE_PHASE_INTEGRATION_REPORT.md) records source/binary identity,
+all test outcomes (including legacy failures), cost and remaining scientific limits.
+The [phase contract](DGQ2_PHASE_FIELD_DESIGN.md) supersedes separate-block manuals;
+historical claims below retain their original scope and revision.
+
 > **Native DGQ2 phase implementation and available evidence, 6 November 2026:** phase-space selection,
 > upwind material transport, whole-cell bounds, SIPG fracture and Bernstein
 > obstacle coordinates are implemented. Native fixed-fault cohesive growth
@@ -11,7 +45,7 @@
 
 > **Completed, 6 November 2026 — corrected-spin layered campaign:** the direction/time/law/mesh, adaptive, 4→2-rank restart, provider rejection and wider-domain comparisons are complete. The finite-slip law effect persists; profile mass error remains 7.26% on the adaptive coarse mesh and 2.39% on the finer uniform mesh. Widening the box changes mechanics but leaves the remapping mass defect essentially unchanged. See [report](LAYERED_BULK_CAMPAIGN_REPORT.md), [closeout handoff](LAYERED_BULK_CAMPAIGN_RESUME.md) and [figures/evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/transported_objective/layered_bulk_campaign/README.md). Native/default laws and protected binaries are preserved; no production/server run or checkpoint conversion. Next proposed work is material-equation-consistent bounded profile transport, not another timestep-only sweep. No campaign run remains active.
 
-## Current campaign implementation audit
+## Historical layered-campaign implementation audit
 
 - `layered_background/`: benchmark-only scalar equilibrated Maxwell reference,
   compatible velocity/top traction and accepted/candidate state. Transport callback

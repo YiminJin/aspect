@@ -39,7 +39,7 @@ namespace aspect
         std::vector<double> slip;
         unsigned int pb()const
         {
-          return this->introspection().variable("phase_field").block_index;
+          return this->introspection().phase_field().block_index;
         }
         std::string root_file(const std::string &path)const
         {
@@ -108,10 +108,10 @@ namespace aspect
           const auto &intro=this->introspection();
           BV owned(intro.index_sets.system_partitioning,this->get_mpi_communicator());
           owned=this->get_solution();
-          Profile function(intro.n_components,intro.variable("phase_field").first_component_index,
+          Profile function(intro.n_components,intro.phase_field().first_component_index,
                            intro.component_indices.velocities[0],p,R);
           std::vector<bool> mask(intro.n_components,false);
-          mask[intro.variable("phase_field").first_component_index]=true;
+          mask[intro.phase_field().first_component_index]=true;
           for (unsigned int d=0; d<dim; ++d)
             mask[intro.component_indices.velocities[d]]=true;
           VectorTools::interpolate(this->get_mapping(),this->get_dof_handler(),function,owned,ComponentMask(mask));
@@ -343,7 +343,7 @@ namespace aspect
           FEValues<dim>fe(this->get_mapping(),this->get_fe(),Quadrature<dim>(points),update_values|update_gradients|update_quadrature_points);
           std::vector<double>phi(points.size());
           std::vector<SymmetricTensor<2,dim>>R(points.size()),du(points.size());
-          const auto scalar=FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index);
+          const auto scalar=FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index);
           SymmetricTensor<2,dim>S;
           S[0][1]=.5*this->get_reconstructed_fault_manager().get_shear_sense(0);
           std::ostringstream local;
@@ -906,7 +906,7 @@ namespace aspect
                         if (cell->is_locally_owned())
                           {
                             mode_fe.reinit(cell);
-                            mode_fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(ghost_mode,sampled);
+                            mode_fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(ghost_mode,sampled);
                             for (unsigned int q=0; q<sampled.size(); ++q)
                               l2+=mode_fe.JxW(q)*sampled[q]*sampled[q];
                           }
@@ -1015,7 +1015,7 @@ namespace aspect
                   FEValues<dim>fe(this->get_mapping(),this->get_fe(),quad,update_values|update_gradients|update_quadrature_points|update_JxW_values);
                   std::vector<double>ph(quad.size()),pha(quad.size());
                   std::vector<SymmetricTensor<2,dim>>du(quad.size()),ra(quad.size());
-                  const auto scalar=FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index);
+                  const auto scalar=FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index);
                   Vector<double> force(this->get_dof_handler().n_dofs());
                   std::vector<types::global_dof_index>indices(this->get_fe().n_dofs_per_cell());
                   SymmetricTensor<2,dim>S,N;
@@ -1127,7 +1127,7 @@ namespace aspect
           const auto quad=model().mechanical_quadrature();
           const QGauss<1>time_quad(time_points);
           FEValues<dim>fe(this->get_mapping(),this->get_fe(),quad,update_values|update_gradients|update_quadrature_points|update_JxW_values);
-          const auto scalar=FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index);
+          const auto scalar=FEValuesExtractors::Scalar(intro.phase_field().first_component_index);
           std::vector<double>phi(quad.size()),dp(quad.size()),pressure(quad.size());
           std::vector<SymmetricTensor<2,dim>>R(quad.size()),du(quad.size());
           SymmetricTensor<2,dim>S,lift;
@@ -1528,7 +1528,7 @@ namespace aspect
               FEValues<dim>fe(this->get_mapping(),this->get_fe(),quad,update_values|update_gradients|update_quadrature_points);
               std::vector<double>phi(quad.size());
               std::vector<SymmetricTensor<2,dim>>R(quad.size()),du(quad.size());
-              const auto scalar=FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index);
+              const auto scalar=FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index);
               SymmetricTensor<2,dim>S;
               S[0][1]=.5*this->get_reconstructed_fault_manager().get_shear_sense(0);
               std::ofstream out(root_file(this->get_output_directory()+"stress-"+std::to_string(step)+".csv"));

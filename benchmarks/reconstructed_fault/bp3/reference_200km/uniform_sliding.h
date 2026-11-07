@@ -54,7 +54,7 @@ namespace aspect
             fe[intro.extractors.velocities].get_function_symmetric_gradients(working,strain);
             fe[intro.extractors.pressure].get_function_values(working,pressure);
             fe[intro.extractors.temperature].get_function_values(working,temperature);
-            fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(working,phi);
+            fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(working,phi);
             for (unsigned int c=0;c<composition.size();++c)
               fe[intro.extractors.compositional_fields[c]].get_function_values(working,composition[c]);
             for (unsigned int q=0;q<nq;++q)

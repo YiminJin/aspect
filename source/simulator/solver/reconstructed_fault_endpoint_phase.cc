@@ -34,7 +34,7 @@ namespace aspect
     AssertThrow(material.uses_consistent_endpoint_phase() && material.has_fe_strain_history()
                 && timestep_number>0,
                 ExcMessage("Endpoint minimization requires initialized independent bulk history."));
-    const unsigned int b=introspection.variable("phase_field").block_index;
+    const unsigned int b=introspection.phase_field().block_index;
     const auto phase_offset=solution.get_block_indices().block_start(b);
     unsigned int hanging_phase=0;
     for(const auto &line:constraints.get_lines())
@@ -56,10 +56,13 @@ namespace aspect
     std::vector<std::pair<double,double>> surface_anchor;
     for(unsigned int i=0;i<manager.get_fault(0).n_vertices();++i)
       surface_anchor.emplace_back(manager.get_fault(0).get_properties(i)[q_property],manager.get_fault(0).get_properties(i)[I_property]);
-    const auto &particles=phase.get_associated_particle_manager();
-    const auto H_property=particles.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
     std::vector<double> H_anchor;
-    for(const auto &particle:particles.get_particle_handler())H_anchor.push_back(particle.get_properties()[H_property]);
+    if (phase.has_associated_particle_manager())
+      {
+        const auto &particles = phase.get_associated_particle_manager();
+        const auto H = particles.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
+        for (const auto &particle : particles.get_particle_handler()) H_anchor.push_back(particle.get_properties()[H]);
+      }
     const auto &settings=phase.solver_parameters;
     AssertThrow(settings.use_bound_constraints && settings.enforce_irreversibility,
                 ExcMessage("Endpoint minimization requires the selected box and previous-physical-phase bounds."));
@@ -69,7 +72,7 @@ namespace aspect
     const bool dg_phase=phase.uses_dg_phase();
     if (dg_phase)
       {
-        phase_coordinates.set_discontinuous_q2(dof_handler,introspection.variable("phase_field").first_component_index,
+        phase_coordinates.set_discontinuous_q2(dof_handler,introspection.phase_field().first_component_index,
                                                phase_offset,mpi_communicator);
         AssertThrow(!settings.endpoint_translation_preconditioner,
                     ExcMessage("The nodal translation preconditioner is not defined for DG Bernstein phase coordinates."));
@@ -110,7 +113,7 @@ namespace aspect
           AssertThrow(x[i]>=lower[i] && x[i]<1.,ExcMessage("Diagnostic starting guess violates the physical obstacle."));
         }
       }
-    const unsigned int component=introspection.variable("phase_field").first_component_index;
+    const unsigned int component=introspection.phase_field().first_component_index;
     std::vector<types::global_dof_index> local_indices(finite_element.n_dofs_per_cell());
     std::vector<double> coordinates(dim*physical_size,0.),counts(physical_size,0.);
     Vector<double> physical_mass(physical_size);
@@ -283,8 +286,9 @@ namespace aspect
                     && manager.get_fault(0).get_properties(i)[I_property]==surface_anchor[i].second,
                     ExcMessage("An endpoint trial changed accepted surface history."));
       unsigned int particle_index=0;
-      for(const auto &particle:particles.get_particle_handler())
-        AssertThrow(particle.get_properties()[H_property]==H_anchor[particle_index++],
+      if (phase.has_associated_particle_manager())
+      for(const auto &particle:phase.get_associated_particle_manager().get_particle_handler())
+        AssertThrow(particle.get_properties()[phase.get_associated_particle_manager().get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force")]==H_anchor[particle_index++],
                     ExcMessage("An endpoint trial changed particle peak history."));
       return e;
     };

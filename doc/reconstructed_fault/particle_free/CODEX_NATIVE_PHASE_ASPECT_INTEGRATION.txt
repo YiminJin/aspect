@@ -1,0 +1,348 @@
+TASK: INTEGRATE NATIVE DGQ2 PHASE INTO ASPECT'S FIELD AND ASSEMBLER INFRASTRUCTURE
+For the existing local Codex thread, using Astra with high reasoning.
+7 November 2026.
+
+Implement this task, including bounded verification and documentation. The user
+has selected the architecture below. Make ordinary implementation decisions and
+complete the work; do not stop at an audit or another proposed refactor. This
+instruction supersedes the earlier preference to keep native phase outside the
+compositional-field infrastructure. It does not select new constitutive physics.
+
+1. PURPOSE, BASELINE AND SCOPE
+=============================
+Apply the user's priorities in this order:
+  1. The scientific purpose and final examples in the paper.
+  2. Accuracy, stability and efficiency.
+  3. Reuse of ASPECT infrastructure.
+  4. Readability and maintainability.
+
+The immediate paper targets remain BP3 first-event behavior on a stationary
+pre-existing fault, and a BP3-like viscous-lower-crust example comparing a fixed
+fault with a materially advected fault. Finish a coherent implementation before
+the expensive server experiments. The existing layered, velocity-strengthening
+fixture is an algorithmic comparison, not an earthquake-nucleation benchmark.
+
+Reviewed remote: https://github.com/YiminJin/aspect/tree/pf-rsf-particle-free
+Reviewed revision: e4291922732a4f238c7bfb5b07ef82eb3964a9c5.
+The 26 selected source hashes in dgq2_phase_field/preservation.json match this
+revision. The tested candidate binary has its own recorded identity; do not
+infer binary identity from HEAD. Verify the actual local branch, changes and
+applicable AGENTS.md before editing. Preserve manual work, retained results,
+checkpoints and protected binaries; do not reset to the reviewed revision.
+
+Read the current design/refactoring documents and these relevant records:
+  - doc/reconstructed_fault/particle_free/DGQ2_PHASE_FIELD_REPORT.md
+  - doc/reconstructed_fault/particle_free/DGQ2_PHASE_FIELD_DESIGN.md
+  - MATURE_MOVING_FAULT.md and its linked discretization/lifecycle descriptions
+  - The existing DGQ2 benchmark README and compact evidence index.
+Use targeted source reads; do not spend the task rereading historical campaigns.
+
+DGQ2 is the chosen development direction. Completed coupled comparisons improve
+initial profile error from 4.36% to 0.219%, remove the Q1 numerical integral drift,
+and retain the peak near 0.35, with 6-11% total runtime overhead. Coupled slip and
+energy are not independently qualified by these comparisons. Reuse the completed
+evidence; do not rerun it simply because the implementation is reorganized.
+
+The user explicitly deferred the full reverse-translation and finer-mesh coupled
+runs. They remain deferred. No server job, full BP3 run, production checkpoint
+conversion or new long campaign is authorized by this task.
+
+Preserve physical true-stress history tau, the independent DGQ2 stress solver,
+stress SSPRK3, the selected bulk-slip-subtracted spin, its coherent accepted-state
+lag, endpoint/RSF laws, plane-strain convention and existing mechanical acceptance
+criteria. The FULL material velocity transports phase and fault geometry. Mature
+moving growth remains disabled; do not invent its missing constitutive extension.
+Retain and integrate the already supported fixed-fault cohesive growth path.
+
+2. ONE PHASE FIELD, FOLLOWING THE POROSITY PATTERN
+================================================
+ASPECT porosity is a compositional field with special physical handling. Inspect
+MeltHandler::is_porosity(), MeltHandler::set_assemblers(), AdvectionField,
+Simulator::set_advection_assemblers() and the composition metadata/introspection.
+The melt module's organization is the precedent; its equations and current DG
+restrictions are not the desired phase-field algorithm.
+
+Register native phase as a specially identified compositional field. Prefer an
+explicit phase-field semantic type, with an unambiguous name/index and a phase
+handler that supplies the appropriate physics and assemblers. Reuse established
+composition family/degree, initial/boundary data, FE block, output and indexing
+conventions. Resolve duplicate phase-specific discretization settings through a
+clear migration rule; conflicting inputs must not silently choose a value.
+
+There must be exactly ONE authoritative native phase field through transport,
+growth, mechanics, normalization, output and checkpointing. Remove the separate
+native VariableDeclaration("phase_field", ...) when the composition owns those
+DoFs. Do not add a proxy composition synchronized with the old phase block, or
+project DG phase back to Q1. A phase accessor may resolve the registered field
+and provide its extractor/index; it must not own another copy of the field.
+
+Update all consumers of variable("phase_field") and vertex-only assumptions.
+Retain deliberate Q1 comparison/legacy entry points without making the new native
+route depend on CPDI. Handle old input syntax explicitly and document necessary
+changes. Preserving legacy behavior does not require two simultaneous native
+phase owners or permanent duplicate parameter systems.
+
+Compositional storage does not make phase a chemical fraction. Exclude phase from
+chemical mixing, normalization-to-unit-sum, material-fraction parameter lists and
+unrelated particle/reaction mapping. Trace material parameter counts and indices
+so adding phase does not introduce a fictitious additional rock composition.
+Ordinary temperature/composition defaults must retain their existing behavior.
+
+Route phase transport through the normal simulator field/solver dispatch with
+explicit identification of its transport method. It must execute once per
+attempted physical step, with the accepted parent and full accepted velocity,
+not once again in the generic composition loop or every Stokes iteration. The
+existing supported nonlinear phase-growth iterations remain where the coupled
+algorithm requires them. Keep the existing joint geometry/history transaction.
+Do not restore a mature single-step driver or a new generic executor pipeline.
+
+3. REUSE ASSEMBLY WITHOUT CHANGING THE TESTED ALGORITHM
+====================================================
+The ordinary ASPECT advection cell assembler incorporates BE/BDF2 time terms;
+solve_advection() normally limits its final solution. Therefore calling those
+functions unchanged would not preserve the tested phase method.
+
+Keep the native phase method:
+  - Material advection, dphi/dt + v.grad(phi) = 0.
+  - Its conservative weak form includes the phi div(v) source; numerical Stokes
+    velocity is not pointwise divergence free.
+  - SSPRK3 transport subcycling, with frozen accepted velocity and stage-time
+    boundary evaluation, and BP limiting at the required stages.
+  - Whole-cell Bernstein bounds and physical cell-mean-preserving scaling.
+  - SIPG fracture energy, residual and tangent from the same functional.
+  - The existing constrained equilibrium/growth law with its mechanical and
+    normalization derivatives and final KKT/energy acceptance.
+
+Use ASPECT's assembler ownership, scratch/copy conventions, distributed algebra
+and established deal.II cell/face machinery. Separate reusable spatial terms
+from time-discretization and thermal/material prefactors where necessary. Share
+actual scalar kernels with existing assemblers where this is a clean, limited
+change; do not label a copied parallel implementation as infrastructure reuse.
+Avoid turning this into a universal advection-framework rewrite. Keep the small
+explicit-stage operation needed by phase within the ordinary simulator dispatch.
+
+There is no need for an artificial global Krylov solve for each explicit DG
+stage: its cell mass inverses are appropriate. Reuse existing linear algebra and
+solver/preconditioner facilities for the constrained growth search. The growth
+equilibrium cannot be replaced by a temperature time-step solve. Do not insert a
+physical-time mass term, apply a generic post-solve limiter to equilibrium, or
+disable its nonlinear residual because generic DG advection does so.
+
+For each attempted step, growth uses the transported phase as its lower obstacle
+where transport and growth are supported, and the accepted old phase in the
+stationary supported case. Growth may increase the phase integral; do not impose
+a transport-style fixed cell mean on the growth solve. Keep Bernstein obstacle
+constraints explicitly documented as sufficient whole-cell conditions, generally
+stronger than pointwise constraints. Preserve accepted parents through retries.
+
+4. REMOVE CARTESIAN GEOMETRY ASSUMPTIONS CONSISTENTLY
+==================================================
+Generalize the phase spatial operators to valid static mapped quadrilateral
+meshes in 2-D, including rotated/sheared affine and distorted bilinear cells.
+Use the simulator Mapping and standard FEValues/FEFaceValues/FESubfaceValues or
+FEInterfaceValues, following ASPECT's existing face traversal where practical.
+The deal.II 9.6 step-74 SIPG example is a useful reference, not a new driver.
+
+In dg_sipg.cc and dg_transport.cc, replace physical-axis assumptions together:
+  - f/2 as a physical axis and 1-axis as the tangent;
+  - physical face normals represented by a signed coordinate component;
+  - coordinate-interval overlap as the actual cell-face intersection;
+  - hand-built physical face quadrature and interval-based face measures;
+  - coordinate widths used for penalties, transport bounds or inverse mapping.
+
+Obtain normals, gradients, quadrature points and JxW from the mapping-aware FE
+objects. Match neighboring quadrature locations and orientation, including
+coarse/fine interfaces. Assemble opposite face contributions consistently across
+MPI partitions. Preserve both SIPG consistency terms, its jump penalty and the
+appropriate boundary terms. Use geometry-aware normal scales/trace estimates
+and coefficient traces in the penalty. Do not pretend general heterogeneous
+coupled fracture coefficients are implemented if the supported law remains
+homogeneous; preserve clear physical admission rules.
+
+Generalize the BP timestep condition as part of this change. The old aligned
+Lobatto condition and 6/h face-loss estimate use Cartesian geometry; swapping
+normals does not establish a valid positivity bound on a mapped cell. Derive and
+document a sufficient condition using physical volume/face weights or suitable
+mapped trace bounds. Verify constant preservation, admissible means and material
+balance with the chosen quadrature, including nonzero div(v). Affine polynomial
+exactness statements must not be copied to non-affine mappings without checking.
+
+Bernstein enclosure remains a reference-element polynomial property. Its scaling
+must preserve the physical mean computed with the correct Jacobian weights. Do
+not clip means, renormalize globally, replace the physical upper bound with an
+epsilon cap, or conceal geometry errors through numerical diffusion.
+
+Replace the native wrapper's unconditional zero-inflow lambda with explicit
+boundary data through the field's established boundary infrastructure. Keep
+zero inflow as the selected compact-profile fixture data. Correct inflow/outflow
+selection and stage-time evaluation matter; do not prescribe outflow values.
+
+Document a deterministic, MPI-independent one-sided trace convention for fault
+observations on DG faces, and use it consistently in mechanics, normalization
+and derivatives. Do not rely on an axis-aligned vertex ordering to define the
+physical trace or average traces before nonlinear localization.
+
+Follow active geometric dependencies beyond these two files. Normalization
+clipping/search and some stress-history optimizations also assume Cartesian
+cells. Replace geometry-only shortcuts or use an existing correct mapped path
+where available; preserve the stress equations and time integration. Do not
+claim full coupled general-mesh support based only on a scalar operator test.
+If a remaining stress/localization restriction requires a substantive separate
+redesign, name the exact path and limitation, retain its truthful guard, and
+finish the phase integration. No new stress formulation is selected here.
+
+Dynamic AMR transfer, ALE/moving bulk meshes, 3-D fault physics and every boundary
+topology are not mandatory additions. Static nonmatching faces are in scope.
+An advected fault on a fixed mesh is not ALE. Avoid new Cartesian assumptions
+in any reusable dimension-templated code.
+
+5. MAKE THE NATIVE ROUTE INDEPENDENT OF PARTICLES
+===============================================
+The completed native DG equations bypass CPDI, but initialize() still requires a
+particle manager with crack_driving_force. Native transaction/publication code
+also copies or writes derived particle properties. Remove those requirements
+throughout the active native route, rather than bypassing one assertion.
+
+Native phase/stress initialization, mechanics, phase growth, fault geometry,
+normalization, acceptance, rejection, output and restart must work when no
+particle postprocessor/manager is configured. Source native material data from
+the existing FE/material interfaces. Do not create dummy particles, a hidden
+particle manager, a fake H field, or a replacement authoritative history.
+
+Optional diagnostic particles may sample accepted native states. They must not
+be necessary for physical publication or acceptance, and their optional handling
+must respect rollback. Native fixtures must not need a particle-freeze environment
+variable. Update affected observers and checkpoint logic as well as production
+code. Surface fault labels/vertices are physical geometry and are not CPDI
+particles; do not remove their required state.
+
+Keep supported legacy CPDI functionality explicitly isolated, with its particle,
+domain and Q1 requirements applying only when that implementation is selected.
+Delete newly obsolete adapters, duplicated assembly and dead native-path code.
+Do not retain a second architecture simply to keep historical code reachable;
+historical evidence can remain without governing the current implementation.
+
+6. READABILITY, EFFICIENCY AND LIFECYCLE
+======================================
+Use the repository's formatting tools and ASPECT Doxygen conventions on changed
+code. Comments should explain the weak form, signs, time levels, ownership,
+quadrature/penalty choices, admissible set and invariants. Expand dense one-line
+loops and ambiguous abbreviations; each important method should be traceable to
+one mathematical operation. Do not multiply tiny forwarding classes/helpers or
+recreate an all-purpose DG object that owns physics, time stepping and publication.
+
+Keep a small set of responsibilities: field identification/configuration;
+transport assembly and explicit stages; fracture assembly; bounds/obstacle
+solution; existing simulator/material coupling. Split or join current files to
+make these responsibilities clear, not to meet an arbitrary file/function count.
+
+Avoid rebuilding unchanged sparsity, mass matrices, basis transformations and
+constant fracture operators in every energy evaluation. Reuse them where lifetime
+and invalidation are straightforward. Preserve distributed sparse assembly; do
+not introduce global dense phase matrices. Address unnecessary replicated local
+gradient/Hessian assembly when naturally exposed by this integration, without
+making a redesign of all nonlocal cohesive derivatives a prerequisite.
+
+Registration changes component/block layouts and field identities. Update
+checkpoint validation accordingly. New-layout restart and rejection must remain
+consistent. Do not silently reinterpret an old separate phase block as a new
+composition. Preserve a deliberate legacy restart path where it already exists,
+or reject incompatible layouts early with a clear explanation. No production
+checkpoint conversion. Retained old inputs/results must remain identifiable.
+
+7. BOUNDED VERIFICATION; NO NEW LONG CAMPAIGN
+==========================================
+Use at most four build workers or MPI ranks and one thread per rank. Run builds
+and substantial jobs sequentially. Use the existing native/operator tests and
+small fixtures rather than another benchmark framework. Add only tests that
+exercise the changed behavior or a concrete failure risk.
+
+Runtime policy:
+  - Target 20-30 minutes for the final verification set, excluding compilation.
+  - Give each new simulation/operator command a 10-minute wall-clock limit.
+  - Budget at most 45 minutes of aggregate new simulation/operator execution
+    for this task, including repeated attempts. Track the cumulative runtime.
+  - Start with a timing sample on the intended small fixture. Scale mesh, number
+    of steps or final time so the test answers its question within the budget.
+  - Do not relax solver tolerances, physical bounds or acceptance criteria to
+    fit the budget. Do not modify the protected old runs or cancel unrelated jobs.
+  - If an essential question cannot be settled within the budget, finish the
+    independent implementation, retain the failure/evidence and state the precise
+    unresolved question. Do not automatically launch a larger/overnight run.
+  - Run the relevant cheap unit suite once after the final changes; repeat only
+    tests affected by subsequent fixes. Avoid repeated broad audits and sweeps.
+
+Use this compact acceptance set, combining checks where possible:
+
+A. Infrastructure and mapped transport
+   Verify phase registration, exclusion from chemical mixing, correct field
+   dispatch and no duplicate transport. On small Cartesian, rotated/sheared and
+   distorted meshes, check constant preservation, nonzero-divergence material
+   balance, bounds and mean preservation, and configured nonzero inflow. Reuse a
+   small positive/negative operator pair; this does not resume the deferred full
+   negative coupled experiment. Include a static nonmatching interface and a
+   serial/two-rank comparison. Use a compact smooth refinement check if needed to
+   distinguish a mapping error; no large coupled mesh-convergence campaign.
+
+B. SIPG and constrained growth
+   Check symmetry and energy/residual/tangent consistency on a mapped mesh,
+   suitable manufactured accuracy, a nonconstant obstacle with active/free
+   regions, positive growth/no healing, and final KKT validity. Exercise one
+   short supported native fixed-fault growth case without particles. Reuse the
+   earlier manufactured cases and avoid a combinatorial mesh/rank/parameter matrix.
+
+C. Native integration and lifecycle
+   Run only a few physical steps of the mature layered fixture, with the new
+   field registration and no particles. Compare common physical observations
+   against a short retained baseline at identical inputs; do not compare raw
+   block vectors after changing their layout. Include a short restart across
+   rank counts and rejection/retry against the same accepted-step schedule.
+   Use a small non-Cartesian coupled case if the complete active path supports
+   it; otherwise identify the exact remaining restriction without conflating
+   scalar generalization with whole-model qualification.
+
+D. Regression
+   Run the relevant existing temperature/composition and legacy Q1 checks touched
+   by the shared code. Existing inexpensive tests are preferable to creating
+   implementation-mirroring tests. Numerical agreement should be judged by the
+   preserved equations, appropriate errors and invariants; do not force bitwise
+   identity across changed assembly ordering through compensating adjustments.
+
+Do NOT rerun the completed T=.8 coupled comparisons, the deferred U=-2 campaign,
+the h=1/12 fine coupled run, the previous 12-hour campaign, or server experiments.
+The purpose of these checks is implementation verification, not new physical
+qualification. A short test cannot be described as convergence of the paper case.
+
+8. DELIVERABLES AND COMPLETION
+=============================
+Deliver working code, a compact evidence-backed report and updated linked
+Markdown documentation. Complete the selected implementation instead of merely
+renaming DGOperator, moving files, or adding wrappers around the Cartesian code.
+
+The documentation should let a reader follow this sequence without searching
+through historical reports:
+  field declaration -> initialization -> one transport attempt -> transported
+  obstacle -> supported constrained growth/mechanical coupling -> joint commit
+  or rollback -> output/restart.
+
+Update MATURE_MOVING_FAULT.md's links, discretization/lifecycle descriptions and
+DGQ2_PHASE_FIELD_DESIGN.md. Include the few governing equations beside their
+assembler/solver entry points, the porosity analogy and its limits, boundary
+semantics, mapped-mesh/BP treatment, configuration migration and remaining
+admission boundaries. Keep historical reports as evidence, not competing manuals.
+Use concise linked Markdown; no new HTML/JSON documentation framework.
+
+The final report must state:
+  - What infrastructure is actually shared and what phase-specific code remains.
+  - The authoritative phase field/index and why it is excluded from chemical
+    composition; confirmation that no duplicate native phase owner remains.
+  - Whether the native path runs with zero particle managers.
+  - Which Cartesian assumptions were removed and which remain elsewhere.
+  - Which tests ran, their total runtime, quantitative outcomes and limitations.
+  - Fresh/restart identity handling and any required input migration.
+  - The deferred tests, explicitly still deferred.
+
+Keep the code, documentation and report consistent. Follow the repository's
+existing commit/push policy. Do not create a new approval checkpoint for routine
+implementation or revive superseded historical plans. Report genuine scientific
+conflicts specifically and continue independent work within this task.

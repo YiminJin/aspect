@@ -18,21 +18,29 @@ namespace aspect
     for (const auto a : critical_energy_densities)
       AssertThrow(a == critical_energy_densities[0], ExcMessage("Coupled DG phase currently requires homogeneous fracture coefficients."));
     const double A = critical_energy_densities[0], ell = geometric_function->get_length_scale(), k = 2 * A * ell * ell;
-    const auto &variable = this->introspection().variable("phase_field");
+    const auto &variable = this->introspection().phase_field();
     const auto b = variable.block_index, c = variable.first_component_index;
     const auto offset = state.get_block_indices().block_start(b);
     const auto &sets = this->introspection().index_sets;
     const auto comm = this->get_mpi_communicator();
-    PhaseField::DGOperator<dim> op(this->get_mapping(), this->get_dof_handler(), c, offset,
-                                   sets.system_partitioning[b], sets.system_relevant_partitioning[b], comm);
-    LinearAlgebra::SparseMatrix matrix;
-    op.reinit_matrix(matrix);
+    auto &op = native_operator(state);
     LinearAlgebra::Vector rhs(sets.system_partitioning[b], comm), values(rhs), action(rhs);
-    const double constant = op.assemble_sipg(matrix, rhs, [&](const Point<dim> &)
-    {
-      return k;
-    },
-    this->get_parameters().discontinuous_penalty);
+    const double penalty = this->get_parameters().discontinuous_penalty;
+    if (!native_fracture_matrix || native_fracture_coefficient != k || native_fracture_penalty != penalty)
+      {
+        native_fracture_matrix = std::make_shared<LinearAlgebra::SparseMatrix>();
+        op.reinit_matrix(*native_fracture_matrix);
+        op.assemble_sipg(*native_fracture_matrix, rhs, [k](const Point<dim> &)
+        {
+          return k;
+        }, penalty);
+        native_fracture_coefficient = k;
+        native_fracture_penalty = penalty;
+      }
+    const auto &matrix = *native_fracture_matrix;
+    // The supported physical fracture boundary is homogeneous natural Neumann.
+    rhs = 0.;
+    const double constant = 0.;
     values = state.block(b);
     matrix.vmult(action, values);
     double energy = .5 * (values * action) - values * rhs + constant;

@@ -84,7 +84,7 @@ namespace aspect
           aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::native_fevalues);
           phase_fe.reinit(cell);
           std::vector<double> values(quadrature.size());
-          phase_fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
+          phase_fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)]
           .get_function_values(s.bulk_history.native, values);
           phase = cache.phase_values.emplace(id, std::move(values)).first;
         }
@@ -185,7 +185,7 @@ namespace aspect
       dg.reinit(space.cells.at(id));
       native.reinit(cell);
       std::vector<double> phi(missing.size());
-      native[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
+      native[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)]
       .get_function_values(s.bulk_history.native, phi);
       const auto old_size = data.size();
       data.resize(old_size + missing.size());
@@ -289,7 +289,7 @@ namespace aspect
           const auto native_cell = state.evaluation_cells.at(id);
           FEValues<dim> phase(this->get_mapping(), this->get_fe(), Quadrature<dim>({unit}), update_values);
           phase.reinit(native_cell);
-          phase[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
+          phase[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)]
           .get_function_values(phase_trial ? *phase_trial : state.bulk_history.native, phi);
 
           aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::dg_fevalues);

@@ -1040,11 +1040,13 @@ namespace aspect
                          "Be careful if you choose 1 as the degree. The resulting element "
                          "is not stable and it may lead to artifacts in the solution. "
                          "Units: None.");
-      prm.declare_entry ("Phase polynomial degree", "1", Patterns::Integer(1),
-                         "Degree of the native phase variable. Supported selections are continuous Q1 and discontinuous Q2.");
-      prm.declare_entry ("Use discontinuous phase discretization", "false", Patterns::Bool(),
-                         "Use the native DG phase field for transport and SIPG constrained equilibrium. "
-                         "This requires Phase polynomial degree = 2 and mesh-based phase physics; CPDI is unsupported.");
+      prm.declare_entry ("Phase polynomial degree", "0", Patterns::Integer(0),
+                         "Deprecated compatibility setting: zero derives the degree from the semantic phase composition. "
+                         "An explicit value must match Composition polynomial degree. The separate CPDI field remains Q1.");
+      prm.declare_entry ("Use discontinuous phase discretization", "auto", Patterns::Selection("auto|true|false"),
+                         "Deprecated compatibility setting: auto derives the family from the semantic phase composition. "
+                         "An explicit true/false must match Use discontinuous composition discretization. "
+                         "Native phase supports Q1 or DGQ2; legacy CPDI remains Q1.");
 
       prm.declare_entry ("Temperature polynomial degree", "2",
                          Patterns::Integer (1),
@@ -1366,7 +1368,7 @@ namespace aspect
                          Patterns::List(Patterns::Anything()),
                          "A user-defined name for each of the compositional fields requested.");
       prm.declare_entry ("Types of fields", "unspecified",
-                         Patterns::List (Patterns::Selection("chemical composition|stress|strain|grain size|porosity|density|entropy|generic|unspecified")),
+                         Patterns::List (Patterns::Selection("chemical composition|stress|strain|grain size|porosity|density|entropy|generic|unspecified|phase field")),
                          "A comma separated list denoting a ``type'' for each of the "
                          "compositional fields requested. ASPECT uses these types to "
                          "determine how fields are handled when evaluating the "
@@ -1992,14 +1994,13 @@ namespace aspect
     }
     prm.leave_subsection();
 
+    std::string legacy_phase_family;
     prm.enter_subsection ("Discretization");
     {
       stokes_velocity_degree = prm.get_integer ("Stokes velocity polynomial degree");
       phase_degree = prm.get_integer("Phase polynomial degree");
-      use_discontinuous_phase_discretization = prm.get_bool("Use discontinuous phase discretization");
-      AssertThrow((use_discontinuous_phase_discretization && phase_degree == 2)
-                  || (!use_discontinuous_phase_discretization && phase_degree == 1),
-                  ExcMessage("Native phase supports continuous Q1 or discontinuous Q2."));
+      legacy_phase_family = prm.get("Use discontinuous phase discretization");
+      use_discontinuous_phase_discretization = legacy_phase_family == "true";
       temperature_degree     = prm.get_integer ("Temperature polynomial degree");
       composition_degrees    = Utilities::possibly_extend_from_1_to_N (Utilities::string_to_unsigned_int(Utilities::split_string_list(prm.get("Composition polynomial degree"))),
                                                                        n_compositional_fields,
@@ -2289,6 +2290,8 @@ namespace aspect
                                        "computations."));
               compositional_field_methods[i] = AdvectionFieldMethod::volume_of_fluid;
             }
+          else if (x_compositional_field_methods[i] == "phase field")
+            compositional_field_methods[i] = AdvectionFieldMethod::native_phase;
           else if (x_compositional_field_methods[i] == "static")
             compositional_field_methods[i] = AdvectionFieldMethod::static_field;
           else if (x_compositional_field_methods[i] == "melt field")
@@ -2301,6 +2304,42 @@ namespace aspect
             compositional_field_methods[i] = AdvectionFieldMethod::prescribed_field_with_diffusion;
           else
             AssertThrow(false,ExcNotImplemented());
+        }
+
+      unsigned int phase_count = 0;
+      for (unsigned int c = 0; c < n_compositional_fields; ++c)
+        {
+          const bool phase = composition_descriptions[c].type == CompositionalFieldDescription::phase_field;
+          AssertThrow(phase == (compositional_field_methods[c] == AdvectionFieldMethod::native_phase),
+                      ExcMessage("Native phase requires both Type = phase field and Compositional field methods = phase field."));
+          if (phase)
+            {
+              ++phase_count;
+              AssertThrow(enable_phase_field && names_of_compositional_fields[c] == "phase_field",
+                          ExcMessage("Enable phase field and name its single semantic composition phase_field."));
+              AssertThrow(std::find(normalized_fields.begin(), normalized_fields.end(), c) == normalized_fields.end(),
+                          ExcMessage("Physical phase must not be normalized with chemical compositions."));
+              AssertThrow(!use_operator_splitting,
+                          ExcMessage("Native phase is not a chemical reaction field; operator-split composition reactions are unsupported."));
+              AssertThrow((use_discontinuous_composition_discretization[c] && composition_degrees[c] == 2)
+                          || (!use_discontinuous_composition_discretization[c] && composition_degrees[c] == 1),
+                          ExcMessage("Native phase supports Q1 or DGQ2, configured through composition discretization."));
+              AssertThrow(phase_degree == 0 || phase_degree == composition_degrees[c],
+                          ExcMessage("Deprecated Phase polynomial degree conflicts with Composition polynomial degree."));
+              AssertThrow(legacy_phase_family == "auto"
+                          || (legacy_phase_family == "true") == use_discontinuous_composition_discretization[c],
+                          ExcMessage("Deprecated phase family conflicts with composition discretization; remove the phase-specific selector."));
+              phase_degree = composition_degrees[c];
+              use_discontinuous_phase_discretization = use_discontinuous_composition_discretization[c];
+            }
+        }
+      AssertThrow(phase_count <= 1, ExcMessage("Only one physical phase composition is permitted."));
+      if (phase_count == 0)
+        {
+          AssertThrow(!use_discontinuous_phase_discretization,
+                      ExcMessage("Separate DG phase blocks are retired. Register phase_field with Type and method phase field, and select DGQ2 through composition discretization."));
+          if (phase_degree == 0) phase_degree = 1;
+          AssertThrow(phase_degree == 1, ExcMessage("The separate legacy phase variable is Q1 only."));
         }
 
       // Enable Volume of Fluid field tracking if any compositional_field_methods are volume_of_fluid

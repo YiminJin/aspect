@@ -536,7 +536,7 @@ namespace aspect
       endpoint=material.make_fe_endpoint_trial(bulk,slip);
     else
       {endpoint.strain.reinit(endpoint_strain);endpoint.strain=endpoint_strain;endpoint.Z=endpoint_Z;}
-    const auto phase_block=introspection.variable("phase_field").block_index;
+    const auto phase_block=introspection.phase_field().block_index;
     const auto phase_coordinates=std::make_shared<internal::EndpointPhaseConstraints>(
       current_constraints,bulk.get_block_indices().block_start(phase_block),bulk.block(phase_block).size());
     return [this,&material,owner,linearization,restricted,active,bulk,endpoint,phase_coordinates](const Vector<double> &direction)

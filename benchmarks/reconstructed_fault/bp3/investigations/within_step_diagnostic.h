@@ -196,7 +196,7 @@ namespace aspect
             {
               fe.reinit(cell);
               const auto &association=manager.get_stokes_qp_fault_associations(cell->id(),quad,fe.get_quadrature_points());
-              fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(base,phase);
+              fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(base,phase);
               fe[intro.extractors.temperature].get_function_values(base,temp);
               fe[intro.extractors.velocities].get_function_symmetric_gradients(ghost,strain);
               for(unsigned int c=0;c<chemical.size();++c)

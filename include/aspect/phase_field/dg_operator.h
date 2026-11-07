@@ -10,6 +10,10 @@
 
 namespace aspect
 {
+  namespace Assemblers
+  {
+    template <int dim> class Interface;
+  }
   namespace PhaseField
   {
     /** Native scalar phase spatial operators. The DoFs belong to the simulator,
@@ -24,6 +28,7 @@ namespace aspect
         using Velocity = std::function<void(const CellIterator &, const std::vector<Point<dim>> &,
                                             std::vector<Tensor<1, dim>> &, std::vector<double> &)>;
         using Field = std::function<double(const Point<dim> &, double)>;
+        using BoundaryField = std::function<double(types::boundary_id, const Point<dim> &, double)>;
         using Coefficient = std::function<double(const Point<dim> &)>;
 
         DGOperator(const Mapping<dim> &, const DoFHandler<dim> &,
@@ -32,7 +37,7 @@ namespace aspect
 
         /** Assemble upwind material transport, including phi div(v). Uses
          * tensor Lobatto5 volume/face quadrature and a positive-mean CFL bound. */
-        void assemble_transport(const Velocity &);
+        void assemble_transport(const Velocity &, const Assemblers::Interface<dim> *cell_assembler = nullptr);
 
         struct TransportStatistics
         {
@@ -49,6 +54,11 @@ namespace aspect
         TransportStatistics transport(const LinearAlgebra::Vector &accepted,
                                       LinearAlgebra::Vector &candidate,
                                       const Field &inflow, double time, double dt,
+                                      double lower, double upper, bool limit = true) const;
+
+        TransportStatistics transport(const LinearAlgebra::Vector &accepted,
+                                      LinearAlgebra::Vector &candidate,
+                                      const BoundaryField &inflow, double time, double dt,
                                       double lower, double upper, bool limit = true) const;
 
         /** Apply the whole-cell mean-preserving limiter to an explicit field. */
@@ -88,6 +98,7 @@ namespace aspect
         };
         struct BoundaryLoad
         {
+          types::boundary_id boundary_id;
           Point<dim> point;
           std::vector<types::global_dof_index> indices;
           Vector<double> values, trace;
@@ -101,7 +112,7 @@ namespace aspect
         };
         std::vector<types::global_dof_index> indices(const CellIterator &) const;
         void evaluate(const LinearAlgebra::Vector &, LinearAlgebra::Vector &,
-                      const Field &, double, double &, double &) const;
+                      const BoundaryField &, double, double &, double &) const;
         const Mapping<dim> &mapping;
         const DoFHandler<dim> &dofs;
         const unsigned int component;

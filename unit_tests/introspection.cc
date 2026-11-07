@@ -175,3 +175,40 @@ TEST_CASE("Introspection::different-composition-degrees")
   CHECK(introspection.get_compositional_field_indices_with_base_element(5) == std::vector<unsigned int>({2,3}));
   CHECK(introspection.get_compositional_field_indices_with_base_element(6) == std::vector<unsigned int>({4}));
 }
+
+TEST_CASE("Introspection::native-phase-is-not-a-chemical-fraction")
+{
+  using namespace aspect;
+  ParameterHandler prm;
+  Simulator<2>::declare_parameters(prm, 0);
+  prm.set("Output directory", "");
+  prm.enter_subsection("Formulation");
+  prm.set("Enable phase field", "true");
+  prm.leave_subsection();
+  prm.enter_subsection("Compositional fields");
+  prm.set("Number of fields", "2");
+  prm.set("Names of fields", "rock,phase_field");
+  prm.set("Types of fields", "chemical composition,phase field");
+  prm.set("Compositional field methods", "field,phase field");
+  prm.leave_subsection();
+  prm.enter_subsection("Discretization");
+  prm.set("Composition polynomial degree", "1,2");
+  prm.set("Use discontinuous composition discretization", "false,true");
+  prm.leave_subsection();
+  const Parameters<2> parameters(prm, MPI_COMM_WORLD);
+  const auto variables = construct_default_variables(parameters);
+  const Introspection<2> intro(variables, parameters);
+  CHECK(intro.n_compositional_fields == 2);
+  CHECK(intro.n_chemical_composition_fields() == 1);
+  CHECK(intro.chemical_composition_field_names() == std::vector<std::string>{"rock"});
+  CHECK(intro.phase_field().first_component_index == intro.component_indices.compositional_fields[1]);
+  CHECK(intro.phase_field().block_index == intro.block_indices.compositional_fields[1]);
+  CHECK(intro.variables_with_name("phase_field").empty());
+  CHECK(parameters.phase_degree == 2);
+  CHECK(parameters.use_discontinuous_phase_discretization);
+  CHECK(intro.compositional_field_methods[1] == Parameters<2>::AdvectionFieldMethod::native_phase);
+  prm.enter_subsection("Discretization");
+  prm.set("Use discontinuous phase discretization", "false");
+  prm.leave_subsection();
+  CHECK_THROWS(Parameters<2>(prm, MPI_COMM_WORLD));
+}

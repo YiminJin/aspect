@@ -86,7 +86,7 @@ namespace aspect
           auto &m=model();
           auto &sim=simulator();
           const auto step=this->get_timestep_number();
-          const auto pb=this->introspection().variable("phase_field").block_index;
+          const auto pb=this->introspection().phase_field().block_index;
           if (!entry_installed)
             {
               check("fresh imported entry only",step==0 && m.uses_dg_tensor_history());
@@ -170,8 +170,8 @@ namespace aspect
         {
           auto &m=model();
           auto &sim=simulator();
-          const auto pb=this->introspection().variable("phase_field").block_index;
-          const auto pc=this->introspection().variable("phase_field").first_component_index;
+          const auto pb=this->introspection().phase_field().block_index;
+          const auto pc=this->introspection().phase_field().first_component_index;
           struct Field:Function<dim>
           {
             const Data &data;
@@ -240,8 +240,8 @@ namespace aspect
           auto &m=model();
           auto &sim=simulator();
           const auto &state=*m.fe_strain_state;
-          const auto pc=this->introspection().variable("phase_field").first_component_index;
-          const auto pb=this->introspection().variable("phase_field").block_index;
+          const auto pc=this->introspection().phase_field().first_component_index;
+          const auto pb=this->introspection().phase_field().block_index;
           const auto offset=sim.solution.get_block_indices().block_start(pb);
           const auto energy=m.evaluate_fe_endpoint_energy(sim.solution,endpoint);
           const auto &I=energy.normalization;
@@ -415,7 +415,7 @@ namespace aspect
           const auto tensor=m.uses_dg_tensor_history()?MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::dg_history_values(m):std::vector<double>();
           ReconstructedFaultVector rates;
           Access::mechanical_trial(sim,rates);
-          check("phase frozen during native mechanical resolution",sim.solution.block(this->introspection().variable("phase_field").block_index)==anchor.block(this->introspection().variable("phase_field").block_index));
+          check("phase frozen during native mechanical resolution",sim.solution.block(this->introspection().phase_field().block_index)==anchor.block(this->introspection().phase_field().block_index));
           const auto defects=Access::endpoint_defects(sim,sim.solution,rates);
           prefix="resolved/";
           const auto endpoint=m.make_fe_endpoint_trial(sim.solution,rates);

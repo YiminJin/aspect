@@ -1,4 +1,20 @@
-> **Current scope, 6 November 2026 — native DGQ2 phase:** native operators,
+> **Current selection complete — native phase ASPECT integration, 6 November 2026:**
+> native phase is one semantic composition, with ordinary field indexing/data,
+> simulator-owned one-attempt transport and registered spatial assembly. Mapped
+> scalar transport/SIPG, physical-mean bounds and stage-time inflow are implemented;
+> mass/fracture caches avoid rebuilding stable operators. Zero-particle mature
+> stepping, loaded fixed-fault cohesive growth, rejection and 4→2-rank restart pass.
+> All 155 unit cases / 185,551 assertions pass. Bounded test runtime is 451.00 s;
+> protected artifacts and retained binaries are unchanged. Legacy P1 physical
+> inadmissibility is reproduced; the old I_h smoke initialization failure remains
+> explicit. Native Q1 and legacy CPDI frozen-input checks pass. Coupled tensor
+> history is still Cartesian; no new physical or production qualification.
+> [Report](NATIVE_PHASE_INTEGRATION_REPORT.md) · [Current contract](DGQ2_PHASE_FIELD_DESIGN.md).
+> Reverse/fine/full-trajectory and server runs remain **deferred**; no runs remain
+> active. A matched-subcycle frozen velocity replay is the next proposed accuracy
+> check, not an automatically selected campaign.
+
+> **Previous selection, 6 November 2026 — native DGQ2 phase:** native operators,
 > short growth/lifecycle checks and both positive coupled timesteps pass. The
 > user deferred the reverse-direction, finer-mesh and remaining tests after the
 > current run. The report and figures are complete using available results;

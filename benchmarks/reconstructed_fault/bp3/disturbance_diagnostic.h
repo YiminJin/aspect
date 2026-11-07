@@ -178,7 +178,7 @@ namespace aspect
       for(const auto &cell:sim.get_dof_handler().active_cell_iterators()) if(cell->is_locally_owned())
         {
           fe.reinit(cell);const auto &associations=manager.get_stokes_qp_fault_associations(cell->id(),quad,fe.get_quadrature_points());
-          fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(working,phi);
+          fe[FEValuesExtractors::Scalar(intro.phase_field().first_component_index)].get_function_values(working,phi);
           fe[intro.extractors.temperature].get_function_values(working,T);
           fe[intro.extractors.pressure].get_function_values(working,p);
           fe[intro.extractors.velocities].get_function_symmetric_gradients(working,eps);

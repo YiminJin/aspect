@@ -14,7 +14,7 @@ namespace aspect
       const LinearAlgebra::BlockVector &accepted_velocity,
       const MaterialTensorField &evaluate_tensor) const
     {
-      const auto phase_component = this->introspection().variable("phase_field").first_component_index;
+      const auto phase_component = this->introspection().phase_field().first_component_index;
       const QGauss<dim> quadrature(std::max(8u, fe_bulk_normal_quadrature_points));
       TimerOutput::Scope timer(this->get_computing_timer(), "Material tensor projection");
 

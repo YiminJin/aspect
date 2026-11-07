@@ -294,8 +294,10 @@ namespace aspect
     if (my_id==0)
       {
         std::ofstream metadata(checkpoint_path+"phase-space.txt");
-        metadata << (parameters.enable_phase_field && parameters.use_discontinuous_phase_discretization
-                     ? "DGQ2 native phase v1" : "Q1 historical phase") << '\n';
+        metadata << (introspection.composition_type_exists(CompositionalFieldDescription::phase_field)
+                     ? std::string("native composition phase v2|") + std::to_string(introspection.find_composition_type(CompositionalFieldDescription::phase_field))
+                       + "|" + std::to_string(parameters.phase_degree) + "|" + std::to_string(parameters.use_discontinuous_phase_discretization)
+                     : std::string("Q1 historical phase")) << '\n';
         phase_metadata_ok=bool(metadata);
       }
     AssertThrow(Utilities::MPI::min(phase_metadata_ok,mpi_communicator)==1,
@@ -480,10 +482,12 @@ namespace aspect
         if (metadata) std::getline(metadata,phase_identity);
       }
     phase_identity=Utilities::MPI::broadcast(mpi_communicator,phase_identity,0);
-    const std::string expected_phase=parameters.enable_phase_field && parameters.use_discontinuous_phase_discretization
-                                     ? "DGQ2 native phase v1" : "Q1 historical phase";
+    const std::string expected_phase=introspection.composition_type_exists(CompositionalFieldDescription::phase_field)
+                     ? std::string("native composition phase v2|") + std::to_string(introspection.find_composition_type(CompositionalFieldDescription::phase_field))
+                       + "|" + std::to_string(parameters.phase_degree) + "|" + std::to_string(parameters.use_discontinuous_phase_discretization)
+                     : std::string("Q1 historical phase");
     AssertThrow(phase_identity==expected_phase,
-                ExcMessage("Checkpoint phase family/degree/representation mismatch. Q1/DGQ2 conversion is not supported."));
+                ExcMessage("Checkpoint phase storage/index/family/degree mismatch. Separate-phase to composition conversion is not supported; start a fresh native composition run."));
 
     // First check existence of the two restart files
     AssertThrow (Utilities::fexists(checkpoint_path + "mesh", mpi_communicator),
