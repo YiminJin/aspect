@@ -4,6 +4,8 @@
 
 #include <aspect/global.h>
 #include <aspect/phase_field/dg_bounds.h>
+#include <aspect/phase_field/dg_quadrature.h>
+#include <aspect/simulator/assemblers/scalar_dg.h>
 #include <deal.II/dofs/dof_handler.h>
 #include <deal.II/fe/mapping.h>
 #include <functional>
@@ -19,7 +21,7 @@ namespace aspect
     /** Native scalar phase spatial operators. The DoFs belong to the simulator,
      * not to an auxiliary field. Assembly borrows explicit coefficients/velocity;
      * advance returns a candidate and never publishes accepted state.
-     * Currently Cartesian 2-D cells, including nonmatching interior faces. */
+     * Static mapped 2-D quadrilateral cells, including nonmatching interior faces. */
     template <int dim>
     class DGOperator
     {
@@ -33,11 +35,18 @@ namespace aspect
 
         DGOperator(const Mapping<dim> &, const DoFHandler<dim> &,
                    unsigned int component, types::global_dof_index offset,
-                   const IndexSet &owned, const IndexSet &relevant, MPI_Comm);
+                   const IndexSet &owned, const IndexSet &relevant, MPI_Comm, unsigned int velocity_degree = 2);
 
         /** Assemble upwind material transport, including phi div(v). Uses
          * tensor Lobatto5 volume/face quadrature and a positive-mean CFL bound. */
-        void assemble_transport(const Velocity &, const Assemblers::Interface<dim> *cell_assembler = nullptr);
+        void assemble_transport(const Velocity &,
+                                Assemblers::ScalarAdvectionForm form = Assemblers::ScalarAdvectionForm::conservative_with_divergence);
+
+        /** Borrow the manager-owned ordinary spatial assemblers. Standalone
+         * tests invoke the same classes' static spatial entry points. */
+        void set_assemblers(const Assemblers::Interface<dim> *cell,
+                            const Assemblers::Interface<dim> *interior,
+                            const Assemblers::Interface<dim> *boundary);
 
         struct TransportStatistics
         {
@@ -76,6 +85,9 @@ namespace aspect
                              const Coefficient &dirichlet = {}) const;
         void reinit_matrix(LinearAlgebra::SparseMatrix &) const;
 
+        /** Read-only spatial A, before cell mass inversion or time integration. */
+        const LinearAlgebra::SparseMatrix &advection_matrix() const { return transport_matrix; }
+
         double maximum_mean_rate() const
         {
           return mean_rate;
@@ -90,11 +102,6 @@ namespace aspect
           FullMatrix<double> inverse_mass;
           Vector<double> mean_weights;
           double volume;
-        };
-        struct Block
-        {
-          std::vector<types::global_dof_index> rows, columns;
-          FullMatrix<double> matrix;
         };
         struct BoundaryLoad
         {
@@ -123,7 +130,14 @@ namespace aspect
         const Q2Bounds<dim> bounds;
         std::vector<unsigned int> local_indices;
         std::vector<Cell> cells;
-        std::vector<Block> blocks;
+        LinearAlgebra::SparseMatrix transport_matrix;
+        const DGQuadrature<dim> quadrature;
+        const Assemblers::Interface<dim> *cell_assembler = nullptr;
+        const Assemblers::Interface<dim> *interior_assembler = nullptr;
+        const Assemblers::Interface<dim> *boundary_assembler = nullptr;
+        void assemble_faces(internal::Assembly::Scratch::ScalarFace<dim> &,
+                            internal::Assembly::CopyData::AdvectionSystem<dim> &,
+                            LinearAlgebra::SparseMatrix &) const;
         std::vector<BoundaryLoad> boundary;
         std::vector<SourceSample> sources;
         double mean_rate = 0.;

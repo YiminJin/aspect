@@ -1,6 +1,6 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/phase_field.h>
-#include <aspect/phase_field/assemblers.h>
+#include <aspect/simulator/assemblers/advection.h>
 #include <aspect/advection_field.h>
 #include <aspect/boundary_composition/interface.h>
 #include <aspect/phase_field/dg_operator.h>
@@ -21,13 +21,24 @@ namespace aspect
   template <int dim>
   void PhaseFieldHandler<dim>::set_assemblers(Assemblers::Manager<dim> &assemblers)
   {
-    transport_cell_assembler = nullptr;
+    spatial_cell_assembler = nullptr;
     if (!this->introspection().composition_type_exists(CompositionalFieldDescription::phase_field)) return;
     const auto field = this->introspection().find_composition_type(CompositionalFieldDescription::phase_field);
     auto &slot = assemblers.advection_system[field+1];
     AssertThrow(slot.empty(), ExcMessage("Native phase must not also receive the implicit composition assemblers."));
-    slot.push_back(std::make_unique<Assemblers::PhaseTransport<dim>>());
-    transport_cell_assembler = slot.back().get();
+    slot.push_back(std::make_unique<Assemblers::AdvectionSystem<dim>>());
+    spatial_cell_assembler = slot.back().get();
+    auto &interior = assemblers.advection_system_on_interior_face[field+1];
+    auto &boundary = assemblers.advection_system_on_boundary_face[field+1];
+    interior.push_back(std::make_unique<Assemblers::AdvectionSystemInteriorFace<dim>>());
+    boundary.push_back(std::make_unique<Assemblers::AdvectionSystemBoundaryFace<dim>>());
+    spatial_interior_assembler = interior.back().get();
+    spatial_boundary_assembler = boundary.back().get();
+    assemblers.advection_system_assembler_on_face_properties[field+1].need_face_finite_element_evaluation = true;
+    // Newton solver schemes may rebuild the manager after initialization.
+    // Refresh borrowed assembler addresses without discarding cached operators.
+    if (native_spatial_operator)
+      native_spatial_operator->set_assemblers(spatial_cell_assembler,spatial_interior_assembler,spatial_boundary_assembler);
   }
 
   template <int dim>
@@ -41,7 +52,8 @@ namespace aspect
                                     this->get_mapping(), this->get_dof_handler(), variable.first_component_index,
                                     state.get_block_indices().block_start(variable.block_index),
                                     sets.system_partitioning[variable.block_index], sets.system_relevant_partitioning[variable.block_index],
-                                    this->get_mpi_communicator());
+                                    this->get_mpi_communicator(),this->get_parameters().stokes_velocity_degree);
+        native_spatial_operator->set_assemblers(spatial_cell_assembler,spatial_interior_assembler,spatial_boundary_assembler);
       }
     return *native_spatial_operator;
   }
@@ -69,7 +81,7 @@ namespace aspect
     AssertThrow(uses_dg_phase(), ExcMessage("DG phase transport requires the native DG field."));
     const auto &variable = this->introspection().phase_field();
     auto &op = native_operator(accepted);
-    AssertThrow(transport_cell_assembler, ExcMessage("Native phase assembler has not been registered."));
+    AssertThrow(spatial_cell_assembler, ExcMessage("Native phase assembler has not been registered."));
     op.assemble_transport([&](const auto & cell, const auto & points, auto & speed, auto & divergence)
     {
       std::vector<Point<dim>> unit;
@@ -80,7 +92,7 @@ namespace aspect
       std::vector<Tensor<2, dim>> gradients(points.size());
       fe[this->introspection().extractors.velocities].get_function_gradients(velocity, gradients);
       for (unsigned int q = 0; q < points.size(); ++q) divergence[q] = trace(gradients[q]);
-    }, transport_cell_assembler);
+    });
     const auto &material = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>&>(this->get_material_model());
     const auto range = material.get_phase_field_range();
     const unsigned int field = this->introspection().find_composition_type(CompositionalFieldDescription::phase_field);

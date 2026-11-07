@@ -18,9 +18,10 @@
 using namespace aspect;
 #include "obstacle_checks.h"
 #include "sipg_energy_checks.h"
+#include "weak_form_checks.h"
 int main(int argc,char **argv)
 {
-  Utilities::MPI::MPI_InitFinalize mpi(argc,argv,1);
+  dealii::Utilities::MPI::MPI_InitFinalize mpi(argc,argv,1);
   deal_II_exceptions::disable_abort_on_exception();
   try
     {
@@ -60,6 +61,8 @@ int main(int argc,char **argv)
       IndexSet relevant;DoFTools::extract_locally_relevant_dofs(dofs,relevant);
       const auto owned=dofs.locally_owned_dofs();
       PhaseField::DGOperator<2> op(mapping,dofs,0,0,owned,relevant,MPI_COMM_WORLD);
+      if (mode=="weak-forms")
+        { check_material_weak_forms(mapping,dofs,owned,relevant); return 0; }
       if (mode=="obstacle" || mode=="no-growth" || mode=="moving-obstacle")
         { obstacle_check(op,mapping,dofs,owned,relevant,mode,level);return 0; }
       if (mode=="elliptic")
@@ -96,7 +99,7 @@ int main(int argc,char **argv)
           const double symmetry=std::abs(x*ay-y*ax)/std::max(1.,std::abs(x*ay)+std::abs(y*ax));
           const double positive=x*ax;
           double smallest_eigenvalue=0.;
-          if (Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD)==1 && level<=2)
+          if (dealii::Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD)==1 && level<=2)
             {
               LAPACKFullMatrix<double> dense(dofs.n_dofs());
               for (const auto i:owned)
@@ -123,9 +126,9 @@ int main(int argc,char **argv)
               fe.reinit(cell);fe.get_function_values(ghost,values);
               for (unsigned int q=0;q<rule.size();++q) error+=fe.JxW(q)*std::pow(values[q]-exact(fe.quadrature_point(q)),2);
             }
-          error=std::sqrt(Utilities::MPI::sum(error,MPI_COMM_WORLD));
+          error=std::sqrt(dealii::Utilities::MPI::sum(error,MPI_COMM_WORLD));
           AssertThrow(symmetry<2e-13 && positive>0.,ExcMessage("SIPG symmetry/coercivity check failed."));
-          if (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)==0)
+          if (dealii::Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)==0)
             std::cout<<std::setprecision(17)<<"{\"mode\":\"elliptic\",\"level\":"<<level<<",\"l2\":"<<error
                      <<",\"energy_identity\":"<<energy_checks[0]<<",\"energy_residual\":"<<energy_checks[1]<<",\"energy_tangent\":"<<energy_checks[2]
                      <<",\"refined\":"<<refined<<",\"smallest_eigenvalue\":"<<smallest_eigenvalue<<",\"symmetry\":"<<symmetry<<",\"rayleigh_numerator\":"<<positive<<",\"iterations\":"<<control.last_step()<<"}\n";
@@ -179,7 +182,7 @@ int main(int argc,char **argv)
             for (unsigned int q=0;q<rule.size();++q)
               { e+=fe.JxW(q)*std::pow(values[q]-exact(fe.quadrature_point(q),t),2);
                 maximum=std::max(maximum,values[q]);minimum=std::min(minimum,values[q]); } }
-        return std::array<double,3>{std::sqrt(Utilities::MPI::sum(e,MPI_COMM_WORLD)),Utilities::MPI::min(minimum,MPI_COMM_WORLD),Utilities::MPI::max(maximum,MPI_COMM_WORLD)};
+        return std::array<double,3>{std::sqrt(dealii::Utilities::MPI::sum(e,MPI_COMM_WORLD)),dealii::Utilities::MPI::min(minimum,MPI_COMM_WORLD),dealii::Utilities::MPI::max(maximum,MPI_COMM_WORLD)};
       };
       const auto moments=[&](double time,bool reference)
       {
@@ -196,7 +199,7 @@ int main(int argc,char **argv)
                 sums[3]+=w*point[0]*point[0];sums[4]+=w*point[1]*point[1];
               }
           }
-        for (auto &value:sums) value=Utilities::MPI::sum(value,MPI_COMM_WORLD);
+        for (auto &value:sums) value=dealii::Utilities::MPI::sum(value,MPI_COMM_WORLD);
         for (unsigned int d=1;d<5;++d) sums[d]/=sums[0];
         sums[3]=std::sqrt(std::max(0.,sums[3]-sums[1]*sums[1]));
         sums[4]=std::sqrt(std::max(0.,sums[4]-sums[2]*sums[2]));
@@ -216,7 +219,7 @@ int main(int argc,char **argv)
       const auto final_error=error(time);
       const auto final_moments=moments(time,false),reference_moments=moments(time,true);
       const double seconds=std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count();
-      if (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)==0)
+      if (dealii::Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)==0)
         std::cout<<std::setprecision(17)<<"{\"mode\":\""<<mode<<"\",\"level\":"<<level<<",\"dofs\":"<<dofs.n_dofs()
                  <<",\"time\":"<<time<<",\"interval\":"<<interval<<",\"refined\":"<<refined<<",\"limited\":"<<limiting<<",\"initial_l2\":"<<initial_error[0]<<",\"final_l2\":"<<final_error[0]
                  <<",\"minimum\":"<<final_error[1]<<",\"maximum\":"<<final_error[2]<<",\"balance\":"<<balance

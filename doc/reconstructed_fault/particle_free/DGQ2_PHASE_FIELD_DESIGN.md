@@ -48,18 +48,44 @@ On a fixed bilinear quadrilateral mesh, the material equation and weak rate are
     (w, phi_dot) = (grad(w).v, phi) + (w div(v), phi)
                   - <w, (v.n) phi_upwind>.
 
-`Assemblers::PhaseTransport` occupies the phase slot in the ordinary assembler
-manager and uses ASPECT scratch/copy bases. Its spatial cell kernel is also used
-by the standalone operator. `DGOperator` owns distributed spatial data and local
-mass inverses, and applies SSPRK3/subcycling without a global implicit solve.
-The existing BE/BDF2 composition cell assembler is deliberately not used.
+`AdvectionSystem`, `AdvectionSystemInteriorFace` and
+`AdvectionSystemBoundaryFace` occupy the phase slots in the ordinary assembler
+manager. Their spatial entry points assemble mass, material advection and
+diffusion independently of time integration. `ScalarCell`/`ScalarFace` scratch
+supply explicit coefficients and FE data; the existing advection copy data hold
+cell and three neighbor blocks. Ordinary fields retain BE/BDF2, thermal capacity,
+ALE corrections, forcing and stabilization in their adapters. Native phase uses
+`M phi_dot = -A phi + b(t)`, cached cell mass inverses and its existing
+SSPRK3/subcycling and Bernstein limiter. There is no implicit phase stage solve.
 
-`FEValues`, `FEFaceValues` and `FESubfaceValues` supply physical gradients,
-normals, points and JxW. Neighbor traces are evaluated at the same physical points
-through inverse mapping, including static coarse/fine faces. There are no physical
-axis/coordinate-overlap assumptions in phase flux or SIPG assembly. Each rank
-assembles its owned rows. Periodic topology, curved higher-order mappings, dynamic
-AMR transfer, ALE and 3-D native phase remain outside this admission boundary.
+The existing face classes own face/subface traversal, quadrature, upwind and
+symmetric diffusion terms. Ordinary assembly borrows its existing WorkStream
+face/subface FEValues; phase owns equivalent scratch for each spatial assembly.
+Shape values and normal derivatives are cached per quadrature point before the
+four matrix loops. Re-registering assemblers refreshes borrowed addresses in
+existing phase operators, including during coupled Stokes/Newton solves. ASPECT's single-face rule selects the coarse cell on
+a coarse/fine interface, otherwise the lower local index or subdomain. That
+owner assembles all four blocks, including off-process rows. The common
+`distribute_scalar_dg_faces` inserts neighbor blocks for both ordinary implicit
+systems and phase spatial matrices; `compress(add)` completes distributed
+assembly. Physical quadrature points are matched across nonperiodic faces before
+combining traces, gradients and coefficients. Periodic ordinary fields retain
+their previous pairing. Native periodic topology, curved higher-order mappings,
+dynamic AMR transfer, ALE and 3-D phase remain outside this admission boundary.
+
+The two material weak forms have the exact integration-by-parts relation
+
+    -(grad(w).v, phi) - (w div(v), phi) + <w v.n phi_up>
+      = (w, v.grad(phi)) + <w v.n (phi_up - phi_inside)>.
+
+The left side defines the retained conservative phase A; the right side defines
+ordinary advective A. The divergence contribution occurs exactly once on the
+left, and is implicit in integration by parts on the right. With continuous
+mapped Q2 velocity and matching quadrature they give the same discrete matrix,
+including nonmatching interfaces. This identity is not assumed for arbitrary
+nonpolynomial callbacks under finite quadrature. The operator check compares
+both complete matrices and SSPRK3 actions with nonzero divergence and timed
+inflow. Keeping the phase form unchanged isolates architecture from aliasing.
 
 Let Jmin be the minimum cell Jacobian determinant at the reference corners.
 For a valid 2-D bilinear map the determinant is affine, so this is a positive
@@ -78,12 +104,21 @@ whole-cell bounds; scaling about the physical J-weighted mean preserves that
 mean. An inadmissible mean is rejected, never clipped or globally corrected.
 The physical singularity at phi=1 is not replaced by an epsilon cap.
 
-Four-point Lobatto quadrature integrates Q2 mass times the bilinear Jacobian
-exactly. Five-point volume/face rules integrate the material weak form with
-mapped Q2 velocity: the Jacobian cancels inverse-Jacobian factors in the gradient
-terms. This is not an assertion that arbitrary nonpolynomial velocity or mapped
-SIPG stiffness is integrated exactly. Both the nonzero-divergence identity and
-manufactured spatial errors are checked separately.
+Quadrature is selected once by `DGQuadrature(phase_degree, velocity_degree)`;
+the native caller supplies the actual Stokes velocity degree. For static Q1
+maps in two dimensions, the Jacobian determinant is degree one per coordinate
+and the cofactor entries are degree at most one. Mass products have degree at
+most `2p+1`; material products are bounded by `2p+p_v+1` after the Jacobian
+cancels inverse-Jacobian factors. Lobatto n integrates through degree `2n-3`.
+The selected rules therefore retain **Lobatto4 mass and Lobatto5 transport** for
+p=p_v=2. Both volume and face transport use the same rule; changing only one can
+break the discrete identity. Five-point Gauss volume/face fracture integration
+is retained as the explicit `2p+1` oversampling policy. On affine cells constant
+coefficient stiffness is polynomial (p+1 Gauss points suffice); bilinear inverse
+Jacobians make it rational and no finite rule is generally exact. Fewer points
+require a separate measured operator comparison, not an implicit optimization.
+The local fracture potential uses the same retained Gauss policy. No stress,
+mechanical or surface quadrature is changed.
 
 Boundary values come from the phase composition's fixed boundary indicators and
 boundary model. Values are requested only on locally incoming faces, at SSP stage
@@ -100,13 +135,17 @@ recoverable mechanical energy to
     1/2 sum_K (k grad(phi), grad(phi))
     - sum_F <{k grad(phi).n}, [phi]> + 1/2 sum_F <sigma [phi], [phi]>.
 
-`dg_sipg.cc` differentiates this functional into one distributed sparse operator.
+`dg_sipg.cc` supplies k and the trace penalty to the common spatial assemblers,
+which differentiate this functional into one distributed sparse operator.
 Both consistency terms and symmetric Nitsche boundary terms are retained; native
 natural zero normal derivative adds no terms. The normal trace scale is bounded
 by full-face J divided by cell Jmin; sigma uses the maximum neighboring scale,
 coefficient and (p+1)^2. Static subface scaling is included on both sides.
-`scalar_symmetric_penalty` is shared with the existing ordinary advection
-boundary assembler, without changing its thermal or time prefactors. Native
+The actual interior/boundary face classes and distributed insertion are shared
+with ordinary advection. Fracture uses unit scale and capacity: no physical dt
+or temperature prefactor enters K. Transport inflow is a separate boundary
+policy and does not impose fracture Dirichlet data. The manufactured elliptic
+check alone selects symmetric Nitsche Dirichlet data explicitly. Native
 fracture coefficients remain homogeneous under the existing material admission.
 
 The constrained solve uses Bernstein coefficients of phi-phi_obstacle and of
@@ -117,7 +156,7 @@ Normalization derivatives and their mechanical work adjoint remain in the couple
 functional and final nonlinear/KKT/energy acceptance.
 
 The handler caches cell mass inverses and constant SIPG sparsity/matrix. Transport
-velocity-dependent blocks are rebuilt per attempt. Fracture coefficient/penalty
+velocity-dependent spatial matrices are rebuilt per attempt. Fracture coefficient/penalty
 changes rebuild its matrix; refinement/mesh-deformation signals clear spatial
 caches. This invalidation does not qualify dynamic material-history transfer.
 Existing endpoint/nonlocal derivative reductions remain replicated; no new global
@@ -178,8 +217,8 @@ full T=.8 reruns stay deferred.
 | Registration, degree/family migration | `simulator/parameters.cc`, `introspection.h`, `simulator/phase_field.cc` |
 | Initial and boundary data | ordinary composition managers; explicit-time boundary interface |
 | Once-per-attempt dispatch | `simulator/core.cc`, `solver_schemes.cc` |
-| Owned cell assembly and stages | `phase_field/assemblers.h`, `dg_transport.cc`, `native_phase.cc` |
-| Mapped faces, SIPG, shared scalar kernel | `mapped_face.h`, `dg_sipg.cc`, `simulator/assemblers/scalar_dg.h` |
+| Owned cell assembly and stages | `simulator/assemblers/advection.h`, `dg_transport.cc`, `native_phase.cc` |
+| Mapped faces, SIPG, shared scalar kernel | `dg_quadrature.h`, `dg_sipg.cc`, `simulator/assemblers/scalar_dg.{h,cc}` |
 | Bounds and obstacle solve | `dg_bounds.h`, `obstacle.cc`, `endpoint_phase_constraints.h` |
 | Native energy and coupled growth | `fracture.cc`, `solver/reconstructed_fault_endpoint_phase.cc` |
 | Geometry/normalization/transaction | existing material and reconstructed-fault owners |

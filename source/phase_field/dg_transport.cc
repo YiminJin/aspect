@@ -1,12 +1,13 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/phase_field/dg_operator.h>
 #include <aspect/phase_field/mapped_face.h>
-#include <aspect/phase_field/assemblers.h>
+#include <aspect/simulator/assemblers/advection.h>
 #include <deal.II/fe/mapping_q1.h>
 #include <deal.II/fe/mapping_cartesian.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/dofs/dof_tools.h>
+#include <numeric>
 
 namespace aspect
 {
@@ -15,11 +16,11 @@ namespace aspect
     template <int dim>
     DGOperator<dim>::DGOperator(const Mapping<dim> &mapping_, const DoFHandler<dim> &dofs_,
                                 const unsigned int component_, const types::global_dof_index offset_,
-                                const IndexSet &owned_, const IndexSet &relevant_, MPI_Comm communicator_)
+                                const IndexSet &owned_, const IndexSet &relevant_, MPI_Comm communicator_, unsigned int velocity_degree)
       : mapping(mapping_), dofs(dofs_), component(component_), offset(offset_),
         owned(owned_), relevant(relevant_), communicator(communicator_),
         element(dofs.get_fe().base_element(dofs.get_fe().component_to_base_index(component).first)),
-        bounds(element)
+        bounds(element), quadrature(element.degree,velocity_degree)
     {
       AssertThrow(dim == 2 && element.n_dofs_per_face() == 0,
                   ExcMessage("DG phase operators require a two-dimensional discontinuous Q2 field."));
@@ -28,7 +29,7 @@ namespace aspect
       AssertThrow(dynamic_cast<const MappingQ1<dim> *>(&mapping) != nullptr
                   || dynamic_cast<const MappingCartesian<dim> *>(&mapping) != nullptr,
                   ExcMessage("Native phase currently supports static bilinear MappingQ1 meshes."));
-      const QGaussLobatto<dim> rule(4);
+      const QGaussLobatto<dim> rule(quadrature.mass_lobatto);
       FEValues<dim> fe(mapping, element, rule, update_values | update_JxW_values);
       for (const auto &cell : dofs.active_cell_iterators())
         if (cell->is_locally_owned())
@@ -38,17 +39,19 @@ namespace aspect
             data.indices = indices(cell);
             data.volume = 0.;
             const auto n = data.indices.size();
-            data.inverse_mass.reinit(n, n);
+            internal::Assembly::CopyData::AdvectionSystem<dim> mass(element,false);
+            internal::Assembly::Scratch::ScalarCell<dim> mass_scratch(fe);
+            mass_scratch.mass = 1.;
             data.mean_weights.reinit(n);
             fe.reinit(typename Triangulation<dim>::cell_iterator(cell));
+            Assemblers::AdvectionSystem<dim>::assemble_spatial(mass_scratch,mass);
+            data.inverse_mass = mass.local_matrix;
             for (unsigned int q = 0; q < rule.size(); ++q)
               {
                 data.volume += fe.JxW(q);
                 for (unsigned int i = 0; i < n; ++i)
                   {
                     data.mean_weights[i] += fe.JxW(q) * fe.shape_value(i, q);
-                    for (unsigned int j = 0; j < n; ++j)
-                      data.inverse_mass(i, j) += fe.JxW(q) * fe.shape_value(i, q) * fe.shape_value(j, q);
                   }
               }
             data.mean_weights /= data.volume;
@@ -67,118 +70,78 @@ namespace aspect
     }
 
     template <int dim>
-    void DGOperator<dim>::assemble_transport(const Velocity &velocity, const Assemblers::Interface<dim> *cell_assembler)
+    void DGOperator<dim>::assemble_transport(const Velocity &velocity, const Assemblers::ScalarAdvectionForm form)
     {
-      blocks.clear();
+      if (transport_matrix.m() == 0) reinit_matrix(transport_matrix);
+      transport_matrix = 0.;
       boundary.clear();
       sources.clear();
       mean_rate = 0.;
-      const QGaussLobatto<dim> rule(5);
-      const QGaussLobatto<dim-1> face_rule(5);
-      MappedFaceScratch<dim> face_scratch(mapping, element, face_rule);
-      FEValues<dim> fe(mapping, element, rule, update_values | update_gradients | update_JxW_values | update_quadrature_points);
+      const QGaussLobatto<dim> rule(quadrature.transport_lobatto);
+      const QGaussLobatto<dim-1> face_rule(quadrature.transport_lobatto);
+      FEValues<dim> fe(mapping,element,rule,update_values | update_gradients | update_JxW_values | update_quadrature_points);
+      std::vector<unsigned int> shapes(element.n_dofs_per_cell());
+      std::iota(shapes.begin(),shapes.end(),0);
+      internal::Assembly::Scratch::ScalarFace<dim> face(mapping,element,face_rule,0,shapes);
+      face.form = form;
+      face.indices = [&](const auto &cell) { return indices(cell); };
+      face.coefficients = [&](const auto &values,const auto &cell,unsigned int,bool)
+      {
+        std::vector<Tensor<1,dim>> speed(values.n_quadrature_points);
+        std::vector<double> divergence(values.n_quadrature_points);
+        velocity(cell,values.get_quadrature_points(),speed,divergence);
+        typename internal::Assembly::Scratch::ScalarFace<dim>::Coefficients result(speed.size());
+        for (unsigned int q = 0; q < speed.size(); ++q) result[q].velocity = speed[q];
+        return result;
+      };
+      // Stage-time values are applied later to these spatial boundary loads.
+      face.boundary_value = [](types::boundary_id,const Point<dim> &) { return 0.; };
       for (const auto &cell : cells)
         {
-          const auto native = cell.iterator;
-          const unsigned int n = cell.indices.size();
-          fe.reinit(typename Triangulation<dim>::cell_iterator(native));
-          std::vector<Tensor<1, dim>> speed(rule.size());
-          std::vector<double> divergence(rule.size());
-          velocity(native, fe.get_quadrature_points(), speed, divergence);
-          FullMatrix<double> self(n, n);
-          double face_loss = 0.;
-          const double minimum_jacobian = minimum_cell_jacobian(mapping, element, native);
-          double minimum_divergence = *std::min_element(divergence.begin(), divergence.end());
+          fe.reinit(typename Triangulation<dim>::cell_iterator(cell.iterator));
+          internal::Assembly::Scratch::ScalarCell<dim> scratch(fe);
+          scratch.velocity.resize(rule.size());
+          scratch.divergence.resize(rule.size());
+          scratch.advection = 1.;
+          scratch.form = form;
+          velocity(cell.iterator,fe.get_quadrature_points(),scratch.velocity,scratch.divergence);
+          internal::Assembly::CopyData::AdvectionSystem<dim> data(element,true);
+          data.local_dof_indices = cell.indices;
+          if (cell_assembler) cell_assembler->execute(scratch,data);
+          else Assemblers::AdvectionSystem<dim>::assemble_spatial(scratch,data);
           for (unsigned int q = 0; q < rule.size(); ++q)
             {
               SourceSample sample;
               sample.indices = cell.indices;
-              sample.weight = fe.JxW(q) * divergence[q];
-              sample.shape.reinit(n);
-              for (unsigned int i = 0; i < n; ++i)
-                {
-                  sample.shape[i] = fe.shape_value(i, q);
-
-                }
+              sample.weight = fe.JxW(q) * scratch.divergence[q];
+              sample.shape.reinit(cell.indices.size());
+              for (unsigned int i = 0; i < cell.indices.size(); ++i) sample.shape[i] = fe.shape_value(i,q);
               sources.push_back(std::move(sample));
             }
-          if (cell_assembler)
-            {
-              internal::Assembly::Scratch::PhaseTransport<dim> scratch(fe, speed, divergence);
-              internal::Assembly::CopyData::PhaseTransport<dim> copy(self);
-              scratch.cell = native;
-              cell_assembler->execute(scratch, copy);
-            }
-          else
-            Assemblers::assemble_phase_transport_cell(fe, speed, divergence, self);
-          for (const auto f : native->face_indices())
-            {
-              AssertThrow(!native->has_periodic_neighbor(f), ExcMessage("DG phase currently requires explicit exterior data, not periodic faces."));
-              std::vector<CellIterator> neighbors;
-              if (native->at_boundary(f)) neighbors.emplace_back();
-              else if (native->neighbor(f)->has_children())
-                for (unsigned int s = 0; s < GeometryInfo<dim>::max_children_per_face; ++s)
-                  neighbors.push_back(native->neighbor_child_on_subface(f, s));
-              else neighbors.push_back(native->neighbor(f));
-              double maximum_outflow = 0.;
-              for (unsigned int patch = 0; patch < neighbors.size(); ++patch)
-                {
-                  const auto &neighbor = neighbors[patch];
-                  const bool interior = !native->at_boundary(f);
-                  const auto &face = face_scratch.reinit(native, f,
-                                                         neighbors.size() > 1 ? patch : numbers::invalid_unsigned_int);
-                  const auto &physical = face.get_quadrature_points();
-                  std::vector<Point<dim>> unit;
-                  for (const auto &point : physical)
-                    unit.push_back(mapping.transform_real_to_unit_cell(native, point));
-                  if (interior)
-                    AssertThrow(!neighbor->is_artificial(), ExcMessage("DG phase needs readable face neighbors."));
-                  std::vector<Tensor<1, dim>> face_speed(physical.size());
-                  std::vector<double> unused(physical.size());
-                  velocity(native, physical, face_speed, unused);
-                  FullMatrix<double> coupling(n, n);
-                  for (unsigned int q = 0; q < physical.size(); ++q)
-                    {
-                      const double vn = face_speed[q] * face.normal_vector(q);
-                      const double weight = face.JxW(q);
-                      // Undo the subface reference scaling when bounding a full face.
-                      const double surface_jacobian = weight / face_rule.weight(q) * neighbors.size();
-                      maximum_outflow = std::max(maximum_outflow, vn * surface_jacobian);
-                      const auto exterior = interior ? mapping.transform_real_to_unit_cell(neighbor, physical[q]) : Point<dim>();
-                      Vector<double> load(n), mass_load(n), trace(n);
-                      for (unsigned int i = 0; i < n; ++i)
-                        {
-                          trace[i] = element.shape_value(i, unit[q]);
-                          load[i] = -weight * vn * trace[i];
-                          for (unsigned int j = 0; j < n; ++j)
-                            if (vn >= 0.) self(i, j) += load[i] * element.shape_value(j, unit[q]);
-                            else if (interior) coupling(i, j) += load[i] * element.shape_value(j, exterior);
-                        }
-                      if (!interior)
-                        {
-                          cell.inverse_mass.vmult(mass_load, load);
-                          boundary.push_back({native->face(f)->boundary_id(), physical[q], cell.indices, std::move(mass_load), std::move(trace), weight * vn});
-                        }
-                    }
-                  if (interior)
-                    {
-                      FullMatrix<double> product(n, n);
-                      cell.inverse_mass.mmult(product, coupling);
-                      blocks.push_back({cell.indices, indices(neighbor), std::move(product)});
-                    }
-                }
-              // A nonnegative reference Q2 polynomial satisfies the exact
-              // Lobatto3 trace bound int_face(phi) <= 6 int_cell(phi).
-              // Weight by max(J_face v.n+)/min(J_cell). This also bounds
-              // split-face quadrature and the complementary upper-gap loss.
-              face_loss += 6. * maximum_outflow / minimum_jacobian;
-            }
-          mean_rate = std::max(mean_rate, face_loss + std::max(0., -minimum_divergence));
-          FullMatrix<double> product(n, n);
-          cell.inverse_mass.mmult(product, self);
-          blocks.push_back({cell.indices, cell.indices, std::move(product)});
+          face.cell = cell.iterator;
+          std::vector<double> maximum_outflow(cell.iterator->n_faces(),0.);
+          face.observe = [&](const auto &,unsigned int f,const auto &values,const auto &coefficients,unsigned int patches)
+          {
+            for (unsigned int q = 0; q < values.n_quadrature_points; ++q)
+              maximum_outflow[f] = std::max(maximum_outflow[f],
+                (coefficients[q].velocity * values.normal_vector(q)) * values.JxW(q) / face_rule.weight(q) * patches);
+          };
+          face.boundary_load = [&](const auto &native,const auto &values,unsigned int q,const auto &load,const auto &trace,double flux)
+          {
+            Vector<double> mass_load(load.size());
+            cell.inverse_mass.vmult(mass_load,load);
+            boundary.push_back({native->face(face.face_number)->boundary_id(),values.quadrature_point(q),
+                                cell.indices,std::move(mass_load),trace,flux});
+          };
+          assemble_faces(face,data,transport_matrix);
+          const double jacobian = minimum_cell_jacobian(mapping,element,cell.iterator);
+          const double trace_bound = (element.degree+1)*element.degree;
+          const double loss = trace_bound * std::accumulate(maximum_outflow.begin(),maximum_outflow.end(),0.) / jacobian;
+          const double divergence = *std::min_element(scratch.divergence.begin(),scratch.divergence.end());
+          mean_rate = std::max(mean_rate,loss+std::max(0.,-divergence));
         }
-      mean_rate = Utilities::MPI::max(mean_rate, communicator);
+      transport_matrix.compress(VectorOperation::add);
+      mean_rate = Utilities::MPI::max(mean_rate,communicator);
     }
 
     template <int dim>
@@ -187,13 +150,20 @@ namespace aspect
     {
       LinearAlgebra::Vector ghost(owned, relevant, communicator);
       ghost = state;
-      rhs = 0.;
+      transport_matrix.vmult(rhs,state);
+      for (const auto &cell : cells)
+        {
+          Vector<double> local(cell.indices.size()), product(cell.indices.size());
+          for (unsigned int i = 0; i < local.size(); ++i) local[i] = rhs[cell.indices[i]];
+          cell.inverse_mass.vmult(product,local);
+          for (unsigned int i = 0; i < local.size(); ++i) rhs[cell.indices[i]] = -product[i];
+        }
+      // Complete the cellwise overwrite collectively before ranks with inflow
+      // add boundary loads. Mixing Insert/Add only on boundary ranks can enter
+      // Trilinos' implicit assembly collectives in different orders.
+      rhs.compress(VectorOperation::insert);
       source = 0.;
       flux = 0.;
-      for (const auto &block : blocks)
-        for (unsigned int i = 0; i < block.rows.size(); ++i)
-          for (unsigned int j = 0; j < block.columns.size(); ++j)
-            rhs[block.rows[i]] += block.matrix(i, j) * ghost[block.columns[j]];
       for (const auto &sample : sources)
         for (unsigned int i = 0; i < sample.indices.size(); ++i)
           source += sample.weight * sample.shape[i] * ghost[sample.indices[i]];
@@ -210,7 +180,7 @@ namespace aspect
               value += load.trace[i] * ghost[load.indices[i]];
           flux += load.flux_weight * value;
         }
-      rhs.compress(VectorOperation::insert);
+      rhs.compress(VectorOperation::add);
       source = Utilities::MPI::sum(source, communicator);
       flux = Utilities::MPI::sum(flux, communicator);
     }
@@ -320,7 +290,7 @@ namespace aspect
     std::size_t DGOperator<dim>::memory_consumption() const
     {
       std::size_t bytes = sizeof(*this);
-      for (const auto &b : blocks) bytes += b.matrix.memory_consumption() + sizeof(types::global_dof_index) * (b.rows.size() + b.columns.size());
+      bytes += transport_matrix.memory_consumption();
       for (const auto &c : cells) bytes += c.inverse_mass.memory_consumption() + c.mean_weights.memory_consumption();
       for (const auto &s : sources) bytes += s.shape.memory_consumption() + sizeof(types::global_dof_index) * s.indices.size();
       for (const auto &b : boundary) bytes += b.values.memory_consumption() + b.trace.memory_consumption();

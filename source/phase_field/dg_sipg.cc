@@ -1,6 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/phase_field/dg_operator.h>
-#include <aspect/simulator/assemblers/scalar_dg.h>
+#include <aspect/simulator/assemblers/advection.h>
+#include <numeric>
 #include <aspect/phase_field/mapped_face.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
@@ -27,8 +28,19 @@ namespace aspect
                     neighbors.push_back(cell.iterator->neighbor_child_on_subface(f, s));
                 else neighbors.push_back(cell.iterator->neighbor(f));
                 for (const auto &neighbor : neighbors)
-                  for (const auto i : cell.indices)
-                    for (const auto j : indices(neighbor)) graph.add(i, j);
+                  {
+                    const auto columns = indices(neighbor);
+                    // The single face owner writes both rows. Register writable
+                    // ghost-row entries too, before Trilinos freezes the graph.
+                    for (const auto i : cell.indices)
+                      for (const auto j : columns)
+                        {
+                          graph.add(i,j);
+                          graph.add(j,i);
+                        }
+                    for (const auto i : columns)
+                      for (const auto j : columns) graph.add(i,j);
+                  }
               }
         }
       graph.compress();
@@ -44,108 +56,97 @@ namespace aspect
       matrix = 0.;
       rhs = 0.;
       double constant = 0.;
-      const QGauss<dim> volume_rule(5);
-      const QGauss<dim-1> face_rule(5);
-      MappedFaceScratch<dim> face_scratch(mapping, element, face_rule);
-      FEValues<dim> volume(mapping, element, volume_rule,
+      const QGauss<dim> volume_rule(quadrature.fracture_gauss);
+      const QGauss<dim-1> face_rule(quadrature.fracture_gauss);
+      FEValues<dim> volume(mapping,element,volume_rule,
                            update_values | update_gradients | update_JxW_values | update_quadrature_points);
+      std::vector<unsigned int> shapes(element.n_dofs_per_cell());
+      std::iota(shapes.begin(),shapes.end(),0);
+      internal::Assembly::Scratch::ScalarFace<dim> face(mapping,element,face_rule,0,shapes);
+      face.indices = [&](const auto &cell) { return indices(cell); };
+      face.coefficients = [&](const auto &values,const auto &cell,unsigned int,bool subface)
+      {
+        typename internal::Assembly::Scratch::ScalarFace<dim>::Coefficients result(values.n_quadrature_points);
+        const double jacobian = minimum_cell_jacobian(mapping,element,cell);
+        for (unsigned int q = 0; q < result.size(); ++q)
+          {
+            auto &c = result[q];
+            c.diffusivity = coefficient(values.quadrature_point(q));
+            AssertThrow(c.diffusivity > 0. && std::isfinite(c.diffusivity),ExcMessage("SIPG requires a positive finite gradient coefficient."));
+            const double h_inverse = values.JxW(q) / face_rule.weight(q)
+                                     * (subface ? GeometryInfo<dim>::max_children_per_face : 1) / jacobian;
+            c.penalty = penalty * (element.degree+1)*(element.degree+1) * c.diffusivity * h_inverse;
+          }
+        return result;
+      };
+      if (dirichlet)
+        face.boundary_value = [&](types::boundary_id,const Point<dim> &x) { return dirichlet(x); };
       for (const auto &cell : cells)
         {
-          const auto native = cell.iterator;
-          const unsigned int n = cell.indices.size();
-          FullMatrix<double> self(n, n);
-          volume.reinit(typename Triangulation<dim>::cell_iterator(native));
+          volume.reinit(typename Triangulation<dim>::cell_iterator(cell.iterator));
+          internal::Assembly::Scratch::ScalarCell<dim> scratch(volume);
+          scratch.diffusion = 1.;
+          scratch.diffusivity.resize(volume_rule.size());
           for (unsigned int q = 0; q < volume_rule.size(); ++q)
             {
-              const double k = coefficient(volume.quadrature_point(q));
-              AssertThrow(k > 0. && std::isfinite(k), ExcMessage("SIPG requires positive finite gradient coefficient."));
-              for (unsigned int i = 0; i < n; ++i)
-                for (unsigned int j = 0; j < n; ++j)
-                  self(i, j) += volume.JxW(q) * k * (volume.shape_grad(i, q) * volume.shape_grad(j, q));
+              scratch.diffusivity[q] = coefficient(volume.quadrature_point(q));
+              AssertThrow(scratch.diffusivity[q] > 0. && std::isfinite(scratch.diffusivity[q]),
+                          ExcMessage("SIPG requires a positive finite gradient coefficient."));
             }
-          for (const auto f : native->face_indices())
-            {
-              AssertThrow(!native->has_periodic_neighbor(f), ExcMessage("SIPG phase periodic faces are not qualified."));
-              const bool interior = !native->at_boundary(f);
-              if (!interior && !dirichlet) continue; // Natural zero normal derivative.
-              std::vector<CellIterator> neighbors;
-              if (!interior) neighbors.emplace_back();
-              else if (native->neighbor(f)->has_children())
-                for (unsigned int s = 0; s < GeometryInfo<dim>::max_children_per_face; ++s)
-                  neighbors.push_back(native->neighbor_child_on_subface(f, s));
-              else neighbors.push_back(native->neighbor(f));
-              for (unsigned int patch = 0; patch < neighbors.size(); ++patch)
-                {
-                  const auto &neighbor = neighbors[patch];
-                  const auto &face = face_scratch.reinit(native, f,
-                                                         neighbors.size() > 1 ? patch : numbers::invalid_unsigned_int);
-                  const auto &points = face.get_quadrature_points();
-                  const double minimum_jacobian = minimum_cell_jacobian(mapping, element, native);
-                  const double neighbor_jacobian = interior ? minimum_cell_jacobian(mapping, element, neighbor) : minimum_jacobian;
-                  std::vector<Point<dim>> neighbor_unit;
-                  if (interior)
-                    {
-                      AssertThrow(!neighbor->is_artificial(), ExcMessage("SIPG requires readable face neighbors."));
-                      for (const auto &point : points)
-                        neighbor_unit.push_back(mapping.transform_real_to_unit_cell(neighbor, point));
-                    }
-                  std::unique_ptr<FEValues<dim>> other;
-                  if (interior)
-                    {
-                      other = std::make_unique<FEValues<dim>>(mapping, element, Quadrature<dim>(neighbor_unit), update_values | update_gradients);
-                      other->reinit(typename Triangulation<dim>::cell_iterator(neighbor));
-                    }
-                  FullMatrix<double> coupling(n, n);
-                  for (unsigned int q = 0; q < points.size(); ++q)
-                    {
-                      const double k = coefficient(points[q]);
-                      const double surface_jacobian = face.JxW(q) / face_rule.weight(q);
-                      const double h_inverse = surface_jacobian * neighbors.size() / minimum_jacobian;
-                      // Fine cells see the full coarse neighbor face; its reference
-                      // face measure is twice the fine patch measure in 2-D.
-                      const double neighbor_scale = interior && native->neighbor_is_coarser(f) ? 2. : 1.;
-                      const double neighbor_h_inverse = surface_jacobian * neighbor_scale / neighbor_jacobian;
-                      const double sigma = penalty * (element.degree + 1) * (element.degree + 1)
-                                           * k * std::max(h_inverse, neighbor_h_inverse);
-                      const double w = face.JxW(q);
-                      const auto normal = face.normal_vector(q);
-                      const double average = interior ? .5 : 1.;
-                      const double g = interior ? 0. : dirichlet(points[q]);
-                      if (!interior) constant += .5 * w * sigma * g * g;
-                      for (unsigned int i = 0; i < n; ++i)
-                        {
-                          const double vi = face.shape_value(i, q), di = normal * face.shape_grad(i, q);
-                          if (!interior) rhs[cell.indices[i]] += w * g * (sigma * vi - k * di);
-                          for (unsigned int j = 0; j < n; ++j)
-                            {
-                              const double vj = face.shape_value(j, q), dj = normal * face.shape_grad(j, q);
-                              // Row on this cell: jump(test)=test. The adjacent
-                              // rank/cell assembles its own rows, never this row.
-                              self(i, j) += w * Assemblers::scalar_symmetric_penalty(vi, average*k*di, vj, average*k*dj, sigma);
-                              if (interior)
-                                coupling(i, j) += w * Assemblers::scalar_symmetric_penalty(vi, .5*k*di,
-                                                                                           -other->shape_value(j,q), .5*k*(normal*other->shape_grad(j,q)), sigma);
-                            }
-                        }
-                    }
-                  if (interior)
-                    {
-                      const auto columns = indices(neighbor);
-                      for (unsigned int i = 0; i < n; ++i)
-                        for (unsigned int j = 0; j < n; ++j)
-                          matrix.add(cell.indices[i], columns[j], coupling(i, j));
-                    }
-                }
-            }
-          for (unsigned int i = 0; i < n; ++i)
-            for (unsigned int j = 0; j < n; ++j) matrix.add(cell.indices[i], cell.indices[j], self(i, j));
+          internal::Assembly::CopyData::AdvectionSystem<dim> data(element,true);
+          data.local_dof_indices = cell.indices;
+          if (cell_assembler) cell_assembler->execute(scratch,data);
+          else Assemblers::AdvectionSystem<dim>::assemble_spatial(scratch,data);
+          face.cell = cell.iterator;
+          assemble_faces(face,data,matrix);
+          for (unsigned int i = 0; i < cell.indices.size(); ++i) rhs[cell.indices[i]] += data.local_rhs[i];
         }
+      constant = face.boundary_energy;
+
       matrix.compress(VectorOperation::add);
       rhs.compress(VectorOperation::insert);
       return Utilities::MPI::sum(constant, communicator);
     }
 
+    template <int dim>
+    void DGOperator<dim>::set_assemblers(const Assemblers::Interface<dim> *cell,
+                                         const Assemblers::Interface<dim> *interior,
+                                         const Assemblers::Interface<dim> *boundary)
+    {
+      cell_assembler = cell;
+      interior_assembler = interior;
+      boundary_assembler = boundary;
+    }
+
+    template <int dim>
+    void DGOperator<dim>::assemble_faces(internal::Assembly::Scratch::ScalarFace<dim> &scratch,
+                                         internal::Assembly::CopyData::AdvectionSystem<dim> &data,
+                                         LinearAlgebra::SparseMatrix &matrix) const
+    {
+      for (const auto f : scratch.cell->face_indices())
+        {
+          AssertThrow(!scratch.cell->has_periodic_neighbor(f),ExcMessage("Native phase periodic topology is not qualified."));
+          scratch.face_number = f;
+          if (scratch.cell->at_boundary(f))
+            {
+              if (boundary_assembler) boundary_assembler->execute(scratch,data);
+              else Assemblers::AdvectionSystemBoundaryFace<dim>::assemble_spatial(scratch,data);
+            }
+          else
+            {
+              if (interior_assembler) interior_assembler->execute(scratch,data);
+              else Assemblers::AdvectionSystemInteriorFace<dim>::assemble_spatial(scratch,data);
+            }
+        }
+      for (unsigned int i = 0; i < data.local_dof_indices.size(); ++i)
+        for (unsigned int j = 0; j < data.local_dof_indices.size(); ++j)
+          matrix.add(data.local_dof_indices[i],data.local_dof_indices[j],data.local_matrix(i,j));
+      Assemblers::distribute_scalar_dg_faces(data,matrix);
+    }
+
 #define INSTANTIATE(dim) \
+  template void DGOperator<dim>::set_assemblers(const Assemblers::Interface<dim> *,const Assemblers::Interface<dim> *,const Assemblers::Interface<dim> *); \
+  template void DGOperator<dim>::assemble_faces(internal::Assembly::Scratch::ScalarFace<dim> &,internal::Assembly::CopyData::AdvectionSystem<dim> &,LinearAlgebra::SparseMatrix &) const; \
   template void DGOperator<dim>::reinit_matrix(LinearAlgebra::SparseMatrix &) const; \
   template double DGOperator<dim>::assemble_sipg(LinearAlgebra::SparseMatrix &,LinearAlgebra::Vector &,const Coefficient &,double,const Coefficient &) const;
     ASPECT_INSTANTIATE(INSTANTIATE)

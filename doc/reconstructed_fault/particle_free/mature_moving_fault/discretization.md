@@ -9,8 +9,8 @@ The fixture uses native continuous Q2 velocity and Q1 pressure on a fixed
 Cartesian mesh. Native phase uses a semantic composition with canonical
 composition FE settings: DGQ2 is the development selection, Q1 a comparison.
 Legacy CPDI retains separate Q1 storage. The [phase contract](../DGQ2_PHASE_FIELD_DESIGN.md)
-and [integration report](../NATIVE_PHASE_INTEGRATION_REPORT.md) describe mapped
-scalar assembly and the still-Cartesian coupled stress admission. Stress has its own scalar `FE_DGQ(2)` space
+and [shared assembly report](../SHARED_SCALAR_DG_REPORT.md) describe mapped
+scalar assembly through the ordinary cell/interior/boundary advection classes and the still-Cartesian coupled stress admission. Stress has its own scalar `FE_DGQ(2)` space
 for each independent in-plane component: nine coefficients per cell/component,
 without continuity constraints across faces. `TensorField` owns these vectors
 and a shared DoF space; it assigns no physical meaning or acceptance status.
