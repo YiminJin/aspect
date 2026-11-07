@@ -101,19 +101,19 @@ void obstacle_check(aspect::PhaseField::DGOperator<2> &op,
           fe.reinit(cell);fe.get_function_values(ghost,values);
           for (unsigned int q=0;q<rule.size();++q) error+=fe.JxW(q)*std::pow(values[q]-exact(fe.quadrature_point(q)),2);
         }
-      error=std::sqrt(dealii::Utilities::MPI::sum(error,comm));
+      error=std::sqrt(Utilities::MPI::sum(error,comm));
     }
   for (const auto i:owned)
     { minimum_gap=std::min(minimum_gap,state[i]-lower[i]);maximum=std::max(maximum,static_cast<double>(state[i]));
       if (std::abs(state[i]-lower[i])<1e-9) ++active;else ++free; }
-  minimum_gap=dealii::Utilities::MPI::min(minimum_gap,comm);maximum=dealii::Utilities::MPI::max(maximum,comm);
-  active=dealii::Utilities::MPI::sum(active,comm);free=dealii::Utilities::MPI::sum(free,comm);
+  minimum_gap=Utilities::MPI::min(minimum_gap,comm);maximum=Utilities::MPI::max(maximum,comm);
+  active=Utilities::MPI::sum(active,comm);free=Utilities::MPI::sum(free,comm);
   VectorType lower_physical(owned,comm);aspect::internal::endpoint_assign(lower_physical,lower_nodal);
   const double integral_increment=op.integral(nodal_owned)-op.integral(lower_physical);
   AssertThrow(minimum_gap>-1e-10 && maximum<=.8+1e-10 && result.residual<=1e-10,
               ExcMessage("Native obstacle primal/dual constraints failed."));
   if (mode=="no-growth" || mode=="moving-obstacle") AssertThrow(error<1e-8,ExcMessage("Known discrete obstacle solution failed."));
-  if (dealii::Utilities::MPI::this_mpi_process(comm)==0)
+  if (Utilities::MPI::this_mpi_process(comm)==0)
     std::cout<<std::setprecision(17)<<"{\"mode\":\""<<mode<<"\",\"level\":"<<level<<",\"error\":"<<error
              <<",\"KKT\":"<<result.residual<<",\"iterations\":"<<result.iterations<<",\"linear_iterations\":"<<result.linear_iterations
              <<",\"minimum_coefficient_gap\":"<<minimum_gap<<",\"maximum_coefficient\":"<<maximum

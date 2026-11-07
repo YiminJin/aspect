@@ -5,7 +5,6 @@ project(dgq2_phase_checks CXX)
 find_package(MPI REQUIRED COMPONENTS CXX)
 get_filename_component(REPOSITORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE)
 add_executable(dgq2_phase_checks operator_checks.cc
-  "${REPOSITORY}/source/simulator/assemblers/scalar_dg.cc"
   "${REPOSITORY}/source/phase_field/dg_transport.cc"
   "${REPOSITORY}/source/phase_field/dg_sipg.cc"
   "${REPOSITORY}/source/phase_field/obstacle.cc")

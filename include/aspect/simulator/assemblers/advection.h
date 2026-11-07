@@ -23,7 +23,6 @@
 
 
 #include <aspect/simulator/assemblers/interface.h>
-#include <aspect/simulator/assemblers/scalar_dg.h>
 #include <aspect/simulator_access.h>
 
 namespace aspect
@@ -39,10 +38,6 @@ namespace aspect
       public SimulatorAccess<dim>
     {
       public:
-        /** Assemble spatial terms independently of the time integrator. */
-        static void assemble_spatial(internal::Assembly::Scratch::ScalarCell<dim> &scratch,
-                                     internal::Assembly::CopyData::AdvectionSystem<dim> &data);
-
         void
         execute(internal::Assembly::Scratch::ScratchBase<dim>  &scratch_base,
                 internal::Assembly::CopyData::CopyDataBase<dim> &data_base) const override;
@@ -131,10 +126,6 @@ namespace aspect
       public SimulatorAccess<dim>
     {
       public:
-        /** Assemble spatial terms independently of the time integrator. */
-        static void assemble_spatial(internal::Assembly::Scratch::ScalarFace<dim> &scratch,
-                                     internal::Assembly::CopyData::AdvectionSystem<dim> &data);
-
         void
         execute(internal::Assembly::Scratch::ScratchBase<dim>  &scratch_base,
                 internal::Assembly::CopyData::CopyDataBase<dim> &data_base) const override;
@@ -149,10 +140,6 @@ namespace aspect
       public SimulatorAccess<dim>
     {
       public:
-        /** Assemble spatial terms independently of the time integrator. */
-        static void assemble_spatial(internal::Assembly::Scratch::ScalarFace<dim> &scratch,
-                                     internal::Assembly::CopyData::AdvectionSystem<dim> &data);
-
         void
         execute(internal::Assembly::Scratch::ScratchBase<dim>  &scratch_base,
                 internal::Assembly::CopyData::CopyDataBase<dim> &data_base) const override;

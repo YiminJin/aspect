@@ -1,28 +1,3 @@
-> Shared scalar assembly now uses the ordinary advection cell/interior/boundary
-> classes for phase mass, transport and fracture. Read
-> [SHARED_SCALAR_DG_REPORT.md](../../../../doc/reconstructed_fault/particle_free/SHARED_SCALAR_DG_REPORT.md).
-> The retained integration build below is a comparison baseline. New builds live
-> under `build-particle-free/shared-scalar-dg/`; do not overwrite either baseline.
-
-## Shared-assembly checks
-
-Configure the operator target with the same compiler as the retained baseline
-(`/opt/gcc/12.4.0/bin/g++`). `weak-forms` compares complete conservative and
-advective material matrices and explicit-stage actions with nonzero divergence,
-discontinuous traces and timed inflow. It uses the same geometry/refinement
-arguments as the other modes. The reproducible bounded comparison is:
-
-```sh
-python3 benchmarks/reconstructed_fault/particle_free/dgq2_phase_field/run_shared_assembly_checks.py \
-  benchmarks/reconstructed_fault/particle_free/evidence/shared_scalar_dg/operators01 \
-  --candidate build-particle-free/shared-scalar-dg/operators/dgq2_phase_checks \
-  --baseline build-particle-free/native-phase-integration/operators/dgq2_phase_checks
-```
-
-This runs sequentially, uses at most four MPI ranks/one thread each and refuses
-to overwrite evidence. Every operator invocation has a 120-second timeout.
-Source helpers belong in version control; generated logs/results do not.
-
 > Current native integration: read the [composition/mapped-phase contract](../../../../doc/reconstructed_fault/particle_free/DGQ2_PHASE_FIELD_DESIGN.md)
 > and [bounded integration report](../../../../doc/reconstructed_fault/particle_free/NATIVE_PHASE_INTEGRATION_REPORT.md).
 > New core/plugins live under `build-particle-free/native-phase-integration/`.

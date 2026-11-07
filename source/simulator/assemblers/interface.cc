@@ -463,7 +463,50 @@ namespace aspect
 
 
 
+        template <int dim>
+        AdvectionSystem<dim>::
+        AdvectionSystem (const FiniteElement<dim> &finite_element,
+                         const bool                field_is_discontinuous)
+          :
+          local_matrix (finite_element.dofs_per_cell,
+                        finite_element.dofs_per_cell),
+          local_matrices_int_ext ((field_is_discontinuous
+                                   ?
+                                   Assemblers::n_interface_matrices(finite_element.reference_cell())
+                                   :
+                                   0),
+                                  FullMatrix<double>(finite_element.dofs_per_cell,
+                                                     finite_element.dofs_per_cell)),
+          local_matrices_ext_int ((field_is_discontinuous
+                                   ?
+                                   Assemblers::n_interface_matrices(finite_element.reference_cell())
+                                   :
+                                   0),
+                                  FullMatrix<double>(finite_element.dofs_per_cell,
+                                                     finite_element.dofs_per_cell)),
+          local_matrices_ext_ext ((field_is_discontinuous
+                                   ?
+                                   Assemblers::n_interface_matrices(finite_element.reference_cell())
+                                   :
+                                   0),
+                                  FullMatrix<double>(finite_element.dofs_per_cell,
+                                                     finite_element.dofs_per_cell)),
+          local_rhs (finite_element.dofs_per_cell),
 
+          assembled_matrices ((field_is_discontinuous
+                               ?
+                               Assemblers::n_interface_matrices(finite_element.reference_cell())
+                               :
+                               0), false),
+
+          local_dof_indices (finite_element.dofs_per_cell),
+          neighbor_dof_indices ((field_is_discontinuous
+                                 ?
+                                 Assemblers::n_interface_matrices(finite_element.reference_cell())
+                                 :
+                                 0),
+                                std::vector<types::global_dof_index>(finite_element.dofs_per_cell))
+        {}
 
       }
     }
@@ -473,6 +516,51 @@ namespace aspect
 
   namespace Assemblers
   {
+    unsigned int
+    n_interface_matrices (const ReferenceCell &reference_cell)
+    {
+      // The current implementation assumes that all faces are
+      // the same; so no wedges or pyramids please.
+      Assert ((reference_cell == ReferenceCells::Triangle)
+              ||
+              (reference_cell == ReferenceCells::Quadrilateral)
+              ||
+              (reference_cell == ReferenceCells::Tetrahedron)
+              ||
+              (reference_cell == ReferenceCells::Hexahedron),
+              ExcNotImplemented());
+      return (reference_cell.n_faces() *
+              reference_cell.face_reference_cell(0).n_isotropic_children());
+    }
+
+
+
+    unsigned int
+    nth_interface_matrix (const ReferenceCell &reference_cell,
+                          const unsigned int face)
+    {
+      AssertIndexRange (face, reference_cell.n_faces());
+      return (face *
+              reference_cell.face_reference_cell(0).n_isotropic_children());
+    }
+
+
+
+    unsigned int
+    nth_interface_matrix (const ReferenceCell &reference_cell,
+                          const unsigned int face,
+                          const unsigned int sub_face)
+    {
+      AssertIndexRange (face, reference_cell.n_faces());
+      AssertIndexRange (sub_face,
+                        reference_cell.face_reference_cell(0).n_isotropic_children());
+      return (face *
+              reference_cell.face_reference_cell(0).n_isotropic_children()
+              + sub_face);
+    }
+
+
+
     template <int dim>
     void
     Interface<dim>::create_additional_material_model_outputs(MaterialModel::MaterialModelOutputs<dim> &) const
@@ -568,6 +656,7 @@ namespace aspect
       namespace CopyData { \
         template struct StokesPreconditioner<dim>; \
         template struct StokesSystem<dim>; \
+        template struct AdvectionSystem<dim>; \
       } \
     } \
   } \

@@ -1,11 +1,3 @@
-> **Completed shared scalar assembly task:** common mass/advection/SIPG and the
-> ordinary face classes are implemented and locally verified. Matching-quadrature
-> weak-form, ordinary/native, rejection/restart and unit checks pass; see
-> [report](SHARED_SCALAR_DG_REPORT.md) and [design](DGQ2_PHASE_FIELD_DESIGN.md).
-> The tested quadrature and SSPRK3/BP scheme are retained. A bounded lower-Gauss
-> operator comparison and separate cohesive cost profile are proposed next;
-> no campaign, server run or quadrature reduction has been selected.
-
 > **Current selection complete — native phase ASPECT integration, 6 November 2026:**
 > native phase is one semantic composition, with ordinary field indexing/data,
 > simulator-owned one-attempt transport and registered spatial assembly. Mapped

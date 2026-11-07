@@ -4220,24 +4220,13 @@ term or post-equilibrium transport limiter is added. Mature moving growth
 remains disabled; operator composition does not establish moving-cohesive physics.
 
 Ordinary field dispatch transports native phase once per attempt before geometry
-binding. The registered common cell and interior/boundary face assemblers
+binding. The registered phase cell assembler and shared scalar Nitsche kernel
 reuse ordinary assembly infrastructure without BE/BDF time terms. Native
 publication depends on FE/surface candidates, not particle histories.
 The existing material transaction jointly publishes phase, geometry and histories
 or restores the accepted parent. Composition-v2 phase-space metadata and schema9 retain all
 cell modes and reject reinterpretation of historical Q1 checkpoints. Adaptive
 DG phase/obstacle transfer is not qualified and is explicitly rejected.
-Spatial assembly provides $M$, $A(\mathbf v)$ and $K$ separately from time
-integration. Native phase retains $M\dot\phi=-A\phi+b(t)$ and SSPRK3; ordinary
-fields retain their implicit time and thermal prefactors. The common face
-classes use single-face ownership and four-block distributed insertion for both
-transport and fracture. Fracture uses its gradient coefficient without a
-physical timestep multiplier, and natural fracture data are independent of
-transport inflow. Conservative volume advection includes $-w\phi\nabla\cdot
-\mathbf v$ in $A$; integration by parts gives the ordinary volume-advection
-form with upwind corrections. Matching Lobatto5 rules make these discretely
-equivalent for mapped Q2 fields. Lobatto4 mass and Gauss5 fracture quadrature
-remain explicit policies; mapped fracture stiffness need not be polynomial.
 The maintained phase design/report documents contain the source map, evidence
 and precise admission boundary. Physical stress, bulk-spin closure, mechanical
 endpoint conventions and stress quadrature are unchanged.

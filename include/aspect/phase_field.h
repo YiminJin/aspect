@@ -448,9 +448,7 @@ namespace aspect
       mutable double native_fracture_coefficient = -1.;
       mutable double native_fracture_penalty = -1.;
 
-      const Assemblers::Interface<dim> *spatial_cell_assembler = nullptr;
-      const Assemblers::Interface<dim> *spatial_interior_assembler = nullptr;
-      const Assemblers::Interface<dim> *spatial_boundary_assembler = nullptr;
+      const Assemblers::Interface<dim> *transport_cell_assembler = nullptr;
 
       PhaseField::SolverParameters solver_parameters;
 

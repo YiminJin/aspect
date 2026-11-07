@@ -1,19 +1,4 @@
-> **Current selection complete — shared scalar DG assembly, 6 November 2026:**
-> phase transport/fracture use the ordinary cell and interior/boundary face
-> classes, shared four-block distributed insertion and explicit spatial
-> coefficients. Private phase flux assembly is removed. SSPRK3/BP, ordinary
-> implicit integration and retained quadrature remain unchanged. Final 27 operator
-> runs, 155 unit cases / 185,551 assertions, ordinary 2-D/3-D regressions, mature
-> transport, loaded cohesive growth, rejection and 4→2-rank restart pass.
-> Weak-form matrix agreement is 2.78e-16; mature phase/stress/slip agree at roundoff.
-> The 3-D assembly overhead was fixed; loaded cohesive runtime remains about 20%
-> above its retained control and nonlinear iteration paths are not bitwise equal.
-> [Report](SHARED_SCALAR_DG_REPORT.md) · [Contract](DGQ2_PHASE_FIELD_DESIGN.md).
-> No new physical or production qualification. Protected binaries/data remain;
-> no jobs are active. Next: bounded quadrature/operator comparison and separate
-> cohesive cost profiling. Campaigns and server runs remain deferred.
-
-> **Previous selection complete — native phase ASPECT integration, 6 November 2026:**
+> **Current selection complete — native phase ASPECT integration, 6 November 2026:**
 > native phase is one semantic composition, with ordinary field indexing/data,
 > simulator-owned one-attempt transport and registered spatial assembly. Mapped
 > scalar transport/SIPG, physical-mean bounds and stage-time inflow are implemented;

@@ -58,12 +58,12 @@ namespace aspect
             if (tangent) (*hessian)[ {i, entry->column()}] += entry->value();
           }
       }
-    const auto &element = this->get_fe().base_element(this->get_fe().component_to_base_index(c).first);
-    const QGauss<dim> rule(PhaseField::DGQuadrature<dim>(element.degree).fracture_gauss);
+    const QGauss<dim> rule(5);
     FEValues<dim> fe(this->get_mapping(), this->get_fe(), rule, update_values | update_JxW_values);
     const FEValuesExtractors::Scalar phase(c);
     std::vector<double> phi(rule.size());
     std::vector<types::global_dof_index> indices(this->get_fe().n_dofs_per_cell());
+    const auto &element = this->get_fe().base_element(this->get_fe().component_to_base_index(c).first);
     double local_energy = 0.;
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())

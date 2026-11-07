@@ -3,37 +3,6 @@
  * scalar_symmetric_penalty kernel. Interior faces contribute half on each side. */
 #include <aspect/phase_field/mapped_face.h>
 
-    template <int dim>
-    class ReferenceFaceScratch
-    {
-      public:
-        ReferenceFaceScratch(const Mapping<dim> &mapping, const FiniteElement<dim> &element,
-                          const Quadrature<dim-1> &rule)
-          : face(mapping, element, rule, update_values | update_gradients |
-                 update_quadrature_points | update_normal_vectors | update_JxW_values),
-          subface(mapping, element, rule, update_values | update_gradients |
-                  update_quadrature_points | update_normal_vectors | update_JxW_values)
-        {}
-
-        template <class Iterator>
-        const FEFaceValuesBase<dim> &reinit(const Iterator &cell, unsigned int f,
-                                            unsigned int sub = numbers::invalid_unsigned_int)
-        {
-          const typename Triangulation<dim>::cell_iterator native(cell);
-          if (sub == numbers::invalid_unsigned_int)
-            {
-              face.reinit(native, f);
-              return face;
-            }
-          subface.reinit(native, f, sub);
-          return subface;
-        }
-
-      private:
-        FEFaceValues<dim> face;
-        FESubfaceValues<dim> subface;
-    };
-
 std::array<double,3> check_sipg_energy(
   const dealii::Mapping<2> &mapping, const dealii::DoFHandler<2> &dofs,
   const aspect::LinearAlgebra::SparseMatrix &matrix,
@@ -52,7 +21,7 @@ std::array<double,3> check_sipg_energy(
   const QGauss<1> face_rule(5);
   FEValues<2> volume(mapping, element, volume_rule,
                      update_gradients | update_quadrature_points | update_JxW_values);
-  ReferenceFaceScratch<2> face_scratch(mapping, element, face_rule);
+  PhaseField::MappedFaceScratch<2> face_scratch(mapping, element, face_rule);
   const auto energy = [&](const VectorType &state)
   {
     VectorType ghost(owned, relevant, comm);
@@ -119,7 +88,7 @@ std::array<double,3> check_sipg_energy(
                 }
             }
         }
-    return dealii::Utilities::MPI::sum(local, comm);
+    return Utilities::MPI::sum(local, comm);
   };
   VectorType x(owned, comm), direction(owned, comm), ax(owned, comm), ad(owned, comm), trial(owned, comm);
   for (const auto i : owned)

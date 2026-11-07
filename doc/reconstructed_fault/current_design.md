@@ -3621,13 +3621,8 @@ search subproblem, not a replacement physical equation. No time-mass term or
 post-equilibrium BP correction is introduced. Mature moving growth remains disabled;
 no moving-cohesive law is inferred from the manufactured composition test.
 
-The ordinary assembler manager owns phase's `AdvectionSystem` cell and
-interior/boundary face assemblers. Shared spatial assembly supplies mass,
-advection and SIPG with explicit coefficients; ordinary implicit time/thermal
-scales remain in their adapter. ASPECT single-face ownership and common four-block
-distributed insertion serve both paths. The handler retains SSPRK3 stages,
-bounds and cached mass/SIPG operators. The authoritative weak-form and quadrature
-contract is in `particle_free/DGQ2_PHASE_FIELD_DESIGN.md`. Ordinary simulator
+The ordinary assembler manager owns the phase spatial cell assembler; the handler
+retains explicit stages, bounds and cached mass/SIPG operators. Ordinary simulator
 field dispatch transports phase once per attempt before geometry binding;
 simulator/material transaction owners retain acceptance, rejection and publication.
 Native physical history uses FE/surface data and needs zero particle managers. Fresh DG checkpoints identify
