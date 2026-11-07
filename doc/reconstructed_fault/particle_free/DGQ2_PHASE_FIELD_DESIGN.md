@@ -1,5 +1,14 @@
 # Native phase in ASPECT: current implementation contract
 
+> **Frozen active architecture (6 November 2026):** this contract describes the
+> restored native-integration source (`84f57503c`, restored by `319b10b94`).
+> Keep the registered phase cell assembler and private mapped phase face loops,
+> SSPRK3/BP, quadrature and obstacle/acceptance rules fixed during the next
+> numerical-validation stage. Full ordinary-face sharing is a reverted review
+> experiment, not the active implementation. See
+> [restoration](PHASE_ARCHITECTURE_RESTORATION.md). Long experiments remain deferred
+> until explicitly selected.
+
 The selected [integration task](CODEX_NATIVE_PHASE_ASPECT_INTEGRATION.txt)
 supersedes the separate native phase-block architecture. The
 [integration report](NATIVE_PHASE_INTEGRATION_REPORT.md) owns current verification;

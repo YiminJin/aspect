@@ -1,4 +1,19 @@
-> **Current selection complete — native phase ASPECT integration, 6 November 2026:**
+> **Current selection — phase architecture restored and frozen, 6 November 2026.**
+> Normal revert `319b10b94` restores the native-integration implementation from
+> `84f57503c`; the preceding DGQ2 and native-integration commits remain intact.
+> Native phase retains its registered phase cell assembler, mapped private
+> transport/SIPG face assembly, explicit SSPRK3/BP and ordinary composition state.
+> Full shared face assembly is historical review work at
+> `review/shared-scalar-dg-3a21d59cf`, not current implementation.
+> [Restoration and short checks](PHASE_ARCHITECTURE_RESTORATION.md) ·
+> [Historical shared-assembly report](SHARED_SCALAR_DG_REPORT.md).
+> Freeze phase architecture, quadrature, time integration and acceptance rules
+> for the next numerical-validation stage. No further architecture work,
+> quadrature reduction, cost profiling or experiment is selected by old plans.
+> Deferred reverse/fine/full-trajectory and server experiments remain deferred
+> until explicitly selected. Historical findings and cleanup losses remain.
+
+> **Previous selection complete — native phase ASPECT integration, 6 November 2026:**
 > native phase is one semantic composition, with ordinary field indexing/data,
 > simulator-owned one-attempt transport and registered spatial assembly. Mapped
 > scalar transport/SIPG, physical-mean bounds and stage-time inflow are implemented;

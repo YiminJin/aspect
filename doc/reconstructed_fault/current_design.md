@@ -3599,6 +3599,14 @@ without reordering publication or adding a second controller.
 
 ## Selected native DGQ2 phase framework (6 November 2026)
 
+**Architecture freeze after restoration:** normal revert `319b10b94` restores
+native integration `84f57503c`, including its phase-specific mapped face loops
+and registered phase cell assembler. Keep this architecture, SSPRK3/BP,
+quadrature and acceptance rules fixed for the next numerical-validation stage.
+Full shared face assembly survives only as review tag
+`review/shared-scalar-dg-3a21d59cf` and historical evidence. Deferred long tests
+require explicit selection; see [restoration report](particle_free/PHASE_ARCHITECTURE_RESTORATION.md).
+
 Native phase is a semantic composition named `phase_field`, with type/method
 `phase field` and ordinary composition family/degree/initial/boundary data. It is
 excluded from chemical fractions and particle mapping. Legacy CPDI retains its

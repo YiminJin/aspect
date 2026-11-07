@@ -1,3 +1,14 @@
+## Phase architecture restoration (6 November 2026)
+
+Revert `319b10b94` exactly restores the tracked tree of `84f57503c` before this
+additive documentation reconciliation. The shared-assembler source is retained
+at `review/shared-scalar-dg-3a21d59cf`; it is not active. All 950 recorded native
+source/include/unit hashes and all seven retained binary/plugin hashes match.
+No rebuild or checkpoint conversion is necessary for the bounded restoration
+control. See [report](PHASE_ARCHITECTURE_RESTORATION.md) for commands and results.
+The restored private phase face loops and registered `PhaseTransport` cell
+assembler are intentional frozen architecture for numerical validation.
+
 ## Native phase integration audit — 6 November 2026
 
 - `CompositionalFieldDescription::phase_field` and `native_phase` method register
