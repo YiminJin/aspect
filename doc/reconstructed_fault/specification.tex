@@ -4239,4 +4239,58 @@ The maintained phase design/report documents contain the source map, evidence
 and precise admission boundary. Physical stress, bulk-spin closure, mechanical
 endpoint conventions and stress quadrature are unchanged.
 
+
+\section{Selected bounded bulk energetic tip control}
+\label{sec:bulk-tip-sections}
+The 7 November 2026 user selection adds an explicit cross-section constitutive
+assumption to the bulk energetic propagation model. It is distinct from both
+surface-damage pilot evolution and mature production. The current reading guide
+is \texttt{particle\_free/TIP\_TREATMENT.md}; its report states the measured
+qualification boundary.
+
+For the fixed-reference control, $S:S=1/2$, $D_f=wS$, $A=eS$, and
+\[
+ \psi_e=\frac{\tau:\tau}{4G}+\frac{GA:A}{h},\quad Q=\frac{2GA}{h},\quad
+ h=m\frac{\phi(1+\phi)}{(1-\phi)^2},\quad Y=\frac{G h'A:A}{h^2}.
+\]
+Backward Euler updates the direct physical stress and cohesive tensor with
+matched constant $G/\eta$ and zero spin/transport. At $\phi=0$, $A=0$ is a
+constraint with reaction $q=\tau:S-f_s$. At $\phi=1$, inverse compliance gives
+finite zero limits for $Q$, cohesive energy and $Y$ at finite $A$; no floor or
+phase cap is introduced. Physical cohesive memory is not replaced by a surface
+moment or a numerical stress predictor.
+
+The additional closure is
+\[
+ V_s=\sum_{q\in s}\frac{JxW_q}{ds_s}w_q,\qquad (\tau-Q):S=f_s,
+ \qquad \theta_s^+=\frac{\theta_s^-+\Delta t}{1+\Delta t|V_s|/D_c},
+\]
+with signed regularized RSF plus radiation at prescribed $p_N>0$. Age is
+initialized on every complete section, including virgin material ahead of the
+initial tip; geometry observations do not reset it. The work identity is
+$\sum_q JxW_q f_s w_q=\sum_s ds_s f_s V_s$. Only the section dissipation must
+be nonnegative; opposing rates and multiple bands are retained and reported.
+The numerical section elimination solves $V+C R(V)=B$ in an asinh coordinate,
+where the local bulk elimination gives $V=B-Cf$. It admits a provably monotone
+endpoint law rather than selecting an arbitrary multiple root. The actually
+integrated rate and its difference from the resolved scalar rate remain explicit
+at finite precision.
+
+The sole fracture functional is the native DGQ2 AT1/SIPG volume/face functional.
+Its residual minus $Y$ and full consistent coupled tangent are pulled back to
+Bernstein coordinates, with accepted lower obstacle and upper bound one.
+No post-equilibrium limiter, surface damage energy, or reconstructed tip
+admission rule replaces this variational inequality. All native stress/history
+points participate before a curve is present. The existing simulator publication
+transaction commits phase, true stress, cohesive memory, age and slip together;
+the new checkpoint signature prohibits silent history conversion.
+
+The initial control has a fixed direction, aligned fixed mesh, native quadrature
+history, and replicated sparse/root-direct mixed solve. Material motion, AMR,
+turning/branching, current-pressure opening/contact and general objective spin
+are not enabled. General motion must include the fracture-gradient deformation
+power $-2K\ell^2(\nabla\phi\otimes\nabla\phi):D$, material-volume and boundary
+flux terms, with a specified configurational closure. Neither positive
+section dissipation nor converged KKT is a proof of uniqueness or stability.
+
 \end{document}

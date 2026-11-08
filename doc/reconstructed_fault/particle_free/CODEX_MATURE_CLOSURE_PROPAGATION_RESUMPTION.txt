@@ -1,0 +1,263 @@
+TASK: TEMPORARILY CLOSE MATURE-FAULT VALIDATION AND RESUME PROPAGATION
+For the existing Codex thread, using Astra with high reasoning.
+7 November 2026
+
+PURPOSE AND AUTHORIZATION
+
+The paper needs three connected demonstrations: BP3 first event; a controlled
+viscous-lower-crust comparison with fixed versus advected fault geometry; and
+fault propagation interacting with unstable RSF sliding. The last item still
+has unresolved formulation questions. The user now prioritizes those questions
+because changes to shared mechanics could otherwise invalidate further tests.
+
+Complete a bounded temporary closure of the mature-fault work, recover the
+propagation workflow, and make the next formulation experiment concrete.
+Do not finish another mature-fault accuracy campaign before doing this.
+This task explicitly supersedes the proposed h=1/16 mature-fault run and earlier
+blanket deferrals of propagation for the recovery work and short checks below.
+
+"Temporary closure" means a reproducible, understood reference with recorded
+limitations. It does not mean final spatial convergence or publication approval.
+Preserve the reference while allowing future scientifically selected changes.
+The priority order remains: the paper's scientific purpose; accuracy, stability
+and efficiency; reuse of ASPECT infrastructure; readable, modular implementation.
+
+A. CLOSE THE MATURE-FAULT STAGE USING EXISTING EVIDENCE
+
+1. Establish the actual baseline.
+   Check the worktree, current revision, local modifications and applicable
+   AGENTS.md. Preserve user work, historical builds, checkpoints and evidence.
+   The overnight campaign tested numerical source matching 84f57503c after the
+   shared-assembler revert, with executable SHA256
+   6ea374c5b9b50a20af00fa6e2c365df61d7ac59ed33ad26c7b338d7bb7ba67d9.
+   These identify the tested reference; they are not instructions to reset HEAD.
+   Verify relevant differences if the current worktree has advanced.
+
+   Reuse the overnight identity/queue/input manifests. Record the source commit
+   and any necessary patch, executable/plugin identities, exact inputs, restart
+   locations and reproduction commands. Preserve a local reference branch/tag
+   or equivalent immutable source record if needed, following repository policy.
+   Do not create another full repository archive, rebuild a matching executable,
+   rescan every historical output, or perform cleanup as part of closure.
+
+2. Write a short MATURE_FAULT_TEMPORARY_CLOSEOUT.md in the established docs area.
+   Link the detailed reports and existing four figures instead of copying them.
+   State the tested problem and the conclusions in plain language:
+
+   - One semantic DGQ2 phase composition, bounded SSPRK3 transport, no particles,
+     direct physical stress history, the accepted bulk-spin convention and the
+     restored phase-specific assemblers worked together in the selected fixture.
+   - All A/B/D/C runs reached T=.8, with both drift directions, no timestep
+     retries, and substantial slip. They test mature stable sliding with growth
+     disabled, not earthquake nucleation or propagation.
+   - The discrete transport balance closes to roundoff. The small phase-integral
+     drift is explained by the nonzero divergence of the computed velocity.
+     In this incompressible model that is a discretization contribution, not
+     evidence of physical compressibility or exact continuum conservation.
+   - Phase/profile accuracy improved, and phase transport cost is about .7%.
+   - Spatial and temporal accuracy of the coupled response remain incomplete:
+     B/D final surface-stress differences are 5.48%/3.71% in central/end regions;
+     endpoint slip-rate/age differences are 2.73%/4.13%. Early temporal age
+     differences reach about 10-12%, despite smaller final differences.
+   - Localization/work quadrature, traction ripples and the fixed 20-label
+     surface remain unresolved. Two meshes do not identify an asymptotic order
+     or establish which component dominates the error.
+
+   Include a small table: conclusion / supporting evidence / remaining limit.
+   Distinguish differences between simulations from errors against an exact
+   solution. Report total driving traction and background-load conventions when
+   discussing relative stress errors. Do not invent a new universal pass threshold.
+
+3. Explicitly park, rather than silently discard:
+   the h=1/16 run, further surface/quadrature refinement, mature-fault parameter
+   sweeps, architecture work and production paper runs. No further full A/B/C/D
+   trajectory is required for this closure. Correct misleading descriptions of
+   the divergence contribution in active documentation or figure captions if
+   useful; preserve original numerical data and trace any regenerated figures.
+
+   Update the current STATUS/active task entry: mature-fault validation is
+   provisionally closed; propagation formulation/recovery is now the priority.
+   Preserve the separate shared-assembler review work in its existing archive.
+
+B. RECOVER THE PROPAGATION PROBLEM AND EXPOSE THE FORMULATION GAP
+
+Read the relevant parts, not every historical report:
+  RSF_EPISODE_REPORT.md
+  RESEARCH_HANDOFF.md
+  COHESIVE_RSF_NATIVE_FORMULATION.md
+  COHESIVE_RSF_NATIVE_REPORT.md
+  the current propagation entry point / ACTIVE_WORKFLOW.md
+  current_design.md and specification.tex where they govern these paths
+  the current true-stress and DGQ2 phase documentation.
+
+Use current source to verify what is still implemented. Historical documents
+describe evidence, not necessarily current APIs or unchanged equations.
+
+4. Recover the exact pause point.
+   The retained October 30 instability report describes step 748 at
+   t=374.58003334330067 s on four ranks. Its maximum observed rate was
+   .0450089 m/s; the final rate was .0444673 m/s, only 1.2% lower.
+   Fully decohered length remained 3 m; damage increased in the tip/cohesive
+   region but no new persistent geometry formed in this episode.
+   Its physical-work remainder was .0573% of sliding dissipation but 20.8%
+   of added fracture work. The episode and fracture-relative accuracy were open.
+   Verify these against the retained evidence; report any later results.
+
+   Keep this distinct from the earlier native curved-growth demonstration,
+   which did admit new material, fully decohere it, and continue RSF sliding.
+   Recover both the useful propagation control and the unfinished instability
+   case. Identify their source/binary/checkpoint compatibility without treating
+   them as interchangeable or rebuilding lost historical trajectories.
+
+5. Produce a concise PROPAGATION_FORMULATION_RESTART.md.
+   Lead with the physical question and your recommended route, not file lists.
+   Aim for 3-5 pages of readable explanation and equations; link existing
+   derivations for detail. Use familiar physical variables, defining any old
+   internal symbols only where necessary.
+
+   Compare the current mature route, the retained cohesive-interface propagation
+   route and the diffuse-phase growth route where it is actually relevant.
+   For each, state:
+     * what physical quantities are stored and solved;
+     * how physical tau, slip, theta and damage determine stress/resistance;
+     * what drives new damage and how irreversible growth is enforced;
+     * what advances the physical fault, versus adding temporary trial geometry;
+     * what recoverable energy, fracture energy and dissipations are counted;
+     * which parts of the current true-stress/spin/transport changes it shares.
+
+   The old interface route used surface damage a and Gc integral(a ds), with
+   geometric phi not providing a second fracture charge. Do not relabel a as phi,
+   add the diffuse fracture energy on top, or assume the new DGQ2 phase solver
+   automatically implements that propagation model. Likewise, do not remove a
+   stress remainder just because an old variable name looks obsolete: establish
+   its physical meaning and any exact transformation first.
+
+   Identify the actual equations needed at the transition from intact material
+   through the cohesive zone to mature frictional sliding. Check the intended
+   intact and mature limits, loading/unloading, contact/normal-traction convention,
+   fracture inventory and creation of new material histories. State which choices
+   are constitutive assumptions and which are discretization decisions.
+   For any proposed moving-growth extension, distinguish material irreversibility
+   from monotonicity at fixed Eulerian nodes. Mean preservation during transport
+   is not a requirement that damage evolution conserve the phase integral.
+
+   Separate:
+     (i) implementation/API drift that can be repaired without changing physics;
+     (ii) an exact change of state variables;
+     (iii) a genuinely different constitutive, energetic or tip/path assumption;
+     (iv) numerical accuracy still to be tested.
+   Recommend a primary formulation and explain why it serves the paper. If a
+   scientific choice is unresolved, supply the competing equations and a concrete
+   distinguishing experiment. Do not silently select a new law from coding
+   convenience or make the interface pilot the paper model by default.
+
+   Do not attempt a general new propagation theory, arbitrary branching, opening,
+   bulk inertia, simultaneous general advection-and-growth support, or an
+   architecture unification in this task. The manuscript's necessary scope must
+   drive the implementation, not the desire to make every experimental path share
+   a solver immediately.
+
+C. MAKE RESUMPTION EXECUTABLE WITH BOUNDED CHECKS
+
+6. Recover and exercise an existing runnable entry point.
+   This stage is authorized; do not stop after writing an audit if the existing
+   workflow can be exercised consistently.
+
+   - Verify one retained propagation/episode checkpoint using its compatible
+     executable and plugin. Restore from a copy/new output directory, never
+     overwrite the protected restart. Use existing zero-advance comparisons,
+     then 2-5 accepted steps if compatible and affordable. Preserve the exact
+     physical model, estimator, tolerances and histories.
+   - Exercise the current source's smallest relevant native propagation fixture
+     or short pre-existing admission/growth window. Prefer an existing build;
+     rebuild only changed dependencies when necessary.
+   - If the two executable paths are the same compatible path, combine these
+     checks instead of duplicating them. If they differ, clearly label historical
+     reproducibility and current-source functionality as separate evidence.
+   - If the old checkpoint is incompatible, do not reinterpret its payload or
+     convert stress/damage histories implicitly. Use a small fresh current-source
+     fixture and document the missing compatibility. Conversion is a distinct
+     scientific/numerical task if it becomes necessary.
+
+   Small fixes to inputs, stale plugin interfaces, paths and diagnostics are in
+   scope when they preserve the equations. Explain and verify any such fix.
+   Follow ASPECT style and existing modules; do not add a special single-step
+   driver or another general orchestration framework. Correct an unambiguous
+   implementation bug only with a clear independent check and identified impact.
+   A choice between physical formulations belongs in the proposal, not in an
+   unreviewed code change.
+
+   If a scientific incompatibility blocks one route, continue independent
+   recovery/analysis and deliver the precise blocker plus a ready experiment.
+   Do not manufacture a successful run by weakening acceptance criteria, changing
+   material parameters, resetting histories or treating a wall stop as arrest.
+
+7. Keep this a restart task, not a long event campaign.
+   Cap aggregate simulation/diagnostic replay time at 60 minutes locally,
+   with at most four MPI ranks or build workers, one numerical thread per rank,
+   and one heavy job at a time. Report necessary build time separately.
+   Prefer a handful of informative steps; the cap is not a target to fill.
+   A matching binary and existing evidence do not need a fresh full regression.
+   If a current build cannot be completed reasonably, preserve the working
+   historical route and give the exact build blocker rather than hide it.
+
+   No h=1/16 mature run, full RSF decay continuation, parameter search or server
+   submission is selected here. The next long run should follow a concrete
+   formulation decision. Preparing its exact input/command is part of this task.
+
+D. DELIVER THE NEXT EXPERIMENT AND A TARGETED RETEST PLAN
+
+8. Recommend ONE next propagation task, ready to execute after review.
+   Base it on the findings, not automatically on the old continuation plan:
+   - If the retained law is consistent with the intended paper formulation,
+     prepare the bounded first-episode continuation with its existing peak/decay
+     diagnostic and separate damage/decohesion/geometry measurements.
+   - If a formulation change is necessary, write the proposed equations and
+     identify the smallest loaded-tip/admission comparison that tests their
+     decisive physical consequence before another expensive full trajectory.
+
+   The task specification must state the hypothesis, selected equations and
+   parameters, control/reference, measurements, stopping condition and estimated
+   compute needs based on observed throughput. An increase in slip rate alone is
+   not new fault formation; temporary geometry is not a developed crack.
+   Preserve the quasi-static/radiation-damped interpretation. Do not promise an
+   earthquake event or physical wave/rupture-speed validation.
+
+9. State exactly which mature-fault evidence survives future changes.
+   Include a compact dependency table with proposed change / affected outputs /
+   minimum justified recheck. Useful distinctions:
+   - Documentation or algebraically equivalent plumbing: verify equivalence;
+     no automatic rerun of four long trajectories.
+   - Growth-only law with an unchanged mature limit: test that limit and the
+     relevant coupled smoke case; do not discard independent transport evidence.
+   - Shared stress/spin, Maxwell response, localization, tractions or time coupling:
+     check affected operators and rerun the relevant mature comparison before
+     reusing numerical claims.
+   - Diagnostic integration alone: reprocess retained states if possible;
+     a changed mechanical quadrature is a different, solver-affecting change.
+   - Geometry/admission/history changes: check ownership, rejection and restart
+     plus whichever moving/growing path actually uses the changed code.
+
+   Do not declare old evidence either universally valid or universally obsolete.
+   Before final publication runs, freeze the selected formulation and establish
+   the accuracy evidence needed for each claimed physical result on that version.
+   Historical runs remain useful controls, with their original provenance.
+
+DELIVERABLES AND COMPLETION
+
+Deliver:
+  1. MATURE_FAULT_TEMPORARY_CLOSEOUT.md with links to the preserved reference.
+  2. PROPAGATION_FORMULATION_RESTART.md containing the equations/route comparison,
+     actual recovery results, concrete next experiment and targeted retest table.
+  3. The necessary small input/harness fixes, exact short-check commands and
+     compact outputs, plus updated active STATUS links.
+
+Keep large generated evidence out of source commits; follow existing commit/push
+policy. Do not delete raw states, checkpoints or historical failures.
+
+The task is complete when the mature tests are safely parked, the propagation
+pause point and current executable route are understood and exercised where
+possible, and the next formulation decision/experiment is reviewable. It does
+not require resolving every mature-fault accuracy issue or completing the full
+propagation event. Lead the final response with the scientific conclusion and
+the recommended next action, followed by what ran and any genuine blocker.

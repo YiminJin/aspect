@@ -1,4 +1,18 @@
+> **Bulk-tip use, 7 November 2026:** the new guarded `bulk tip sections` route
+> reuses the existing authoritative DGQ2 fracture/SIPG operators and Bernstein
+> constraint coordinates for bulk energetic growth. It adds no shared-advection
+> refactor or transport integrator change. Native quadrature tau/A histories,
+> nonlocal RSF closure and qualification limits are documented in
+> [TIP_TREATMENT.md](TIP_TREATMENT.md) and its implementation report. The current
+> phase architecture remains the restored native implementation.
+
 # Native phase in ASPECT: current implementation contract
+
+> **Completed numerical validation:** the four restored-build A/B/D/C cases
+> reached T=.8; see [report](DGQ2_COUPLED_VALIDATION_REPORT.md). Both directions
+> are stable, but coupled spatial stress/state sensitivity and localized-work
+> integration remain unresolved. The architecture freeze remains in force;
+> no follow-up run, optimization, server pilot or cohesive extension is selected.
 
 > **Frozen active architecture (6 November 2026):** this contract describes the
 > restored native-integration source (`84f57503c`, restored by `319b10b94`).
@@ -177,8 +191,10 @@ Cartesian tensor-face implementation. Reworking these independent stress
 operators is outside this phase integration. Normalization has a mapped remote
 sampling fallback, but it does not remove the stress admission guard. Mature
 moving growth, cohesive-tip failures, endpoint energy accuracy and production
-qualification remain unresolved. Reverse translation, fine coupled mesh and
-full T=.8 reruns stay deferred.
+qualification remain unresolved. The selected restored-build forward/reverse and fine-mesh T=.8 matrix is now
+complete; its measured coupled accuracy limits are recorded in
+[DGQ2_COUPLED_VALIDATION_REPORT.md](DGQ2_COUPLED_VALIDATION_REPORT.md). Further
+trajectories require explicit selection.
 
 ## Entry points
 

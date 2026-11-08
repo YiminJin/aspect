@@ -147,10 +147,13 @@ def common_bulk_quadrature(sa,sb,shift,order=8):
     return np.stack(np.meshgrid(*axes,indexing='ij'),axis=-1).reshape(-1,2),np.outer(*weights).ravel()
 
 
-def compare_final(a,b,translate=False):
+def compare_final(a,b,translate=False,at_time=None):
     pa,ca,ra=load_case(a['case']);pb,cb,rb=load_case(b['case'])
-    sa=state_at(pa,ca,int(ra[-1]['step']));sb=state_at(pb,cb,int(rb[-1]['step']))
-    time=b['records'][-1]['time']
+    ar=a['records'][-1] if at_time is None else next(r for r in a['records'] if abs(r['time']-at_time)<1e-10)
+    br=b['records'][-1] if at_time is None else next(r for r in b['records'] if abs(r['time']-at_time)<1e-10)
+    assert abs(ar['time']-br['time'])<1e-10, 'Compare matching accepted physical times'
+    sa=state_at(pa,ca,int(ar['step']));sb=state_at(pb,cb,int(br['step']))
+    time=br['time']
     shift=(a['arguments']['translation']-b['arguments']['translation'])*time if translate else 0.
     x,w=common_bulk_quadrature(sa,sb,shift);xa=x.copy();xa[:,0]+=shift
     ta,tb=sa.stress(xa),sb.stress(x);num,den=dot3(ta-tb,ta-tb),dot3(tb,tb);labels,distance=nearest_labels(sb,x)
@@ -163,7 +166,7 @@ def compare_final(a,b,translate=False):
     ua[:,0]-=a['arguments']['translation'];ub[:,0]-=b['arguments']['translation']
     result['velocity_without_uniform_translation']=metric(np.sum((ua-ub)**2,axis=1),np.sum(ub**2,axis=1),w)
     result['pressure']=metric((va[:,17]-vb[:,17])**2,vb[:,17]**2,w)
-    labels,weights=surface_rule([sa,sb]);A=surface(sa,labels,a['records'][-1]['cumulative_vertices']);B=surface(sb,labels,b['records'][-1]['cumulative_vertices'])
+    labels,weights=surface_rule([sa,sb]);A=surface(sa,labels,ar['cumulative_vertices']);B=surface(sb,labels,br['cumulative_vertices'])
     if translate:
         A['geometry'][:,0]-=a['arguments']['translation']*time;B['geometry'][:,0]-=b['arguments']['translation']*time
     result['surface_common_quadrature']={}

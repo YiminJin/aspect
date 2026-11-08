@@ -4,6 +4,7 @@
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/history/tensor_field.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive.h>
+#include <aspect/material_model/phase_field_fault/bulk_tip.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_tensor.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_coulomb.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_gradient.h>
@@ -21,6 +22,7 @@ namespace aspect
        * use distinct entries. No fault-surface normalization is stored here. */
       struct LocalHistory
       {
+        BulkCohesive::Tensor stress {}; ///< Direct physical stress only in the bulk-tip mode.
         double a = 0.; ///< Elastic engineering shear.
         double signed_shear = 0.; ///< Signed inelastic shear.
         double absolute_shear = 0.; ///< Accumulated absolute inelastic shear.
@@ -33,12 +35,24 @@ namespace aspect
         double L = 0.;
       };
       BulkFlowRule flow_rule = BulkFlowRule::scalar;
+      bool direct_tip() const { return flow_rule==BulkFlowRule::bulk_tip_sections; }
+      /** Fixed-direction control: actual x-Gauss sections span the entire box.
+       * The age is physical everywhere from initialization, including ahead of
+       * the initial damage. Geometry observations never create/reset this state. */
+      struct Section
+      {
+        double coordinate=0., weight=0., age=0., slip=0., rate=0., force=0.;
+      };
+      std::vector<Section> sections;
+      std::map<CellId,std::vector<unsigned int>> section_ids;
+      std::map<CellId,std::vector<double>> normal_weights;
       bool tensor_flow() const
       {
         return flow_rule != BulkFlowRule::scalar;
       }
       std::string checkpoint_signature() const
       {
+        if (direct_tip()) return "bulk tip physical tau A DGQ2 sections BE v1";
         if (flow_rule == BulkFlowRule::coulomb_fixed_phase)
           return "bulk cohesive closed Coulomb fixed phase cell history v1";
         if (flow_rule == BulkFlowRule::fixed_tensor)
@@ -54,6 +68,7 @@ namespace aspect
       struct PointResponse : BulkCohesive::Response
       {
         BulkCohesive::TensorReturn::Response tensor_point;
+        BulkCohesive::Tip::Response tip_point;
         // Allocated only for the experimental Coulomb mode.
         std::shared_ptr<const BulkCohesive::CoulombReturn::Response> coulomb_point;
       };

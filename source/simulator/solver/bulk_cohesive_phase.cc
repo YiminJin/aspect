@@ -37,6 +37,9 @@ namespace aspect
     const unsigned int rank=Utilities::MPI::this_mpi_process(mpi_communicator);
     const unsigned int ranks=Utilities::MPI::n_mpi_processes(mpi_communicator);
     const bool fixed_coulomb=model.bulk_flow_rule==Model::BulkFlowRule::coulomb_fixed_phase;
+    const bool tip=model.bulk_flow_rule==Model::BulkFlowRule::bulk_tip_sections;
+    AssertThrow(phase_field_handler->uses_dg_phase()==tip,
+                ExcMessage("Bulk DGQ2 phase requires bulk tip sections; retained bulk controls use Q1."));
     AssertThrow(!fixed_coulomb || !model.evolve_phase_field,
                 ExcMessage("Native Coulomb phase evolution is not qualified; phase must remain fixed."));
     using Clock=std::chrono::steady_clock;
@@ -55,6 +58,7 @@ namespace aspect
     if(timestep_number==0)
       {
         AssertThrow(!model.bulk_cohesive_state,ExcMessage("Bulk initial history cannot publish twice."));
+        if(tip)model.initialize_fe_shared_phase(solution);
         model.initialize_bulk_cohesive_history(solution);
         old_solution=solution;old_old_solution=solution;current_linearization_point=solution;
         return; // Genuine unloaded initialization, no artificial interval.
@@ -63,6 +67,7 @@ namespace aspect
     AssertThrow(parent && parent->step+1==timestep_number
                 && parent->mesh==triangulation.get_vertices() && time_step>0.,
                 ExcMessage("Bulk cohesive history/mesh/clock changed outside accepted advancement."));
+    AssertThrow(tip==parent->direct_tip(),ExcInternalError());
     const auto p=parent->parameters;
     const double dt=time_step,G=p.G,beta=1./(1.+dt*G/p.eta);
     // Bounded continuation diagnostics, inactive in ordinary runs. These
@@ -96,7 +101,8 @@ namespace aspect
           }
       }
     const unsigned int micro_points=gradient?parent->slip_space->points.size():0;
-    const unsigned int n=native_n+2*micro_points;
+    const unsigned int sections=tip?parent->sections.size():0;
+    const unsigned int n=native_n+2*micro_points+sections;
     std::vector<BC::Tensor> oldK(micro_points);
     if(gradient)for(const auto &cell:parent->slip_space->ids)
       for(unsigned int q=0;q<cell.second.size();++q)oldK[cell.second[q]]=parent->history.at(cell.first)[q].K;
@@ -105,10 +111,17 @@ namespace aspect
                 ExcMessage("Bulk cohesive phase requires native physical bounds and irreversibility."));
     const double mechanical_tolerance=parameters.nonlinear_tolerance;
     const double phase_tolerance=settings.nonlinear_solver_tolerance;
-    const internal::EndpointPhaseConstraints phase_coordinates(native_constraints,po,np);
-    AssertThrow(ranks==1 || phase_coordinates.identity(),ExcMessage("Distributed bulk hanging-node phase evolution is outside this qualification."));
+    internal::EndpointPhaseConstraints phase_coordinates(native_constraints,po,np);
+    if(tip)
+      {
+        AssertThrow(finite_element.base_element(finite_element.component_to_base_index(pc).first).degree==2
+                    && introspection.use_discontinuous_composition_discretization[introspection.get_indices_for_fields_of_type(CompositionalFieldDescription::phase_field).at(0)],
+                    ExcMessage("Bulk tip sections require the authoritative DGQ2 phase composition."));
+        phase_coordinates.set_discontinuous_q2(dof_handler,pc,po,mpi_communicator);
+      }
+    AssertThrow(tip || ranks==1 || phase_coordinates.identity(),ExcMessage("Distributed bulk hanging-node phase evolution is outside this qualification."));
     const Vector<double> lower=phase_coordinates.select(parent->phase);
-    AssertThrow(phase_coordinates.expand(lower)==parent->phase,
+    AssertThrow(tip || phase_coordinates.expand(lower)==parent->phase,
                 ExcMessage("Bulk accepted phase obstacle violates native constraints."));
 
     // Scratch unknowns: displacement increment, p/G, physical phase. The native
@@ -117,7 +130,8 @@ namespace aspect
     for(unsigned int i=0;i<nv;++i)x[i]=dt*global_solution[i];
     for(unsigned int i=pressure_begin;i<pressure_end;++i)
       x[i]=global_solution[i]/G;
-    for(unsigned int i=0;i<np;++i)x[po+i]=parent->phase[i];
+    for(unsigned int i=0;i<np;++i)x[po+i]=tip?lower[i]:parent->phase[i];
+    for(unsigned int k=0;k<sections;++k)x[native_n+k]=parent->sections[k].force/G;
     if(gradient)for(unsigned int i=0;i<micro_points;++i)
       {x[native_n+2*i]=oldK[i][0][0];x[native_n+2*i+1]=oldK[i][0][1];}
     AffineConstraints<double> base(native_constraints);
@@ -147,6 +161,7 @@ namespace aspect
               if(!native_constraints.is_constrained(cell->face(f)->vertex_dof_index(v,introspection.component_indices.velocities[d])))open_normal=1;
           }
     open_normal=Utilities::MPI::max(open_normal,mpi_communicator);
+    double tip_pressure_shift=0.;
     if(fixed_coulomb)
       {
         AssertThrow(!open_normal && !pinned && phase_coordinates.identity(),
@@ -175,6 +190,8 @@ namespace aspect
         while(gauge<pressure_end && base.is_constrained(gauge))++gauge;
         AssertThrow(gauge<pressure_end,ExcMessage("No bulk pressure gauge is available."));
         base.add_line(gauge);
+        if(tip)
+          {tip_pressure_shift=x[gauge];for(unsigned int i=pressure_begin;i<pressure_end;++i)x[i]-=tip_pressure_shift;}
       }
     base.close();base.distribute(x);
     // Supported loading-aware continuation for this bulk law. At a change of
@@ -199,8 +216,8 @@ namespace aspect
     const auto initialize_continuation=[&]()
       {
         for(unsigned int i=0;i<nv;++i)x[i]=0.;
-        for(unsigned int i=pressure_begin;i<pressure_end;++i)x[i]=beta*global_solution[i]/G;
-        for(unsigned int i=0;i<np;++i)x[po+i]=parent->phase[i];
+        for(unsigned int i=pressure_begin;i<pressure_end;++i)x[i]=beta*(global_solution[i]/G-tip_pressure_shift);
+        for(unsigned int i=0;i<np;++i)x[po+i]=tip?lower[i]:parent->phase[i];
         base.distribute(x);relaxation_guess=true;
       };
     if((loading_aware && !test_predictor) || diagnostic_relaxation)initialize_continuation();
@@ -245,6 +262,14 @@ namespace aspect
           for(const auto &cell:part)base.add_entries_local_to_global(cell,dynamic,true);
         for(unsigned int i=0;i<n;++i)dynamic.add(i,i);
       }
+    if(tip)
+      {
+        // SIPG neighbor rows are supplied by the phase owner. The fixed small
+        // control retains the existing replicated sparse solve, not a new driver.
+        for(unsigned int i=0;i<np;++i)for(unsigned int j=0;j<np;++j)dynamic.add(po+i,po+j);
+        for(unsigned int k=0;k<sections;++k)for(unsigned int j=0;j<n;++j)if(selected(j))
+          {dynamic.add(native_n+k,j);dynamic.add(j,native_n+k);}
+      }
     SparsityPattern sparsity;sparsity.copy_from(dynamic);
     SparseMatrix<double> jacobian(sparsity);
     const auto quadrature=model.mechanical_quadrature();
@@ -272,11 +297,15 @@ namespace aspect
       if(entry.second!=0.)fracture_entries.push_back({entry.first.first,entry.first.second,entry.second});
     Vector<double> physical_mass(np);
     for(const auto &cell:dof_handler.active_cell_iterators())if(cell->is_locally_owned())
-      for(const auto v:cell->vertex_indices())physical_mass[cell->vertex_dof_index(v,pc)-po]+=cell->measure()/GeometryInfo<dim>::vertices_per_cell;
+      if(tip)
+        {fe.reinit(cell);cell->get_dof_indices(ids);
+         for(unsigned int q=0;q<quadrature.size();++q)for(unsigned int i=0;i<dpc;++i)
+           if(finite_element.system_to_component_index(i).first==pc)physical_mass[ids[i]-po]+=fe.JxW(q)*fe.shape_value_component(i,q,pc);}
+      else for(const auto v:cell->vertex_indices())physical_mass[cell->vertex_dof_index(v,pc)-po]+=cell->measure()/GeometryInfo<dim>::vertices_per_cell;
     BC::sum(physical_mass,mpi_communicator);
     const auto mass=phase_coordinates.transpose(physical_mass);
     std::map<CellId,std::vector<SymmetricTensor<2,dim>>> oldT;
-    for(const auto &cell:dof_handler.active_cell_iterators())if(cell->is_locally_owned())oldT[cell->id()]=parent->evaluate_tensor(model,cell->id(),quadrature);
+    for(const auto &cell:dof_handler.active_cell_iterators())if(cell->is_locally_owned() && !tip)oldT[cell->id()]=parent->evaluate_tensor(model,cell->id(),quadrature);
 
     struct Evaluation
     {
@@ -289,12 +318,22 @@ namespace aspect
       double Db=0.,Dc=0.,Df=0.,projection_error=0.;
       double storage_change=0.;
       double micro=0.,gradient_energy=0.,gradient_loss=0.;
+      Vector<double> section_rate, section_absolute, section_positive, section_negative;
+      std::vector<double> section_age,section_force,section_resolved_rate,section_integral_force;
+      double friction=0.,radiation=0.,power_defect=0.;
       bool admissible=true;std::string contact_error;
     };
     auto evaluate=[&](const Vector<double> &v,const bool tangent)
       {
         const auto assembly_start=Clock::now();++evaluations;
         Evaluation e;e.raw.reinit(n);e.delta_phase.reinit(np);
+        Vector<double> physical_phase(np);for(unsigned int i=0;i<np;++i)physical_phase[i]=v[po+i];
+        if(tip)physical_phase=phase_coordinates.expand(physical_phase);
+        e.section_rate.reinit(sections);e.section_absolute.reinit(sections);
+        e.section_positive.reinit(sections);e.section_negative.reinit(sections);
+        e.section_age.resize(sections);e.section_force.resize(sections);
+        e.section_resolved_rate.resize(sections);e.section_integral_force.resize(sections);
+        std::vector<Vector<double>> section_actions(sections,Vector<double>(tangent?n:0));
         std::vector<BC::Tensor> K(micro_points),X;
         if(gradient)
           {
@@ -306,7 +345,7 @@ namespace aspect
             e.gradient_loss=parent->slip_space->energy(delta,G,parent->slip_length);
           }
         if(tangent)jacobian=0.;
-        for(unsigned int i=0;i<np;++i)e.delta_phase[i]=v[po+i]-parent->phase[i];
+        for(unsigned int i=0;i<np;++i)e.delta_phase[i]=physical_phase[i]-parent->phase[i];
         Vector<double> fg(np);
         for(unsigned int i=0;i<np;++i)fg[i]=fracture.gradient[i];
         for(const auto &entry:fracture_entries)
@@ -320,8 +359,39 @@ namespace aspect
         std::vector<SymmetricTensor<2,dim>> gradients(quadrature.size());
         std::vector<double> pressures(quadrature.size()),phis(quadrature.size()),old_phis(quadrature.size());
         Vector<double> native_fields(native_n);for(unsigned int i=0;i<native_n;++i)native_fields[i]=v[i];
+        for(unsigned int i=0;i<np;++i)native_fields[po+i]=physical_phase[i];
         Vector<double> incoming_fields(native_fields);
         for(unsigned int i=0;i<np;++i)incoming_fields[po+i]=parent->phase[i];
+        // Eliminate the strictly monotone section law before assembling its
+        // force equation. Evaluating RSF on a cancellation-sized integrated
+        // rate is ill-conditioned at cold creep; V+C*RSF(V)=B has the identical
+        // root and a well-scaled scalar solve. No clipping or physical regularization.
+        using SectionLaw=typename MaterialModel::Rheology::FaultFriction<dim>::SectionEndpoint;
+        std::vector<SectionLaw> section_laws(sections);
+        if(tip)
+          {
+            Vector<double> free_rate(sections),mobility(sections);
+            for(const auto &cell:dof_handler.active_cell_iterators())if(cell->is_locally_owned())
+              {
+                fe.reinit(cell);
+                fe[introspection.extractors.velocities].get_function_symmetric_gradients(native_fields,gradients);
+                fe[FEValuesExtractors::Scalar(pc)].get_function_values(native_fields,phis);
+                fe[FEValuesExtractors::Scalar(pc)].get_function_values(incoming_fields,old_phis);
+                for(unsigned int q=0;q<quadrature.size();++q)
+                  {
+                    const auto &old=parent->history.at(cell->id())[q];
+                    const auto point=BC::Tip::update(p,{old.stress,old.A,old_phis[q]},embed(gradients[q]),phis[q],dt,S,0.);
+                    const auto k=parent->section_ids.at(cell->id())[q];
+                    const double dn=parent->normal_weights.at(cell->id())[q];
+                    free_rate[k]+=dn*point.rate;mobility[k]+=dn*point.fraction/(G*beta*dt);
+                  }
+              }
+            BC::sum(free_rate,mpi_communicator);BC::sum(mobility,mpi_communicator);
+            std::vector<double> fractions(model.elastic_shear_moduli.size(),0.);fractions[0]=1.;
+            for(unsigned int k=0;k<sections;++k)
+              section_laws[k]=model.fault_friction.section_endpoint(fractions,free_rate[k],mobility[k],parent->sections[k].age,dt,
+                                   parameters.surface_pressure,model.radiation_damping_coefficients[0]);
+          }
         for(const auto &cell:dof_handler.active_cell_iterators())if(cell->is_locally_owned())
           {
             fe.reinit(cell);cell->get_dof_indices(ids);
@@ -337,8 +407,9 @@ namespace aspect
                 {
                 const double old_phi=old_phis[q];
                 const auto &old=parent->history.at(cell->id())[q];
-                BC::State incoming;incoming.T[0][0]=oldT.at(cell->id())[q][0][0];incoming.T[1][1]=oldT.at(cell->id())[q][1][1];
-                incoming.T[2][2]=-incoming.T[0][0]-incoming.T[1][1];incoming.T[0][1]=oldT.at(cell->id())[q][0][1];
+                BC::State incoming;
+                if(!tip){incoming.T[0][0]=oldT.at(cell->id())[q][0][0];incoming.T[1][1]=oldT.at(cell->id())[q][1][1];
+                incoming.T[2][2]=-incoming.T[0][0]-incoming.T[1][1];incoming.T[0][1]=oldT.at(cell->id())[q][0][1];}
                 incoming.a=old.a;incoming.signed_shear=old.signed_shear;incoming.absolute_shear=old.absolute_shear;incoming.q=old.q;incoming.phi=old_phi;
                 const auto increment=embed(gradients[q]);
                 TR::State tensor_incoming;
@@ -347,7 +418,23 @@ namespace aspect
                 tensor_incoming.Q=old.Q;tensor_incoming.L=old.L;
                 const BC::Tensor *fixed=parent->flow_rule==Model::BulkFlowRule::fixed_tensor ? &S : nullptr;
                 auto &r=responses[q];
-                if(parent->tensor_flow())
+                const unsigned int section=tip?parent->section_ids.at(cell->id())[q]:0;
+                const double force=tip?G*v[native_n+section]:0.;
+                BC::Tip::State tip_incoming{old.stress,old.A,old_phi};
+                if(tip)
+                  {
+                    r.tip_point=BC::Tip::update(p,tip_incoming,increment,phis[q],dt,S,force);
+                    const auto &t=r.tip_point;
+                    r.stress=t.state.stress;r.driving=t.driving;r.w=t.rate;
+                    r.bulk_energy=t.bulk_energy;r.cohesive_energy=t.cohesive_energy;
+                    r.bulk_dissipation=t.bulk_viscosity;r.cohesive_dissipation=t.cohesive_viscosity;
+                    r.friction_dissipation=force*t.rate;
+                    const double dn=parent->normal_weights.at(cell->id())[q];
+                    e.section_rate[section]+=dn*t.rate;e.section_absolute[section]+=dn*std::abs(t.rate);
+                    e.section_positive[section]+=dn*std::max(0.,t.rate);
+                    e.section_negative[section]+=dn*std::min(0.,t.rate);
+                  }
+                else if(parent->tensor_flow())
                   {
                     if(fixed_coulomb)
                       {
@@ -380,7 +467,7 @@ namespace aspect
                 const double weight=fe.JxW(q);
                 e.bulk+=weight*r.bulk_energy;e.cohesive+=weight*r.cohesive_energy;
                 e.Db+=weight*dt*r.bulk_dissipation;e.Dc+=weight*dt*r.cohesive_dissipation;e.Df+=weight*dt*r.friction_dissipation;
-                const auto ledger=parent->tensor_flow() ? TR::account(p,tensor_incoming,r.tensor_point,increment,dt)
+                const auto ledger=tip?BC::Tip::account(p,tip_incoming,r.tip_point,increment,dt,force):parent->tensor_flow() ? TR::account(p,tensor_incoming,r.tensor_point,increment,dt)
                                                        : BC::account(p,incoming,r,increment,dt);
                 e.storage_change+=weight*ledger.storage_change;
                 e.internal_work+=weight*ledger.internal_work;
@@ -388,10 +475,14 @@ namespace aspect
                 e.pressure_work+=fixed_coulomb ? weight*total_pressure*trace(gradients[q])
                                              : weight*G*pressures[q]*trace(gradients[q]);
                 e.stress_loss+=weight*ledger.stress_loss;e.traction_loss+=weight*ledger.traction_loss;
+                if(tip)e.phase_remainder+=weight*(ledger.compliance_work-r.driving*(phis[q]-old_phi));
+                else
+                  {
                 const auto h0=BC::compliance(old_phi,p.m),h1=BC::compliance(phis[q],p.m);
                 const double traction_energy=parent->tensor_flow() ? (r.tensor_point.state.Q*r.tensor_point.state.Q)/(4*G)
                                                                  : r.state.q*r.state.q/(2*G);
                 e.phase_remainder+=weight*traction_energy*(h1.h-h0.h-h1.first*(phis[q]-old_phi));
+                  }
                 std::vector<BC::Tensor> shapeE(dpc);
                 std::vector<double> div(dpc),P(dpc),N(dpc);
                 for(unsigned int i=0;i<dpc;++i)
@@ -405,7 +496,7 @@ namespace aspect
                 if(tangent)
                   {
                     std::vector<TR::Variation> actions;
-                    if(parent->tensor_flow())
+                    if(parent->tensor_flow() && !tip)
                       {
                         actions.resize(dpc);
                         for(unsigned int j=0;j<dpc;++j)if(selected(ids[j]))
@@ -418,7 +509,12 @@ namespace aspect
                       for(unsigned int j=0;j<dpc;++j)if(selected(ids[j]))
                         {
                           double value;
-                          if(parent->tensor_flow())
+                          if(tip)
+                            {
+                              const auto a=BC::Tip::derivative(p,r.tip_point,shapeE[j],N[j],dt,S,0.);
+                              value=(a.stress*shapeE[i])/G-div[i]*P[j]-P[i]*div[j]-N[i]*a.driving/Kf;
+                            }
+                          else if(parent->tensor_flow())
                             value=(actions[j].stress*shapeE[i])/G-div[i]*P[j]-P[i]*div[j]
                               -N[i]*actions[j].driving/Kf;
                           else
@@ -431,6 +527,19 @@ namespace aspect
                             }
                           if(value!=0.)jacobian.add(ids[i],ids[j],weight*value);
                         }
+                    if(tip)
+                      {
+                        const double dn=parent->normal_weights.at(cell->id())[q];
+                        const auto a=BC::Tip::derivative(p,r.tip_point,{},0.,dt,S,G);
+                        for(unsigned int i=0;i<dpc;++i)if(selected(ids[i]))
+                          {
+                            jacobian.add(ids[i],native_n+section,weight*((a.stress*shapeE[i])/G-N[i]*a.driving/Kf));
+                            const auto b=BC::Tip::derivative(p,r.tip_point,shapeE[i],N[i],dt,S,0.);
+                            section_actions[section][ids[i]]+=dn*(b.rate+(force-section_laws[section].law.traction)
+                              *r.tip_point.fraction_derivative*N[i]/(G*beta*dt));
+                          }
+                        // The eliminated target is independent of the trial section force.
+                      }
                     if(gradient)
                       {
                         const auto point=parent->slip_space->ids.at(cell->id())[q];const auto &joint=e.joint.at(cell->id())[q];
@@ -492,6 +601,54 @@ namespace aspect
         communication_seconds+=seconds(communication_start);
         for(unsigned int i=0;i<np;++i)e.raw[po+i]+=fg[i]/Kf;
         if(tangent)for(const auto &entry:fracture_entries)jacobian.add(po+entry.i,po+entry.j,entry.value/Kf);
+        if(tip)
+          {
+            BC::sum(e.section_rate,mpi_communicator);BC::sum(e.section_absolute,mpi_communicator);
+            BC::sum(e.section_positive,mpi_communicator);BC::sum(e.section_negative,mpi_communicator);
+            std::vector<double> fraction(model.elastic_shear_moduli.size(),0.);fraction[0]=1.;
+            double power=0.;
+            for(unsigned int k=0;k<sections;++k)
+              {
+                const auto law=model.fault_friction.signed_endpoint(fraction,e.section_rate[k],parent->sections[k].age,dt,
+                             parameters.surface_pressure,model.radiation_damping_coefficients[0]);
+                e.section_age[k]=law.age;e.section_force[k]=G*v[native_n+k];
+                e.raw[native_n+k]=v[native_n+k]-section_laws[k].law.traction/G;
+                e.section_resolved_rate[k]=section_laws[k].rate;e.section_integral_force[k]=law.traction;
+                const double measure=parent->sections[k].weight;
+                power+=dt*measure*e.section_force[k]*e.section_rate[k];
+                e.friction+=dt*measure*section_laws[k].law.friction*section_laws[k].rate;
+                e.radiation+=dt*measure*section_laws[k].law.radiation*section_laws[k].rate;
+                if(tangent)
+                  {
+                    BC::sum(section_actions[k],mpi_communicator);
+                    for(unsigned int j=0;j<n;++j)if(selected(j))
+                      jacobian.set(native_n+k,j,(j==native_n+k?1.:0.)-section_laws[k].force_derivative*section_actions[k][j]/G);
+                  }
+              }
+            e.power_defect=e.Df-power;
+            AssertThrow(std::abs(e.power_defect)<1e-11*std::max(1.,std::abs(power)),ExcMessage("Bulk/section work adjoint failed."));
+            // Pull back the complete coupled residual and tangent, including
+            // nonlocal section rows and SIPG faces, to Bernstein coordinates.
+            const auto row=[&](const unsigned int i)
+              {
+                std::vector<std::pair<unsigned int,double>> result;
+                if(i>=po && i<po+np)for(const auto &a:phase_coordinates.weights()[i-po])result.emplace_back(po+a.first,a.second);
+                else result.emplace_back(i,1.);
+                return result;
+              };
+            Vector<double> pulled(n);
+            for(unsigned int i=0;i<n;++i)for(const auto &a:row(i))pulled[a.first]+=a.second*e.raw[i];
+            e.raw=pulled;
+            e.fracture_gradient=phase_coordinates.transpose(fg);
+            if(tangent)
+              {
+                SparseMatrix<double> pulled_matrix(sparsity);
+                for(unsigned int i=0;i<n;++i)for(auto it=jacobian.begin(i);it!=jacobian.end(i);++it)
+                  if(it->value()!=0.)for(const auto &a:row(i))for(const auto &b:row(it->column()))
+                    pulled_matrix.add(a.first,b.first,a.second*b.second*it->value());
+                jacobian.copy_from(pulled_matrix);
+              }
+          }
         // Test-only export of the actual raw/condensed actions. Independent
         // reconstruction of C checks hanging-node reduction exactly once;
         // these files never select a constitutive or acceptance rule.
@@ -527,15 +684,15 @@ namespace aspect
           }
         Vector<double> raw_phase(np);
         for(unsigned int i=0;i<np;++i)raw_phase[i]=e.raw[po+i];
-        e.phase_gradient=phase_coordinates.transpose(raw_phase);
-        const auto phase_values=[&](){Vector<double> a(np);for(unsigned int i=0;i<np;++i)a[i]=v[po+i];return phase_coordinates.select(a);}();
-        for(unsigned int i=0;i<native_n;++i)if(selected(i) && !base.is_constrained(i) && !(i>=po && i<po+np))
+        e.phase_gradient=tip?raw_phase:phase_coordinates.transpose(raw_phase);
+        const auto phase_values=[&](){Vector<double> a(np);for(unsigned int i=0;i<np;++i)a[i]=v[po+i];return tip?a:phase_coordinates.select(a);}();
+        for(unsigned int i=0;i<(tip?n:native_n);++i)if(selected(i) && !base.is_constrained(i) && !(i>=po && i<po+np))
           e.mechanical+=e.residual[i]*e.residual[i];
         e.mechanical=std::sqrt(e.mechanical);
         double phase_norm=0.;
         for(unsigned int i=0;!fixed_coulomb && i<phase_coordinates.size();++i)
           {
-            const double a=std::min(phase_values[i]-lower[i],e.phase_gradient[i]/mass[i]);
+            const double a=tip?phase_values[i]-std::clamp(phase_values[i]-e.phase_gradient[i]/mass[i],lower[i],1.):std::min(phase_values[i]-lower[i],e.phase_gradient[i]/mass[i]);
             e.kkt=std::max(e.kkt,std::abs(a));phase_norm+=a*a;
           }
         e.norm=std::sqrt(std::pow(e.mechanical/mechanical_tolerance,2)+phase_norm/(phase_tolerance*phase_tolerance)+std::pow(e.micro/1e-12,2));
@@ -622,7 +779,11 @@ namespace aspect
       {
         auto current=evaluate(x,true);
         AssertThrow(current.admissible,ExcMessage("Closed Coulomb current iterate is inadmissible: "+current.contact_error));
-        if((fixed_coulomb && std::getenv("ASPECT_BULK_CHECK_TANGENT")
+        if((tip && continuation_diagnostic && std::getenv("ASPECT_TIP_CHECK_ITERATION")
+            && iteration==static_cast<unsigned int>(std::stoul(std::getenv("ASPECT_TIP_CHECK_ITERATION"))))
+           || (tip && std::getenv("ASPECT_BULK_CHECK_TANGENT") && timestep_number==8
+            && current.mechanical<=mechanical_tolerance && current.kkt<=phase_tolerance)
+           || (fixed_coulomb && std::getenv("ASPECT_BULK_CHECK_TANGENT")
             && current.mechanical<=mechanical_tolerance && (timestep_number==8 || timestep_number==16 || timestep_number==24))
            || (std::getenv("ASPECT_BULK_CHECK_TANGENT") && iteration==0
             && time>=.11-1e-12 && time<.11+.5*dt)
@@ -665,7 +826,7 @@ namespace aspect
                         // stability check, vary only interior phase masters,
                         // relative to their physical distance from the obstacle.
                         const double gap=x[ids[i]]-parent->phase[ids[i]-po];
-                        d[ids[i]]=critical_tangent
+                        d[ids[i]]=tip ? .01*std::min(x[ids[i]],1.-x[ids[i]]) : critical_tangent
                           ? (critical_phase[ids[i]-po]?(gap>1e-9?.01*gap:(x[ids[i]]>0.?.01*x[ids[i]]:1e-5)):0.)
                           :(.01+.005*sx*sx);
                       }
@@ -685,7 +846,8 @@ namespace aspect
             // Shared coefficients are identical functions of physical position.
             // Sum only uniquely owned DoFs before imposing global constraints.
             if(ranks>1)
-              {for(unsigned int i=0;i<n;++i)if(!dof_handler.locally_owned_dofs().is_element(i))d[i]=0.;BC::sum(d,mpi_communicator);}
+              {for(unsigned int i=0;i<n;++i)if(i>=native_n || !dof_handler.locally_owned_dofs().is_element(i))d[i]=0.;BC::sum(d,mpi_communicator);}
+            if(tip)for(unsigned int k=0;k<sections;++k)d[native_n+k]=.0001*std::cos(parent->sections[k].coordinate);
             homogeneous.distribute(d);
             Vector<double> full_action(n);jacobian.vmult(full_action,d);
             // condense() supplies artificial slave-row diagonals for solving.
@@ -804,7 +966,7 @@ namespace aspect
           }
         if(current.mechanical<=mechanical_tolerance && current.kkt<=phase_tolerance && current.micro<=1e-12)
           {export_localization(current,"converged");accepted=std::move(current);converged=true;break;}
-        const auto linear_start=Clock::now();++linear_solves;
+        const auto linear_start=Clock::now();
         std::vector<bool> active(n,false);
         Vector<double> direction(n);
         if(gradient)for(const auto &cell:current.joint)for(unsigned int q=0;q<cell.second.size();++q)
@@ -824,7 +986,17 @@ namespace aspect
             const auto global=po+phase_coordinates.physical_index(i);
             if(x[global]-lower[i]<=current.phase_gradient[i]/mass[i])
               {active[global]=true;direction[global]=lower[i]-x[global];}
+            else if(tip && x[global]-1.>=current.phase_gradient[i]/mass[i])
+              {active[global]=true;direction[global]=1.-x[global];}
           }
+        // Solve the linearized Newton problem on the admissible phase box.
+        // Merely projecting an outward direction after the coupled solve drops
+        // its compensating section-force variation and need not be a descent
+        // direction. Resolve those linearized bound rows in the new tip mode;
+        // the full nonlinear KKT conditions are still checked on the next iterate.
+        for(unsigned int feasible_pass=0;;++feasible_pass)
+        {
+        ++linear_solves;
         std::vector<unsigned int> free;
         std::vector<unsigned int> index(n,numbers::invalid_unsigned_int);
         for(unsigned int i=0;i<n;++i)if(selected(i) && !base.is_constrained(i) && !active[i])
@@ -850,9 +1022,20 @@ namespace aspect
         if(!linear_error.empty())export_localization(current,"failed-linear");
         AssertThrow(linear_error.empty(),ExcMessage(linear_error));
         if(ranks>1){std::vector<double> values(delta.begin(),delta.end());values=Utilities::MPI::broadcast(mpi_communicator,values,0);std::copy(values.begin(),values.end(),delta.begin());}
-        linear_seconds+=seconds(linear_start);
         for(unsigned int k=0;k<free.size();++k)direction[free[k]]=delta[k];
         homogeneous.distribute(direction);
+        unsigned int added=0;
+        if(tip)for(unsigned int k=0;k<phase_coordinates.size();++k)
+          {
+            const auto i=po+phase_coordinates.physical_index(k);
+            if(!active[i] && (x[i]+direction[i]<lower[k] || x[i]+direction[i]>1.))
+              {active[i]=true;direction[i]=(x[i]+direction[i]<lower[k]?lower[k]:1.)-x[i];++added;}
+          }
+        if(!added)break;
+        AssertThrow(feasible_pass<np,ExcMessage("Bulk tip linearized bound set did not terminate."));
+        if(rank==0)pcout<<"   Bulk tip: resolve "<<added<<" outward bound directions"<<std::endl;
+        }
+        linear_seconds+=seconds(linear_start);
         bool found=false;
         for(unsigned int line=0;line<settings.max_newton_line_search_iterations;++line)
           {
@@ -867,18 +1050,38 @@ namespace aspect
             for(unsigned int i=0;i<phase_coordinates.size();++i)
               {
                 const auto global=po+phase_coordinates.physical_index(i);
-                trial[global]=std::max(lower[i],trial[global]);
+                trial[global]=tip?std::clamp(trial[global],lower[i],1.):std::max(lower[i],trial[global]);
               }
             base.distribute(trial);
             bool admissible=true;
-            for(unsigned int i=0;i<np;++i)admissible=admissible && trial[po+i]>=parent->phase[i] && trial[po+i]<1.;
+            for(unsigned int i=0;i<np;++i)admissible=admissible && trial[po+i]>=(tip?lower[i]:parent->phase[i]) && (tip?trial[po+i]<=1.:trial[po+i]<1.);
             if(!admissible)continue;
             const auto candidate=evaluate(trial,false);
+            if(tip && continuation_diagnostic && rank==0)
+              {
+                std::ofstream out(parameters.output_directory+"tip-line-search.csv",std::ios::app);
+                if(out.tellp()==0)out<<"iteration,alpha,initial_norm,trial_norm,mechanical,phase_KKT\n";
+                out<<std::setprecision(17)<<iteration<<','<<alpha<<','<<current.norm<<','<<candidate.norm<<','<<candidate.mechanical<<','<<candidate.kkt<<'\n';
+              }
             if(candidate.admissible && candidate.norm<(1.-1e-4*alpha)*current.norm)
               {x=std::move(trial);found=true;break;}
           }
         if(!found)
           {
+            if(tip && rank==0)
+              {
+                std::ofstream out(parameters.output_directory+"tip-failed-sections.csv");
+                out<<std::setprecision(17)<<"section,s,force,V,positive,negative,age,law_force,law_derivative,residual\n";
+                std::vector<double> fractions(model.elastic_shear_moduli.size(),0.);fractions[0]=1.;
+                for(unsigned int k=0;k<sections;++k)
+                  {
+                    const auto law=model.fault_friction.signed_endpoint(fractions,current.section_rate[k],parent->sections[k].age,dt,
+                                      parameters.surface_pressure,model.radiation_damping_coefficients[0]);
+                    out<<k<<','<<parent->sections[k].coordinate<<','<<current.section_force[k]<<','<<current.section_rate[k]<<','
+                       <<current.section_positive[k]<<','<<current.section_negative[k]<<','<<law.age<<','<<law.traction<<','
+                       <<law.derivative<<','<<current.raw[native_n+k]<<'\n';
+                  }
+              }
             export_localization(current,"failed-linesearch");
             std::ofstream failure;if(rank==0)failure.open(parameters.output_directory+"bulk-failed-direction.csv");
             failure<<std::setprecision(17)<<"time,iteration,dof,phi,obstacle,direction,gradient_density,active\n";
@@ -893,6 +1096,7 @@ namespace aspect
       }
     if(!converged)throw ExcNonlinearSolverNoConvergence();
 
+    if(tip)break; // No section-aware stability test is implemented; KKT is not a certificate.
     if(fixed_coulomb)
       {
         // There are no admissible phase variations: this is not a Coulomb
@@ -1033,6 +1237,8 @@ namespace aspect
 
     const auto history_start=Clock::now();
     auto next=std::make_shared<BulkState>(*parent);
+    if(!tip)
+      {
     next->tensor=std::make_shared<typename Model::TensorField>();next->tensor->space=parent->tensor->space;
     for(auto &field:next->tensor->coefficients)
       field.reinit(next->tensor->space->dofs.locally_owned_dofs(),mpi_communicator);
@@ -1075,6 +1281,7 @@ namespace aspect
     owned_history.compress(VectorOperation::insert);
     next->native_history=owned_history;
     next->rebuild_native_projection(model);
+      }
     next->step=timestep_number;next->time=time;next->publications=parent->publications+1;
     for(const auto &entry:accepted.points)
       {
@@ -1082,15 +1289,21 @@ namespace aspect
         for(unsigned int q=0;q<entry.second.size();++q)
           {
             const auto &r=entry.second[q];auto &h=next->history[entry.first][q];
-            if(parent->tensor_flow())
+            if(tip)
+              {
+                h.stress=r.tip_point.state.stress;h.A=r.tip_point.state.cohesive_strain;
+                h.rate=r.tip_point.rate;h.q=r.tip_point.Q*S;
+                h.signed_shear+=dt*h.rate;h.absolute_shear+=dt*std::abs(h.rate);
+              }
+            else if(parent->tensor_flow())
               {
                 h.A=r.tensor_point.state.A;h.K=r.tensor_point.state.K;
                 h.Q=r.tensor_point.state.Q;h.W=r.tensor_point.flow_rate;h.L=r.tensor_point.state.L;
               }
-            else h={r.state.a,r.state.signed_shear,r.state.absolute_shear,r.state.q,r.w};
+            else {h.a=r.state.a;h.signed_shear=r.state.signed_shear;h.absolute_shear=r.state.absolute_shear;h.q=r.state.q;h.rate=r.w;}
             expected.push_back(r.state.T);
           }
-        try
+        if(!tip)try
           {accepted.projection_error=std::max(accepted.projection_error,next->check_tensor(model,entry.first,quadrature,expected));}
         catch (const std::exception &)
           {
@@ -1126,16 +1339,31 @@ namespace aspect
     history_seconds=seconds(history_start);
     AssertThrow(accepted.projection_error<=1e-12,ExcMessage("Bulk native DG source projection fails its independent QP check."));
     for(unsigned int i=0;i<np;++i)next->phase[i]=x[po+i];
+    if(tip)
+      {
+        next->phase=phase_coordinates.expand(next->phase);
+        for(unsigned int k=0;k<sections;++k)
+          {next->sections[k].age=accepted.section_age[k];next->sections[k].rate=accepted.section_rate[k];
+           next->sections[k].force=accepted.section_force[k];next->sections[k].slip+=dt*accepted.section_rate[k];}
+      }
     double phase_work=0.;
-    for(unsigned int i=0;i<np;++i)phase_work+=Kf*accepted.raw[po+i]*(next->phase[i]-parent->phase[i]);
+    for(unsigned int i=0;i<np;++i)phase_work+=Kf*accepted.raw[po+i]*(tip?x[po+i]-lower[i]:next->phase[i]-parent->phase[i]);
     const double energy_change=accepted.storage_change+accepted.fracture-fracture.energy;
     const double physical_dissipation=accepted.Db+accepted.Dc+accepted.Df;
     const double discrete_remainder=accepted.stress_loss+accepted.traction_loss+accepted.phase_remainder+accepted.fracture_loss+accepted.gradient_loss;
     const double mechanical_work=accepted.internal_work-accepted.external_work;
     const double ledger_error=accepted.external_work-energy_change-physical_dissipation
                              -discrete_remainder+phase_work+mechanical_work;
+    if(tip && rank==0)
+      {
+        std::ofstream out(parameters.output_directory+"tip-ledger-trials.csv",std::ios::app);
+        if(out.tellp()==0)out<<"step,ledger_error,Db,Dc,Df,friction,radiation,phase_work,mechanical_work\n";
+        out<<std::setprecision(17)<<timestep_number<<','<<ledger_error<<','<<accepted.Db<<','<<accepted.Dc<<','<<accepted.Df<<','
+           <<accepted.friction<<','<<accepted.radiation<<','<<phase_work<<','<<mechanical_work<<'\n';
+      }
     AssertThrow(std::abs(ledger_error)<=1e-10*std::max({1.,std::abs(accepted.external_work),accepted.bulk+accepted.cohesive+accepted.fracture})
-                && accepted.Db>=0. && accepted.Dc>=0. && accepted.Df>=0.,
+                && accepted.Db>=0. && accepted.Dc>=0.
+                && (tip ? accepted.friction>=0. && accepted.radiation>=0. : accepted.Df>=0.),
                 ExcMessage("Bulk constitutive energy ledger or physical dissipation failed before publication."));
     if(benchmark_endpoint_precommit)benchmark_endpoint_precommit();
     AssertThrow(!pending_dg_endpoint_publication,ExcInternalError());
@@ -1156,12 +1384,35 @@ namespace aspect
         if(profile.tellp()==0)profile<<"step,time,ranks,evaluations,linear_solves,assembly,communication,linear,history,total,open_normal,stability,stability_retries\n";
         profile<<std::setprecision(17)<<timestep_number<<','<<time<<','<<ranks<<','<<evaluations<<','<<linear_solves<<','<<assembly_seconds<<','<<communication_seconds<<','<<linear_seconds<<','<<history_seconds<<','<<solve_seconds<<','<<open_normal<<','<<stability_seconds<<','<<stability_retries<<'\n';
       }
-    pending_dg_endpoint_publication=[this,&model,parent,next,accepted,Kf,physical_mass,phase_work,ledger_error,energy_change](const bool accept)
+    pending_dg_endpoint_publication=[this,&model,parent,next,accepted,Kf,physical_mass,phase_coordinates,lower,phase_work,ledger_error,energy_change](const bool accept)
       {
         AssertThrow(model.bulk_cohesive_state==parent && next->publications==parent->publications+1
                     && next->step==timestep_number,ExcMessage("Bulk publication parent/clock changed or published twice."));
         if(!accept)return;
         model.bulk_cohesive_state=next;
+        if(next->direct_tip())
+          {
+            FEValues<dim> values(*mapping,finite_element,model.mechanical_quadrature(),update_quadrature_points|update_JxW_values|update_values);
+            std::ofstream points(parameters.output_directory+"tip-points-"+Utilities::int_to_string(next->step,4)+"-r"+std::to_string(Utilities::MPI::this_mpi_process(mpi_communicator))+".csv");
+            points<<std::setprecision(17)<<"cell,q,x,y,weight,phi,tauxx,tauyy,tauzz,tauxy,Axx,Ayy,Azz,Axy,qcoh,w,signed_shear,absolute_shear,section\n";
+            for(const auto &entry:next->native_cells)
+              {values.reinit(entry.second);std::vector<double> phis(values.n_quadrature_points);
+               values[FEValuesExtractors::Scalar(introspection.phase_field().first_component_index)].get_function_values(solution,phis);
+               for(unsigned int q=0;q<values.n_quadrature_points;++q)
+                 {const auto &h=next->history.at(entry.first)[q];points<<entry.first<<','<<q<<','<<values.quadrature_point(q)[0]<<','<<values.quadrature_point(q)[1]<<','<<values.JxW(q)<<','<<phis[q];
+                  for(const auto &t:{h.stress,h.A})points<<','<<t[0][0]<<','<<t[1][1]<<','<<t[2][2]<<','<<t[0][1];
+                  points<<','<<h.q<<','<<h.rate<<','<<h.signed_shear<<','<<h.absolute_shear<<','<<next->section_ids.at(entry.first)[q]<<'\n';}}
+            if(Utilities::MPI::this_mpi_process(mpi_communicator)==0)
+              {
+                std::ofstream out(parameters.output_directory+"tip-sections-"+Utilities::int_to_string(next->step,4)+".csv");
+                out<<std::setprecision(17)<<"s,ds,age,slip,V,force,integral_abs_w,positive_w,negative_w,resolved_V,integral_rate_defect,RSF_of_integral\n";
+                for(unsigned int k=0;k<next->sections.size();++k)
+                  {const auto &a=next->sections[k];out<<a.coordinate<<','<<a.weight<<','<<a.age<<','<<a.slip<<','<<a.rate<<','<<a.force<<','<<accepted.section_absolute[k]<<','<<accepted.section_positive[k]<<','<<accepted.section_negative[k]<<','<<accepted.section_resolved_rate[k]<<','<<a.rate-accepted.section_resolved_rate[k]<<','<<accepted.section_integral_force[k]<<'\n';}
+                std::ofstream work(parameters.output_directory+"tip-power.csv",std::ios::app);
+                if(work.tellp()==0)work<<"step,power_adjoint_error,friction,radiation,section_residual_work\n";
+                work<<std::setprecision(17)<<next->step<<','<<accepted.power_defect<<','<<accepted.friction<<','<<accepted.radiation<<','<<accepted.Df-accepted.friction-accepted.radiation<<'\n';
+              }
+          }
         if(Utilities::MPI::this_mpi_process(mpi_communicator)!=0)return;
         if(next->slip_length>0.)
           {
@@ -1171,9 +1422,12 @@ namespace aspect
           }
         std::ofstream phase_out(parameters.output_directory+"phase-forces-"+Utilities::int_to_string(next->step,4)+".csv");
         phase_out<<std::setprecision(17)<<"dof,phi,obstacle,mass,fracture_gradient,mechanical_gradient,residual\n";
+        const auto reported_phase=next->direct_tip()?phase_coordinates.select(next->phase):next->phase;
+        const auto reported_obstacle=next->direct_tip()?lower:parent->phase;
+        const auto reported_mass=next->direct_tip()?phase_coordinates.transpose(physical_mass):physical_mass;
         const auto offset=solution.get_block_indices().block_start(introspection.phase_field().block_index);
         for(unsigned int i=0;i<next->phase.size();++i)
-          phase_out<<i<<','<<next->phase[i]<<','<<parent->phase[i]<<','<<physical_mass[i]<<','<<accepted.fracture_gradient[i]<<','<<Kf*accepted.raw[offset+i]-accepted.fracture_gradient[i]<<','<<Kf*accepted.raw[offset+i]<<'\n';
+          phase_out<<i<<','<<reported_phase[i]<<','<<reported_obstacle[i]<<','<<reported_mass[i]<<','<<accepted.fracture_gradient[i]<<','<<Kf*accepted.raw[offset+i]-accepted.fracture_gradient[i]<<','<<Kf*accepted.raw[offset+i]<<'\n';
         std::ofstream out(parameters.output_directory+"bulk-accepted.csv",std::ios::app);out<<std::setprecision(17);
         if(out.tellp()==0)out<<"step,time,dt,publications,bulk,cohesive,fracture,Wext,Db,Dc,Df,stress_loss,traction_loss,phase_remainder,fracture_loss,phase_work,mechanical_work,pressure_work,mechanical_residual,phase_KKT,projection_error,energy_change,ledger_error\n";
         out<<next->step<<','<<next->time<<','<<time_step<<','<<next->publications<<','<<accepted.bulk<<','<<accepted.cohesive<<','<<accepted.fracture<<','<<accepted.external_work<<','

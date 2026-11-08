@@ -118,6 +118,33 @@ namespace aspect
                             const double               cfl_number,
                             const bool                 use_operator_splitting) const;
 
+          /** Signed regularized RSF and endpoint aging for the bulk section
+           * control. Unlike the legacy rate API this includes V=0 without a
+           * minimum-rate substitution. Tractions are Pa; age is seconds. */
+          /** Exact configured signed-law parameters for restart identity. */
+          std::vector<double> signed_parameter_record() const;
+
+          struct SignedEndpoint
+          {
+            double traction, derivative, age, friction, radiation;
+          };
+          /** Eliminate V + mobility*f(V)=free_rate in a scaled asinh coordinate.
+           * The admitted control requires a provably monotone endpoint law;
+           * this never chooses an arbitrary velocity-weakening root. */
+          struct SectionEndpoint
+          {
+            SignedEndpoint law;
+            double rate=0., force_derivative=0.; ///< df/d(free_rate), with fixed mobility.
+          };
+          SectionEndpoint section_endpoint(const std::vector<double> &fractions,
+                                            double free_rate, double mobility,
+                                            double old_age, double dt,
+                                            double compression, double radiation) const;
+
+          SignedEndpoint signed_endpoint(const std::vector<double> &fractions,
+                                         double velocity, double old_age, double dt,
+                                         double compression, double radiation) const;
+
           double get_reference_slip_rate() const;
 
           double get_minimum_slip_rate() const;

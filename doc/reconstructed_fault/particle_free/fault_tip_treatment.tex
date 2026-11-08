@@ -1,0 +1,498 @@
+% Standalone review draft, 4 November 2026.
+% Copy the main subsection and, if useful, the appendix into the manuscript.
+% This is a proposed CONTINUUM tip formulation, independent of current code.
+% It completes the surface-reduced description with bulk cohesive storage
+% in the process zone; it is not a purely notational change to Sections 2.2--2.3.
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=24mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,bm,microtype}
+\usepackage{booktabs,tabularx,array}
+\usepackage[authoryear,round]{natbib}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlength{\emergencystretch}{2em}
+\begin{document}
+\begin{center}
+{\large\bfseries An energetic treatment of fault tips}\\[3pt]
+{\small Proposed main-text subsection and derivation --- 4 November 2026}
+\end{center}
+
+\textit{Recommendation.} Keep the physical tip formulation in the main text,
+with the supporting intact-limit, tensor, and geometric arguments in an
+appendix. The intact limit belongs to the constitutive law, while
+irreversibility belongs to the phase equation. Their interaction at a tip
+explains their connection but does not justify combining all three subjects
+under one heading.
+
+\textit{Modeling choice.} For a propagation model, the mechanical phase driving
+must be defined in material that has not yet become a reconstructed fault.
+The proposed treatment below achieves this by retaining a bulk cohesive elastic
+state in the process zone, and recovering the surface description in the
+fault interior. This is one consistent energetic completion, not a universal
+consequence of choosing true stress as the primary variable. It requires the
+corresponding constitutive extension in Sections 2.2--2.3. The scalar derivation
+uses a locally fixed Mode-II frame; the tensor form for changing directions is
+given in Appendix~\ref{app:tip_tensor}. Variations are taken at a fixed
+instantaneous configuration; global Eulerian transport and geometric work must
+be included consistently when that configuration evolves. Constant $G$ and
+matched Maxwell relaxation times are assumed below. The final author notes
+compare this proposal with the distinct implementations in the repository.
+
+\setcounter{section}{2}
+\setcounter{subsection}{3}
+% BEGIN MAIN-TEXT SUBSECTION
+\subsection{Fault-tip process zone and propagation}
+\label{sect:fault_tips}
+
+A structural fault tip separates an existing fault from surrounding intact
+material. It is distinct from a rupture front propagating along an existing
+fault and from the endpoint of a reconstructed curve. A weakening process zone
+connects the slipped fault to intact material; continuing frictional sliding
+and the creation of new fracture have distinct energy costs
+\citep{FeiChoo2020Shear}. The phase field resolves this transition without
+requiring a sharp tip as an internal boundary. Its transverse regularization
+length $\ell$ need not equal the along-fault process-zone length.
+
+\paragraph{Constitutive description ahead of the tip.}
+The cohesive law is defined in the two-dimensional process zone, including
+material ahead of the current reconstructed endpoint. Let
+$e_s^{\rm coh}$ be the recoverable cohesive engineering shear strain,
+which is dimensionless. For a locally fixed shear direction, select
+\begin{equation}
+ \psi^{\rm elas}
+ =\frac{\bm\tau:\bm\tau}{4G}
+    +\frac{G(e_s^{\rm coh})^2}{2h(\phi)},
+ \qquad
+ \tau_s^{\rm coh}=\frac{G e_s^{\rm coh}}{h(\phi)}.
+ \label{eq:tip_bulk_storage}
+\end{equation}
+The second term is the energy of the additional compliance $h/G$.
+Here $e_s^{\rm coh}$ and $\tau_s^{\rm coh}$ are bulk fields. The
+surface memory $\bar\tau_s^{\rm coh}$ is their reduced normal-profile
+quantity, not an additional copy of the same stored energy.
+The mechanical law must likewise supply the admissible shear flow and its
+frictional resistance in this process zone; an undefined surface normalization
+cannot serve as an intact-material constitutive law.
+
+\paragraph{Phase driving and activation.}
+At positive compliance, differentiation at fixed physical elastic states gives
+\begin{equation}
+ Y:=-\partial_\phi\psi^{\rm elas}
+   =\frac{G(e_s^{\rm coh})^2 h'(\phi)}{2h(\phi)^2}
+   =\frac{h'(\phi)}{2G}(\tau_s^{\rm coh})^2.
+ \label{eq:tip_driving}
+\end{equation}
+$Y$ is an instantaneous energy-density driving force, not a maximum-history
+variable. At $h=0$, the cohesive strain is constrained to zero, while the
+cohesive traction remains a reaction determined by the intact mechanical
+problem. Its finite, one-sided relaxed limit gives
+$Y(0)=h'(0)(\tau_s^{\rm coh})^2/(2G)$, as derived in
+Appendix~\ref{app:tip_intact}; no division by zero is required.
+
+With the fracture density introduced in Section~2.3, the phase force is
+\begin{equation}
+ \mathcal F_\phi
+ =\frac{G_c}{c_\alpha\ell}
+      \bigl(\alpha'(\phi)-2\ell^2\Delta\phi\bigr)-Y.
+ \label{eq:tip_phase_force}
+\end{equation}
+Rate-independent irreversible evolution satisfies, away from the upper bound,
+\begin{equation}
+ \dot\phi\geq0,\qquad \mathcal F_\phi\geq0,
+ \qquad \dot\phi\,\mathcal F_\phi=0.
+ \label{eq:tip_phase_law}
+\end{equation}
+These equations apply on both sides of the process zone. In a locally uniform
+intact region, with $h'(0)>0$, loss of intact stability occurs at
+\begin{equation}
+ \frac{h'(0)}{2G}(\tau_s^{\rm coh})^2
+       =\frac{G_c\alpha'(0)}{c_\alpha\ell}.
+ \label{eq:tip_onset}
+\end{equation}
+This is a local onset condition. Near an existing tip, the full gradient term
+in \eqref{eq:tip_phase_force} determines the nonlocal response; the onset
+formula is not imposed as an additional pointwise propagation rule.
+
+\paragraph{Advance, direction and reconstruction.}
+Damage can advance when the mechanical driving overcomes fracture resistance
+in the constrained phase problem. The phase problem therefore
+allows variations in the material ahead of the tip, with the full two-dimensional
+phase gradient retained. A freely turning fault also requires a constitutive
+choice of admissible shear directions in that material. Those directions and
+the coupled phase response determine the path; a geometric continuation of the
+old tangent is only a prescribed-path restriction. Changes of slip direction
+must retain the physical tensor history rather than realign an old scalar
+memory (Appendix~\ref{app:tip_tensor}).
+
+The reconstructed curve follows the resulting fault geometry and carries
+surface variables where their reduction is valid. A phase threshold used to
+locate its numerical endpoint is a representation convention, not a fracture
+criterion. No extra phase boundary condition is applied at that endpoint.
+The physical lower bound is the transported phase,
+$\phi^{n+1}\geq\phi^{n,*}$, and numerical reconstruction does not create or
+reset damage. Existing material histories are transferred; newly activated
+material follows the stated cohesive and RSF initialization. Fracture energy
+is counted once through $\int_\Omega G_c\gamma\,d\bm x$, with no extra
+charge for inserting a curve vertex.
+% END MAIN-TEXT SUBSECTION
+
+\appendix
+\numberwithin{equation}{section}
+% BEGIN OPTIONAL APPENDIX
+\section{Derivation and interpretation of the tip treatment}
+
+\subsection{Why the driving force must exist before a surface exists}
+
+A bulk phase-field description permits fracture to develop without prescribing
+its location as a sharp discontinuity \citep{Bourdin2000Variational}.
+A surface reduction alone has a different domain of definition. If mechanical
+energy depends on $\phi$ only through normal profiles of an existing curve,
+a variation supported wholly outside those profiles changes no mechanical
+energy. The fracture-gradient term can smooth a cap there, but does not supply
+the missing mechanical driving for activation.
+
+The bulk cohesive state in \eqref{eq:tip_bulk_storage} supplies that driving.
+It is physical recoverable deformation; it is not a trial stress or an
+operator commutator. A different completion, based on an independently
+formulated sharp-front advance law, is possible. The present proposal instead
+lets the bulk mechanical and phase laws determine advance, and uses curve
+reconstruction to represent the result.
+
+\subsection{The intact limit as a constrained constitutive problem}
+\label{app:tip_intact}
+
+The cohesive energy has the extended-valued definition
+\begin{equation}
+ \psi_s^{\rm elas,coh}(e,h)=
+ \begin{cases}
+ G e^2/(2h),&h>0,\\
+ 0,&h=0,\ e=0,\\
+ +\infty,&h=0,\ e\ne0.
+ \end{cases}
+ \label{eq:tip_perspective}
+\end{equation}
+Here $e=e_s^{\rm coh}$ only within this derivation.
+An equivalent mixed form is
+\begin{equation}
+ \psi_s^{\rm elas,coh}(e,h)
+ =\sup_{\tau_s^{\rm coh}}
+    \left(\tau_s^{\rm coh}e
+          -\frac{h(\tau_s^{\rm coh})^2}{2G}\right).
+ \label{eq:tip_mixed}
+\end{equation}
+For $h>0$, stationarity recovers $e=h\tau_s^{\rm coh}/G$.
+For $h=0$, finiteness enforces $e=0$ while the intact mechanical problem
+selects its reaction $\tau_s^{\rm coh}$.
+
+To obtain the relaxed one-sided driving, consider an infinitesimal increase
+of compliance under that instantaneous conjugate reaction:
+\begin{equation}
+ \inf_e\left[\frac{Ge^2}{2h}-\tau_s^{\rm coh}e\right]
+       =-\frac{h(\tau_s^{\rm coh})^2}{2G}.
+ \label{eq:tip_relaxed_energy}
+\end{equation}
+Its derivative gives $-\partial_\phi\psi_{\rm relaxed}
+=h'(0)(\tau_s^{\rm coh})^2/(2G)$ at onset.
+This calculation permits the mechanically induced cohesive strain to relax.
+It is not the ordinary derivative along the artificially fixed path $e=0$,
+which would give zero. The reaction must be obtained from the selected intact
+mechanics and friction law; it is not an arbitrary value assigned to a $0/0$
+quotient. A smooth regularized RSF law has zero frictional traction at exactly
+zero slip rate, whereas a Coulomb sticking law permits a traction interval.
+These laws give different reaction selections and must not be interchanged.
+
+Equation~\eqref{eq:tip_onset} has a positive local threshold only when the
+chosen $h$ and $\alpha$ supply one. For example, $\alpha'(0)=0$ with
+$h'(0)>0$ gives no positive homogeneous elastic onset threshold in this
+formulation. This is a model property, not a tip-search parameter.
+
+\subsection{Tensor history and consistency with true-stress mechanics}
+\label{app:tip_tensor}
+
+For a fixed shear tensor $\bm{\mathcal S}:\bm{\mathcal S}=1/2$, write
+$\bm\varepsilon^{\rm elas,coh}=e_s^{\rm coh}\bm{\mathcal S}$.
+For rotating or changing directions retain this tensor itself as the
+cohesive elastic history. Select
+\begin{equation}
+ \psi_s^{\rm elas,coh}
+ =\frac{G}{h}\bm\varepsilon^{\rm elas,coh}:
+                       \bm\varepsilon^{\rm elas,coh},
+ \qquad
+ \bm\tau^{\rm coh}=\frac{2G}{h}\bm\varepsilon^{\rm elas,coh}.
+ \label{eq:tip_tensor_storage}
+\end{equation}
+The scalar traction is $\bm\tau^{\rm coh}:\bm{\mathcal S}$.
+For a single fixed shear direction, \eqref{eq:tip_tensor_storage} reduces
+exactly to \eqref{eq:tip_bulk_storage}.
+For general tensor memory, its phase driving is instead
+\begin{equation}
+ Y=\frac{G h'}{h^2}\bm\varepsilon^{\rm elas,coh}:
+                         \bm\varepsilon^{\rm elas,coh}
+   =\frac{h'}{4G}\bm\tau^{\rm coh}:\bm\tau^{\rm coh}.
+ \label{eq:tip_tensor_driving}
+\end{equation}
+It cannot generally be replaced by the square of one resolved shear traction.
+This tensor storage is an explicit constitutive extension of the single-direction
+model; its admissible strain space and frictional direction law must be specified.
+
+With the bulk fault-deformation rate $\dot{\bm\varepsilon}^{\rm fault}$,
+one consistent matched-Maxwell choice is
+\begin{equation}
+ \frac{\mathring{\bm\tau}}{2G}+\frac{\bm\tau}{2\eta}
+   =\dot{\bm\varepsilon}-\dot{\bm\varepsilon}^{\rm fault},
+ \qquad
+ (\bm\varepsilon^{\rm elas,coh})^\circ
+     +\frac{G}{\eta}\bm\varepsilon^{\rm elas,coh}
+   =\dot{\bm\varepsilon}^{\rm fault}.
+ \label{eq:tip_tensor_rates}
+\end{equation}
+The fault-deformation rate is defined throughout the process zone. Its
+interior approximation may be $\chi\widetilde V\widetilde{\bm{\mathcal S}}$;
+that approximation is not used to define an intact $0/0$ normalization.
+The physical slip/flow law must make
+$(\bm\tau-\bm\tau^{\rm coh}):\dot{\bm\varepsilon}^{\rm fault}$
+its nonnegative frictional and radiation loss, with a dimensionally consistent
+relation between a bulk deformation rate and any interface slip rate.
+
+Contracting \eqref{eq:tip_tensor_rates} with the conjugate stresses gives the
+local stored-energy rate
+\begin{equation}
+ \begin{split}
+ \dot\psi^{\rm elas}={}&\bm\tau:\dot{\bm\varepsilon}
+ -\frac{\bm\tau:\bm\tau}{2\eta}
+ -\frac{h\bm\tau^{\rm coh}:\bm\tau^{\rm coh}}{2\eta}\\
+ &-(\bm\tau-\bm\tau^{\rm coh}):\dot{\bm\varepsilon}^{\rm fault}
+ -Y\dot\phi.
+ \end{split}
+ \label{eq:tip_local_power}
+\end{equation}
+The stress-spin contractions vanish. Thus $Y\dot\phi$ is the mechanical
+power made available to phase evolution, while bulk viscosity, cohesive
+viscosity, friction and radiation remain separately accounted losses.
+No total displacement history, auxiliary trial stress or localization
+commutator enters this derivation.
+
+\subsection{Connection to the surface cohesive energy}
+
+For a locally straight interior profile with uniform
+$\tau_s^{\rm coh}$ across it,
+\begin{equation}
+ \bar\tau_s^{\rm coh}:=G\int e_s^{\rm coh}\,d\zeta
+       =\bar h_\xi\tau_s^{\rm coh},
+ \qquad
+ \int\frac{G(e_s^{\rm coh})^2}{2h}\,d\zeta
+       =\frac{(\bar\tau_s^{\rm coh})^2}{2G\bar h_\xi}.
+ \label{eq:tip_surface_reduction}
+\end{equation}
+This recovers the interior surface energy. It uses a locally flat profile,
+line measure $d\zeta$, and uniform cohesive traction; general curved/nonuniform
+profiles require their actual measures and retain additional transverse state.
+Indeed, for $\bar h_\xi=\int h\,d\zeta>0$, the exact flat-profile identity is
+\begin{equation}
+ \int\frac{G(e_s^{\rm coh})^2}{2h}\,d\zeta
+ -\frac{(\bar\tau_s^{\rm coh})^2}{2G\bar h_\xi}
+ =\int\frac{h}{2G}
+ \left(\tau_s^{\rm coh}-\frac{\bar\tau_s^{\rm coh}}{\bar h_\xi}\right)^2d\zeta.
+ \label{eq:tip_transverse_variance}
+\end{equation}
+Thus a single surface moment loses recoverable energy when the transverse
+traction is nonuniform; recovering it is a constitutive approximation, not
+just a change of notation.
+The bulk and surface expressions describe the same cohesive storage and are
+not added over the same region. Near a tip, where longitudinal variation and
+intact activation matter, the bulk description remains authoritative.
+
+\subsection{Variational growth and its sharp-front interpretation}
+
+At the time-step endpoint, let $\phi^{n,*}$ be the transported accepted lower bound.
+The weak phase law is
+\begin{equation}
+ \begin{gathered}
+ \phi^{n,*}\leq\phi^{n+1}\leq1,\\
+ \int_\Omega\left[
+ \left(\frac{G_c\alpha'(\phi^{n+1})}{c_\alpha\ell}-Y^{n+1}\right)
+                  (\widehat\phi-\phi^{n+1})
+ +\frac{2G_c\ell}{c_\alpha}\nabla\phi^{n+1}\cdot
+                    \nabla(\widehat\phi-\phi^{n+1})\right]d\bm x\geq0
+ \end{gathered}
+ \label{eq:tip_vi}
+\end{equation}
+for every admissible $\widehat\phi$. Mechanical and cohesive states are
+updated consistently with this phase problem. A negative first variation in
+an admissible direction ahead of the current tip requires a phase update;
+a chosen solver must also address nonconvex branch selection. Stationarity
+alone does not prove global stability.
+
+For a single sharp front in a quasistatic rate-independent limit, define
+$\mathcal G_{\rm II}$ as the net mechanical energy available per unit new
+fault area after the appropriate sliding/viscous losses and transport/geometry
+work are accounted for. If $c_{\rm tip}$ is the nonnegative advance speed
+relative to the material, fracture power is $G_c c_{\rm tip}$ per unit
+out-of-plane thickness. Energetic stability and balance give
+\begin{equation}
+ c_{\rm tip}\geq0,\qquad
+ G_c-\mathcal G_{\rm II}\geq0,\qquad
+ c_{\rm tip}(G_c-\mathcal G_{\rm II})=0.
+ \label{eq:tip_griffith}
+\end{equation}
+This is the sharp-front interpretation of an appropriately calibrated and
+convergent phase formulation, not an extra condition to impose at every
+phase-field tip. At finite $\ell$, the diffuse fracture functional, rather
+than $G_c$ times a threshold-defined curve length, is the actual energy.
+An elastic traction-free $J$-integral is not automatically
+$\mathcal G_{\rm II}$ for a frictional viscoelastic fault.
+
+\subsection{Geometry and endpoint conditions}
+
+For a straight fault $\bm f(\xi)=(\xi,0)$ ending at $\xi=0$, normal
+coordinates $\bm f(\xi)+\zeta\hat{\bm n}=(\xi,\zeta)$ with $\xi\leq0$
+cover the strip behind the tip. A two-dimensional cap ahead of it projects
+onto the single endpoint, not onto a family of normal fibers. Assigning that
+cap the endpoint slip value would create a concentrated endpoint contribution
+to the work adjoint. The bulk tip formulation avoids treating such a cap as
+an ordinary interior surface profile. Boundary completion at a domain edge
+remains distinct from physical tip advance.
+
+The tip velocity and slip rate are also distinct. Writing its position as
+$\bm f(\xi_{\rm tip}(t),t)$ gives
+\begin{equation}
+ \frac{d}{dt}\bm f(\xi_{\rm tip}(t),t)
+ =\partial_t\bm f+\partial_\xi\bm f\,\dot\xi_{\rm tip}.
+ \label{eq:tip_motion}
+\end{equation}
+For illustration, on a stationary straight material path introduce sharp slip
+$U(\xi,t)$ with $V=\partial_tU|_\xi$. If the two sides meet at an advancing
+front, $U(\xi_{\rm tip}(t),t)=0$ implies, wherever the derivatives exist,
+\begin{equation}
+ V+\dot\xi_{\rm tip}\partial_\xi U=0.
+ \label{eq:tip_compatibility}
+\end{equation}
+It does not generally imply $V=0$ at a moving front. Singular sharp-tip
+fields require a limiting interpretation. Zero rate may be appropriate for
+a stationary tied endpoint or another specifically derived process-zone
+condition; it is not a universal condition at the last reconstructed vertex.
+$U$ here explains compatibility and need not be stored in the rate formulation.
+
+The phase equation has no internal tip boundary. Its outer boundary may carry
+natural zero microtraction or prescribed phase data. Tip position, candidate
+spacing and a geometric threshold are numerical diagnostics/settings; physical
+activation follows the coupled law. Verify growth threshold, path, advance and
+work balance under bulk/surface/time refinement at fixed physical $\ell$.
+Varying $\ell$ is a separate model/regularization study. Transferring an existing
+material point preserves its history; genuinely new material requires a stated
+initial cohesive state and positive RSF age, not a reset based on a new index.
+% END OPTIONAL APPENDIX
+
+\begin{thebibliography}{2}
+\bibitem[Bourdin et~al.(2000)]{Bourdin2000Variational}
+B. Bourdin, G. A. Francfort, and J.-J. Marigo (2000).
+Numerical experiments in revisited brittle fracture.
+\textit{Journal of the Mechanics and Physics of Solids}, 48, 797--826.
+\href{https://doi.org/10.1016/S0022-5096(99)00028-9}
+{doi:10.1016/S0022-5096(99)00028-9}.
+\bibitem[Fei and Choo(2020)]{FeiChoo2020Shear}
+F. Fei and J. Choo (2020).
+A phase-field model of frictional shear fracture in geologic materials.
+\textit{Computer Methods in Applied Mechanics and Engineering}, 369, 113265.
+\href{https://doi.org/10.1016/j.cma.2020.113265}
+{doi:10.1016/j.cma.2020.113265}.
+\end{thebibliography}
+
+\clearpage
+% BEGIN AUTHOR NOTES -- do not paste this implementation audit into the theory section.
+\begingroup
+\small
+\setlength{\parskip}{3pt}
+\section*{Author notes: continuum target versus current implementation}
+
+This comparison concerns branch \texttt{pf-rsf-particle-free} at commit
+\href{https://github.com/YiminJin/aspect/tree/69e8a10a93a08718d31af961197899e320657c04}
+{\texttt{69e8a10a93a0}}, reviewed on 4 November 2026. It is based on source
+inspection and the repository's recorded tests; those simulations were not rerun
+for this review. The repository contains several distinct formulations. An
+absent capability in the older surface-reduced route must not be attributed to
+all of them.
+
+\renewcommand{\arraystretch}{1.08}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{.18\linewidth}
+ >{\raggedright\arraybackslash}p{.31\linewidth}
+ >{\raggedright\arraybackslash}X@{}}
+\toprule
+Topic & Continuum target in this draft & Current implementation and difference\\
+\midrule
+Driving ahead of a tip & A bulk cohesive reaction and phase force exist before
+there is a surface record. & Already implemented in the separate bulk cohesive
+route, including its $h=0$ reaction. The older surface-profile route has zero
+mechanical phase derivative strictly ahead of its normal strip. [1,2]\\
+\addlinespace
+Turning and memory & Retain cohesive tensor history when the active direction
+changes; solve the full spatial phase problem. & Native fixed/radial tensor
+bulk modes already retain this history and its consistent phase coupling.
+Reported tests show connected activation in initially intact material, but
+not converged general turning, branching or developed crack propagation. [3]\\
+\addlinespace
+Friction and RSF & Specify a process-zone flow law and its relation to physical
+slip rate, with consistent friction/radiation work. & The evolving bulk mode
+uses prescribed constant resistance; the pressure-dependent Coulomb option
+requires fixed phase. Bulk RSF is explicitly unsupported. A separate interface
+pilot has RSF and segment admission, with a different physical damage variable
+and fracture functional. [2,4]\\
+\addlinespace
+Motion and growth & Material transport, objective history, phase irreversibility
+and new activation must coexist consistently. & Restricted moving mature-fault
+experiments transport history/profile with growth disabled. The bulk cohesive
+growth route excludes transport and moving mesh; general deformed cohesive
+evolution remains unsupported. [2,5]\\
+\addlinespace
+Energy and accuracy & Count physical fracture once and establish growth/path/work
+convergence independently of algebraic solve accuracy. & Bulk and interface
+routes already have separate storage/dissipation accounting and accepted-state
+publication. Their exact discrete balances do not establish propagation
+accuracy. The interface's later localized-tip and fracture-relative physical
+energy screens retain failures. [3,4,6]\\
+\bottomrule
+\end{tabularx}
+
+\paragraph{What this means for the proposed section.}
+The bulk cohesive route is the closest existing implementation of the
+continuum construction above. Its core phase driving and intact limit do
+\emph{not} need to be invented again. The remaining difference is a complete,
+qualified coupling to RSF, general material motion, and the intended fault
+geometry representation. Conversely, the newer cohesive-interface pilot is
+an alternative physical formulation, not merely a more efficient discretization
+of this bulk phase equation: it charges $G_c\int_\Gamma a\,ds$, while this
+draft charges $\int_\Omega G_c\gamma(\phi,\nabla\phi)\,d\bm x$.
+Both may be useful, but their damage variables and energy inventories cannot
+be identified without a separate derivation.
+
+The code also retains auxiliary stress representations. Changing their storage
+to direct $\bm\tau$ is a separate representation/lifecycle task; it does not
+by itself supply tip physics, RSF, or transport. No commutator is needed in
+the direct physical constitutive equations given here.
+
+\paragraph{Source anchors.}
+\begin{enumerate}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\item \href{https://github.com/YiminJin/aspect/blob/69e8a10a93a08718d31af961197899e320657c04/doc/reconstructed_fault/particle_free/P4A_TIP_REPORT.md}{P4a finite-tip report}:
+strictly-ahead derivatives and the restricted older surface route.
+\item \href{https://github.com/YiminJin/aspect/blob/69e8a10a93a08718d31af961197899e320657c04/source/material_model/phase_field_fault/bulk_cohesive.cc}{Bulk scalar return},
+\href{https://github.com/YiminJin/aspect/blob/69e8a10a93a08718d31af961197899e320657c04/source/material_model/phase_field_fault/bulk_cohesive_tensor.cc}{tensor return},
+\href{https://github.com/YiminJin/aspect/blob/69e8a10a93a08718d31af961197899e320657c04/source/simulator/solver/bulk_cohesive_phase.cc}{coupled phase solver}, and
+\href{https://github.com/YiminJin/aspect/blob/69e8a10a93a08718d31af961197899e320657c04/source/material_model/phase_field_fault.cc}{material-model admission guards}.
+\item \href{https://github.com/YiminJin/aspect/blob/69e8a10a93a08718d31af961197899e320657c04/doc/reconstructed_fault/particle_free/P5B_NATIVE_REPORT.md}{P5b native tensor integration} and
+\href{https://github.com/YiminJin/aspect/blob/69e8a10a93a08718d31af961197899e320657c04/doc/reconstructed_fault/particle_free/P5C_CONTINUATION_REPORT.md}{P5c connected process-zone extension}:
+implemented histories, measured activation, and remaining convergence limits.
+\item \href{https://github.com/YiminJin/aspect/blob/69e8a10a93a08718d31af961197899e320657c04/doc/reconstructed_fault/particle_free/COHESIVE_RSF_NATIVE_REPORT.md}{Native cohesive--RSF report} and
+\href{https://github.com/YiminJin/aspect/blob/69e8a10a93a08718d31af961197899e320657c04/doc/reconstructed_fault/particle_free/IMPLEMENTATION_MAPS.md}{implementation/energy inventory}:
+surface damage, formation, histories and alternative fracture accounting.
+\item \href{https://github.com/YiminJin/aspect/blob/69e8a10a93a08718d31af961197899e320657c04/doc/reconstructed_fault/current_design.md}{Current design, Stage C material-step sections}:
+restricted moving mature model and deferred cohesive geometry work.
+\item \href{https://github.com/YiminJin/aspect/blob/69e8a10a93a08718d31af961197899e320657c04/doc/reconstructed_fault/particle_free/STAGE_C_COHESIVE_DIAGNOSIS.md}{Stage C cohesive diagnosis}:
+physical energy remainder and localized-tip nonlinear failure.
+\end{enumerate}
+\endgroup
+% END AUTHOR NOTES
+\end{document}

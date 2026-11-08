@@ -1,3 +1,92 @@
+## 7 November 2026 — bulk tip sections implementation
+
+Root/branch/HEAD remain `aspect-pf-rsf-particle-free` / `pf-rsf-particle-free` /
+`36de6bcf3633dce96f904d27b1256c37b6675ccc`; incoming recovery/manual changes remain.
+The new `bulk_tip.{h,cc}` owns physical endpoint tau/A elimination and ledger.
+`FaultFriction::signed_endpoint/section_endpoint` owns the signed BE-age law and
+implicit nonlocal section closure. Existing bulk history/solver owns native
+point storage, section measures, coupled DGQ2 phase/section residual, tangents,
+checkpoint identity and joint transaction. `phase_field.cc` only admits the
+separately guarded native bulk-tip path. Mature/default storage, solver path,
+ordinary advection assemblers and production checkpoints were not converted.
+
+An isolated core in `build-particle-free/bulk-tip/native` has SHA256
+`340b6c37516a8f60792d46412e031023daa04ea366f467bb404a5f56ee03ebf2`;
+checker `5c5ba77cddf02b5cd5bf38cafef2cda16536b36406f0f62ed377dc9090743446`.
+All seven protected baseline binary hashes still match. Per-run manifests retain
+exact dirty source hashes and commands; HEAD alone is not the candidate identity.
+Point suite 632/10 passes; coarse and half-dt finish, active recovery passes;
+finer .05 line-search failure remains. Report separates algebraic identity from
+physical accuracy, documents initial fracture-profile adjustment, reverse-rate/
+multiple-band diagnostics and full transverse cohesive energy. No unqualified
+stability certificate is applied. No new source commit or production run.
+
+[Guide](TIP_TREATMENT.md) · [Report](TIP_TREATMENT_IMPLEMENTATION_REPORT.md).
+Reusable benchmark source is `benchmarks/reconstructed_fault/particle_free/bulk_tip/`;
+large outputs stay in the local build tree, compact evidence in `evidence/bulk_tip/`.
+Old four-step interface evidence is only reduced, never resumed in this task.
+
+## 7 November 2026 — mature closure and propagation recovery
+
+Entry root/branch/HEAD: `aspect-pf-rsf-particle-free` / `pf-rsf-particle-free` /
+`36de6bcf3`, preserving the seven incoming tracked edits and untracked overnight
+work. All 950 numerical source hashes and seven native-integration binary hashes
+match the previous validation. No source/include/CMake/unit change in this task.
+The existing `84f57503c` commit and source manifest provide the immutable source
+record; no numerical patch, new checkout or full archive is necessary.
+
+The current cohesive fixture plugin alone was rebuilt against the retained core
+in `build-particle-free/propagation-recovery/checks/`, using two workers. Legacy
+core/plugin `7277eebc…83b1d` / `7bfbeaa3…22f5d` reproduce the step-748 episode
+checkpoint exactly, then accept four steps through 752. Current native fresh,
+rejection and restart states agree bitwise with the matching accepted-timestep
+control. The extra fixed-fault DGQ2 growth replay timed out at 330 s during its
+first physical step; it is not counted as a pass. No acceptance or physics change.
+
+New reusable support: `benchmarks/reconstructed_fault/particle_free/propagation_recovery/`
+contains a read-only reducer, reproduction notes and a syntax-validated, unlaunched
+next-episode input. It uses existing runners and introduces no evolution driver.
+Generated compact evidence under `evidence/propagation_recovery/` records 189
+preserved files, exact commands, all nine retained binary identities, new plugin
+identity, lifecycle comparisons and an updated episode-window figure. Numerical
+records and checkpoints stay outside source commits. The reduction found an
+unchanged accuracy limitation: four-step physical work error 21.72% of fracture,
+versus .0631% of sliding dissipation. All 484.76 s of launches were sequential;
+no recovery simulations remain. Build time is reported separately (about 48 s).
+
+The current formulation discussion is
+[PROPAGATION_FORMULATION_RESTART](PROPAGATION_FORMULATION_RESTART.md);
+[MATURE_FAULT_TEMPORARY_CLOSEOUT](MATURE_FAULT_TEMPORARY_CLOSEOUT.md) preserves
+mature findings and defers additional accuracy/architecture campaigns. Shared
+assembler review and inherited loss of 39/45 native-pilot frames and earlier
+temporary logs remain unchanged. Older entries below retain their provenance.
+
+## Restored DGQ2 overnight validation (completed 7 November 2026)
+
+All four selected cases completed; [report](DGQ2_COUPLED_VALIDATION_REPORT.md)
+records measured temporal/spatial/directional differences, frozen Gauss8/12/16
+observers, cost and limitations. Closeout reverified all 950 source hashes,
+seven binaries/plugins, 1,632 original shared-review files and 165 archive
+files. No core source/CMake or binary changes. New benchmark support prepares
+only this four-case matrix, monitors budgets/health, losslessly compresses its
+own completed rank observations, and reuses the existing reductions/plots.
+`layered_fields.read` accepts plain/gzip observations; `compare_final` can select
+a matching accepted physical time instead of only the final record. Existing
+callers retain their defaults. No historical data or checkpoint was converted.
+The selected numerical-validation task is complete; architecture remains frozen.
+
+Selected four-case numerical validation on documentation HEAD `36de6bcf3`.
+All 950 native-integration source/include/unit hashes and seven retained
+binary/plugin hashes match the tested `84f57503c` behavior. No source or binary
+change is selected. The ordinary composition initialization, registered phase
+cell assembler, private mapped face loops, SSPRK3/BP and native subcycle bound
+remain frozen. Only preparation/reduction/plotting support changes are allowed.
+The first startup attempt found the inherited unconditional particle-load-
+balancing admission guard; the inputs retain the inert `none` setting with zero
+particle managers, without changing that guard. Sandbox MPI launch failures and
+all pre-step input failures are preserved. Evidence and progress are under
+`benchmarks/reconstructed_fault/particle_free/evidence/dgq2_overnight/`.
+
 ## Phase architecture restoration (6 November 2026)
 
 Revert `319b10b94` exactly restores the tracked tree of `84f57503c` before this

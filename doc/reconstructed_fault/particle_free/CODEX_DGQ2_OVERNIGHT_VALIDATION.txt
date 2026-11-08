@@ -1,0 +1,265 @@
+TASK: OVERNIGHT COUPLED VALIDATION OF THE RESTORED DGQ2 PHASE IMPLEMENTATION
+For the existing Codex thread, using Astra with high reasoning.
+6 November 2026, Pacific time.
+
+The user has restored the implementation preceding the broad shared-advection
+assembler refactor and has now selected a larger overnight testing task.
+Complete the experiments, analysis and concise handoff below. Freeze the numerical
+implementation. This task does not reopen architecture or quadrature optimization.
+
+1. SCIENTIFIC QUESTION AND SELECTED SCOPE
+=======================================
+Determine whether the improved DGQ2 phase representation gives a sufficiently
+resolved COUPLED moving-fault solution: phase/localization, stress/traction, slip,
+state and geometry. Distinguish physical-timestep sensitivity, bulk-mesh
+sensitivity and translation-direction behavior. A small transport balance error
+alone does not establish accurate coupled mechanics.
+
+Run four matched cases on the restored implementation, to the previously used
+final time T=0.8. This instruction explicitly selects the previously deferred
+negative-translation and fine-mesh cases as part of this bounded overnight
+matrix. It supersedes their deferral and the earlier 45-minute testing budget
+ONLY for this task. No server job, production BP3 trajectory, parameter sweep,
+moving-cohesive growth extension or new refactoring is selected.
+
+The paper goals remain a stationary-fault BP3 first event, and a BP3-like viscous
+lower-crust comparison with fixed versus materially advected fault geometry.
+The present layered fixture is a velocity-strengthening algorithmic test. Do not
+interpret it as earthquake nucleation or the dimensional paper experiment.
+
+2. VERIFY AND FREEZE THE RESTORED BASELINE
+========================================
+Check the actual worktree, branch, local changes and applicable AGENTS.md. The
+intended restored behavior is the native phase integration at 84f57503, retaining:
+  - one authoritative phase composition named phase_field;
+  - DGQ2, SSPRK3/subcycling and whole-cell Bernstein BP scaling;
+  - mapped scalar phase operators and the existing particle-independent path;
+  - the phase-specific assembly infrastructure preceding 3a21d59c.
+Do not assume HEAD has that exact hash after a revert. Verify the actual diff.
+Do not reset, revert again, discard manual work, or resurrect the shared-core
+rewrite. If the restored source differs materially from this description,
+identify the difference before treating it as the intended experimental baseline.
+
+Read DGQ2_PHASE_FIELD_REPORT.md, NATIVE_PHASE_INTEGRATION_REPORT.md, the current
+DGQ2_PHASE_FIELD_DESIGN.md and the layered fixture inputs/evidence needed here.
+Do not repeat the earlier architecture audits or historical test campaigns.
+
+Use one coherent executable and matching diagnostic/boundary plugins throughout.
+Verify source/binary/plugin identities. Reuse an existing matching restored build
+if available; otherwise build separately, at most four workers. Preserve all
+protected historical executables, evidence, checkpoints and untracked work.
+The previous native integration binary hash was
+6ea374c5b9b50a20af00fa6e2c365df61d7ac59ed33ad26c7b338d7bb7ba67d9;
+this is an identity reference, not permission to assume an arbitrary binary matches.
+
+Keep true physical stress tau, the independent DGQ2 stress solver, bulk-slip-
+subtracted spin and its coherent accepted-state lag, endpoint/RSF laws, native
+mechanical quadrature, convergence criteria and joint acceptance/rollback intact.
+Use the full accepted material velocity for transport. Disable phase growth and
+adaptive physical timestepping in these mature-fault cases, as in the fixture.
+No particles, particle mapping or particle-freeze environment variable is needed.
+
+The earlier full DGQ2 runs used the older separate-block implementation; the
+restored composition implementation also changed the transport subcycle bound.
+Those old trajectories are historical context, not matched controls for the new
+fine/reverse cases. Obtain the positive controls from this same frozen build.
+Reuse a completed case only if source, plugins, all physical/numerical inputs,
+field layout, accepted schedule and final time actually match.
+
+3. THE FOUR-RUN MATRIX
+=====================
+Use the established domain [-6,6] x [-2,2], unchanged analytic phase initialization,
+20 fixed material surface labels, full prescribed exterior-stress/top-traction
+provider and the same loading/material parameters in every case.
+
+Case   Translation U   Bulk cell size   Bulk cells   Physical dt   Final time
+A      +2              h=1/8            96 x 32      0.0125        0.8
+B      +2              h=1/8            96 x 32      0.00625       0.8
+D      +2              h=1/12           144 x 48     0.00625       0.8
+C      -2              h=1/8            96 x 32      0.0125        0.8
+
+Run sequentially in the order A, B, D, C: baseline, timestep control, spatial
+comparison, direction check. A/B isolate physical-timestep sensitivity; B/D
+measure spatial sensitivity at the same physical dt; A/C check both advection
+directions at matched resolution and dt. Confirm actual cell counts and accepted
+times, rather than relying on a refinement-level label. The historical fine
+fixture achieves 144 x 48 using box repetitions plus refinement; do not replace
+it accidentally with a much larger uniform-refinement case.
+
+Reuse the documented fixture: G=10, eta(y)=5.5+4.5*tanh(y/.35), background loading
+3.7 and the established a=.025, b=.015 friction parameters, initial stress, age,
+curve, exterior recurrence and boundary conditions. Check these against the
+retained inputs rather than reconstructing the full model from this short list.
+In particular, h refinement must not change the physical profile width, amplitude,
+fault endpoints, label count, loading or material length scales.
+
+Positive/negative translation means changing the uniform horizontal drift U.
+It does NOT mean reversing shear loading, frictional slip, all velocity components
+or the fault frame. Use the established provider's handling of incoming faces
+and compatible stress/traction data for each U. The oblique fault, imposed shear
+and finite boundaries do not guarantee an exact left/right symmetry of the
+coupled solution. Do not force one through altered physical data.
+
+Initialize every case freshly from the same physical analytic fields. Do not
+interpolate the coarse checkpoint onto the fine mesh. Record the initial FE
+approximation error, physical integral, normalization and slip rate separately;
+different h changes the represented initial profile as well as subsequent
+evolution. Do not force equal integrals by rescaling the physical profile.
+
+Use the restored method's native stable transport subcycling on every mesh.
+Record physical timesteps, subcycle counts, internal substeps and limiter activity.
+Halving the physical dt need not halve the internal advection substep. Do not
+silently fix subcycles or introduce a new CFL rule to improve a comparison.
+
+4. REUSE THE EXISTING HARNESS CAREFULLY
+=====================================
+Prefer the existing dgq2_phase_field and transported_objective preparation,
+run, reduction and comparison scripts. Make small harness changes as necessary;
+do not build another testing framework or modify production algorithms.
+
+The old dgq2_phase_field/run_coupled.py points to the earlier dgq2-phase candidate
+and old input conventions. Do not launch it unchanged. Likewise, the native
+prepare_integration_fixture.py was written for short lifecycle cases and has
+fixed plugin paths and defaults. Prepare and inspect the resolved four inputs
+for the restored executable before enqueueing them.
+
+Select phase via ordinary composition degree/family and semantic type/method,
+with explicit initial and boundary composition models. Clear retired private
+phase-seed inputs and mandatory particle settings. Rebuild affected diagnostic
+plugins only when required by the actual source/binary identity.
+
+Verify that the candidate uses the intended phase method, material spin law,
+mesh, dt, U and exterior provider in its startup output. Use the first few steps
+of case A as the timing and setup check; continue the same run if valid. Do not
+create a separate large smoke-test matrix before these four runs.
+
+5. OVERNIGHT COMPUTE BUDGET AND FAILURE HANDLING
+=============================================
+Allow up to EIGHT HOURS of aggregate wall-clock time for simulations, reductions
+and any diagnostic replay in this task. Report compilation time separately.
+The earlier timings suggest several hours, but measure rather than promise a
+completion time. Reserve roughly 45-60 minutes for analysis and closeout when
+planning the queue.
+
+Use at most four MPI ranks and one numerical thread per rank. Run only one
+simulation or substantial reduction/build at a time. No simultaneous four-rank
+cases or background high-thread analysis. Preserve unrelated running jobs.
+
+Set a two-hour wall limit on each coarse run A/B/C and a four-hour limit on D,
+subject to the overall eight-hour budget. Estimate remaining cost from actual
+step timings, including later nonlinear-solver costs. Do not start another case
+if it cannot reasonably fit. Keep a small progress ledger with case, physical
+time, elapsed time, estimated remaining time, retries and numerical health.
+
+Use native checkpoints so an interrupted selected case can be continued under
+exactly the same build, layout and inputs. Keep a modest checkpoint cadence;
+avoid the two-step lifecycle fixture's excessive checkpoint/output defaults.
+Do not label a partial trajectory complete or compare mismatched final times.
+
+Run compact health reductions after each case so a common setup failure does not
+invalidate an entire unattended queue. A timestep-size ceiling or unexpected
+schedule change must be reported explicitly, not hidden behind the requested dt.
+Stop affected cases for invalid means, loss of physical admissibility, repeated
+solver failure or inconsistent exterior/history publication. Do not relax
+tolerances, alter the model, add damping or switch quadrature to make them pass.
+
+At most one short, existing diagnostic replay (target <=15 minutes, within the
+total budget) may isolate a concrete failure. Continue independent valid cases
+when meaningful. Do not recursively expand a failure into another experiment
+campaign. If a production defect requires a source change, preserve the failed
+baseline and explain the defect; do not mix pre-fix and post-fix trajectories
+as matched evidence or reopen refactoring without a selected follow-up task.
+
+6. ANALYZE THE COUPLED SOLUTION, NOT ONLY PHASE BALANCE
+====================================================
+Use common physical times and material labels. Report central labels [.2,.8]
+and the complementary endpoint regions separately, plus whole-domain measures.
+Reuse the existing union-cell and mesh-crossing comparison quadratures; do not
+compare raw coefficient vectors across different FE layouts or meshes.
+
+For A/B and B/D, report absolute differences, reference norms and relative L2
+differences at t=0, selected intermediate times and t=.8 for:
+  - phase, profile integral, peak and normal width;
+  - normalization I and the physical curve geometry;
+  - bulk/surface stress, driving shear and pressure-inclusive normal traction;
+  - slip rate, cumulative slip and age.
+Retain signed tractions and the established stress/pressure convention. Do not
+normalize a tiny perturbation shear by itself and call the result a large error
+in the total driving shear. Do not divide by a near-zero initial slip increment.
+
+For C, verify stability, physical bounds, transport balance, compatible boundary
+inflow and endpoint behavior, and compare corresponding material-label traces
+with A. Distinguish a sign-dependent numerical failure from genuine finite-domain
+differences. Plots may subtract the known U*t drift for visualization, but must
+retain the physical frame in work/traction calculations. No assertion of exact
+Galilean invariance follows from this finite-domain pair.
+
+Use the native SSPRK stage-weighted source/flux accounting:
+  change in integral(phi) = integrated phi*div(v) - outward boundary flux
+                            + numerical balance defect.
+Report signed and accumulated absolute defects. Nonzero raw integral change can
+be physical for the discrete velocity. Include limiter activity and its effect
+on profile shape; do not infer full accuracy from conservation or a smooth image.
+
+Retain the existing endpoint and trapezoidal energy/work diagnostics, signed and
+absolute remainders, and reaction-projection losses. Report them against relevant
+absolute work/storage scales. Do not combine distinct inventories or treat small
+signed cancellation as an accuracy certificate. Summarize the selected bulk-spin
+exposure and accumulated slip to show what finite deformation this run actually
+tests; do not add new total-spin/no-spin comparison trajectories.
+
+Two bulk meshes show a refinement difference, not an asymptotic convergence
+order or an exact error estimate. B/D refines the coupled bulk discretization,
+not phase alone. The 20-label surface resolution stays fixed; it can limit the
+benefit of bulk refinement. A/B is a physical-timestep comparison, not a proof
+of third-order accuracy of the complete coupled algorithm.
+
+7. SMALL FROZEN-STATE CHECK AND PAPER READINESS
+=============================================
+After the main runs, if budget permits, use the EXISTING observers on the final
+accepted B and D states for a bounded higher-quadrature evaluation of localization
+measure and localized work. This is postprocessing of fixed fields: no new
+mechanical solve, production quadrature change, phase optimization or added
+trajectory. Use existing Gauss8/12/16-style diagnostic capability as appropriate.
+Compare the two higher evaluations when affordable and state any unresolved
+quadrature sensitivity. Do not claim a tiny mesh/energy difference is resolved
+if the measurement changes comparably with diagnostic quadrature.
+
+Prepare a short readiness table for the paper examples: stationary BP3, fixed
+fault with viscous lower crust, and its advected-fault counterpart. Identify
+which needed capabilities are present, the remaining numerical/physical blockers,
+and the next single justified experiment. Read the established BP3 review and
+pilot mapping where needed. This is a readiness assessment, not authorization
+to invent dimensional parameters, submit server runs or enable new fault growth.
+Remember that U=0 in the current material fixture still permits fault deformation;
+it is not automatically the paper's frozen-fault control.
+
+8. DELIVERABLES
+===============
+Produce one report, DGQ2_COUPLED_VALIDATION_REPORT.md, linked to a compact CSV/JSON
+summary, exact four input files, commands, source/binary/plugin identities, run
+ledger and retained evidence locations. Update the active status with the tested
+restored implementation and actual completed/unfinished cases.
+
+Provide a small set of readable PNG figures:
+  1. Phase/profile balance and shape, with physical-source and numerical-defect
+     contributions distinguished.
+  2. Central/end traction, slip, age and normalization comparisons for timestep
+     and mesh refinement.
+  3. Representative phase and stress/localization fields in the moving region,
+     with useful zooms and consistent color scales; include reverse motion.
+  4. Energy diagnostics and runtime/solver/subcycle costs, combined if clear.
+Use existing figure/reduction code where possible. Avoid a full-resolution field
+export at every substep or a large gallery of redundant plots. Retain enough
+accepted states and checkpoints to reproduce the reported comparisons.
+
+Lead the report with the scientific finding: whether the coupled differences
+are dominated by timestep, bulk resolution, localization/quadrature, endpoints
+or an unresolved implementation defect, and what evidence supports that judgment.
+State uncertainty if these tests do not separate the causes. Do not invent
+universal percent-error acceptance thresholds after inspecting the results.
+
+Make one concrete recommendation: proceed toward a paper-oriented server pilot,
+address a specified accuracy bottleneck, or perform one clearly justified missing
+comparison. Do not default to more architectural refactoring or an unbounded
+matrix. The eight-hour limit and four-case scope remain in force through closeout.

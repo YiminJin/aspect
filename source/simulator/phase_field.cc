@@ -719,9 +719,9 @@ namespace aspect
                 ExcMessage("Native phase requires a composition named phase_field with Type and method phase field. Legacy CPDI retains the separate Q1 block."));
     AssertThrow(!registered || mesh_data,
                 ExcMessage("The native phase composition requires mesh-based material data; CPDI uses the legacy Q1 path."));
-    AssertThrow(!uses_dg_phase() || (mesh_data && !fault->uses_bulk_cohesive_phase()
-                                    && (fault->uses_transported_mature_history() || fault->uses_consistent_endpoint_phase())),
-                ExcMessage("DG phase requires transported mature or fixed-fault consistent-endpoint physics."));
+    AssertThrow(!uses_dg_phase() || (mesh_data
+                                    && (fault->uses_bulk_cohesive_phase() || fault->uses_transported_mature_history() || fault->uses_consistent_endpoint_phase())),
+                ExcMessage("DG phase requires transported mature, fixed-fault consistent-endpoint, or the separately guarded bulk-tip physics."));
     for (unsigned int i = 0; i < this->n_particle_managers(); ++i)
       {
         auto &manager = this->get_particle_manager(i);

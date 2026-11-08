@@ -1349,9 +1349,10 @@ namespace aspect
          * from mature/surface constitutive modes and cannot convert histories. */
         enum class BulkFlowRule
         {
-          scalar, fixed_tensor, radial_tensor, coulomb_fixed_phase
+          scalar, fixed_tensor, radial_tensor, coulomb_fixed_phase, bulk_tip_sections
         };
         BulkFlowRule bulk_flow_rule = BulkFlowRule::scalar;
+        double bulk_tip_initial_age = 1.; ///< Virgin and initially damaged section age, seconds.
         /**
          * @}
          */

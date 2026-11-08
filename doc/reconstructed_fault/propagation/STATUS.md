@@ -1,3 +1,29 @@
+> **Current propagation selection, 7 November 2026:** the bulk energetic tip
+> control now couples direct physical stress, cohesive tensor history, DGQ2 bulk
+> damage and an explicitly selected cross-section RSF closure. Coarse/half-dt
+> controls and lifecycle checks pass; the finer .05 line search remains a
+> qualification limit. No general turning, moving growth or production claim.
+> The older surface-damage continuation is preserved but superseded as the next
+> propagation choice. Mature four-run closure and cleanup losses remain intact.
+> [Guide](../particle_free/TIP_TREATMENT.md) · [Report and next bounded diagnostic](../particle_free/TIP_TREATMENT_IMPLEMENTATION_REPORT.md).
+
+# 7 November 2026 — propagation formulation recovery
+
+The mature moving-fault stage is temporarily closed around its four completed
+runs. The current entry point is
+[PROPAGATION_FORMULATION_RESTART](../particle_free/PROPAGATION_FORMULATION_RESTART.md),
+not an automatic return to historical P2/P3 instructions below.
+The retained exact-jump RSF episode restores bitwise and advances four bounded
+steps to 752 / 374.5801868754 s with its matching historical executable. Current
+source fresh/rejection/restart checks pass. The physical event and fracture-work
+accuracy remain incomplete; surface damage is the sole fracture inventory in
+this route. A bounded next continuation is prepared, not launched. No shared
+mechanics or phase architecture was changed; total recovery launches took
+8.08 minutes. Preserve the separate diffuse DGQ2 growth replay timeout and all
+historical failures. [Mature closure](../particle_free/MATURE_FAULT_TEMPORARY_CLOSEOUT.md).
+
+---
+
 # Historical roadmap and current review entry
 
 This file preserves the older propagation stages. Current native cohesive/RSF

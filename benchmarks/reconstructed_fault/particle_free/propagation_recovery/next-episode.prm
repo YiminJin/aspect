@@ -1,0 +1,11 @@
+# Prepared only: requires review/selection before a long run.
+# Retained small-strain exact-jump law, residual-resolved estimator and physics.
+# Includes are resolved from the repository root. qualify.py supplies output,
+# matching historical executable/plugin and an isolated checkpoint copy.
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/episode.prm
+set End time = 374.68003334330067
+subsection Termination criteria
+  set Termination criteria = end time, end step, user request, wall time
+  set End step = 20000
+  set Wall time = 1.4
+end

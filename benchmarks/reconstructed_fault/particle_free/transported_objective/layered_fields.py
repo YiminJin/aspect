@@ -2,7 +2,18 @@
 import os
 for k in ('OPENBLAS_NUM_THREADS','OMP_NUM_THREADS'):os.environ[k]='1'
 import numpy as np
-from assess_material_native import State as LegacyState,basis,read,NAMES
+from assess_material_native import State as LegacyState,basis,read as plain_read,NAMES
+import csv
+import gzip
+
+def read(path):
+    """Read retained CSV observations, including losslessly compacted new runs."""
+    if not path.exists() and path.with_suffix(path.suffix+".gz").exists():
+        path=path.with_suffix(path.suffix+".gz")
+    if path.suffix==".gz":
+        with gzip.open(path,"rt") as stream:return list(csv.DictReader(stream))
+    return plain_read(path)
+
 from compare_bounded_profile import dot3
 class State:
     memory=LegacyState.memory
@@ -10,7 +21,7 @@ class State:
         self.h=h;self.m=m;self.direct=True
         meta=read(path/"material-model.csv")[0]
         self.background_shear=float(meta.get("background_shear",2.7));self.sense=float(meta['sense'])
-        records=[r for p in sorted(path.glob(f'material-{step}-rank*.csv')) for r in read(p)]
+        records=[r for p in sorted(path.glob(f'material-{step}-rank*.csv*')) for r in read(p)]
         records.sort(key=lambda r:(r['cell'],int(r['q'])))
         self.x=np.array([[float(r['x']),float(r['y'])] for r in records])
         self.values=np.array([[float(r[k]) for k in NAMES+['pressure']] for r in records])

@@ -20,6 +20,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 
 #include <aspect/material_model/rheology/fault_friction.h>
 #include <aspect/utilities.h>
+#include <limits>
 
 namespace aspect
 {
@@ -27,6 +28,83 @@ namespace aspect
   {
     namespace Rheology
     {
+      template <int dim>
+      std::vector<double>
+      FaultFriction<dim>::signed_parameter_record() const
+      {
+        AssertThrow(friction_law==FrictionLaw::rate_state && regularized,
+                    ExcMessage("Signed section law requires regularized rate and state friction."));
+        std::vector<double> result{V0,Dc};
+        for(const auto *values:{&mu0,&a,&b})
+          result.insert(result.end(),values->begin(),values->end());
+        return result;
+      }
+
+      template <int dim>
+      typename FaultFriction<dim>::SignedEndpoint
+      FaultFriction<dim>::signed_endpoint(const std::vector<double> &fractions,
+                                         const double V, const double old_age,
+                                         const double dt, const double pressure,
+                                         const double radiation) const
+      {
+        AssertThrow(friction_law==FrictionLaw::rate_state && regularized
+                    && old_age>0. && dt>0. && pressure>0. && radiation>=0.,
+                    ExcMessage("Bulk sections require regularized RSF, positive age and prescribed compression."));
+        AssertDimension(fractions.size(),mu0.size());
+        double direct=0.,evolution=0.,reference=0.;
+        for(unsigned int j=0;j<fractions.size();++j)
+          {direct+=fractions[j]*a[j];evolution+=fractions[j]*b[j];reference+=fractions[j]*mu0[j];}
+        const double speed=std::abs(V),denominator=1.+dt*speed/Dc;
+        const double age=(old_age+dt)/denominator;
+        const double scale=std::exp((reference+evolution*std::log(age*V0/Dc))/direct)/(2.*V0);
+        const double z=speed*scale,ratio=z/std::hypot(1.,z);
+        const double friction=std::copysign(pressure*direct*std::asinh(z),V);
+        const double slope=pressure*((speed>0.?direct*ratio/speed:direct*scale)
+                                    -evolution*ratio*dt/(Dc*denominator))+radiation;
+        return {friction+radiation*V,slope,age,friction,radiation*V};
+      }
+
+      template <int dim>
+      typename FaultFriction<dim>::SectionEndpoint
+      FaultFriction<dim>::section_endpoint(const std::vector<double> &fractions,
+                                          const double free_rate, const double mobility,
+                                          const double old_age, const double dt,
+                                          const double pressure, const double radiation) const
+      {
+        const auto zero=signed_endpoint(fractions,0.,old_age,dt,pressure,radiation);
+        double direct=0.,evolution=0.,reference=0.;
+        for(unsigned int j=0;j<fractions.size();++j)
+          {direct+=fractions[j]*a[j];evolution+=fractions[j]*b[j];reference+=fractions[j]*mu0[j];}
+        // R'(V)=p*ratio*(a/|V|-b/(Dc/dt+|V|))+eta_rad.
+        // The negative part is bounded by -p*dt/Dc*(sqrt(b)-sqrt(a))_+^2.
+        const double weakening=std::max(0.,std::sqrt(evolution)-std::sqrt(direct));
+        AssertThrow(mobility>=0. && radiation>=pressure*dt/Dc*weakening*weakening,
+                    ExcMessage("Bulk section elimination requires a monotone endpoint RSF law. Multiple-root selection is not qualified."));
+        if(free_rate==0.)return {zero,0.,zero.derivative/(1.+mobility*zero.derivative)};
+        if(mobility==0.)
+          {const auto law=signed_endpoint(fractions,free_rate,old_age,dt,pressure,radiation);return {law,free_rate,law.derivative};}
+        const double scale=2.*V0*std::exp(-(reference+evolution*std::log((old_age+dt)*V0/Dc))/direct);
+        AssertThrow(scale>0. && std::isfinite(scale),ExcMessage("Section RSF rate scale is outside floating-point range."));
+        const double target=std::abs(free_rate),sign=std::copysign(1.,free_rate);
+        long double lower=0.,upper=std::asinh(static_cast<long double>(target)/scale),coordinate=.5L*upper;
+        SignedEndpoint law=zero;double rate=0.;bool converged=false;
+        for(unsigned int iteration=0;iteration<100;++iteration)
+          {
+            rate=static_cast<double>(scale*std::sinh(coordinate));
+            law=signed_endpoint(fractions,rate,old_age,dt,pressure,radiation);
+            const long double residual=static_cast<long double>(rate)+static_cast<long double>(mobility)*law.traction-target;
+            if(std::abs(residual)<=32.*std::numeric_limits<double>::epsilon()*target)
+              {converged=true;break;}
+            if(residual>0.)upper=coordinate;else lower=coordinate;
+            const long double derivative=(1.+mobility*law.derivative)*scale*std::cosh(coordinate);
+            const long double trial=coordinate-residual/derivative;
+            coordinate=trial>lower && trial<upper?trial:.5*(lower+upper);
+          }
+        AssertThrow(converged,ExcMessage("Monotone section RSF elimination did not reach roundoff accuracy."));
+        rate*=sign;law=signed_endpoint(fractions,rate,old_age,dt,pressure,radiation);
+        return {law,rate,law.derivative/(1.+mobility*law.derivative)};
+      }
+
       template <int dim>
       double
       FaultFriction<dim>::

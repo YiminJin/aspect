@@ -1,3 +1,20 @@
+> **Current propagation selection, 7 November 2026:** the bulk energetic tip
+> control now couples direct physical stress, cohesive tensor history, DGQ2 bulk
+> damage and an explicitly selected cross-section RSF closure. Coarse/half-dt
+> controls and lifecycle checks pass; the finer .05 line search remains a
+> qualification limit. No general turning, moving growth or production claim.
+> The older surface-damage continuation is preserved but superseded as the next
+> propagation choice. Mature four-run closure and cleanup losses remain intact.
+> [Guide](particle_free/TIP_TREATMENT.md) · [Report and next bounded diagnostic](particle_free/TIP_TREATMENT_IMPLEMENTATION_REPORT.md).
+
+> **7 November 2026 — mature closure and propagation recovery:** four mature
+> A/B/D/C runs preserved with accuracy limits; historical cohesive–RSF checkpoint
+> restored exactly and four steps accepted through 752. Current native lifecycle
+> checks pass; an additional diffuse-growth replay timed out. Surface-fracture,
+> direct-stress and DGQ2 phase roles remain distinct. No new model or server run.
+> [Current formulation/restart report](particle_free/PROPAGATION_FORMULATION_RESTART.md)
+> · [Mature closure](particle_free/MATURE_FAULT_TEMPORARY_CLOSEOUT.md).
+
 > **4 November 2026 — ASPECT architecture refactor complete:** rejected mature driver removed; ordinary simulator/solver ownership and independent tensor discretization are implemented. Full units, seven moving comparisons, stationary/non-fault and serial controls pass. [Guide](particle_free/MATURE_MOVING_FAULT.md) · [report](particle_free/ASPECT_ARCHITECTURE_REPORT.md). Scientific campaigns remain paused; no new physical or production qualification.
 
 > **4 November 2026 — stress-history consolidation complete:** tested direct/publication baseline `e4b74c556` preserved before interface cleanup. Existing unit suite and short constant/layered, default and lifecycle comparisons pass; scientific work remains paused. See [report](particle_free/STRESS_HISTORY_CONSOLIDATION_REPORT.md). This changes no production or cohesive qualification claim.

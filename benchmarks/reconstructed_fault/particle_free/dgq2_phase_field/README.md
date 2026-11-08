@@ -1,3 +1,16 @@
+> Restored-build overnight A/B/D/C validation is complete. Read the
+> [coupled report](../../../../doc/reconstructed_fault/particle_free/DGQ2_COUPLED_VALIDATION_REPORT.md).
+> `run_overnight.py` prepares/runs only the four selected cases through T=.8;
+> it refuses existing run directories/logs and preserves native checkpoints.
+> `analyze_overnight.py` reuses the established field observers and union-cell /
+> mesh-crossing rules, including selected common times and final Gauss8/12/16
+> diagnostic evaluation; `plot_overnight.py` produces four PNGs. New rank CSVs
+> are losslessly compressed after each run and remain readable by the shared
+> observer. See the local `evidence/dgq2_overnight/README.md` for actual commands,
+> hash ledgers and retained failed pre-step attempts. Source, quadrature and
+> architecture remain frozen; these entry points are reproduction tools, not
+> authorization to enqueue another campaign.
+
 > Current native integration: read the [composition/mapped-phase contract](../../../../doc/reconstructed_fault/particle_free/DGQ2_PHASE_FIELD_DESIGN.md)
 > and [bounded integration report](../../../../doc/reconstructed_fault/particle_free/NATIVE_PHASE_INTEGRATION_REPORT.md).
 > New core/plugins live under `build-particle-free/native-phase-integration/`.

@@ -1,4 +1,56 @@
-> **Current selection — phase architecture restored and frozen, 6 November 2026.**
+> **Current selection — bulk energetic tip control, 7 November 2026.**
+> The user-approved cross-section RSF closure is implemented with physical true
+> stress/cohesive tensor history and authoritative DGQ2 bulk damage. This is an
+> additional constitutive assumption for a fixed-reference, fixed-direction,
+> prescribed-compression specimen; it is separate from mature production and
+> the historical surface-damage episode. Coarse and half-dt controls reach .08 s;
+> 632 point assertions, SIPG/coupled derivatives, rollback and active-slip 2→1-rank
+> restart pass. The refined run fails its line search at .05 s; temporal energy
+> error remains large relative to fracture and no developed tip advance is shown.
+> [Current guide](TIP_TREATMENT.md) · [Implementation/evidence report](TIP_TREATMENT_IMPLEMENTATION_REPORT.md).
+> The next proposed experiment is the refined .0475→.05 constrained active-set/
+> stability diagnostic, with unchanged physics; not an automatic continuation.
+> Candidate was tested as local changes on `36de6bcf3`; seven protected mature binaries
+> remain unchanged. New simulations total about 175 s; separate builds about
+> 23.6 min. No active run, production conversion or server job. Historical
+> cleanup losses and mature deferred refinements remain unchanged. The previous
+> prepared interface continuation is superseded as the next propagation choice.
+
+> **Previous selection — mature closure and propagation recovery, 7 November 2026.**
+> The four completed A/B/D/C runs are preserved at numerical source `84f57503c`
+> and core `6ea374c5…a67d9`; no further mature trajectory is selected.
+> [Temporary mature closure](MATURE_FAULT_TEMPORARY_CLOSEOUT.md) records accuracy
+> limits, checkpoints and parked h=1/16/surface/quadrature/architecture work.
+> The original cohesive–RSF episode checkpoint restores bitwise with its compatible
+> binary; four new steps reach step 752, t=374.5801868754 s. Current-source
+> fresh/rejection/restart checks pass; the additional diffuse DGQ2 growth replay
+> timed out before completing its first physical step. Total launches: 8.08 min,
+> plus a small benchmark-plugin build; no core changes or active jobs remain.
+> [Formulation/restart report](PROPAGATION_FORMULATION_RESTART.md) distinguishes
+> surface damage/fracture from mature true stress and DGQ2 phase, provides the
+> proposed next episode experiment and targeted mature retest table. The event
+> remains incomplete; new-window work error is 21.72% of fracture work. The
+> prepared continuation is **not launched**; it requires the next selection.
+> No server job, new law or checkpoint conversion. Historical failures,
+> shared-assembler review and cleanup losses remain preserved.
+
+> **Completed — restored DGQ2 coupled validation, 7 November 2026.**
+> All selected A/B/D/C cases reached T=.8 on verified native integration
+> `84f57503c` behavior: 384 accepted steps, zero retries, matching exterior
+> references, four ranks sequentially. Numerical source and protected binaries
+> are unchanged; the shared-assembler review remains inactive. Phase balance
+> defects stay below 3.22e-15, but B/D central/end surface stress differs by
+> 5.48%/3.71%, endpoint age by 4.13%, and localized-work quadrature remains
+> sensitive. The coupled solution is not yet spatially qualified for a paper
+> server pilot. The state transient also remains timestep-sensitive.
+> [Report, data and four figures](DGQ2_COUPLED_VALIDATION_REPORT.md).
+> Measured run/reduction overhead was about 4 h 20 min; no compilation, replay,
+> source change or production/server run. All jobs are finished. Architecture
+> remains frozen. Next proposed single comparison: +U, h=1/16, dt=.00625,
+> T=.8, unchanged 20 labels; **not launched or authorized by this closeout**.
+> Other deferred experiments and inherited cleanup losses remain unchanged.
+
+> **Previous selection — phase architecture restored and frozen, 6 November 2026.**
 > Normal revert `319b10b94` restores the native-integration implementation from
 > `84f57503c`; the preceding DGQ2 and native-integration commits remain intact.
 > Native phase retains its registered phase cell assembler, mapped private

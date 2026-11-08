@@ -3641,3 +3641,42 @@ and [integration report](particle_free/NATIVE_PHASE_INTEGRATION_REPORT.md) disti
 implementation, native checks, coupled comparisons and remaining limitations.
 Stress transport, bulk-spin closure, endpoint forcing, physical coefficients,
 quadrature of stress and existing convergence criteria are unchanged.
+
+### Selected fixed-reference bulk energetic tip control (7 November 2026)
+
+The user selects the bulk energetic propagation direction and explicitly adds a
+cross-section RSF closure for a bounded straight, single-fault control. This is
+separate from the historical surface-damage episode and mature production. The
+maintained entry is [TIP_TREATMENT.md](particle_free/TIP_TREATMENT.md); numerical
+qualification is recorded separately in its implementation report.
+
+The new opt-in `bulk tip sections` route retains physical true deviatoric stress
+τ and recoverable cohesive tensor A at fixed native mechanical quadrature points.
+It uses backward-Euler matched Maxwell evolution, full 3-D plane-strain tensor
+products, zero spin/transport, prescribed positive frictional confinement and
+one fixed Mode-II direction. The only damage/fracture inventory is the native
+DGQ2 bulk phase with AT1/SIPG energy, constrained in Bernstein coordinates by
+accepted phase and the upper bound one. The analytic intact reaction and fully
+damaged limits require no compliance floor or phase cap.
+
+The additional constitutive assumption is V(s)=∫w(s,n)dn for D_f=wS, excluding
+ordinary bulk deformation. One age exists on each full section from initialization,
+including ahead of the initial tip, and obeys positive endpoint aging. A uniform
+section resistance is the work adjoint of the actual JxW/ds integration; local
+fw can be signed, and transverse cohesive variance remains physical bulk energy.
+Multiple bands/opposing rates are diagnosed without clipping or relocalization.
+A monotone scalar constitutive elimination avoids cold-creep cancellation in the
+mixed resistance equation. The raw integrated rate, resolved scalar rate and
+power defect remain separately observable; no dissipation is added to Gc.
+
+The existing simulator/bulk coupled solver owns trial/acceptance ordering. A
+single publication contains stress, cohesive memory, phase, section age and
+slip. A new checkpoint law rejects reinterpretation of older histories. The
+first fixed aligned-cell adapter and replicated/root-direct solve are bounded
+qualification infrastructure, not the general geometry or scalable production
+solution. No ordinary advection face-assembly refactor is selected.
+
+Nonzero cohesive spin needs J_f, general moving growth needs fracture-gradient
+configuration work, and turning/branching/current-pressure contact require
+additional physical closures. None is inferred from the energy identity or
+from a moving mature comparison. KKT convergence does not establish stability.

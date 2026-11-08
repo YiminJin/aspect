@@ -1,5 +1,14 @@
 # Active fixed-mesh cohesive–RSF workflow
 
+**Recovery checked 7 November 2026:** the existing fresh fixture and its
+rejection/restart work with the restored native-phase-integration core and a
+newly matched benchmark plugin. Historical episode restart instead uses its
+preserved core/plugin pair; do not substitute a different stress law.
+[Formulation, measured checks and next proposed experiment](../../../../doc/reconstructed_fault/particle_free/PROPAGATION_FORMULATION_RESTART.md)
+· [Exact recovery commands](../propagation_recovery/README.md).
+The new four-step episode endpoint is 752 / 374.5801868754 s; the physical
+episode and fracture-relative accuracy remain incomplete.
+
 `active.prm` is the maintained, fresh-history starting point. It needs source,
 ASPECT/deal.II and the compiled fixture plugin; it reads no prototype, kernel,
 checkpoint, or archived evidence. Its four-step loading/hold interval is an API

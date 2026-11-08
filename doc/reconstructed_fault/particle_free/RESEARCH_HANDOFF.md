@@ -1,3 +1,39 @@
+> **Current selection — bulk energetic tip control, 7 November 2026.**
+> The user-approved cross-section RSF closure is implemented with physical true
+> stress/cohesive tensor history and authoritative DGQ2 bulk damage. This is an
+> additional constitutive assumption for a fixed-reference, fixed-direction,
+> prescribed-compression specimen; it is separate from mature production and
+> the historical surface-damage episode. Coarse and half-dt controls reach .08 s;
+> 632 point assertions, SIPG/coupled derivatives, rollback and active-slip 2→1-rank
+> restart pass. The refined run fails its line search at .05 s; temporal energy
+> error remains large relative to fracture and no developed tip advance is shown.
+> [Current guide](TIP_TREATMENT.md) · [Implementation/evidence report](TIP_TREATMENT_IMPLEMENTATION_REPORT.md).
+> The next proposed experiment is the refined .0475→.05 constrained active-set/
+> stability diagnostic, with unchanged physics; not an automatic continuation.
+> Candidate was tested as local changes on `36de6bcf3`; seven protected mature binaries
+> remain unchanged. New simulations total about 175 s; separate builds about
+> 23.6 min. No active run, production conversion or server job. Historical
+> cleanup losses and mature deferred refinements remain unchanged. The previous
+> prepared interface continuation is superseded as the next propagation choice.
+
+> **Previous selection — mature closure and propagation recovery, 7 November 2026.**
+> The four completed A/B/D/C runs are preserved at numerical source `84f57503c`
+> and core `6ea374c5…a67d9`; no further mature trajectory is selected.
+> [Temporary mature closure](MATURE_FAULT_TEMPORARY_CLOSEOUT.md) records accuracy
+> limits, checkpoints and parked h=1/16/surface/quadrature/architecture work.
+> The original cohesive–RSF episode checkpoint restores bitwise with its compatible
+> binary; four new steps reach step 752, t=374.5801868754 s. Current-source
+> fresh/rejection/restart checks pass; the additional diffuse DGQ2 growth replay
+> timed out before completing its first physical step. Total launches: 8.08 min,
+> plus a small benchmark-plugin build; no core changes or active jobs remain.
+> [Formulation/restart report](PROPAGATION_FORMULATION_RESTART.md) distinguishes
+> surface damage/fracture from mature true stress and DGQ2 phase, provides the
+> proposed next episode experiment and targeted mature retest table. The event
+> remains incomplete; new-window work error is 21.72% of fracture work. The
+> prepared continuation is **not launched**; it requires the next selection.
+> No server job, new law or checkpoint conversion. Historical failures,
+> shared-assembler review and cleanup losses remain preserved.
+
 > **Current scope, 6 November 2026 — native DGQ2 phase:** native operators,
 > short growth/lifecycle checks and both positive coupled timesteps pass. The
 > user deferred the reverse-direction, finer-mesh and remaining tests after the

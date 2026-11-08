@@ -431,12 +431,16 @@ namespace aspect
                             "with pre-existing faults.");
 
           prm.declare_entry("Bulk cohesive flow rule", "fixed scalar",
-                            Patterns::Selection("fixed scalar|fixed tensor|in-plane radial tensor|closed Coulomb fixed phase"),
+                            Patterns::Selection("fixed scalar|fixed tensor|in-plane radial tensor|closed Coulomb fixed phase|bulk tip sections"),
                             "Experimental bulk-only point return. Fixed scalar preserves the "
                             "existing law/default. Tensor modes retain physical cohesive memory "
                             "and use distinct checkpoint tags; conversion is unsupported. Closed Coulomb "
                             "is restricted to fixed phase, zero residual cohesion and a prescribed "
                             "background Surface pressure plus solved zero-mean perturbation pressure.");
+
+          prm.declare_entry("Bulk tip initial age", "1", Patterns::Double(0.),
+                            "Initial age in seconds of every physical cross-section, including virgin material. "
+                            "Used only by the fixed-reference bulk tip sections control.");
 
           prm.declare_entry("Fault constitutive mode", "cohesive",
                             Patterns::Selection("cohesive|mature frictional|bulk cohesive"),
@@ -649,7 +653,8 @@ namespace aspect
           evolve_phase_field = prm.get_bool("Evolve phase field");
           bulk_cohesive_phase = prm.get("Fault constitutive mode") == "bulk cohesive";
           const auto bulk_rule = prm.get("Bulk cohesive flow rule");
-          bulk_flow_rule = bulk_rule == "fixed scalar" ? BulkFlowRule::scalar
+          bulk_tip_initial_age=prm.get_double("Bulk tip initial age");
+          bulk_flow_rule = bulk_rule == "bulk tip sections" ? BulkFlowRule::bulk_tip_sections : bulk_rule == "fixed scalar" ? BulkFlowRule::scalar
                            : (bulk_rule == "fixed tensor" ? BulkFlowRule::fixed_tensor
                               : (bulk_rule == "in-plane radial tensor" ? BulkFlowRule::radial_tensor : BulkFlowRule::coulomb_fixed_phase));
           AssertThrow(bulk_cohesive_phase || bulk_flow_rule == BulkFlowRule::scalar,
@@ -859,12 +864,13 @@ namespace aspect
                       && this->get_parameters().nonlinear_solver == Parameters<dim>::NonlinearSolver::single_Advection_iterated_Newton_Stokes
                       && (bulk_flow_rule == BulkFlowRule::coulomb_fixed_phase ? !evolve_phase_field : evolve_phase_field)
                       && homogeneous_mesh_data && !mature_frictional_fault
+                      && !jaumann_particle_stress && !jaumann_dg_stress && !dg_material_transport
                       && dg_tensor_history && !fe_strain_history && !consistent_endpoint_phase
-                      && !dg_accepted_history && !fault_friction.has_state_variable(),
+                      && !dg_accepted_history && (bulk_flow_rule==BulkFlowRule::bulk_tip_sections || !fault_friction.has_state_variable()),
                       ExcMessage("Bulk cohesive experiment requires fixed-mesh 2-D Q2 mechanics, "
                                  "homogeneous mesh data and physical phase evolution (or explicitly fixed "
                                  "phase for closed Coulomb); disable the old "
-                                 "surface/DG-endpoint path. No RSF, transport or moving mesh is supported."));
+                                 "surface/DG-endpoint path. RSF requires bulk tip sections; transport and moving mesh are unsupported."));
           for (unsigned int j = 0; j < elastic_shear_moduli.size(); ++j)
             AssertThrow(elastic_shear_moduli[j] == elastic_shear_moduli[0]
                         && reference_viscosities[j] == reference_viscosities[0]
@@ -872,12 +878,16 @@ namespace aspect
                         && critical_energy_release_rates[j] == critical_energy_release_rates[0]
                         && cohesions[j] == cohesions[0]
                         && cohesions[j] > 0. && critical_energy_release_rates[j] > 0.
-                        && radiation_damping_coefficients[j] == 0.,
+                        && (bulk_flow_rule==BulkFlowRule::bulk_tip_sections || radiation_damping_coefficients[j] == 0.),
                         ExcMessage("Bulk experiment requires matched homogeneous G/eta/Gc/cohesion and constant friction."));
           AssertThrow(minimum_viscosity <= reference_viscosities[0] && maximum_viscosity >= reference_viscosities[0],
                       ExcMessage("Bulk experiment requires the configured homogeneous viscosity without clipping."));
+          if(bulk_flow_rule==BulkFlowRule::bulk_tip_sections)
+            AssertThrow(fault_friction.has_state_variable() && bulk_tip_initial_age>0.
+                        && this->get_parameters().surface_pressure>0.,
+                        ExcMessage("Bulk tip sections require RSF, positive initial age and prescribed compression."));
           double mu = -1.;
-          for (unsigned int j = 0; j < elastic_shear_moduli.size(); ++j)
+          for (unsigned int j = 0; bulk_flow_rule!=BulkFlowRule::bulk_tip_sections && j < elastic_shear_moduli.size(); ++j)
             {
               std::vector<double> fractions(elastic_shear_moduli.size(), 0.);
               fractions[j] = 1.;

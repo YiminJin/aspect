@@ -1,3 +1,10 @@
+> The separately selected [bulk tip control](TIP_TREATMENT.md) uses physical
+> cohesive tensor memory, bulk DGQ2 fracture and a cross-section RSF assumption.
+> It does not replace this mature law, spin closure, history or integrator.
+> Its qualification and unresolved refined-mesh failure are in the
+> [tip report](TIP_TREATMENT_IMPLEMENTATION_REPORT.md); none extends the mature
+> production or moving-growth claims below.
+
 # Mature moving-fault stress: developer guide
 
 This guide follows one **direct physical-stress** step from its equation to its

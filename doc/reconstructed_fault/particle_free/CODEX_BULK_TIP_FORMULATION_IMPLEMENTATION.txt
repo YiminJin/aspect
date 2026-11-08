@@ -1,0 +1,439 @@
+TASK: IMPLEMENT THE BULK PHASE-FIELD TIP MODEL AND DOCUMENT IT
+For the existing Codex thread, using Astra with high reasoning.
+7 November 2026
+
+PURPOSE
+
+The user selects the bulk energetic phase-field description in the attached
+fault_tip_treatment.tex as the intended propagation direction. The current
+cohesive-interface RSF episode solves a different model: surface damage a and
+Gc integral(a ds). Continuing that episode does not implement the selected
+bulk tip model.
+
+Correct the implementation/model mismatch by extending the existing bulk
+cohesive route, integrating its phase evolution and a physically defined RSF
+closure, and providing a readable linked guide comparable to MATURE_MOVING_FAULT.md.
+This is an implementation task, not another documentation-only recovery audit.
+Do not rewrite every fault module or restart the mature-fault testing campaign.
+
+The mathematical review below verifies an energetic core, not a unique complete
+RSF/path model or a proof of well-posedness. Complete the necessary constitutive
+specification explicitly. Do not disguise a new physical assumption as a
+numerical detail or claim that all unspecified laws follow from the free energy.
+If a required closure cannot be obtained without a substantive physical choice,
+show the exact missing equation and a concrete proposed completion; implement
+and verify the independent, unambiguous parts rather than stopping all work.
+A material scientific choice must be reviewable before using it for a long run.
+
+Priority: paper objectives; accuracy/stability/efficiency; ASPECT reuse;
+readable modular code. User-authorized implementation supersedes historical
+"propagation deferred" entries. Routine implementation choices need no repeated
+permission. Preserve the completed mature baseline and old interface evidence.
+
+1. MATHEMATICAL REVIEW AND IMPLEMENTATION CONTRACT
+
+1.1 Variables and assumptions
+
+tau = true physical deviatoric stress, Pa, full 3-D plane-strain metric.
+A = physical recoverable cohesive strain tensor, dimensionless.
+Q = cohesive conjugate stress, Pa; derived from A and phi except at a constraint.
+D_f = bulk fault-deformation rate, 1/s.
+D_3 = deviatoric symmetric velocity gradient.
+lambda = G/eta, 1/s, with constant G>0 and matched relaxation times.
+h(phi)>=0 = additional dimensionless compliance.
+phi is the authoritative bulk damage field; theta>0 is RSF age.
+
+Do not confuse A with total accumulated strain, interface damage a, or trial
+stress. Using true tau removes auxiliary stress reconstruction, not the
+recoverable cohesive state required to store energy. A scalar is sufficient
+only for a fixed shear direction; retain the physical tensor for changing
+directions. Reorienting an old scalar is not tensor-history transport.
+
+The first coupled finite-tip implementation/qualification is a fixed-reference,
+small-strain specimen with one explicit closed Mode-II direction and no material
+advection. This is a controlled first qualification, not permission to bake
+Cartesian normals, a serial-only solver or a permanent fixed-direction
+assumption into general infrastructure. General material motion/free turning
+must remain explicitly unsupported until their missing closures are supplied.
+Do not describe this as a finite-strain model.
+
+1.2 Verified local energy and rates
+
+For h>0:
+  psi_el = tau:tau/(4G) + G A:A/h,
+  Q = 2G A/h,
+  Y = -partial_phi psi_el |_(tau,A)
+    = G h'(phi) A:A/h^2 = h'(phi) Q:Q/(4G).
+
+Use:
+  tau^circle/(2G) + tau/(2eta) = D_3 - D_f,
+  A^circle + lambda A = D_f.
+
+These imply the identity:
+  D_t psi_el =
+      tau:D_3
+    - tau:tau/(2eta)
+    - h Q:Q/(2eta)
+    - (tau-Q):D_f
+    - Y D_t phi.
+
+The two viscous losses are distinct and nonnegative. The flow/friction law
+must specify the last mechanical loss (tau-Q):D_f and make the appropriate
+local or explicitly nonlocal dissipation nonnegative. This inequality alone
+does not determine that law.
+
+The full tensor algebra, compliance derivatives, phase force and endpoint
+identity were checked symbolically for this handoff. Spin power vanishes for
+isotropic quadratic energies because Q is proportional to A. This does NOT
+select the physical spin or prove that any spin gives the same trajectory.
+Specify the objective rates of tau and A from the selected kinematics. If using
+W_b=skew(grad v-J_f), define J_f throughout the process zone first; D_f alone
+does not determine its antisymmetric part. Do not extend the mature selector
+to cohesive growth by merely removing an admission guard.
+
+For D_f=w S and A=e S, S:S=1/2:
+  w [1/s], e dimensionless, q=Q:S=G e/h,
+  psi_coh=G e^2/(2h), Y=h' q^2/(2G).
+Keep these factors of two consistent with the tensor implementation.
+
+1.3 Intact and fully damaged limits
+
+At h=0:
+  A=0 is a constraint, Q is its mechanically selected reaction.
+Use the mixed/one-sided limit, not an h floor or 0/0 evaluation. The scalar
+relaxed force is Y(0)=h'(0) q^2/(2G), with q supplied by the chosen flow law.
+
+The old constant-resistance return selects an excess-over-resistance reaction.
+A smooth regularized RSF law has zero frictional traction at V=0 and generally
+does NOT preserve that Coulomb sticking interval or onset threshold. Re-derive
+the intact limit with the actual chosen kinematics and friction law; do not
+copy the old excess formula after replacing its resistance by a rate function.
+
+For the existing h=m phi(1+phi)/(1-phi)^2, examine phi=1 using inverse compliance:
+  r=1/h=(1-phi)^2/[m phi(1+phi)],
+  Q=2G r A, psi_coh=G r A:A, Y=-G r' A:A.
+For finite A, r and r' tend to zero at phi=1, so these three quantities have
+finite zero limits. r is singular at phi=0; use the intact constraint there.
+No single naively evaluated formula is valid at both endpoints.
+Check the coupled return and tangent limits, not just these energy limits.
+Do not introduce a hidden phi cap to avoid the calculation.
+
+A growth-disabled mature profile with phi<1 and cohesion manually absent is
+not automatically this model's fully damaged limit. Identify the actual
+reduction/calibration needed before claiming equality with the mature branch.
+
+1.4 Phase law and one fracture inventory
+
+Use only:
+  E_frac = integral_Omega Gc/(c_alpha ell)
+             [alpha(phi)+ell^2 |grad phi|^2] dx.
+
+At fixed configuration:
+  F_phi = Gc/(c_alpha ell)[alpha'(phi)-2ell^2 Laplacian(phi)] - Y.
+Solve the variational inequality on phi_old <= phi_new <= 1.
+For future material transport the lower bound is transported phi_old.
+Use the inequality with both bounds; the simpler sign/complementarity form
+applies away from the upper bound.
+
+The derivative defining Y holds physical elastic states fixed. After local
+elimination, the Newton tangent must include the induced changes of A, Q and
+mechanics. Do not differentiate viscous/frictional losses as though they were
+stored energy to construct an unjustified common minimization functional.
+Pressure-dependent RSF can require a nonsymmetric coupled tangent.
+KKT satisfaction alone does not prove uniqueness or global stability.
+
+For the scalar homogeneous intact condition:
+  h'(0) q^2/(2G) = Gc alpha'(0)/(c_alpha ell).
+This is a diagnostic derived from the selected law, not an extra propagation
+criterion. Use the full spatial phase equation at the tip. alpha'(0)=0 need
+not give a positive homogeneous threshold.
+
+The energy is volumetric. Do not add Gc integral(a ds), vertex insertion energy,
+or an independently evolved interface damage variable to the same fracture.
+Finite-ell fracture energy is not exactly Gc times a threshold-defined length.
+Reconstruction observes the damage geometry; its endpoint must not gate bulk
+phase driving or impose an artificial internal phase boundary.
+
+1.5 RSF closure must actually be closed
+
+This is the main missing physics in the attachment. Define, before coupling:
+  - D_f and its admissible directions, including virgin material;
+  - the physical V [m/s] used by RSF and aging, in relation to bulk rate [1/s];
+  - pressure/normal-traction convention, closed-contact scope, and theta's owner;
+  - friction/radiation power and its work-conjugate bulk/surface coupling;
+  - mature-interior reduction and behavior where no reconstructed surface exists.
+
+Reuse the selected regularized signed RSF law and aging equation where applicable:
+  r_f = p_N A_RSF asinh[
+          V/(2 V0) exp((mu0+B_RSF ln(theta V0/Dc))/A_RSF)]
+        + eta_rad V,
+  D_t theta = 1 - |V| theta/Dc.
+Then r_f V >= 0 for p_N>0 and eta_rad>=0.
+A positive endpoint aging update is
+  theta+ = (theta- + dt)/(1 + dt |V+|/Dc).
+This is a time discretization, not an exact update for arbitrary V(t).
+
+A bulk rate cannot be inserted directly as V. Neither V=cell_size*w nor an
+undocumented width proportional to ell is an acceptable conversion. A local
+conversion V=b*w introduces a physical/calibrated length b unless a reduction
+derives it; energy admissibility alone does not determine b.
+
+Prefer deriving the coupling from the existing physical profile/jump definition
+and work-adjoint operators, retaining the complete bulk cohesive energy near
+the tip. Demonstrate
+  integral_Omega (tau-Q):D_f dx
+    = the declared friction/radiation power
+with actual discrete measures, or state and account for any additional bulk
+dissipation. Merely using similarly named V and chi does not establish this.
+
+For a locally straight interior, V=integral w dn is a physical profile rate.
+Reducing it to w=chi V requires an additional transverse-profile assumption.
+Do not enforce that ansatz in a two-dimensional cap or divide by a nonexistent
+normalization ahead of the endpoint. A scalar surface moment cannot in general
+represent the bulk cohesive tensor or its transverse variance energy.
+A numerical candidate curve cannot be used to create physical driving for free.
+
+Use a fixed-direction, prescribed-compression control if needed to isolate and
+verify the first bulk/RSF coupling. Clearly distinguish that control from the
+subsequent current-pressure coupling. The completion report must state whether
+the physical closure is fully specified and implemented. A constant-resistance
+replay alone is not completion of the requested RSF tip model.
+
+If no justified existing definition resolves the intact/cap rate mapping,
+complete the energy/phase/ownership work and present a minimal mathematical
+counterexample plus one recommended closure with its physical implications.
+Do not silently import the old damage-weighted interface resistance, invent a
+band width, or advertise a new experimental closure as a proven equivalence.
+This is a genuine unresolved scientific choice, not an excuse for another
+general audit or for leaving independent implementation unfinished.
+
+1.6 Material motion needs additional work, not just an advected obstacle
+
+Let K=Gc/(c_alpha ell), constant here. For a material gradient:
+  D_t grad phi = grad(D_t phi) - (grad v)^T grad phi.
+Consequently:
+  D_t[K alpha(phi)+K ell^2|grad phi|^2]
+    = K alpha' D_t phi + 2K ell^2 grad phi . grad(D_t phi)
+      - 2K ell^2 (grad phi outer grad phi):D.
+A material-volume balance also includes psi_frac div(v); Eulerian balances
+have transport/boundary flux. For incompressible flow the last displayed
+deformation power generally remains.
+
+Therefore a general advected growing model needs a consistent configurational/
+microstress contribution or an explicitly prescribed-geometry work accounting.
+The attachment's local elastic identity alone does not close this balance.
+Derive the corresponding stress/work and boundary terms before enabling that
+capability. Do not add a shape-work "correction" defined by the observed residual.
+Keep the initial fixed-reference propagation scope separate from the preserved
+moving mature test; neither proves general moving growth.
+
+2. IMPLEMENTATION WORK
+
+A. Establish the selected current source and extend existing owners.
+
+Use the actual worktree and existing AGENTS.md; preserve unrelated edits.
+Read the new recovery/closeout, attached tip draft, relevant current design,
+bulk_cohesive.{h,cc}, bulk_cohesive_tensor.*, bulk_cohesive_phase.cc, modern
+phase DG/SIPG owners and the mature guide. Consult the retained
+COULOMB_DIRECTION/LOCALIZATION/GRADIENT reports for known nonuniqueness and
+short-wavelength findings before selecting a flow law. Thermodynamic positivity
+alone does not repair those findings; do not silently add their experimental
+gradient energy or retain an arbitrary local root.
+
+The old cohesive-interface path remains an explicit comparison model. This
+task selects a different authoritative growth route; do not delete its evidence
+or force old interface checkpoints into the new state.
+
+B. Implement physical tau plus cohesive history.
+
+Use direct physical stress in the new propagation path, with A as the necessary
+physical cohesive history. Keep numerical predictors as local work variables,
+not unexplained extra persistent physical tensors. Preserve any native/cut
+stress modes needed by the existing representation; quantify projection if
+changing spaces. Do not flatten the complete history to ordinary uncut DGQ2
+and assume equivalence.
+
+For zero spin/transport, backward Euler gives a clear implementation reference:
+  beta=(1+dt G/eta)^-1,
+  tau+ = beta[tau-+2G dt(D_3+ - D_f+)],
+  A+   = beta[A-+dt D_f+].
+Solve these with the actual flow law and phase condition. They are not the
+mature branch's exponential-integration formula; label the difference.
+An algebraically equivalent predictor may be eliminated internally.
+
+All trial mechanics, phase, RSF and geometry use the same accepted parent.
+Commit all physical histories once; rejection/retry restores everything.
+Version new checkpoint semantics explicitly. Fresh small experiments are
+preferred to converting the loaded interface episode.
+
+C. Connect the spatial bulk phase law to the modern DGQ2 machinery.
+
+Reuse the existing authoritative phase composition, mapped phase-specific
+SIPG operators, physical quadrature/normals, boundary handling and solver
+infrastructure. Supply the bulk Y and consistent tangent from the new
+constitutive response. Do not keep an independent hidden Q1 phase solver
+beside the authoritative DGQ2 field or continue CPDI/particle assumptions.
+
+The discrete phase residual/tangent must be derivatives of the same fracture
+functional, including SIPG face and boundary terms. Do not combine an interface
+damage update with a separately minimized bulk fracture energy.
+
+Admissibility must hold for the represented DG field under the stated constraint
+set. Mean-preserving BP scaling is a transport operation; growth changes means.
+Do not post-limit a converged growth solution and retain its old KKT certificate.
+If a bound operation changes the growth candidate, re-establish the coupled
+conditions. Reuse established bounds/obstacles where compatible.
+
+Do not edit the ordinary ASPECT AdvectionSystemInteriorFace/BoundaryFace classes
+or restart the reverted shared-assembler refactor. Use existing phase modules
+and ordinary ASPECT interfaces, linear algebra, signals and lifecycle.
+
+D. Make geometry and histories follow the physical solution.
+
+Provide driving in intact bulk material before a surface record is present.
+Do not seed positive damage, extend the surface to grant driving, or impose V=0
+at every last reconstructed vertex as a universal tip law. At the initial
+fixed-direction qualification, explicitly prescribe orientation as a restriction.
+
+Preserve cohesive tensor memory when directions later change. Document what
+is physical (damage/strain/age) and what is reconstructed geometry metadata.
+A zero-time reconstruction must not change energy, physical state or active
+mechanics merely by changing observer vertex count. New numerical labels do
+not reset material histories. Keep true new-material initialization explicit.
+
+E. Implement an honest energy ledger.
+
+Measure independently: external work; bulk/cohesive stored energy; diffuse
+fracture increment; bulk/cohesive viscosity; friction; radiation; boundary flux
+when present; temporal/projection/quadrature defects; nonlinear residual work.
+
+For endpoint integration at finite h, retain the verified identity:
+  Q+:(A+ - A-) =
+      Delta[h Q:Q/(4G)]
+    + h- |Q+ - Q-|^2/(4G)
+    + (h+ - h-) Q+:Q+/(4G).
+Together with the tau increment identity this exposes BE numerical terms.
+The compliance-work term is not generally Y+ Delta phi for nonlinear h.
+Derive the actual discrete phase contribution; do not equate these by fiat.
+Use stable limit expressions at h=0/infinity.
+
+Preserve separate signed sums and sums of absolute physical-work remainders.
+Compare with active work and genuinely added fracture energy, with absolute
+values when the latter is zero/tiny. Do not charge numerical dissipation as Gc
+or tune a closure to make the ledger vanish. Changing the physical model is
+not by itself a cure for the old 21.72% time-integration remainder.
+Decompose the already exported four-step interface data if available; no new
+interface episode is required for this diagnostic.
+
+3. BOUNDED VALIDATION THAT MUST EXERCISE THE NEW CODE
+
+Reuse existing independent tests where they apply, extending them only for
+changed physics. Complete passing stages without asking after each routine step.
+
+- Material points: verified energy/power identity; intact below/above onset;
+  finite h; phi->1 analytic limit; unloading/reversal with no healing; relaxation;
+  signed regularized friction and positive age. Check physical derivatives
+  against independent perturbations, with one-sided tests at switches.
+- Stress representation: compare reconstructed old-bulk and new-direct physical
+  tau, cohesive storage and sources for the same matched-constant-resistance
+  control. This isolates variable storage from the new RSF law.
+- Phase energy: independently differentiate the discrete DGQ2 fracture energy,
+  including faces, and its coupled driving. Exercise a virgin cell not associated
+  with the initial curve; no artificial phase seed to make activation possible.
+- Profile reduction: one straight matched case and one nonuniform transverse
+  history. Account for variance energy; do not force the latter to equal a
+  single surface moment.
+- One coupled loaded finite-tip experiment using the selected closed law,
+  with a subcritical/unloaded control and an active growth window. Show whether
+  material outside the initial damaged support activates. Distinguish damage
+  growth, threshold motion, fully developed advance and slip on existing damage.
+  Include a velocity-weakening RSF case once its closure is implemented; a full
+  earthquake episode is not required for this implementation task.
+- One focused timestep halving over the active window, with componentwise
+  energy accounting. Add one spatial comparison at fixed physical ell if it
+  fits the budget; otherwise give the exact queued comparison and limitation.
+- Small rejection/retry, restart and 1/2-rank controls for newly persistent state.
+  Use 4 ranks only when useful; no broad MPI scaling campaign.
+- A small mature-limit/shared-component regression if the changed code is shared.
+  Do not rerun all A/B/D/C trajectories or reopen their parked refinement.
+
+Use at most four MPI ranks/build workers, one numerical thread per rank and
+one heavy job at a time. Default budget: two hours total new simulation/check
+time, report compilation separately. Favor small specimens and short informative
+windows, retaining physical ell and a meaningful resolution. No production
+BP3 run, long old-interface continuation, server submission or parameter sweep.
+If a physical/numerical obstacle is exposed, preserve it and diagnose its exact
+equation/term; do not loosen gates, add empirical damping or retune to get growth.
+The deliverable may have a precisely identified remaining scientific blocker;
+it must not claim full success when the RSF closure remains unspecified.
+
+4. DOCUMENTATION: A GUIDE PEOPLE CAN ACTUALLY READ
+
+Create TIP_TREATMENT.md as a short linked entry page beside MATURE_MOVING_FAULT.md,
+with focused Markdown pages under tip_treatment/. Prefer Markdown with equations,
+small tables and repository links; do not introduce HTML/JSON navigation.
+
+Suggested pages (combine where this improves readability):
+  model.md                 physical variables, assumptions, energetic core;
+  intact_and_mature.md     constrained intact reaction and limiting cases;
+  friction_and_direction.md closed RSF/rate/pressure/direction equations;
+  discretization.md        actual residuals, tangents, DG terms, time update;
+  geometry_and_history.md  phase/curve relationship, birth, transfer, restart;
+  energy_and_validation.md energy inventory, error terms, evidence and limits;
+  configuration.md         runnable small example, selectors and units.
+
+The entry page must answer in plain words:
+  What makes the tip advance?
+  What is solved in the bulk and on the curve?
+  Why is cohesive elastic memory still needed when tau is stored directly?
+  What is different from the historical interface pilot?
+  What is supported now, and what remains unimplemented or unqualified?
+
+Include one compact equation-to-owner/function table and an accepted-step
+description linked to the implementation. Explain normals, signs, measures,
+units, variable lifetimes and consistent tangents in headers/source comments.
+Follow adjacent ASPECT indentation and Doxygen conventions. Use cohesive
+modules by physical responsibility, not another single-step driver, duplicated
+solver infrastructure or many trivial wrappers.
+
+Document the actually implemented model; place proposed general extensions in
+a clearly separated limitations page. Do not present the continuum attachment
+as fully implemented. Include the extra material-gradient work term in the
+general-motion discussion and the conditions needed for the surface reduction.
+Cross-link the mature guide's corresponding limitations without rewriting its
+historical qualification.
+
+5. COMPLETION REPORT
+
+Provide TIP_TREATMENT_IMPLEMENTATION_REPORT.md, the guide, changed source/tests,
+one runnable small example, and at most three useful PNG figures:
+  specimen and phase advance; driving/traction/state near the tip; energy/cost.
+
+Lead with:
+  - the exact selected physical closure;
+  - what now matches the bulk formulation and what does not;
+  - actual new coupled evidence;
+  - any unresolved physical choice or numerical failure;
+  - the single next propagation experiment.
+
+Record version, parameters and reproduction commands. Do not overwrite or
+reinterpret historical checkpoints. No unnecessary large data in source commits;
+follow repository commit/push policy.
+
+The minimum useful result is implemented and independently checked bulk energetic
+tip machinery with an explicit account of RSF completion. The intended completion
+is a running coupled bulk-phase/RSF finite-tip case and an accurate readable
+guide, not a polished description of the old interface law. If full closure is
+not achieved, say so and give the concrete missing constitutive relation rather
+than declaring the requested model "fixed".
+
+BACKGROUND REFERENCES (NOT PROOF OF THIS NEW MODEL)
+
+Attached fault_tip_treatment.tex, with the qualifications/corrections above.
+Existing bulk_surface_cohesive_derivation.tex and bulk/Coulomb reports.
+Fei & Choo (2020), doi:10.1016/j.cma.2020.113265.
+Fei et al., doi:10.1002/nag.3465, and doi:10.1002/nag.70416:
+published phase-field/RSF formulations require their own kinematics, pressure
+coupling and fracture driving. Do not import one term while retaining incompatible
+parts of this model. Algebraic consistency, well-posedness and physical validation
+are different claims and must be documented separately.
