@@ -438,6 +438,10 @@ namespace aspect
                             "is restricted to fixed phase, zero residual cohesion and a prescribed "
                             "background Surface pressure plus solved zero-mean perturbation pressure.");
 
+          prm.declare_entry("Bulk tip solver", "ASPECT", Patterns::Selection("ASPECT|benchmark direct"),
+                            "Distributed coupled solver; benchmark direct retains the small historical oracle only.");
+          prm.declare_entry("Equilibrate bulk tip seed", "false", Patterns::Bool(),
+                            "Minimize the native fracture functional under the initial seed before the physical clock and age begin.");
           prm.declare_entry("Bulk tip initial age", "1", Patterns::Double(0.),
                             "Initial age in seconds of every physical cross-section, including virgin material. "
                             "Used only by the fixed-reference bulk tip sections control.");
@@ -463,7 +467,7 @@ namespace aspect
                             "restart for a prescribed closed-boundary driver or the separately selected "
                             "consistent-endpoint DG phase experiment. No surface transport, AMR or MPI. Default is false.");
           prm.declare_entry("Bulk history representation", "particle stress",
-                            Patterns::Selection("particle stress|accepted FE strain|DG trial stress"),
+                            Patterns::Selection("particle stress|accepted FE strain|DG trial stress|native tip stress"),
                             "Accepted FE strain supports fresh stationary mature faults and the restricted P2 total-energy "
                             "option. It retains d_R with R=dev_3(symgrad(d_R)), matching uniform "
                             "bulk/fault Maxwell coefficients and no transport/birth. Mature faults "
@@ -653,6 +657,8 @@ namespace aspect
           evolve_phase_field = prm.get_bool("Evolve phase field");
           bulk_cohesive_phase = prm.get("Fault constitutive mode") == "bulk cohesive";
           const auto bulk_rule = prm.get("Bulk cohesive flow rule");
+          bulk_tip_direct_oracle = prm.get("Bulk tip solver") == "benchmark direct";
+          bulk_tip_equilibrate_seed = prm.get_bool("Equilibrate bulk tip seed");
           bulk_tip_initial_age=prm.get_double("Bulk tip initial age");
           bulk_flow_rule = bulk_rule == "bulk tip sections" ? BulkFlowRule::bulk_tip_sections : bulk_rule == "fixed scalar" ? BulkFlowRule::scalar
                            : (bulk_rule == "fixed tensor" ? BulkFlowRule::fixed_tensor
@@ -662,7 +668,11 @@ namespace aspect
           fe_strain_history = prm.get("Bulk history representation") == "accepted FE strain";
           // Legacy input spelling selects the DG space, not the stress meaning.
           // Direct tau and separated T/R use the same numerical discretization.
-          dg_tensor_history = prm.get("Bulk history representation") == "DG trial stress";
+          dg_tensor_history = prm.get("Bulk history representation") == "DG trial stress"
+                              || prm.get("Bulk history representation") == "native tip stress";
+          AssertThrow(prm.get("Bulk history representation") != "native tip stress"
+                      || (bulk_cohesive_phase && bulk_flow_rule == BulkFlowRule::bulk_tip_sections),
+                      ExcMessage("Native tip stress belongs only to the bulk tip sections law."));
           dg_accepted_history = prm.get_bool("Enable prescribed DG accepted history");
           consistent_particle_strain = prm.get("Particle stress strain convention") == "three dimensional deviator";
           constitutive_spin = prm.get("Constitutive spin")=="bulk slip subtracted"

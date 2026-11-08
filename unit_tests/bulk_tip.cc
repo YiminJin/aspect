@@ -3,6 +3,7 @@
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_tensor.h>
 #include "../contrib/catch/catch.hpp"
 #include <cmath>
+#include <deal.II/lac/vector.h>
 
 namespace BT=aspect::MaterialModel::BulkCohesive;
 
@@ -106,4 +107,63 @@ TEST_CASE("Bulk tip matched relaxation without fault slip", "[bulk_tip]")
       REQUIRE(std::abs(r.rate)<1e-15);
       REQUIRE(std::abs(BT::Tip::account(p,old,r,{},dt,0.).error)<1e-12);
     }
+}
+
+#include <aspect/phase_field/box_constraints.h>
+#include <deal.II/lac/full_matrix.h>
+
+TEST_CASE("Coupled box iteration releases incorrect lower and upper bounds", "[bulk_tip][bounds]")
+{
+  // Independently prescribed constrained minimizer of a coupled positive
+  // quadratic. Free mechanics changes the sign of the initially wrong phase
+  // multiplier. Mirroring covers release of both lower and upper constraints.
+  for (const double sense : {1.,-1.})
+    {
+      dealii::FullMatrix<double> A(3,3);
+      A(0,0)=2.; A(0,1)=A(1,0)=-1.; A(0,2)=A(2,0)=.5;
+      A(1,1)=2.; A(2,2)=1.;
+      dealii::Vector<double> exact(3),rhs(3),x(3),g(3);
+      exact[0]=.2;exact[1]=.4;exact[2]=1.;A.vmult(rhs,exact);rhs[2]+=.3;
+      x[0]=-5.;
+      if(sense<0.)
+        {
+          dealii::Vector<double> shift(3),action(3);shift[1]=shift[2]=1.;A.vmult(action,shift);
+          rhs*=-1.;rhs+=action;exact*=-1.;exact+=shift;x*=-1.;x+=shift;
+        }
+      std::array<int,3> previous{{0,0,0}};
+      unsigned int releases=0;bool converged=false;
+      for(unsigned int iteration=0;iteration<10;++iteration)
+        {
+          A.vmult(g,x);g-=rhs;std::array<int,3> active{{0,0,0}};
+          for(unsigned int i=1;i<3;++i)
+            {
+              active[i]=aspect::PhaseField::box_constraint(x[i],g[i],A(i,i),0.,1.).status;
+              releases+=previous[i]!=0 && previous[i]!=active[i];
+            }
+          if(iteration>0 && previous==active){converged=true;break;}
+          auto restricted=A;auto load=rhs;
+          for(unsigned int i=0;i<3;++i)
+            if(active[i])
+              {for(unsigned int j=0;j<3;++j)restricted(i,j)=0.;restricted(i,i)=1.;load[i]=active[i]>0?1.:0.;}
+            else for(unsigned int j=1;j<3;++j)if(active[j])
+              {load[i]-=A(i,j)*(active[j]>0?1.:0.);restricted(i,j)=0.;}
+          restricted.gauss_jordan();restricted.vmult(x,load);previous=active;
+        }
+      REQUIRE(converged);REQUIRE(releases>0);
+      x-=exact;REQUIRE(x.linfty_norm()<1e-14);
+      REQUIRE(sense*g[2]<0.); // Correct signed multiplier on the retained bound.
+    }
+}
+
+TEST_CASE("Bound displacement retains a tiny accepted obstacle", "[bulk_tip][bounds]")
+{
+  const double lower=1e-30,x=.01,increment=lower-x;
+  REQUIRE(x+increment==0.); // The naive expression loses the physical obstacle.
+  REQUIRE(aspect::PhaseField::box_trial_value(x,increment,lower,1.,1.)==lower);
+  for(const double alpha:{.25,.5,1.})
+    {
+      const double trial=aspect::PhaseField::box_trial_value(x,increment,lower,1.,alpha);
+      REQUIRE(trial>=lower);REQUIRE(trial<=x);
+    }
+  REQUIRE(aspect::PhaseField::box_trial_value(x,-.02,lower,1.,1.)<lower);
 }

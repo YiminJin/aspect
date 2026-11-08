@@ -17,9 +17,10 @@ must be identical along each normal section; adaptive and moving meshes are
 unsupported. MPI owns cell histories uniquely and collectively reduces section
 integrals. Sections are small replicated state, not reconstructed surface nodes.
 
-The ordinary simulator calls the existing bulk solve. Every evaluation reads
+The ordinary simulator solver scheme owns the coupled iteration. Every evaluation reads
 the same accepted parent. Newton iterates, local τ/A responses and phase
-candidates remain scratch. On convergence and energy checks, one prepared owner
+candidates remain scratch. On convergence and energy checks, `PhaseFieldFault::prepare_bulk_tip_candidate`
+constructs one prepared owner
 contains all new physical histories, section ages/slip and phase. The existing
 pending-publication callback installs it once on acceptance; rejection leaves
 the accepted owner untouched and the ordinary solver transaction restores fields.

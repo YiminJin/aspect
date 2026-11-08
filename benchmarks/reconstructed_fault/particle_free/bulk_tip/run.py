@@ -4,15 +4,22 @@ import argparse,hashlib,json,os,signal,subprocess,time
 from pathlib import Path
 root=Path(__file__).resolve().parents[4]
 p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--fixture',type=Path,default=Path(__file__).with_name('finite_tip.prm'));p.add_argument('--oracle',action='store_true');
 p.add_argument('label');p.add_argument('--dt',type=float,default=.005);p.add_argument('--end',type=float,default=.08)
 p.add_argument('--ranks',type=int,choices=[1,2,4],default=1);p.add_argument('--refinement',type=int,default=0)
 p.add_argument('--seconds',type=int,default=600);p.add_argument('--unloaded',action='store_true')
-p.add_argument('--tangent',action='store_true');p.add_argument('--intact',action='store_true');p.add_argument('--rejection',action='store_true')
+p.add_argument('--linear-oracle',action='store_true');p.add_argument('--tangent',action='store_true');p.add_argument('--intact',action='store_true');p.add_argument('--rejection',action='store_true')
+p.add_argument('--linear-oracle-step',type=int,default=1)
+p.add_argument('--tangent-step',type=int,default=8);p.add_argument('--rejection-step',type=int,default=2)
 p.add_argument('--snapshot-id',type=int,choices=[1,2,3]);p.add_argument('--resume-from',type=Path);p.add_argument('--no-checker',action='store_true');a=p.parse_args()
 assert a.label and all(c.isalnum() or c in '-_' for c in a.label)
 run=root/'build-particle-free/bulk-tip/runs'/a.label;run.mkdir(parents=True,exist_ok=False)
-text=Path(__file__).with_name('finite_tip.prm').read_text()
-if a.unloaded:text=text.replace('.02*(y-.5);0','0;0')
+text=a.fixture.read_text()
+# The integrated adapter reuses ASPECT's assembled block-AMG Stokes inverse.
+if not a.oracle:text+='\nsubsection Solver parameters\n subsection Stokes solver parameters\n  set Stokes solver type = block AMG\n end\nend\n'
+if a.oracle:text+='\nsubsection Material model\n subsection Phase field fault\n  set Bulk tip solver = benchmark direct\n end\nend\n'
+if a.unloaded:
+    text=text.replace('.02*(y-.5);0','0;0').replace('.01*(y-1);0','0;0')
 if a.intact:text=text.replace('.2*max(0,1-((x-1)/.5)^2)*max(0,1-((y-.5)/.25)^2)','0')
 text+=f'\nset Maximum time step = {a.dt:.17g}\nset Maximum first time step = {a.dt:.17g}\nset End time = {a.end:.17g}\nset Output directory = {run}/output\n'
 text+=f'\nsubsection Mesh refinement\n set Initial global refinement = {a.refinement}\nend\n'
@@ -33,15 +40,20 @@ if a.resume_from:
 (run/'input.prm').write_text(text)
 env=os.environ.copy()
 for key in ('OMP_NUM_THREADS','OPENBLAS_NUM_THREADS','DEAL_II_NUM_THREADS'):env[key]='1'
-if a.rejection:env['ASPECT_TIP_RECOVERY']='1'
-if a.tangent:env['ASPECT_BULK_CHECK_TANGENT']='1'
+if a.rejection:
+    env['ASPECT_TIP_RECOVERY']='1';env['ASPECT_TIP_RECOVERY_STEP']=str(a.rejection_step)
+if a.tangent:
+    env['ASPECT_BULK_CHECK_TANGENT']='1';env['ASPECT_TIP_TANGENT_STEP']=str(a.tangent_step)
+if a.linear_oracle:
+    env['ASPECT_TIP_LINEAR_ORACLE']='1';env['ASPECT_TIP_LINEAR_ORACLE_STEP']=str(a.linear_oracle_step)
 command=['/opt/openmpi/5.0.6/bin/mpirun','-np',str(a.ranks),str(exe),str(run/'input.prm')]
 sha=lambda file:hashlib.sha256(file.read_bytes()).hexdigest()
 files=subprocess.check_output(['git','diff','--name-only'],cwd=root,text=True).splitlines()
-files+=[str(f.relative_to(root)) for base in ('include','source','unit_tests') for f in (root/base).rglob('*bulk_tip*') if f.is_file()]
-record=dict(command=command,arguments=vars(a)|{'resume_from':str(a.resume_from)},binary_sha256=sha(exe),input_sha256=sha(run/'input.prm'),
+files+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','include','source','unit_tests'],cwd=root,text=True).splitlines()
+record=dict(command=command,arguments={k:(str(v) if isinstance(v,Path) else v) for k,v in vars(a).items()},binary_sha256=sha(exe),input_sha256=sha(run/'input.prm'),
             source_sha256={f:sha(root/f) for f in files if (root/f).is_file()},revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip())
 if not a.no_checker:record['checker_sha256']=sha(plugin)
+if a.resume_from:record['restart_source_sha256']={str(f.relative_to(a.resume_from)):sha(f) for f in sorted(a.resume_from.glob('restart*/**/*')) if f.is_file()}
 (run/'command.json').write_text(json.dumps(record,indent=2)+'\n')
 started=time.monotonic()
 with (run/'run.log').open('w') as log:

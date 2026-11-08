@@ -89,7 +89,8 @@ namespace aspect
       double check_tensor(const PhaseFieldFault<dim> &model, const CellId &cell_id, const Quadrature<dim> &quadrature,
                           const std::vector<BulkCohesive::Tensor> &reference) const;
       std::map<CellId, std::vector<LocalHistory>> history;
-      Vector<double> phase;
+      Vector<double> phase; ///< Legacy/direct-oracle compatibility only.
+      LinearAlgebra::Vector tip_phase; ///< Locally relevant accepted DG values in the active tip route.
       std::vector<Point<dim>> mesh;
       BulkCohesive::Parameters parameters;
       unsigned int quadrature = 0; ///< Native Gauss order; part of persistence identity.

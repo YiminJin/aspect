@@ -47,3 +47,23 @@ cancellation; multiple separated active bands share the same age and resistance
 and may cancel in V. This is a physical limitation of this closure, not a reason
 to clip rates or silently select one band. Bulk cohesive variance energy remains
 in the point history and cannot be discarded in a one-moment surface reduction.
+
+## Endpoint monotonicity, not steady-state stability
+
+For positive V, with endpoint aging already eliminated,
+\[
+R'(V)=p_N\,\rho(V)\left[\frac aV-\frac b{D_c/\Delta t+V}\right]
+ +\eta_{rad},\qquad 0\le\rho\le1.
+\]
+Writing d=D_c/dt, the negative part of a/V−b/(d+V) is bounded below
+by −(max(0,sqrt(b)−sqrt(a)))²/d. Thus the implemented guard
+\[
+\eta_{rad}\ge\frac{p_N\Delta t}{D_c}
+ [\max(0,\sqrt b-\sqrt a)]^2
+\]
+ensures monotone endpoint R and uniqueness of V+C R(V)=B for C≥0.
+It also makes the section primitive convex. It neither removes b>a steady
+velocity weakening nor proves convexity/stability of the coupled phase problem.
+The search primitive integrates R itself, not fV. Its logarithmic-rate Gauss
+quadrature is separately derivative-checked; it does not change the physical
+constitutive law or mechanical/phase quadrature.

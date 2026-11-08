@@ -33,18 +33,22 @@ namespace aspect
           const auto &points = element.get_unit_support_points();
           for (unsigned int i = 0; i < points.size(); ++i)
             for (unsigned int j = 0; j < points.size(); ++j)
-              {
-                unsigned int index = j;
-                double value = 1.;
-                for (unsigned int d = 0; d < dim; ++d, index /= 3)
-                  {
-                    const double x = points[i][d];
-                    value *= index % 3 == 0 ? (1 - x) * (1 - x) :
-                             index % 3 == 1 ? 2 * x * (1 - x) : x * x;
-                  }
-                expansion(i, j) = value;
-              }
+              expansion(i, j) = basis_value(j, points[i]);
           inverse.invert(expansion);
+        }
+
+        /** Positive tensor-product evaluation in the existing Q2 space.
+         * This avoids cancellation through nodal Lagrange shapes near an exact
+         * obstacle endpoint; it changes neither the polynomial nor quadrature. */
+        static double basis_value(unsigned int index, const dealii::Point<dim> &point)
+        {
+          double result=1.;
+          for (unsigned int d=0; d<dim; ++d,index/=3)
+            {
+              const double x=point[d];
+              result*=index%3==0 ? (1.-x)*(1.-x) : index%3==1 ? 2.*x*(1.-x) : x*x;
+            }
+          return result;
         }
 
         dealii::Vector<double> coefficients(const dealii::Vector<double> &nodal) const

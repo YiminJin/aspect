@@ -22,13 +22,16 @@ mature production law.
 
 - [Physical model, intact reaction and mature limits](tip_treatment/model.md)
 - [Section friction, direction and power](tip_treatment/friction_and_direction.md)
-- [Discretization and implementation owners](tip_treatment/discretization.md)
+- [One step, equations and executable operations](tip_treatment/discretization.md)
+- [State dictionary and worked point trace](tip_treatment/state_and_trace.md)
 - [History, geometry and lifecycle](tip_treatment/geometry_and_history.md)
 - [Energy accounting and validation](tip_treatment/energy_and_validation.md)
 - [Configuration](tip_treatment/configuration.md)
 - [Limitations and future material motion](tip_treatment/limitations.md)
 
-Implementation and measured qualification are distinguished in the
-[TIP_TREATMENT_IMPLEMENTATION_REPORT.md](TIP_TREATMENT_IMPLEMENTATION_REPORT.md).
+The current solver-integration work and its measured qualification are in
+[TIP_SOLVER_INTEGRATION_REPORT.md](TIP_SOLVER_INTEGRATION_REPORT.md). The
+[original implementation report](TIP_TREATMENT_IMPLEMENTATION_REPORT.md) remains
+historical evidence, including the original refined failure.
 The supplied [continuum draft](fault_tip_treatment.tex) supplies the energetic
 core; the section closure is an additional assumption, not its consequence.

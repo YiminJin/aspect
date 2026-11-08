@@ -1,5 +1,6 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/phase_field/obstacle.h>
+#include <aspect/phase_field/box_constraints.h>
 #include <deal.II/lac/solver_cg.h>
 #include <deal.II/lac/trilinos_precondition.h>
 #include <cmath>
@@ -37,18 +38,19 @@ namespace aspect
           matrix.vmult(gradient, state);
           gradient -= rhs;
           double defect = 0.;
+          unsigned int feasible = 1;
           for (const auto i : owned)
             {
+              feasible &= state[i]>=lower[i] && state[i]<=upper[i];
               const double diagonal = matrix.diag_element(i);
-              const double prediction = state[i] - gradient[i] / diagonal;
-              const double projected = std::max(lower[i], std::min(upper[i], prediction));
-              defect = std::max(defect, std::abs(state[i] - projected) * diagonal);
-              active[i] = prediction <= lower[i] ? -1. : prediction >= upper[i] ? 1. : 0.;
+              const auto bound = box_constraint(state[i], gradient[i], diagonal, lower[i], upper[i]);
+              defect = std::max(defect, std::abs(bound.projected_residual) * diagonal);
+              active[i] = bound.status;
               fixed[i] = active[i] < 0. ? lower[i] : active[i] > 0. ? upper[i] : 0.;
             }
           result.residual = Utilities::MPI::max(defect, communicator);
           result.iterations = iteration;
-          if (result.residual <= tolerance)
+          if (result.residual <= tolerance && Utilities::MPI::min(feasible,communicator))
             {
               result.energy = .5 * (state * gradient) - .5 * (state * rhs);
               return result;
@@ -95,6 +97,10 @@ namespace aspect
           candidate = state;
           solver.solve(restricted, candidate, load, preconditioner);
           result.linear_iterations += control.last_step();
+          // Enforce active Dirichlet rows exactly before rechecking the VI.
+          // This is part of the subproblem, not post-certificate clipping.
+          for (const auto i:owned)if (active[i]!=0.)candidate[i]=fixed[i];
+          candidate.compress(VectorOperation::insert);
           state = candidate;
           // No clipping here. Active-set classification and the final projected
           // residual must resolve every primal and dual violation themselves.

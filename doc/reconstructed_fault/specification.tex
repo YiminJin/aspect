@@ -4285,10 +4285,21 @@ points participate before a curve is present. The existing simulator publication
 transaction commits phase, true stress, cohesive memory, age and slip together;
 the new checkpoint signature prohibits silent history conversion.
 
-The initial control has a fixed direction, aligned fixed mesh, native quadrature
-history, and replicated sparse/root-direct mixed solve. Material motion, AMR,
-turning/branching, current-pressure opening/contact and general objective spin
-are not enabled. General motion must include the fracture-gradient deformation
+The initial control has a fixed direction, aligned fixed mesh and native
+quadrature history. The active ASPECT route uses distributed native FE rows and
+a sparse cell/face operator plus exact section integration/adjoint products.
+The ordinary simulator scheme owns nonlinear iteration and acceptance; flexible
+Krylov reuses the ordinary assembled Stokes inverse and phase fracture operator.
+The historical replicated mixed direct solve is an explicit benchmark oracle,
+not the active route. Phase constraints can enter and release on either bound.
+A positive phase search metric and functional globalization may replace an
+unsuccessful nonconvex Newton search, but never its physical residual, obstacle,
+endpoint law or final acceptance tolerances. Optional zero-clock equilibration
+uses the same fracture functional under a fixed seed before physical aging.
+Checkpoint physical meanings remain unchanged. See the maintained Markdown
+bulk-tip guide for the equation-to-code map and measured qualification boundary.
+Material motion, AMR, turning/branching, current-pressure opening/contact and
+general objective spin are not enabled. General motion must include the fracture-gradient deformation
 power $-2K\ell^2(\nabla\phi\otimes\nabla\phi):D$, material-volume and boundary
 flux terms, with a specified configurational closure. Neither positive
 section dissipation nor converged KKT is a proof of uniqueness or stability.

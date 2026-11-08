@@ -39,12 +39,14 @@
 
 namespace aspect
 {
+  namespace internal { template <int dim> class BulkTipCoupling; }
   namespace Postprocess
   {
     template <int dim> class MomentCycle;
   }
   namespace MaterialModel
   {
+    namespace BulkCohesive { namespace Tip { struct Response; } }
     namespace HistoryDiscretization
     {
       template <int dim>
@@ -360,6 +362,12 @@ namespace aspect
         {
           return bulk_cohesive_phase;
         }
+        /** Active distributed solver versus the explicit small direct oracle. */
+        bool uses_integrated_bulk_tip() const
+        {
+          return bulk_cohesive_phase && bulk_flow_rule == BulkFlowRule::bulk_tip_sections
+                 && !bulk_tip_direct_oracle;
+        }
         /** Restricted PF2 tensor history; fixed localization and no transport. */
         bool uses_dg_tensor_history() const
         {
@@ -500,6 +508,7 @@ namespace aspect
         friend class internal::PhaseFieldFaultTestAccess<dim>;
         friend class Postprocess::MomentCycle<dim>;
         friend class aspect::Simulator<dim>;
+        friend class aspect::internal::BulkTipCoupling<dim>;
         friend struct DGGeometryUpdate<dim>;
 
         struct FEStrainState;
@@ -509,6 +518,15 @@ namespace aspect
         std::shared_ptr<BulkCohesiveState> bulk_cohesive_state;
         std::shared_ptr<BulkCohesiveArchive> bulk_cohesive_archive;
         void initialize_bulk_cohesive_history(const LinearAlgebra::BlockVector &initial);
+
+        /** Prepare a noncommitting physical tip owner from a converged response.
+         * The caller retains the immutable parent until ordinary joint publication.
+         * Only actual fault-deformation integrals advance section age and slip. */
+        std::shared_ptr<BulkCohesiveState> prepare_bulk_tip_candidate(
+          const std::shared_ptr<const BulkCohesiveState> &parent,
+          const std::map<CellId,std::vector<BulkCohesive::Tip::Response>> &points,
+          const std::vector<double> &rates, const std::vector<double> &forces,
+          const LinearAlgebra::Vector &phase) const;
         template<class Archive> void serialize_bulk_cohesive_history(Archive &ar);
         void restore_bulk_cohesive_history();
         struct FEStrainUpdate;
@@ -1352,6 +1370,8 @@ namespace aspect
           scalar, fixed_tensor, radial_tensor, coulomb_fixed_phase, bulk_tip_sections
         };
         BulkFlowRule bulk_flow_rule = BulkFlowRule::scalar;
+        bool bulk_tip_direct_oracle = false; ///< Explicit benchmark-only replicated oracle.
+        bool bulk_tip_equilibrate_seed = false; ///< Zero-clock fracture equilibration before history initialization.
         double bulk_tip_initial_age = 1.; ///< Virgin and initially damaged section age, seconds.
         /**
          * @}

@@ -128,14 +128,19 @@ namespace aspect
           {
             double traction, derivative, age, friction, radiation;
           };
-          /** Eliminate V + mobility*f(V)=free_rate in a scaled asinh coordinate.
-           * The admitted control requires a provably monotone endpoint law;
-           * this never chooses an arbitrary velocity-weakening root. */
+          /** Integral from zero to V of the signed endpoint traction. A search
+           * functional only, not stored energy or physical friction power. */
+          double section_primitive(const std::vector<double> &, double V, double old_age,
+                                   double dt, double pressure, double radiation) const;
+
           struct SectionEndpoint
           {
             SignedEndpoint law;
             double rate=0., force_derivative=0.; ///< df/d(free_rate), with fixed mobility.
           };
+          /** Eliminate V + mobility*f(V)=free_rate in a scaled asinh coordinate.
+           * The admitted control requires a provably monotone endpoint law;
+           * this never chooses an arbitrary velocity-weakening root. */
           SectionEndpoint section_endpoint(const std::vector<double> &fractions,
                                             double free_rate, double mobility,
                                             double old_age, double dt,

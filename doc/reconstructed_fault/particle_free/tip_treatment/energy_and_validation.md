@@ -44,8 +44,10 @@ repartition and transfer-stress defects are zero. The remainder is 21.72% of
 4.44353502785e-5 J/m added fracture. All four timesteps are the same; these data
 establish decomposition, not timestep scaling or convergence of the new model.
 
-See the [implementation report](../TIP_TREATMENT_IMPLEMENTATION_REPORT.md) for
-actual new runs, numerical errors, failures, cost and qualification limits.
+See the [current integration report](../TIP_SOLVER_INTEGRATION_REPORT.md) for
+the corrected solve and equilibrated fixture, and the
+[original implementation report](../TIP_TREATMENT_IMPLEMENTATION_REPORT.md) for
+retained add-only results. Their physical windows and initialization differ.
 
 ## Restricted incremental stationarity functional
 

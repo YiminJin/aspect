@@ -1,0 +1,314 @@
+TASK: INTEGRATE THE BULK TIP CONTROL WITH ASPECT SOLVERS, CORRECT ITS
+CONSTRAINED ITERATION, AND MAKE THE EQUATIONS TRACEABLE IN THE CODE
+
+For the existing Codex thread, Astra with high reasoning.
+Reviewed baseline: 663937bed9305df2823ac77a3fc2c3925bb94caa
+7 November 2026
+
+PURPOSE AND AUTHORIZATION
+
+The paper needs credible fault propagation coupled to RSF. The bounded bulk-tip
+control is useful implementation evidence, but it has not yet demonstrated a
+localized advancing fault, spatial convergence, or accurate fracture-scale work.
+The next task must improve the actual solver and produce a more interpretable
+short control, together with documentation the user can follow into the source.
+Do not finish with another diagnosis-only report or a cosmetic file relocation.
+
+The user wants ASPECT-style components and actual reuse of generic solvers.
+Small, opt-in extensions to existing solver orchestration/assembly interfaces are
+authorized where needed for this coupled system. Preserve ordinary configurations.
+This does not authorize reviving the rejected mature single-step driver or the
+reverted global advection-assembler refactor.
+
+Verify the actual worktree/revision/edits and follow applicable AGENTS.md.
+Preserve unrelated work, old results and checkpoints. Read the current report,
+TIP_TREATMENT.md and linked pages, the prior mathematical handoff, and the
+architecture/refactoring guidance. These instructions supersede the report's
+proposal to stop after one failure-window audit. Complete the work below in
+separable reviewable changes, with numerical behavior changes distinguished
+from representation-preserving refactoring.
+
+1. START FROM WHAT THE EVIDENCE ACTUALLY SHOWS
+
+The attached report/evidence and reviewed branch agree for the inspected main
+numerical sources, checker and point tests. The small coupled controls take
+seconds, not hours. Preserve their inputs as regression cases.
+
+- Direct physical tau, physical cohesive A, DGQ2 phase, section RSF and BE age
+  are coupled. The fixed-direction cross-section closure is an explicit nonlocal
+  constitutive choice. Retain it for this task; it is not general tip physics.
+- Coarse dt=.005 and .0025 complete to .08. The refined dt=.0025 case fails at
+  .05 after reaching .0475. A passing directional derivative does not validate
+  the active-set algorithm, its globalization, or a stable branch.
+- The new active-window physical remainder is .0528775/.0266422 J/m, versus
+  .0308367/.0298617 J/m added diffuse fracture: 171.5%/89.2%. Roughly 92% of
+  that remainder is the stress BE term. The factor-of-two reduction is useful
+  temporal evidence, not adequate physical-work accuracy.
+- The previous interface 21.72% remainder decomposes into approximately 87.1%
+  bulk BE and 12.9% surface endpoint terms. This is a separate model/window;
+  do not present the new larger percentages as an apples-to-apples regression.
+- At .045, approximately 98% of the refined virgin-damage integral is also
+  present in the unloaded control. Initial profile equilibration contaminates
+  the spatial comparison. Increasing phi can reduce its gradient energy.
+- The original uniform loading reaches the nominal intact threshold near .05.
+  Outer-boundary sections carry the largest final rates. This is not a clean
+  localized tip-growth fixture. No fully developed advancing core was shown.
+- Transverse variance contains about 7.15% of final coarse cohesive energy.
+  Keep the full point history; do not replace it with one section elastic moment.
+
+2. CORRECT THE CONSTRAINED SOLVE BEFORE INTERPRETING THE REFINED FAILURE
+
+The reviewed solve_bulk_cohesive_phase() has an add-only inner bound loop near
+lines 997-1035. It fixes every trial coordinate that crosses a bound, resolves,
+and never releases an incorrectly fixed coordinate inside that loop. The failing
+step fixes all 1,152 phase coordinates, including 69 upper targets. This is a
+specific algorithmic deficiency, not proof it is the only cause of failure.
+
+Reproduce the .0475 -> .05 window with unchanged physical parameters, accepted
+history, phase obstacle, timestep, quadrature and acceptance tolerances. Retain
+the original failure. Then implement a proper constrained Newton/VI iteration:
+
+- Use primal feasibility, multiplier signs and complementarity to classify AND
+  release lower/upper active coordinates. Solve the coupled linearized equations
+  consistently with imposed bound displacements, including mechanics and section
+  force corrections. Do not freeze a phase coordinate merely because an earlier
+  unconstrained direction crossed a bound.
+- Use a mathematically justified projected/semismooth merit or a restricted
+  incremental-functional globalization. Account for scaling and the nonconvex
+  phase problem; a raw residual decrease is not automatically compatible with
+  an energy-based constrained direction. Derive the actual acceptance conditions.
+- Recompute full mechanical/section residuals and phase KKT after trial updates.
+  No post-clipping followed by reuse of an obsolete residual/tangent certificate.
+- Reuse the existing PhaseField::solve_obstacle where its SPD quadratic contract
+  holds, e.g. an appropriate search subproblem. It is NOT a drop-in solver for
+  the full mixed indefinite/nonconvex Jacobian. Share numerical bound operations
+  where useful without weakening that existing contract or duplicating a second
+  nearly identical active-set implementation.
+- Add a small independent coupled bound problem that requires releasing a
+  wrongly active coordinate, and covers both bound signs and coupled correction.
+  This is a meaningful regression for the demonstrated missing capability.
+
+If a correct constrained iteration still encounters nonconvexity, examine the
+restricted incremental stationarity functional in energy_and_validation.md.
+First check that its derivatives reproduce the actual residual with the stated
+row/variable scalings. Restrict to admissible incompressible variations and the
+phase critical cone, properly eliminating/handling pressure and section states.
+The raw saddle-point Jacobian is not a stability Hessian: its negative eigenvalues
+or nonsymmetry do not establish physical instability. Negative curvature at an
+unconverged predictor also does not establish a physical bifurcation.
+
+A trust region, consistent search-metric modification, or similar globalization
+may change the SEARCH while leaving the physical residual and final acceptance
+unchanged. Explain that distinction. Do not change radiation, Gc, the obstacle,
+damage caps, friction parameters or tolerances to manufacture convergence.
+Do not silently add viscosity, spatial gradient physics, or a branch rule.
+If a genuine unresolved branch selection remains, provide the concrete residual,
+critical mode and admissible alternatives; complete independent integration and
+documentation rather than claiming the entire model has been qualified.
+
+3. ACTUAL ASPECT SOLVER INTEGRATION, WITH CLEAR PHYSICS OWNERSHIP
+
+The two files the user named have different roles:
+
+- source/simulator/solver/cohesive_rsf.cc is a 126-line adapter for the RETAINED
+  INTERFACE model. It already uses build_stokes_preconditioner()/solve_stokes()
+  as a bulk inverse. It is unchanged by the new tip implementation. Preserve
+  this reference and its physical state/checkpoint semantics. It need not be
+  rewritten merely to eliminate its filename. Reuse useful adapter patterns.
+- source/simulator/solver/bulk_cohesive_phase.cc is a 1,442-line function mixing
+  several legacy controls and the selected bulk-tip route. It owns replicated
+  mixed algebra, material evaluation, assembly, bounds, Newton/line search,
+  stability diagnostics, history publication and extensive test output.
+  It allocates every pair of phase DoFs (current source near lines 264-267),
+  despite the local DG fracture stencil; it also
+  couples every section structurally to all selected DoFs. These are concrete
+  targets for replacement, not just style problems.
+
+Integrate the ACTIVE bulk-tip route into existing responsibilities:
+
+  Ordinary Simulator solver scheme:
+    ordering, nonlinear iteration/control, supported advection handling,
+    retry/acceptance transaction, solver signals and shared settings.
+  Material/rheology components:
+    pure point response and consistent derivatives; signed RSF/age evaluation.
+  PhaseFieldHandler and its existing numerical components:
+    authoritative DGQ2 fracture operator, Bernstein transformations, bounds/KKT.
+  Coupling assembly/operator:
+    mechanics-phase-section residual blocks and their work-adjoint actions.
+  Existing physical history owner:
+    accepted tau/A/section state, preparation/publication and checkpoint checks.
+  Benchmark/postprocessing owners:
+    failure probes, CSV/plot exports and detailed diagnostic accounting output.
+
+Separate files for substantial assemblers/operators are appropriate. An enormous
+function moved into solver.cc, or renamed BulkTipSolver::advance() owning all
+these operations again, does not satisfy the requested architecture. Avoid a
+new generic callback-driven timestep executor or a forest of one-line wrappers.
+Prefer a few components with mathematical responsibilities and clear interfaces.
+
+The full problem has (mechanics, phase, section) coupling. An ordinary scalar
+advection solve or a single Stokes-then-phase pass cannot replace it equivalently.
+The existing solve_stokes() intentionally operates on velocity/pressure only.
+Do not hand it an augmented vector and assume it solves the extra equations.
+
+Implement real reuse of the existing distributed Stokes assembly/algebra and
+linear solver/preconditioner within a consistent coupled block solve. A suitable
+target is an exact coupled operator with a block Schur or flexible Krylov solve,
+using ASPECT's mechanical inverse/preconditioner and the existing phase operator.
+Select the smallest sound implementation after deriving the blocks. If the
+mechanical subblock loses invertibility in an admitted limit, do not assume an
+exact Schur inverse exists; handle that within the coupled solver/preconditioner.
+Keep physical tangent actions exact; approximate preconditioning is distinct.
+
+Use opt-in assembler/additional-output components for the point stress/tangent
+as appropriate to the actual APIs. Keep model-specific physical formulas out of
+ordinary generic Stokes classes. Ordinary solvers may receive a narrow extension
+for the coupled blocks/convergence information; explain and test the unchanged
+disabled path. Leave AdvectionSystemInteriorFace/BoundaryFace unchanged.
+
+Remove the active route's global phase-pair allocation and root-only full mixed
+UMFPACK dependency. Preserve cell/face sparsity. Represent nonlocal section
+coupling with its real support or integration/adjoint actions; do not fabricate
+global dense coupling. Retain a small direct solve only as an explicit benchmark
+oracle for operator/Newton-direction comparison. Small section metadata may be
+replicated; global FE vectors/matrices should use ordinary distributed ownership.
+
+The ordinary solver scheme must visibly own iteration and convergence of the
+enabled coupling, including phase KKT and section residuals. Calling a renamed
+all-in-one experimental solve before the normal scheme and immediately returning
+does not accomplish that. Preserve immutable accepted parents across all trials
+and one joint publication/rollback. Pure material evaluation must not advance
+time, run a global solve, or publish physical state.
+
+Do not force the historical interface law into the bulk law or refactor all old
+research selectors. Clearly mark any retained legacy-only solver implementation.
+Document remaining specialized components by the mathematics they provide.
+Integration is incomplete if the active control still silently depends on the
+same replicated full-system direct solve or an independent iteration driver.
+
+4. DOCUMENT EQUATIONS ALL THE WAY TO EXECUTABLE OPERATIONS
+
+Keep Markdown with working links and rendered mathematics. JSON/HTML would not
+solve the user's problem. The present discretization.md owner table is a useful
+start, but a pointer to a 1,442-line function is insufficient.
+
+Revise TIP_TREATMENT.md and linked pages to provide:
+
+A. A short reading path and one step's complete narrative: accepted inputs,
+   unknowns, point elimination, section integration, residual/Jacobian assembly,
+   bound handling, convergence, trial response and joint publication.
+B. Stable equation labels and links to exact headers, qualified functions/classes
+   and relevant tests. Relative source links support local reading; optional
+   commit-pinned line links document the reviewed revision. Broad filenames alone
+   are not enough. Update links after refactoring; do not leave obsolete owners.
+C. A symbol-to-code/state table with units, tensor metric, storage location,
+   trial versus accepted status and lifetime. Include tau, A, Q, phi, e, w, V,
+   section resistance, theta, beta, h, fraction and driving factor. Explain the
+   independent Bernstein coordinates versus nodal FE values and coefficients.
+D. The actual weak residuals and block Jacobian: mechanical equilibrium and
+   incompressibility; DG cell AND face fracture terms minus Y; section law; lower
+   and upper complementarity. Explain nonzero cross-blocks, pressure/force/phase
+   scaling, homogeneous versus particular boundary increments, and MPI measures.
+E. A worked constitutive trace. In the reviewed code, documentation's H maps to
+   Response::fraction, documentation's force-like z maps to Response::force,
+   while the local code variable z currently means c+d. Resolve this needless
+   naming collision and show how each temporary avoids singular endpoint
+   evaluation without changing the physical equation.
+F. A residual/derivative/test trace for each important equation. For example:
+   tau/A endpoint -> Tip::update -> material response/tangent -> mechanical and
+   phase assembly -> independent point test and coupled directional test.
+   V integral/RSF -> history section measures + section_endpoint -> residual and
+   adjoint -> discrete power identity and section derivative test.
+   Fracture VI -> PhaseFieldHandler::evaluate_dg_fracture/SIPG -> Bernstein
+   primal/dual transformation -> corrected bound iteration -> KKT/release test.
+G. A precise distinction between physical energy, the restricted incremental
+   stationarity functional, physical-work remainder, BE numerical terms, and
+   algebraic closure. Derive the monotonicity guard for the endpoint section law;
+   distinguish it from steady velocity weakening and global phase stability.
+H. Supported scope and concrete remaining limitations: straight aligned control,
+   fixed quadrature histories, no moving/curved/branching tip closure, prescribed
+   compression, constant coefficients, zero spin. Label implemented versus
+   verified versus proposed. Include accurate limitations of any new integration.
+
+Improve ASPECT formatting and Doxygen in changed headers/sources. Explain why a
+transformation or approximation is used; avoid comments that only restate syntax.
+Move test-specific times, flags and giant export blocks out of numerical kernels
+where existing benchmark facilities suffice. Avoid global unrelated reformatting.
+Explain or remove misleading new-control configuration such as the retained
+"Bulk history representation = DG trial stress" input when the actual state is
+native true tau/A; preserve old parameter/checkpoint meanings for legacy users.
+
+5. SHORT, INTERPRETABLE VALIDATION AFTER THE FIX/INTEGRATION
+
+First retain the ORIGINAL coarse, half-dt and refined fixtures unchanged. Compare
+the new operator/directions with the small direct reference at fixed parent,
+iterate, constraints and active set. Differences caused by correcting the active
+set are expected; demonstrate equivalent physical residuals independently.
+Rerun the refined failure window and, if it converges appropriately, continue to
+the common .08 endpoint. Do not stop at a single rescued Newton step.
+
+Then create ONE better localized fixture rather than an open-ended parameter
+sweep. Its purpose is to distinguish load-driven tip-zone evolution from initial
+profile relaxation and remote intact nucleation:
+
+- Define a common physical finite seed/obstacle and fixed ell on both meshes.
+  Equilibrate the initial fracture profile at zero load under that seed and the
+  declared bounds, using the same DG functional. Make the resulting profile the
+  accepted initial obstacle and record its initial energy. Do this before the
+  physical clock/age history begins. Do not pre-damage an advancing tip or smooth
+  an accepted physical state. Document mesh-dependent initialization explicitly.
+- Check the unloaded initialized profile remains stationary to its solve accuracy.
+  Separate diffuse-fracture energy, damage integral and threshold-defined extent.
+- Choose a bounded loading/geometry with a reasoned remote-intact margin and
+  adequate distance from outer boundaries. Use the existing intact threshold and
+  actual elastic/constitutive solution to justify it; do not infer localized
+  propagation merely by lowering a plotted contour threshold. Keep the physical
+  law/material parameters fixed when comparing mesh and timestep.
+- Compare one coarse/finer mesh pair and one timestep halving only, with matched
+  physical initialization/loading. Track actual tip-zone driving/energy, new
+  damage, stronger-core extent and slip, as well as remote activation. Check the
+  fixed-section closure's cancellation/multiple-band diagnostics without clipping.
+- Target a credible short localized growth response. Do not force an RSF event
+  or claim fully developed propagation if only weak diffuse damage appears.
+  Preserve velocity-weakening parameters; stable sliding alone does not validate
+  the paper's eventual instability experiment.
+
+Retain the existing energetic component breakdown. No need to redesign time
+integration in this task: first remove solver/initialization confounding, then
+measure the BE trend and residual relative to the scientific fracture increment.
+No subtracting numerical dissipation and calling the trajectory physically exact.
+
+Run the relevant point/derivative checks, active-set release regression, short
+one/two-rank active-state restart/rollback, an ordinary no-fault Stokes control,
+and one short mature/shared-component regression. Do not rerun the mature campaign
+or the historical long interface episode. Demonstrate that the integrated path
+really invokes the reused solver facilities; include sparse storage/ownership
+and linear/nonlinear iteration counts, not a timing-only claim of scalability.
+
+Use at most four build workers or MPI ranks and one numerical thread per rank;
+run heavy jobs sequentially. Keep aggregate new simulation/check time within two
+hours; build time is recorded separately. These small fixtures previously needed
+about three minutes total, so do useful decisive checks without launching a sweep.
+If a new run is unexpectedly expensive, stop that run, preserve evidence and
+finish independent code/documentation work. No server/BP3 submission is included.
+
+6. DELIVERABLES AND COMPLETION
+
+- Corrected bound-constrained iteration and meaningful release/coupling test.
+- Active bulk-tip implementation using generic ASPECT solver facilities with
+  explicit coupled physics operators, distributed sparse algebra and ordinary
+  simulator lifecycle. State exactly what was reused and what remains specialized.
+- A readable equation-to-source-to-test guide, including a worked accepted step.
+- Reproduction of the original failure and its resolution, or a precise remaining
+  mathematical obstruction after the corrected method; no unsupported stability
+  or uniqueness claim.
+- A prepared short localized fixture with unloaded reference and bounded time/mesh
+  comparisons, with no presentation of profile relaxation as physical growth.
+- One report with source/binary identity, commands, compact norms, costs, failed
+  evidence and at most three useful figures. Update current status and guide.
+
+Report the scientific result, numerical limitations and architecture separately.
+If any required integration remains incomplete, say exactly which operator/path
+still bypasses shared infrastructure. Do not label a file move or a generic-looking
+wrapper as ASPECT integration. Conversely, do not remove a legitimate physics
+module just to reduce the number of files.

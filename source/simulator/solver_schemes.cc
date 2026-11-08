@@ -26,6 +26,8 @@
 #include <aspect/newton.h>
 #include <aspect/melt.h>
 #include <aspect/phase_field.h>
+#include <aspect/simulator/solver/bulk_tip.h>
+#include <aspect/phase_field/box_constraints.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
@@ -1135,6 +1137,179 @@ namespace aspect
   {
     if(parameters.cohesive_rsf_propagation)
       { solve_cohesive_rsf_propagation(); return; }
+    auto *bulk_model=dynamic_cast<MaterialModel::PhaseFieldFault<dim> *>(material_model.get());
+    if (bulk_model && bulk_model->uses_integrated_bulk_tip())
+      {
+        AssertThrow(parameters.stokes_solver_type==Parameters<dim>::StokesSolverType::block_amg,
+                    ExcMessage("The integrated bulk-tip adapter requires Stokes solver type = block AMG."));
+        // Fixed-reference coupling: thermal/ordinary composition fields must be
+        // static. The authoritative phase advances in this coupled VI, not in
+        // a second advection/growth pass before mechanics.
+        AssertThrow(parameters.temperature_method==Parameters<dim>::AdvectionFieldMethod::static_field,
+                    ExcMessage("The fixed-reference tip control requires static temperature."));
+        for (unsigned int c=0; c<introspection.n_compositional_fields; ++c)
+          AssertThrow(introspection.compositional_field_methods[c]==Parameters<dim>::AdvectionFieldMethod::static_field
+                      || introspection.component_indices.compositional_fields[c]==introspection.phase_field().first_component_index,
+                      ExcMessage("Bulk tip admits only static auxiliary compositions and native phase."));
+        if (timestep_number==0)
+          {
+            bulk_model->initialize_fe_shared_phase(solution);
+            bulk_model->initialize_bulk_cohesive_history(solution);
+            if (bulk_model->bulk_tip_equilibrate_seed)
+              {
+                internal::BulkTipCoupling<dim> seed(*this,*bulk_model,current_constraints);
+                auto coordinates=seed.coordinates(solution);
+                seed.equilibrate_seed(coordinates);
+                solution=seed.physical_field(coordinates);
+                bulk_model->bulk_cohesive_state->tip_phase=solution.block(introspection.phase_field().block_index);
+              }
+            old_solution=solution;
+            old_old_solution=solution;
+            current_linearization_point=solution;
+            return;
+          }
+        bulk_tip_coupling=std::make_shared<internal::BulkTipCoupling<dim>>(*this,*bulk_model,current_constraints);
+        auto &coupling=*bulk_tip_coupling;
+        const AffineConstraints<double> original_constraints(current_constraints);
+        const bool original_newton=assemble_newton_stokes_system;
+        const bool original_matrix=assemble_newton_stokes_matrix;
+        const auto original_linearization=current_linearization_point;
+        const double original_linear_tolerance=parameters.linear_stokes_solver_tolerance;
+        auto restore=[&]()
+        {
+          current_constraints.copy_from(original_constraints);
+          assemble_newton_stokes_system=original_newton;
+          assemble_newton_stokes_matrix=original_matrix;
+          parameters.linear_stokes_solver_tolerance=original_linear_tolerance;
+          current_linearization_point=original_linearization;
+          set_assemblers();
+        };
+        try
+          {
+            // The ordinary Stokes inverse retains its pressure-nullspace handling.
+            // Only the exact outer coupling operator pins a pressure coordinate.
+            for (const auto &line:original_constraints.get_lines())
+              current_constraints.set_inhomogeneity(line.index,0.);
+            current_constraints.close();
+            assemble_newton_stokes_system=false;
+            assemble_newton_stokes_matrix=false;
+            set_assemblers();
+            // Ordinary distributed Stokes assembly and AMG use eta_BE from the
+            // material model. This is a reference inverse/preconditioner only;
+            // the exact cohesive and section tangent stays in the outer operator.
+            pressure_scaling=compute_pressure_scaling_factor();
+            rebuild_stokes_matrix=true;
+            rebuild_stokes_preconditioner=true;
+            assemble_stokes_system();
+            build_stokes_preconditioner();
+            parameters.linear_stokes_solver_tolerance=1e-4;
+            auto x=coupling.initial_guess(solution);
+            auto current=coupling.evaluate(x,false);
+            // Restore admissible incompressibility after a change in boundary
+            // loading. Subsequent homogeneous coupled directions preserve it.
+            LinearAlgebra::BlockVector rhs(x),correction(x);
+            rhs=0.;
+            correction=0.;
+            rhs.block(1)=current->residual.block(1);
+            rhs.block(1)*=-1.;
+            apply_bulk_tip_stokes_inverse(correction,rhs);
+            x+=correction;
+            const auto &phase_settings=phase_field_handler->get_solver_parameters();
+            SolverControl control(parameters.max_nonlinear_iterations,1.);
+            nonlinear_iteration=0;
+            bool converged=false;
+            for (; nonlinear_iteration<=parameters.max_nonlinear_iterations; ++nonlinear_iteration)
+              {
+                current=coupling.evaluate(x,true);
+                const double residual=std::max(current->mechanical/parameters.nonlinear_tolerance,
+                                               current->kkt/phase_settings.nonlinear_solver_tolerance);
+                pcout<<"   Bulk tip coupled Newton "<<nonlinear_iteration<<": mechanics="<<current->mechanical
+                     <<", phase KKT="<<current->kkt<<", section rate defect="<<current->section_defect<<std::endl;
+                if (control.check(nonlinear_iteration,residual)==SolverControl::success)
+                  {
+                    converged=true;
+                    break;
+                  }
+                if (control.last_check()==SolverControl::failure)break;
+                bool found=false;
+                // Try the exact coupled Newton VI first. On failure, use the
+                // SPD phase obstacle search and its exact coupled mechanical
+                // correction. The functional line search tests descent; physical
+                // residuals, constitutive equations and final gates stay fixed.
+                for (unsigned int search=0; search<10 && !found; ++search)
+                  {
+                    const double shift=search==0?0.:std::pow(10.,int(search)-1);
+                    if (search>0)++coupling.search_shifts;
+                    LinearAlgebra::BlockVector direction(x);
+                    direction=0.;
+                    if (!compute_bulk_tip_direction(x,current->residual,shift,direction))continue;
+                    const double slope=coupling.directional_work(*current,direction);
+                    const double roundoff=128*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(current->functional));
+                    if (slope>=roundoff)continue;
+                    for (unsigned int line=0; line<phase_settings.max_newton_line_search_iterations; ++line)
+                      {
+                        const double alpha=std::ldexp(1.,-int(line));
+                        auto trial=x;
+                        trial.add(alpha,direction);
+                        unsigned int feasible=1;
+                        const auto pb=coupling.phase_block();
+                        for (const auto i:trial.block(pb).locally_owned_elements())
+                          {
+                            trial.block(pb)[i]=PhaseField::box_trial_value(x.block(pb)[i],direction.block(pb)[i],coupling.obstacle()[i],1.,alpha);
+                            feasible &= trial.block(pb)[i]>=coupling.obstacle()[i] && trial.block(pb)[i]<=1.;
+                          }
+                        trial.compress(VectorOperation::insert);
+                        if (!Utilities::MPI::min(feasible,mpi_communicator))continue;
+                        const auto candidate=coupling.evaluate(trial,false);
+                        const double trial_residual=std::max(candidate->mechanical/parameters.nonlinear_tolerance,
+                                                             candidate->kkt/phase_settings.nonlinear_solver_tolerance);
+                        // When energy differences are below summation accuracy,
+                        // do not accept a KKT spike merely through the roundoff
+                        // allowance. The physical natural-map merit breaks ties;
+                        // resolvable steps still obey the functional Armijo test.
+                        const bool resolved_decrease=candidate->functional<current->functional-roundoff;
+                        if (candidate->functional<=current->functional+1e-4*alpha*slope+roundoff
+                            && (resolved_decrease || trial_residual<residual))
+                          {
+                            x=trial;
+                            found=true;
+                            break;
+                          }
+                      }
+                  }
+                if (!found)break;
+                if (parameters.run_postprocessors_on_nonlinear_iterations)postprocess();
+              }
+            coupling.newton_iterations=nonlinear_iteration;
+            signals.post_nonlinear_solver(control);
+            AssertThrow(converged,ExcNonlinearSolverNoConvergence());
+            AssertThrow(std::abs(current->ledger_error)<=1e-10*std::max({1.,std::abs(current->external_work),
+                                                                         current->bulk+current->cohesive+current->fracture
+                                                                        }) && current->Db>=0. && current->Dc>=0.
+                        && current->friction>=0. && current->radiation>=0.,
+                        ExcMessage("Bulk tip physical dissipation or independent endpoint ledger failed."));
+            coupling.accepted_evaluation=current;
+            coupling.accepted_coordinates=x;
+            const auto parent=coupling.accepted_parent();
+            const auto next=coupling.candidate(x,*current);
+            if (benchmark_endpoint_precommit)benchmark_endpoint_precommit();
+            solution=coupling.physical_field(x);
+            AssertThrow(!pending_dg_endpoint_publication,ExcInternalError());
+            pending_dg_endpoint_publication=[bulk_model,parent,next](const bool accept)
+            {
+              AssertThrow(bulk_model->bulk_cohesive_state==parent,ExcMessage("Bulk tip accepted parent changed during a trial."));
+              if (accept)bulk_model->bulk_cohesive_state=next;
+            };
+            restore();
+            current_linearization_point=solution;
+          }
+        catch (...)
+          {
+            restore();
+            throw;
+          }
+        return;
+      }
     if(const auto *fault=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
       if(fault->uses_bulk_cohesive_phase())
         { solve_bulk_cohesive_phase(); return; }

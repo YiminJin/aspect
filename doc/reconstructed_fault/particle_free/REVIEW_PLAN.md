@@ -1,4 +1,22 @@
-> **Current selection — bulk energetic tip control, 7 November 2026.**
+> **Completed bounded task — bulk-tip solver integration, 7 November 2026.**
+> Entry `663937bed9305df2823ac77a3fc2c3925bb94caa`; retained final core
+> `1cc27f9c…7cac6`. Both-bound release, distributed exact coupling and real
+> ASPECT Stokes reuse are implemented under ordinary simulator control. All
+> 3319 point assertions pass. The original refined failure is reproduced and
+> its unchanged checkpoint continued to .08; localized mesh/time, active MPI
+> restart/rollback, ordinary Stokes and native DGQ2 mature checks pass. The
+> alternative Krylov scaling is rejected as a cost improvement and inactive.
+> Localized damage remains weak; mesh refinement changes slip about 11%, and
+> the original fine active-window work remainder is 77.1% of added fracture.
+> This is local numerical qualification, not general propagation or production
+> readiness. See [report](TIP_SOLVER_INTEGRATION_REPORT.md),
+> [equation-to-code guide](TIP_TREATMENT.md) and linked figures/evidence.
+> About 35 min wrapped simulation/check time and 33.6 min separate builds;
+> all jobs finished, protected identities and inherited data losses preserved.
+> Next proposed work: one fixed-parent .0575→.06 preconditioner/search comparison
+> before longer propagation. No mature or server campaign is resumed.
+
+> **Previous implementation — bulk energetic tip control, 7 November 2026.**
 > The user-approved cross-section RSF closure is implemented with physical true
 > stress/cohesive tensor history and authoritative DGQ2 bulk damage. This is an
 > additional constitutive assumption for a fixed-reference, fixed-direction,

@@ -33,24 +33,31 @@ Dissipation positivity and a converged KKT system do not prove uniqueness,
 ellipticity, global stability or physical validity. The earlier Coulomb
 localization/gradient findings remain evidence for those different laws. No
 uncalibrated slip-gradient energy, damping, phase cap, or tolerance relaxation
-has been imported to bypass them. Velocity-weakening RSF may itself produce
-multiple roots or instability; failed evidence must remain visible.
+has been imported to bypass them. The admitted endpoint section law is monotone and has a unique scalar root;
+this does not exclude global phase instability or steady velocity weakening.
+Failed evidence must remain visible.
 
-The bounded root-direct mixed solve is not a scalable production algorithm.
+The active coupling uses distributed sparse FE ownership and ASPECT Stokes
+inverses. The root-direct mixed solve is now an explicit benchmark-only route.
+Distributed storage is not a performance qualification: difficult phase searches
+can still consume many Krylov and Stokes iterations.
 Point-history quadrature and phase-space/obstacle refinement are distinct
 accuracy questions. The [mature guide](../MATURE_MOVING_FAULT.md) and its four-run
 closeout remain unchanged qualifications of a different model and integrator.
 
 ## Measured qualification boundary
 
-The completed coarse and half-dt controls demonstrate the closed law, not a
-spatially converged growing fault. The refined control fails at .05 s in the
-linearized-bound/line-search procedure; its coupled derivative passes. See the
-[report](../TIP_TREATMENT_IMPLEMENTATION_REPORT.md) for exact diagnostics. Initial
-fracture-profile adjustment depends strongly on the mesh. The loading reaches
-the nominal homogeneous intact threshold near .05 s and activates a broad weak
-halo; peak rates at outer boundaries are not localized tip propagation. No
-fully developed phi≈1 advance is demonstrated. BE physical-work remainder
-halves under timestep halving but remains large relative to added fracture.
-The complete law is specified for this control; stable branch selection,
-spatial accuracy and production readiness remain open.
+The [original report](../TIP_TREATMENT_IMPLEMENTATION_REPORT.md) retains the
+coarse/half-dt passes and refined .05 failure of the old add-only procedure.
+The [integration report](../TIP_SOLVER_INTEGRATION_REPORT.md) records its corrected
+failure-window replay and current continuation limits. They are different solver
+generations, not contradictory descriptions of one executable.
+
+The original loading reaches the homogeneous intact threshold near .05 s and
+activates broad weak damage. Its unloaded profile relaxation and outer-boundary
+rates prevent interpreting that experiment as localized propagation. The new
+fixture equilibrates the declared seed before its physical clock and checks
+remote driving, but its load-driven diffuse increment and BE work remainder must
+still be judged against their measured sizes. No phi≈1 advancing core, stable
+branch selection, mesh/quadrature qualification or production readiness follows
+from successful residual/KKT/ledger tests.

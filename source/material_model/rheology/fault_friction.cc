@@ -21,6 +21,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #include <aspect/material_model/rheology/fault_friction.h>
 #include <aspect/utilities.h>
 #include <limits>
+#include <deal.II/base/quadrature_lib.h>
 
 namespace aspect
 {
@@ -62,6 +63,33 @@ namespace aspect
         const double slope=pressure*((speed>0.?direct*ratio/speed:direct*scale)
                                     -evolution*ratio*dt/(Dc*denominator))+radiation;
         return {friction+radiation*V,slope,age,friction,radiation*V};
+      }
+
+      template <int dim>
+      double FaultFriction<dim>::section_primitive(const std::vector<double> &fractions,
+                                                   const double V, const double old_age,
+                                                   const double dt, const double pressure,
+                                                   const double radiation) const
+      {
+        if (V == 0.) return 0.;
+        const auto zero = signed_endpoint(fractions, 0., old_age, dt, pressure, radiation);
+        double direct = 0.;
+        for (unsigned int j=0; j<fractions.size(); ++j) direct += fractions[j]*a[j];
+        const double scale = pressure*direct/(zero.derivative-radiation);
+        const double limit = std::asinh(std::abs(V)/scale);
+        // Logarithmic rate coordinates resolve cold creep and finite slip with
+        // the same smooth quadrature. This is search quadrature, not a change
+        // to constitutive/residual or physical work integration.
+        static const QGauss<1> rule(48);
+        double value = 0.;
+        for (unsigned int q=0; q<rule.size(); ++q)
+          {
+            const double u = limit*rule.point(q)[0];
+            const double rate = scale*std::sinh(u);
+            value += rule.weight(q)*signed_endpoint(fractions, rate, old_age, dt,
+                                                    pressure, radiation).traction*scale*std::cosh(u);
+          }
+        return limit*value;
       }
 
       template <int dim>

@@ -21,17 +21,17 @@ namespace aspect
                       && (old.phi!=0. || old.cohesive_strain.norm()==0.),
                       dealii::ExcMessage("Bulk tip memory must remain in the prescribed Mode-II space; intact A=0."));
           const double beta=1./(1.+dt*p.G/p.eta);
-          const double c=p.m*phi*(1.+phi), d=(1.-phi)*(1.-phi), z=c+d;
-          const double cp=p.m*(1.+2.*phi), dp=-2.*(1.-phi), zp=cp+dp;
+          const double c=p.m*phi*(1.+phi), d=(1.-phi)*(1.-phi), denominator=c+d;
+          const double cp=p.m*(1.+2.*phi), dp=-2.*(1.-phi), denominator_derivative=cp+dp;
           Response r;
-          r.fraction=c/z;
-          r.fraction_derivative=(cp*d-c*dp)/(z*z);
-          r.driving_factor=p.m*(1.+3.*phi)*(1.-phi)/(z*z);
-          r.driving_factor_derivative=p.m*(2.-6.*phi)/(z*z)-2.*r.driving_factor*zp/z;
+          r.fraction=c/denominator;
+          r.fraction_derivative=(cp*d-c*dp)/(denominator*denominator);
+          r.driving_factor=p.m*(1.+3.*phi)*(1.-phi)/(denominator*denominator);
+          r.driving_factor_derivative=p.m*(2.-6.*phi)/(denominator*denominator)-2.*r.driving_factor*denominator_derivative/denominator;
           const double old_e=2.*(old.cohesive_strain*S);
           const Tensor predictor=beta*(old.stress+2.*p.G*increment);
           r.force=predictor*S+p.G*beta*old_e-f;
-          const double e=r.fraction*r.force/p.G, q=(d/z)*r.force;
+          const double e=r.fraction*r.force/p.G, q=(d/denominator)*r.force;
           r.state={predictor-2.*p.G*(e-beta*old_e)*S, e*S, phi};
           r.Q=2.*q*S;
           r.rate=(e/beta-old_e)/dt;

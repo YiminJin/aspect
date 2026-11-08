@@ -129,6 +129,7 @@ namespace aspect
 
   namespace internal
   {
+    template <int dim> class BulkTipCoupling;
     template <int dim> class PhaseFieldTestAccess;
     class EndpointBulkDirect;
     namespace Assembly
@@ -617,7 +618,15 @@ namespace aspect
                                                      ReconstructedFaultVector *trial_slip_rate = nullptr);
       /** Default-off, serial fixed-direction bulk cohesive model. Reuses the
        * native FE, AffineConstraints, direct factorization and outer lifecycle. */
-      void solve_bulk_cohesive_phase();
+      void solve_bulk_cohesive_phase(); // Retained legacy controls / explicit small direct oracle only.
+      std::shared_ptr<internal::BulkTipCoupling<dim>> bulk_tip_coupling;
+      /** ASPECT mechanical inverse used only as a coupled Krylov preconditioner. */
+      void apply_bulk_tip_stokes_inverse(LinearAlgebra::BlockVector &,
+                                         const LinearAlgebra::BlockVector &);
+      /** Linearized box VI: classifies and releases both active bound signs. */
+      bool compute_bulk_tip_direction(const LinearAlgebra::BlockVector &,
+                                      const LinearAlgebra::BlockVector &, double,
+                                      LinearAlgebra::BlockVector &);
       /** Default-off fixed-mesh exact-jump cohesive--RSF native system. */
       void solve_cohesive_rsf_propagation();
       /** Test-access-only, noncommitting complete-step failure injection. */

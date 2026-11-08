@@ -3669,12 +3669,33 @@ A monotone scalar constitutive elimination avoids cold-creep cancellation in the
 mixed resistance equation. The raw integrated rate, resolved scalar rate and
 power defect remain separately observable; no dissipation is added to Gc.
 
-The existing simulator/bulk coupled solver owns trial/acceptance ordering. A
-single publication contains stress, cohesive memory, phase, section age and
-slip. A new checkpoint law rejects reinterpretation of older histories. The
-first fixed aligned-cell adapter and replicated/root-direct solve are bounded
-qualification infrastructure, not the general geometry or scalable production
-solution. No ordinary advection face-assembly refactor is selected.
+The ordinary `single Advection, iterated Newton Stokes` solver scheme now owns
+nonlinear iteration and convergence of the active `Bulk tip solver = ASPECT`
+route. `internal::BulkTipCoupling` supplies distributed native mechanics/phase
+residuals and the exact condensed section integration/adjoint tangent. Flexible
+Krylov uses ordinary Stokes assembly, AMG construction and `solve_stokes()` as
+its mechanical reference inverse; the exact physical operator retains every
+coupling. The phase owner supplies distributed AT1/SIPG rows. There is no active
+all-pairs phase graph or root-only full-system direct solve. The former mixed
+solver remains an explicit `benchmark direct` oracle and legacy-control path.
+
+The Newton VI reclassifies both lower and upper constraints, including release.
+A failed nonconvex quadratic search may use the existing SPD obstacle solver
+with a positive phase metric and its coupled mechanical correction. Functional
+globalization changes the search, not the physical endpoint equations or final
+mechanics/KKT/energy gates. A current equation-to-source guide and qualification
+boundary are maintained in [the integration report](particle_free/TIP_SOLVER_INTEGRATION_REPORT.md)
+and [discretization guide](particle_free/tip_treatment/discretization.md).
+
+The material history owner prepares the candidate. One ordinary publication
+contains stress, cohesive memory, native phase, section age and slip; rejection
+retains the immutable parent. The existing checkpoint law and physical meanings
+remain unchanged. `native tip stress` makes the history meaning explicit, while
+the old input spelling remains compatible. Optional zero-clock fracture
+initialization equilibrates under the declared finite seed before physical
+aging. This fixed aligned-cell control is not general tip geometry or a
+production-qualified solver. No ordinary advection face-assembly refactor is
+selected.
 
 Nonzero cohesive spin needs J_f, general moving growth needs fracture-gradient
 configuration work, and turning/branching/current-pressure contact require

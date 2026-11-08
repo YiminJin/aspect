@@ -60,3 +60,26 @@ TEST_CASE("DGQ2 phase positive-basis roundtrip and inactive smooth bounds")
   REQUIRE_THROWS(bounds.limit(values, -.01, 0., 1.));
   dealii::deal_II_exceptions::enable_abort_on_exception();
 }
+
+TEST_CASE("Positive Q2 evaluation represents the same native polynomial")
+{
+  dealii::FE_DGQ<2> fe(2);
+  aspect::PhaseField::Q2Bounds<2> basis(fe);
+  dealii::Vector<double> coefficients(9),nodal(9);
+  for(unsigned int i=0;i<9;++i)coefficients[i]=i%3==0?0.:std::pow(1e-3,int(i));
+  basis.expansion.vmult(nodal,coefficients);
+  const dealii::QGauss<2> rule(6);
+  for(const auto &point:rule.get_points())
+    {
+      double positive=0.,native=0.,partition=0.;
+      for(unsigned int i=0;i<9;++i)
+        {
+          const double shape=basis.basis_value(i,point);
+          REQUIRE(shape>=0.);partition+=shape;
+          positive+=shape*coefficients[i];native+=fe.shape_value(i,point)*nodal[i];
+        }
+      REQUIRE(positive>=0.);
+      REQUIRE(std::abs(partition-1.)<5e-16);
+      REQUIRE(std::abs(positive-native)<2e-18);
+    }
+}

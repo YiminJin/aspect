@@ -1,4 +1,47 @@
-## 7 November 2026 — bulk tip sections implementation
+> **Completed bounded task — bulk-tip solver integration, 7 November 2026.**
+> Entry `663937bed9305df2823ac77a3fc2c3925bb94caa`; retained final core
+> `1cc27f9c…7cac6`. Both-bound release, distributed exact coupling and real
+> ASPECT Stokes reuse are implemented under ordinary simulator control. All
+> 3319 point assertions pass. The original refined failure is reproduced and
+> its unchanged checkpoint continued to .08; localized mesh/time, active MPI
+> restart/rollback, ordinary Stokes and native DGQ2 mature checks pass. The
+> alternative Krylov scaling is rejected as a cost improvement and inactive.
+> Localized damage remains weak; mesh refinement changes slip about 11%, and
+> the original fine active-window work remainder is 77.1% of added fracture.
+> This is local numerical qualification, not general propagation or production
+> readiness. See [report](TIP_SOLVER_INTEGRATION_REPORT.md),
+> [equation-to-code guide](TIP_TREATMENT.md) and linked figures/evidence.
+> About 35 min wrapped simulation/check time and 33.6 min separate builds;
+> all jobs finished, protected identities and inherited data losses preserved.
+> Next proposed work: one fixed-parent .0575→.06 preconditioner/search comparison
+> before longer propagation. No mature or server campaign is resumed.
+
+## 7 November 2026 — constrained solve and distributed integration
+
+The active route is in ordinary `solver_schemes.cc`, with exact mathematical
+operations in `solver/bulk_tip_assembly.cc` and `solver/bulk_tip_linear.cc`.
+`PhaseFieldHandler::assemble_dg_fracture` supplies owned native SIPG rows;
+`PhaseFieldFault::prepare_bulk_tip_candidate` owns physical candidate histories.
+Bound classification is shared in `phase_field/box_constraints.h`. The existing
+SPD obstacle solver now enforces prescribed rows exactly and rechecks feasibility.
+The benchmark-only direct oracle and old `benchmark direct` route are explicit;
+active FE algebra is distributed and sparse, with section integration/adjoint
+products. The retained interface and ordinary advection face classes are unchanged.
+
+Native tau/A/phase/section checkpoint meanings remain v1; accepted native phase
+ownership is distributed. Pure material evaluation never solves or publishes.
+Source, core/checker and command identities are in the
+[closeout manifest](../../../benchmarks/reconstructed_fault/particle_free/evidence/tip_solver/closeout.json).
+Final core `1cc27f9ced605c5e03886ea810e792959e1ae2783c0e6e27d84a7915c087cac6`
+is byte-identical to the preserved unweighted reference. The rejected equivalent
+coordinate-scaling experiment remains only in named controls/evidence.
+
+The [report](TIP_SOLVER_INTEGRATION_REPORT.md) records complete original fine
+checkpoint ancestry, failed attempts, exact-reference checks, local mesh/time
+comparisons and current cost/physics limits. No raw saddle eigenvalue or timeout
+is presented as a stability diagnosis; no global stable-branch or production claim.
+
+## Historical — 7 November 2026 initial bulk tip sections implementation
 
 Root/branch/HEAD remain `aspect-pf-rsf-particle-free` / `pf-rsf-particle-free` /
 `36de6bcf3633dce96f904d27b1256c37b6675ccc`; incoming recovery/manual changes remain.

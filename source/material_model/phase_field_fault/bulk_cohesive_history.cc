@@ -169,6 +169,38 @@ namespace aspect
     }
 
     template <int dim>
+    std::shared_ptr<typename PhaseFieldFault<dim>::BulkCohesiveState>
+    PhaseFieldFault<dim>::prepare_bulk_tip_candidate(
+      const std::shared_ptr<const BulkCohesiveState> &parent,
+      const std::map<CellId,std::vector<BulkCohesive::Tip::Response>> &points,
+      const std::vector<double> &rates, const std::vector<double> &forces,
+      const LinearAlgebra::Vector &phase) const
+    {
+      AssertThrow(uses_integrated_bulk_tip() && parent==bulk_cohesive_state
+                  && parent->step+1==this->get_timestep_number(),
+                  ExcMessage("Tip candidate must use the current immutable accepted parent."));
+      const double dt=this->get_timestep();
+      auto next=std::make_shared<BulkCohesiveState>(*parent);
+      next->tip_phase=phase;next->step=this->get_timestep_number();
+      next->time=this->get_time();next->publications=parent->publications+1;
+      for(const auto &cell:points)for(unsigned int q=0;q<cell.second.size();++q)
+        {
+          const auto &r=cell.second[q];auto &h=next->history.at(cell.first)[q];
+          h.stress=r.state.stress;h.A=r.state.cohesive_strain;h.q=r.Q[0][1];h.rate=r.rate;
+          h.signed_shear+=dt*r.rate;h.absolute_shear+=dt*std::abs(r.rate);
+        }
+      std::vector<double> fractions(elastic_shear_moduli.size(),0.);fractions[0]=1.;
+      AssertDimension(rates.size(),next->sections.size());AssertDimension(forces.size(),rates.size());
+      for(unsigned int k=0;k<next->sections.size();++k)
+        {
+          auto &s=next->sections[k];s.rate=rates[k];s.slip+=dt*s.rate;s.force=forces[k];
+          s.age=fault_friction.signed_endpoint(fractions,s.rate,parent->sections[k].age,dt,
+                  this->get_parameters().surface_pressure,radiation_damping_coefficients[0]).age;
+        }
+      return next;
+    }
+
+    template <int dim>
     void
     PhaseFieldFault<dim>::initialize_bulk_cohesive_history(
       const LinearAlgebra::BlockVector &initial)
@@ -193,7 +225,14 @@ namespace aspect
                       ExcMessage("Closed Coulomb requires positive background confinement and fixed phase."));
         }
       const auto b = this->introspection().phase_field().block_index;
-      s->phase = aspect::internal::endpoint_values(initial.block(b), this->get_mpi_communicator());
+      if (uses_integrated_bulk_tip())
+        {
+          const auto &sets = this->introspection().index_sets;
+          s->tip_phase.reinit(sets.system_partitioning[b], sets.system_relevant_partitioning[b], this->get_mpi_communicator());
+          s->tip_phase = initial.block(b);
+        }
+      else
+        s->phase = aspect::internal::endpoint_values(initial.block(b), this->get_mpi_communicator());
       for (unsigned int i = 0; i < s->phase.size(); ++i)
         if(s->direct_tip()) AssertThrow(s->phase[i]>=0. && s->phase[i]<=1.,ExcMessage("Invalid initial tip phase."));
         else BulkCohesive::compliance(s->phase[i], s->parameters.m);
@@ -309,7 +348,7 @@ namespace aspect
                 {
                   auto &row=local[entry.first.to_string()];entry.second->get_dof_indices(ids);
                   for(const auto v:entry.second->vertex_indices())for(unsigned int d=0;d<dim;++d)row.push_back(entry.second->vertex(v)[d]);
-                  for(unsigned int i=0;i<ids.size();++i)if(this->get_fe().system_to_component_index(i).first==pc)row.push_back(s.phase[ids[i]-po]);
+                  for(unsigned int i=0;i<ids.size();++i)if(this->get_fe().system_to_component_index(i).first==pc)row.push_back(uses_integrated_bulk_tip() ? s.tip_phase[ids[i]-po] : s.phase[ids[i]-po]);
                   for(const auto &h:s.history.at(entry.first))
                     {for(const auto *t:{&h.stress,&h.A})for(unsigned int i=0;i<3;++i)for(unsigned int j=i;j<3;++j)row.push_back((*t)[i][j]);
                      for(double v:{h.signed_shear,h.absolute_shear,h.rate,h.q})row.push_back(v);}
@@ -438,7 +477,7 @@ namespace aspect
           for(const auto &entry:s.native_cells)
             {unsigned int k=offsets.at(entry.first.to_string());entry.second->get_dof_indices(ids);
              for(const auto v:entry.second->vertex_indices())for(unsigned int d=0;d<dim;++d)AssertThrow(a.local[k++]==entry.second->vertex(v)[d],ExcMessage("Tip mesh changed."));
-             for(unsigned int i=0;i<ids.size();++i)if(fe.system_to_component_index(i).first==pc)AssertThrow(a.local[k++]==s.phase[ids[i]-po],ExcMessage("Tip phase obstacle changed."));
+             for(unsigned int i=0;i<ids.size();++i)if(fe.system_to_component_index(i).first==pc)AssertThrow(a.local[k++]==(uses_integrated_bulk_tip() ? s.tip_phase[ids[i]-po] : s.phase[ids[i]-po]),ExcMessage("Tip phase obstacle changed."));
              for(auto &h:s.history[entry.first])
                {for(auto *t:{&h.stress,&h.A})for(unsigned int i=0;i<3;++i)for(unsigned int j=i;j<3;++j)(*t)[i][j]=a.local[k++];
                 h.signed_shear=a.local[k++];h.absolute_shear=a.local[k++];h.rate=a.local[k++];h.q=a.local[k++];}}
@@ -583,6 +622,7 @@ namespace aspect
   template void PhaseFieldFault<dim>::BulkCohesiveState::rebuild_native_projection(const PhaseFieldFault<dim> &); \
   template std::vector<SymmetricTensor<2,dim>> PhaseFieldFault<dim>::BulkCohesiveState::evaluate_tensor(const PhaseFieldFault<dim> &,const CellId &,const Quadrature<dim> &) const; \
   template double PhaseFieldFault<dim>::BulkCohesiveState::check_tensor(const PhaseFieldFault<dim> &,const CellId &,const Quadrature<dim> &,const std::vector<BulkCohesive::Tensor> &) const; \
+  template std::shared_ptr<PhaseFieldFault<dim>::BulkCohesiveState> PhaseFieldFault<dim>::prepare_bulk_tip_candidate(const std::shared_ptr<const BulkCohesiveState> &,const std::map<CellId,std::vector<BulkCohesive::Tip::Response>> &,const std::vector<double> &,const std::vector<double> &,const LinearAlgebra::Vector &) const; \
   template void PhaseFieldFault<dim>::initialize_bulk_cohesive_history(const LinearAlgebra::BlockVector &); \
   template void PhaseFieldFault<dim>::serialize_bulk_cohesive_history<aspect::oarchive>(aspect::oarchive &); \
   template void PhaseFieldFault<dim>::serialize_bulk_cohesive_history<aspect::iarchive>(aspect::iarchive &); \

@@ -1,4 +1,6 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
+// Legacy bulk controls and explicit benchmark-direct tip oracle only.
+// The active ASPECT bulk-tip route is owned by solver_schemes and BulkTipCoupling.
 // Fixed-mesh bulk cohesive experiment. This is a distinct residual,
 // not the surface endpoint potential or an unconverged phase-first pass.
 #include <aspect/simulator.h>

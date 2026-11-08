@@ -1,0 +1,127 @@
+# Proposed localized control: zero-clock profile equilibrium, remote nominal shear 800 Pa at .08 s.
+# Fixed-reference bounded section-RSF control. SI units throughout.
+# This is an explicit nonlocal constitutive assumption, not mature production.
+set Dimension = 2
+set End time = 0.08
+set Use years instead of seconds = false
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Max nonlinear iterations = 80
+set Nonlinear solver tolerance = 1e-9
+set Nonlinear solver failure strategy = abort program
+set Maximum time step = 0.005
+set Maximum first time step = 0.005
+set Surface pressure = 1000
+set Pressure normalization = no
+set Output directory = build-particle-free/bulk-tip/runs/finite-tip/output
+subsection Formulation
+ set Enable phase field = true
+ set Reconstruct faults from phase field = false
+end
+subsection Geometry model
+ set Model name = box
+ subsection Box
+  set X extent = 4
+  set Y extent = 2
+  set X repetitions = 16
+  set Y repetitions = 8
+ end
+end
+subsection Gravity model
+ set Model name = vertical
+ subsection Vertical
+  set Magnitude = 0
+ end
+end
+subsection Temperature field
+ set Temperature method = static
+end
+subsection Initial temperature model
+ set Model name = function
+ subsection Function
+  set Function expression = 293
+ end
+end
+subsection Compositional fields
+ set Number of fields = 4
+ set Names of fields = tau_xx, tau_yy, tau_xy, phase_field
+ set Types of fields = stress, stress, stress, phase field
+ set Compositional field methods = static, static, static, phase field
+ set Mapped particle properties =
+end
+subsection Discretization
+ set Composition polynomial degree = 2
+ set Use discontinuous composition discretization = true
+end
+subsection Initial composition model
+ set Model name = function
+ subsection Function
+  set Variable names = x,y
+  set Function expression = 0;0;0;.8*max(0,1-((x-2)/.8)^2)*max(0,1-((y-1)/.2)^2)
+ end
+end
+subsection Material model
+ set Model name = phase field fault
+ subsection Phase field fault
+  set Evolve phase field = true
+  set Use homogeneous mesh data = true
+  set Viscosity averaging scheme = arithmetic
+  set Reference viscosities = 1e8
+  set Elastic shear moduli = 1e6
+  set Cohesions = 1000
+  set Critical energy release rates = 26.6666666667
+  set Friction law = rate state
+  set Reference friction coefficients = .6
+  set Reference slip rate = .001
+  set Characteristic slip distance = .01
+  set Direct effect parameters = .015
+  set Evolution effect parameters = .02
+  set Radiation damping coefficients = 1000
+  set Use regularized formulation = true
+  set Use adiabatic pressure in fault friction = true
+  set Fault constitutive mode = bulk cohesive
+  set Bulk cohesive flow rule = bulk tip sections
+  set Bulk tip initial age = 10
+  set Bulk history representation = native tip stress
+  set Equilibrate bulk tip seed = true
+  set FE bulk normal quadrature points = 6
+  set Initial time step = .005
+  set Minimum viscosity = 1e6
+  set Maximum viscosity = 1e10
+ end
+end
+subsection Phase field model
+ set Length scale = .25
+ set Geometric function type = AT1
+ set Degradation curvature parameter = 1
+end
+subsection Mesh refinement
+ set Initial global refinement = 0
+ set Initial adaptive refinement = 0
+ set Time steps between mesh refinement = 0
+end
+subsection Boundary velocity model
+ set Prescribed velocity boundary indicators = left:function, right:function, bottom:function, top:function
+ subsection Function
+  set Variable names = x,y,t
+  set Function expression = .01*(y-1);0
+ end
+end
+subsection Solver parameters
+ subsection Phase field solver parameters
+  set Use bound constraints = true
+  set Enforce phase irreversibility = true
+  set Nonlinear solver tolerance = 1e-7
+  set Max Newton line search iterations = 30
+  set Max nonlinear iterations = 80
+ end
+end
+subsection Postprocess
+ set List of postprocessors =
+end
+subsection Checkpointing
+ set Steps between checkpoint = 4
+ set Time between checkpoint = 0
+end
+subsection Termination criteria
+ set Checkpoint on termination = true
+end

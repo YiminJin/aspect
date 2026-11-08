@@ -6,11 +6,21 @@ The input is
 [`benchmarks/reconstructed_fault/particle_free/bulk_tip/finite_tip.prm`](../../../../benchmarks/reconstructed_fault/particle_free/bulk_tip/finite_tip.prm).
 It selects `Fault constitutive mode = bulk cohesive` and
 `Bulk cohesive flow rule = bulk tip sections`, with an authoritative DGQ2
-`phase_field` composition. The inherited `Bulk history representation = DG trial
-stress` admits the existing bulk owner; the **bulk tip flow selector overrides
-that owner's physical history meaning** to direct native-quadrature τ and A.
-It does not enable the mature direct/separated history option. Checkpoint v1 and
-point exports explicitly identify this distinction. General stress-composition
+`phase_field` composition. The clearer `Bulk history representation = native tip stress` option identifies
+physical native-quadrature tau/A. The old `DG trial stress` spelling remains
+accepted for the unchanged original fixtures; it does not make the new tip owner
+an auxiliary mature trial-stress history. Checkpoint v1 and point exports retain
+the same physical meanings.
+
+`Bulk tip solver = ASPECT` selects the distributed coupled route. Its reference
+mechanical inverse currently requires `Stokes solver type = block AMG`; the
+benchmark runner supplies this setting explicitly. `benchmark direct` retains
+the small old mixed solver as an explicit oracle, including its historical
+search limitations. `Equilibrate bulk tip seed = true` selects zero-clock
+fracture equilibration before freezing the initial obstacle; the original
+fixture leaves it false. It cannot smooth an already accepted physical step.
+
+General stress-composition
 fields are inert compatibility fields in this fixture; use the bulk-tip physical
 point exports for stress observations.
 
@@ -58,3 +68,13 @@ regular checkpoint within the copy when a terminal checkpoint carries a tiny
 end-time-clipped timestep. `--unloaded`, `--intact`,
 `--rejection`, `--dt`, and `--refinement` select the bounded checks. See the report
 for actually executed commands and failures before selecting a longer run.
+
+The locally exercised `localized.prm` is one equilibrated control: [0,4]×[0,2] m,
+fixed ell=.25 m, common compact seed centered at (2,1), with half-length .8 m,
+half-width .2 m and maximum .8, and boundary shear rate .01/s. Its nominal remote
+intact shear stress at .08 s is below 800 Pa, versus the 1000 Pa calibration;
+actual remote driving must still be checked in the coupled solution. The mesh
+pair uses h=.25/.125 with identical physical seed and loading; zero-clock
+obstacle equilibration is mesh dependent and reported. The unloaded checks and bounded mesh/time comparisons pass; they show weak
+diffuse adjustment and significant accuracy limits, rather than a developed
+advancing core. See the current report before extending the fixture.
