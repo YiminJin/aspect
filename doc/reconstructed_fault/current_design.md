@@ -3687,6 +3687,16 @@ mechanics/KKT/energy gates. A current equation-to-source guide and qualification
 boundary are maintained in [the integration report](particle_free/TIP_SOLVER_INTEGRATION_REPORT.md)
 and [discretization guide](particle_free/tip_treatment/discretization.md).
 
+Search ordering is local to a physical step: start exact-first, prefer the
+positive-metric family after an accepted shifted correction, and retry exact
+when scaled mechanics/KKT merit r <= max(10, 0.1 r_last_exact). Shifted attempts
+always restart at the least original shift; exact remains fallback. No active
+classification, search direction or physical history is cached. The near-gate
+clause restores exact-first polishing without changing final gates or linear
+accuracy. The retained preconditioner remains block diagonal; a tested triangular
+candidate cost more. See the [efficiency/growth report](particle_free/TIP_EFFICIENCY_AND_GROWTH_REPORT.md)
+for bounded cost, near-intact reaction sensitivity and time/growth limits.
+
 The material history owner prepares the candidate. One ordinary publication
 contains stress, cohesive memory, native phase, section age and slip; rejection
 retains the immutable parent. The existing checkpoint law and physical meanings
@@ -3701,3 +3711,24 @@ Nonzero cohesive spin needs J_f, general moving growth needs fracture-gradient
 configuration work, and turning/branching/current-pressure contact require
 additional physical closures. None is inferred from the energy identity or
 from a moving mature comparison. KKT convergence does not establish stability.
+
+
+## Native Bernstein phase coordinates (9 November 2026)
+
+The selected native DG phase representation is described by
+[the compact guide](particle_free/NATIVE_DG_BERNSTEIN.md). Active bulk-tip fixtures
+use `Phase basis = Bernstein`; default/legacy nodal storage remains selectable.
+FE_DGQBernstein reuses FE_DGQ topology and polynomial transfer, but coefficients
+are not nodal samples. Initialization computes the same native interpolant and
+normal FEValues supplies physical samples. No new field or history owner is added.
+The growth coefficient box and transport polynomial enclosure/scaling remain
+different contracts. BE, SSPRK3, quadrature, physical inputs, mechanics scaling,
+search ordering and acceptance gates are unchanged. Native fracture/transport
+assembly avoids repeated phase coordinate transforms; only nodal compatibility
+and the bounded benchmark import retain conversions. Parent and reference
+quadrature caches live for one fixed coupling attempt. Basis metadata guards
+restart separately from constitutive identity. Mature schema9 uses generalized
+anchors with native coefficients, without assigning them nodal meaning.
+The admitted fault routes are integrated bulk tip and growth-off mature material
+transport; historical replicated cohesive/endpoint solvers require nodal phase.
+This does not resolve BE work error or qualify moving growth, branching or AMR.

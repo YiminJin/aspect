@@ -858,6 +858,12 @@ namespace aspect
         }
       AssertThrow(!material_direct_stress || (mature_frictional_fault && !bulk_cohesive_phase),
                   ExcMessage("Direct physical stress is restricted to the mature material branch."));
+      AssertThrow(!this->get_parameters().use_bernstein_phase_basis
+                  || uses_integrated_bulk_tip()
+                  || (mature_frictional_fault && dg_material_transport && !evolve_phase_field),
+                  ExcMessage("Native Bernstein phase is supported by the integrated bulk-tip solver "
+                             "and growth-off mature material transport. Historical replicated cohesive "
+                             "and endpoint-phase solvers retain their nodal basis."));
       if (bulk_cohesive_phase)
         {
           // Tensor histories use the same unique CellId ownership and native

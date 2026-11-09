@@ -1,6 +1,7 @@
 /* Bounded bulk-tip diagnostics; reuse the existing benchmark friendship only. */
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
+#include <aspect/termination_criteria/interface.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_internal.h>
 #include <aspect/phase_field.h>
 #include <aspect/simulator/solver/bulk_tip.h>
@@ -16,12 +17,16 @@
 
 namespace aspect
 {
+  namespace { bool tip_remote_margin_reached=false; }
   namespace Postprocess
   {
     template<int dim> class MomentCycle:public Interface<dim>,public SimulatorAccess<dim>
     {
       using Model=MaterialModel::PhaseFieldFault<dim>;
       bool rejected=false;
+      unsigned long inner_stokes=0, inner_A=0, inner_S=0;
+      Timer step_timer;
+
       Model &model()const{return const_cast<Model&>(Plugins::get_plugin_as_type<const Model>(this->get_material_model()));}
       Simulator<dim> &sim()const{return const_cast<Simulator<dim>&>(this->get_simulator());}
       void gate(const std::string &name,const bool local)const
@@ -44,6 +49,139 @@ namespace aspect
            for(double x:{p.rate,p.q,p.signed_shear,p.absolute_shear})a.push_back(x);}
         return a;
       }
+      /** Narrow same-mesh benchmark import, never a production restart. All
+       * components are keyed by CellId/component/local shape; physical history
+       * uses its existing material archive and validates geometry/law on restore.
+       */
+      void export_parent(const std::string &file)
+      {
+        gate("parent export serial nodal",dim==2 && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
+             && !this->get_parameters().use_bernstein_phase_basis);
+        std::ofstream stream(file,std::ios::binary);AssertThrow(stream,ExcMessage("Cannot create parent export."));
+        aspect::oarchive archive(stream);
+        std::string signature="tip benchmark parent v1: cell-component Q2 Bernstein phase";
+        archive &signature &sim().time &sim().time_step &sim().old_time_step &sim().timestep_number;
+        const auto &fe=this->get_fe();const auto pc=this->introspection().phase_field().first_component_index;
+        PhaseField::Q2Bounds<dim> basis(fe.base_element(fe.component_to_base_index(pc).first));
+        std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
+        for(const auto *field:{&sim().solution,&sim().old_solution,&sim().old_old_solution})
+          {
+            std::map<std::string,std::vector<double>> cells;
+            for(const auto &cell:this->get_dof_handler().active_cell_iterators())
+              {
+                cell->get_dof_indices(ids);auto &row=cells[cell->id().to_string()];
+                for(unsigned int c=0;c<fe.n_components();++c)
+                  {
+                    const auto n=fe.base_element(fe.component_to_base_index(c).first).n_dofs_per_cell();
+                    Vector<double> values(n);
+                    for(unsigned int j=0;j<n;++j)values[j]=(*field)[ids[fe.component_to_system_index(c,j)]];
+                    if(c==pc)values=basis.coefficients(values);
+                    row.insert(row.end(),values.begin(),values.end());
+                  }
+              }
+            archive &cells;
+          }
+        model().serialize_bulk_cohesive_history(archive);
+        fixed_parent_action();
+      }
+
+      void import_parent(const std::string &file)
+      {
+        gate("parent import serial Bernstein",dim==2 && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
+             && this->get_parameters().use_bernstein_phase_basis && !model().bulk_cohesive_state);
+        std::ifstream stream(file,std::ios::binary);AssertThrow(stream,ExcMessage("Cannot read parent export."));
+        aspect::iarchive archive(stream);std::string signature;
+        archive &signature;
+        AssertThrow(signature=="tip benchmark parent v1: cell-component Q2 Bernstein phase",ExcMessage("Unexpected benchmark parent format."));
+        archive &sim().time &sim().time_step &sim().old_time_step &sim().timestep_number;
+        const auto &fe=this->get_fe();
+        const auto &sets=this->introspection().index_sets;const auto comm=this->get_mpi_communicator();
+        std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
+        for(auto *field:{&sim().solution,&sim().old_solution,&sim().old_old_solution})
+          {
+            std::map<std::string,std::vector<double>> cells;archive &cells;
+            AssertDimension(cells.size(),this->get_triangulation().n_global_active_cells());
+            LinearAlgebra::BlockVector owned(sets.system_partitioning,comm);owned=0.;
+            for(const auto &cell:this->get_dof_handler().active_cell_iterators())
+              {
+                const auto &row=cells.at(cell->id().to_string());unsigned int k=0;cell->get_dof_indices(ids);
+                for(unsigned int c=0;c<fe.n_components();++c)
+                  for(unsigned int j=0;j<fe.base_element(fe.component_to_base_index(c).first).n_dofs_per_cell();++j)
+                    owned[ids[fe.component_to_system_index(c,j)]]=row.at(k++);
+                AssertDimension(k,row.size());
+              }
+            owned.compress(VectorOperation::insert);*field=owned;
+          }
+        // Convert only the explicit accepted-phase copy in the material record.
+        // Every quadrature history/section/clock/material byte retains its meaning.
+        model().serialize_bulk_cohesive_history(archive);
+        auto &record=*model().bulk_cohesive_archive;
+        const FE_DGQ<dim> nodal(2);const PhaseField::Q2Bounds<dim> basis(nodal);
+        const unsigned int geometry_size=GeometryInfo<dim>::vertices_per_cell*dim;
+        const unsigned int stride=geometry_size+nodal.n_dofs_per_cell()+16*model().mechanical_quadrature().size();
+        AssertDimension(record.local.size(),stride*record.cells.size());
+        double phase_error=0.;
+        const auto parent_quadrature=model().mechanical_quadrature();
+        for(unsigned int cell=0;cell<record.cells.size();++cell)
+          {
+            Vector<double> a(nodal.n_dofs_per_cell());
+            for(unsigned int j=0;j<a.size();++j)a[j]=record.local[cell*stride+geometry_size+j];
+            const auto b=basis.coefficients(a);
+            for(const auto &point:parent_quadrature.get_points())
+              {
+                double old_value=0.,new_value=0.;
+                for(unsigned int j=0;j<a.size();++j)
+                  {old_value+=nodal.shape_value(j,point)*a[j];new_value+=basis.basis_value(j,point)*b[j];}
+                phase_error=std::max(phase_error,std::abs(old_value-new_value));
+              }
+            for(unsigned int j=0;j<a.size();++j)record.local[cell*stride+geometry_size+j]=b[j];
+          }
+        const auto accepted_step=record.step;const auto accepted_time=record.time;
+        model().restore_bulk_cohesive_history();
+        sim().current_linearization_point=sim().solution;
+        gate("import phase polynomial preserved",phase_error<2e-14);
+        const auto pb=this->introspection().phase_field().block_index;
+        auto difference=model().bulk_cohesive_state->tip_phase;difference-=sim().solution.block(pb);
+        gate("import accepted obstacle equals current phase",difference.linfty_norm()==0.);
+        std::ofstream report(this->get_output_directory()+"parent-import.csv");
+        report<<std::setprecision(17)<<"accepted_step,accepted_time,pending_time,dt,phase_error\n"
+              <<accepted_step<<','<<accepted_time<<','<<sim().time<<','<<sim().time_step<<','<<phase_error<<'\n';
+        fixed_parent_action();
+      }
+
+      void fixed_parent_action()
+      {
+        sim().compute_current_constraints();
+        internal::BulkTipCoupling<dim> op(sim(),model(),sim().current_constraints);
+        auto x=op.initial_guess(sim().solution);const auto response=op.evaluate(x,true);
+        auto direction=x;direction=0.;
+        const auto &fe=this->get_fe();const auto pc=this->introspection().phase_field().first_component_index;
+        std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
+        for(const auto &cell:this->get_dof_handler().active_cell_iterators())
+          {
+            cell->get_dof_indices(ids);
+            for(unsigned int c=0;c<fe.n_components();++c)
+              {
+                const auto &element=fe.base_element(fe.component_to_base_index(c).first);
+                for(unsigned int j=0;j<element.n_dofs_per_cell();++j)
+                  {
+                    const auto p=c==pc ? cell->center() : this->get_mapping().transform_unit_to_real_cell(cell,element.get_generalized_support_points()[j]);
+                    direction[ids[fe.component_to_system_index(c,j)]]=std::sin(.7*p[0]+.3*p[1]+c+(c==pc?.1*j:0.));
+                  }
+              }
+          }
+        direction.compress(VectorOperation::insert);auto action=x;op.vmult(action,direction);
+        std::ofstream out(this->get_output_directory()+"fixed-parent-action.csv");
+        out<<std::setprecision(17)<<"cell,component,shape,coordinate,residual,action\n";
+        for(const auto &cell:this->get_dof_handler().active_cell_iterators())
+          {
+            cell->get_dof_indices(ids);
+            for(unsigned int c=0;c<fe.n_components();++c)
+              for(unsigned int j=0;j<fe.base_element(fe.component_to_base_index(c).first).n_dofs_per_cell();++j)
+                {const auto i=ids[fe.component_to_system_index(c,j)];out<<cell->id()<<','<<c<<','<<j<<','<<x[i]<<','<<response->raw[i]<<','<<action[i]<<'\n';}
+          }
+      }
+
       void compare_linear_oracle() const
       {
         gate("serial direct oracle only",Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1);
@@ -97,7 +235,7 @@ namespace aspect
         for(const auto &line:original_constraints.get_lines())sim().current_constraints.set_inhomogeneity(line.index,0.);
         sim().current_constraints.close();sim().assemble_newton_stokes_system=false;
         bool solved=false;
-        try {solved=sim().compute_bulk_tip_direction(x,residual,0.,direction);}
+        try {solved=sim().compute_bulk_tip_search_direction(x,residual,0.,direction);}
         catch(...){sim().current_constraints.copy_from(original_constraints);sim().assemble_newton_stokes_system=original_newton;throw;}
         sim().current_constraints.copy_from(original_constraints);sim().assemble_newton_stokes_system=original_newton;
         gate("coupled manufactured bound direction",solved);
@@ -111,36 +249,95 @@ namespace aspect
         out<<"free_unknowns,relative_krylov_direct,relative_manufactured,relative_weighted_symmetry\n"<<std::setprecision(17)
            <<free.size()<<','<<relative<<','<<direction.l2_norm()/exact.l2_norm()<<','<<symmetry<<'\n';
       }
-      void export_step() const
+      void export_step()
       {
         const auto &s=*model().bulk_cohesive_state;
         const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
         const auto directory=this->get_output_directory();
         std::ofstream points(directory+"tip-points-"+Utilities::int_to_string(s.step,4)+"-r"+std::to_string(rank)+".csv");
-        points<<std::setprecision(17)<<"cell,q,x,y,weight,phi,tauxx,tauyy,tauzz,tauxy,Axx,Ayy,Azz,Axy,qcoh,w,signed_shear,absolute_shear,section\n";
-        FEValues<dim> fe(this->get_mapping(),this->get_fe(),model().mechanical_quadrature(),update_values|update_quadrature_points|update_JxW_values);
+        points<<std::setprecision(17)<<"cell,q,x,y,weight,phi,tauxx,tauyy,tauzz,tauxy,Axx,Ayy,Azz,Axy,qcoh,w,signed_shear,absolute_shear,section,H,Y,fracture_density\n";
+        FEValues<dim> fe(this->get_mapping(),this->get_fe(),model().mechanical_quadrature(),update_values|update_gradients|update_quadrature_points|update_JxW_values);
         std::vector<double> phase(fe.n_quadrature_points);
+        std::vector<Tensor<1,dim>> phase_gradient(fe.n_quadrature_points);
+        const double ell=this->get_phase_field_handler().get_length_scale();
+        const double Kf=model().critical_energy_release_rates[0]/((8./3.)*ell);
+        double remote_driving=0.,remote_phase=0.;
         for(const auto &entry:s.native_cells)
           {
             fe.reinit(entry.second);fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(this->get_solution(),phase);
+            fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_gradients(this->get_solution(),phase_gradient);
             for(unsigned int q=0;q<phase.size();++q)
               {
                 const auto &h=s.history.at(entry.first)[q];const auto p=fe.quadrature_point(q);
+                const double phi=phase[q];
+                const double c=s.parameters.m*phi*(1.+phi),d=(1.-phi)*(1.-phi);
+                const double fraction=c/(c+d);
+                const double driving=sim().bulk_tip_coupling && sim().bulk_tip_coupling->accepted_evaluation
+                    ? sim().bulk_tip_coupling->accepted_evaluation->points.at(entry.first)[q].driving : 0.;
+                if(std::abs(p[0]-2.)>1.3)
+                  { remote_driving=std::max(remote_driving,driving); remote_phase=std::max(remote_phase,phi); }
                 points<<entry.first<<','<<q<<','<<p[0]<<','<<p[1]<<','<<fe.JxW(q)<<','<<phase[q]<<','
                       <<h.stress[0][0]<<','<<h.stress[1][1]<<','<<h.stress[2][2]<<','<<h.stress[0][1]<<','
                       <<h.A[0][0]<<','<<h.A[1][1]<<','<<h.A[2][2]<<','<<h.A[0][1]<<','<<h.q<<','<<h.rate<<','
-                      <<h.signed_shear<<','<<h.absolute_shear<<','<<s.section_ids.at(entry.first)[q]<<'\n';
+                      <<h.signed_shear<<','<<h.absolute_shear<<','<<s.section_ids.at(entry.first)[q]<<','<<fraction<<','<<driving<<','<<Kf*(phi+ell*ell*phase_gradient[q].norm_square())<<'\n';
+              }
+          }
+        remote_driving=Utilities::MPI::max(remote_driving,this->get_mpi_communicator());
+        remote_phase=Utilities::MPI::max(remote_phase,this->get_mpi_communicator());
+        if(std::getenv("ASPECT_TIP_REMOTE_MARGIN") && s.step>0)
+          {
+            const double Kf=sim().bulk_tip_coupling->fracture_scale();
+            tip_remote_margin_reached=remote_driving/Kf>=.95 || remote_phase>1e-12;
+            if(rank==0)
+              {
+                std::ofstream remote(directory+"tip-remote.csv",std::ios::app);
+                if(remote.tellp()==0)remote<<"step,time,driving_ratio,max_phase,stop\n";
+                remote<<std::setprecision(17)<<s.step<<','<<s.time<<','<<remote_driving/Kf<<','<<remote_phase<<','<<tip_remote_margin_reached<<'\n';
               }
           }
         if(s.step==0)
           {
             LinearAlgebra::Vector gradient;
             const double energy=this->get_phase_field_handler().assemble_dg_fracture(this->get_solution(),gradient);
+            if(std::getenv("ASPECT_TIP_REMOTE_MARGIN"))
+              {
+                // Native seed coordinates and the authoritative SIPG derivative
+                // permit an exact quadratic energy-change partition afterwards.
+                // This is an observation, not a second equilibration or operator.
+                const auto &element=this->get_fe();
+                const auto pc=this->introspection().phase_field().first_component_index;
+                const auto pb=this->introspection().phase_field().block_index;
+                const auto offset=this->get_solution().get_block_indices().block_start(pb);
+                PhaseField::Q2Bounds<dim> basis(element.base_element(element.component_to_base_index(pc).first));
+                std::vector<types::global_dof_index> ids(element.n_dofs_per_cell());
+                std::ofstream seed(directory+"tip-seed-fracture-r"+std::to_string(rank)+".csv");
+                seed<<std::setprecision(17)<<"cell,i,B,fracture_gradient\n";
+                for(const auto &entry:s.native_cells)
+                  {
+                    entry.second->get_dof_indices(ids);
+                    dealii::Vector<double> nodal(basis.inverse.n()),coefficients(basis.inverse.m());
+                    for(unsigned int i=0;i<nodal.size();++i)nodal[i]=this->get_solution()[ids[element.component_to_system_index(pc,i)]];
+                    basis.inverse.vmult(coefficients,nodal);
+                    for(unsigned int j=0;j<coefficients.size();++j)
+                      {
+                        double force=0.;
+                        for(unsigned int i=0;i<basis.expansion.m();++i)
+                          force+=basis.expansion(i,j)*gradient[ids[element.component_to_system_index(pc,i)]-offset];
+                        seed<<entry.first<<','<<j<<','<<coefficients[j]<<','<<force<<'\n';
+                      }
+                  }
+              }
             if(rank==0){std::ofstream initial(directory+"tip-initial.csv");initial<<"fracture,initial_age\n"<<std::setprecision(17)<<energy<<','<<s.sections.front().age<<'\n';}
             return;
           }
         if(!sim().bulk_tip_coupling || !sim().bulk_tip_coupling->accepted_evaluation)return;
         auto &op=*sim().bulk_tip_coupling;const auto &e=*op.accepted_evaluation;
+        if(rank==0)
+          {
+            std::ofstream profile(directory+"tip-profile.csv",std::ios::app);
+            if(profile.tellp()==0)profile<<"step,stokes_iterations,velocity_iterations,pressure_iterations,active_passes,active_repeats,exact_attempts,search_failures,line_trials,evaluations,tangent_assemblies,step_seconds\n";
+            profile<<s.step<<','<<inner_stokes<<','<<inner_A<<','<<inner_S<<','<<op.active_passes<<','<<op.active_repeats<<','<<op.exact_attempts<<','<<op.search_failures<<','<<op.line_trials<<','<<op.evaluations<<','<<op.tangent_assemblies<<','<<step_timer.wall_time()<<'\n';
+          }
         if(std::getenv("ASPECT_TIP_LINEAR_ORACLE") && s.step==static_cast<unsigned int>(std::getenv("ASPECT_TIP_LINEAR_ORACLE_STEP")?std::atoi(std::getenv("ASPECT_TIP_LINEAR_ORACLE_STEP")):1))compare_linear_oracle();
         if(std::getenv("ASPECT_BULK_CHECK_TANGENT") && s.step==static_cast<unsigned int>(std::getenv("ASPECT_TIP_TANGENT_STEP")?std::atoi(std::getenv("ASPECT_TIP_TANGENT_STEP")):8))
           {
@@ -177,7 +374,41 @@ namespace aspect
             // separately; arbitrary saddle-point directions cannot certify it.
             if(rank==0){std::ofstream out(directory+"bulk-tangent.csv");out<<"time,relative_action_error,functional_directional_reference,functional_derivative_error,lagrangian_derivative_error\n"<<std::setprecision(17)<<this->get_time()<<','<<error<<','<<expected<<','<<functional_error<<','<<lagrangian_error<<'\n';}
           }
+        if(std::getenv("ASPECT_TIP_REMOTE_MARGIN"))
+          {
+            LinearAlgebra::Vector gradient;
+            this->get_phase_field_handler().assemble_dg_fracture(this->get_solution(),gradient);
+            const auto pc=this->introspection().phase_field().first_component_index;
+            const auto &element=this->get_fe();
+            PhaseField::Q2Bounds<dim> basis(element.base_element(element.component_to_base_index(pc).first));
+            const auto pb=op.phase_block();const auto offset=op.accepted_coordinates.get_block_indices().block_start(pb);
+            std::vector<types::global_dof_index> ids(element.n_dofs_per_cell());
+            std::ofstream balance(directory+"tip-balance-"+Utilities::int_to_string(s.step,4)+"-r"+std::to_string(rank)+".csv");
+            balance<<std::setprecision(17)<<"cell,i,x,y,B,lower,mass,fracture_gradient,driving_load,residual\n";
+            for(const auto &entry:s.native_cells)
+              {
+                const auto cell=entry.second;cell->get_dof_indices(ids);
+                for(unsigned int j=0;j<basis.expansion.n();++j)
+                  {
+                    double fracture=0.;
+                    for(unsigned int i=0;i<basis.expansion.m();++i)
+                      fracture+=basis.expansion(i,j)*gradient[ids[element.component_to_system_index(pc,i)]-offset];
+                    const auto index=ids[element.component_to_system_index(pc,j)]-offset;
+                    const double residual=op.fracture_scale()*e.raw.block(pb)[index];
+                    balance<<entry.first<<','<<j<<','<<cell->center()[0]<<','<<cell->center()[1]<<','<<op.accepted_coordinates.block(pb)[index]<<','<<op.obstacle()[index]<<','<<op.phase_mass()[index]<<','<<fracture<<','<<fracture-residual<<','<<residual<<'\n';
+                  }
+              }
+          }
         if(rank!=0)return;
+        {
+          std::ofstream timers(directory+"tip-timers.csv");timers<<"section,seconds,calls\n";
+          const auto wall=this->get_computing_timer().get_summary_data(TimerOutput::total_wall_time);
+          const auto calls=this->get_computing_timer().get_summary_data(TimerOutput::n_calls);
+          std::ofstream step_timers(directory+"tip-step-timers.csv",std::ios::app);
+          if(step_timers.tellp()==0)step_timers<<"step,section,seconds,calls\n";
+          for(const auto &entry:wall)step_timers<<s.step<<','<<entry.first<<','<<std::setprecision(17)<<entry.second<<','<<calls.at(entry.first)<<'\n';
+          for(const auto &entry:wall)timers<<entry.first<<','<<std::setprecision(17)<<entry.second<<','<<calls.at(entry.first)<<'\n';
+        }
         std::ofstream sections(directory+"tip-sections-"+Utilities::int_to_string(s.step,4)+".csv");
         sections<<std::setprecision(17)<<"s,ds,age,slip,V,force,integral_abs_w,positive_w,negative_w,resolved_V,integral_rate_defect,RSF_of_integral\n";
         std::vector<double> fractions(model().elastic_shear_moduli.size(),0.);fractions[0]=1.;
@@ -215,6 +446,20 @@ namespace aspect
     public:
       void initialize()override
       {
+        this->get_signals().post_set_initial_state.connect([this](const SimulatorAccess<dim>&)
+          { if(const auto file=std::getenv("ASPECT_TIP_IMPORT_PARENT"))import_parent(file); });
+        this->get_signals().post_resume_time_step.connect([this](const SimulatorAccess<dim>&,double &dt)
+          {
+            if(const auto file=std::getenv("ASPECT_TIP_EXPORT_PARENT"))export_parent(file);
+            if(const auto value=std::getenv("ASPECT_TIP_RESTART_DT"))dt=std::stod(value);
+          });
+        this->get_signals().post_stokes_solver.connect([this](const SimulatorAccess<dim>&,const unsigned int ns,const unsigned int na,const SolverControl &cheap,const SolverControl &expensive)
+          {
+            inner_S+=ns; inner_A+=na;
+            if(cheap.last_step()!=numbers::invalid_unsigned_int)inner_stokes+=cheap.last_step();
+            if(expensive.last_step()!=numbers::invalid_unsigned_int)inner_stokes+=expensive.last_step();
+          });
+        this->get_signals().start_timestep.connect([this](const SimulatorAccess<dim>&){inner_stokes=inner_A=inner_S=0;step_timer.restart();});
         this->get_signals().start_timestep.connect([this](const SimulatorAccess<dim>&)
           {if(std::getenv("ASPECT_TIP_RECOVERY") && !rejected && this->get_timestep_number()==static_cast<unsigned int>(std::getenv("ASPECT_TIP_RECOVERY_STEP")?std::atoi(std::getenv("ASPECT_TIP_RECOVERY_STEP")):2))recovery();});
       }
@@ -280,5 +525,22 @@ namespace aspect
       }
     };
     ASPECT_REGISTER_POSTPROCESSOR(MomentCycle,"bulk tip checks","Bounded bulk section-RSF diagnostics and opt-in rejection exercise.")
+  }
+}
+
+namespace aspect
+{
+  namespace TerminationCriteria
+  {
+    /** Benchmark observation only: preserve the accepted endpoint exhausting
+     * the remote-intact margin, then stop through ordinary termination. */
+    template <int dim>
+    class TipRemoteMargin : public Interface<dim>
+    {
+      public:
+        bool execute() override { return tip_remote_margin_reached; }
+    };
+    ASPECT_REGISTER_TERMINATION_CRITERION(TipRemoteMargin,"tip remote margin",
+      "Stop the localized diagnostic after its accepted endpoint exhausts the remote-intact margin.")
   }
 }

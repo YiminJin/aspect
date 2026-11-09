@@ -1,3 +1,8 @@
+> **Native basis update, 9 November 2026:** [DG Bernstein guide](NATIVE_DG_BERNSTEIN.md)
+> defines the selectable native coefficient representation, bounds and restart
+> contract. The existing equations, quadrature and integrators remain unchanged;
+> [bounded qualification](NATIVE_DG_BERNSTEIN_REPORT.md) supersedes older nodal-only descriptions.
+
 > **Bulk-tip use, 7 November 2026:** the new guarded `bulk tip sections` route
 > reuses the existing authoritative DGQ2 fracture/SIPG operators and Bernstein
 > constraint coordinates for bulk energetic growth. It adds no shared-advection

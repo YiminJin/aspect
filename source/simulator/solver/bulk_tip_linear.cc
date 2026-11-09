@@ -25,6 +25,7 @@ namespace aspect
   void Simulator<dim>::apply_bulk_tip_stokes_inverse(LinearAlgebra::BlockVector &dst,
                                                      const LinearAlgebra::BlockVector &src)
   {
+    TimerOutput::Scope timer(computing_timer,"Tip Stokes inverse");
     const auto &coupling=*bulk_tip_coupling;
     const auto saved_linearization=current_linearization_point;
     const auto saved_normalization=last_pressure_normalization_adjustment;
@@ -83,11 +84,12 @@ namespace aspect
   }
 
   template <int dim>
-  bool Simulator<dim>::compute_bulk_tip_direction(const LinearAlgebra::BlockVector &x,
+  bool Simulator<dim>::compute_bulk_tip_search_direction(const LinearAlgebra::BlockVector &x,
                                                   const LinearAlgebra::BlockVector &residual,
                                                   const double shift,
                                                   LinearAlgebra::BlockVector &direction)
   {
+    TimerOutput::Scope timer(computing_timer,shift>0. ? "Tip shifted search" : "Tip exact search");
     using Vector=LinearAlgebra::BlockVector;
     auto &coupling=*bulk_tip_coupling;
     const auto pb=coupling.phase_block();
@@ -157,12 +159,14 @@ namespace aspect
         direction+=correction;
         return true;
       }
+    ++coupling.exact_attempts;
     std::vector<std::vector<int>> classifications;
     Vector action(direction),gradient(direction),fixed(direction),rhs(direction),free(direction);
     // The initial multiplier classification can release on every following
     // pass. A crossed bound is never permanently added to an irreversible list.
     for (unsigned int pass=0; pass<24; ++pass)
       {
+        ++coupling.active_passes;
         coupling.vmult(action,direction);
         gradient=residual;
         gradient+=action;
@@ -189,6 +193,7 @@ namespace aspect
         for (const auto &previous:classifications)
           if (Utilities::MPI::min(int(previous==classification),mpi_communicator))
             {
+              ++coupling.active_repeats;
               pcout<<"   Linearized tip bounds repeat: shift="<<shift<<", pass="<<pass
                    <<", natural residual="<<violation<<std::endl;
               return false;
@@ -216,7 +221,10 @@ namespace aspect
         data.elliptic=true;
         data.higher_order_elements=true;
         data.smoother_sweeps=2;
-        phase_inverse.initialize(phase_preconditioner,data);
+        {
+          TimerOutput::Scope setup(computing_timer,"Tip phase AMG setup");
+          phase_inverse.initialize(phase_preconditioner,data);
+        }
         const TipLinearAction matrix
         {
           [&](Vector &dst,const Vector &src)
@@ -266,7 +274,7 @@ namespace aspect
   }
 #define INSTANTIATE(dim) \
   template void Simulator<dim>::apply_bulk_tip_stokes_inverse(LinearAlgebra::BlockVector &,const LinearAlgebra::BlockVector &); \
-  template bool Simulator<dim>::compute_bulk_tip_direction(const LinearAlgebra::BlockVector &,const LinearAlgebra::BlockVector &,double,LinearAlgebra::BlockVector &);
+  template bool Simulator<dim>::compute_bulk_tip_search_direction(const LinearAlgebra::BlockVector &,const LinearAlgebra::BlockVector &,double,LinearAlgebra::BlockVector &);
   ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE
 }

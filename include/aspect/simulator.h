@@ -624,7 +624,7 @@ namespace aspect
       void apply_bulk_tip_stokes_inverse(LinearAlgebra::BlockVector &,
                                          const LinearAlgebra::BlockVector &);
       /** Linearized box VI: classifies and releases both active bound signs. */
-      bool compute_bulk_tip_direction(const LinearAlgebra::BlockVector &,
+      bool compute_bulk_tip_search_direction(const LinearAlgebra::BlockVector &,
                                       const LinearAlgebra::BlockVector &, double,
                                       LinearAlgebra::BlockVector &);
       /** Default-off fixed-mesh exact-jump cohesive--RSF native system. */

@@ -4294,7 +4294,13 @@ The historical replicated mixed direct solve is an explicit benchmark oracle,
 not the active route. Phase constraints can enter and release on either bound.
 A positive phase search metric and functional globalization may replace an
 unsuccessful nonconvex Newton search, but never its physical residual, obstacle,
-endpoint law or final acceptance tolerances. Optional zero-clock equilibration
+endpoint law or final acceptance tolerances. The current search ordering starts
+exact-first at each physical step and prefers the shifted family after an accepted
+positive-metric correction. With the existing scaled mechanics/KKT merit $r$,
+exact-first is retried when $r\le\max(10,0.1r_{\mathrm{last\ exact}})$, or as
+fallback when shifted searches fail. Each shifted family restarts from its least
+original shift; no active set or physical history is frozen. The retained
+block-diagonal inverse and strict linear tolerances are unchanged. Optional zero-clock equilibration
 uses the same fracture functional under a fixed seed before physical aging.
 Checkpoint physical meanings remain unchanged. See the maintained Markdown
 bulk-tip guide for the equation-to-code map and measured qualification boundary.
@@ -4303,5 +4309,26 @@ general objective spin are not enabled. General motion must include the fracture
 power $-2K\ell^2(\nabla\phi\otimes\nabla\phi):D$, material-volume and boundary
 flux terms, with a specified configurational closure. Neither positive
 section dissipation nor converged KKT is a proof of uniqueness or stability.
+
+
+\subsection{Native DG Bernstein phase coordinates (9 November 2026)}
+The optional phase basis is a representation change in the existing DGQ2
+polynomial space. With $a=Eb$, native Bernstein coefficients $b$ replace nodal
+coefficients $a$, preserving the interpolated seed and quadrature. Consequently
+$M_B=E^TM_NE$, $r_B=E^Tr_N(Eb)$, $J_B=E^TJ_NE$, and the transport generator satisfies
+$L_B=E^{-1}L_NE$. Native assembly supplies these coordinates directly; legacy
+nodal compatibility retains the transformations. Mechanical solver coordinates
+remain $u=\Delta t\,v$ and $\pi=p/G$.
+Growth retains $b^-\leq b\leq1$ and the release-capable KKT solve. Transport
+retains subdivision enclosures and physical-mean scaling
+$b_i\leftarrow\bar\phi+\alpha(b_i-\bar\phi)$, not coefficient clipping.
+The accepted obstacle follows the existing material transaction. Checkpoint
+metadata identifies the numerical basis separately from the constitutive law;
+incompatible arrays are rejected before deserialization. Generalized sample
+anchors identify local coefficients, not physical nodal values. Supported fault
+routes are the integrated fixed-reference bulk-tip solver and growth-off mature
+material transport. The BE endpoint scheme, SSPRK3, integration rules and final
+gates are unchanged. See \texttt{particle\_free/NATIVE\_DG\_BERNSTEIN.md} for
+ownership, code entry points and qualification limits.
 
 \end{document}

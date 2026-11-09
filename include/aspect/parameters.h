@@ -773,6 +773,7 @@ namespace aspect
     /** Native phase family/degree; Q1 remains the historical default. */
     bool                           use_discontinuous_phase_discretization;
     unsigned int                   phase_degree;
+    bool                           use_bernstein_phase_basis;
     bool                           use_limiter_for_discontinuous_phase_solution;
     unsigned int                   temperature_degree;
     std::vector<unsigned int>      composition_degrees;

@@ -1,4 +1,49 @@
-> **Completed bounded task — bulk-tip solver integration, 7 November 2026.**
+## Native phase basis integration — 9 November 2026
+
+Entry `d481a09c` plus the completed uncommitted efficiency work; all 48 entry
+hashes verified. The [report](NATIVE_DG_BERNSTEIN_REPORT.md),
+[guide](NATIVE_DG_BERNSTEIN.md) and local `evidence/native_bernstein/closeout.json`
+record actual source/executable identities separately.
+
+- `include/aspect/fe_dgq_bernstein.h`: project-owned DG polynomial element,
+  generalized interpolation, stable evaluation and inherited transfer.
+- Parameters/introspection/initialization: phase-specific native basis; isolate
+  it from adjacent compositions, retain default nodal and semantic registration.
+- `Q2Bounds`: shared polynomial enclosure/scaling, direct native coefficients,
+  nodal compatibility adapter. Growth box and transport bounds stay distinct.
+- `BulkTipCoupling`: direct native fracture coordinates, constructor-local nodal
+  map, one ghosted trial, immutable quadrature/parent caches for one attempt.
+- Checkpoint basis metadata rejects reinterpretation. Mature `dg_accepted.cc`
+  uses generalized coefficient anchors; this fixes the observed save crash.
+  Diagnostic `history.cc` uses the same anchor meaning. Historical nodal-only
+  fault solvers reject the selector in the material parser.
+- Benchmark-only complete-parent import/export and physical reducers; new native
+  operator/element cases exercise production assembly, not a shadow method.
+
+No ordinary face-assembler change, new physical equation, time integrator,
+preconditioner/search change or general refactor. The entry-relative patch
+separates this work from inherited efficiency edits. Nine protected hashes and
+retained efficiency core/checker remain unchanged. Local checks pass; BE work
+error and unresolved growth remain scientific limitations.
+
+> **Completed bounded task — tip efficiency and localized growth, 7 November 2026.**
+> Entry `d481a09c1415578ec6fb148e6b9e13c80184b6c4`; final core `8a652f3e…89115`.
+> Progress-based search ordering retains the exact operator, original inverse,
+> physical inputs, BE convention and final gates. Difficult-step accounted time
+> falls 200.51→101.36 s (1.98×); continuation through .065 and two half steps pass.
+> Bulk/phase/slip agree closely, but near-zero-rate resistance differs up to
+> 35.35 Pa: full reaction equivalence is not claimed. Halving dt halves work
+> error, still 5.17× added fracture. Localized growth stops at .09 on remote
+> Y/Kf=.98149, with no resolved advance of fixed phase/H contours and no remote
+> damage. See [final report and figures](TIP_EFFICIENCY_AND_GROWTH_REPORT.md).
+> 3319 assertions, oracle/derivatives, MPI restart/rejection, ordinary Stokes
+> and one layered mature check pass. All jobs finished: 24.28 min wrapped checks,
+> 13.28 min separate builds; protected evidence and inherited losses preserved.
+> Next proposed physical check: intact response to compact tangential loading;
+> derive time accuracy/cost separately before expensive growth. Neither is
+> launched. No general propagation/production qualification or mature campaign.
+
+> **Previous completed task — bulk-tip solver integration, 7 November 2026.**
 > Entry `663937bed9305df2823ac77a3fc2c3925bb94caa`; retained final core
 > `1cc27f9c…7cac6`. Both-bound release, distributed exact coupling and real
 > ASPECT Stokes reuse are implemented under ordinary simulator control. All
@@ -13,8 +58,25 @@
 > [equation-to-code guide](TIP_TREATMENT.md) and linked figures/evidence.
 > About 35 min wrapped simulation/check time and 33.6 min separate builds;
 > all jobs finished, protected identities and inherited data losses preserved.
-> Next proposed work: one fixed-parent .0575→.06 preconditioner/search comparison
-> before longer propagation. No mature or server campaign is resumed.
+> Its proposed fixed-parent comparison is now completed in the newer report
+> above. No mature or server campaign is resumed.
+
+## 7 November 2026 — efficiency closeout
+
+`solver_schemes.cc` owns the per-step search ordering and unchanged acceptance;
+`compute_bulk_tip_search_direction` retains the exact constrained operator and
+block-diagonal Stokes/phase inverse. Progress and near-gate exact retries replace
+unconditional exact-first work; no active set or metric is frozen. The tested
+triangular preconditioner and failed ordering variants are inactive snapshots.
+`bulk_tip_assembly.cc` adds timing/counters, not constitutive changes. Benchmark
+`checks.cc` observes nested timers, native point/section and Bernstein balance,
+provides the remote-margin termination criterion and pending restart-dt hook.
+The final optional zero-clock gradient observer was checked independently after
+preserving the comparison checker. No physical input or checkpoint schema changes.
+`analyze_efficiency.py`, `analyze_growth.py`, and `plot_efficiency.py` reduce actual
+native measures and preserve signed/absolute errors; volume-only fracture is
+explicitly distinct from the authoritative SIPG weak-work partition.
+[Source/binary/input manifest](../../../benchmarks/reconstructed_fault/particle_free/evidence/tip_efficiency/closeout.json).
 
 ## 7 November 2026 — constrained solve and distributed integration
 

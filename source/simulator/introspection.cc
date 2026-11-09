@@ -20,6 +20,7 @@
 
 
 #include <aspect/introspection.h>
+#include <aspect/fe_dgq_bernstein.h>
 #include <aspect/global.h>
 #include <aspect/utilities.h>
 
@@ -259,7 +260,13 @@ namespace aspect
     // "Q2,Q2,DGQ1,Q2", we actually create "Q2^2, DGQ1, Q2":
     for (unsigned int c=0; c<parameters.n_compositional_fields; ++c)
       {
+        const auto bernstein_phase = [&](const unsigned int index)
+        {
+          return parameters.use_bernstein_phase_basis
+                 && parameters.composition_descriptions[index].type == CompositionalFieldDescription::phase_field;
+        };
         if (c>0
+            && bernstein_phase(c) == bernstein_phase(c-1)
             && parameters.use_discontinuous_composition_discretization[c] == parameters.use_discontinuous_composition_discretization[c-1]
             && parameters.composition_degrees[c] == parameters.composition_degrees[c-1])
           {
@@ -271,6 +278,8 @@ namespace aspect
           {
             std::shared_ptr<FiniteElement<dim>> fe = internal::new_FE_Q_or_DGQ<dim>(parameters.use_discontinuous_composition_discretization[c],
                                                                                      parameters.composition_degrees[c]);
+            if (bernstein_phase(c))
+              fe = std::make_shared<FE_DGQBernstein<dim>>(parameters.composition_degrees[c]);
             variables.push_back(VariableDeclaration<dim>("compositions", fe, 1, 1));
           }
       }

@@ -25,8 +25,12 @@ void obstacle_check(aspect::PhaseField::DGOperator<2> &op,
   for (const auto &cell:dofs.active_cell_iterators()) if (cell->is_locally_owned())
     {
       cell->get_dof_indices(ids);fe.reinit(cell);
-      for (unsigned int i=0;i<ids.size();++i)
-        lower[ids[i]]=lower_function(mapping.transform_unit_to_real_cell(cell,element.get_unit_support_points()[i]));
+      std::vector<Vector<double>> samples(ids.size(),Vector<double>(1));
+      std::vector<double> coefficients(ids.size());
+      for(unsigned int i=0;i<ids.size();++i)
+        samples[i][0]=lower_function(mapping.transform_unit_to_real_cell(cell,element.get_generalized_support_points()[i]));
+      element.convert_generalized_support_point_values_to_dof_values(samples,coefficients);
+      for(unsigned int i=0;i<ids.size();++i)lower[ids[i]]=coefficients[i];
       for (unsigned int q=0;q<rule.size();++q)
         {
           const auto x=fe.quadrature_point(q);const double r2=x.norm_square(),s=std::max(0.,1.-r2);

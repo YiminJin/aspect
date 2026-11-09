@@ -22,7 +22,7 @@ the report for the configurations actually tested.
    evaluates physical point responses, and assembles residuals and tangents.
    Its lifetime is one physical attempt; evaluation never publishes history.
 4. The ordinary solver scheme owns nonlinear convergence and functional line
-   search. [`Simulator::compute_bulk_tip_direction`](../../../../source/simulator/solver/bulk_tip_linear.cc)
+   search. [`Simulator::compute_bulk_tip_search_direction`](../../../../source/simulator/solver/bulk_tip_linear.cc)
    solves a linearized box problem, allowing active constraints to enter **and
    leave**. Flexible Krylov applies the exact coupled tangent. Its approximate
    block preconditioner invokes ordinary ASPECT Stokes assembly, AMG construction
@@ -36,10 +36,11 @@ the report for the configurations actually tested.
 ## Coordinates and point elimination
 
 Write \(u=\Delta t\,v\), \(\pi=p/G\), and \(\phi=EB\), where E maps independent
-cell Bernstein coefficients B to native DGQ2 nodal coefficients. Material
+cell Bernstein coefficients B to native phase coefficients. E is the identity
+for the active native Bernstein fixtures; only the retained nodal route uses
+a conversion. See the [basis guide](../NATIVE_DG_BERNSTEIN.md). Material
 quadrature evaluates the same polynomial directly with positive Bernstein basis
-functions, avoiding cancellation near intact values. This is a coordinate
-evaluation change, not a new FE space or quadrature rule. The displacement
+functions, avoiding cancellation near intact values. The polynomial space and quadrature rule are unchanged. The displacement
 boundary value is \(u_D=\Delta t\,v_D\). Corrections have homogeneous velocity
 boundary values. One pressure coefficient fixes the outer operator's gauge;
 frictional compression \(p_N\) is separately prescribed, not that gauge.
@@ -130,7 +131,7 @@ J=\begin{pmatrix}J_{uu}&-D^T&J_{uB}\\-D&0&0\\J_{Bu}&0&J_{BB}\end{pmatrix}
 \]
 Here c_s integrates the fixed-force rate derivative; a_s is the force derivative
 of mechanical/phase residuals. \(J_{uB},J_{Bu}\) and the section products are
-nonzero. All phase rows/columns receive the dual/primal E transformations.
+nonzero. The retained nodal route applies dual/primal E transformations to phase rows/columns; native Bernstein assembly already has those coordinates.
 The phase scaling K_f and mechanical scaling G are algebraic only. For the
 restricted functional, row weights are \(\beta G\) and K_f, respectively.
 The functional-weighted tangent is checked for symmetry on the free subspace.
@@ -146,6 +147,30 @@ Stokes inverse handles its usual pressure nullspace; the adapter reconstructs
 the omitted continuity row using partition of unity and subtracts the output
 pressure gauge. This is distinct from changing the prescribed compression.
 
+## Exact operator and approximate inverse
+
+The retained preconditioner is block diagonal. A triangular candidate added the
+exact phase-to-mechanics block but increased measured wall time and was rejected.
+No physical tangent block is dropped from the outer solve.
+
+| Operation | Owner and actual work | Mathematical role |
+|---|---|---|
+| Full J action | `BulkTipCoupling::vmult`: distributed cell/face matrix and section integration/adjoint | Exact physical derivative, including cross-blocks |
+| Mechanical reference inverse | `Simulator::apply_bulk_tip_stokes_inverse`: ordinary ASPECT assembly, AMG and `solve_stokes` | Approximate coupled Krylov preconditioner; preserves pressure quotient and coordinate scaling |
+| Positive phase inverse | `BulkTipCoupling::phase_search_matrix` and AMG | Fracture-plus-mass approximation; not the possibly indefinite J_BB |
+| Shifted phase minimizer | `PhaseField::solve_obstacle` | SPD bound-constrained search subproblem |
+| Mechanical correction after imposed phase change | Exact restricted J action with FGMRES and ASPECT Stokes preconditioning | Includes induced section-force correction and homogeneous incompressibility |
+| Search ordering and acceptance | `Simulator::solve_single_advection_iterated_newton_stokes` | Fresh physical response, restricted-functional Armijo and final physical gates |
+
+The exact-search linear tolerance remains
+`max(1e-16, min(1e-10 * ||rhs||, 1e-10 * minimum_phase_mass))`; the ordinary
+Stokes reference inverse retains 1e-4. Neither is an adaptive forcing policy.
+The search-order merit is
+\(r=\max(\|R_m\|/\epsilon_m,\mathrm{KKT}/\epsilon_\phi)\).
+The Newton retry condition \(r\le\max(10,0.1r_{last\,Newton})\) does not
+change acceptance at r≤1. Line search remains on the restricted functional,
+with the existing scaled-residual tie-break for roundoff-sized energy changes.
+
 ## Bounds, search and physical acceptance
 
 <a id="bounds"></a> **(B) Linearized box subproblem**
@@ -156,8 +181,17 @@ Every pass reclassifies both signs; previously constrained coordinates may
 release. Fixed-bound displacements enter **all** coupled right-hand-side blocks.
 The free equations are solved with flexible Krylov, not the SPD obstacle solver.
 
-Try the exact coupled Newton VI first. If its active set cycles or it fails to
-supply a descent candidate, use a positive phase search metric
+At the first iteration of each physical step, try the exact coupled Newton VI.
+If it fails to supply an accepted correction, prefer the positive phase-search
+family on subsequent iterations, testing its least restrictive metric first.
+Retry exact Newton when the scaled mechanics/KKT residual falls tenfold since
+its previous attempt, or is within one decade of the unchanged final gates.
+Successful exact corrections restore exact-first ordering; an exhausted shifted
+family also falls back to exact Newton. This is a search-order policy, reset at
+each physical step. Every trial still receives fresh bounds, coupled correction,
+constitutive evaluation and globalization; no active set or direction is cached.
+See the [efficiency report](../TIP_EFFICIENCY_AND_GROWTH_REPORT.md) for validation
+and rejected variants. The positive phase search metric is
 \(P_B=H_f/K_f+\mu M_B\), with \(\mu>0\). The existing SPD obstacle solver
 minimizes \(R_B\cdot(y-B)+\tfrac12(y-B)^TP_B(y-B)\) over the true bounds.
 The imposed phase displacement y−B then enters an **exact coupled mechanical**
@@ -193,7 +227,7 @@ state is smoothed.
 | S: signed section rate, RSF, age | `FaultFriction::signed_endpoint`, `section_endpoint` | [checker](../../../../benchmarks/reconstructed_fault/particle_free/bulk_tip/checks.cc): signed/condensed derivative, discrete power identity |
 | R: DG fracture | `PhaseFieldHandler::assemble_dg_fracture` | checker SIPG energy/Hessian derivative and compatibility observer |
 | R: full coupling | `BulkTipCoupling::evaluate`, `vmult` | checker distributed coupled directional derivative; benchmark oracle comparisons in report |
-| B: primal/dual release | `Simulator::compute_bulk_tip_direction`, `PhaseField::box_constraint` | point test “Coupled box iteration releases incorrect lower and upper bounds” |
+| B: primal/dual release | `Simulator::compute_bulk_tip_search_direction`, `PhaseField::box_constraint` | point test “Coupled box iteration releases incorrect lower and upper bounds” |
 | Physical lifecycle | accepted bulk owner, pending simulator publication | checker rejection/retry, checkpoint and rank-change checks |
 
 Mechanical quadrature remains configured Gauss6; fracture remains tested Gauss5

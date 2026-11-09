@@ -48,6 +48,10 @@ namespace aspect
         Vector accepted_coordinates;
         unsigned int newton_iterations=0, linear_iterations=0, stokes_solves=0, active_releases=0, search_shifts=0;
 
+        // Per-attempt diagnostics; never serialized as physical history.
+        unsigned int active_passes=0, active_repeats=0, exact_attempts=0, search_failures=0;
+        unsigned int line_trials=0, evaluations=0, tangent_assemblies=0;
+
         BulkTipCoupling(Simulator<dim> &, Model &, const AffineConstraints<double> &);
         /** Build current boundary/accepted-history guess; no accepted mutation. */
         Vector initial_guess(const Vector &solution) const;
@@ -121,8 +125,8 @@ namespace aspect
         double dt, G, beta, Kf;
         AffineConstraints<double> boundary, homogeneous;
         PhaseField::Q2Bounds<dim> basis;
-        std::map<types::global_dof_index,
-            std::vector<std::pair<types::global_dof_index,double>>> phase_rows;
+        FullMatrix<double> phase_values; ///< Fixed reference quadrature, Bernstein ordering.
+        std::map<CellId, std::vector<double>> parent_phase_values; ///< Immutable for this attempt.
         LinearAlgebra::Vector lower, mass, fracture_linear;
         LinearAlgebra::SparseMatrix fracture_matrix;
         LinearAlgebra::BlockSparseMatrix local_matrix;

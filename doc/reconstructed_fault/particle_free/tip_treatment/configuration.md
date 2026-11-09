@@ -6,7 +6,8 @@ The input is
 [`benchmarks/reconstructed_fault/particle_free/bulk_tip/finite_tip.prm`](../../../../benchmarks/reconstructed_fault/particle_free/bulk_tip/finite_tip.prm).
 It selects `Fault constitutive mode = bulk cohesive` and
 `Bulk cohesive flow rule = bulk tip sections`, with an authoritative DGQ2
-`phase_field` composition. The clearer `Bulk history representation = native tip stress` option identifies
+`phase_field` composition, now selecting `Discretization / Phase basis = Bernstein`.
+The default remains nodal; see the [basis guide](../NATIVE_DG_BERNSTEIN.md). The clearer `Bulk history representation = native tip stress` option identifies
 physical native-quadrature tau/A. The old `DG trial stress` spelling remains
 accepted for the unchanged original fixtures; it does not make the new tip owner
 an auxiliary mature trial-stress history. Checkpoint v1 and point exports retain
@@ -16,7 +17,9 @@ the same physical meanings.
 mechanical inverse currently requires `Stokes solver type = block AMG`; the
 benchmark runner supplies this setting explicitly. `benchmark direct` retains
 the small old mixed solver as an explicit oracle, including its historical
-search limitations. `Equilibrate bulk tip seed = true` selects zero-clock
+search limitations; use `run.py --oracle --phase-basis nodal` for that historical
+solver. The strict direct/manufactured-direction checker of the integrated solver
+works with either basis (`--linear-oracle`). `Equilibrate bulk tip seed = true` selects zero-clock
 fracture equilibration before freezing the initial obstacle; the original
 fixture leaves it false. It cannot smooth an already accepted physical step.
 

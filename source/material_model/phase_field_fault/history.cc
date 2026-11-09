@@ -834,7 +834,9 @@ namespace aspect
                         put("old_anchor", i, 0, 0, s.bulk_history.native[native_indices[i]]);
                         put("new_anchor", i, 0, 0, fe_update->bulk_history.native[native_indices[i]]);
                         const auto base = this->get_fe().system_to_base_index(i);
-                        const auto support = this->get_fe().base_element(base.first.first).get_unit_support_points()[base.second];
+                        // This diagnostic labels coefficients by interpolation samples;
+                        // generalized samples are not Bernstein coefficient values.
+                        const auto support = this->get_fe().base_element(base.first.first).get_generalized_support_points()[base.second];
                         for (unsigned int d = 0; d < dim; ++d)
                           put("native_support", i, d, 0, support[d]);
                       }

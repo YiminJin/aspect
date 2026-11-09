@@ -1,0 +1,347 @@
+TASK: INTEGRATE A NATIVE DG BERNSTEIN PHASE ELEMENT WITH ASPECT
+
+For the existing Codex thread: Astra, high reasoning.
+9 November 2026
+
+PURPOSE AND SELECTED SCOPE
+
+Implement FE_DGQBernstein and use its coefficients as the native representation
+of the phase field in the supported DGQ2 growth and transport paths. The goal is
+a clearer ASPECT-style implementation with fewer basis conversions, while
+preserving the currently selected discrete equations and admissible sets.
+Complete integration and bounded verification, not a feasibility report or an
+unused element class.
+
+This is a representation and implementation task. Keep the current BE endpoint
+equations, signed section RSF closure, physical histories, search ordering,
+quadrature, loading and final acceptance criteria. Time-integration changes and
+the proposed compact-loading experiment are separate subsequent scientific
+tasks. Do not mix them into this equivalence comparison.
+
+The paper priorities remain: final scientific examples; accuracy, stability and
+efficiency; reuse of ASPECT/deal.II infrastructure; readable code. The element
+must support the established moving-profile route as well as the fixed-reference
+tip control. This task does not qualify general moving fault growth or branching.
+
+ENTRY AND BASELINE
+
+Verify repository root, branch, actual source revision, dirty work and applicable
+AGENTS.md. Preserve unrelated work, retained binaries, checkpoints and evidence.
+Read TIP_EFFICIENCY_AND_GROWTH_REPORT.md, its closeout manifest and source record,
+TIP_TREATMENT.md and relevant linked pages, and the current architecture guidance.
+
+The last reviewed remote revision is
+d481a09c1415578ec6fb148e6b9e13c80184b6c4. The completed efficiency task was recorded
+as uncommitted changes on that revision. Its retained core is
+8a652f3ec0ce1efda2608db133376bfae21551aa0205a7c96f3fed8a66989115,
+preserved in controls/efficiency-polished. Use the actual completed local state
+as the reference; do not reset to the remote hash and discard that work.
+Match source and checker identities against the manifest before rebuilding.
+
+Retain the progress-based search ordering and near-gate exact polishing. The
+measured difficult-step speedup is about 1.98x; the triangular preconditioner was
+slower and removed. Near-zero-rate section resistance remains sensitive to the
+accepted numerical error. The current work remainder and lack of resolved front
+advance remain scientific limitations; a new basis cannot resolve them by itself.
+
+1. IMPLEMENT THE ELEMENT BY REUSING THE EXISTING DG MACHINERY
+
+Name the class FE_DGQBernstein. Prefer deriving from dealii::FE_DGQ<dim,spacedim>,
+using its protected constructor that accepts one-dimensional polynomials, as
+FE_DGQLegendre and FE_DGQHermite do. FE_DGQ already derives from FE_Poly and owns
+useful DG topology, interpolation/transfer machinery and polynomial evaluation.
+Derive directly from FE_Poly only if inspection reveals a concrete incompatibility
+that makes the additional implementation necessary; explain that decision.
+
+Inspect the installed deal.II sources, not just the online API. Relevant upstream
+references are:
+https://dealii.org/9.7.0/doxygen/deal.II/fe__dgq_8h_source.html
+https://dealii.org/9.7.0/doxygen/deal.II/fe__dgq_8cc_source.html
+https://dealii.org/9.7.0/doxygen/deal.II/polynomials__bernstein_8h_source.html
+
+The library supplies generate_complete_bernstein_basis<double>(degree). Start
+from its existing facilities rather than copying FE_Bernstein or FE_DGQ. The
+continuous FE_Bernstein class is not the proposed element.
+
+Implement or verify the operations actually required by ASPECT: correct L2
+conformity and cell-local DoFs, tensor-product numbering, shape values and
+derivatives, face support/orientation, clone(), name/registration, interpolation
+and polynomial transfer. Override inherited nodal assumptions where necessary.
+Keep the element independent of fracture, RSF, phase bounds and history ownership.
+Use a normal project-owned location/namespace consistent with existing extension
+classes; no required patch to the user's installed deal.II library.
+
+The Bernstein constant mode has every coefficient equal to one. Do not copy
+FE_DGQLegendre's first-coefficient-only constant mode. Degree two is the supported
+phase target; do not enlarge the physics scope to arbitrary-order phase solves.
+If the element accepts other degrees, give that interface honest behavior and
+small polynomial-level coverage rather than silently hardcoding Q2 everywhere.
+
+Bernstein coefficients are not nodal point values. Do not populate ordinary
+unit_support_points with a fictitious cardinal interpretation. Generalized
+support points may sample a function, provided the corresponding conversion
+computes Bernstein coefficients. For Q2, use the same native interpolant as the
+reference: b=E^{-1}a, where a contains its nodal values. Setting b_i=f(x_i) would
+produce a different approximation and alter the seed.
+
+Check numerical evaluation through the actual FEValues/FEFaceValues machinery.
+The inspected deal.II Bernstein generator represents polynomials by power
+coefficients. Mathematical positivity alone does not prove stable floating-point
+evaluation near endpoints. Compare against product-form/de Casteljau evaluation,
+including tiny positive phase and points near zero/one. Preserve the current
+stable intact-endpoint behavior. If necessary, use existing stable polynomial
+facilities or one localized evaluator fix; do not clamp evaluated phase or scatter
+independent Bernstein formulas through material and solver code.
+
+2. MAKE BERNSTEIN COEFFICIENTS THE ACTUAL NATIVE PHASE DoFs
+
+Use the normal ASPECT variable declaration and mixed finite-element system.
+Do not create another phase DoFHandler, shadow solution field, or second phase
+history merely to avoid adapting existing consumers.
+
+The phase can currently be declared through the composition description or as
+its own native variable. Handle the supported registration paths consistently.
+Consecutive ordinary compositions may share a base element: isolate the phase
+element without changing stress components or other compositional fields.
+
+Provide a focused phase-specific basis selection if needed for old inputs and
+controlled comparisons. Use Bernstein in the updated active DG phase fixtures
+and document the intended setting. Preserve ordinary ASPECT defaults and the
+legacy nodal route needed to read/reference old results. Share physical assembly
+and solver logic; do not maintain two duplicate implementations of the model.
+
+Trace coefficient meaning through initialization, old/current solutions,
+physical accepted phase history, fracture assembly, transport, geometry/profile
+evaluation, diagnostics, visualization and restart. A generic consumer may use
+FEValues without knowing the basis; code that directly interprets vector entries
+as sampled phase values must be corrected.
+
+In the native Bernstein path:
+
+- The stored phase vector, phase history and phase part of the coupled unknown
+  all contain Bernstein coefficients in one documented ordering.
+- Fracture residuals and matrices assemble directly in that basis.
+- Material quadrature consumes physical values evaluated from those coefficients.
+- The constrained phase solve uses those same coefficients, with no repeated
+  nodal-to-Bernstein conversion.
+
+Keep displacement/pressure solver scalings u=dt*v and pi=p/G. Removing the phase
+conversion does not remove the need for those mechanical coordinate conversions.
+Keep basis conversion only at genuine compatibility boundaries or in the
+reference/oracle implementation. No persistent duplicate nodal phase field.
+
+3. PRESERVE THE NUMERICAL METHOD AND ITS TWO DISTINCT BOUND CONTRACTS
+
+With a=E b denoting the same polynomial in nodal and Bernstein coordinates,
+the following identities provide the comparison contract:
+
+  M_B = E^T M_N E,
+  r_B(b) = E^T r_N(E b),
+  J_B(b) = E^T J_N(E b) E.
+
+For coupled residuals apply the transformation only to phase rows/columns;
+mechanical coordinates and the stated row scalings are unchanged. The existing
+bulk-tip solver already uses Bernstein coordinates, so its retained residual
+and exact tangent should agree directly after consistent ordering.
+
+For a linear semidiscrete transport generator, L_B=E^{-1} L_N E. Preserve the
+same weak form, upwind flux, physical measures, timestep/CFL rule and quadrature.
+With nonlinear limiting, also compare the resulting physical polynomial and
+cell mean after each relevant operation; the linear matrix identity alone is
+not sufficient.
+
+Do not introduce mass lumping or reduce quadrature as part of this task. The
+current transport assembles a dense local mass matrix with QGaussLobatto(4)
+for Q2, rather than the three-point collocated diagonal mass approximation.
+Changing basis does not require changing its integration. Preserve the existing
+fracture Gauss5 and mechanical Gauss6 rules in the tip controls.
+
+Growth bounds:
+  Keep b_parent <= b <= 1 and the existing release-capable KKT solve. This
+  coefficient box is sufficient for polynomial bounds/irreversibility and is
+  more restrictive than all pointwise-admissible Q2 fields. Native Bernstein
+  storage does not justify changing that admissible set. Preserve zero-clock
+  seed equilibration and exact lower-bound arithmetic.
+
+Transport bounds:
+  Preserve the existing subdivision-based polynomial enclosure and the
+  mean-preserving scaling limiter. A bounded polynomial can have Bernstein
+  coefficients outside [0,1]; do not replace the enclosure by coefficient
+  clipping or unnecessarily restrict every transport polynomial to the growth
+  coefficient box. Express the same scaling directly in Bernstein coordinates:
+  b_i_new = mean + alpha*(b_i-mean).
+  Use physical JxW-based means. The arithmetic mean of coefficients applies on
+  affine cells, not generally on mapped cells. An inadmissible mean remains
+  an update failure; it is not clipped.
+
+Irreversibility follows the existing material-history/transport ordering. Do
+not compare old and new coefficients at the same spatial cell as a substitute
+for a transported material obstacle. Do not activate moving growth in the
+fixed-reference tip control or alter the mature growth-off configuration.
+
+Retain direct tau/A histories, full plane-strain tensor conventions, the same
+section integration/work adjoint, trial-parent immutability, rejection and one
+joint publication. Keep mechanics 1e-9, phase KKT 1e-7 and the existing independent
+ledger/dissipation gates for the comparison cases. No physical parameter tuning.
+
+4. INTERPOLATION, TRANSFER AND RESTART MUST KEEP THEIR MEANING
+
+Provide polynomial-exact interpolation between nodal and Bernstein Q2 and exact
+refinement embedding. Reuse inherited deal.II machinery where it satisfies the
+contract and verify it with independent polynomial tests. Child Bernstein
+coefficients can be obtained by subdivision; constants and the represented
+physical field must be preserved.
+
+For coarsening, distinguish polynomial projection accuracy from physical bounds
+and irreversibility. Check the element's restriction on a polynomial that is
+exactly representable on the parent, and conservation for the supported mapping.
+Do not claim that arbitrary child fields can be coarsened without information
+loss or that ordinary L2 projection preserves the phase obstacle. Maintain the
+current physical AMR restrictions; this task does not require a new general
+adaptive irreversible-phase algorithm.
+
+Record the actual basis in checkpoint/FE metadata. Old nodal arrays must never
+be silently interpreted as Bernstein coefficients, even if vector sizes match.
+Preserve old checkpoints. Distinguish constitutive-law identity from numerical
+basis identity and implement either an explicit compatible conversion or a
+clear rejection for incompatible representations.
+
+For the bounded old/new active-state comparison, a narrow benchmark import
+of the complete accepted state on the same mesh is authorized if ordinary
+restart cannot perform the basis conversion safely. Match cells by persistent
+identity and local basis ordering; convert the phase polynomial and every
+required accepted phase/obstacle copy, while preserving physical tau/A,
+quadrature, section age/slip, mesh, clock and material data. Validate the imported
+parent before stepping. Do not patch anonymous checkpoint bytes or build a
+general production-checkpoint conversion framework for this task.
+
+Test restart of the new representation itself, including one rank change and
+the existing trial/reject/retry contract. Use exact physical-field comparison,
+not a vector-index comparison between different bases.
+
+5. REMOVE REDUNDANT WORK AS PART OF THE INTEGRATION
+
+In the reviewed BulkTipCoupling::evaluate(), a nodal-phase copy and a second
+ghosted vector are created even though phase is evaluated directly from
+Bernstein coefficients; the first vector supplies only velocity and pressure.
+Verify current callers, then eliminate this redundant conversion/copy/exchange.
+Reuse one correctly populated ghosted trial vector for the required components.
+
+Cache reference-cell Bernstein values/derivatives at fixed quadrature rules
+where the FE infrastructure does not already do so. Cache immutable parent
+phase samples for the duration of a fixed attempt where useful. Respect cache
+invalidation when mesh, mapping, degree, quadrature or parent changes. Do not
+cache trial constitutive responses or section roots across changed iterates.
+
+Measure the affected setup/evaluation/transport costs and the full step cost.
+The exact operator and nonlinear trajectory should not be altered to obtain a
+speedup. No new preconditioner search, tolerance policy or solver redesign is
+selected. Clean native representation is a valid benefit even if total runtime
+improves modestly. Do not promise that a new basis removes the coupled Krylov cost.
+
+6. BOUNDED, MEANINGFUL VERIFICATION
+
+Complete these checks with existing tests/fixtures where possible:
+
+A. Element and operator checks (small, inexpensive):
+   - Polynomial values and physical gradients through FEValues on affine and
+     supported skew/bilinear cells; face traces/orientation and a nonconforming
+     interface where the current DG operator supports it.
+   - Partition of unity, the correct constant mode, tiny-endpoint behavior,
+     cloning/name registration and initialization through the real ASPECT path.
+   - Nodal/Bernstein interpolation and refinement/restriction contracts above.
+   - Mass, SIPG energy/residual/Hessian and transport-action equivalence with
+     fixed quadrature, including boundary flux and cell-mean balance.
+   - Bounds and limiter equivalence, including a pointwise-bounded polynomial
+     with a Bernstein coefficient above one, plus an actual overshoot case.
+     Verify the limiter preserves the mean and the same physical output.
+
+B. Coupled fixed-state and endpoint checks:
+   Reuse the strict direct/manufactured-direction oracle and derivative tests.
+   Compare old and new residual/tangent actions at the same physical active
+   state before attributing any trajectory difference to nonlinear tolerances.
+   Run one difficult .0575 -> .06 step from the same accepted history, using
+   the retained efficiency implementation as control. Record any explicit import
+   and verify the parent first. Do not rerun the entire original chain.
+   Compare tau, A, phase, Y, section V/age/slip/resistance, active-bound status,
+   energies/work terms and final physical residuals. Retain absolute and scaled
+   errors. Very small rates require separate reporting of resistance and Y:
+   the previous 35 Pa sensitivity is not a blanket tolerance for new errors.
+   If a discrepancy appears, use fixed-state checks and one targeted tighter
+   solve to distinguish representation error from convergence sensitivity;
+   do not weaken production gates or start an extensive tolerance sweep.
+
+C. Short integrated phase checks:
+   Run the existing equilibrated localized coarse control to .08, or a shorter
+   common-parent interval that still exercises actual phase growth, with matched
+   initial physical fields. Preserve the seed and material parameters.
+   Run a short moving-profile DG test that exercises the mean-preserving limiter
+   and flux conservation, and one existing layered mature coupled step/short
+   window to exercise phase sampling in localization and stress. These establish
+   integration beyond the fixed-reference tip route; no long translation or
+   full mature campaign is required. Do not claim full transport qualification
+   if the chosen test never activates the limiter.
+
+D. Lifecycle and ordinary behavior:
+   One active one-to-two-rank native restart with rejection/retry, and the
+   existing ordinary no-fault Stokes regression. Retain all protected binaries
+   and checkpoints. When a check fails, diagnose that failure before adding
+   more trajectories. Reuse already valid evidence instead of repeating it.
+
+Use the current report's commands, exact clock values and benchmark wrappers.
+Do not silently reuse an old source's executable after changing FE metadata.
+
+7. CODE QUALITY AND DOCUMENTATION
+
+Use ASPECT indentation and explanatory header/source comments. The element
+owns basis and FE operations; the phase handler owns native phase integration;
+the bound utilities own numerical enclosures/constraints; material code owns
+constitutive response; the simulator owns iteration and publication.
+
+Refactor Q2Bounds so its remaining responsibilities are clear after native
+Bernstein storage. Keep one authoritative enclosure/scaling implementation;
+legacy nodal conversion should be a small adapter. Remove obsolete conversions
+and unused helpers after checking callers. Preserve independently useful
+transport limiting; do not delete it because the growth solver uses an active set.
+
+Do not create another timestep driver, shadow solver, generic callback executor,
+or duplicate phase assembly. Leave AdvectionSystemInteriorFace and
+AdvectionSystemBoundaryFace unchanged. Prefer existing FEValues, distributed
+assembly and solver interfaces over model-specific infrastructure.
+
+Update TIP_TREATMENT and the relevant phase-transport documentation with linked
+Markdown explanations of:
+   - native DoF meaning versus sampled physical phase;
+   - coefficient growth bounds versus transport enclosure/limiting;
+   - the element's inheritance and actual reused deal.II operations;
+   - initialization, transfer and checkpoint basis identity;
+   - which conversions disappeared and which compatibility conversions remain;
+   - formulas linked to qualified functions and verification cases.
+State clearly that this change preserves the selected model and does not cure
+BE work error or establish fault propagation. Keep the reading path compact.
+
+DELIVERABLES, BUDGET AND COMPLETION
+
+Deliver working native DG Bernstein phase integration, updated fixtures/docs,
+one NATIVE_DG_BERNSTEIN_REPORT.md and compact reproducibility evidence. Update
+STATUS.md. Separate the element/integration change from redundant-work removal
+in reviewable changes where practical. Follow the existing commit/push policy.
+
+The report should answer: what representation changed, what code disappeared,
+which equations/constraints stayed identical, whether physical comparisons
+passed, what actually became faster, and what remains unsupported. Cite measured
+costs and their scopes; do not sum nested timers or infer speed from iteration
+counts alone. Preserve failed evidence and distinguish it from setup failures.
+
+At most four build workers/MPI ranks, one numerical thread per rank, and heavy
+jobs sequentially. Cap aggregate new numerical runs/checks at two hours; record
+build time separately. Use fresh run labels and per-run timeouts. Prioritize
+completion of the actual integration and short decisive checks over additional
+profiling variants. No server submission, deferred h=1/16 mature run, long event
+trajectory, new physical loading campaign or time-integrator change is included.
+
+Proceed through routine implementation decisions without repeated confirmation.
+If a genuine scientific conflict is discovered, isolate the affected change and
+complete independent work. Finish with no numerical job left running. The next
+scientific milestone remains a better coupled time update and an interpretable
+localized-growth specimen, followed ultimately by unstable RSF propagation.

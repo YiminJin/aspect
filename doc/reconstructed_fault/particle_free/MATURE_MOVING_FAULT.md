@@ -1,3 +1,8 @@
+> **Native basis update, 9 November 2026:** [DG Bernstein guide](NATIVE_DG_BERNSTEIN.md)
+> defines the selectable native coefficient representation, bounds and restart
+> contract. The existing equations, quadrature and integrators remain unchanged;
+> [bounded qualification](NATIVE_DG_BERNSTEIN_REPORT.md) supersedes older nodal-only descriptions.
+
 > The separately selected [bulk tip control](TIP_TREATMENT.md) uses physical
 > cohesive tensor memory, bulk DGQ2 fracture and a cross-section RSF assumption.
 > It does not replace this mature law, spin closure, history or integrator.

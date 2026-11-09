@@ -123,8 +123,11 @@ namespace aspect
           std::vector<types::global_dof_index> indices(9);
           if (p.version >= 3)
             {
-              // Only uniquely owned CellIds contribute. Physical phase values
-              // and corners avoid partition-dependent native DoF numbering.
+              // Only uniquely owned CellIds contribute. Store native coefficients
+              // and generalized interpolation anchors, not fictitious nodal
+              // values for Bernstein. The outer phase-space metadata guards
+              // basis identity before this archive is read. Anchors and cell
+              // IDs avoid partition-dependent native DoF numbering.
               std::map<std::string, std::vector<double>> local, global;
               const auto pc = this->introspection().phase_field().first_component_index;
               for (const auto &entry : s.cells)
@@ -135,7 +138,7 @@ namespace aspect
                   entry.second->get_dof_indices(native_indices);
                   for (unsigned int v=0;v<element.n_dofs_per_cell();++v)
                     {
-                      const auto point=p.version==9 ? this->get_mapping().transform_unit_to_real_cell(entry.second,element.get_unit_support_points()[v]) : entry.second->vertex(v);
+                      const auto point=p.version==9 ? this->get_mapping().transform_unit_to_real_cell(entry.second,element.get_generalized_support_points()[v]) : entry.second->vertex(v);
                       for (unsigned int d=0;d<dim;++d) values.push_back(point[d]);
                       values.push_back(s.bulk_history.native[native_indices[this->get_fe().component_to_system_index(pc,v)]]);
                     }
@@ -279,7 +282,7 @@ namespace aspect
               for (unsigned int v=0;v<element.n_dofs_per_cell();++v)
                 {
                   const unsigned int i=element.n_dofs_per_cell()*cell_number+v;
-                  const auto point=p.version==9 ? this->get_mapping().transform_unit_to_real_cell(native->second,element.get_unit_support_points()[v]) : native->second->vertex(v);
+                  const auto point=p.version==9 ? this->get_mapping().transform_unit_to_real_cell(native->second,element.get_generalized_support_points()[v]) : native->second->vertex(v);
                   if (p.mesh[i]!=point || p.phase[i]!=s.bulk_history.native[native_indices[this->get_fe().component_to_system_index(pc,v)]])
                     matching_phase=0;
                 }

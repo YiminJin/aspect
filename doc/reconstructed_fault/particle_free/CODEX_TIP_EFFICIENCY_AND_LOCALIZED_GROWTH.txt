@@ -1,0 +1,286 @@
+TASK: MAKE THE BULK-TIP SOLVE PRACTICAL AND TEST THE NEXT LOCALIZED GROWTH WINDOW
+
+For the existing Codex thread: Astra, high reasoning.
+Reviewed remote baseline: d481a09c1415578ec6fb148e6b9e13c80184b6c4
+7 November 2026
+
+PURPOSE AND SCOPE
+
+The paper needs credible fault propagation coupled to RSF. The latest task has
+corrected the constrained solve, reused ASPECT's Stokes infrastructure, and
+continued the original refined trajectory to .08 s. Its remaining problems are
+high solver cost, substantial backward-Euler work error, and the absence of
+demonstrated advance of a strongly damaged region in the localized fixture.
+
+Accept the report's fixed-parent .0575 -> .06 comparison as the starting point,
+but complete an implementation-and-validation task, not another profiling-only
+report. Improve the solver, test beyond the one fitted step, and perform one
+bounded localized-growth probe. Do not wait for ideal solver performance before
+doing the inexpensive physical diagnostic. A numerical limitation and a missing
+physical growth mechanism are different outcomes and must be reported separately.
+
+Priorities remain: paper goals; accuracy, stability and efficiency; reuse of
+ASPECT infrastructure; readable code. Preserve the fixed-direction nonlocal
+section closure for this task. General moving/turning/branching faults and a new
+time integrator are outside this task.
+
+Verify the actual branch, source revision, worktree edits and applicable
+AGENTS.md. Preserve unrelated work, retained binaries, checkpoints and evidence.
+The reviewed hash is an evidence reference, not a reset target. Read the latest
+TIP_SOLVER_INTEGRATION_REPORT.md, TIP_TREATMENT.md and linked pages, and the
+previous CODEX_TIP_SOLVER_INTEGRATION_AND_VALIDATION.txt. Read the companion
+TIP_SOLVER_WALKTHROUGH.md if supplied; check explanatory claims against source.
+These instructions authorize the bounded continuation described below and
+supersede the report's recommendation to stop after a one-step comparison.
+
+1. ESTABLISH THE CONTROL AND FIND THE EXPENSIVE OPERATION
+
+Preserve the retained final unweighted implementation as the numerical control.
+The original fine trajectory is a documented continuation chain, not a fresh
+uninterrupted run of the final executable. Preserve that distinction.
+
+Recover the exact accepted parent at .0575 s and reproduce the .06 endpoint
+with dt=.0025. Verify that the claimed checkpoint actually contains that parent.
+If only an earlier checkpoint exists, replay the minimum prefix with the retained
+executable and record its ancestry; do not invent a .0575 checkpoint or substitute
+a new initialization. Reuse reliable existing timings where they are sufficient.
+
+The report identifies 19,964 outer Krylov iterations at this difficult step.
+Determine how much cost comes from:
+
+- coupled Krylov iterations and the ordinary Stokes solves inside them;
+- active-set reclassifications, repeated classifications and bound release;
+- failed exact Newton attempts and the shifted phase-search fallback;
+- line-search trials, material/section evaluations and assembly;
+- setup/rebuilding of preconditioners versus their application.
+
+Distinguish outer coupled Krylov counts, inner Stokes iterations, actual Stokes
+calls, and wall time. A lower outer iteration count can still be more expensive.
+Use compact counters/timers in the existing diagnostic infrastructure rather
+than creating a new profiling framework.
+
+The current code gives two concrete leads, not established diagnoses:
+
+  source/simulator/solver/bulk_tip_linear.cc:
+    compute_bulk_tip_direction() uses a block-diagonal preconditioner with an
+    ordinary reference Stokes inverse and fracture-plus-mass phase AMG. It
+    omits mechanics/phase cross-block information from the preconditioner.
+    Its linear tolerance can be as tight as
+    max(1e-16, min(1e-10*||rhs||, 1e-10*minimum_phase_mass)).
+  source/simulator/solver_schemes.cc:
+    the reference Stokes inverse uses a fixed 1e-4 inner tolerance, and every
+    nonlinear iteration retries the exact direction before shifted searches.
+
+Measure which of these actually matters. Do not repeat the rejected diagonal
+coordinate rescaling as the principal improvement: it already increased Krylov
+counts in the overlap test.
+
+2. IMPLEMENT A SUBSTANTIVE, SMALL SOLVER IMPROVEMENT
+
+Use the measured cause to select the simplest effective modification. The
+preferred first candidate is a coupled block preconditioner, with a justified
+inexact-Newton tolerance policy if oversolving is significant. Implement and
+compare candidates one change at a time so their effects remain interpretable.
+
+Write the constrained free-unknown tangent as
+
+             [ J_mm   J_mb ]
+       J  =  [             ],   m=(displacement increment, pressure),
+             [ J_bm   J_bb ]     b=free Bernstein phase coefficients.
+
+Every block includes the appropriate condensed section derivative. The exact
+outer action remains BulkTipCoupling::vmult(), including section integration,
+its work adjoint, pressure constraints and active-bound treatment.
+
+Use ASPECT's existing Stokes inverse as an approximate mechanical inverse, not
+as a replacement physical Jacobian. A block triangular application or a practical
+approximation of J_bb - J_bm J_mm^{-1} J_mb can include coupling absent from the
+current preconditioner. Derive signs, row/variable scalings and free/active
+restrictions explicitly. This is guidance, not a requirement to construct an
+exact Schur inverse or assume J_mm is invertible in every admitted limit.
+
+If useful, expose block actions through the existing coupling operator, retaining
+its distributed section reductions. Avoid duplicate constitutive derivatives,
+global dense phase/section matrices, and a replicated full-system direct solve.
+Retain FGMRES when inner actions are variable/inexact. Keep any positive phase
+approximation clearly separate from the possibly nonconvex physical tangent.
+Charge every additional Stokes application to the measured cost.
+
+If excessive linear accuracy dominates, use a residual-based inexact-Newton
+forcing policy that tightens toward convergence. Derive it in the actual scaled
+mechanics/phase norms, and account for linearized bound/KKT checks. Do not merely
+replace a small hardcoded tolerance by a looser constant. An approximate direction
+must still pass true residual, feasibility and globalization checks. Preserve
+the admissible incompressibility needed by the functional line search; an
+inaccurate continuity solve cannot be justified by a cheap direction alone.
+
+If repeated search failures dominate instead, improve the existing constrained
+search using the measured failure. Reusing a previous active classification as
+an initial guess is permissible only if both lower and upper coordinates can
+still be released. Reusing a successful search metric is permissible only with
+fresh physical evaluation and acceptance. Do not freeze an active set, introduce
+a damage cap, or add physical damping to suppress the difficulty.
+
+Keep the final mechanics 1e-9, phase KKT 1e-7, dissipation and scaled 1e-10
+independent ledger gates. Preserve the point law, BE endpoint/age convention,
+quadrature, obstacle, prescribed compression, material/loading parameters and
+accepted-parent semantics in the numerical comparisons. No post-clipping.
+
+A useful engineering aim is at least a factor-of-two reduction in expensive
+step wall time. This is a target, not permission to weaken equations or gates.
+Retain an improvement only on measured cost/correctness evidence. If an honest
+improvement is smaller, explain the remaining cost rather than tuning the test
+or multiplying speculative solver variants.
+
+3. VERIFY THE IMPLEMENTATION AND A SHORT CONTINUATION
+
+Use the existing small direct and manufactured-direction oracles at a fixed
+active state to check the exact operator and converged linear direction. Keep
+a strict oracle solve available even if production directions now use adaptive
+accuracy. Add tests only for genuinely new numerical behavior, for example
+coupled preconditioning with active phase rows or a new tolerance stopping rule.
+Existing derivative and bound-release tests should continue to pass.
+
+Compare the retained control and candidate from the identical .0575 parent:
+accepted tau, A, phase, section rate/age/slip; mechanics/KKT/section residuals;
+physical energy components and numerical work terms; iterations and runtime.
+Then run the candidate continuously through .0625 and .065 to check that the
+improvement is not fitted to one step. Use retained reference samples when they
+exist. Report any change of converged stationary state explicitly: the model is
+nonconvex, so a changed search can select a different state even with identical
+equations. Do not label that numerical equivalence without investigating it.
+
+Run the short existing localized coarse/half-dt controls if affected. Include
+one active two-rank restart/rejection check if state handling or distributed
+actions changed, plus the existing ordinary no-fault Stokes regression. A mature
+one-step check is enough if shared solver code was touched. Do not reopen the
+full mature campaign or the deferred h=1/16 run.
+
+4. MEASURE THE TIME-ACCURACY COST WITHOUT CHANGING THE INTEGRATOR
+
+On the difficult fixed-parent interval, compare one dt=.0025 step against two
+dt=.00125 steps from exactly the same accepted parent to the same physical
+endpoint. Use the improved solver. The intermediate accepted parent of the
+two-half-step path must be advanced normally, including its phase obstacle and
+RSF age; do not reset histories between the halves.
+
+Compare physical fields, phase growth, slip and stored energies. Sum the
+independent physical work remainder and its stress-BE, cohesive-BE, compliance
+endpoint, fracture-quadratic and residual-work components over each complete
+path. Report both signed totals and accumulated absolute contributions.
+
+This is a local timestep-sensitivity check with a common history, not a global
+temporal-convergence study. It cannot remove time error already in the parent.
+Algebraic ledger closure is not physical-work accuracy. Do not subtract the BE
+loss and call the remaining trajectory energy-conserving.
+
+Give a cost estimate for a provisional 10%-of-added-fracture numerical-work
+budget on a genuinely growing interval, using observed scaling only when the
+comparison supports it. That percentage is a planning example, not a newly
+validated scientific threshold or an acceptance gate for these diagnostic runs.
+Where added fracture is tiny, report absolute errors and an explicitly defined
+active-work scale; an enormous ratio alone does not identify a faulty tip law.
+Do not run a timestep sweep to force this target. End with a concrete assessment
+of whether BE with affordable substeps looks viable, or whether time integration
+requires a separate derivation before expensive propagation experiments.
+
+5. COMPLETE ONE BOUNDED LOCALIZED-GROWTH PROBE
+
+Use the equilibrated localized fixture and its accepted .08 parent, with the
+existing physical parameters, fixed ell, mesh and boundary-velocity law. Its
+remote region is |x-2|>1.3 m; the previous endpoint has max Y/40 about .73 there.
+The existing phi>.5 extent did not advance. Distinguish a seed halo, irreversible
+damage growth and advance of a mechanically weakened region.
+
+Continue the coarse h=.25, dt=.0025 control for at most eight steps, ending no
+later than .10 s. Stop this diagnostic extension earlier once the measured
+remote intact driving ratio reaches .95, remote damage begins, or nonlinear
+admission fails. Record the endpoint that triggers stopping; do not modify or
+clip it to preserve a localization claim. The .95 threshold is an experimental
+remote-intact margin, not a new material threshold or solver condition.
+
+This short probe is authorized even if the speedup target was not achieved,
+provided it fits the bounded runtime budget. Do not extend uniform loading
+indefinitely until unrelated remote nucleation obscures the question. If the
+available checkpoint cannot be reused, the already short localized prefix may
+be replayed once with its original equilibrated initialization.
+
+Report native-quadrature spatial profiles near both seed ends, not only maxima:
+
+- phase increment and fracture contribution relative to the same accepted seed;
+- extents at the existing phase thresholds, including .1, .5 and .99;
+- driving versus the actual discrete fracture/obstacle balance at the front;
+- section V, point rate w, stress, cohesive response and cumulative slip;
+- remote-intact margin and any signed-rate cancellation/multiple-band evidence.
+
+Do not define physical propagation solely as phi approaching one. For this law,
+H=h/(1+h) can be large before phi is near one. Show H (Response::fraction) and
+the corresponding local constitutive weakening, with its precise held-fixed
+variables. H alone is not the full coupled tangent or a new propagation law.
+Use it alongside phase contours and mechanical/slip profiles to explain whether
+an advancing weakened zone is present. A moving very weak contour alone is
+likewise insufficient. Keep comparison thresholds fixed and disclose sampling
+resolution; do not infer subcell front accuracy from quadrature-point extents.
+
+Do not tune Gc, m, radiation, friction, initial age, seed amplitude or loading
+to force a successful figure in this task. If the remote margin is exhausted
+before meaningful front advance, that is a useful result: identify whether the
+present specimen/loading can test localized growth, and propose one concrete
+better loading/seed geometry for the next physical task, with its mechanical
+reason. Do not build a parameter sweep or interpret this outcome as a proof
+that the constitutive model cannot propagate.
+
+6. ASPECT STYLE, DOCUMENTATION AND DELIVERABLES
+
+Keep the ordinary solver scheme responsible for iteration and acceptance;
+material evaluation remains noncommitting; the physical owner publishes once.
+Extend existing components by mathematical responsibility. Do not introduce a
+new timestep driver, generic callback executor, all-in-one solver class, or a
+forest of one-line wrappers. Leave generic advection face assemblers unchanged.
+
+Use ASPECT formatting and explanatory comments for block scalings, constraints,
+preconditioner approximations and tolerance choices. Keep experimental switches
+minimal; benchmark controls do not all need permanent public parameters.
+Clarify the misleading word 'direction': compute_bulk_tip_direction computes a
+nonlinear search correction, not a fault orientation. A focused rename to
+compute_bulk_tip_search_direction, with callers and docs updated, is appropriate.
+
+Update the linked TIP_TREATMENT guide with:
+
+- the exact coupled operator versus the approximate inverse/preconditioner;
+- one diagram/table showing which block actions use ordinary ASPECT solvers;
+- the tolerance/globalization contract and unchanged final physical gates;
+- equations linked to qualified functions and the validating tests;
+- a plain-language account of what the growth probe did and did not establish.
+
+Preserve the useful walkthrough explanation of constructor, evaluate, search
+correction and publication, while updating it to the actual retained algorithm.
+Keep documentation in linked Markdown pages; no new documentation framework.
+
+Deliver one compact TIP_EFFICIENCY_AND_GROWTH_REPORT.md, update STATUS.md, and
+retain commands, input/source/binary identities and small comparison data.
+Lead the report with three answers:
+  (1) What became cheaper, by how much, and with what numerical equivalence?
+  (2) What timestep sensitivity/work-error cost was measured?
+  (3) Did a localized weakened front advance before remote activation?
+Separate implemented, verified, physically observed and still unresolved claims.
+No stability certificate follows from residual convergence or a saddle Jacobian.
+
+RUNTIME BUDGET AND COMPLETION
+
+Use at most four build workers or MPI ranks, one numerical thread per rank,
+and sequential heavy jobs. Budget at most two hours aggregate new numerical
+runs/checks, with about half reserved for validation and the growth/time probes.
+Build time is recorded separately. Use fresh output labels and per-run caps;
+do not spend the whole budget on a stalled solver variant. At most a few
+evidence-driven variants are useful, not an open-ended optimizer search.
+
+If a difficult window consumes its budget, retain the failure and complete
+independent cheap localized diagnostics/documentation. Do not silently weaken
+physics, tolerances or acceptance to finish. No server submission, long event
+campaign, general propagation closure or old mature campaign is included.
+
+Complete the authorized changes and bounded checks without repeatedly asking
+for confirmation of routine implementation choices. Follow the existing
+commit/push policy. Finish with no background simulation left running and a
+clear next scientific decision supported by the new evidence.

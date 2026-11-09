@@ -76,57 +76,88 @@ namespace aspect
       homogeneous.close();
       std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
       const unsigned int nphase=basis.expansion.m();
-      for (const auto &cell:this->get_dof_handler().active_cell_iterators())
-        if (!cell->is_artificial())
-          {
-            cell->get_dof_indices(ids);
-            for (unsigned int i=0; i<nphase; ++i)
+      // Only the retained nodal compatibility path needs a coordinate map.
+      std::map<types::global_dof_index,
+          std::vector<std::pair<types::global_dof_index,double>>> phase_rows;
+      if (!basis.native_bernstein)
+        {
+          for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+            if (!cell->is_artificial())
               {
-                auto &row=phase_rows[ids[fe.component_to_system_index(pc,i)]-po];
-                for (unsigned int j=0; j<nphase; ++j)
-                  if (basis.expansion(i,j)!=0.)
-                    row.emplace_back(ids[fe.component_to_system_index(pc,j)]-po,basis.expansion(i,j));
+                cell->get_dof_indices(ids);
+                for (unsigned int i=0; i<nphase; ++i)
+                  {
+                    auto &row=phase_rows[ids[fe.component_to_system_index(pc,i)]-po];
+                    for (unsigned int j=0; j<nphase; ++j)
+                      if (basis.expansion(i,j)!=0.)
+                        row.emplace_back(ids[fe.component_to_system_index(pc,j)]-po,basis.expansion(i,j));
+                  }
               }
-          }
+        }
       lower.reinit(sets.system_partitioning[pb],comm);
       auto parent_field=ghost(this->get_solution());
       parent_field.block(pb)=parent->tip_phase;
       auto initial=coordinates(parent_field);
       lower=initial.block(pb);
       mass.reinit(sets.system_partitioning[pb],comm);
-      FEValues<dim> values(this->get_mapping(),fe,model.mechanical_quadrature(),update_values|update_JxW_values);
-      for (const auto &cell:this->get_dof_handler().active_cell_iterators()) if (cell->is_locally_owned())
+      const auto quadrature = model.mechanical_quadrature();
+      phase_values.reinit(quadrature.size(), nphase);
+      const auto &phase_element = fe.base_element(fe.component_to_base_index(pc).first);
+      for (unsigned int q = 0; q < quadrature.size(); ++q)
+        for (unsigned int j = 0; j < nphase; ++j)
+          phase_values(q,j) = basis.native_bernstein
+                              ? phase_element.shape_value(j, quadrature.point(q))
+                              : basis.basis_value(j, quadrature.point(q));
+      LinearAlgebra::Vector old_coefficients(sets.system_partitioning[pb], sets.system_relevant_partitioning[pb], comm);
+      old_coefficients = lower;
+      FEValues<dim> values(this->get_mapping(), fe, quadrature, update_JxW_values);
+      for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+        if (cell->is_locally_owned())
           {
             cell->get_dof_indices(ids);
             values.reinit(cell);
-            for (unsigned int q=0; q<values.n_quadrature_points; ++q)
-              for (unsigned int j=0; j<nphase; ++j)
-                for (unsigned int i=0; i<nphase; ++i)
-                  mass[ids[fe.component_to_system_index(pc,j)]-po] +=
-                    values.JxW(q)*values.shape_value_component(fe.component_to_system_index(pc,i),q,pc)*basis.expansion(i,j);
+            auto &samples = parent_phase_values[cell->id()];
+            samples.assign(quadrature.size(), 0.);
+            for (unsigned int q = 0; q < quadrature.size(); ++q)
+              for (unsigned int j = 0; j < nphase; ++j)
+                {
+                  const auto index = ids[fe.component_to_system_index(pc,j)]-po;
+                  mass[index] += values.JxW(q)*phase_values(q,j);
+                  samples[q] += phase_values(q,j)*old_coefficients[index];
+                }
           }
       mass.compress(VectorOperation::add);
       LinearAlgebra::Vector native_gradient;
       LinearAlgebra::SparseMatrix native_hessian;
       this->get_phase_field_handler().assemble_dg_fracture(parent_field,native_gradient,&native_hessian);
-      LinearAlgebra::DynamicSparsityPattern phase_pattern;
-      phase_pattern.reinit(sets.system_partitioning[pb],sets.system_partitioning[pb],sets.system_relevant_partitioning[pb],comm);
-      for (const auto i:sets.system_partitioning[pb])
-        for (auto entry=native_hessian.begin(i); entry!=native_hessian.end(i); ++entry)
-          for (const auto &a:phase_rows.at(i)) for (const auto &b:phase_rows.at(entry->column()))
-              phase_pattern.add(a.first,b.first);
-      phase_pattern.compress();
-      fracture_matrix.reinit(phase_pattern);
-      fracture_linear.reinit(sets.system_partitioning[pb],comm);
-      for (const auto i:sets.system_partitioning[pb])
+      if (basis.native_bernstein)
         {
-          for (const auto &a:phase_rows.at(i)) fracture_linear[a.first] += a.second*native_gradient[i];
-          for (auto entry=native_hessian.begin(i); entry!=native_hessian.end(i); ++entry)
-            for (const auto &a:phase_rows.at(i)) for (const auto &b:phase_rows.at(entry->column()))
-                fracture_matrix.add(a.first,b.first,a.second*b.second*entry->value());
+          // Fracture already assembles in the solver's native coordinates.
+          fracture_matrix.copy_from(native_hessian);
+          fracture_linear.reinit(sets.system_partitioning[pb], comm);
+          fracture_linear = native_gradient;
         }
-      fracture_matrix.compress(VectorOperation::add);
-      fracture_linear.compress(VectorOperation::add);
+      else
+        {
+          LinearAlgebra::DynamicSparsityPattern phase_pattern;
+          phase_pattern.reinit(sets.system_partitioning[pb],sets.system_partitioning[pb],sets.system_relevant_partitioning[pb],comm);
+          for (const auto i:sets.system_partitioning[pb])
+            for (auto entry=native_hessian.begin(i); entry!=native_hessian.end(i); ++entry)
+              for (const auto &a:phase_rows.at(i)) for (const auto &b:phase_rows.at(entry->column()))
+                  phase_pattern.add(a.first,b.first);
+          phase_pattern.compress();
+          fracture_matrix.reinit(phase_pattern);
+          fracture_linear.reinit(sets.system_partitioning[pb],comm);
+          for (const auto i:sets.system_partitioning[pb])
+            {
+              for (const auto &a:phase_rows.at(i)) fracture_linear[a.first] += a.second*native_gradient[i];
+              for (auto entry=native_hessian.begin(i); entry!=native_hessian.end(i); ++entry)
+                for (const auto &a:phase_rows.at(i)) for (const auto &b:phase_rows.at(entry->column()))
+                    fracture_matrix.add(a.first,b.first,a.second*b.second*entry->value());
+            }
+          fracture_matrix.compress(VectorOperation::add);
+          fracture_linear.compress(VectorOperation::add);
+        }
       LinearAlgebra::Vector action(lower);
       fracture_matrix.vmult(action,lower);
       fracture_linear-=action;
@@ -159,6 +190,7 @@ namespace aspect
     template <int dim>
     void BulkTipCoupling<dim>::transform_phase(Vector &v, const bool inverse) const
     {
+      if (basis.native_bernstein) return;
       const auto &fe=this->get_fe();
       std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
       dealii::Vector<double> input(basis.expansion.m()),output(input.size());
@@ -211,6 +243,9 @@ namespace aspect
     std::shared_ptr<typename BulkTipCoupling<dim>::Evaluation>
     BulkTipCoupling<dim>::evaluate(const Vector &x,const bool tangent)
     {
+      TimerOutput::Scope timer(this->get_computing_timer(), tangent ? "Tip tangent evaluation" : "Tip trial evaluation");
+      ++evaluations;
+      if (tangent)++tangent_assemblies;
       namespace Tip=MaterialModel::BulkCohesive::Tip;
       using Tensor=MaterialModel::BulkCohesive::Tensor;
       const auto comm=this->get_mpi_communicator();
@@ -230,14 +265,10 @@ namespace aspect
              &e->rate,&e->absolute_rate,&e->positive_rate,&e->negative_rate
            })v->assign(ns,0.);
       std::vector<double> free_rate(ns,0.),mobility(ns,0.);
-      Vector nodal(sets.system_partitioning,comm);
-      nodal=x;
-      transform_phase(nodal,false);
-      const auto field=ghost(nodal);
-      const auto coefficients=ghost(x);
-      LinearAlgebra::Vector old_coefficients(sets.system_partitioning[pb],sets.system_relevant_partitioning[pb],comm);
-      old_coefficients=lower;
-      const auto quadrature=model.mechanical_quadrature();
+      // Velocity and pressure already have solver coordinates. Phase is
+      // sampled from Bernstein coordinates below on both compatibility paths;
+      // no nodal copy or second ghost exchange is needed for this evaluation.
+      const auto field=ghost(x);
       FEValues<dim> values(this->get_mapping(),fe,model.mechanical_quadrature(),
                            update_values|update_gradients|update_JxW_values);
       const unsigned int nq=values.n_quadrature_points,dpc=fe.n_dofs_per_cell();
@@ -250,13 +281,11 @@ namespace aspect
         cell->get_dof_indices(ids);
         values[intro.extractors.velocities].get_function_symmetric_gradients(field,strains);
         std::fill(phis.begin(),phis.end(),0.);
-        std::fill(old_phis.begin(),old_phis.end(),0.);
+        old_phis = parent_phase_values.at(cell->id());
         for (unsigned int q=0; q<nq; ++q)for (unsigned int j=0; j<basis.expansion.m(); ++j)
             {
               const auto index=ids[fe.component_to_system_index(pc,j)];
-              const double shape=basis.basis_value(j,quadrature.point(q));
-              phis[q]+=shape*coefficients[index];
-              old_phis[q]+=shape*old_coefficients[index-po];
+              phis[q]+=phase_values(q,j)*field[index];
             }
         values[intro.extractors.pressure].get_function_values(field,pressures);
       };
@@ -332,7 +361,7 @@ namespace aspect
                     P[i]=values[intro.extractors.pressure].value(i,q);
                   }
                 for (unsigned int j=0; j<basis.expansion.m(); ++j)
-                  N[fe.component_to_system_index(pc,j)]=basis.basis_value(j,quadrature.point(q));
+                  N[fe.component_to_system_index(pc,j)]=phase_values(q,j);
                 for (unsigned int i=0; i<dpc; ++i)
                   {
                     cell_residual[i]+=weight*((r.state.stress*E[i])/G-pressures[q]*div[i]-P[i]*trace(strains[q])-N[i]*r.driving/Kf);

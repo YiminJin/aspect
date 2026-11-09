@@ -1170,6 +1170,8 @@ namespace aspect
           }
         bulk_tip_coupling=std::make_shared<internal::BulkTipCoupling<dim>>(*this,*bulk_model,current_constraints);
         auto &coupling=*bulk_tip_coupling;
+        pcout<<"   Bulk tip accepted parent: step="<<coupling.accepted_parent()->step
+             <<", time="<<coupling.accepted_parent()->time<<", dt="<<coupling.timestep()<<std::endl;
         const AffineConstraints<double> original_constraints(current_constraints);
         const bool original_newton=assemble_newton_stokes_system;
         const bool original_matrix=assemble_newton_stokes_matrix;
@@ -1218,6 +1220,8 @@ namespace aspect
             SolverControl control(parameters.max_nonlinear_iterations,1.);
             nonlinear_iteration=0;
             bool converged=false;
+            bool prefer_shifted_search=false;
+            double last_exact_residual=std::numeric_limits<double>::infinity();
             for (; nonlinear_iteration<=parameters.max_nonlinear_iterations; ++nonlinear_iteration)
               {
                 current=coupling.evaluate(x,true);
@@ -1232,22 +1236,41 @@ namespace aspect
                   }
                 if (control.last_check()==SolverControl::failure)break;
                 bool found=false;
-                // Try the exact coupled Newton VI first. On failure, use the
-                // SPD phase obstacle search and its exact coupled mechanical
-                // correction. The functional line search tests descent; physical
-                // residuals, constitutive equations and final gates stay fixed.
-                for (unsigned int search=0; search<10 && !found; ++search)
+                // Once a positive phase search succeeds, prefer that search
+                // family at the next iterate. Always retry its least restrictive
+                // metric first: freezing a large successful shift can stall the
+                // physical VI. Recompute bounds and coupled corrections afresh.
+                // Exact Newton remains the fallback if these searches fail; no
+                // direction or active classification survives this iteration.
+                // Reset this ordering at each physical step, not in checkpoints.
+                // A tenfold reduction in the actual scaled mechanics/KKT merit
+                // justifies a fresh Newton attempt: the tangent has changed and
+                // can now accelerate convergence. This is an ordering trigger,
+                // not a relaxed residual gate or a history-dependent parameter.
+                // Within one decade of the final physical gates, retain the
+                // original exact-first polishing order. A small decrease of an
+                // already small residual must not indefinitely postpone Newton.
+                if (residual<=std::max(10.,0.1*last_exact_residual))prefer_shifted_search=false;
+                std::vector<double> shifts;
+                if (!prefer_shifted_search)shifts.push_back(0.);
+                for (unsigned int power=0; power<9; ++power)
+                  shifts.push_back(std::pow(10.,int(power)));
+                if (prefer_shifted_search)shifts.push_back(0.);
+                for (const double shift:shifts)
                   {
-                    const double shift=search==0?0.:std::pow(10.,int(search)-1);
-                    if (search>0)++coupling.search_shifts;
+                    if (found)break;
+                    if (shift>0.)++coupling.search_shifts;
+                    else last_exact_residual=residual;
                     LinearAlgebra::BlockVector direction(x);
                     direction=0.;
-                    if (!compute_bulk_tip_direction(x,current->residual,shift,direction))continue;
+                    if (!compute_bulk_tip_search_direction(x,current->residual,shift,direction))
+                      { ++coupling.search_failures; continue; }
                     const double slope=coupling.directional_work(*current,direction);
                     const double roundoff=128*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(current->functional));
                     if (slope>=roundoff)continue;
                     for (unsigned int line=0; line<phase_settings.max_newton_line_search_iterations; ++line)
                       {
+                        ++coupling.line_trials;
                         const double alpha=std::ldexp(1.,-int(line));
                         auto trial=x;
                         trial.add(alpha,direction);
@@ -1273,6 +1296,8 @@ namespace aspect
                           {
                             x=trial;
                             found=true;
+                            prefer_shifted_search=shift>0.;
+                            pcout<<"   Bulk tip accepted search: shift="<<shift<<", alpha="<<alpha<<std::endl;
                             break;
                           }
                       }

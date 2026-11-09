@@ -38,3 +38,8 @@ observer only. Intact quadrature points receive Y before any curve exists.
 A contour moving is not by itself a fully developed fault advance. New damage
 outside the initial support, threshold motion, φ≈1 advance, and slip on old
 damage must be reported separately.
+
+The numerical phase basis is guarded by outer `phase-space.txt` metadata before
+checkpoint deserialization. Native Bernstein obstacles contain coefficients,
+not nodal samples; [basis and import rules](../NATIVE_DG_BERNSTEIN.md) distinguish
+the bounded benchmark conversion from ordinary production restart.

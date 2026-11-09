@@ -76,3 +76,21 @@ and assess this functional's constrained second variation. The current solver
 therefore reports residual/KKT acceptance, not a stability certificate. This
 functional provides a concrete diagnostic for a remaining refined-mesh
 admission/globalization failure without changing loading or physical parameters.
+
+## Current common-parent and localized evidence
+
+The [efficiency/growth report](../TIP_EFFICIENCY_AND_GROWTH_REPORT.md) compares
+one .0025 step with two normal .00125 steps from the identical .0575 parent.
+Physical remainder halves (.00174784→.000874876 J/m), while added fracture
+changes only .761%. Both signed and accumulated absolute contributions are
+reported; the independent ledger closes without removing numerical losses from
+the physical remainder. This is a local sensitivity test, not global convergence.
+
+For spatial fracture accounting, point volume density omits SIPG faces. The
+benchmark instead exports the actual Bernstein gradient g_f and uses
+.5[g_f(B)+g_f(B_seed)]·(B−B_seed). Its sum is the exact quadratic fracture change
+(up to roundoff); assigning rows to their cells defines a weak-work partition,
+not a unique point density. The final localized partition closes to 4.17e-14 J/m.
+At .09 s the front VI is converged, but the fixed phase/H extents have not
+advanced and the observed remote driving margin has reached its diagnostic stop.
+Residual convergence alone does not supply physical propagation evidence.

@@ -18,6 +18,7 @@
 using namespace aspect;
 #include "obstacle_checks.h"
 #include "sipg_energy_checks.h"
+#include "bernstein_checks.h"
 int main(int argc,char **argv)
 {
   Utilities::MPI::MPI_InitFinalize mpi(argc,argv,1);
@@ -56,7 +57,14 @@ int main(int argc,char **argv)
             }
           return q;
         }, mesh);
-      FE_DGQ<2> element(2);MappingQ1<2> mapping;DoFHandler<2> dofs(mesh);dofs.distribute_dofs(element);
+      MappingQ1<2> mapping;
+      if(mode=="bernstein-equivalence"){bernstein_equivalence(mesh,mapping);return 0;}
+      const bool bernstein=argc>8 && std::string(argv[8])=="Bernstein";
+      std::unique_ptr<FiniteElement<2>> storage;
+      if(bernstein)storage=std::make_unique<FE_DGQBernstein<2>>(2);
+      else storage=std::make_unique<FE_DGQ<2>>(2);
+      const auto &element=*storage;
+      DoFHandler<2> dofs(mesh);dofs.distribute_dofs(element);
       IndexSet relevant;DoFTools::extract_locally_relevant_dofs(dofs,relevant);
       const auto owned=dofs.locally_owned_dofs();
       PhaseField::DGOperator<2> op(mapping,dofs,0,0,owned,relevant,MPI_COMM_WORLD);
@@ -165,8 +173,15 @@ int main(int argc,char **argv)
       aspect::LinearAlgebra::Vector state(owned,MPI_COMM_WORLD),next(owned,MPI_COMM_WORLD),ghost(owned,relevant,MPI_COMM_WORLD);
       std::vector<types::global_dof_index> ids(element.n_dofs_per_cell());
       for (const auto &cell:dofs.active_cell_iterators()) if (cell->is_locally_owned())
-        { cell->get_dof_indices(ids);for (unsigned int i=0;i<ids.size();++i)
-            state[ids[i]]=initial(mapping.transform_unit_to_real_cell(cell,element.get_unit_support_points()[i])); }
+        {
+          cell->get_dof_indices(ids);
+          std::vector<Vector<double>> samples(ids.size(),Vector<double>(1));
+          std::vector<double> coefficients(ids.size());
+          for(unsigned int i=0;i<ids.size();++i)
+            samples[i][0]=initial(mapping.transform_unit_to_real_cell(cell,element.get_generalized_support_points()[i]));
+          element.convert_generalized_support_point_values_to_dof_values(samples,coefficients);
+          for(unsigned int i=0;i<ids.size();++i)state[ids[i]]=coefficients[i];
+        }
       state.compress(VectorOperation::insert);
       const QGauss<2> rule(8);
       FEValues<2> fe(mapping,element,rule,update_values|update_quadrature_points|update_JxW_values);

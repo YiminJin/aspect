@@ -297,6 +297,7 @@ namespace aspect
         metadata << (introspection.composition_type_exists(CompositionalFieldDescription::phase_field)
                      ? std::string("native composition phase v2|") + std::to_string(introspection.find_composition_type(CompositionalFieldDescription::phase_field))
                        + "|" + std::to_string(parameters.phase_degree) + "|" + std::to_string(parameters.use_discontinuous_phase_discretization)
+                       + (parameters.use_bernstein_phase_basis ? "|Bernstein" : "")
                      : std::string("Q1 historical phase")) << '\n';
         phase_metadata_ok=bool(metadata);
       }
@@ -485,9 +486,10 @@ namespace aspect
     const std::string expected_phase=introspection.composition_type_exists(CompositionalFieldDescription::phase_field)
                      ? std::string("native composition phase v2|") + std::to_string(introspection.find_composition_type(CompositionalFieldDescription::phase_field))
                        + "|" + std::to_string(parameters.phase_degree) + "|" + std::to_string(parameters.use_discontinuous_phase_discretization)
+                       + (parameters.use_bernstein_phase_basis ? "|Bernstein" : "")
                      : std::string("Q1 historical phase");
     AssertThrow(phase_identity==expected_phase,
-                ExcMessage("Checkpoint phase storage/index/family/degree mismatch. Separate-phase to composition conversion is not supported; start a fresh native composition run."));
+                ExcMessage("Checkpoint phase storage/index/family/degree/basis mismatch. Automatic phase representation conversion is not supported; use matching metadata or start a fresh run."));
 
     // First check existence of the two restart files
     AssertThrow (Utilities::fexists(checkpoint_path + "mesh", mpi_communicator),

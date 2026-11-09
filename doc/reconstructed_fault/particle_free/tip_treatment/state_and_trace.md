@@ -12,9 +12,9 @@ integrated over the 2-D specimen are J/m of out-of-plane thickness.
 | A minus | 1 | `LocalHistory::A` | Accepted physical cohesive strain tensor; full point history, not a section moment |
 | tau, A | Pa, 1 | `Tip::Response::state` | Current eliminated trial point state; copied to candidate only after convergence |
 | Q, q=Q:S | Pa | `Response::Q`; accepted `LocalHistory::q` | Derived cohesive conjugate stress; scalar accepted diagnostic does not replace tensor history |
-| phi minus | 1 | `BulkCohesiveState::tip_phase` | Accepted locally relevant native DG nodal field; checkpoint keeps its existing per-cell meaning |
-| B minus | 1 | `BulkTipCoupling::lower` | Independent Bernstein obstacle derived from accepted phi; scratch for one attempt |
-| B, phi=EB | 1 | coupled coordinate phase block; ordinary `solution` phase block | Trial Bernstein unknown versus native nodal FE coefficients; never interchangeable |
+| phi minus | 1 | `BulkCohesiveState::tip_phase` | Accepted locally relevant native DG field; Bernstein in active fixtures, nodal in the compatibility route; basis-guarded checkpoint |
+| B minus | 1 | `BulkTipCoupling::lower` | Bernstein obstacle copied from accepted native b (converted only for nodal compatibility); scratch for one attempt |
+| B, phi=EB | 1 | coupled coordinate phase block; ordinary `solution` phase block | Trial Bernstein unknown; native phase is also B with the Bernstein selector, EB only with nodal compatibility |
 | e=2A:S | 1 | local `e` in `Tip::update` | Engineering cohesive strain, not total strain |
 | w | 1/s | `Response::rate`; accepted `LocalHistory::rate` | Fault-deformation rate only |
 | V | m/s | `Evaluation::rate`; accepted `Section::rate` | Signed normal integral of w; resolved scalar-law rate also retained separately for cancellation checks |
@@ -87,3 +87,5 @@ all section states only after the mechanical/KKT/energy gates pass. This step
 rescues the original failure; it does not by itself qualify later evolution.
 The exact values are retained in
 [accepted-point-trace.json](../../../../benchmarks/reconstructed_fault/particle_free/evidence/tip_solver/accepted-point-trace.json).
+
+The [native Bernstein guide](../NATIVE_DG_BERNSTEIN.md) defines coefficient and sampled-value meanings, checkpoint identity and remaining compatibility conversions.

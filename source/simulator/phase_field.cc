@@ -19,6 +19,7 @@
  */
 
 #include <aspect/phase_field.h>
+#include <aspect/fe_dgq_bernstein.h>
 #include <aspect/reconstructed_fault/endpoint_mpi.h>
 #include <aspect/simulator.h>
 #include <aspect/utilities.h>
@@ -697,7 +698,9 @@ namespace aspect
                     [](const auto &field) { return field.type == CompositionalFieldDescription::phase_field; }))
       return; // The ordinary composition declaration owns these DoFs.
     std::shared_ptr<FiniteElement<dim>> element;
-    if (parameters.use_discontinuous_phase_discretization)
+    if (parameters.use_bernstein_phase_basis)
+      element = std::make_shared<FE_DGQBernstein<dim>>(parameters.phase_degree);
+    else if (parameters.use_discontinuous_phase_discretization)
       element = std::make_shared<FE_DGQ<dim>>(parameters.phase_degree);
     else
       element = std::make_shared<FE_Q<dim>>(parameters.phase_degree);

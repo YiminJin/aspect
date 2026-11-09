@@ -61,3 +61,13 @@ remote driving, but its load-driven diffuse increment and BE work remainder must
 still be judged against their measured sizes. No phi≈1 advancing core, stable
 branch selection, mesh/quadrature qualification or production readiness follows
 from successful residual/KKT/ledger tests.
+
+The [bounded efficiency/growth task](../TIP_EFFICIENCY_AND_GROWTH_REPORT.md)
+retains progress-based search ordering on measured cost and local checks. The
+same gates permit tens of Pa of resistance variation at rates around 1e-13 m/s;
+independent RSF evaluation explains that sensitivity, but it is not uniform
+reaction accuracy. A unique physical stationary state is not established.
+The localized extension reaches remote Y/Kf=.98149 at .09 before any resolved
+advance of the measured phase or H contours. It shows halo adjustment, not an
+advancing weakened front. Compact loading and a separately derived time-accuracy
+strategy are next proposals; neither a new load nor integrator is enabled.

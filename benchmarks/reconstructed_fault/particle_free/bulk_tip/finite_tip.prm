@@ -48,6 +48,7 @@ subsection Compositional fields
  set Mapped particle properties =
 end
 subsection Discretization
+ set Phase basis = Bernstein
  set Composition polynomial degree = 2
  set Use discontinuous composition discretization = true
 end

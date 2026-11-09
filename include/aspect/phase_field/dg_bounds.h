@@ -2,6 +2,7 @@
 #ifndef ASPECT_PHASE_FIELD_DG_BOUNDS_H
 #define ASPECT_PHASE_FIELD_DG_BOUNDS_H
 
+#include <aspect/fe_dgq_bernstein.h>
 #include <deal.II/base/exceptions.h>
 #include <deal.II/base/utilities.h>
 #include <deal.II/fe/fe.h>
@@ -16,8 +17,11 @@ namespace aspect
 {
   namespace PhaseField
   {
-    /** Change of coordinates for ordinary tensor Q2, not a different FE space.
-     * Bernstein coefficients bound the polynomial over the complete cell.
+    /** Whole-cell polynomial enclosure and mean-preserving Q2 scaling.
+     * Native Bernstein values are already coefficients. The nodal compatibility
+     * adapter converts only for the enclosure; scaling acts in the supplied
+     * coordinates. Both bases span the same polynomial space. Growth's stricter
+     * coefficient box is a separate solver constraint, not this limiter.
      * This helper owns no physical state, DoFs, or acceptance decisions. */
     template <int dim>
     class Q2Bounds
@@ -25,11 +29,18 @@ namespace aspect
       public:
         explicit Q2Bounds(const dealii::FiniteElement<dim> &element)
           : expansion(element.n_dofs_per_cell(), element.n_dofs_per_cell()),
-            inverse(element.n_dofs_per_cell(), element.n_dofs_per_cell())
+            inverse(element.n_dofs_per_cell(), element.n_dofs_per_cell()),
+            native_bernstein(dynamic_cast<const FE_DGQBernstein<dim> *>(&element) != nullptr)
         {
           AssertThrow(element.degree == 2 && element.n_components() == 1
                       && element.n_dofs_per_cell() == dealii::Utilities::fixed_power<dim>(3u),
                       dealii::ExcMessage("Phase bounds require scalar tensor Q2."));
+          if (native_bernstein)
+            {
+              expansion = dealii::IdentityMatrix(element.n_dofs_per_cell());
+              inverse = expansion;
+              return;
+            }
           const auto &points = element.get_unit_support_points();
           for (unsigned int i = 0; i < points.size(); ++i)
             for (unsigned int j = 0; j < points.size(); ++j)
@@ -51,46 +62,49 @@ namespace aspect
           return result;
         }
 
-        dealii::Vector<double> coefficients(const dealii::Vector<double> &nodal) const
+        dealii::Vector<double> coefficients(const dealii::Vector<double> &values) const
         {
-          dealii::Vector<double> result(nodal.size());
-          inverse.vmult(result, nodal);
+          dealii::Vector<double> result(values.size());
+          if (native_bernstein) return values;
+          inverse.vmult(result, values);
           return result;
         }
 
         /** Return a certified enclosure, tightened by de Casteljau subdivision
          * only where the coefficient hull crosses the requested physical range.
          * Subdivision changes neither the polynomial nor its integral. */
-        std::pair<double, double> enclosure(const dealii::Vector<double> &nodal,
+        std::pair<double, double> enclosure(const dealii::Vector<double> &values,
                                             const double lower, const double upper,
                                             const unsigned int depth = 4) const
         {
-          return enclose(coefficients(nodal), lower, upper, depth);
+          return enclose(coefficients(values), lower, upper, depth);
         }
 
         /** Mean-preserving scaling. An inadmissible mean is an update failure,
          * never clipped. The tolerance covers floating-point evaluation only;
          * it is not a replacement upper cap for singular constitutive laws. */
-        double limit(dealii::Vector<double> &nodal, const double mean,
+        double limit(dealii::Vector<double> &values, const double mean,
                      const double lower, const double upper) const
         {
           const double tolerance = 128 * std::numeric_limits<double>::epsilon()
                                    * std::max({1., std::abs(lower), std::abs(upper)});
           AssertThrow(std::isfinite(mean) && mean >= lower - tolerance && mean <= upper + tolerance,
                       dealii::ExcMessage("DG phase has an inadmissible cell mean; reduce the transport substep."));
-          const auto range = enclosure(nodal, lower, upper);
+          const auto range = enclosure(values, lower, upper);
           double alpha = 1.;
           if (range.first < lower && range.first < mean)
             alpha = std::min(alpha, std::max(0., (mean - lower) / (mean - range.first)));
           if (range.second > upper && range.second > mean)
             alpha = std::min(alpha, std::max(0., (upper - mean) / (range.second - mean)));
           if (alpha < 1.)
-            for (auto &value : nodal) value = mean + alpha * (value - mean);
+            for (auto &value : values) value = mean + alpha * (value - mean);
           return alpha;
         }
 
-        dealii::FullMatrix<double> expansion; ///< Nodal values = E Bernstein coefficients.
-        dealii::FullMatrix<double> inverse;   ///< Bernstein coefficients = E^-1 nodal values.
+        dealii::FullMatrix<double> expansion; ///< Native coefficients = E Bernstein; identity on the native Bernstein path.
+        dealii::FullMatrix<double> inverse;   ///< Bernstein = E^-1 native; retained for compatibility consumers.
+
+        const bool native_bernstein; ///< Native coefficients need no coordinate conversion.
 
       private:
         static std::pair<double, double> enclose(const dealii::Vector<double> &values,

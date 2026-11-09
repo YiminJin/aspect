@@ -1,4 +1,32 @@
-> **Completed bounded task — bulk-tip solver integration, 7 November 2026.**
+> **Current native basis closeout, 9 November 2026.**
+> The bounded DG Bernstein task is complete on `d481a09c` plus preserved local
+> efficiency work. See [report](NATIVE_DG_BERNSTEIN_REPORT.md) and
+> [current guide](NATIVE_DG_BERNSTEIN.md). Native coefficients remove repeated
+> phase transforms without changing BE, SSPRK3, bounds, quadrature or gates.
+> Fixed-state/endpoint, MPI rollback/restart, moving profile, layered coupling
+> and ordinary controls pass; a mature checkpoint assumption was fixed.
+> Costs are mixed. All jobs finished; longer campaigns, loading changes and time
+> integration remain separate subsequent tasks. Historical entries below retain
+> their original evidence and do not authorize another campaign.
+
+> **Completed bounded task — tip efficiency and localized growth, 7 November 2026.**
+> Entry `d481a09c1415578ec6fb148e6b9e13c80184b6c4`; final core `8a652f3e…89115`.
+> Progress-based search ordering retains the exact operator, original inverse,
+> physical inputs, BE convention and final gates. Difficult-step accounted time
+> falls 200.51→101.36 s (1.98×); continuation through .065 and two half steps pass.
+> Bulk/phase/slip agree closely, but near-zero-rate resistance differs up to
+> 35.35 Pa: full reaction equivalence is not claimed. Halving dt halves work
+> error, still 5.17× added fracture. Localized growth stops at .09 on remote
+> Y/Kf=.98149, with no resolved advance of fixed phase/H contours and no remote
+> damage. See [final report and figures](TIP_EFFICIENCY_AND_GROWTH_REPORT.md).
+> 3319 assertions, oracle/derivatives, MPI restart/rejection, ordinary Stokes
+> and one layered mature check pass. All jobs finished: 24.28 min wrapped checks,
+> 13.28 min separate builds; protected evidence and inherited losses preserved.
+> Next proposed physical check: intact response to compact tangential loading;
+> derive time accuracy/cost separately before expensive growth. Neither is
+> launched. No general propagation/production qualification or mature campaign.
+
+> **Previous completed task — bulk-tip solver integration, 7 November 2026.**
 > Entry `663937bed9305df2823ac77a3fc2c3925bb94caa`; retained final core
 > `1cc27f9c…7cac6`. Both-bound release, distributed exact coupling and real
 > ASPECT Stokes reuse are implemented under ordinary simulator control. All
@@ -13,8 +41,8 @@
 > [equation-to-code guide](TIP_TREATMENT.md) and linked figures/evidence.
 > About 35 min wrapped simulation/check time and 33.6 min separate builds;
 > all jobs finished, protected identities and inherited data losses preserved.
-> Next proposed work: one fixed-parent .0575→.06 preconditioner/search comparison
-> before longer propagation. No mature or server campaign is resumed.
+> Its proposed fixed-parent comparison is now completed in the newer report
+> above. No mature or server campaign is resumed.
 
 > **Previous implementation — bulk energetic tip control, 7 November 2026.**
 > The user-approved cross-section RSF closure is implemented with physical true

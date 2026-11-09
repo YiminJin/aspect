@@ -1040,6 +1040,10 @@ namespace aspect
                          "Be careful if you choose 1 as the degree. The resulting element "
                          "is not stable and it may lead to artifacts in the solution. "
                          "Units: None.");
+      prm.declare_entry ("Phase basis", "nodal", Patterns::Selection("nodal|Bernstein"),
+                         "Native phase coefficient basis. Bernstein requires discontinuous Q2 phase; "
+                         "it preserves the polynomial space, quadrature and bound algorithms. "
+                         "Checkpoint basis changes are rejected without explicit conversion.");
       prm.declare_entry ("Phase polynomial degree", "0", Patterns::Integer(0),
                          "Deprecated compatibility setting: zero derives the degree from the semantic phase composition. "
                          "An explicit value must match Composition polynomial degree. The separate CPDI field remains Q1.");
@@ -1999,6 +2003,7 @@ namespace aspect
     {
       stokes_velocity_degree = prm.get_integer ("Stokes velocity polynomial degree");
       phase_degree = prm.get_integer("Phase polynomial degree");
+      use_bernstein_phase_basis = prm.get("Phase basis") == "Bernstein";
       legacy_phase_family = prm.get("Use discontinuous phase discretization");
       use_discontinuous_phase_discretization = legacy_phase_family == "true";
       temperature_degree     = prm.get_integer ("Temperature polynomial degree");
@@ -2341,6 +2346,9 @@ namespace aspect
           if (phase_degree == 0) phase_degree = 1;
           AssertThrow(phase_degree == 1, ExcMessage("The separate legacy phase variable is Q1 only."));
         }
+
+      AssertThrow(!use_bernstein_phase_basis || (phase_count == 1 && use_discontinuous_phase_discretization && phase_degree == 2),
+                  ExcMessage("Bernstein phase requires the supported native DGQ2 phase composition; legacy separate Q1 is unchanged."));
 
       // Enable Volume of Fluid field tracking if any compositional_field_methods are volume_of_fluid
       volume_of_fluid_tracking_enabled =
