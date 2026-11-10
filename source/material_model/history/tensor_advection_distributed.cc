@@ -11,14 +11,13 @@ namespace aspect
     {
       template<int dim>
       std::shared_ptr<TensorAdvection<dim>>
-      TensorAdvection<dim>::assemble_distributed(
+      TensorAdvection<dim>::assemble(
         const SimulatorAccess<dim> &context, const History &history, const Cells &cells,
         const LinearAlgebra::BlockVector &velocity, const unsigned int order, const double relaxation_rate)
       {
         AssertThrow(dim == 2 && order >= 4,
                     ExcMessage("Complete DG transport requires plane-strain objective history and Gauss4 or higher."));
         auto op = std::make_shared<TensorAdvection>();
-        op->distributed = true;
         op->space = history.space;
         op->mesh_vertices = context.get_triangulation().get_vertices();
         op->quadrature_order = order;
@@ -160,10 +159,10 @@ namespace aspect
 
       template<int dim>
       std::shared_ptr<TensorField<dim>>
-      TensorAdvection<dim>::advance_distributed(const SimulatorAccess<dim> &context, const TensorAdvection &op,
+      TensorAdvection<dim>::advance(const SimulatorAccess<dim> &context, const TensorAdvection &op,
                                                 const History &incoming, const Field &inflow, const Field &source, const double time, const double dt)
       {
-        AssertThrow(op.distributed && incoming.space == op.space
+        AssertThrow(incoming.space == op.space
 
                     && context.get_triangulation().get_vertices() == op.mesh_vertices
                     && std::isfinite(time) && std::isfinite(dt) && dt > 0.
@@ -234,8 +233,8 @@ namespace aspect
       }
 
 #define INSTANTIATE(dim) \
-  template std::shared_ptr<TensorAdvection<dim>> TensorAdvection<dim>::assemble_distributed(const SimulatorAccess<dim> &,const History &,const Cells &,const LinearAlgebra::BlockVector &,unsigned int,double); \
-  template std::shared_ptr<TensorField<dim>> TensorAdvection<dim>::advance_distributed(const SimulatorAccess<dim> &,const TensorAdvection &,const History &,const Field &,const Field &,double,double);
+  template std::shared_ptr<TensorAdvection<dim>> TensorAdvection<dim>::assemble(const SimulatorAccess<dim> &,const History &,const Cells &,const LinearAlgebra::BlockVector &,unsigned int,double); \
+  template std::shared_ptr<TensorField<dim>> TensorAdvection<dim>::advance(const SimulatorAccess<dim> &,const TensorAdvection &,const History &,const Field &,const Field &,double,double);
       ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE
     }

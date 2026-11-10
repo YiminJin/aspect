@@ -1,5 +1,12 @@
 # Discrete transport, rotation and projection
 
+Current support is native DG Bernstein phase and owned-row stress transport on
+all ranks. Q1 remap/MacCormack, CPDI and nodal-phase descriptions below are
+historical comparisons only; their implementations are retired. The old
+`Material profile transport` name is parsed solely for checkpoint identity and
+its retained support admission. It does not select an algorithm. See the
+[active reading path](../ACTIVE_RESEARCH_MODEL.md).
+
 [Overview](../MATURE_MOVING_FAULT.md) · Prerequisite: [model](model.md)
 · Next: [geometry](geometry.md)
 

@@ -1,83 +1,133 @@
 # Running the bounded control
 
-[Guide](../TIP_TREATMENT.md)
+[Guide](../TIP_TREATMENT.md) · [current qualification](../TIP_CONSOLIDATION_REPORT.md)
 
-The input is
-[`benchmarks/reconstructed_fault/particle_free/bulk_tip/finite_tip.prm`](../../../../benchmarks/reconstructed_fault/particle_free/bulk_tip/finite_tip.prm).
-It selects `Fault constitutive mode = bulk cohesive` and
-`Bulk cohesive flow rule = bulk tip sections`, with an authoritative DGQ2
-`phase_field` composition, now selecting `Discretization / Phase basis = Bernstein`.
-The default remains nodal; see the [basis guide](../NATIVE_DG_BERNSTEIN.md). The clearer `Bulk history representation = native tip stress` option identifies
-physical native-quadrature tau/A. The old `DG trial stress` spelling remains
-accepted for the unchanged original fixtures; it does not make the new tip owner
-an auxiliary mature trial-stress history. Checkpoint v1 and point exports retain
-the same physical meanings.
+## Supported settings
 
-`Bulk tip solver = ASPECT` selects the distributed coupled route. Its reference
-mechanical inverse currently requires `Stokes solver type = block AMG`; the
-benchmark runner supplies this setting explicitly. `benchmark direct` retains
-the small old mixed solver as an explicit oracle, including its historical
-search limitations; use `run.py --oracle --phase-basis nodal` for that historical
-solver. The strict direct/manufactured-direction checker of the integrated solver
-works with either basis (`--linear-oracle`). `Equilibrate bulk tip seed = true` selects zero-clock
-fracture equilibration before freezing the initial obstacle; the original
-fixture leaves it false. It cannot smooth an already accepted physical step.
+The active inputs are
+[`finite_tip.prm`](../../../../benchmarks/reconstructed_fault/particle_free/bulk_tip/finite_tip.prm)
+and [`localized.prm`](../../../../benchmarks/reconstructed_fault/particle_free/bulk_tip/localized.prm).
+Both select the semantic `phase_field` composition, discontinuous degree two and
+`Discretization / Phase basis = Bernstein`. Phase initializes through the ordinary
+composition initial-condition model. Bernstein is the supported/default phase
+basis. Q1, CPDI and native nodal phase are retired; ordinary ASPECT fields keep
+their own FE choices. Old phase representations require their retained binary.
 
-General stress-composition
-fields are inert compatibility fields in this fixture; use the bulk-tip physical
-point exports for stress observations.
+| Setting | Actual role |
+|---|---|
+| `Fault constitutive mode = bulk cohesive` | Bulk recoverable tau/A and one bulk fracture inventory |
+| `Bulk cohesive flow rule = bulk tip sections` | Fixed-direction signed section RSF closure |
+| `Bulk tip time update = backward Euler` (default), or `midpoint` | Focused numerical choice for integrated native Bernstein; stage equations and method admission in [time integration](time_integration.md) |
+| `Bulk tip solver = ASPECT` (default) | Distributed coupled solver under ordinary simulator ownership |
+| `Bulk history representation = native tip stress` | Explicit physical history meaning; old `DG trial stress` spelling in `finite_tip.prm` remains accepted |
+| `single Advection, iterated Newton Stokes` | Selected simulator scheme; tip branch bypasses ordinary phase transport |
+| `Stokes solver type = block AMG` | Required reference inverse; `run.py` supplies it for the integrated route |
+| Static temperature and auxiliary compositions | Required by the fixed-reference control; stress compositions are inert, not physical tau |
+| `Surface pressure = 1000` | Prescribed frictional compression in Pa; independent of the solved pressure gauge |
+| `Bulk tip initial age = 10` | Age in seconds on every section, including intact material |
+| `FE bulk normal quadrature points = 6` | Tensor Gauss6 native point-history/mechanical rule |
+| `Equilibrate bulk tip seed` | False in `finite_tip.prm`, true in `localized.prm`; fracture-only zero-clock obstacle solve |
 
-The specimen is [0,2]×[0,1] m, initially unloaded, with prescribed boundary
-velocity (0.02(y−0.5),0) m/s. The initial damaged patch has exact support
-x∈[0.5,1.5], y∈[0.25,0.75]; all other material is intact. The compact biquadratic
-profile has maximum 0.2. It is declared pre-existing damage, not a tip admission
-seed. The coarse grid is 8×4, with ell=0.25 m. Refinement holds ell and inputs
-fixed. This is a bounded implementation control, not a spatially qualified
-fracture experiment.
+The admitted physical route is 2-D, fixed Cartesian aligned mesh and direction,
+matched homogeneous coefficients, full prescribed velocity boundary, no
+reconstruction, transport, spin or AMR. Ordinary particle managers are unnecessary.
+The phase basis does not change these restrictions. No second phase growth solve
+or SSPRK3 phase stage runs inside this tip calculation.
 
-G=1 MPa, η=100 MPa·s, Gc=26.6666666667 J/m², calibration c=1000 Pa,
-p_N=1000 Pa, radiation=1000 Pa·s/m, μ0=0.6, a=0.015, b=0.02,
-V0=0.001 m/s, Dc=0.01 m, initial age=10 s. Thus b>a: the law is
-velocity weakening. Mechanical boundary velocities determine work and a pressure
-gauge; p_N is an independently prescribed frictional confinement assumption.
-Fracture boundaries are natural, with no transport inflow in this fixed-reference
-calculation. No particles or reconstructed surface are required.
+The replicated `benchmark direct` solver is retired. `--linear-oracle` checks
+the integrated solver against an independent small direct/manufactured-direction
+reference in benchmark support, using the same native Bernstein basis.
 
-Use a separate candidate build. Do not overwrite the protected mature build:
+## Physical fixtures
+
+SI units and ell=.25 m are common. G=1 MPa, eta=100 MPa s,
+Gc=26.6666666667 J/m², calibration cohesion=1000 Pa, radiation=1000 Pa s/m,
+mu0=.6, a=.015, b=.02, V0=.001 m/s and Dc=.01 m. Thus b>a gives steady velocity
+weakening; the separate endpoint monotonicity guard still applies. Fracture has
+natural boundary conditions. These fixed-reference runs have no transport inflow.
+
+| Input | Domain / coarse cells | Declared seed | Boundary velocity |
+|---|---|---|---|
+| `finite_tip.prm` | [0,2]×[0,1] m / 8×4 | Center (1,.5), half-length .5, half-width .25, peak .2 | (.02(y−.5),0) m/s |
+| `localized.prm` | [0,4]×[0,2] m / 16×8 | Center (2,1), half-length .8, half-width .2, peak .8 | (.01(y−1),0) m/s |
+
+Each seed formula is a product of truncated quadratics. The physical initial
+field is its FE interpolant, then bounded initialization and, for the localized
+fixture, fracture equilibration. The declared analytic support/peak is not a
+promise about the equilibrated FE seed. Refinement holds physical inputs fixed;
+initial interpolation and equilibration are mesh dependent and must be compared.
+The optional remote-margin diagnostic measures actual coupled intact driving;
+nominal homogeneous loading is not a substitute.
+
+## Build and short run example
+
+The paths below are separate candidate directories; do not rebuild a protected
+executable or reuse an existing run label. Rebuild the checker against the same
+ASPECT headers/build, especially after changing FE or parameter layout.
 
 ```sh
-cmake -S . -B build-particle-free/bulk-tip/native \
+cmake -S . -B build-particle-free/bulk-tip/doc-control \
   -DCMAKE_BUILD_TYPE=Release -DDEAL_II_DIR=/opt/dealii/9.6-local \
   -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++ \
   -DASPECT_UNITY_BUILD=ON -DASPECT_PRECOMPILE_HEADERS=ON -DASPECT_WITH_PYTHON=OFF
-cmake --build build-particle-free/bulk-tip/native -j4
+cmake --build build-particle-free/bulk-tip/doc-control -j4
 cmake -S benchmarks/reconstructed_fault/particle_free/bulk_tip \
-  -B build-particle-free/bulk-tip/points -DCMAKE_BUILD_TYPE=Release \
+  -B build-particle-free/bulk-tip/doc-checks -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++ \
-  -DAspect_DIR="$PWD/build-particle-free/bulk-tip/native"
-cmake --build build-particle-free/bulk-tip/points -j4
-build-particle-free/bulk-tip/points/bulk_tip_points
+  -DAspect_DIR="$PWD/build-particle-free/bulk-tip/doc-control"
+cmake --build build-particle-free/bulk-tip/doc-checks -j4
 python3 benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py \
-  bulk-tip-example 620 python3 benchmarks/reconstructed_fault/particle_free/bulk_tip/run.py \
-  example --seconds 600
+  doc-tip-control 140 python3 benchmarks/reconstructed_fault/particle_free/bulk_tip/run.py \
+  doc-tip-control --seconds 120 --dt .005 --end .01 \
+  --executable build-particle-free/bulk-tip/doc-control/aspect-release \
+  --checker build-particle-free/bulk-tip/doc-checks/libbulk_tip_checks.release.so
 ```
 
-Run one heavy job at a time, ≤4 build workers/MPI ranks and one numerical thread
-per rank. The runner creates a fresh label directory and records executable,
-checker, inputs, source hashes, command, runtime and status. It never resumes an
-old formulation. `--resume-from` copies only a new-law checkpoint into a fresh
-output directory; its source remains untouched. `--snapshot-id` selects a retained
-regular checkpoint within the copy when a terminal checkpoint carries a tiny
-end-time-clipped timestep. `--unloaded`, `--intact`,
-`--rejection`, `--dt`, and `--refinement` select the bounded checks. See the report
-for actually executed commands and failures before selecting a longer run.
+This is a short usage example, not a new qualification result or a growth
+campaign. Run heavy jobs sequentially, ≤4 build workers/MPI ranks and one numerical
+thread/rank. The wrapper records timeout and thread settings. `run.py` creates
+a fresh directory and records inputs, executable/checker hashes, source revision,
+command, runtime and status; a source revision alone does not identify a binary.
 
-The locally exercised `localized.prm` is one equilibrated control: [0,4]×[0,2] m,
-fixed ell=.25 m, common compact seed centered at (2,1), with half-length .8 m,
-half-width .2 m and maximum .8, and boundary shear rate .01/s. Its nominal remote
-intact shear stress at .08 s is below 800 Pa, versus the 1000 Pa calibration;
-actual remote driving must still be checked in the coupled solution. The mesh
-pair uses h=.25/.125 with identical physical seed and loading; zero-clock
-obstacle equilibration is mesh dependent and reported. The unloaded checks and bounded mesh/time comparisons pass; they show weak
-diffuse adjustment and significant accuracy limits, rather than a developed
-advancing core. See the current report before extending the fixture.
+| Runner option | Use / boundary |
+|---|---|
+| `--fixture`, `--dt`, `--end`, `--refinement`, `--ranks` | Select the input and bounded mesh/time/rank control; ranks are 1, 2 or 4 |
+| `--unloaded` | Replace the supported fixtures' boundary shear by zero |
+| `--intact` | Replace the original `finite_tip.prm` seed expression by zero; not a generic seed override for `localized.prm` |
+| `--remote-margin` | Add the benchmark remote-driving diagnostic stop |
+| `--tangent`, `--tangent-step` | Coupled derivative check at the chosen step |
+| `--linear-oracle`, `--linear-oracle-step` | Small integrated-system direct/manufactured-direction check |
+| `--rejection`, `--rejection-step` | Checker trial/rollback/retry test at the chosen step |
+| `--resume-from`, `--snapshot-id` | Copy retained restart files into the fresh run; source remains untouched; require matching law, basis and other metadata |
+| `--restart-dt` | Reduce a pending restart interval through the existing benchmark signal; preserve and record the parent clock |
+| `--export-parent`, `--import-parent` | Explicit serial same-mesh benchmark nodal→Bernstein parent conversion; not ordinary checkpoint migration |
+
+Ordinary restart rejects nodal/Bernstein mismatch before deserialization. End-time
+clipping and the restart loop can affect the pending interval; inspect recorded
+clocks and use the exact schedules in the reports when reproducing a comparison.
+Retain failed evidence, and consult [limits](limitations.md) before extending a run.
+
+## Time-update and mechanical-screen controls
+
+Use `run.py --time-update midpoint` for the candidate. Midpoint requires native
+Bernstein and the integrated solver; no legacy/direct-oracle fallback occurs.
+The archive's physical-law schema stays unchanged. The separate numerical-method
+metadata rejects ordinary BE↔midpoint restart. Only an explicitly labeled
+benchmark parent import can change methods at an accepted state.
+
+`--compact-width 1.2 --fixed-phase` selects the bounded compact-loading screen
+on `localized.prm`. The checker uses an existing assembler-setup signal to set the
+phase upper bound equal to its accepted lower bound; the same mechanics, section
+RSF and bulk history still evolve. This constraint is benchmark-only and is not
+a new physical cohesive law. `--intact` removes either fixture's seed.
+`--load-factor` scales only the declared compact boundary velocities. Fresh
+histories are required for a new loading; do not relabel old checkpoints.
+
+Endpoint phase/stress/age and last-stage rate/resistance are distinguished in
+[time integration](time_integration.md). Time-dependent velocity constraints
+remain right-endpoint sampled and are outside the midpoint accuracy claim.
+
+`--boundary-stop` additionally stops a growing compact-loading pilot when the
+previously intact .25 m boundary strip acquires phase above 1e-12. This is a
+benchmark diagnostic stop, alongside the retained remote gate, not a phase cap.
+Fixed-phase screens export these margins without using them to terminate.

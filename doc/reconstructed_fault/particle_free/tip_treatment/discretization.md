@@ -1,12 +1,16 @@
 # Discrete equations and executable operations
 
-[Guide](../TIP_TREATMENT.md) · [current integration evidence](../TIP_SOLVER_INTEGRATION_REPORT.md)
+This page describes the retained **BE default**. The selectable midpoint stage,
+exact aging, endpoint publication and work identity are in
+[time integration](time_integration.md); do not apply BE loss formulas to that mode.
+
+[Guide](../TIP_TREATMENT.md) · [current basis qualification](../NATIVE_DG_BERNSTEIN_REPORT.md)
 
 This page describes the integrated `Bulk tip solver = ASPECT` route. The older
-`benchmark direct` route is an explicit small reference, with its original
-add-only search and replicated algebra. Its convergence is not the definition
-of the corrected algorithm. Implementation and verification are distinct; consult
-the report for the configurations actually tested.
+`benchmark direct` solver is retired from the active executable. Its historical
+convergence is not the definition of the corrected algorithm. The independent
+small linear oracle remains in benchmark support. Consult the
+[consolidation report](../TIP_CONSOLIDATION_REPORT.md) for current qualification.
 
 ## One accepted step: reading path
 
@@ -15,35 +19,55 @@ the report for the configurations actually tested.
    All auxiliary compositions and temperature are static. Initialization is a
    zero-clock operation; it advances neither Maxwell memory nor section age.
 2. [`internal::BulkTipCoupling`](../../../../include/aspect/simulator/solver/bulk_tip.h)
-   prepares cell Bernstein coordinates, the accepted obstacle, fixed boundary
-   displacement, and the authoritative distributed fracture operator.
-3. [`BulkTipCoupling::evaluate`](../../../../source/simulator/solver/bulk_tip_assembly.cc)
+   prepares native Bernstein coordinates, the accepted obstacle, fixed boundary
+   displacement, and the authoritative distributed fracture operator. Reference
+   basis values and accepted parent samples are immutable caches for this attempt;
+   trial point responses and section roots are always recomputed.
+3. The initial guess satisfies prescribed displacement and fixes the outer
+   pressure gauge. An ordinary Stokes correction removes its continuity residual
+   before the coupled iterations; subsequent directions have homogeneous boundary
+   data. The approximate Stokes inverse does not replace the physical residual.
+4. [`BulkTipCoupling::evaluate`](../../../../source/simulator/solver/bulk_tip_assembly.cc)
    integrates the free section rate and mobility, eliminates section resistance,
    evaluates physical point responses, and assembles residuals and tangents.
-   Its lifetime is one physical attempt; evaluation never publishes history.
-4. The ordinary solver scheme owns nonlinear convergence and functional line
+   The coupling object lives for one physical attempt; each evaluation is trial
+   scratch and never publishes history.
+5. The ordinary solver scheme owns nonlinear convergence and functional line
    search. [`Simulator::compute_bulk_tip_search_direction`](../../../../source/simulator/solver/bulk_tip_linear.cc)
    solves a linearized box problem, allowing active constraints to enter **and
    leave**. Flexible Krylov applies the exact coupled tangent. Its approximate
    block preconditioner invokes ordinary ASPECT Stokes assembly, AMG construction
    and `solve_stokes()` for velocity/pressure, and the phase fracture matrix for
    the phase block. It does not hand phase unknowns to `solve_stokes()`.
-5. Every trial recomputes the full point, section, mechanics and phase response.
+6. Every trial recomputes the full point, section, mechanics and phase response.
    Only final physical residual/KKT and energy checks permit the ordinary
    pending-publication transaction to install all histories together. A rejected
    attempt leaves the accepted owner intact; the simulator restores fields.
 
 ## Coordinates and point elimination
 
-Write \(u=\Delta t\,v\), \(\pi=p/G\), and \(\phi=EB\), where E maps independent
-cell Bernstein coefficients B to native phase coefficients. E is the identity
-for the active native Bernstein fixtures; only the retained nodal route uses
-a conversion. See the [basis guide](../NATIVE_DG_BERNSTEIN.md). Material
-quadrature evaluates the same polynomial directly with positive Bernstein basis
-functions, avoiding cancellation near intact values. The polynomial space and quadrature rule are unchanged. The displacement
-boundary value is \(u_D=\Delta t\,v_D\). Corrections have homogeneous velocity
-boundary values. One pressure coefficient fixes the outer operator's gauge;
-frictional compression \(p_N\) is separately prescribed, not that gauge.
+Use \(u=\Delta t\,v\), \(\pi=p/G\), and the Bernstein coefficient vector B.
+The physical field and native vector coefficients are different objects:
+\[
+\phi_h(x)=\sum_i B_i\mathcal B_i(x),\qquad a=E_{native}B.
+\]
+For `Phase basis = Bernstein`, \(E_{native}=I\): the native phase block,
+accepted obstacle and coupled unknown all store B, ordered \(i=i_x+3i_y\).
+The old nodal map \((E_{native})_{ij}=\mathcal B_j(x_i)\) remains only in
+independent representation tests and explicit historical-parent import.
+Initialization interpolates the same physical seed; it does not set Bernstein
+coefficients to point samples. See the [basis guide](../NATIVE_DG_BERNSTEIN.md).
+
+`BulkTipCoupling::evaluate` uses one ghosted solver-coordinate vector. It samples
+phase from the cached Bernstein basis and mechanics from native FEValues.
+`coordinates` and `physical_field` retain the u/v and pressure scalings. The
+phase vector is already native Bernstein; no phase transformation remains in
+these operations or in the fracture rows and matrices. The polynomial space
+and quadrature are unchanged.
+
+The displacement boundary value is \(u_D=\Delta t\,v_D\). Corrections have
+homogeneous velocity boundary values. One pressure coefficient fixes the outer
+operator's gauge; frictional compression \(p_N\) is separately prescribed.
 
 For accepted parent \((\tau^-,A^-,\phi^-)\), define \(e^-=2A^-:S\),
 \(\beta=(1+\Delta tG/\eta)^{-1}\) and \(P=\beta(\tau^-+2G D_3u)\).
@@ -96,7 +120,7 @@ products. Only the small section reductions are replicated across MPI ranks.
 \qquad (R_\pi)_j=-\int_\Omega N_j^p\nabla\!\cdot u\,dx,
 \]
 \[
-R_B=\frac{1}{K_f}E^T\left[\partial_\phi E_f-\int_\Omega N^\phi Y\,dx\right],
+R_{B,i}=\frac{1}{K_f}\left[\frac{\partial E_f}{\partial B_i}-\int_\Omega\mathcal B_i Y\,dx\right],
 \qquad K_f=\frac{G_c}{(8/3)\ell}.
 \]
 Natural fracture boundaries contribute no prescribed flux. Closed prescribed
@@ -131,7 +155,8 @@ J=\begin{pmatrix}J_{uu}&-D^T&J_{uB}\\-D&0&0\\J_{Bu}&0&J_{BB}\end{pmatrix}
 \]
 Here c_s integrates the fixed-force rate derivative; a_s is the force derivative
 of mechanical/phase residuals. \(J_{uB},J_{Bu}\) and the section products are
-nonzero. The retained nodal route applies dual/primal E transformations to phase rows/columns; native Bernstein assembly already has those coordinates.
+nonzero. Fracture, local point residual and section actions are assembled in
+native Bernstein coordinates. There is no active nodal congruence map.
 The phase scaling K_f and mechanical scaling G are algebraic only. For the
 restricted functional, row weights are \(\beta G\) and K_f, respectively.
 The functional-weighted tangent is checked for symmetry on the free subspace.
@@ -157,7 +182,7 @@ No physical tangent block is dropped from the outer solve.
 |---|---|---|
 | Full J action | `BulkTipCoupling::vmult`: distributed cell/face matrix and section integration/adjoint | Exact physical derivative, including cross-blocks |
 | Mechanical reference inverse | `Simulator::apply_bulk_tip_stokes_inverse`: ordinary ASPECT assembly, AMG and `solve_stokes` | Approximate coupled Krylov preconditioner; preserves pressure quotient and coordinate scaling |
-| Positive phase inverse | `BulkTipCoupling::phase_search_matrix` and AMG | Fracture-plus-mass approximation; not the possibly indefinite J_BB |
+| Positive phase inverse | `BulkTipCoupling::phase_search_matrix` and AMG | Fracture plus positive diagonal weights; not the possibly indefinite J_BB |
 | Shifted phase minimizer | `PhaseField::solve_obstacle` | SPD bound-constrained search subproblem |
 | Mechanical correction after imposed phase change | Exact restricted J action with FGMRES and ASPECT Stokes preconditioning | Includes induced section-force correction and homogeneous incompressibility |
 | Search ordering and acceptance | `Simulator::solve_single_advection_iterated_newton_stokes` | Fresh physical response, restricted-functional Armijo and final physical gates |
@@ -192,8 +217,12 @@ each physical step. Every trial still receives fresh bounds, coupled correction,
 constitutive evaluation and globalization; no active set or direction is cached.
 See the [efficiency report](../TIP_EFFICIENCY_AND_GROWTH_REPORT.md) for validation
 and rejected variants. The positive phase search metric is
-\(P_B=H_f/K_f+\mu M_B\), with \(\mu>0\). The existing SPD obstacle solver
-minimizes \(R_B\cdot(y-B)+\tfrac12(y-B)^TP_B(y-B)\) over the true bounds.
+\(P_B=H_f/K_f+\mu D_m\), with \(\mu>0\). Here \(D_m=\operatorname{diag}(m_i)\), with
+\(m_i=\int_\Omega\mathcal B_i\,dx>0\) from mechanical JxW quadrature.
+This diagonal term is a search regularization and KKT metric; it is neither a
+physical phase time-mass term nor the dense mass matrix of DG transport. The
+existing SPD obstacle solver minimizes
+\(R_B\cdot(y-B)+\tfrac12(y-B)^TP_B(y-B)\) over the true bounds.
 The imposed phase displacement y−B then enters an **exact coupled mechanical**
 linear correction, including the condensed section derivative. This is a search
 direction, not a replacement constitutive update or a one-pass partitioned solve.
@@ -210,7 +239,8 @@ obstacles in B+(Bminus−B); arbitrary infeasible directions are not clipped.
 When functional differences fall below summation roundoff, the line search also
 requires decrease of the scaled physical residual. Resolvable decreases obey
 Armijo; the tie-break does not weaken final physical gates.
-Final gates retain the input mechanical and phase tolerances and physical ledger.
+Final gates use the input mechanical and phase tolerances and the independent
+ledger/dissipation checks detailed in [energy accounting](energy_and_validation.md#acceptance).
 Nonlinear convergence is not a constrained stability or uniqueness certificate.
 
 Zero-load fracture equilibration has an SPD quadratic contract. It uses the
@@ -228,6 +258,7 @@ state is smoothed.
 | R: DG fracture | `PhaseFieldHandler::assemble_dg_fracture` | checker SIPG energy/Hessian derivative and compatibility observer |
 | R: full coupling | `BulkTipCoupling::evaluate`, `vmult` | checker distributed coupled directional derivative; benchmark oracle comparisons in report |
 | B: primal/dual release | `Simulator::compute_bulk_tip_search_direction`, `PhaseField::box_constraint` | point test “Coupled box iteration releases incorrect lower and upper bounds” |
+| Native phase coordinates | `FE_DGQBernstein`, `Q2Bounds`, `coordinates`, `physical_field` | [element/bounds suite](../../../../unit_tests/phase_field_dg_bounds.cc), [production-operator comparisons](../../../../benchmarks/reconstructed_fault/particle_free/dgq2_phase_field/bernstein_checks.h), complete-parent import |
 | Physical lifecycle | accepted bulk owner, pending simulator publication | checker rejection/retry, checkpoint and rank-change checks |
 
 Mechanical quadrature remains configured Gauss6; fracture remains tested Gauss5

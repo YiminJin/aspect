@@ -1,3 +1,10 @@
+> **Current supported path:** native DG Bernstein phase with SSPRK3/BP;
+> DGQ2 tensor transport uses owned rows on all ranks, including one rank.
+> Q1/CPDI phase and the Q1 remapper are retired. See
+> [active reading path](ACTIVE_RESEARCH_MODEL.md) and
+> [consolidation](TIP_CONSOLIDATION_REPORT.md). Prior numerical evidence below
+> retains its original representation and accuracy limits.
+
 > **Native basis update, 9 November 2026:** [DG Bernstein guide](NATIVE_DG_BERNSTEIN.md)
 > defines the selectable native coefficient representation, bounds and restart
 > contract. The existing equations, quadrature and integrators remain unchanged;
@@ -30,8 +37,8 @@ mature timestep driver.
 
 Native phase is now one semantic composition named `phase_field`; ordinary
 composition family/degree and initial/boundary data configure it. DGQ2 uses
-material upwind transport with SSPRK3 and whole-cell bounds; native Q1 remains
-a deliberate comparison. Legacy CPDI keeps its separate Q1 owner. Stress remains
+material upwind transport with SSPRK3 and whole-cell bounds. Q1 and CPDI phase
+are retired from this executable. Stress remains
 ordinary DGQ2. See the [current phase contract](DGQ2_PHASE_FIELD_DESIGN.md) and
 [integration report](NATIVE_PHASE_INTEGRATION_REPORT.md). Native initialization,
 publication and restart no longer require a particle manager. The separate

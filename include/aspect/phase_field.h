@@ -276,24 +276,7 @@ namespace aspect
       double nonlinear_solver_tolerance;
       unsigned int max_nonlinear_iterations;
       unsigned int max_newton_line_search_iterations;
-      bool adaptive_endpoint_linear_accuracy = false;
-      bool endpoint_translation_preconditioner = false;
-      bool endpoint_quasi_newton_search = false;
-      bool endpoint_direct_mechanics = false;
     };
-  }
-
-  namespace PhaseFieldUtilities
-  {
-    template <int dim>
-    std::vector<std::pair<double, std::vector<double>>>
-    interpolate_from_particles_in_crack_zone(const Particles::ParticleHandler<dim> &particle_handler,
-                                             const std::vector<Point<dim>>         &positions,
-                                             const ComponentMask                   &selected_properties,
-                                             const typename Triangulation<dim>::active_cell_iterator &target_cell,
-                                             const GridTools::Cache<dim>           &grid_cache,
-                                             const std::function<bool(const ArrayView<const double>&)> &is_in_crack_zone);
-
   }
 
   template <int dim>
@@ -301,12 +284,6 @@ namespace aspect
   {
     public:
       PhaseFieldHandler(const Simulator<dim> &sim);
-
-      /**
-       * Add the phase fields to the list of variables, which will be used later
-       * to set up the introspection object.
-       */
-      void edit_finite_element_variables(std::vector<VariableDeclaration<dim>> &variables);
 
       void initialize();
 
@@ -342,17 +319,8 @@ namespace aspect
 
       bool uses_bound_constraints() const { return solver_parameters.use_bound_constraints; }
 
-      /** Native CPDI fracture part for the restricted endpoint minimizer.
-       * Mechanical energy is evaluated with an explicit non-committing FE endpoint. */
-      bool evaluate_fe_fracture(LinearAlgebra::BlockSparseMatrix &,
-                                LinearAlgebra::BlockVector &,
-                                const LinearAlgebra::BlockVector &,
-                                double &energy, double &arithmetic_allowance) const;
-
-      /** Ordinary FE fracture functional for the restricted DG phase operator.
-       * Coefficients come from this handler, not particles or duplicate inputs.
-       * Nodal derivatives are unconstrained; the native box solver applies the
-       * physical bounds. The retained evaluate_fe_fracture is CPDI integration. */
+      /** Small diagnostic view of the native SIPG functional. Production uses
+       * assemble_dg_fracture with owned rows; only benchmark oracles gather. */
       struct CellFractureEnergy
       {
         double energy = 0.;
@@ -392,7 +360,7 @@ namespace aspect
       std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>>
       get_phase_field_profiles(const double core_phase_field) const;
 
-      /** Optional diagnostic particles on the native route; mandatory for CPDI. */
+      /** Optional diagnostic particles; never an owner of phase integration. */
       bool has_associated_particle_manager() const { return particle_manager != nullptr; }
 
       const Particle::Manager<dim> &get_associated_particle_manager() const;
@@ -417,35 +385,9 @@ namespace aspect
       friend class internal::PhaseFieldTestAccess<dim>;
       friend class Simulator<dim>;
 
-      bool
-      assemble_phase_field_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
-                                  LinearAlgebra::BlockVector       &system_rhs,
-                                  const LinearAlgebra::BlockVector &current_solution,
-                                  const bool assemble_system_jacobian,
-                                  double *residual_roundoff_allowance = nullptr,
-                                  double *energy = nullptr,
-                                  bool omit_fe_elastic_energy = false) const;
-
-      unsigned int
-      solve_phase_field_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
-                               const LinearAlgebra::BlockVector       &system_rhs,
-                               LinearAlgebra::BlockVector             &solution_vector) const;
-
       CellFractureEnergy evaluate_dg_fracture(
         const LinearAlgebra::BlockVector &, bool tangent,
         std::map<std::pair<unsigned int,unsigned int>,double> *) const;
-
-      void solve_bound_constrained_phase(LinearAlgebra::BlockSparseMatrix &matrix,
-                                         LinearAlgebra::BlockVector &rhs,
-                                         LinearAlgebra::BlockVector &state,
-                                         const LinearAlgebra::BlockVector *lower_bound = nullptr) const;
-
-      void constrain_phase_newton_system(LinearAlgebra::BlockSparseMatrix &matrix,
-                                         LinearAlgebra::BlockVector &rhs,
-                                         const LinearAlgebra::BlockVector &state,
-                                         const LinearAlgebra::BlockVector *lower_bound = nullptr) const;
-
-      void initialize_phase_guess(LinearAlgebra::BlockVector &state) const;
 
       /** Static-mesh operators are rebuilt only after FE layout or mesh changes. */
       PhaseField::DGOperator<dim> &native_operator(const LinearAlgebra::BlockVector &) const;
@@ -471,7 +413,6 @@ namespace aspect
       std::unique_ptr<GridTools::Cache<dim>> grid_cache;
       std::uint64_t degradation_revision = 0;
 
-      std::vector<types::global_dof_index> vertex_to_dof_indices;
   };
 }
 

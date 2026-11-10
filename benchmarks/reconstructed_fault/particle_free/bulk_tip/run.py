@@ -6,12 +6,17 @@ root=Path(__file__).resolve().parents[4]
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--executable',type=Path,default=root/'build-particle-free/bulk-tip/native/aspect-release')
 p.add_argument('--checker',type=Path,default=root/'build-particle-free/bulk-tip/points/libbulk_tip_checks.release.so')
-p.add_argument('--fixture',type=Path,default=Path(__file__).with_name('finite_tip.prm'));p.add_argument('--oracle',action='store_true');
+p.add_argument('--fixture',type=Path,default=Path(__file__).with_name('finite_tip.prm'));
 p.add_argument('label');p.add_argument('--dt',type=float,default=.005);p.add_argument('--end',type=float,default=.08)
 p.add_argument('--ranks',type=int,choices=[1,2,4],default=1);p.add_argument('--refinement',type=int,default=0)
 p.add_argument('--seconds',type=int,default=600);p.add_argument('--unloaded',action='store_true')
 p.add_argument('--remote-margin',action='store_true')
-p.add_argument('--phase-basis',choices=['nodal','Bernstein'])
+p.add_argument('--time-update',choices=['backward Euler','midpoint'])
+p.add_argument('--fixed-phase',action='store_true')
+p.add_argument('--boundary-stop',action='store_true')
+p.add_argument('--compact-width',type=float)
+p.add_argument('--load-factor',type=float,default=1.)
+p.add_argument('--phase-basis',choices=['Bernstein'])
 p.add_argument('--export-parent',type=Path)
 p.add_argument('--import-parent',type=Path)
 p.add_argument('--restart-dt',type=float,help='Reduce only the pending restart interval using the existing simulator signal')
@@ -19,17 +24,22 @@ p.add_argument('--linear-oracle',action='store_true');p.add_argument('--tangent'
 p.add_argument('--linear-oracle-step',type=int,default=1)
 p.add_argument('--tangent-step',type=int,default=8);p.add_argument('--rejection-step',type=int,default=2)
 p.add_argument('--snapshot-id',type=int,choices=[1,2,3]);p.add_argument('--resume-from',type=Path);p.add_argument('--no-checker',action='store_true');a=p.parse_args()
+if a.boundary_stop:a.remote_margin=True
 assert a.label and all(c.isalnum() or c in '-_' for c in a.label)
 run=root/'build-particle-free/bulk-tip/runs'/a.label;run.mkdir(parents=True,exist_ok=False)
 text=a.fixture.read_text()
+if a.time_update:text+=f'\nsubsection Material model\n subsection Phase field fault\n  set Bulk tip time update = {a.time_update}\n end\nend\n'
+if a.compact_width:
+    text=text.replace('.01*(y-1);0',f'{.01*a.load_factor:.17g}*(y-1)*max(0,1-((x-2)/{a.compact_width:.17g})^2)^2;0')
 if a.phase_basis:text+=f'\nsubsection Discretization\n set Phase basis = {a.phase_basis}\nend\n'
 # The integrated adapter reuses ASPECT's assembled block-AMG Stokes inverse.
-if not a.oracle:text+='\nsubsection Solver parameters\n subsection Stokes solver parameters\n  set Stokes solver type = block AMG\n end\nend\n'
-if a.remote_margin:text+='\nsubsection Termination criteria\n set Termination criteria = end time, tip remote margin\nend\n'
-if a.oracle:text+='\nsubsection Material model\n subsection Phase field fault\n  set Bulk tip solver = benchmark direct\n end\nend\n'
+text+='\nsubsection Solver parameters\n subsection Stokes solver parameters\n  set Stokes solver type = block AMG\n end\nend\n'
+if a.remote_margin and not a.fixed_phase:text+='\nsubsection Termination criteria\n set Termination criteria = end time, tip remote margin\nend\n'
 if a.unloaded:
     text=text.replace('.02*(y-.5);0','0;0').replace('.01*(y-1);0','0;0')
-if a.intact:text=text.replace('.2*max(0,1-((x-1)/.5)^2)*max(0,1-((y-.5)/.25)^2)','0')
+if a.intact:
+    text=text.replace('.2*max(0,1-((x-1)/.5)^2)*max(0,1-((y-.5)/.25)^2)','0')
+    text=text.replace('.8*max(0,1-((x-2)/.8)^2)*max(0,1-((y-1)/.2)^2)','0')
 text+=f'\nset Maximum time step = {a.dt:.17g}\nset Maximum first time step = {a.dt:.17g}\nset End time = {a.end:.17g}\nset Output directory = {run}/output\n'
 text+=f'\nsubsection Mesh refinement\n set Initial global refinement = {a.refinement}\nend\n'
 exe=a.executable.resolve();plugin=a.checker.resolve()
@@ -49,6 +59,8 @@ if a.resume_from:
 (run/'input.prm').write_text(text)
 env=os.environ.copy()
 for key in ('OMP_NUM_THREADS','OPENBLAS_NUM_THREADS','DEAL_II_NUM_THREADS'):env[key]='1'
+if a.fixed_phase:env['ASPECT_TIP_FIXED_PHASE']='1'
+if a.boundary_stop:env['ASPECT_TIP_BOUNDARY_STOP']='1'
 if a.remote_margin:env['ASPECT_TIP_REMOTE_MARGIN']='1'
 if a.export_parent:env['ASPECT_TIP_EXPORT_PARENT']=str(a.export_parent.resolve())
 if a.import_parent:env['ASPECT_TIP_IMPORT_PARENT']=str(a.import_parent.resolve())

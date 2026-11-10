@@ -71,3 +71,58 @@ The localized extension reaches remote Y/Kf=.98149 at .09 before any resolved
 advance of the measured phase or H contours. It shows halo adjustment, not an
 advancing weakened front. Compact loading and a separately derived time-accuracy
 strategy are next proposals; neither a new load nor integrator is enabled.
+
+
+## Native basis boundary
+
+The committed implementation at `e8b6dd091` stores native Bernstein phase in the
+active fixtures. The [basis report](../NATIVE_DG_BERNSTEIN_REPORT.md) establishes
+operator and bounded coupled equivalence, including a same-parent difficult
+step and an active MPI restart/rejection check. It does not add an endpoint
+integrator, compact physical loading, stress rotation or transport to bulk-tip
+growth. A passed shared phase test on bilinear/nonconforming cells does not
+remove the tip control's Cartesian aligned-section and fixed-mesh restrictions.
+
+Element polynomial interpolation/embedding/restriction is not a general
+irreversible AMR transfer. Ordinary checkpoint loading requires the same numerical
+basis as well as the same physical law. The small benchmark parent converter
+is separate from that production policy. Native Bernstein is not admitted by the
+historical replicated `benchmark direct` or cohesive endpoint solvers; their
+nodal routes are retired from the current executable and preserved through
+their reference binaries.
+
+The basis change removes repeated conversions and a redundant ghosted trial
+copy, but does not eliminate Krylov cost: the difficult step increased from
+101.36 to 109.94 s while the localized total fell from 12.49 to 10.61 s. The
+near-roundoff physical comparison supports the new representation, not a general
+speedup. Endpoint time accuracy and an interpretable localized-growth specimen
+remain the next scientific questions; no longer trajectory is authorized by
+this documentation update.
+
+## Selectable midpoint and deferred cleanup
+
+The [time-integration page](time_integration.md) defines one candidate, not an
+integrator framework or an instability qualification. Its sufficient unique-root
+condition differs from BE. It excludes sign-changing free Maxwell relaxation
+through ΔtG/eta≤2, but this is not an accuracy guarantee. Active-set changes,
+intact birth, endpoint stationarity defects and nonlinear cohesive chain-rule
+error remain measurable temporal limits. Stage rates are not endpoint rates.
+Time-dependent boundary data and stiff viscous-crust evolution are unqualified.
+
+[The time-update report](../TIP_TIME_UPDATE_AND_GROWTH_REPORT.md) records the
+bounded comparison and specimen decision. A compact boundary profile alone does
+not establish tip localization. The [deferred cleanup inventory](../TIP_DEFERRED_CLEANUP.md)
+identifies current callers and evidence dependencies; broad deletion is deferred
+until this numerical/specimen decision, before expensive publication runs.
+
+The completed study keeps midpoint opt-in: none of its three common-parent
+refinements finishes the .0575→.06 window. A smaller work remainder in the
+separate old-loading control does not qualify that missing endpoint. The compact
+pilot stops at boundary damage after 23 steps; its high phase contours do not
+advance. Opposite-sign local fault rates and multiple bands nearly cancel the
+section slip, despite finite cohesive energy and local work of both signs.
+The closure guarantees integrated section power, not pointwise frictional
+positivity. These are measured limits, not reasons to clip rates or modify the
+localization. The subsequent bounded failed-row/search diagnosis is closed without a local
+repair; see [consolidation](../TIP_CONSOLIDATION_REPORT.md). A revised loading
+screen or broader globalization study needs a separate selection.

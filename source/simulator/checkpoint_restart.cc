@@ -304,6 +304,19 @@ namespace aspect
     AssertThrow(Utilities::MPI::min(phase_metadata_ok,mpi_communicator)==1,
                 ExcMessage("Could not write native phase checkpoint identity."));
 
+    if (const auto *tip=dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(material_model.get()))
+      if (tip->uses_integrated_bulk_tip())
+        {
+          unsigned int ok=1;
+          if(my_id==0)
+            {
+              std::ofstream method(checkpoint_path+"bulk-tip-time-update.txt");
+              method << (tip->uses_bulk_tip_midpoint() ? "midpoint exact stage aging v1" : "backward Euler v1") << '\n';
+              ok=bool(method);
+            }
+          AssertThrow(Utilities::MPI::min(ok,mpi_communicator)==1,ExcMessage("Could not write tip numerical method identity."));
+        }
+
     // save Triangulation and Solution vectors:
     {
       std::vector<const LinearAlgebra::BlockVector *> x_system
@@ -490,6 +503,20 @@ namespace aspect
                      : std::string("Q1 historical phase");
     AssertThrow(phase_identity==expected_phase,
                 ExcMessage("Checkpoint phase storage/index/family/degree/basis mismatch. Automatic phase representation conversion is not supported; use matching metadata or start a fresh run."));
+
+    if (const auto *tip=dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(material_model.get()))
+      if(tip->uses_integrated_bulk_tip())
+        {
+          std::string method="backward Euler v1"; // historical absence means BE
+          if(Utilities::MPI::this_mpi_process(mpi_communicator)==0)
+            {
+              std::ifstream metadata(checkpoint_path+"bulk-tip-time-update.txt");
+              if(metadata) std::getline(metadata,method);
+            }
+          method=Utilities::MPI::broadcast(mpi_communicator,method,0);
+          AssertThrow(method==(tip->uses_bulk_tip_midpoint() ? "midpoint exact stage aging v1" : "backward Euler v1"),
+                      ExcMessage("Bulk tip checkpoint numerical method mismatch. Only an explicit benchmark parent import may switch methods."));
+        }
 
     // First check existence of the two restart files
     AssertThrow (Utilities::fexists(checkpoint_path + "mesh", mpi_communicator),

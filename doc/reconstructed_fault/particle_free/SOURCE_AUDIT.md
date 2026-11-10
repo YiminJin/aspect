@@ -1,3 +1,100 @@
+## Active-path consolidation — 9 November 2026
+
+The existing `e8b6dd091` worktree, completed midpoint implementation and manual
+changes were preserved before cleanup. Final core SHA-256 is
+`5d8f9ab1adc94662f7b96a9b63267657a18bc0674dfb51693e763f5877c18e3e`;
+[closeout](../../../benchmarks/reconstructed_fault/particle_free/evidence/tip_consolidation/closeout.json)
+records matching plugins, commands and protected-binary checks.
+
+- Native phase admission requires DGQ2 Bernstein. Removed the separate fault
+  phase registration, CPDI/Q1 assembly, Q1 profile remap, native nodal tip
+  congruence, replicated endpoint solvers and their dispatch/solver parameters.
+  Generic ASPECT fields and particle infrastructure remain intact.
+- Removed historical exact endpoint Schur/tangent/cache code. The independent
+  bulk inverse is now `unit_tests/support/endpoint_bulk_reference.h`; the small
+  active tip oracle remains benchmark support.
+- `TensorAdvection::assemble/advance` now always use the owned-row implementation;
+  `project` remains explicit. The previous sparse serial algorithm exists only
+  in benchmark support, with a manufactured comparison covering both directions,
+  shear and divergence. SSPRK3, inflow, spin and endpoint physics are unchanged.
+- Old Q1/CPDI fixture registrations and replicated plugin umbrella are retired.
+  Their source, inputs and historical evidence remain. Maintained control
+  projects are separate; source support contains no generated run products.
+- Retained mature profile-selector strings identify checkpoint laws only, with
+  their original support checks. They do not execute a removed remapper. Phase
+  basis and time-method guards still reject incompatible checkpoints.
+- The bounded midpoint search audit found no justified local repair. Temporary
+  prints are archived and removed. Original tolerances and iteration limits stay.
+
+Full unit suite, BE/midpoint controls, coupled derivatives, rollback, tip/mature
+MPI restarts, layered transport and ordinary Stokes pass. See
+[TIP_CONSOLIDATION_REPORT.md](TIP_CONSOLIDATION_REPORT.md) for numerical errors,
+retained failures and limitations. [ACTIVE_RESEARCH_MODEL.md](ACTIVE_RESEARCH_MODEL.md)
+is the current equation-to-code entry; tip documents no longer direct readers
+to removed implementations. Physical propagation and midpoint adoption remain
+unqualified. Inherited data losses remain unchanged.
+
+## Coupled midpoint and compact-loading closeout — 9 November 2026
+
+Entry `e8b6dd0912640433676a69089d2b2ad17701bcbf`, `pf-rsf-particle-free`;
+eleven incoming modified documents preserved before source edits. See
+[report](TIP_TIME_UPDATE_AND_GROWTH_REPORT.md) and
+[identities/commands](../../../benchmarks/reconstructed_fault/particle_free/evidence/tip_time_update/closeout.json).
+
+- `BulkTipCoupling` uses explicit physical and stage durations, stage-coordinate
+  bounds and pressure/Stokes scaling; its existing BE rational elimination is
+  reused at half duration. Endpoint storage and stage search storage are distinct.
+- `Tip::midpoint_endpoint/midpoint_account` implement endpoint extrapolation
+  and the nonlinear cohesive chain defect. Native phase and physical tau/A,
+  exact constant-stage-rate age and signed slip publish once through the existing
+  material transaction. No mature tensor convention or phase operator changes.
+- Shared signed friction/root/primitive code has one optional exact-aging
+  choice, its complete derivative and sufficient monotonicity guard; BE's
+  original slope arithmetic remains intact. The material selector rejects
+  unsupported midpoint routes. Stiff sign reversal is excluded by dtG/eta≤2.
+- Checkpoints retain physical-law/basis metadata and add a separate numerical
+  method sidecar; ordinary method switching is rejected. Explicit benchmark
+  parent imports remain labeled and separate from production restart.
+- The compact fixed-phase screen exposed an inexact pure-pressure direction
+  rejected as uphill. A pressure-only completion is permitted only when both
+  original full residual gates pass; primal fields and histories do not change.
+  The final difficult midpoint recheck still fails at the identical KKT value.
+- Benchmark setup/observers identify stage versus endpoint time, dynamic
+  pressure/normal stress, boundary reaction work, signed local section power,
+  SIPG weak-work partitions and boundary-damage stopping. A wrong signal hook
+  and a pre-allocation rejection probe were fixed in benchmark support, with
+  failed evidence retained. No broad cleanup or physical-law tuning.
+
+6078 assertions/21 point cases pass. Independent tangent/direct oracle,
+localized two-grid controls, final 1→2-rank active restart/rejection and expected
+method-mismatch rejection pass. BE point/section and mature layered physical
+exports reproduce retained controls bitwise; ordinary statistics/depth average
+are byte-identical. All three common-parent grids fail to finish, so midpoint
+is implemented but not adopted. The compact specimen is rejected for boundary
+loading and section-rate cancellation. The report separates solver correctness,
+state/work accuracy, loading interpretation and absent production qualification.
+
+## Tip guide synchronization — 9 November 2026
+
+Reviewed committed source `e8b6dd0912640433676a69089d2b2ad17701bcbf` on
+`pf-rsf-particle-free`, with a clean tracked worktree at entry. Documentation
+changes only; historical result reports and all numerical artifacts retained.
+The [tip guide](TIP_TREATMENT.md) now distinguishes physical phi from native and
+coupled coefficient vectors, the diagonal search/KKT metric from the dense DG
+transport mass, and raw versus constrained residuals. The ledger signs and
+acceptance checks match `BulkTipCoupling::evaluate` and the ordinary simulator
+scheme. The closed prescribed-displacement search functional has no subtracted
+reaction-work term; `external_work` is an accounting diagnostic in this route.
+
+Checked material update/derivative/account, section elimination and primitive,
+ASPECT Stokes/search ordering, candidate publication, checkpoint basis guard,
+current fixtures and runner flags against their actual definitions. Accepted
+age/slip uses the integrated section rate; the root-resolved rate remains a
+separate diagnostic. Current native-basis evidence is separated from older
+nodal solver traces, mature transport evidence and general propagation claims.
+Validation is local link/anchor, notation and source-entry checking, plus
+`git diff --check`; unchanged numerical results are reused without new runs.
+
 ## Native phase basis integration — 9 November 2026
 
 Entry `d481a09c` plus the completed uncommitted efficiency work; all 48 entry

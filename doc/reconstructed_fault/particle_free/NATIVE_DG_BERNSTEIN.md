@@ -1,7 +1,8 @@
 # Native DG Bernstein phase: reading guide
 
 The active bulk-tip fixtures select `Discretization / Phase basis = Bernstein`.
-The ordinary default is `nodal`, including existing inputs and checkpoints. This
+Bernstein is now the supported/default phase basis. Historical nodal checkpoints
+require their retained executable or explicit benchmark import. This
 is a change of coordinates in the same discontinuous Q2 polynomial space, not a
 new constitutive law or time integrator. Qualification is in the
 [bounded report](NATIVE_DG_BERNSTEIN_REPORT.md).
@@ -33,6 +34,9 @@ near intact endpoints, also for derivatives. No phase clamp is used.
 Degree two is the admitted phase degree. Small element tests cover degrees 0–3;
 this is not an arbitrary-order phase qualification. Full-dimensional cells only
 are admitted: inherited codimension transfer substitutes a different element.
+
+The nodal maps below describe independent comparison/import algebra. They are
+not an active solver branch after [consolidation](TIP_CONSOLIDATION_REPORT.md).
 
 ## Operations and ownership
 

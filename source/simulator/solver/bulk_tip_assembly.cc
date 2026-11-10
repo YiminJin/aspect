@@ -53,7 +53,11 @@ namespace aspect
       nv=this->get_solution().block(0).size();
       pressure_begin=nv;
       pressure_end=nv+this->get_solution().block(1).size();
-      dt=this->get_timestep_number()>0 ? this->get_timestep() : model.initial_time_step;
+      physical_dt=this->get_timestep_number()>0 ? this->get_timestep() : model.initial_time_step;
+      midpoint=model.uses_bulk_tip_midpoint() && this->get_timestep_number()>0;
+      dt=midpoint ? .5*physical_dt : physical_dt;
+      AssertThrow(!midpoint || physical_dt*parent->parameters.G/parent->parameters.eta<=2.,
+                  ExcMessage("Midpoint control requires dt*G/eta<=2 to exclude sign-changing free Maxwell relaxation; no BE fallback."));
       G=parent->parameters.G;
       beta=1./(1.+dt*G/parent->parameters.eta);
       const double ell=this->get_phase_field_handler().get_length_scale();
@@ -76,29 +80,16 @@ namespace aspect
       homogeneous.close();
       std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
       const unsigned int nphase=basis.expansion.m();
-      // Only the retained nodal compatibility path needs a coordinate map.
-      std::map<types::global_dof_index,
-          std::vector<std::pair<types::global_dof_index,double>>> phase_rows;
-      if (!basis.native_bernstein)
-        {
-          for (const auto &cell:this->get_dof_handler().active_cell_iterators())
-            if (!cell->is_artificial())
-              {
-                cell->get_dof_indices(ids);
-                for (unsigned int i=0; i<nphase; ++i)
-                  {
-                    auto &row=phase_rows[ids[fe.component_to_system_index(pc,i)]-po];
-                    for (unsigned int j=0; j<nphase; ++j)
-                      if (basis.expansion(i,j)!=0.)
-                        row.emplace_back(ids[fe.component_to_system_index(pc,j)]-po,basis.expansion(i,j));
-                  }
-              }
-        }
+      AssertThrow(basis.native_bernstein,ExcMessage("Bulk tip requires native Bernstein phase coordinates."));
       lower.reinit(sets.system_partitioning[pb],comm);
       auto parent_field=ghost(this->get_solution());
       parent_field.block(pb)=parent->tip_phase;
       auto initial=coordinates(parent_field);
       lower=initial.block(pb);
+      upper.reinit(sets.system_partitioning[pb],comm);
+      upper=1.;
+      if(midpoint) for(const auto i:upper.locally_owned_elements()) upper[i]=.5*(1.+lower[i]);
+      upper.compress(VectorOperation::insert);
       mass.reinit(sets.system_partitioning[pb],comm);
       const auto quadrature = model.mechanical_quadrature();
       phase_values.reinit(quadrature.size(), nphase);
@@ -130,34 +121,9 @@ namespace aspect
       LinearAlgebra::Vector native_gradient;
       LinearAlgebra::SparseMatrix native_hessian;
       this->get_phase_field_handler().assemble_dg_fracture(parent_field,native_gradient,&native_hessian);
-      if (basis.native_bernstein)
-        {
-          // Fracture already assembles in the solver's native coordinates.
-          fracture_matrix.copy_from(native_hessian);
-          fracture_linear.reinit(sets.system_partitioning[pb], comm);
-          fracture_linear = native_gradient;
-        }
-      else
-        {
-          LinearAlgebra::DynamicSparsityPattern phase_pattern;
-          phase_pattern.reinit(sets.system_partitioning[pb],sets.system_partitioning[pb],sets.system_relevant_partitioning[pb],comm);
-          for (const auto i:sets.system_partitioning[pb])
-            for (auto entry=native_hessian.begin(i); entry!=native_hessian.end(i); ++entry)
-              for (const auto &a:phase_rows.at(i)) for (const auto &b:phase_rows.at(entry->column()))
-                  phase_pattern.add(a.first,b.first);
-          phase_pattern.compress();
-          fracture_matrix.reinit(phase_pattern);
-          fracture_linear.reinit(sets.system_partitioning[pb],comm);
-          for (const auto i:sets.system_partitioning[pb])
-            {
-              for (const auto &a:phase_rows.at(i)) fracture_linear[a.first] += a.second*native_gradient[i];
-              for (auto entry=native_hessian.begin(i); entry!=native_hessian.end(i); ++entry)
-                for (const auto &a:phase_rows.at(i)) for (const auto &b:phase_rows.at(entry->column()))
-                    fracture_matrix.add(a.first,b.first,a.second*b.second*entry->value());
-            }
-          fracture_matrix.compress(VectorOperation::add);
-          fracture_linear.compress(VectorOperation::add);
-        }
+      fracture_matrix.copy_from(native_hessian);
+      fracture_linear.reinit(sets.system_partitioning[pb], comm);
+      fracture_linear = native_gradient;
       LinearAlgebra::Vector action(lower);
       fracture_matrix.vmult(action,lower);
       fracture_linear-=action;
@@ -188,30 +154,12 @@ namespace aspect
     }
 
     template <int dim>
-    void BulkTipCoupling<dim>::transform_phase(Vector &v, const bool inverse) const
-    {
-      if (basis.native_bernstein) return;
-      const auto &fe=this->get_fe();
-      std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
-      dealii::Vector<double> input(basis.expansion.m()),output(input.size());
-      for (const auto &cell:this->get_dof_handler().active_cell_iterators()) if (cell->is_locally_owned())
-          {
-            cell->get_dof_indices(ids);
-            for (unsigned int i=0; i<input.size(); ++i) input[i]=v[ids[fe.component_to_system_index(pc,i)]];
-            (inverse?basis.inverse:basis.expansion).vmult(output,input);
-            for (unsigned int i=0; i<input.size(); ++i) v[ids[fe.component_to_system_index(pc,i)]]=output[i];
-          }
-      v.compress(VectorOperation::insert);
-    }
-
-    template <int dim>
     typename BulkTipCoupling<dim>::Vector BulkTipCoupling<dim>::coordinates(const Vector &v) const
     {
       Vector result(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
       result=v;
       result.block(0)*=dt;
       result.block(1)/=G;
-      transform_phase(result,true);
       return result;
     }
 
@@ -222,7 +170,7 @@ namespace aspect
       result=v;
       result.block(0)/=dt;
       result.block(1)*=G;
-      transform_phase(result,false);
+      if(midpoint) { result.block(pb)*=2.; result.block(pb)-=lower; }
       return ghost(result);
     }
 
@@ -308,7 +256,7 @@ namespace aspect
       fractions[0]=1.;
       for (unsigned int k=0; k<ns; ++k)
         e->laws[k]=model.fault_friction.section_endpoint(fractions,free_rate[k],mobility[k],parent->sections[k].age,
-                                                         dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0]);
+                                                         dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0],midpoint);
       if (tangent)
         {
           local_matrix=0.;
@@ -341,17 +289,20 @@ namespace aspect
                 e->absolute_rate[k]+=dn*std::abs(r.rate);
                 e->positive_rate[k]+=dn*std::max(0.,r.rate);
                 e->negative_rate[k]+=dn*std::min(0.,r.rate);
-                const auto ledger=Tip::account(parameters,incoming,r,increment,dt,f);
-                e->bulk+=weight*r.bulk_energy;
-                e->cohesive+=weight*r.cohesive_energy;
-                e->Db+=weight*dt*r.bulk_viscosity;
-                e->Dc+=weight*dt*r.cohesive_viscosity;
-                e->Df+=weight*dt*f*r.rate;
+                const auto ledger=midpoint ? Tip::midpoint_account(parameters,incoming,r,2.*increment,physical_dt,f)
+                                           : Tip::account(parameters,incoming,r,increment,dt,f);
+                const auto endpoint=midpoint ? Tip::midpoint_endpoint(incoming,r) : r.state;
+                e->stage_storage+=weight*(r.bulk_energy+r.cohesive_energy);
+                e->bulk+=weight*(midpoint ? (endpoint.stress*endpoint.stress)/(4.*G) : r.bulk_energy);
+                e->cohesive+=weight*(midpoint ? Tip::cohesive_energy(parameters,endpoint) : r.cohesive_energy);
+                e->Db+=weight*physical_dt*r.bulk_viscosity;
+                e->Dc+=weight*physical_dt*r.cohesive_viscosity;
+                e->Df+=weight*physical_dt*f*r.rate;
                 e->storage_change+=weight*ledger.storage_change;
                 e->internal_work+=weight*ledger.internal_work;
                 e->stress_loss+=weight*ledger.stress_loss;
                 e->traction_loss+=weight*ledger.traction_loss;
-                e->compliance_remainder+=weight*(ledger.compliance_work-r.driving*(phis[q]-old_phis[q]));
+                e->compliance_remainder+=weight*(ledger.compliance_work-r.driving*(endpoint.phi-old_phis[q]));
                 std::vector<Tensor> E(dpc);
                 std::vector<double> div(dpc),P(dpc),N(dpc,0.);
                 for (unsigned int i=0; i<dpc; ++i)
@@ -386,7 +337,7 @@ namespace aspect
       e->raw.compress(VectorOperation::add);
       for (double *value:
            {
-             &e->bulk,&e->cohesive,&e->Db,&e->Dc,&e->Df,&e->storage_change,&e->internal_work,
+             &e->stage_storage,&e->bulk,&e->cohesive,&e->Db,&e->Dc,&e->Df,&e->storage_change,&e->internal_work,
              &e->stress_loss,&e->traction_loss,&e->compliance_remainder
            })
         *value=Utilities::MPI::sum(*value,comm);
@@ -402,7 +353,14 @@ namespace aspect
       gradient+=fracture_linear;
       e->fracture=.5*(x.block(pb)*action)+x.block(pb)*fracture_linear;
       fracture_matrix.vmult(action,delta);
-      e->fracture_loss=.5*(delta*action);
+      e->stage_storage+=e->fracture;
+      e->fracture_loss=midpoint ? 0. : .5*(delta*action);
+      if(midpoint)
+        {
+          // Quadratic fracture chain rule uses the stage gradient and full change.
+          e->fracture+=gradient*delta+.5*(delta*action);
+          delta*=2.;
+        }
       fracture_matrix.vmult(action,lower);
       const double old_fracture=.5*(lower*action)+lower*fracture_linear;
       e->storage_change+=e->fracture-old_fracture;
@@ -421,24 +379,24 @@ namespace aspect
       e->mechanical=std::hypot(e->residual.block(0).l2_norm(),e->residual.block(1).l2_norm());
       double kkt=0.,external=0.;
       for (const auto i:sets.system_partitioning[pb])
-        kkt=std::max(kkt,std::abs(PhaseField::box_constraint(x.block(pb)[i],e->residual.block(pb)[i],mass[i],lower[i],1.).projected_residual));
+        kkt=std::max(kkt,std::abs(PhaseField::box_constraint(x.block(pb)[i],e->residual.block(pb)[i],mass[i],lower[i],upper[i]).projected_residual));
       e->kkt=Utilities::MPI::max(kkt,comm);
       for (const auto &line:boundary.get_lines())
         if (line.index<nv && sets.system_partitioning[0].is_element(line.index))external+=G*x[line.index]*e->raw[line.index];
-      e->external_work=Utilities::MPI::sum(external,comm);
+      e->external_work=(midpoint ? 2. : 1.)*Utilities::MPI::sum(external,comm);
       e->phase_work=Kf*(delta*e->residual.block(pb));
-      e->functional=e->bulk+e->cohesive+e->fracture;
+      e->functional=midpoint ? e->stage_storage : e->bulk+e->cohesive+e->fracture;
       double section_work=0.;
       for (unsigned int k=0; k<ns; ++k)
         {
           const auto &law=e->laws[k];
           const auto ds=parent->sections[k].weight;
-          section_work+=dt*ds*law.law.traction*e->rate[k];
-          e->friction+=dt*ds*law.law.friction*law.rate;
-          e->radiation+=dt*ds*law.law.radiation*law.rate;
+          section_work+=physical_dt*ds*law.law.traction*e->rate[k];
+          e->friction+=physical_dt*ds*law.law.friction*law.rate;
+          e->radiation+=physical_dt*ds*law.law.radiation*law.rate;
           e->section_defect=std::max(e->section_defect,std::abs(e->rate[k]-law.rate));
           e->functional+=beta*dt*ds*model.fault_friction.section_primitive(fractions,law.rate,parent->sections[k].age,
-                                                                           dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0]);
+                                                                           dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0],midpoint);
         }
       e->adjoint_error=e->Df-section_work;
       e->ledger_error=e->internal_work-e->storage_change-e->Db-e->Dc-e->Df-e->stress_loss-e->traction_loss

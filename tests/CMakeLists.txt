@@ -202,6 +202,15 @@ foreach(_test ${_tests})
 
   set(_use_test ON)
 
+  # These fixtures exercise the retired fault-specific Q1/CPDI model and its
+  # replicated endpoint solvers. Preserve their inputs and expected evidence,
+  # but do not register them against the native Bernstein research model.
+  # Current controls live in benchmarks/reconstructed_fault/particle_free/
+  # (bulk_tip, dgq2_phase_field, transported_objective/native).
+  if (_testname MATCHES "^phase_field_")
+    set(_use_test OFF)
+  endif()
+
   if ("${_testname}" STREQUAL "")
     message("Ignoring invalid .prm '${_test_full}'...")
     set(_use_test OFF)

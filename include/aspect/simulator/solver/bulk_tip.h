@@ -9,6 +9,7 @@
 
 namespace aspect
 {
+  namespace Postprocess { template <int dim> class MomentCycle; }
   namespace internal
   {
     /** Fixed-reference bulk-tip residual and exact condensed tangent.
@@ -38,6 +39,7 @@ namespace aspect
           std::vector<double> rate, absolute_rate, positive_rate, negative_rate;
           double mechanical = 0., kkt = 0., section_defect = 0.;
           double bulk = 0., cohesive = 0., fracture = 0., functional = 0.;
+          double stage_storage = 0.; ///< Search storage, never endpoint energy.
           double storage_change = 0., internal_work = 0., external_work = 0.;
           double Db = 0., Dc = 0., Df = 0., friction = 0., radiation = 0.;
           double stress_loss = 0., traction_loss = 0., compliance_remainder = 0.;
@@ -67,6 +69,12 @@ namespace aspect
         {
           return lower;
         }
+        const LinearAlgebra::Vector &upper_bound() const
+        {
+          return upper;
+        }
+        double stage_timestep() const { return dt; }
+        bool uses_midpoint() const { return midpoint; }
         const LinearAlgebra::Vector &phase_mass() const
         {
           return mass;
@@ -105,7 +113,7 @@ namespace aspect
         }
         double timestep() const
         {
-          return dt;
+          return physical_dt;
         }
         double directional_work(const Evaluation &, const Vector &) const;
         std::uint64_t sparse_entries() const
@@ -118,16 +126,18 @@ namespace aspect
         void equilibrate_seed(Vector &coordinates);
 
       private:
+        friend class Postprocess::MomentCycle<dim>; // Bounded fixed-phase mechanical screen.
         Model &model;
         std::shared_ptr<const State> parent;
         unsigned int pb, pc;
         types::global_dof_index po, nv, pressure_begin, pressure_end;
-        double dt, G, beta, Kf;
+        double dt, physical_dt, G, beta, Kf; ///< dt is algebraic stage duration.
+        bool midpoint;
         AffineConstraints<double> boundary, homogeneous;
         PhaseField::Q2Bounds<dim> basis;
         FullMatrix<double> phase_values; ///< Fixed reference quadrature, Bernstein ordering.
         std::map<CellId, std::vector<double>> parent_phase_values; ///< Immutable for this attempt.
-        LinearAlgebra::Vector lower, mass, fracture_linear;
+        LinearAlgebra::Vector lower, upper, mass, fracture_linear;
         LinearAlgebra::SparseMatrix fracture_matrix;
         LinearAlgebra::BlockSparseMatrix local_matrix;
         /** Each section has rank-local sparse integration/adjoint coefficients. */
@@ -135,7 +145,6 @@ namespace aspect
         std::vector<double> section_slopes;
         std::shared_ptr<Evaluation> linearization;
         Vector ghost(const Vector &) const;
-        void transform_phase(Vector &, bool inverse) const;
     };
   }
 }

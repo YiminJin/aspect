@@ -167,3 +167,119 @@ TEST_CASE("Bound displacement retains a tiny accepted obstacle", "[bulk_tip][bou
     }
   REQUIRE(aspect::PhaseField::box_trial_value(x,-.02,lower,1.,1.)<lower);
 }
+
+TEST_CASE("Midpoint stage elimination satisfies the continuous discrete equations", "[bulk_tip][midpoint]")
+{
+  const BT::Parameters p{1e6,1e8,128.,0.};BT::Tensor S;S[0][1]=.5;
+  for(double pn:{0.,.02,.4,1.})for(double p1:{pn,.5*(1.+pn),1.})for(double shear:{-.02,0.,.02})
+    {
+      BT::Tip::State old;old.phi=pn;old.stress[0][1]=700.;old.stress[0][0]=300.;old.stress[2][2]=-300.;
+      old.cohesive_strain=(pn==0.?0.:.002)*S;
+      const double dt=.1,f=-200.;const auto increment=shear*S;
+      const auto m=BT::Tip::update(p,old,.5*increment,.5*(pn+p1),.5*dt,S,f);
+      const auto end=BT::Tip::midpoint_endpoint(old,m);
+      REQUIRE(((end.stress-old.stress)/(2.*p.G*dt)+m.state.stress/(2.*p.eta)-increment/dt+m.rate*S).norm()<1e-16);
+      REQUIRE(((end.cohesive_strain-old.cohesive_strain)/dt+(p.G/p.eta)*m.state.cohesive_strain-m.rate*S).norm()<1e-16);
+      REQUIRE(std::abs((m.state.stress-m.Q)*S-f)<1e-10);
+      REQUIRE(std::abs(end.phi-p1)<2e-16);
+      const auto ledger=BT::Tip::midpoint_account(p,old,m,increment,dt,f);
+      REQUIRE(std::abs(ledger.error)<2e-10);
+      REQUIRE(ledger.stress_loss==0.);REQUIRE(ledger.traction_loss==0.);
+      REQUIRE(m.bulk_viscosity>=0.);REQUIRE(m.cohesive_viscosity>=0.);
+      const double C=m.Q*(end.cohesive_strain-old.cohesive_strain)-m.driving*(p1-pn)
+                     -(BT::Tip::cohesive_energy(p,end)-BT::Tip::cohesive_energy(p,old));
+      REQUIRE(std::abs(ledger.compliance_work-m.driving*(p1-pn)-C)<2e-10);
+    }
+}
+
+TEST_CASE("Midpoint analytic Maxwell forcing, relaxation and stiff sign reversal", "[bulk_tip][midpoint]")
+{
+  const BT::Parameters p{1e6,1e6,80.,0.};BT::Tensor S;S[0][1]=.5;
+  for(double sign:{-1.,1.})for(double force:{0.,300.})
+    {
+      double previous=0.;
+      for(unsigned int n:{10u,20u,40u})
+        {
+          BT::Tip::State state;state.stress[0][1]=sign*700.;
+          const double dt=1./n;
+          for(unsigned int i=0;i<n;++i)
+            {
+              // Intact material: prescribed smooth shear strain rate cos(t).
+              const auto increment=sign*force/p.G*std::cos((i+.5)*dt)*dt*S;
+              const auto stage=BT::Tip::update(p,state,.5*increment,0.,.5*dt,S,0.);
+              state=BT::Tip::midpoint_endpoint(state,stage);
+            }
+          const double exact=sign*(700.*std::exp(-1.)+.5*force*(std::cos(1.)+std::sin(1.)-std::exp(-1.)));
+          const double error=std::abs(state.stress[0][1]-exact);
+          if(previous>0.) REQUIRE(previous/error>3.9);
+          previous=error;
+        }
+    }
+  BT::Tip::State old;old.stress[0][0]=300.;old.stress[2][2]=-300.;
+  for(double z:{.2,2.,4.,20.})
+    {
+      const auto m=BT::Tip::update(p,old,{},0.,.5*z,S,0.);
+      const auto end=BT::Tip::midpoint_endpoint(old,m);
+      REQUIRE(std::abs(end.stress[0][0]-300.*(1.-z/2.)/(1.+z/2.))<1e-12);
+      if(z>2.) REQUIRE(end.stress[0][0]<0.);
+    }
+}
+
+TEST_CASE("Midpoint nonlinear cohesive chain defect converges without hiding work", "[bulk_tip][midpoint]")
+{
+  const BT::Parameters p{1e6,1e7,128.,0.};BT::Tensor S;S[0][1]=.5;
+  // Independently prescribed A(t), phi(t). This is a chain-rule check, not a VI.
+  auto phase=[](double t){return .1+.1*t;};
+  auto strain=[&](double t){return (.001+.0003*std::sin(t))*S;};
+  double previous=0.;
+  for(unsigned int n:{8u,16u,32u})
+    {
+      double sum=0.,absolute=0.;
+      for(unsigned int i=0;i<n;++i)
+        {
+          const double t=double(i)/n,t1=double(i+1)/n,phi=.5*(phase(t)+phase(t1));
+          const auto A=.5*(strain(t)+strain(t1));
+          const double c=p.m*phi*(1.+phi),d=(1.-phi)*(1.-phi);
+          const auto Q=2.*p.G*d/c*A;
+          const double Y=p.G*(A*A)*p.m*(1.+3.*phi)*(1.-phi)/(c*c);
+          const double defect=Q*(strain(t1)-strain(t))-Y*(phase(t1)-phase(t))
+            -(BT::Tip::cohesive_energy(p,{{},strain(t1),phase(t1)})-BT::Tip::cohesive_energy(p,{{},strain(t),phase(t)}));
+          sum+=defect;absolute+=std::abs(defect);
+        }
+      REQUIRE(absolute>=std::abs(sum));REQUIRE(absolute>0.);
+      if(previous>0.) REQUIRE(previous/absolute>3.9);
+      previous=absolute;
+    }
+}
+
+TEST_CASE("Midpoint physical state converges for prescribed smooth cohesive phase", "[bulk_tip][midpoint]")
+{
+  const BT::Parameters p{1e6,1e7,128.,0.};BT::Tensor S;S[0][1]=.5;
+  auto phi=[](double t){return .05+.02*t;};
+  auto fraction=[&](double v){const double c=p.m*v*(1.+v);return c/(c+(1.-v)*(1.-v));};
+  for(double sign:{-1.,1.})
+    {
+      double previous=0.;
+      for(unsigned int n:{10u,20u,40u})
+        {
+          // Z=tau+2GA obeys a scalar forced Maxwell ODE, independent of phi.
+          const double Z0=sign*1200.,f=sign*200.,forcing=sign*300.,lambda=p.G/p.eta,dt=1./n;
+          BT::Tip::State state;state.phi=phi(0.);
+          state.cohesive_strain=fraction(state.phi)*(Z0-f)/p.G*S;
+          state.stress=2.*Z0*S-2.*p.G*state.cohesive_strain;
+          for(unsigned int i=0;i<n;++i)
+            {
+              const auto increment=forcing/p.G*dt*S;
+              const double stage_phase=.5*(phi(double(i)/n)+phi(double(i+1)/n));
+              const auto m=BT::Tip::update(p,state,.5*increment,stage_phase,.5*dt,S,f);
+              state=BT::Tip::midpoint_endpoint(state,m);
+            }
+          const double Z=Z0*std::exp(-lambda)+forcing/lambda*(1.-std::exp(-lambda));
+          const auto A=fraction(phi(1.))*(Z-f)/p.G*S;
+          const auto tau=2.*Z*S-2.*p.G*A;
+          const double error=(state.stress-tau).norm()+p.G*(state.cohesive_strain-A).norm();
+          if(previous>0.) REQUIRE(previous/error>3.8);
+          previous=error;
+        }
+    }
+}

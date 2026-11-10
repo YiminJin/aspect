@@ -1040,17 +1040,17 @@ namespace aspect
                          "Be careful if you choose 1 as the degree. The resulting element "
                          "is not stable and it may lead to artifacts in the solution. "
                          "Units: None.");
-      prm.declare_entry ("Phase basis", "nodal", Patterns::Selection("nodal|Bernstein"),
-                         "Native phase coefficient basis. Bernstein requires discontinuous Q2 phase; "
+      prm.declare_entry ("Phase basis", "Bernstein", Patterns::Selection("Bernstein"),
+                         "Supported native phase coefficient basis. Bernstein requires discontinuous Q2 phase; "
                          "it preserves the polynomial space, quadrature and bound algorithms. "
                          "Checkpoint basis changes are rejected without explicit conversion.");
       prm.declare_entry ("Phase polynomial degree", "0", Patterns::Integer(0),
                          "Deprecated compatibility setting: zero derives the degree from the semantic phase composition. "
-                         "An explicit value must match Composition polynomial degree. The separate CPDI field remains Q1.");
+                         "An explicit value must match Composition polynomial degree. Separate CPDI phase fields are retired.");
       prm.declare_entry ("Use discontinuous phase discretization", "auto", Patterns::Selection("auto|true|false"),
                          "Deprecated compatibility setting: auto derives the family from the semantic phase composition. "
                          "An explicit true/false must match Use discontinuous composition discretization. "
-                         "Native phase supports Q1 or DGQ2; legacy CPDI remains Q1.");
+                         "Native phase supports DGQ2 Bernstein; Q1/CPDI phase is retired.");
 
       prm.declare_entry ("Temperature polynomial degree", "2",
                          Patterns::Integer (1),
@@ -2326,9 +2326,8 @@ namespace aspect
                           ExcMessage("Physical phase must not be normalized with chemical compositions."));
               AssertThrow(!use_operator_splitting,
                           ExcMessage("Native phase is not a chemical reaction field; operator-split composition reactions are unsupported."));
-              AssertThrow((use_discontinuous_composition_discretization[c] && composition_degrees[c] == 2)
-                          || (!use_discontinuous_composition_discretization[c] && composition_degrees[c] == 1),
-                          ExcMessage("Native phase supports Q1 or DGQ2, configured through composition discretization."));
+              AssertThrow(use_discontinuous_composition_discretization[c] && composition_degrees[c] == 2,
+                          ExcMessage("Native phase requires DGQ2 Bernstein, configured through composition discretization. Q1 phase is retired."));
               AssertThrow(phase_degree == 0 || phase_degree == composition_degrees[c],
                           ExcMessage("Deprecated Phase polynomial degree conflicts with Composition polynomial degree."));
               AssertThrow(legacy_phase_family == "auto"
@@ -2339,16 +2338,8 @@ namespace aspect
             }
         }
       AssertThrow(phase_count <= 1, ExcMessage("Only one physical phase composition is permitted."));
-      if (phase_count == 0)
-        {
-          AssertThrow(!use_discontinuous_phase_discretization,
-                      ExcMessage("Separate DG phase blocks are retired. Register phase_field with Type and method phase field, and select DGQ2 through composition discretization."));
-          if (phase_degree == 0) phase_degree = 1;
-          AssertThrow(phase_degree == 1, ExcMessage("The separate legacy phase variable is Q1 only."));
-        }
-
-      AssertThrow(!use_bernstein_phase_basis || (phase_count == 1 && use_discontinuous_phase_discretization && phase_degree == 2),
-                  ExcMessage("Bernstein phase requires the supported native DGQ2 phase composition; legacy separate Q1 is unchanged."));
+      AssertThrow(!enable_phase_field || phase_count == 1,
+                  ExcMessage("Register phase_field with Type and method phase field and DGQ2 composition discretization. Separate Q1/CPDI phase blocks are retired."));
 
       // Enable Volume of Fluid field tracking if any compositional_field_methods are volume_of_fluid
       volume_of_fluid_tracking_enabled =

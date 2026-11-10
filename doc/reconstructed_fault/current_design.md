@@ -3732,3 +3732,60 @@ anchors with native coefficients, without assigning them nodal meaning.
 The admitted fault routes are integrated bulk tip and growth-off mature material
 transport; historical replicated cohesive/endpoint solvers require nodal phase.
 This does not resolve BE work error or qualify moving growth, branching or AMR.
+
+
+## Selectable coupled bulk-tip midpoint (9 November 2026)
+
+The selected time-update task adds one option to the integrated native Bernstein
+bulk-tip route; **BE remains default**. The continuous bulk/section model and
+ASPECT solver ownership are unchanged. The authoritative derivation is
+[tip time integration](particle_free/tip_treatment/time_integration.md); the
+[bounded report](particle_free/TIP_TIME_UPDATE_AND_GROWTH_REPORT.md) distinguishes
+working local controls from failed qualification and any adoption decision.
+
+The coupled coordinates are a=(Δt/2)v_m, p_m/G and b_m. The existing point
+elimination uses half duration and returns stage tau/A/Q/w/Y. Endpoint tensors
+and phase extrapolate from that stage with the endpoint cone imposed directly
+as b_n≤b_m≤(1+b_n)/2. Section age uses the exact constant-stage-rate aging solution
+at half/full duration. Stage stress and Y drive mechanics and the same fracture
+VI. Search storage is evaluated at the stage; physical storage at the endpoint.
+The reduced functional uses beta_h h times the stage friction primitive, with
+row weights beta_h G and K_f. The Stokes adapter uses h=Δt/2 consistently.
+
+The physical work remainder retains the nonlinear cohesive chain-rule defect
+and upper-bound/residual work. It does not acquire BE numerical-loss terms.
+Only endpoints publish; stored w, q and resistance are labeled last-stage
+observations. Separate method metadata prevents ordinary restart from changing
+BE to midpoint. Prescribed time-independent velocities are qualified controls;
+ordinary endpoint sampling of time-dependent boundary data is not a midpoint
+boundary-accuracy claim. Free Maxwell admission ΔtG/eta≤2 excludes sign-changing
+relaxation, not temporal error or stiffness. No mature or surface-cohesive time
+law, SSPRK3 transport, quadrature, damping or convergence gate is changed.
+
+The compact fixed-phase screen exposes multiplier-only completion: a roundoff
+velocity component of an inexact saddle direction can fail primal energy descent
+while its pressure correction solves the remaining mechanics. An uphill full
+direction may therefore test pressure alone, holding both primal fields fixed;
+accept only at the original full mechanics/KKT gates. The functional is exactly
+independent of that multiplier under prescribed-compression RSF. This scoped
+completion changes neither material history nor a convergence tolerance.
+
+
+## Supported phase/solver consolidation (9 November 2026)
+
+This selection supersedes earlier descriptions of available Q1/CPDI, native
+nodal phase, replicated bulk/endpoint phase solvers and serial production tensor
+transport. The active fault model uses a semantic native DGQ2 Bernstein phase
+composition. Ordinary ASPECT FE_Q/FE_DGQ fields are unaffected. Integrated bulk
+tip and growth-off mature transport are the two supported physical routes; their
+histories remain distinct. BE is reference/default, midpoint stays experimental;
+its single bounded repair audit did not complete the difficult parent window.
+The compact-loading experiment is closed without propagation qualification.
+
+Native phase keeps its existing SSPRK3/BP and SIPG operators. Tensor advection
+uses owned rows and ghosts on every rank count, with the old serial operator only
+in benchmark support. Old profile names remain solely at the material checkpoint
+identity/admission boundary. No physical-law, method or basis migration is implied.
+The [active reading path](particle_free/ACTIVE_RESEARCH_MODEL.md) and
+[consolidation report](particle_free/TIP_CONSOLIDATION_REPORT.md) govern current
+entry points; earlier reports describe retained evidence and removed APIs.

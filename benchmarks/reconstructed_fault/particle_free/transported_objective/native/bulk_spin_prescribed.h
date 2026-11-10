@@ -113,9 +113,9 @@
         // synthetic geometry/history or pretending to run a stationary trajectory.
         const auto saved_checkpoint=m.dg_checkpoint;
         const auto saved_identity=m.material_viscosity_identity;
-        const bool saved_bounded=m.material_bounded_profile,saved_trace=m.material_trace_inflow;
+        const bool saved_bounded=m.legacy_bounded_profile_identity,saved_trace=m.material_trace_inflow;
         m.dg_material_transport=false;m.material_direct_stress=false;
-        m.material_bounded_profile=false;m.material_trace_inflow=false;
+        m.legacy_bounded_profile_identity=false;m.material_trace_inflow=false;
         m.fe_strain_state=std::make_shared<typename Model::FEStrainState>(*original);
         auto parent=std::make_shared<History>(*original->bulk_history.tensor);
         parent->representation=History::Representation::separated_trial;
@@ -138,6 +138,6 @@
             if(archive_results)archive_results<<(bulk_spin ? 8 : 6)<<','<<buffer.str().size()<<",1,1\n";
           }
         m.dg_checkpoint=saved_checkpoint;m.material_viscosity_identity=saved_identity;
-        m.material_bounded_profile=saved_bounded;m.material_trace_inflow=saved_trace;restore();
+        m.legacy_bounded_profile_identity=saved_bounded;m.material_trace_inflow=saved_trace;restore();
         AssertThrow(snapshot()==before,ExcMessage("Prescribed scratch check modified accepted physical state."));
       }

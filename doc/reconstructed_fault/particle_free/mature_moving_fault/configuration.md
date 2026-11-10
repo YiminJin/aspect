@@ -1,4 +1,11 @@
 > Native phase inputs now require semantic composition registration and ordinary
+
+Current support is native DG Bernstein phase and owned-row stress transport on
+all ranks. Q1 remap/MacCormack, CPDI and nodal-phase descriptions below are
+historical comparisons only; their implementations are retired. The old
+`Material profile transport` name is parsed solely for checkpoint identity and
+its retained support admission. It does not select an algorithm. See the
+[active reading path](../ACTIVE_RESEARCH_MODEL.md).
 > initial/boundary composition data. The [migration example](../DGQ2_PHASE_FIELD_DESIGN.md#observation-migration-and-limits)
 > supersedes old separate-phase launch snippets below. Retained old binaries and
 > inputs remain paired evidence. `prepare_integration_fixture.py` creates short
@@ -167,7 +174,7 @@ energy accuracy.
 | $A_h$ | [TensorAdvection](../../../../source/material_model/history/tensor_advection.cc), [distributed rows](../../../../source/material_model/history/tensor_advection_distributed.cc) | Changing numerical transport or inflow treatment |
 | $P_h$ | [TensorField::project](../../../../source/material_model/history/tensor_projection.cc) | Changing common mass algebra, field count, ghost publication |
 | $Q\tau Q^T$ | [objective_stress.h](../../../../include/aspect/reconstructed_fault/objective_stress.h), [stress_evolution.cc](../../../../source/material_model/phase_field_fault/stress_evolution.cc) | Changing objective integration/order; preserve full history coverage |
-| $X^+,\phi^+,I^+$ | [material_geometry.cc](../../../../source/material_model/phase_field_fault/material_geometry.cc), [profile_transport.cc](../../../../source/material_model/phase_field_fault/profile_transport.cc), [manager.cc](../../../../source/reconstructed_fault/manager.cc) | Changing material geometry/profile; retain joint rollback and obstacle |
+| $X^+,\phi^+,I^+$ | [material_geometry.cc](../../../../source/material_model/phase_field_fault/material_geometry.cc), `profile_transport.cc` (retired source), [manager.cc](../../../../source/reconstructed_fault/manager.cc) | Changing material geometry/profile; retain joint rollback and obstacle |
 | Friction/age | [fault_friction.cc](../../../../source/material_model/rheology/fault_friction.cc), [surface_system.cc](../../../../source/reconstructed_fault/surface_system.cc) | Changing friction response or its derivative/age convention |
 | Physical stress access | [physical_stress.cc](../../../../source/material_model/phase_field_fault/physical_stress.cc) | Adding an observer; avoid reconstructing T/R/B in a mechanics consumer |
 | Coupled correction/inner solve | [reconstructed_fault_stokes.cc](../../../../source/simulator/solver/reconstructed_fault_stokes.cc) | Changing outer convergence or mechanical solve; keep terminal rates and gates |

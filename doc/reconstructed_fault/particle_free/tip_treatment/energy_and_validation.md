@@ -1,5 +1,9 @@
 # Energy ledger and evidence
 
+This page describes the retained **BE default**. The selectable midpoint stage,
+exact aging, endpoint publication and work identity are in
+[time integration](time_integration.md); do not apply BE loss formulas to that mode.
+
 [Guide](../TIP_TREATMENT.md)
 
 The instantaneous bulk identity is
@@ -44,8 +48,9 @@ repartition and transfer-stress defects are zero. The remainder is 21.72% of
 4.44353502785e-5 J/m added fracture. All four timesteps are the same; these data
 establish decomposition, not timestep scaling or convergence of the new model.
 
-See the [current integration report](../TIP_SOLVER_INTEGRATION_REPORT.md) for
-the corrected solve and equilibrated fixture, and the
+The [native Bernstein report](../NATIVE_DG_BERNSTEIN_REPORT.md) gives current
+representation-equivalence checks. The [integration report](../TIP_SOLVER_INTEGRATION_REPORT.md)
+records the corrected solve and equilibrated fixture, and the
 [original implementation report](../TIP_TREATMENT_IMPLEMENTATION_REPORT.md) for
 retained add-only results. Their physical windows and initialization differ.
 
@@ -60,9 +65,14 @@ stationarity functional is
 \[
 \mathcal I=\sum_q JxW_q\left[
 \frac{(T_*-2GA):(T_*-2GA)}{4G}+\frac{GA:A}{h}\right]
-+E_f(\phi)+\beta\Delta t\sum_s ds_s\Phi_s(V_s)-\beta W_{ext}.
++E_f(\phi)+\beta\Delta t\sum_s ds_s\Phi_s(V_s).
 \]
-Add the incompressibility multiplier with the same β scaling. Its displacement
+This is exactly the stored `Evaluation::functional`: bulk plus cohesive plus
+fracture energy plus the section primitive. The supported boundary is wholly
+prescribed velocity/displacement. There is no applied-traction potential to
+subtract; computed reaction work `external_work` is an accounting diagnostic,
+not an extra term in the search functional. Add the incompressibility multiplier
+with the same β scaling when checking unconstrained variations. Its displacement
 variation is β times mechanics, its e variation is −t+q+R(V), and its phase
 variation is the fracture derivative minus Y (with the constrained one-sided
 intact limit). This is an incremental **stationarity functional**, not a new
@@ -73,9 +83,9 @@ The admitted monotone section law makes Φ convex in V. It does not make the
 whole φ problem convex or establish a unique stable growing solution. The old
 bulk stability checker has not been extended to eliminate the section variables
 and assess this functional's constrained second variation. The current solver
-therefore reports residual/KKT acceptance, not a stability certificate. This
-functional provides a concrete diagnostic for a remaining refined-mesh
-admission/globalization failure without changing loading or physical parameters.
+therefore reports residual/KKT acceptance, not a stability certificate. Earlier
+refined-step failures and their corrected replay remain historical evidence;
+this statement does not assert that the current difficult-step control fails.
 
 ## Current common-parent and localized evidence
 
@@ -94,3 +104,62 @@ not a unique point density. The final localized partition closes to 4.17e-14 J/m
 At .09 s the front VI is converged, but the fixed phase/H extents have not
 advanced and the observed remote driving margin has reached its diagnostic stop.
 Residual convergence alone does not supply physical propagation evidence.
+
+
+<a id="acceptance"></a>
+## Actual convergence and publication gates
+
+[`BulkTipCoupling::evaluate`](../../../../source/simulator/solver/bulk_tip_assembly.cc)
+keeps the raw assembled residual and the residual with homogeneous constrained
+rows zeroed. Its mechanical norm is the Euclidean norm of the displacement and
+pressure residual blocks. With the positive phase weights
+\(m_i=\int\mathcal B_i\,dx\), the KKT diagnostic is the natural map
+
+\[
+\kappa=\max_i\left|B_i-\operatorname{clamp}
+ (B_i-R_{B,i}/m_i,\ B_i^-,\ 1)\right|.
+\]
+
+The fixture gates are mechanics ≤1e-9 and κ≤1e-7. The outer solver uses their
+maximum after division by these respective tolerances. This is neither a
+relative reaction-force tolerance nor a guarantee of accuracy at tiny rates.
+Every section root must separately satisfy `section_endpoint`'s roundoff-scaled
+scalar equation; the difference between its resolved rate and the subsequently
+integrated point rate is also reported.
+
+Let ΔE include bulk, cohesive and fracture storage; D_b, D_c and D_f denote
+step-integrated bulk viscosity, cohesive viscosity and section friction plus
+radiation. Define C_rem as compliance work minus YΔphi, N_tau and N_Q as the two
+BE losses, N_f as the fracture quadratic increment, and W_phi as phase residual
+work. The code's independent ledger is
+
+\[
+\mathcal L=W_{int}-\Delta E-D_b-D_c-D_f-N_\tau-N_Q-C_{rem}-N_f+W_\phi.
+\]
+
+The [simulator acceptance block](../../../../source/simulator/solver_schemes.cc)
+requires |L|≤1e-10 max(1, |W_ext|, E_bulk+E_cohesive+E_fracture), and nonnegative
+D_b, D_c, friction and radiation integrals. W_int is integrated stress work;
+W_ext is reaction work computed from prescribed displacement and raw mechanical
+rows. The separately reported `mechanical_work` is W_int−W_ext.
+The phase work and numerical losses remain visible even when the ledger closes.
+The discrete section adjoint defect is `Df − sum_s dt ds f V_integrated`;
+checker power tests assess it independently.
+
+Only then does the material prepare a candidate for the simulator's single
+publication callback. A small ledger residual proves this discrete accounting
+identity, not small physical work error, quadrature convergence or propagation.
+
+## Native-basis evidence versus physical accuracy
+
+The native Bernstein difficult-step comparison preserves the accepted parent,
+physical tau/A, Y, section state and diagnosed active set to near roundoff.
+The localized control shows actual phase growth and agrees with the nodal result;
+MPI rejection/retry preserves the parent. These tests qualify representation and
+integration. The short moving-profile and layered mature checks in the same
+report concern the shared phase implementation and a different constitutive
+route; they do not enable moving tip growth.
+
+The earlier .09 remote-margin stop and large BE physical remainder remain the
+scientific boundary. No endpoint integrator or loading change has been made by
+the native-basis implementation.

@@ -4331,4 +4331,64 @@ material transport. The BE endpoint scheme, SSPRK3, integration rules and final
 gates are unchanged. See \texttt{particle\_free/NATIVE\_DG\_BERNSTEIN.md} for
 ownership, code entry points and qualification limits.
 
+
+\subsection{Selectable bulk-tip midpoint candidate (9 November 2026)}
+Backward Euler remains the default of Section~\ref{sec:bulk-tip-sections}.
+The explicitly selected candidate uses $h_t=\Delta t/2$, algebraic displacement
+$a=h_t v_m$, pressure $p_m/G$, and $b_m=(b_1+b_n)/2$. The endpoint cone is
+imposed as $b_n\le b_m\le(1+b_n)/2$. The existing rational point elimination
+with duration $h_t$, increment $D_3(a)$ and phase $\phi_m$ gives the stage
+$\tau_m,A_m,Q_m,w_m,Y_m$ exactly. Endpoints are $2\tau_m-\tau_n$ and
+$2A_m-A_n$, not accepted half steps. Mechanics and the fracture VI use stage
+stress, pressure and driving force.
+
+For $k=|V_m|/D_c$, stage/end aging uses
+$\theta(s)=\theta_n e^{-ks}+(1-e^{-ks})/k$, with its continuous zero-rate limit,
+at $s=h_t$ and $s=\Delta t$. Signed friction and radiation act at the stage.
+A sufficient unique-root condition is $\eta_{rad}\ge p_N b h_t/D_c$, since
+$-h_t/D_c\le\partial_{|V|}\log\theta(h_t)\le0$. No multiple-root selection or
+physical damping change is implied. In these coordinates the reduced search
+functional has stage storage plus $\beta_{h_t}h_t\sum_s ds_s\int_0^{V_m}R_m(v)dv$,
+with residual row weights $\beta_{h_t}G$ and $K_f$. The ordinary simulator and
+ASPECT reference inverse retain ownership; no alternate driver is introduced.
+
+Endpoint storage and stage dissipation obey
+\[
+ W_{int}-\Delta E-D-\int C_c\,dx+W_{phase}=0,\qquad
+ C_c=Q_m:(A_1-A_n)-Y_m(\phi_1-\phi_n)-\Delta\psi_c,
+\]
+where $W_{phase}=K_f(b_1-b_n)\cdot R_b$ includes any upper-bound reaction.
+The nonlinear cohesive chain rule is not exact. The physical remainder is
+$W_{ext}-\Delta E-D$, reported without subtracting numerical terms. Only accepted
+endpoints publish. Stored rates/resistances are last-stage observations;
+numerical-method checkpoint metadata is distinct from the physical-law schema.
+Ordinary restart cannot change methods. Time-independent boundary velocities
+use the exact imposed stage increment; time-dependent inputs remain endpoint
+sampled and unqualified for midpoint boundary accuracy.
+
+The admission $\Delta tG/\eta\le2$ excludes the sign reversal of free Maxwell
+amplification $(1-z/2)/(1+z/2)$ but does not establish accuracy or L-stability.
+See \texttt{particle\_free/tip\_treatment/time\_integration.md} and the bounded
+report for independent checks, failed evidence and the qualification boundary.
+
+
+\subsection{Supported phase and solver consolidation (9 November 2026)}
+The active research model uses native DGQ2 Bernstein coefficients for the
+semantic phase composition. Fault-specific Q1/CPDI phase, native nodal phase,
+and historical replicated bulk/endpoint phase solvers are retired. This does
+not remove ordinary ASPECT uses of FE\_Q or FE\_DGQ. The supported physical
+routes are integrated fixed-reference bulk tip and growth-disabled mature
+material transport; their physical histories remain distinct.
+Backward Euler remains the reference and default. The shared experimental
+midpoint method retains its equations and acceptance gates; its bounded
+near-intact convergence audit did not establish adoption. The compact-loading
+experiment is closed without propagation qualification.
+Tensor advection uses owned rows and readable ghosts on all communicator sizes,
+including one rank. Native phase retains SSPRK3 and its bound-preserving limiter.
+The old Q1 profile-selector string is retained only for existing material
+checkpoint identity and support admission, never for algorithm dispatch.
+Physical-law, basis and numerical-method guards remain independent; no automatic
+checkpoint conversion is introduced. See \texttt{ACTIVE\_RESEARCH\_MODEL.md}
+and \texttt{TIP\_CONSOLIDATION\_REPORT.md} for current code entry points and tests.
+
 \end{document}

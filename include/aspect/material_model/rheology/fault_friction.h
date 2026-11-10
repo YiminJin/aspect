@@ -131,7 +131,7 @@ namespace aspect
           /** Integral from zero to V of the signed endpoint traction. A search
            * functional only, not stored energy or physical friction power. */
           double section_primitive(const std::vector<double> &, double V, double old_age,
-                                   double dt, double pressure, double radiation) const;
+                                   double dt, double pressure, double radiation, bool exact_aging = false) const;
 
           struct SectionEndpoint
           {
@@ -144,11 +144,11 @@ namespace aspect
           SectionEndpoint section_endpoint(const std::vector<double> &fractions,
                                             double free_rate, double mobility,
                                             double old_age, double dt,
-                                            double compression, double radiation) const;
+                                            double compression, double radiation, bool exact_aging = false) const;
 
           SignedEndpoint signed_endpoint(const std::vector<double> &fractions,
                                          double velocity, double old_age, double dt,
-                                         double compression, double radiation) const;
+                                         double compression, double radiation, bool exact_aging = false) const;
 
           double get_reference_slip_rate() const;
 

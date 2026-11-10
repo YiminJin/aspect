@@ -1,5 +1,12 @@
 # Geometry, profile and localization
 
+Current support is native DG Bernstein phase and owned-row stress transport on
+all ranks. Q1 remap/MacCormack, CPDI and nodal-phase descriptions below are
+historical comparisons only; their implementations are retired. The old
+`Material profile transport` name is parsed solely for checkpoint identity and
+its retained support admission. It does not select an algorithm. See the
+[active reading path](../ACTIVE_RESEARCH_MODEL.md).
+
 [Overview](../MATURE_MOVING_FAULT.md) · Prerequisite: [discretization](discretization.md)
 · Next: [mechanics](mechanics.md)
 
@@ -32,7 +39,7 @@ candidate to mechanics; it is not acceptance.
 
 ## Profile and material irreversibility
 
-For the historical continuous Q1 selection, [transport_material_profile](../../../../source/material_model/phase_field_fault/profile_transport.cc)
+For the historical continuous Q1 selection, `transport_material_profile` (retired source)
 visits owned Q1 vertices $x_i$ and pulls back the accepted field:
 $\phi_F(x_i)=\phi_h^-(x_i-\Delta t v^-(x_i))$. The default is this `Q1 remap`.
 Remote-point averaging handles points shared by cells. Missing departure

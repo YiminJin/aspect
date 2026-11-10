@@ -44,7 +44,7 @@ namespace aspect
     sum=Utilities::MPI::sum(sum,mpi_communicator);
     if (system_rhs.block(1).locally_owned_elements().is_element(0))system_rhs.block(1)[0]=-sum;
     system_rhs.block(1).compress(VectorOperation::insert);
-    system_rhs.block(1)*=pressure_scaling/coupling.timestep();
+    system_rhs.block(1)*=pressure_scaling/coupling.stage_timestep();
     current_linearization_point=0.;
     last_pressure_normalization_adjustment=0.;
     // Normalize homogeneous inverse loads to avoid absolute Arnoldi breakdown
@@ -62,7 +62,7 @@ namespace aspect
             ++bulk_tip_coupling->stokes_solves;
           }
         dst.block(0)=answer.block(0);
-        dst.block(0)*=coupling.timestep();
+        dst.block(0)*=coupling.stage_timestep();
         dst.block(1)=answer.block(1);
         dst.block(1)/=coupling.shear_modulus();
         const double gauge=Utilities::MPI::sum(dst.block(1).locally_owned_elements().is_element(0)?double(dst.block(1)[0]):0.,mpi_communicator);
@@ -109,7 +109,7 @@ namespace aspect
         LinearAlgebra::SparseMatrix metric;
         coupling.phase_search_matrix(metric,shift);
         LinearAlgebra::Vector load(lower),upper(lower),phase(x.block(pb));
-        upper=1.;
+        upper=coupling.upper_bound();
         metric.vmult(load,phase);
         load-=residual.block(pb);
         double minimum_mass=std::numeric_limits<double>::max();
@@ -176,12 +176,12 @@ namespace aspect
         fixed=0.;
         for (const auto i:owned)
           {
-            const double value=PhaseField::box_trial_value(x.block(pb)[i],direction.block(pb)[i],lower[i],1.,1.);
-            const auto bound=PhaseField::box_constraint(value,gradient.block(pb)[i],std::max(1.,shift)*mass[i],lower[i],1.);
-            feasible &= value>=lower[i] && value<=1.;
+            const double value=PhaseField::box_trial_value(x.block(pb)[i],direction.block(pb)[i],lower[i],coupling.upper_bound()[i],1.);
+            const auto bound=PhaseField::box_constraint(value,gradient.block(pb)[i],std::max(1.,shift)*mass[i],lower[i],coupling.upper_bound()[i]);
+            feasible &= value>=lower[i] && value<=coupling.upper_bound()[i];
             released+=active[i]!=0. && int(active[i])!=bound.status;
             active[i]=bound.status;
-            fixed.block(pb)[i]=bound.status<0 ? lower[i]-x.block(pb)[i] : bound.status>0 ? 1.-x.block(pb)[i] : 0.;
+            fixed.block(pb)[i]=bound.status<0 ? lower[i]-x.block(pb)[i] : bound.status>0 ? coupling.upper_bound()[i]-x.block(pb)[i] : 0.;
             violation=std::max(violation,std::abs(bound.projected_residual));
           }
         coupling.active_releases+=Utilities::MPI::sum(released,mpi_communicator);

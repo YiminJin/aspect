@@ -362,11 +362,15 @@ namespace aspect
         {
           return bulk_cohesive_phase;
         }
-        /** Active distributed solver versus the explicit small direct oracle. */
+        /** Numerical method identity, independent of the physical-law archive. */
+        bool uses_bulk_tip_midpoint() const
+        {
+          return bulk_tip_midpoint;
+        }
+
         bool uses_integrated_bulk_tip() const
         {
-          return bulk_cohesive_phase && bulk_flow_rule == BulkFlowRule::bulk_tip_sections
-                 && !bulk_tip_direct_oracle;
+          return bulk_cohesive_phase && bulk_flow_rule == BulkFlowRule::bulk_tip_sections;
         }
         /** Restricted PF2 tensor history; fixed localization and no transport. */
         bool uses_dg_tensor_history() const
@@ -564,7 +568,7 @@ namespace aspect
         {
           return dg_material_transport && (material_variable_viscosity || material_direct_stress);
         }
-        bool material_bounded_profile = false;
+        bool legacy_bounded_profile_identity = false; ///< Retired selector, retained only for checkpoint identity/admission.
         bool material_trace_inflow = false;
         bool material_prescribed_inflow = false;
         std::string material_exterior_identity;
@@ -588,7 +592,7 @@ namespace aspect
          * velocity; store results in the private attempt workspace. No reaction,
          * geometry publication or modification of the accepted parent occurs. */
         void transport_material_history(const MaterialHistoryInputs &input);
-        /** Transport the Q1 profile/obstacle and material surface labels. Bind the
+        /** Move material surface labels and bind the transported Bernstein profile/obstacle. Bind the
          * staged geometry/profile, then rebuild normalization for mechanics.
          * Update phase blocks in bulk and linear; retain rollback copies. The
          * bound state is still unaccepted and must be finished exactly once. */
@@ -609,10 +613,6 @@ namespace aspect
          * geometry, profile, histories and particle properties from the parent.
          * Clear attempt/correction caches in either case. */
         void finish_dg_material_step(bool accept) noexcept;
-        /** Return the transported mixed FE profile/obstacle from the accepted
-         * parent, using the selected Q1 remap or bounded transport. Does not bind
-         * or publish it; the non-phase blocks keep their existing meanings. */
-        LinearAlgebra::BlockVector transport_material_profile(const MaterialHistoryInputs &input) const;
         /** Evaluate the selected spatial multiplier times reference viscosity
          * (Pa s) at x (m). Does not advect a material identity or alter history. */
         double material_viscosity(const Point<dim> &x,
@@ -1370,7 +1370,7 @@ namespace aspect
           scalar, fixed_tensor, radial_tensor, coulomb_fixed_phase, bulk_tip_sections
         };
         BulkFlowRule bulk_flow_rule = BulkFlowRule::scalar;
-        bool bulk_tip_direct_oracle = false; ///< Explicit benchmark-only replicated oracle.
+        bool bulk_tip_midpoint = false; ///< Coupled stage equations; only endpoints persist.
         bool bulk_tip_equilibrate_seed = false; ///< Zero-clock fracture equilibration before history initialization.
         double bulk_tip_initial_age = 1.; ///< Virgin and initially damaged section age, seconds.
         /**

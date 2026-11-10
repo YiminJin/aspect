@@ -43,6 +43,38 @@ namespace aspect
           return r;
         }
 
+        State midpoint_endpoint(const State &old, const Response &stage)
+        {
+          return {2.*stage.state.stress-old.stress,
+                  2.*stage.state.cohesive_strain-old.cohesive_strain,
+                  2.*stage.state.phi-old.phi};
+        }
+
+        double cohesive_energy(const Parameters &p, const State &state)
+        {
+          if (state.phi==0.)
+            {
+              AssertThrow(state.cohesive_strain.norm()==0.,dealii::ExcMessage("Intact endpoint requires A=0."));
+              return 0.;
+            }
+          return p.G*(state.cohesive_strain*state.cohesive_strain)
+                 *(1.-state.phi)*(1.-state.phi)/(p.m*state.phi*(1.+state.phi));
+        }
+
+        StepAccounting midpoint_account(const Parameters &p, const State &old, const Response &stage,
+                                        const Tensor &increment, const double dt, const double f)
+        {
+          const auto end=midpoint_endpoint(old,stage);
+          StepAccounting a;
+          const double change=cohesive_energy(p,end)-cohesive_energy(p,old);
+          a.internal_work=stage.state.stress*increment;
+          a.storage_change=(end.stress*end.stress-old.stress*old.stress)/(4.*p.G)+change;
+          a.physical_dissipation=dt*(stage.bulk_viscosity+stage.cohesive_viscosity+f*stage.rate);
+          a.compliance_work=stage.Q*(end.cohesive_strain-old.cohesive_strain)-change;
+          a.error=a.internal_work-a.storage_change-a.physical_dissipation-a.compliance_work;
+          return a;
+        }
+
         Variation derivative(const Parameters &p, const Response &r, const Tensor &increment,
                              const double dphi, const double dt, const Tensor &S, const double df)
         {

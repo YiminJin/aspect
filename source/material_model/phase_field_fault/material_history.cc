@@ -142,7 +142,7 @@ namespace aspect
     PhaseFieldFault<dim>::prepare_material_history(
       const LinearAlgebra::BlockVector &accepted_velocity, const double time, const double dt)
     {
-      AssertThrow(!(material_bounded_profile || material_trace_inflow || material_prescribed_inflow)
+      AssertThrow(!(legacy_bounded_profile_identity || material_trace_inflow || material_prescribed_inflow)
                   || this->get_reconstructed_fault_manager().uses_full_normal_cross_section(),
                   ExcMessage("The selected material profile/inflow extension requires Association support = full normal cross-section. "
                              "Stationary seed support can clip the independently supplied/transported Q1 profile while normalization includes its tails."));
@@ -187,7 +187,7 @@ namespace aspect
       AssertThrow(jaumann_dg_stress || (dg_tensor_history && !consistent_endpoint_phase),
                   ExcMessage("Tensor transport requires objective history or the retained PF4 control."));
       return DGTransport::assemble(*this, fe_strain_state->bulk_history.tensor->primary, fe_strain_state->cells,
-                                   velocity, order, relax ? fe_strain_state->G / fe_strain_state->eta : 0., jaumann_dg_stress);
+                                   velocity, order, relax ? fe_strain_state->G / fe_strain_state->eta : 0.);
     }
     template <int dim>
     std::shared_ptr<typename PhaseFieldFault<dim>::DGHistory>

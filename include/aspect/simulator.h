@@ -131,7 +131,6 @@ namespace aspect
   {
     template <int dim> class BulkTipCoupling;
     template <int dim> class PhaseFieldTestAccess;
-    class EndpointBulkDirect;
     namespace Assembly
     {
       namespace Scratch
@@ -613,12 +612,6 @@ namespace aspect
       void solve_reconstructed_fault_stokes_inner (bool publish_history,
                                                    ReconstructedFaultVector *trial_slip_rate,
                                                    bool reuse_endpoint_bulk_preconditioner);
-      void solve_reconstructed_fault_endpoint_phase (bool publish_history = true,
-                                                     const LinearAlgebra::BlockVector *initial_trial = nullptr,
-                                                     ReconstructedFaultVector *trial_slip_rate = nullptr);
-      /** Default-off, serial fixed-direction bulk cohesive model. Reuses the
-       * native FE, AffineConstraints, direct factorization and outer lifecycle. */
-      void solve_bulk_cohesive_phase(); // Retained legacy controls / explicit small direct oracle only.
       std::shared_ptr<internal::BulkTipCoupling<dim>> bulk_tip_coupling;
       /** ASPECT mechanical inverse used only as a coupled Krylov preconditioner. */
       void apply_bulk_tip_stokes_inverse(LinearAlgebra::BlockVector &,
@@ -637,21 +630,6 @@ namespace aspect
        * Physical endpoint publication is a separate operation. */
       void commit_reconstructed_fault_geometry(
         const std::shared_ptr<MaterialModel::DGGeometryUpdate<dim>> &);
-      /** Fixed-step serial velocity inverse used only as an endpoint
-       * mechanical preconditioner. Rebuilt with the homogeneous A block. */
-      std::function<void(LinearAlgebra::Vector &,const LinearAlgebra::Vector &)>
-        endpoint_velocity_inverse;
-      /** Default-off serial full Stokes factor. Rebuilt with the homogeneous
-       * bulk operator; surface factors live with their exact linearization. */
-      std::shared_ptr<internal::EndpointBulkDirect> endpoint_bulk_direct;
-      /** One fixed-trial mechanical linearization and its matrix-free reduced
-       * elastic phase tangent. Invalid after another mechanical/phase trial. */
-      std::function<Vector<double>(const Vector<double> &)>
-      make_reconstructed_fault_endpoint_tangent(const LinearAlgebra::BlockVector &,
-                                                const ReconstructedFaultVector &,
-                                                const LinearAlgebra::BlockVector &endpoint_strain,
-                                                const std::vector<double> &endpoint_Z);
-
       /** Bulk norm and surface residual returned by one coupled evaluation. */
       struct ReconstructedFaultCoupledResidual;
       /** Test-access-only norms of a noncommitting explicit mechanical endpoint. */

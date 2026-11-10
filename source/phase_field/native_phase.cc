@@ -105,8 +105,6 @@ namespace aspect
     const Utilities::MPI::RemotePointEvaluation<dim> &lookup, const LinearAlgebra::BlockVector &state) const
   {
     const auto c = this->introspection().phase_field().first_component_index;
-    if (!uses_dg_phase())
-      return VectorTools::point_values<1>(lookup, this->get_dof_handler(), state, VectorTools::EvaluationFlags::avg, c);
     using Sample = std::pair<std::string, double>;
     const auto samples = lookup.template evaluate_and_process<Sample>(
                            [&](const ArrayView<Sample> &values, const auto & data)

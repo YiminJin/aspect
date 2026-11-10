@@ -46,7 +46,7 @@ namespace aspect
       FaultFriction<dim>::signed_endpoint(const std::vector<double> &fractions,
                                          const double V, const double old_age,
                                          const double dt, const double pressure,
-                                         const double radiation) const
+                                         const double radiation, const bool exact_aging) const
       {
         AssertThrow(friction_law==FrictionLaw::rate_state && regularized
                     && old_age>0. && dt>0. && pressure>0. && radiation>=0.,
@@ -56,12 +56,15 @@ namespace aspect
         for(unsigned int j=0;j<fractions.size();++j)
           {direct+=fractions[j]*a[j];evolution+=fractions[j]*b[j];reference+=fractions[j]*mu0[j];}
         const double speed=std::abs(V),denominator=1.+dt*speed/Dc;
-        const double age=(old_age+dt)/denominator;
+        const double age=exact_aging ? (speed==0. ? old_age+dt : old_age*std::exp(-dt*speed/Dc)-Dc/speed*std::expm1(-dt*speed/Dc)) : (old_age+dt)/denominator;
+        const double log_age_derivative=exact_aging
+          ? update_state_derivative_wrt_slip_rate(speed,old_age,dt)/age : -dt/(Dc*denominator);
         const double scale=std::exp((reference+evolution*std::log(age*V0/Dc))/direct)/(2.*V0);
         const double z=speed*scale,ratio=z/std::hypot(1.,z);
         const double friction=std::copysign(pressure*direct*std::asinh(z),V);
-        const double slope=pressure*((speed>0.?direct*ratio/speed:direct*scale)
-                                    -evolution*ratio*dt/(Dc*denominator))+radiation;
+        const double slope=exact_aging
+          ? pressure*((speed>0.?direct*ratio/speed:direct*scale)+evolution*ratio*log_age_derivative)+radiation
+          : pressure*((speed>0.?direct*ratio/speed:direct*scale)-evolution*ratio*dt/(Dc*denominator))+radiation;
         return {friction+radiation*V,slope,age,friction,radiation*V};
       }
 
@@ -69,10 +72,10 @@ namespace aspect
       double FaultFriction<dim>::section_primitive(const std::vector<double> &fractions,
                                                    const double V, const double old_age,
                                                    const double dt, const double pressure,
-                                                   const double radiation) const
+                                                   const double radiation, const bool exact_aging) const
       {
         if (V == 0.) return 0.;
-        const auto zero = signed_endpoint(fractions, 0., old_age, dt, pressure, radiation);
+        const auto zero = signed_endpoint(fractions, 0., old_age, dt, pressure, radiation, exact_aging);
         double direct = 0.;
         for (unsigned int j=0; j<fractions.size(); ++j) direct += fractions[j]*a[j];
         const double scale = pressure*direct/(zero.derivative-radiation);
@@ -87,7 +90,7 @@ namespace aspect
             const double u = limit*rule.point(q)[0];
             const double rate = scale*std::sinh(u);
             value += rule.weight(q)*signed_endpoint(fractions, rate, old_age, dt,
-                                                    pressure, radiation).traction*scale*std::cosh(u);
+                                                    pressure, radiation, exact_aging).traction*scale*std::cosh(u);
           }
         return limit*value;
       }
@@ -97,20 +100,22 @@ namespace aspect
       FaultFriction<dim>::section_endpoint(const std::vector<double> &fractions,
                                           const double free_rate, const double mobility,
                                           const double old_age, const double dt,
-                                          const double pressure, const double radiation) const
+                                          const double pressure, const double radiation, const bool exact_aging) const
       {
-        const auto zero=signed_endpoint(fractions,0.,old_age,dt,pressure,radiation);
+        const auto zero=signed_endpoint(fractions,0.,old_age,dt,pressure,radiation,exact_aging);
         double direct=0.,evolution=0.,reference=0.;
         for(unsigned int j=0;j<fractions.size();++j)
           {direct+=fractions[j]*a[j];evolution+=fractions[j]*b[j];reference+=fractions[j]*mu0[j];}
         // R'(V)=p*ratio*(a/|V|-b/(Dc/dt+|V|))+eta_rad.
-        // The negative part is bounded by -p*dt/Dc*(sqrt(b)-sqrt(a))_+^2.
+        // Exact aging is a positive mixture of exp(-|V|r/Dc), 0<=r<=dt,
+        // so d(log theta)/d|V| >= -dt/Dc: R' >= eta_rad-p*b*dt/Dc.
+        // For BE the negative part is bounded by -p*dt/Dc*(sqrt(b)-sqrt(a))_+^2.
         const double weakening=std::max(0.,std::sqrt(evolution)-std::sqrt(direct));
-        AssertThrow(mobility>=0. && radiation>=pressure*dt/Dc*weakening*weakening,
+        AssertThrow(mobility>=0. && radiation>=pressure*dt/Dc*(exact_aging ? evolution : weakening*weakening),
                     ExcMessage("Bulk section elimination requires a monotone endpoint RSF law. Multiple-root selection is not qualified."));
         if(free_rate==0.)return {zero,0.,zero.derivative/(1.+mobility*zero.derivative)};
         if(mobility==0.)
-          {const auto law=signed_endpoint(fractions,free_rate,old_age,dt,pressure,radiation);return {law,free_rate,law.derivative};}
+          {const auto law=signed_endpoint(fractions,free_rate,old_age,dt,pressure,radiation,exact_aging);return {law,free_rate,law.derivative};}
         const double scale=2.*V0*std::exp(-(reference+evolution*std::log((old_age+dt)*V0/Dc))/direct);
         AssertThrow(scale>0. && std::isfinite(scale),ExcMessage("Section RSF rate scale is outside floating-point range."));
         const double target=std::abs(free_rate),sign=std::copysign(1.,free_rate);
@@ -119,7 +124,7 @@ namespace aspect
         for(unsigned int iteration=0;iteration<100;++iteration)
           {
             rate=static_cast<double>(scale*std::sinh(coordinate));
-            law=signed_endpoint(fractions,rate,old_age,dt,pressure,radiation);
+            law=signed_endpoint(fractions,rate,old_age,dt,pressure,radiation,exact_aging);
             const long double residual=static_cast<long double>(rate)+static_cast<long double>(mobility)*law.traction-target;
             if(std::abs(residual)<=32.*std::numeric_limits<double>::epsilon()*target)
               {converged=true;break;}
@@ -129,7 +134,7 @@ namespace aspect
             coordinate=trial>lower && trial<upper?trial:.5*(lower+upper);
           }
         AssertThrow(converged,ExcMessage("Monotone section RSF elimination did not reach roundoff accuracy."));
-        rate*=sign;law=signed_endpoint(fractions,rate,old_age,dt,pressure,radiation);
+        rate*=sign;law=signed_endpoint(fractions,rate,old_age,dt,pressure,radiation,exact_aging);
         return {law,rate,law.derivative/(1.+mobility*law.derivative)};
       }
 
@@ -171,7 +176,7 @@ namespace aspect
       double FaultFriction<dim>::update_state_derivative_wrt_slip_rate(
         const double V, const double old, const double dt) const
       {
-        Assert(friction_law==FrictionLaw::rate_state && V>=Vmin && old>0. && dt>=0.,
+        Assert(friction_law==FrictionLaw::rate_state && V>=0. && old>0. && dt>=0.,
                ExcInternalError());
         const double x=V*dt/Dc;
         // The two O(x) terms cancel. Use the analytic Taylor limit for small x,

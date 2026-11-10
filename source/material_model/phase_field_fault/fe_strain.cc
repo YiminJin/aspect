@@ -45,81 +45,14 @@ namespace aspect
     bool
     PhaseFieldFault<dim>::initialize_fe_shared_phase(LinearAlgebra::BlockVector &trial) const
     {
-      if (this->introspection().composition_type_exists(CompositionalFieldDescription::phase_field))
-        {
-          AssertThrow(this->get_timestep_number() == 0 && !this->get_parameters().resume_computation
-                      && !fe_strain_state, ExcMessage("Native phase initialization is fresh-only."));
-          LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,
-                                           this->get_mpi_communicator());
-          owned = trial;
-          if (this->get_phase_field_handler().uses_dg_phase())
-            this->get_phase_field_handler().limit_dg_phase(owned);
-          trial = owned;
-          return true;
-        }
-      if (fe_initial_phase_profile.empty() && !uses_prescribed_dg_geometry() && !dg_material_transport)
-        return false;
-      AssertThrow((consistent_endpoint_phase || dg_material_transport) && this->get_timestep_number() == 0
-                  && !this->get_parameters().resume_computation && !fe_strain_state,
-                  ExcMessage("Shared profile is fresh pre-existing damage; history conversion is prohibited."));
-      std::ifstream input(fe_initial_phase_profile);
-      AssertThrow(dg_material_transport || uses_prescribed_dg_geometry() || bool(input), ExcMessage("Cannot open FE initial phase profile."));
-      std::vector<std::pair<double, double>> data;
-      double y, value;
-      while (!dg_material_transport && !uses_prescribed_dg_geometry() && input >> y >> value)
-        {
-          AssertThrow(std::isfinite(y) && value >= 0. && value < 1.
-                      && (data.empty() || y > data.back().first), ExcMessage("Invalid shared phase data."));
-          data.emplace_back(y, value);
-        }
-      AssertThrow(dg_material_transport || uses_prescribed_dg_geometry() || (input.eof() && data.size() >= 2), ExcMessage("Malformed shared phase data."));
-      LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
+      AssertThrow(this->introspection().composition_type_exists(CompositionalFieldDescription::phase_field)
+                  && this->get_timestep_number() == 0 && !this->get_parameters().resume_computation
+                  && !fe_strain_state, ExcMessage("Native phase initialization is fresh-only."));
+      LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,
+                                       this->get_mpi_communicator());
       owned = trial;
-      const auto component = this->introspection().phase_field().first_component_index;
-      std::vector<types::global_dof_index> indices(this->get_fe().n_dofs_per_cell());
-      for (const auto &cell : this->get_dof_handler().active_cell_iterators())
-        if (!cell->is_artificial())
-          {
-            cell->get_dof_indices(indices);
-            const auto &phase_element=this->get_fe().base_element(this->get_fe().component_to_base_index(component).first);
-            for (unsigned int v = 0; v < phase_element.n_dofs_per_cell(); ++v)
-              {
-                const Point<dim> point=this->get_phase_field_handler().uses_dg_phase()
-                                       ? this->get_mapping().transform_unit_to_real_cell(cell,phase_element.get_unit_support_points()[v]) : cell->vertex(v);
-                const auto i = indices[this->get_fe().component_to_system_index(component, v)];
-                if (!owned.locally_owned_elements().is_element(i))
-                  continue;
-                if (uses_prescribed_dg_geometry() || dg_material_transport)
-                  {
-                    const double phi = dg_material_transport ? material_initial_phase.value(point) : prescribed_geometry_phase(point);
-                    AssertThrow(std::isfinite(phi) && phi >= 0. && phi < 1., ExcMessage("Inadmissible prescribed physical phase."));
-                    owned[i] = phi;
-                    continue;
-                  }
-                const double yy = point[1];
-                AssertThrow(yy >= data.front().first && yy <= data.back().first,
-                            ExcMessage("Shared phase profile does not cover the domain."));
-                auto right = std::upper_bound(data.begin(), data.end(), yy, [](double x, const auto & p)
-                {
-                  return x < p.first;
-                });
-                if (right == data.end())
-                  owned[i] = data.back().second;
-                else if (right == data.begin())
-                  owned[i] = right->second;
-                else
-                  {
-                    const auto &left = *(right - 1);
-                    const double t = (yy - left.first) / (right->first - left.first);
-                    owned[i] = (1 - t) * left.second + t * right->second;
-                  }
-              }
-          }
-      owned.compress(VectorOperation::insert);
-      if (this->get_phase_field_handler().uses_dg_phase())
-        this->get_phase_field_handler().limit_dg_phase(owned);
+      this->get_phase_field_handler().limit_dg_phase(owned);
       trial = owned;
-      this->get_pcout() << "   Accepted supplied continuum phase seed; native particle H retained as diagnostic, unloaded independent histories constructed afterward." << std::endl;
       return true;
     }
     template <int dim>

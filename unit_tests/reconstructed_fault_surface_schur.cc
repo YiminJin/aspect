@@ -1,7 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT.
  * SPDX-License-Identifier: GPL-2.0-or-later */
 #include "common.h"
-#include <aspect/simulator/solver/reconstructed_fault_surface_schur.h>
+#include "support/endpoint_bulk_reference.h"
 #include <deal.II/lac/block_sparsity_pattern.h>
 
 TEST_CASE("Fault direct bulk inverse preserves pressure quotient and constraints",

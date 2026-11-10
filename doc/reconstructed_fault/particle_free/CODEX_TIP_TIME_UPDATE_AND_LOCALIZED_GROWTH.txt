@@ -1,0 +1,335 @@
+TASK: TEST A COUPLED MIDPOINT TIME UPDATE AND RESUME LOCALIZED TIP GROWTH
+
+For the existing Codex thread: Astra, high reasoning.
+9 November 2026
+
+OBJECTIVE
+
+Implement and test one consistent alternative to the current backward-Euler
+(BE) bulk-tip update, then use a short mechanical screen to construct a more
+informative localized-growth experiment. Complete useful implementation and
+bounded experiments in this task. Keep the eventual paper goal in view:
+unstable RSF sliding coupled to propagation, after the mature-fault examples.
+This task is a step toward that goal, not an instability qualification.
+
+Priority order: scientific examples; accuracy/stability/efficiency; reuse of
+ASPECT/deal.II infrastructure; readable implementation. Native DG Bernstein
+is the selected phase representation for all new tip cases.
+
+ENTRY AND WHAT IS ALREADY ESTABLISHED
+
+Verify repository, branch, current revision, local changes and AGENTS.md.
+The reviewed remote is pf-rsf-particle-free at
+e8b6dd0912640433676a69089d2b2ad17701bcbf
+(Integrate native DG Bernstein phase and retain tip efficiency improvements).
+Its NATIVE_DG_BERNSTEIN_REPORT.md matches the supplied report. Read that report,
+TIP_EFFICIENCY_AND_GROWTH_REPORT.md, TIP_TREATMENT.md and relevant linked pages.
+Preserve subsequent user work; this hash is a reference, not a reset target.
+
+Native Bernstein has passed local operator, coupled, transport and lifecycle
+comparisons. The difficult endpoint differs from the original control by only
+4.68e-16 in phase and 1.59e-12 Pa in stress. Full-step speed is mixed: there is
+no basis for reopening a general performance campaign. Retain the progress
+search ordering and near-gate exact polishing unless the new time equations
+require a specifically derived adaptation.
+
+Preserve the final native core
+76e9c5c1f16caf64e4f98e763463936dc12ba7d4649b280febbd34f5dbd5641a,
+the initial native comparison core and the retained nodal efficiency core,
+with their compatible plugins/checkpoints. Match actual identities to manifests.
+
+The unresolved time error is physical, despite an accurately closed algebraic
+ledger: in the earlier common-parent .0575 -> .06 window, BE's remainder was
+.001747836 J/m, about 10.25 times the added fracture work. Two half steps reduced
+it to .000874876 J/m, still about 5.17 times added fracture work. Stress BE loss
+dominates. These are local-window results, not global trajectory error estimates.
+The existing uniformly sheared localized specimen showed weak growth but no
+resolved front advance before remote driving approached its diagnostic limit.
+
+1. DERIVE AND IMPLEMENT ONE COUPLED MIDPOINT CANDIDATE
+
+Keep the same continuous model, prescribed compression, signed section closure,
+fixed direction/reference mesh, physical tau/A histories and single SIPG fracture
+functional. Change time discretization explicitly; do not change h(phi), Gc,
+RSF parameters, geometry, physical damping or the phase admissible cone.
+Retain BE as the comparison mode. Add at most one focused time-integrator
+selection for the integrated tip route; do not introduce an integrator framework.
+
+Use the following candidate, verifying its derivation before wiring the coupled
+solver. Superscripts n and 1 denote accepted beginning and new endpoint. Let
+
+  dt = physical step duration,  u = dt*v_m,
+  tau_m = (tau_1 + tau_n)/2,  A_m = (A_1 + A_n)/2,
+  b_m = (b_1 + b_n)/2,        phi_m = sum_i b_m,i B_i.
+
+The subscript m denotes the time stage. The coupled equations are
+
+  (tau_1-tau_n)/(2G dt) + tau_m/(2 eta) = D3(u)/dt - w_m S,
+  (A_1-A_n)/dt + (G/eta) A_m = w_m S,
+  Q_m = 2G A_m/h(phi_m),
+  Y_m = G h'(phi_m) (A_m:A_m)/h(phi_m)^2,
+  (tau_m-Q_m):S = f_m,
+  V_m,s = sum_{q in s} dn_q w_m,q.
+
+As in the present model, singular expressions above denote their analytic
+intact/fully-damaged limits. Never evaluate infinity times zero or regularize
+them with an arbitrary phase floor. Retain the full 3-D plane-strain metric.
+
+Assemble mechanics using stage stress and pressure, and the phase VI using
+
+  R_b = [H_f b_m + ell_f - integral B Y_m]/K_f,
+  b_n <= b_1 <= 1,
+
+with the existing lower/free/upper signs. Here H_f and ell_f come from the
+same authoritative quadratic AT1/SIPG energy. The obstacle applies to the
+endpoint b_1. Do not solve a midpoint obstacle and then extrapolate beyond one
+or clip the endpoint. With stage coordinates, the equivalent upper bound is
+(1+b_n)/2; document the chosen coordinates and all factors of two.
+
+A useful exact algebraic reuse is available: the existing BE point elimination
+evaluated with duration dt/2, strain increment D3(u)/2 and phase phi_m supplies
+tau_m, A_m, Q_m, w_m and Y_m for these equations. Recover tau_1=2*tau_m-tau_n
+and A_1=2*A_m-A_n. This is a local algebraic identity, not an accepted half step.
+Check it against the equations above independently. Reuse the stable rational
+elimination, rather than duplicate a second constitutive law. Endpoint storage
+must be evaluated from tau_1, A_1 and phi_1, not from the stage response.
+
+For state evolution use the exact solution of the aging equation at a constant
+stage rate, at both stage and endpoint. With k=abs(V_m)/Dc,
+
+  theta(s) = theta_n*exp(-k*s) + [1-exp(-k*s)]/k,
+  theta_m = theta(dt/2),  theta_1 = theta(dt).
+
+Use the continuous k=0 limit theta_n+s and stable expm1-based arithmetic.
+Evaluate signed regularized RSF at (V_m,theta_m), including radiation at V_m.
+This advances the same aging ODE and preserves positive age; it is not exact
+for an arbitrary varying physical rate. Accumulate signed slip with dt*V_m,
+and distinguish any existing absolute-slip diagnostic.
+Where necessary, separate the existing signed RSF evaluation from its age-update
+choice so BE and midpoint share the friction algebra and root machinery. Keep
+this refactoring local; do not duplicate an entire friction implementation.
+
+Differentiate the complete stage law, including theta_m(V_m), stage-phase
+dependence, local elimination and section condensation. The old BE monotonicity
+bound does not automatically apply. Derive a sufficient condition for the new
+law or an otherwise justified unique-root admission on the tested cases.
+Retain the current scope excluding unqualified multiple-root selection; do not
+increase radiation damping or alter a/b to make a difficult case pass.
+The intended later instability campaign remains a separate qualification.
+
+Use boundary data and reaction work at the same stage. The present controls
+have time-independent prescribed velocities. For time-dependent data, document
+the approximation to the imposed displacement increment. Keep u/dt and pressure
+explicitly identified as stage quantities, not endpoint observations.
+
+2. CONSISTENT GLOBALIZATION, OWNERSHIP AND ACCOUNTING
+
+Reuse the integrated BulkTipCoupling, ordinary simulator nonlinear loop,
+release-capable constrained solve, distributed fracture assembly and ASPECT
+Stokes preconditioner. No new timestep driver, shadow phase solver, replicated
+production algebra or changes to the ordinary advection face assemblers.
+
+Derive the reduced stage functional and its directional derivative before using
+the existing Armijo test. The BE functional with the half-duration stage algebra
+and the primitive integral_0^V R_m(v) dv provides a route; apply the coordinate
+chain rule and row weights explicitly. Do not assume old beta, dt, derivative
+weights or an old friction primitive still match the new residual. Retain the
+strict tangent/direct-reference checks and progress search where compatible.
+Do not mistake this search functional for physical stored energy.
+
+Keep final mechanics/KKT tolerances 1e-9/1e-7 for the selected discrete equations
+and keep the independent algebraic-ledger accuracy. Testing the new residual
+does not mean imposing the old BE endpoint equations as an extra acceptance gate.
+Report endpoint constitutive/phase stationarity discrepancies as temporal
+diagnostics where relevant; do not relabel stage residuals as endpoint ones.
+
+Only accepted endpoints become history: tau_1, A_1, phi_1, theta_1 and cumulative
+slip. Stage responses remain attempt-local. If stored output rates/resistances
+represent the last stage, identify that time location and do not reuse them as
+an instantaneous endpoint friction law. Adapt independent observers accordingly.
+All Newton/line-search evaluations use one immutable accepted parent. Rejection,
+retry and checkpoint restoration must preserve this meaning and publication once.
+Record integrator identity in checkpoint metadata; an explicit benchmark
+common-parent import may change the numerical method, but ordinary restart must
+not silently switch methods. Keep physical-law and method identities distinct.
+
+The stage equations give a useful independent energy check. Write
+psi_c(A,phi)=G A:A/h(phi). Define the local nonlinear chain-rule defect
+
+  C_c = Q_m:(A_1-A_n) - Y_m*(phi_1-phi_n)
+        - [psi_c(A_1,phi_1)-psi_c(A_n,phi_n)].
+
+Quadratic stress energy satisfies its midpoint chain rule exactly. So does the
+assembled quadratic fracture energy:
+
+  Delta E_f = (H_f b_m + ell_f) dot (b_1-b_n).
+
+Use the actual SIPG cell/face energy. Physical dissipation uses the same stage:
+dt*tau_m:tau_m/(2 eta), dt*(G/eta)*Q_m:A_m, and section-integrated friction and
+radiation work. Independently evaluate reaction work, endpoint storage and these
+losses. Derive/check their identity including integrated C_c, phase residual work,
+mechanical residual work and any upper-bound reaction work. Do not discard an
+upper-bound multiplier contribution when the phase reaches one.
+
+In particular, nonlinear cohesive energy does NOT satisfy a general exact
+midpoint chain rule. Report C_c and the physical-work remainder, both signed and
+accumulated absolute values. Do not manufacture conservation by subtracting
+numerical terms from the reported physical error, adjusting Gc, or merely changing
+diagnostic work to trapezoidal integration while leaving BE mechanics unchanged.
+
+This is a candidate with expected second-order behavior on smooth admitted
+trajectories, not a claim of unconditional energy decrease or second-order
+accuracy across active-set changes. Intact birth, saturation and reversal need
+separate checks. For free Maxwell relaxation its amplification factor is
+(1-z/2)/(1+z/2), z=dt*G/eta: it changes sign for z>2 and is not L-stable. Include
+that inexpensive counterexample, document a justified timestep/admission limit,
+and do not claim qualification of a stiff viscous crust from these tip tests.
+Do not silently fall back to BE. If the candidate is unsuitable, retain its
+measured failure as evidence and complete the independent loading screen below;
+do not launch a survey of integrators or redesign the constitutive model.
+
+3. SHORT TIME-ACCURACY AND LIFECYCLE COMPARISONS
+
+A. Point/section checks, then coupled verification:
+   - Constant-phase Maxwell relaxation and smooth forcing against analytic or
+     tightly resolved independent references, including both signs of shear.
+   - Cohesive point evolution with a prescribed smooth changing phase for the
+     chain-rule test; distinguish this from a coupled admissible growth solution.
+   - Exactly intact/fully damaged states, onset from intact, near-zero rates,
+     aging at V=0, finite-rate aging, reversal and stiff relaxation.
+   - Finite differences of the point and condensed section response, then the
+     integrated mechanics/phase tangent and reduced-functional derivative.
+   - Test physical dissipation and state accuracy, not ledger closure alone.
+
+B. Use the retained common accepted .0575 parent and exact recorded clock.
+   Compare the new method over the same .0025 window with 1, 2 and 4 substeps.
+   Reuse matching retained BE full/half-step evidence; rerun only what is needed
+   for a valid comparison. Use one additional finer reference only if the three
+   new levels do not resolve the relevant state error or convergence trend.
+   Do not replay the full trajectory to reconstruct the parent.
+
+   Compare tau, A, phase, Y, slip, age, stage rate/resistance at matching temporal
+   locations, added fracture work, each physical loss and the physical remainder.
+   Stage observations from different time grids are not same-time endpoint data;
+   compare integrals or reconstruct matched-time diagnostics where needed.
+   Keep absolute errors for tiny rates/energies, alongside meaningful normalized
+   errors. A small energy remainder alone does not establish an accurate state.
+
+   The practical target is to reduce the formerly dominant numerical work error
+   substantially at the existing step size, with compatible state convergence
+   and reasonable cost. Report whether it falls below 10% of added fracture work
+   on this window; this is a useful task target, not a universal acceptance law.
+   Distinguish a missed target from a wrong equation or failed nonlinear solve.
+   Report wall time, nonlinear/Krylov work and cost at comparable accuracy.
+
+C. Run a short native-Bernstein localized control with actual coupled growth
+   under the old loading to separate the method change from the new specimen.
+   Include a short half-dt comparison through an active-set change. Do not claim
+   smooth second order from only a fixed-phase manufactured problem.
+
+D. One active 1->2 rank new-method restart with reject/retry; one ordinary BE
+   control verifying unchanged behavior. Use one short mature smoke check only
+   if shared material/serialization changes affect that route. Do not repeat the
+   completed FE, transport and full mature campaigns without a relevant change.
+
+4. COMPACT-LOADING SCREEN AND ONE BOUNDED GROWTH PILOT
+
+Use the existing 4-by-2 specimen, equilibrated seed, h=ell=.25 and material/RSF
+parameters as the starting control. Retain uniform-shear results as evidence.
+For a new explicitly labeled loading configuration, start with
+
+  L(x) = max(0, 1-((x-2)/1.2)^2)^2,
+  v_x(top) = +.01 L(x),  v_x(bottom) = -.01 L(x),
+  v_y = 0,  side velocities = 0.
+
+These are boundary conditions, not a prescribed interior velocity profile.
+First solve the mechanical response with (i) intact phase and (ii) the actual
+equilibrated seed held fixed. In both cases retain the same bulk/section law.
+A small benchmark-only fixed-phase constraint is sufficient; do not introduce
+a different physical cohesive model for the screen. Inspect shear/normal stress,
+Y, section rates/resistance and boundary reactions at a few bounded load levels.
+
+Define tip neighborhoods, seeded interior, remote region and boundary strips
+before assessing maxima. Include boundary hot spots in the assessment. Determine
+whether existing tips can be driven while unseeded material retains a useful
+margin; localized boundary velocity does not guarantee localized interior stress.
+Y/K_f is a diagnostic in intact material, not a replacement for the full fracture
+VI near a tip. If the first profile loads shoulders/boundaries instead, one
+mechanically justified width/support adjustment is allowed. Record it explicitly;
+do not run an open-ended parameter sweep or tune toughness/friction to get growth.
+
+After an informative screen, run one growing specimen, at most 24 physical steps,
+using a timestep supported by the time study. Use the new method if qualified;
+otherwise use explicitly labeled BE for this independent pilot. Start the new
+loading from its documented seed/history, not a checkpoint created under a
+different loading history. Choose the modest amplitude/stop window from the
+mechanical screen, without changing material parameters.
+
+Continue far enough to test resolved axial advance, subject to runtime and
+admission limits. Retain the previous remote Y/K_f=.95 diagnostic stop unless
+the screen supplies a documented replacement. Stop for boundary-dominated or
+remote damage, violated assumptions or nonlinear failure; preserve the reason.
+
+Show physical phase contours at several fixed levels, incremental damage and Y,
+and the actual spatial sampling resolution. Distinguish seed thickening, a weak
+diffuse halo, shoulder growth and axial tip advance. Give tip-region incremental
+fracture work using the actual SIPG weak-work partition, whose sum must reproduce
+the global change. A smooth image or changing low contour is not propagation
+qualification. Do not add a long unstable-event run or server campaign here.
+
+5. READABILITY, DEFERRED CLEANUP AND DELIVERABLES
+
+Use ASPECT formatting and comments explaining physical variables, time locations,
+ownership and factors of two. Reuse existing material and friction routines where
+their contracts fit; avoid enum forests, callback frameworks or parallel solver
+implementations. No attempt-local stage quantity becomes a second physical history.
+
+The user explicitly defers broad cleanup for this task. Record a concrete cleanup
+list with callers and retained-test dependencies: phase-specific FE_Q/Q1 legacy
+paths and CPDI assumptions, nodal phase compatibility, historical replicated
+endpoint solvers, and
+the serial tensor-advection implementation in material_model/history/tensor_advection.cc.
+The FE_Q/FE_DGQ classes also serve ordinary ASPECT fields and stress: do not mark
+their general infrastructure for deletion. Distinguish reference-only code from
+production callers, and compatibility needed to interpret old evidence from
+code that must remain executable indefinitely. Update an existing cleanup record
+if present. Do not build a new abstraction solely to preserve every old path.
+
+Plan the focused deletion/consolidation after the time method and short growth
+control are settled, before expensive publication runs. It need not wait for all
+final scientific experiments. Do not perform that broad deletion in this task.
+
+Deliver:
+  - Working selectable candidate integrated in the current solver, or a precise
+    independently demonstrated mathematical blocker with unaffected BE retained.
+  - TIP_TIME_UPDATE_AND_GROWTH_REPORT.md with the method decision, time/state/work
+    comparisons, cost, loading screen, pilot outcome and remaining limitations.
+  - A linked tip_treatment/time_integration.md deriving continuous equations ->
+    stage/endpoint update -> elimination -> coupled residual/tangent -> physical
+    work identity, each linked to qualified code functions and independent tests.
+  - Updated STATUS.md, configuration/limitations pages and the bounded cleanup
+    list. Explain stage versus endpoint outputs in plain words.
+  - Compact reproducibility records: source/binary/plugin/input identities,
+    exact clocks, commands, wall time, rejected attempts and protected references.
+
+For context on midpoint/discrete-gradient energy and stiff damping, see the
+primary reference Hairer & Lubich, Energy-diminishing integration of gradient
+systems: https://www.unige.ch/~hairer/preprints/gradientflow.pdf . Its results do
+not by themselves prove properties of this constrained RSF model. The derivation
+and checks above must establish the actual candidate's behavior.
+
+RESOURCE AND SCOPE LIMITS
+
+At most four total build workers or MPI ranks across concurrent jobs, one numerical
+thread per rank. Run heavy jobs sequentially, including builds; the preceding
+report records an accidental build overlap. Cap aggregate new numerical runs at
+two hours, excluding builds. Use per-run timeouts and fresh labels. Spend this
+budget on the selected candidate and short growth pilot, not broad profiling or
+the old long translations. Reuse valid evidence. Finish with no jobs left running.
+
+No server submission, h=1/16 mature run, general moving cohesive growth, turning,
+branching, AMR, new fault direction law or unqualified multiple-root RSF extension.
+No arbitrary weakening of gates, compensating dissipation or smoothing of accepted
+histories. Ordinary implementation choices are authorized; proceed without repeated
+confirmation. If a scientific contradiction blocks one part, document it and
+complete the independent parts. Follow the established commit/push policy.

@@ -3,7 +3,6 @@
 #define ASPECT_MATERIAL_MODEL_TENSOR_ADVECTION_H
 
 #include <aspect/material_model/history/tensor_field.h>
-#include <deal.II/lac/sparse_matrix.h>
 
 namespace aspect
 {
@@ -17,9 +16,9 @@ namespace aspect
        * divergence correction keeps this a material, not conservative, update.
        * No constitutive reconstruction, rotation, or history publication occurs.
        *
-       * Supported geometry is fixed 2-D Cartesian Q2 without hanging/periodic
-       * faces. The owned-row implementation uses readable neighbor ghosts; the
-       * retained serial control uses a sparse matrix and global serial vectors.
+       * Supported geometry is fixed 2-D Cartesian Q2, including hanging faces
+       * but excluding periodic faces. One owned-row implementation with readable
+       * neighbor ghosts is used on every communicator, including one rank.
        * Rebuild after mesh or velocity changes. Construction/advance are collective
        * on the simulator communicator and are called outside threaded assembly.
        */
@@ -36,10 +35,10 @@ namespace aspect
           static std::shared_ptr<TensorAdvection> assemble(
             const SimulatorAccess<dim> &context, const History &history,
             const Cells &cells, const LinearAlgebra::BlockVector &velocity,
-            unsigned int quadrature_order, double relaxation_rate, bool distributed);
+            unsigned int quadrature_order, double relaxation_rate);
 
           /** Mass-project an explicit spatial/time field into a new numerical field.
-           * Works with serial or distributed operators; refreshes coefficient ghosts. */
+           * Refreshes coefficient ghosts after owned-row projection. */
           static std::shared_ptr<History> project(
             const SimulatorAccess<dim> &context, const TensorAdvection &op,
             const Field &field, double time, unsigned int quadrature_order);
@@ -49,18 +48,6 @@ namespace aspect
            * Requires dt*(inverse_advection_time+relaxation_rate) <= 0.125; caller subcycles if needed.
            * Return owned coefficients with readable ghosts in the same space. */
           static std::shared_ptr<History> advance(
-            const SimulatorAccess<dim> &context, const TensorAdvection &op,
-            const History &history, const Field &inflow, const Field &source,
-            double time, double dt);
-
-        private:
-          /** Owned-row assembly, with no replicated global dense field. */
-          static std::shared_ptr<TensorAdvection> assemble_distributed(
-            const SimulatorAccess<dim> &context, const History &history,
-            const Cells &cells, const LinearAlgebra::BlockVector &velocity,
-            unsigned int quadrature_order, double relaxation_rate);
-          /** Owned-row SSPRK3; refresh ghost values at each stage. */
-          static std::shared_ptr<History> advance_distributed(
             const SimulatorAccess<dim> &context, const TensorAdvection &op,
             const History &history, const Field &inflow, const Field &source,
             double time, double dt);
@@ -90,11 +77,7 @@ namespace aspect
             std::vector<types::global_dof_index> columns; ///< Readable source DoFs.
             FullMatrix<double> values; ///< Mass-inverted transport contribution.
           };
-          bool distributed = false; ///< Selects owned-row storage below.
-          std::vector<Block> blocks; ///< Distributed operator contributions.
-          SparsityPattern sparsity; ///< Serial operator graph.
-          SparseMatrix<double> matrix; ///< Serial upwind operator.
-          SparseMatrix<double> divergence_correction; ///< Serial material correction.
+          std::vector<Block> blocks; ///< Owned-row operator contributions.
           std::vector<Load> source; ///< Volume source quadrature.
           std::vector<Load> inflow; ///< Incoming-boundary quadrature.
           std::vector<Point<dim>> mesh_vertices; ///< Fixed-mesh identity guard.

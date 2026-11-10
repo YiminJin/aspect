@@ -186,7 +186,11 @@ namespace aspect
       for(const auto &cell:points)for(unsigned int q=0;q<cell.second.size();++q)
         {
           const auto &r=cell.second[q];auto &h=next->history.at(cell.first)[q];
-          h.stress=r.state.stress;h.A=r.state.cohesive_strain;h.q=r.Q[0][1];h.rate=r.rate;
+          const auto &old=parent->history.at(cell.first)[q];
+          h.stress=bulk_tip_midpoint ? 2.*r.state.stress-old.stress : r.state.stress;
+          h.A=bulk_tip_midpoint ? 2.*r.state.cohesive_strain-old.A : r.state.cohesive_strain;
+          // Rate and reaction are last-stage observations, not endpoint laws.
+          h.q=r.Q[0][1];h.rate=r.rate;
           h.signed_shear+=dt*r.rate;h.absolute_shear+=dt*std::abs(r.rate);
         }
       std::vector<double> fractions(elastic_shear_moduli.size(),0.);fractions[0]=1.;
@@ -195,7 +199,7 @@ namespace aspect
         {
           auto &s=next->sections[k];s.rate=rates[k];s.slip+=dt*s.rate;s.force=forces[k];
           s.age=fault_friction.signed_endpoint(fractions,s.rate,parent->sections[k].age,dt,
-                  this->get_parameters().surface_pressure,radiation_damping_coefficients[0]).age;
+                  this->get_parameters().surface_pressure,radiation_damping_coefficients[0],bulk_tip_midpoint).age;
         }
       return next;
     }

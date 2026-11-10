@@ -1236,6 +1236,9 @@ namespace aspect
                   }
                 if (control.last_check()==SolverControl::failure)break;
                 bool found=false;
+                unsigned int failed_linear=0, uphill=0, infeasible=0, evaluated=0;
+                double least_slope=std::numeric_limits<double>::infinity();
+                double best_trial=residual, least_change=std::numeric_limits<double>::infinity();
                 // Once a positive phase search succeeds, prefer that search
                 // family at the next iterate. Always retry its least restrictive
                 // metric first: freezing a large successful shift can stall the
@@ -1264,10 +1267,33 @@ namespace aspect
                     LinearAlgebra::BlockVector direction(x);
                     direction=0.;
                     if (!compute_bulk_tip_search_direction(x,current->residual,shift,direction))
-                      { ++coupling.search_failures; continue; }
+                      { ++coupling.search_failures; ++failed_linear; continue; }
                     const double slope=coupling.directional_work(*current,direction);
                     const double roundoff=128*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(current->functional));
-                    if (slope>=roundoff)continue;
+                    least_slope=std::min(least_slope,slope);
+                    if (slope>=roundoff)
+                      {
+                        ++uphill;
+                        // Pressure is a multiplier, absent from stage storage
+                        // and from the prescribed-compression section law.
+                        // An inexact saddle solve can give its otherwise pure
+                        // pressure correction an uphill roundoff-sized velocity
+                        // component. Test the multiplier alone: no energy descent
+                        // is required, but BOTH unchanged physical residual gates
+                        // must pass. No primal field or history is filtered.
+                        auto pressure_trial=x;
+                        pressure_trial.block(1)+=direction.block(1);
+                        const auto pressure_response=coupling.evaluate(pressure_trial,false);
+                        if (pressure_response->mechanical<=parameters.nonlinear_tolerance
+                            && pressure_response->kkt<=phase_settings.nonlinear_solver_tolerance)
+                          {
+                            x=pressure_trial;
+                            found=true;
+                            pcout<<"   Bulk tip accepted multiplier-only correction at full residual gates."<<std::endl;
+                            break;
+                          }
+                        continue;
+                      }
                     for (unsigned int line=0; line<phase_settings.max_newton_line_search_iterations; ++line)
                       {
                         ++coupling.line_trials;
@@ -1278,14 +1304,17 @@ namespace aspect
                         const auto pb=coupling.phase_block();
                         for (const auto i:trial.block(pb).locally_owned_elements())
                           {
-                            trial.block(pb)[i]=PhaseField::box_trial_value(x.block(pb)[i],direction.block(pb)[i],coupling.obstacle()[i],1.,alpha);
-                            feasible &= trial.block(pb)[i]>=coupling.obstacle()[i] && trial.block(pb)[i]<=1.;
+                            trial.block(pb)[i]=PhaseField::box_trial_value(x.block(pb)[i],direction.block(pb)[i],coupling.obstacle()[i],coupling.upper_bound()[i],alpha);
+                            feasible &= trial.block(pb)[i]>=coupling.obstacle()[i] && trial.block(pb)[i]<=coupling.upper_bound()[i];
                           }
                         trial.compress(VectorOperation::insert);
-                        if (!Utilities::MPI::min(feasible,mpi_communicator))continue;
+                        if (!Utilities::MPI::min(feasible,mpi_communicator)){++infeasible;continue;}
                         const auto candidate=coupling.evaluate(trial,false);
                         const double trial_residual=std::max(candidate->mechanical/parameters.nonlinear_tolerance,
                                                              candidate->kkt/phase_settings.nonlinear_solver_tolerance);
+                        ++evaluated;
+                        best_trial=std::min(best_trial,trial_residual);
+                        least_change=std::min(least_change,candidate->functional-current->functional);
                         // When energy differences are below summation accuracy,
                         // do not accept a KKT spike merely through the roundoff
                         // allowance. The physical natural-map merit breaks ties;
@@ -1302,7 +1331,14 @@ namespace aspect
                           }
                       }
                   }
-                if (!found)break;
+                if (!found)
+                  {
+                    pcout<<"   Bulk tip exhausted search: linear failures="<<failed_linear
+                         <<", uphill="<<uphill<<", infeasible="<<infeasible<<", evaluated="<<evaluated
+                         <<", least slope="<<least_slope<<", least functional change="<<least_change
+                         <<", current/best merit="<<residual<<'/'<<best_trial<<std::endl;
+                    break;
+                  }
                 if (parameters.run_postprocessors_on_nonlinear_iterations)postprocess();
               }
             coupling.newton_iterations=nonlinear_iteration;
@@ -1334,20 +1370,6 @@ namespace aspect
             throw;
           }
         return;
-      }
-    if(const auto *fault=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
-      if(fault->uses_bulk_cohesive_phase())
-        { solve_bulk_cohesive_phase(); return; }
-    if (parameters.reconstruct_faults && timestep_number>0)
-      {
-        auto &fault=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
-        if (fault.uses_consistent_endpoint_phase())
-          {
-            assemble_and_solve_temperature();
-            assemble_and_solve_composition();
-            solve_reconstructed_fault_endpoint_phase();
-            return;
-          }
       }
     if (parameters.reconstruct_faults)
       {

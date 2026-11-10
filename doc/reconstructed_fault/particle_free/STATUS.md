@@ -1,3 +1,54 @@
+> **Consolidation complete — 9 November 2026.**
+> Native DG Bernstein is now the supported fault phase representation. BE remains
+> the reference/default; the shared midpoint option remains experimental. The
+> single bounded repair audit reproduces the .0575→.06 failure and identifies
+> near-intact phase search stagnation; no justified local correction was found.
+> The compact-loading experiment is closed. Q1/CPDI fault paths and replicated
+> endpoint solvers are retired; tensor transport uses owned rows on every rank
+> count. Ordinary ASPECT FE_Q/FE_DGQ fields are unchanged.
+> The full unit suite passes (189,151 assertions/169 cases). BE, successful
+> midpoint and layered mature controls reproduce retained fields exactly;
+> tip rollback and rank-changing tip/mature restarts pass at roundoff. Nine
+> bounded wrappers total 166.95 s, including failed evidence. No jobs remain.
+> See the [current reading path](ACTIVE_RESEARCH_MODEL.md),
+> [consolidation report](TIP_CONSOLIDATION_REPORT.md), and updated
+> [tip guide](TIP_TREATMENT.md). Preserved identities and data losses are unchanged.
+> Next proposed experiment: fixed-phase mechanical screening with uniform shear
+> plus a compact perturbation, before selecting another growth run. Broader
+> midpoint solver redesign and long campaigns remain deferred.
+>
+> Older entries below retain their historical claims and next-action proposals;
+> they do not supersede this closeout or authorize a campaign.
+
+> **Completed bounded midpoint and loading study — 9 November 2026.**
+> Entry `e8b6dd091` plus eleven preserved manual documentation changes. The
+> selectable native-Bernstein midpoint candidate is implemented; **BE stays
+> default**. Point equations/convergence, coupled derivatives, active MPI
+> restart/rejection and regressions pass. All three difficult common-parent
+> time grids fail to complete the requested window, including the final-source
+> recheck. The old-loading midpoint control reduces work remainder 4.075× on
+> halving dt, without establishing full coupled second order or adoption.
+> The compact-loading screen and single BE pilot show boundary damage before
+> resolved axial advance and strong opposite-sign section-rate cancellation.
+> See [report and figures](TIP_TIME_UPDATE_AND_GROWTH_REPORT.md),
+> [time equations](tip_treatment/time_integration.md) and
+> [deferred cleanup](TIP_DEFERRED_CLEANUP.md). All jobs finished; 24 wrappers
+> total 14.03 min, with ≤4 workers and heavy jobs sequential. Protected artifacts
+> and inherited data losses are preserved. Next proposed work is the targeted
+> first-failure active-row/search diagnosis at the retained .0575 parent;
+> longer growth and a revised loading specimen remain deferred.
+>
+> Entries below describe prior tasks and retain their original evidence.
+
+> **Tip documentation synchronized to `e8b6dd091`, 9 November 2026.**
+> [TIP_TREATMENT.md](TIP_TREATMENT.md) and its linked pages describe the committed
+> native Bernstein tip route, coefficient/physical-field distinction, diagonal
+> search metric, exact acceptance ledger, section-rate publication and basis-safe
+> restart. The prescribed-displacement search functional is documented without
+> subtracting diagnostic reaction work. Historical reports remain unchanged.
+> This is a documentation-only audit; no solver, input, binary or numerical
+> qualification changed, and no simulation was launched.
+
 > **Completed bounded task — native DG Bernstein phase, 9 November 2026.**
 > Entry remains `d481a09c` plus the preserved efficiency implementation. Native
 > phase coefficients, initialization, fracture/transport, bounds and restart are

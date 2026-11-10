@@ -1,5 +1,9 @@
 # Cross-section closure
 
+This page describes the retained **BE default**. The selectable midpoint stage,
+exact aging, endpoint publication and work identity are in
+[time integration](time_integration.md); do not apply BE loss formulas to that mode.
+
 [Guide](../TIP_TREATMENT.md)
 
 The user expressly selected this additional constitutive assumption for one
@@ -67,3 +71,31 @@ velocity weakening nor proves convexity/stability of the coupled phase problem.
 The search primitive integrates R itself, not fV. Its logarithmic-rate Gauss
 quadrature is separately derivative-checked; it does not change the physical
 constitutive law or mechanical/phase quadrature.
+
+
+## Implementation and cancellation diagnostics
+
+[`FaultFriction::section_endpoint`](../../../../source/material_model/rheology/fault_friction.cc)
+uses a safeguarded scalar Newton/bisection solve in an asinh rate coordinate,
+with the sign of the free section rate. It verifies the root to a tolerance of
+32 double-precision machine epsilons times the absolute free rate, with explicit zero-rate and
+zero-mobility cases. `signed_endpoint` supplies traction, derivative, age and
+separate friction/radiation parts; no minimum-slip-rate floor enters this law.
+`section_primitive` uses Gauss48 in a logarithmic rate coordinate only for the
+line-search functional.
+
+`BulkTipCoupling::evaluate` first integrates the fixed-force-free point response
+and mobility, solves the section root, then reevaluates every point at that common
+force. The second pass independently records V_integrated, integral(abs(w)),
+integral(max(w,0)) and integral(min(w,0)). The last quantity is signed negative.
+`tip-sections-*.csv` retains these and the root-resolved rate, their difference,
+and the independently evaluated resistance at the integrated rate. Point exports
+retain w and full cohesive history, allowing separate active bands to be inspected.
+A small net V alone cannot establish a single localized band or small local work.
+
+The accepted section age/slip uses the integrated rate. Search and split
+friction/radiation diagnostics use the resolved scalar law, while point work uses
+f*w and the exact discrete integration adjoint. Their agreement is checked in
+qualification; tiny rates need absolute resistance and Y errors as well as slip
+errors. The native-basis control's near-roundoff agreement does not erase the
+older tolerance-sensitivity evidence from a different solver comparison.

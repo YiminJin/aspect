@@ -45,7 +45,7 @@ mean transported/rotated data fixed during the mechanical solve.
 | $v,\nabla v$ | m/s, 1/s; bulk native FE | Accepted $v^-$ drives transport/spin; current $v^+$ drives strain forcing |
 | $V$ | m/s; fault nodal scalar | Committed accepted rate for spin; private endpoint iterate for reaction. Never $Z/\Delta t$ |
 | $D_3,W_b$ | 1/s; bulk quadrature | Endpoint strain, accepted spin respectively |
-| $\phi$ | dimensionless; continuous Q1 | Transported endpoint physical profile and irreversibility obstacle |
+| $\phi$ | dimensionless; native DG Bernstein Q2 | Transported endpoint physical profile and irreversibility obstacle |
 | $h(\phi),I,\chi=h/I$ | 1, m, 1/m | Endpoint profile compliance, normal integral and localization |
 | $S$ | dimensionless; extended fault frame | `shear_sense*sym(tangent outer normal)` on the associated segment |
 | $G,\eta_b$ | Pa, Pa s; material samples | Constant $G$; positive spatial multiplier times reference viscosity |

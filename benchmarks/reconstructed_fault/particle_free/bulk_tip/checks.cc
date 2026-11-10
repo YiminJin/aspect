@@ -137,6 +137,8 @@ namespace aspect
             for(unsigned int j=0;j<a.size();++j)record.local[cell*stride+geometry_size+j]=b[j];
           }
         const auto accepted_step=record.step;const auto accepted_time=record.time;
+        if(const auto value=std::getenv("ASPECT_TIP_RESTART_DT"))
+          {sim().time_step=std::stod(value);sim().time=accepted_time+sim().time_step;}
         model().restore_bulk_cohesive_history();
         sim().current_linearization_point=sim().solution;
         gate("import phase polynomial preserved",phase_error<2e-14);
@@ -193,11 +195,11 @@ namespace aspect
         for(unsigned int b:{0u,1u,pb})for(const auto i:x.block(b).locally_owned_elements())
           {
             const auto global=x.get_block_indices().block_start(b)+i;
-            const bool bounded=b==pb && (x.block(pb)[i]<=lower[i]+1e-8 || x.block(pb)[i]>=1.-1e-8);
+            const bool bounded=b==pb && (x.block(pb)[i]<=lower[i]+1e-8 || x.block(pb)[i]>=op.upper_bound()[i]-1e-8);
             if(!op.constraints().is_constrained(global) && !bounded)
               {
                 free.push_back(global);
-                exact[global]=1e-6*std::sin(.7*global)*(b==pb ? (x.block(pb)[i]-lower[i])*(1.-x.block(pb)[i]) : 1.);
+                exact[global]=1e-6*std::sin(.7*global)*(b==pb ? (x.block(pb)[i]-lower[i])*(op.upper_bound()[i]-x.block(pb)[i]) : 1.);
               }
           }
         exact.compress(VectorOperation::insert);
@@ -205,7 +207,7 @@ namespace aspect
         auto residual=rhs;residual*=-1.;
         for(const auto i:x.block(pb).locally_owned_elements())
           if(std::find(free.begin(),free.end(),offset+i)==free.end())
-            residual.block(pb)[i]+=(x.block(pb)[i]>=1.-1e-8?-1.:1.)*op.phase_mass()[i];
+            residual.block(pb)[i]+=(x.block(pb)[i]>=op.upper_bound()[i]-1e-8?-1.:1.)*op.phase_mass()[i];
         residual.compress(VectorOperation::insert);
         DynamicSparsityPattern pattern(free.size());
         for(unsigned int i=0;i<free.size();++i)for(unsigned int j=0;j<free.size();++j)pattern.add(i,j);
@@ -255,17 +257,18 @@ namespace aspect
         const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
         const auto directory=this->get_output_directory();
         std::ofstream points(directory+"tip-points-"+Utilities::int_to_string(s.step,4)+"-r"+std::to_string(rank)+".csv");
-        points<<std::setprecision(17)<<"cell,q,x,y,weight,phi,tauxx,tauyy,tauzz,tauxy,Axx,Ayy,Azz,Axy,qcoh,w,signed_shear,absolute_shear,section,H,Y,fracture_density\n";
+        points<<std::setprecision(17)<<"cell,q,x,y,weight,phi,tauxx,tauyy,tauzz,tauxy,Axx,Ayy,Azz,Axy,qcoh,w,signed_shear,absolute_shear,section,H,Y,fracture_density,Y_endpoint,stage_phi,stage_tauxy,stage_Axy,stage_pressure,stage_normal_x,stage_normal_y\n";
         FEValues<dim> fe(this->get_mapping(),this->get_fe(),model().mechanical_quadrature(),update_values|update_gradients|update_quadrature_points|update_JxW_values);
-        std::vector<double> phase(fe.n_quadrature_points);
+        std::vector<double> phase(fe.n_quadrature_points),pressure(fe.n_quadrature_points);
         std::vector<Tensor<1,dim>> phase_gradient(fe.n_quadrature_points);
         const double ell=this->get_phase_field_handler().get_length_scale();
         const double Kf=model().critical_energy_release_rates[0]/((8./3.)*ell);
-        double remote_driving=0.,remote_phase=0.;
+        double remote_driving=0.,remote_phase=0.,boundary_driving=0.,boundary_phase=0.;
         for(const auto &entry:s.native_cells)
           {
             fe.reinit(entry.second);fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(this->get_solution(),phase);
             fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_gradients(this->get_solution(),phase_gradient);
+            fe[this->introspection().extractors.pressure].get_function_values(this->get_solution(),pressure);
             for(unsigned int q=0;q<phase.size();++q)
               {
                 const auto &h=s.history.at(entry.first)[q];const auto p=fe.quadrature_point(q);
@@ -274,25 +277,38 @@ namespace aspect
                 const double fraction=c/(c+d);
                 const double driving=sim().bulk_tip_coupling && sim().bulk_tip_coupling->accepted_evaluation
                     ? sim().bulk_tip_coupling->accepted_evaluation->points.at(entry.first)[q].driving : 0.;
+                if(std::min({p[0],4.-p[0],p[1],2.-p[1]})<=.25)
+                  {boundary_driving=std::max(boundary_driving,driving);boundary_phase=std::max(boundary_phase,phi);}
                 if(std::abs(p[0]-2.)>1.3)
                   { remote_driving=std::max(remote_driving,driving); remote_phase=std::max(remote_phase,phi); }
                 points<<entry.first<<','<<q<<','<<p[0]<<','<<p[1]<<','<<fe.JxW(q)<<','<<phase[q]<<','
                       <<h.stress[0][0]<<','<<h.stress[1][1]<<','<<h.stress[2][2]<<','<<h.stress[0][1]<<','
                       <<h.A[0][0]<<','<<h.A[1][1]<<','<<h.A[2][2]<<','<<h.A[0][1]<<','<<h.q<<','<<h.rate<<','
-                      <<h.signed_shear<<','<<h.absolute_shear<<','<<s.section_ids.at(entry.first)[q]<<','<<fraction<<','<<driving<<','<<Kf*(phi+ell*ell*phase_gradient[q].norm_square())<<'\n';
+                      <<h.signed_shear<<','<<h.absolute_shear<<','<<s.section_ids.at(entry.first)[q]<<','<<fraction<<','<<driving<<','<<Kf*(phi+ell*ell*phase_gradient[q].norm_square())<<','
+                      <<(phi>0. ? 2.*s.parameters.G*h.A[0][1]*h.A[0][1]*s.parameters.m*(1.+3.*phi)*(1.-phi)/(c*c) : std::numeric_limits<double>::quiet_NaN())<<',';
+                if(sim().bulk_tip_coupling && sim().bulk_tip_coupling->accepted_evaluation)
+                  {
+                    const auto &stage=sim().bulk_tip_coupling->accepted_evaluation->points.at(entry.first)[q];
+                    points<<stage.state.phi<<','<<stage.state.stress[0][1]<<','<<stage.state.cohesive_strain[0][1]<<','<<pressure[q]<<','<<stage.state.stress[0][0]-pressure[q]<<','<<stage.state.stress[1][1]-pressure[q];
+                  }
+                else points<<phi<<','<<h.stress[0][1]<<','<<h.A[0][1]<<','<<pressure[q]<<','<<h.stress[0][0]-pressure[q]<<','<<h.stress[1][1]-pressure[q];
+                points<<'\n';
               }
           }
         remote_driving=Utilities::MPI::max(remote_driving,this->get_mpi_communicator());
         remote_phase=Utilities::MPI::max(remote_phase,this->get_mpi_communicator());
+        boundary_driving=Utilities::MPI::max(boundary_driving,this->get_mpi_communicator());
+        boundary_phase=Utilities::MPI::max(boundary_phase,this->get_mpi_communicator());
         if(std::getenv("ASPECT_TIP_REMOTE_MARGIN") && s.step>0)
           {
             const double Kf=sim().bulk_tip_coupling->fracture_scale();
-            tip_remote_margin_reached=remote_driving/Kf>=.95 || remote_phase>1e-12;
+            tip_remote_margin_reached=remote_driving/Kf>=.95 || remote_phase>1e-12
+              || (std::getenv("ASPECT_TIP_BOUNDARY_STOP") && boundary_phase>1e-12);
             if(rank==0)
               {
                 std::ofstream remote(directory+"tip-remote.csv",std::ios::app);
-                if(remote.tellp()==0)remote<<"step,time,driving_ratio,max_phase,stop\n";
-                remote<<std::setprecision(17)<<s.step<<','<<s.time<<','<<remote_driving/Kf<<','<<remote_phase<<','<<tip_remote_margin_reached<<'\n';
+                if(remote.tellp()==0)remote<<"step,time,driving_ratio,max_phase,stop,boundary_driving_ratio,boundary_phase\n";
+                remote<<std::setprecision(17)<<s.step<<','<<s.time<<','<<remote_driving/Kf<<','<<remote_phase<<','<<tip_remote_margin_reached<<','<<boundary_driving/Kf<<','<<boundary_phase<<'\n';
               }
           }
         if(s.step==0)
@@ -332,6 +348,11 @@ namespace aspect
           }
         if(!sim().bulk_tip_coupling || !sim().bulk_tip_coupling->accepted_evaluation)return;
         auto &op=*sim().bulk_tip_coupling;const auto &e=*op.accepted_evaluation;
+        if(std::getenv("ASPECT_TIP_FIXED_PHASE"))
+          {
+            auto difference=s.tip_phase;difference-=op.accepted_parent()->tip_phase;
+            gate("fixed screen phase invariant",difference.linfty_norm()==0.);
+          }
         if(rank==0)
           {
             std::ofstream profile(directory+"tip-profile.csv",std::ios::app);
@@ -378,13 +399,16 @@ namespace aspect
           {
             LinearAlgebra::Vector gradient;
             this->get_phase_field_handler().assemble_dg_fracture(this->get_solution(),gradient);
+            LinearAlgebra::Vector stage_gradient(op.lower);
+            op.fracture_matrix.vmult(stage_gradient,op.accepted_coordinates.block(op.phase_block()));
+            stage_gradient+=op.fracture_linear;
             const auto pc=this->introspection().phase_field().first_component_index;
             const auto &element=this->get_fe();
             PhaseField::Q2Bounds<dim> basis(element.base_element(element.component_to_base_index(pc).first));
             const auto pb=op.phase_block();const auto offset=op.accepted_coordinates.get_block_indices().block_start(pb);
             std::vector<types::global_dof_index> ids(element.n_dofs_per_cell());
             std::ofstream balance(directory+"tip-balance-"+Utilities::int_to_string(s.step,4)+"-r"+std::to_string(rank)+".csv");
-            balance<<std::setprecision(17)<<"cell,i,x,y,B,lower,mass,fracture_gradient,driving_load,residual\n";
+            balance<<std::setprecision(17)<<"cell,i,x,y,B,lower,mass,fracture_gradient,driving_load,residual,stage_B,stage_fracture_gradient\n";
             for(const auto &entry:s.native_cells)
               {
                 const auto cell=entry.second;cell->get_dof_indices(ids);
@@ -395,10 +419,39 @@ namespace aspect
                       fracture+=basis.expansion(i,j)*gradient[ids[element.component_to_system_index(pc,i)]-offset];
                     const auto index=ids[element.component_to_system_index(pc,j)]-offset;
                     const double residual=op.fracture_scale()*e.raw.block(pb)[index];
-                    balance<<entry.first<<','<<j<<','<<cell->center()[0]<<','<<cell->center()[1]<<','<<op.accepted_coordinates.block(pb)[index]<<','<<op.obstacle()[index]<<','<<op.phase_mass()[index]<<','<<fracture<<','<<fracture-residual<<','<<residual<<'\n';
+                    balance<<entry.first<<','<<j<<','<<cell->center()[0]<<','<<cell->center()[1]<<','<<this->get_solution().block(pb)[index]<<','<<op.obstacle()[index]<<','<<op.phase_mass()[index]<<','<<fracture<<','<<stage_gradient[index]-residual<<','<<residual<<','<<op.accepted_coordinates.block(pb)[index]<<','<<stage_gradient[index]<<'\n';
                   }
               }
           }
+        {
+          // Constrained velocity rows are nodal reaction forces in the same
+          // JxW/face measures as mechanics. Corner forces are not split into
+          // fictitious per-wall tractions; coordinates identify shared corners.
+          const auto &element=this->get_fe();
+          std::vector<types::global_dof_index> ids(element.n_dofs_per_cell());
+          std::map<types::global_dof_index,std::pair<Point<dim>,unsigned int>> nodes;
+          for(const auto &entry:s.native_cells)
+            {
+              const auto cell=entry.second;cell->get_dof_indices(ids);
+              for(unsigned int component=0;component<dim;++component)
+                {
+                  const auto &base=element.base_element(element.component_to_base_index(component).first);
+                  for(unsigned int j=0;j<base.n_dofs_per_cell();++j)
+                    {
+                      const auto index=ids[element.component_to_system_index(component,j)];
+                      if(op.boundary_constraints().is_constrained(index) && e.raw.locally_owned_elements().is_element(index))
+                        nodes[index]={this->get_mapping().transform_unit_to_real_cell(cell,base.get_unit_support_points()[j]),component};
+                    }
+                }
+            }
+          std::ofstream reaction(directory+"tip-reactions-"+Utilities::int_to_string(s.step,4)+"-r"+std::to_string(rank)+".csv");
+          reaction<<std::setprecision(17)<<"dof,x,y,component,force,stage_velocity,physical_work\n";
+          for(const auto &node:nodes)
+            {
+              const double force=op.shear_modulus()*e.raw[node.first],velocity=this->get_solution()[node.first];
+              reaction<<node.first<<','<<node.second.first[0]<<','<<node.second.first[1]<<','<<node.second.second<<','<<force<<','<<velocity<<','<<op.timestep()*force*velocity<<'\n';
+            }
+        }
         if(rank!=0)return;
         {
           std::ofstream timers(directory+"tip-timers.csv");timers<<"section,seconds,calls\n";
@@ -409,13 +462,16 @@ namespace aspect
           for(const auto &entry:wall)step_timers<<s.step<<','<<entry.first<<','<<std::setprecision(17)<<entry.second<<','<<calls.at(entry.first)<<'\n';
           for(const auto &entry:wall)timers<<entry.first<<','<<std::setprecision(17)<<entry.second<<','<<calls.at(entry.first)<<'\n';
         }
+        std::ofstream location(directory+"tip-time-location.csv",std::ios::app);
+        if(location.tellp()==0)location<<"step,parent_time,stage_time,endpoint_time,midpoint\n";
+        location<<std::setprecision(17)<<s.step<<','<<op.accepted_parent()->time<<','<<s.time-(op.uses_midpoint()?.5*op.timestep():0.)<<','<<s.time<<','<<op.uses_midpoint()<<'\n';
         std::ofstream sections(directory+"tip-sections-"+Utilities::int_to_string(s.step,4)+".csv");
         sections<<std::setprecision(17)<<"s,ds,age,slip,V,force,integral_abs_w,positive_w,negative_w,resolved_V,integral_rate_defect,RSF_of_integral\n";
         std::vector<double> fractions(model().elastic_shear_moduli.size(),0.);fractions[0]=1.;
         for(unsigned int k=0;k<s.sections.size();++k)
           {
             const auto &v=s.sections[k];const auto raw=model().fault_friction.signed_endpoint(fractions,v.rate,op.accepted_parent()->sections[k].age,
-                op.timestep(),this->get_parameters().surface_pressure,model().radiation_damping_coefficients[0]);
+                op.stage_timestep(),this->get_parameters().surface_pressure,model().radiation_damping_coefficients[0],op.uses_midpoint());
             sections<<v.coordinate<<','<<v.weight<<','<<v.age<<','<<v.slip<<','<<v.rate<<','<<v.force<<','<<e.absolute_rate[k]<<','<<e.positive_rate[k]<<','<<e.negative_rate[k]<<','<<e.laws[k].rate<<','<<v.rate-e.laws[k].rate<<','<<raw.traction<<'\n';
           }
         std::ofstream work(directory+"tip-power.csv",std::ios::app);
@@ -434,7 +490,18 @@ namespace aspect
       {
         const auto before=persistent();const auto owner=model().bulk_cohesive_state;
         const auto original=sim().solution;
-        sim().compute_current_constraints();sim().solve_timestep();
+        sim().compute_current_constraints();
+        // start_timestep emits its signal before ordinary matrix setup. A
+        // first-pending-step restart probe must prepare those existing owners
+        // before invoking a trial; later probes already have their matrices.
+        if(sim().rebuild_sparsity_and_matrices)
+          {
+            sim().setup_system_matrix(this->introspection().index_sets.system_partitioning);
+            sim().setup_system_preconditioner(this->introspection().index_sets.system_partitioning);
+            sim().rebuild_sparsity_and_matrices=false;
+            sim().rebuild_stokes_matrix=sim().rebuild_stokes_preconditioner=true;
+          }
+        sim().solve_timestep();
         gate("trial keeps complete accepted parent",before==persistent() && owner==model().bulk_cohesive_state && bool(sim().pending_dg_endpoint_publication));
         const auto trial=sim().solution;
         auto reject=std::move(sim().pending_dg_endpoint_publication);sim().pending_dg_endpoint_publication={};reject(false);
@@ -452,6 +519,11 @@ namespace aspect
           {
             if(const auto file=std::getenv("ASPECT_TIP_EXPORT_PARENT"))export_parent(file);
             if(const auto value=std::getenv("ASPECT_TIP_RESTART_DT"))dt=std::stod(value);
+          });
+        this->get_signals().set_assemblers.connect([this](const SimulatorAccess<dim>&,Assemblers::Manager<dim>&)
+          {
+            if(std::getenv("ASPECT_TIP_FIXED_PHASE") && sim().bulk_tip_coupling)
+              sim().bulk_tip_coupling->upper=sim().bulk_tip_coupling->lower;
           });
         this->get_signals().post_stokes_solver.connect([this](const SimulatorAccess<dim>&,const unsigned int ns,const unsigned int na,const SolverControl &cheap,const SolverControl &expensive)
           {
@@ -471,30 +543,38 @@ namespace aspect
         if(s.step>0)return {"Bulk tip","accepted histories checked"};
         std::vector<double> fractions(model().elastic_shear_moduli.size(),0.);fractions[0]=1.;
         const auto &law=model().fault_friction;
-        for(double v:{0.,1e-20,-1e-20,.001,-.001,.01,-.01})
+        for(bool exact:{false,true}) for(double v:{0.,1e-20,-1e-20,.001,-.001,.01,-.01})
           {
-            const auto r=law.signed_endpoint(fractions,v,10.,.005,1000.,1000.);
+            const auto r=law.signed_endpoint(fractions,v,10.,.005,1000.,1000.,exact);
             const double eps=v==0.?1e-24:std::abs(v)*1e-5;
-            const auto a=law.signed_endpoint(fractions,v+eps,10.,.005,1000.,1000.);
-            const auto b=law.signed_endpoint(fractions,v-eps,10.,.005,1000.,1000.);
+            const auto a=law.signed_endpoint(fractions,v+eps,10.,.005,1000.,1000.,exact);
+            const auto b=law.signed_endpoint(fractions,v-eps,10.,.005,1000.,1000.,exact);
             gate("signed RSF derivative",std::abs((a.traction-b.traction)/(2*eps)-r.derivative)<2e-6*std::max(1.,std::abs(r.derivative)));
-            gate("positive BE age and signed dissipation",r.age>0. && r.traction*v>=0.);
+            gate("positive age and signed dissipation",r.age>0. && r.traction*v>=0.);
+            if(exact)
+              {
+                // Independent Simpson integration of the positive aging kernel.
+                double integral=0.;const double h=.005/1000.,k=std::abs(v)/.01;
+                for(unsigned int j=0;j<=1000;++j) integral+=(j==0 || j==1000 ? 1. : j%2 ? 4. : 2.)*std::exp(-k*j*h);
+                const double expected=10.*std::exp(-k*.005)+h*integral/3.;
+                gate("exact aging independent quadrature",std::abs(r.age-expected)<2e-13);
+              }
             if(v!=0.)
               {
-                const double primitive_plus=law.section_primitive(fractions,v+eps,10.,.005,1000.,1000.);
-                const double primitive_minus=law.section_primitive(fractions,v-eps,10.,.005,1000.,1000.);
+                const double primitive_plus=law.section_primitive(fractions,v+eps,10.,.005,1000.,1000.,exact);
+                const double primitive_minus=law.section_primitive(fractions,v-eps,10.,.005,1000.,1000.,exact);
                 gate("section search primitive derivative",std::abs((primitive_plus-primitive_minus)/(2*eps)-r.traction)<2e-6*std::max(1.,std::abs(r.traction)));
               }
           }
-        for(double free:{0.,.001,-.001,.1,-.1})for(double mobility:{0.,1e-7,1e-4})
+        for(bool exact:{false,true}) for(double free:{0.,.001,-.001,.1,-.1})for(double mobility:{0.,1e-7,1e-4})
           {
-            const auto r=law.section_endpoint(fractions,free,mobility,10.,.005,1000.,1000.);
+            const auto r=law.section_endpoint(fractions,free,mobility,10.,.005,1000.,1000.,exact);
             gate("implicit section balance",std::abs(r.rate+mobility*r.law.traction-free)<1e-14);
             if(free!=0.)
               {
                 const double eps=1e-6*std::abs(free);
-                const auto a=law.section_endpoint(fractions,free+eps,mobility,10.,.005,1000.,1000.);
-                const auto b=law.section_endpoint(fractions,free-eps,mobility,10.,.005,1000.,1000.);
+                const auto a=law.section_endpoint(fractions,free+eps,mobility,10.,.005,1000.,1000.,exact);
+                const auto b=law.section_endpoint(fractions,free-eps,mobility,10.,.005,1000.,1000.,exact);
                 gate("implicit section derivative",std::abs((a.law.traction-b.law.traction)/(2*eps)-r.force_derivative)<2e-6*std::max(1.,std::abs(r.force_derivative)));
               }
           }

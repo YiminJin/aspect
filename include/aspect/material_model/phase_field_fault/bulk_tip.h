@@ -41,6 +41,14 @@ namespace aspect
                         const Tensor &strain_increment, double phi, double dt,
                         const Tensor &direction, double resistance);
 
+        /** Recover a physical endpoint from the half-duration algebraic stage. */
+        State midpoint_endpoint(const State &parent, const Response &stage);
+        double cohesive_energy(const Parameters &, const State &);
+        /** Midpoint work: compliance_work includes Y_m Delta phi plus C_c.
+         * No BE quadratic numerical losses are included. */
+        StepAccounting midpoint_account(const Parameters &, const State &, const Response &,
+                                        const Tensor &physical_increment, double dt, double resistance);
+
         struct Variation
         {
           Tensor stress, cohesive_strain, Q;

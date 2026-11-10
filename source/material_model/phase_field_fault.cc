@@ -114,7 +114,7 @@ namespace aspect
               // rate; the reconstructed-fault assembler supplies the frozen stress.
               const double G = compute_elastic_shear_modulus(volume_fractions);
               const double eta = material_viscosity(in.position[i], compute_creep_viscosity(volume_fractions, in.temperature[i]));
-              const double time_step = (this->get_timestep_number() > 0
+              const double time_step = (uses_integrated_bulk_tip() && bulk_tip_midpoint && this->get_timestep_number()>0 ? .5 : 1.) * (this->get_timestep_number() > 0
                                         ? this->get_timestep()
                                         : initial_time_step);
               const MaxwellCoefficients coefficients =
@@ -438,8 +438,10 @@ namespace aspect
                             "is restricted to fixed phase, zero residual cohesion and a prescribed "
                             "background Surface pressure plus solved zero-mean perturbation pressure.");
 
-          prm.declare_entry("Bulk tip solver", "ASPECT", Patterns::Selection("ASPECT|benchmark direct"),
-                            "Distributed coupled solver; benchmark direct retains the small historical oracle only.");
+          prm.declare_entry("Bulk tip time update", "backward Euler", Patterns::Selection("backward Euler|midpoint"),
+                            "Numerical update for the integrated native Bernstein tip control. Midpoint uses stage mechanics and exact constant-stage-rate aging; it is not L-stable.");
+          prm.declare_entry("Bulk tip solver", "ASPECT", Patterns::Selection("ASPECT"),
+                            "Distributed coupled solver. Historical replicated solvers are retired; the independent direct oracle lives in benchmark support.");
           prm.declare_entry("Equilibrate bulk tip seed", "false", Patterns::Bool(),
                             "Minimize the native fracture functional under the initial seed before the physical clock and age begin.");
           prm.declare_entry("Bulk tip initial age", "1", Patterns::Double(0.),
@@ -510,8 +512,8 @@ namespace aspect
                             "does not reconstruct stress from auxiliary slip memory.");
           prm.declare_entry("Material profile transport", "Q1 remap",
                             Patterns::Selection("Q1 remap|bounded MacCormack"),
-                            "Material Q1 profile and obstacle transport. The optional MacCormack "
-                            "correction is limited to accepted donor-cell extrema; growth remains disabled.");
+                            "Retired Q1 algorithm name retained only to match existing material checkpoint identity. "
+                            "The active Bernstein field always uses native DG SSPRK3 transport and its BP limiter.");
           prm.declare_entry("Material tensor inflow", "zero",
                             Patterns::Selection("zero|accepted trace|prescribed exterior stress"),
                             "Exterior T and R+B during the split advection stage: zero history or "
@@ -657,7 +659,7 @@ namespace aspect
           evolve_phase_field = prm.get_bool("Evolve phase field");
           bulk_cohesive_phase = prm.get("Fault constitutive mode") == "bulk cohesive";
           const auto bulk_rule = prm.get("Bulk cohesive flow rule");
-          bulk_tip_direct_oracle = prm.get("Bulk tip solver") == "benchmark direct";
+          bulk_tip_midpoint = prm.get("Bulk tip time update") == "midpoint";
           bulk_tip_equilibrate_seed = prm.get_bool("Equilibrate bulk tip seed");
           bulk_tip_initial_age=prm.get_double("Bulk tip initial age");
           bulk_flow_rule = bulk_rule == "bulk tip sections" ? BulkFlowRule::bulk_tip_sections : bulk_rule == "fixed scalar" ? BulkFlowRule::scalar
@@ -680,9 +682,11 @@ namespace aspect
           jaumann_particle_stress = prm.get("Stress rotation") == "Jaumann lagged Lie";
           dg_material_transport = prm.get("Stress rotation") == "Jaumann DG material Lie";
           material_direct_stress = prm.get("Material stress representation") == "direct physical stress";
-          AssertThrow(!material_direct_stress || dg_material_transport,
+          AssertThrow(!bulk_tip_midpoint || (uses_integrated_bulk_tip() && this->get_parameters().use_bernstein_phase_basis),
+                  ExcMessage("Midpoint is restricted to the integrated native Bernstein bulk-tip route."));
+      AssertThrow(!material_direct_stress || dg_material_transport,
                       ExcMessage("Direct physical stress requires Jaumann DG material Lie."));
-          material_bounded_profile = prm.get("Material profile transport") == "bounded MacCormack";
+          legacy_bounded_profile_identity = prm.get("Material profile transport") == "bounded MacCormack";
           material_trace_inflow = prm.get("Material tensor inflow") == "accepted trace";
           material_prescribed_inflow = prm.get("Material tensor inflow") == "prescribed exterior stress";
           material_exterior_identity = prm.get("Material exterior stress identity");
@@ -690,7 +694,7 @@ namespace aspect
                       ExcMessage("Prescribed exterior stress requires a nonempty provider identity; other inflow options require an empty identity."));
           AssertThrow(!material_prescribed_inflow || material_direct_stress,
                       ExcMessage("Prescribed physical exterior stress currently requires direct physical stress; separated exterior histories are not specified."));
-          AssertThrow(dg_material_transport || (!material_bounded_profile && !material_trace_inflow && !material_prescribed_inflow),
+          AssertThrow(dg_material_transport || (!legacy_bounded_profile_identity && !material_trace_inflow && !material_prescribed_inflow),
                       ExcMessage("Material profile/inflow selections require Jaumann DG material Lie."));
           jaumann_dg_stress = dg_material_transport || prm.get("Stress rotation") == "Jaumann DG Lie";
           prm.enter_subsection("Material viscosity multiplier");
@@ -705,7 +709,7 @@ namespace aspect
           material_viscosity_identity += "|initial phase:" + prm.get("Function expression") + "|" + prm.get("Function constants") + "|" + prm.get("Variable names");
           prm.leave_subsection();
           // Preserve the existing schema7 identity for the retained default.
-          if (material_bounded_profile || material_trace_inflow || material_prescribed_inflow)
+          if (legacy_bounded_profile_identity || material_trace_inflow || material_prescribed_inflow)
             material_viscosity_identity += "|profile transport:" + prm.get("Material profile transport")
                                            + "|tensor inflow:" + prm.get("Material tensor inflow");
           if (material_prescribed_inflow)
@@ -856,14 +860,16 @@ namespace aspect
           material_viscosity_identity += "|" + std::string(name) + "=" + prm.get(name);
           prm.leave_subsection();
         }
+      AssertThrow(!bulk_tip_midpoint || (uses_integrated_bulk_tip() && this->get_parameters().use_bernstein_phase_basis),
+                  ExcMessage("Midpoint is restricted to the integrated native Bernstein bulk-tip route."));
       AssertThrow(!material_direct_stress || (mature_frictional_fault && !bulk_cohesive_phase),
                   ExcMessage("Direct physical stress is restricted to the mature material branch."));
-      AssertThrow(!this->get_parameters().use_bernstein_phase_basis
-                  || uses_integrated_bulk_tip()
-                  || (mature_frictional_fault && dg_material_transport && !evolve_phase_field),
-                  ExcMessage("Native Bernstein phase is supported by the integrated bulk-tip solver "
-                             "and growth-off mature material transport. Historical replicated cohesive "
-                             "and endpoint-phase solvers retain their nodal basis."));
+      AssertThrow(homogeneous_mesh_data && this->get_parameters().use_bernstein_phase_basis
+                  && (uses_integrated_bulk_tip()
+                      || (mature_frictional_fault && dg_material_transport && !evolve_phase_field)),
+                  ExcMessage("The active fault model supports native DG Bernstein phase with the integrated bulk-tip solver "
+                             "or growth-off mature material transport. Particle/CPDI, Q1/nodal phase, and historical "
+                             "replicated endpoint solvers are retired; use their retained executable for old evidence."));
       if (bulk_cohesive_phase)
         {
           // Tensor histories use the same unique CellId ownership and native

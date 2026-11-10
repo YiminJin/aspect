@@ -1287,8 +1287,7 @@ namespace aspect
           }
       }
 
-    // The phase field system is solved with CPDI method, which couples more
-    // DoFs. So we let the phase field handler make its own sparsity pattern.
+    // Native DG phase requires neighbor-face couplings in the shared graph.
     if (parameters.enable_phase_field)
       phase_field_handler->make_sparsity_pattern(sp);
 
@@ -2073,12 +2072,9 @@ namespace aspect
         endpoint_model->transport_material_history(parent);
         LinearAlgebra::BlockVector transported_phase(introspection.index_sets.system_partitioning, mpi_communicator);
         transported_phase = endpoint_model->accepted_fe_strain_state();
-        if (phase_field_handler->uses_dg_phase())
-          solve_native_phase_transport(AdvectionField::composition(introspection.find_composition_type(CompositionalFieldDescription::phase_field)),
-                                       endpoint_model->accepted_fe_strain_state(), old_solution, time-time_step, time_step,
-                                       transported_phase);
-        else
-          transported_phase = endpoint_model->transport_material_profile(parent);
+        solve_native_phase_transport(AdvectionField::composition(introspection.find_composition_type(CompositionalFieldDescription::phase_field)),
+                                     endpoint_model->accepted_fe_strain_state(), old_solution, time-time_step, time_step,
+                                     transported_phase);
         endpoint_model->stage_material_geometry(parent,transported_phase,solution,current_linearization_point);
         endpoint_model->rotate_material_history(parent);
         reconstructed_fault_surface_system->invalidate_material_geometry();
