@@ -19,6 +19,7 @@
 */
 
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/phase_field_fault/bulk_tip.h>
 #include <aspect/material_model/utilities.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
@@ -117,10 +118,9 @@ namespace aspect
               const double time_step = (uses_integrated_bulk_tip() && bulk_tip_midpoint && this->get_timestep_number()>0 ? .5 : 1.) * (this->get_timestep_number() > 0
                                         ? this->get_timestep()
                                         : initial_time_step);
-              const MaxwellCoefficients coefficients =
-                compute_maxwell_coefficients(eta, G, time_step);
-              out.viscosities[i] = bulk_cohesive_phase ? G * time_step / (1. + time_step * G / eta)
-                                   : coefficients.eta_ve;
+              out.viscosities[i] = bulk_cohesive_phase
+                                   ? G * time_step * BulkCohesive::Tip::relaxation_factor(G, eta, time_step)
+                                   : compute_maxwell_coefficients(eta, G, time_step).eta_ve;
             }
         }
     }
@@ -683,8 +683,8 @@ namespace aspect
           dg_material_transport = prm.get("Stress rotation") == "Jaumann DG material Lie";
           material_direct_stress = prm.get("Material stress representation") == "direct physical stress";
           AssertThrow(!bulk_tip_midpoint || (uses_integrated_bulk_tip() && this->get_parameters().use_bernstein_phase_basis),
-                  ExcMessage("Midpoint is restricted to the integrated native Bernstein bulk-tip route."));
-      AssertThrow(!material_direct_stress || dg_material_transport,
+                      ExcMessage("Midpoint is restricted to the integrated native Bernstein bulk-tip route."));
+          AssertThrow(!material_direct_stress || dg_material_transport,
                       ExcMessage("Direct physical stress requires Jaumann DG material Lie."));
           legacy_bounded_profile_identity = prm.get("Material profile transport") == "bounded MacCormack";
           material_trace_inflow = prm.get("Material tensor inflow") == "accepted trace";
@@ -860,8 +860,7 @@ namespace aspect
           material_viscosity_identity += "|" + std::string(name) + "=" + prm.get(name);
           prm.leave_subsection();
         }
-      AssertThrow(!bulk_tip_midpoint || (uses_integrated_bulk_tip() && this->get_parameters().use_bernstein_phase_basis),
-                  ExcMessage("Midpoint is restricted to the integrated native Bernstein bulk-tip route."));
+
       AssertThrow(!material_direct_stress || (mature_frictional_fault && !bulk_cohesive_phase),
                   ExcMessage("Direct physical stress is restricted to the mature material branch."));
       AssertThrow(homogeneous_mesh_data && this->get_parameters().use_bernstein_phase_basis

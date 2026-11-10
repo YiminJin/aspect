@@ -35,49 +35,116 @@ namespace aspect
       {
         AssertThrow(friction_law==FrictionLaw::rate_state && regularized,
                     ExcMessage("Signed section law requires regularized rate and state friction."));
-        std::vector<double> result{V0,Dc};
-        for(const auto *values:{&mu0,&a,&b})
-          result.insert(result.end(),values->begin(),values->end());
+        std::vector<double> result {V0,Dc};
+        for (const auto *values:
+        {
+          &mu0,&a,&b
+        })
+        result.insert(result.end(),values->begin(),values->end());
         return result;
+      }
+
+      template <int dim>
+      typename FaultFriction<dim>::RateStateParameters
+      FaultFriction<dim>::rate_state_parameters(const std::vector<double> &fractions) const
+      {
+        AssertThrow(has_state_variable(), ExcMessage("Rate-state parameters require a stateful friction law."));
+        AssertThrow(fractions.size() == mu0.size() && a.size() == mu0.size() && b.size() == mu0.size(),
+                    ExcMessage("Inconsistent rate-state material mixture sizes."));
+        RateStateParameters result;
+        for (unsigned int j=0; j<fractions.size(); ++j)
+          {
+            AssertThrow(std::isfinite(fractions[j]) && fractions[j]>=0.,
+                        ExcMessage("Friction material fractions must be finite and nonnegative."));
+            if (fractions[j]>0.)
+              {
+                result.reference+=fractions[j]*mu0[j];
+                result.direct+=fractions[j]*a[j];
+                result.evolution+=fractions[j]*b[j];
+              }
+          }
+        return result;
+      }
+
+      template <int dim>
+      typename FaultFriction<dim>::AgeEvaluation
+      FaultFriction<dim>::evaluate_age(const double speed, const double old_age,
+                                       const double dt, const AgingMethod method) const
+      {
+        AssertThrow(has_state_variable(), ExcMessage("The selected friction law has no state variable."));
+        AssertThrow(std::isfinite(speed) && speed>=0. && std::isfinite(old_age) && old_age>0.
+                    && std::isfinite(dt) && dt>=0., ExcMessage("Invalid aging inputs."));
+        if (dt==0.) return {old_age,0.};
+        const double x=speed*dt/Dc;
+        if (method==AgingMethod::backward_euler)
+          {
+            const double denominator=1.+x;
+            const double age=(old_age+dt)/denominator;
+            return {age,-age *dt/(Dc*denominator)};
+          }
+        const double exponential=std::exp(-x);
+        const double integral=x==0. ? 1. : -std::expm1(-x)/x;
+        const double age=old_age*exponential+dt*integral;
+        // Differentiate the exact integral of exp(-speed*t/Dc). The two O(x)
+        // terms cancel; use its Taylor limit without a speed substitution.
+        const double kernel=x<1e-3
+                            ? -.5+x*(1./3.+x*(-1./8.+x*(1./30.+x*(-1./144.+x/840.))))
+                            : (std::expm1(-x)+x*exponential)/(x*x);
+        return {age,dt/Dc *(dt*kernel-old_age*exponential)};
+      }
+
+      template <int dim>
+      typename FaultFriction<dim>::CoefficientEvaluation
+      FaultFriction<dim>::rate_state_coefficient(const RateStateParameters &p,
+                                                 const double speed, const double age) const
+      {
+        AssertThrow(std::isfinite(age) && age>0. && std::isfinite(speed) && speed>=0.,
+                    ExcMessage("Invalid stateful friction inputs."));
+        if (!regularized)
+          {
+            AssertThrow(speed>0., ExcMessage("Logarithmic friction requires positive speed."));
+            return {p.reference+p.direct *std::log(speed/V0)+p.evolution *std::log(age *V0/Dc),
+                    p.direct/speed,p.evolution/age
+                   };
+          }
+        AssertThrow(p.direct>0., ExcMessage("Regularized friction requires positive effective direct effect."));
+        const double scale=std::exp((p.reference+p.evolution*std::log(age*V0/Dc))/p.direct)/(2.*V0);
+        const double z=speed*scale, ratio=z/std::hypot(1.,z);
+        return {p.direct *std::asinh(z), speed>0. ? p.direct *ratio/speed : p.direct*scale,
+                p.evolution *ratio/age
+               };
       }
 
       template <int dim>
       typename FaultFriction<dim>::SignedEndpoint
       FaultFriction<dim>::signed_endpoint(const std::vector<double> &fractions,
-                                         const double V, const double old_age,
-                                         const double dt, const double pressure,
-                                         const double radiation, const bool exact_aging) const
+                                          const double V, const double old_age,
+                                          const double dt, const double pressure,
+                                          const double radiation, const AgingMethod aging) const
       {
         AssertThrow(friction_law==FrictionLaw::rate_state && regularized
                     && old_age>0. && dt>0. && pressure>0. && radiation>=0.,
                     ExcMessage("Bulk sections require regularized RSF, positive age and prescribed compression."));
-        AssertDimension(fractions.size(),mu0.size());
-        double direct=0.,evolution=0.,reference=0.;
-        for(unsigned int j=0;j<fractions.size();++j)
-          {direct+=fractions[j]*a[j];evolution+=fractions[j]*b[j];reference+=fractions[j]*mu0[j];}
-        const double speed=std::abs(V),denominator=1.+dt*speed/Dc;
-        const double age=exact_aging ? (speed==0. ? old_age+dt : old_age*std::exp(-dt*speed/Dc)-Dc/speed*std::expm1(-dt*speed/Dc)) : (old_age+dt)/denominator;
-        const double log_age_derivative=exact_aging
-          ? update_state_derivative_wrt_slip_rate(speed,old_age,dt)/age : -dt/(Dc*denominator);
-        const double scale=std::exp((reference+evolution*std::log(age*V0/Dc))/direct)/(2.*V0);
-        const double z=speed*scale,ratio=z/std::hypot(1.,z);
-        const double friction=std::copysign(pressure*direct*std::asinh(z),V);
-        const double slope=exact_aging
-          ? pressure*((speed>0.?direct*ratio/speed:direct*scale)+evolution*ratio*log_age_derivative)+radiation
-          : pressure*((speed>0.?direct*ratio/speed:direct*scale)-evolution*ratio*dt/(Dc*denominator))+radiation;
-        return {friction+radiation*V,slope,age,friction,radiation*V};
+        const auto parameters=rate_state_parameters(fractions);
+        const auto age=evaluate_age(std::abs(V),old_age,dt,aging);
+        const auto coefficient=rate_state_coefficient(parameters,std::abs(V),age.age);
+        const double friction=std::copysign(pressure*coefficient.value,V);
+        // For either sign, d[sign(V)*mu(|V|,theta(|V|))]/dV has the
+        // positive-speed total derivative. The state partial vanishes at zero.
+        const double slope=pressure*(coefficient.speed_partial
+                                     +coefficient.state_partial*age.speed_derivative)+radiation;
+        return {friction+radiation*V,slope,age.age,friction,radiation*V};
       }
 
       template <int dim>
       double FaultFriction<dim>::section_primitive(const std::vector<double> &fractions,
                                                    const double V, const double old_age,
                                                    const double dt, const double pressure,
-                                                   const double radiation, const bool exact_aging) const
+                                                   const double radiation, const AgingMethod aging) const
       {
         if (V == 0.) return 0.;
-        const auto zero = signed_endpoint(fractions, 0., old_age, dt, pressure, radiation, exact_aging);
-        double direct = 0.;
-        for (unsigned int j=0; j<fractions.size(); ++j) direct += fractions[j]*a[j];
+        const auto zero = signed_endpoint(fractions, 0., old_age, dt, pressure, radiation, aging);
+        const double direct = rate_state_parameters(fractions).direct;
         const double scale = pressure*direct/(zero.derivative-radiation);
         const double limit = std::asinh(std::abs(V)/scale);
         // Logarithmic rate coordinates resolve cold creep and finite slip with
@@ -90,7 +157,7 @@ namespace aspect
             const double u = limit*rule.point(q)[0];
             const double rate = scale*std::sinh(u);
             value += rule.weight(q)*signed_endpoint(fractions, rate, old_age, dt,
-                                                    pressure, radiation, exact_aging).traction*scale*std::cosh(u);
+                                                    pressure, radiation, aging).traction*scale*std::cosh(u);
           }
         return limit*value;
       }
@@ -98,43 +165,52 @@ namespace aspect
       template <int dim>
       typename FaultFriction<dim>::SectionEndpoint
       FaultFriction<dim>::section_endpoint(const std::vector<double> &fractions,
-                                          const double free_rate, const double mobility,
-                                          const double old_age, const double dt,
-                                          const double pressure, const double radiation, const bool exact_aging) const
+                                           const double free_rate, const double mobility,
+                                           const double old_age, const double dt,
+                                           const double pressure, const double radiation, const AgingMethod aging) const
       {
-        const auto zero=signed_endpoint(fractions,0.,old_age,dt,pressure,radiation,exact_aging);
-        double direct=0.,evolution=0.,reference=0.;
-        for(unsigned int j=0;j<fractions.size();++j)
-          {direct+=fractions[j]*a[j];evolution+=fractions[j]*b[j];reference+=fractions[j]*mu0[j];}
+        const auto zero=signed_endpoint(fractions,0.,old_age,dt,pressure,radiation,aging);
+        const auto parameters=rate_state_parameters(fractions);
+        const double direct=parameters.direct,evolution=parameters.evolution,reference=parameters.reference;
         // R'(V)=p*ratio*(a/|V|-b/(Dc/dt+|V|))+eta_rad.
         // Exact aging is a positive mixture of exp(-|V|r/Dc), 0<=r<=dt,
         // so d(log theta)/d|V| >= -dt/Dc: R' >= eta_rad-p*b*dt/Dc.
         // For BE the negative part is bounded by -p*dt/Dc*(sqrt(b)-sqrt(a))_+^2.
         const double weakening=std::max(0.,std::sqrt(evolution)-std::sqrt(direct));
-        AssertThrow(mobility>=0. && radiation>=pressure*dt/Dc*(exact_aging ? evolution : weakening*weakening),
+        AssertThrow(mobility>=0. && radiation>=pressure*dt/Dc*(aging==AgingMethod::constant_rate_exact ? evolution : weakening*weakening),
                     ExcMessage("Bulk section elimination requires a monotone endpoint RSF law. Multiple-root selection is not qualified."));
-        if(free_rate==0.)return {zero,0.,zero.derivative/(1.+mobility*zero.derivative)};
-        if(mobility==0.)
-          {const auto law=signed_endpoint(fractions,free_rate,old_age,dt,pressure,radiation,exact_aging);return {law,free_rate,law.derivative};}
+        if (free_rate==0.)return {zero,0.,zero.derivative/(1.+mobility*zero.derivative)};
+        if (mobility==0.)
+          {
+            const auto law=signed_endpoint(fractions,free_rate,old_age,dt,pressure,radiation,aging);
+            return {law,free_rate,law.derivative};
+          }
         const double scale=2.*V0*std::exp(-(reference+evolution*std::log((old_age+dt)*V0/Dc))/direct);
         AssertThrow(scale>0. && std::isfinite(scale),ExcMessage("Section RSF rate scale is outside floating-point range."));
         const double target=std::abs(free_rate),sign=std::copysign(1.,free_rate);
         long double lower=0.,upper=std::asinh(static_cast<long double>(target)/scale),coordinate=.5L*upper;
-        SignedEndpoint law=zero;double rate=0.;bool converged=false;
-        for(unsigned int iteration=0;iteration<100;++iteration)
+        SignedEndpoint law=zero;
+        double rate=0.;
+        bool converged=false;
+        for (unsigned int iteration=0; iteration<100; ++iteration)
           {
             rate=static_cast<double>(scale*std::sinh(coordinate));
-            law=signed_endpoint(fractions,rate,old_age,dt,pressure,radiation,exact_aging);
+            law=signed_endpoint(fractions,rate,old_age,dt,pressure,radiation,aging);
             const long double residual=static_cast<long double>(rate)+static_cast<long double>(mobility)*law.traction-target;
-            if(std::abs(residual)<=32.*std::numeric_limits<double>::epsilon()*target)
-              {converged=true;break;}
-            if(residual>0.)upper=coordinate;else lower=coordinate;
+            if (std::abs(residual)<=32.*std::numeric_limits<double>::epsilon()*target)
+              {
+                converged=true;
+                break;
+              }
+            if (residual>0.)upper=coordinate;
+            else lower=coordinate;
             const long double derivative=(1.+mobility*law.derivative)*scale*std::cosh(coordinate);
             const long double trial=coordinate-residual/derivative;
             coordinate=trial>lower && trial<upper?trial:.5*(lower+upper);
           }
         AssertThrow(converged,ExcMessage("Monotone section RSF elimination did not reach roundoff accuracy."));
-        rate*=sign;law=signed_endpoint(fractions,rate,old_age,dt,pressure,radiation,exact_aging);
+        rate*=sign;
+        law=signed_endpoint(fractions,rate,old_age,dt,pressure,radiation,aging);
         return {law,rate,law.derivative/(1.+mobility*law.derivative)};
       }
 
@@ -152,9 +228,7 @@ namespace aspect
 
         AssertThrow(std::isfinite(V_raw) && V_raw >= Vmin,
                     ExcMessage("The slip rate is below the minimum admissible slip rate."));
-        const double V = V_raw;
-        const double x = V * dt / Dc;
-        return -Dc / V * std::expm1(-x) + theta_old * std::exp(-x);
+        return evaluate_age(V_raw,theta_old,dt,AgingMethod::constant_rate_exact).age;
       }
 
 
@@ -173,31 +247,12 @@ namespace aspect
 
 
       template <int dim>
-      double FaultFriction<dim>::update_state_derivative_wrt_slip_rate(
-        const double V, const double old, const double dt) const
-      {
-        Assert(friction_law==FrictionLaw::rate_state && V>=0. && old>0. && dt>=0.,
-               ExcInternalError());
-        const double x=V*dt/Dc;
-        // The two O(x) terms cancel. Use the analytic Taylor limit for small x,
-        // not a subtraction of the already updated state from the old state.
-        const double kernel=x<1e-3
-          ? -.5+x*(1./3.+x*(-1./8.+x*(1./30.+x*(-1./144.+x/840.))))
-          : (std::expm1(-x)+x*std::exp(-x))/(x*x);
-        return dt/Dc*(dt*kernel-old*std::exp(-x));
-      }
-
-
-      template <int dim>
       double FaultFriction<dim>::friction_coefficient_derivative_wrt_state(
         const std::vector<double> &fractions, const double V, const double theta) const
       {
-        double a_eff=0.,b_eff=0.;
-        for (unsigned int m=0;m<fractions.size();++m)
-          { a_eff+=fractions[m]*a[m]; b_eff+=fractions[m]*b[m]; }
-        // Both partial derivatives share the same regularization multiplier.
-        return friction_coefficient_derivative_wrt_slip_rate(fractions,V,theta)
-               *(b_eff/a_eff)*V/theta;
+        const auto parameters=rate_state_parameters(fractions);
+        AssertThrow(std::isfinite(V) && V>=Vmin, ExcMessage("Slip rate is below the minimum admissible rate."));
+        return rate_state_coefficient(parameters,V,theta).state_partial;
       }
 
 
@@ -214,13 +269,8 @@ namespace aspect
         AssertDimension(fractions.size(), mu0.size());
         AssertThrow(std::isfinite(V) && V >= Vmin && std::isfinite(coefficient),
                     ExcMessage("Invalid initial friction target or slip rate."));
-        double f = 0., direct = 0., evolution = 0.;
-        for (unsigned int m=0; m<fractions.size(); ++m)
-          {
-            f += fractions[m]*mu0[m];
-            direct += fractions[m]*a[m];
-            evolution += fractions[m]*b[m];
-          }
+        const auto parameters=rate_state_parameters(fractions);
+        const double f=parameters.reference, direct=parameters.direct, evolution=parameters.evolution;
         AssertThrow(evolution > 0. && (!regularized || coefficient > 0.),
                     ExcMessage("The requested friction target has no unique positive initial state."));
         double state_term = coefficient-f-direct*std::log(V/V0);
@@ -252,24 +302,13 @@ namespace aspect
         AssertDimension(volume_fractions.size(), mu0.size());
         AssertThrow(theta > 0, ExcMessage("The slip state is non-positive."));
 
-        double mu0_eff = 0, a_eff = 0, b_eff = 0;
-        for (unsigned int j = 0; j < volume_fractions.size(); ++j)
-          if (volume_fractions[j] > 0)
-            {
-              mu0_eff += volume_fractions[j] * mu0[j];
-              a_eff   += volume_fractions[j] * a[j];
-              b_eff   += volume_fractions[j] * b[j];
-            }
+        const auto parameters=rate_state_parameters(volume_fractions);
 
         AssertThrow(std::isfinite(V_raw) && V_raw >= Vmin,
                     ExcMessage("The slip rate is below the minimum admissible slip rate."));
         const double V = V_raw;
 
-        return (regularized
-                ?
-                a_eff * std::asinh(V / (2. * V0) * std::exp((mu0_eff + b_eff * std::log(theta * V0 / Dc)) / a_eff))
-                :
-                mu0_eff + a_eff * std::log(V / V0) + b_eff * std::log(theta * V0 / Dc));
+        return rate_state_coefficient(parameters,V,theta).value;
       }
 
 
@@ -315,28 +354,13 @@ namespace aspect
         AssertDimension(volume_fractions.size(), mu0.size());
         AssertThrow(theta > 0, ExcMessage("The slip state is non-positive."));
 
-        double mu0_eff = 0, a_eff = 0, b_eff = 0;
-        for (unsigned int j = 0; j < volume_fractions.size(); ++j)
-          if (volume_fractions[j] > 0)
-            {
-              mu0_eff += volume_fractions[j] * mu0[j];
-              a_eff   += volume_fractions[j] * a[j];
-              b_eff   += volume_fractions[j] * b[j];
-            }
+        const auto parameters=rate_state_parameters(volume_fractions);
 
         AssertThrow(std::isfinite(V_raw) && V_raw >= Vmin,
                     ExcMessage("The slip rate is below the minimum admissible slip rate."));
         const double V = V_raw;
 
-        double dmu_dV = a_eff / V;
-        if (regularized)
-          {
-            const double Z = V / (2. * V0) * std::exp((mu0_eff + b_eff * std::log(V0 * theta / Dc)) / a_eff);
-            if (Z < 1.e6)
-              dmu_dV *= Z / (std::sqrt(1. + Z * Z));
-          }
-
-        return dmu_dV;
+        return rate_state_coefficient(parameters,V,theta).speed_partial;
       }
 
 
@@ -389,16 +413,11 @@ namespace aspect
         if (use_operator_splitting == false)
           return cfl_number * Dc / V;
 
-        double a_eff = 0, b_eff = 0;
-        for (unsigned int j = 0; j < volume_fractions.size(); ++j)
-          if (volume_fractions[j] > 0)
-            {
-              a_eff += volume_fractions[j] * a[j];
-              b_eff += volume_fractions[j] * b[j];
-            }
+        const auto parameters=rate_state_parameters(volume_fractions);
+        const double a_eff=parameters.direct,b_eff=parameters.evolution;
 
         // Limit the time step only for rate-softening regions
-        return (a_eff > b_eff ? 
+        return (b_eff == 0. || a_eff > b_eff ?
                 std::numeric_limits<double>::max() :
                 cfl_number * (a_eff * Dc) / (b_eff * V));
       }
@@ -560,10 +579,10 @@ namespace aspect
     namespace Rheology
     {
 #define INSTANTIATE(dim) \
-      template class FaultFriction<dim>;
+  template class FaultFriction<dim>;
 
       ASPECT_INSTANTIATE(INSTANTIATE)
-        
+
 #undef INSTANTIATE
     }
   }

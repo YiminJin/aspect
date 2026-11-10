@@ -1,13 +1,23 @@
+> **Latest numerical evidence:** [material consolidation and midpoint growth](MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md). Coarse midpoint histories reduce work loss; spatial growth remains unresolved. The scalar stopping-floor fix passes the failed fine interval. BE remains default; no fine .06 endpoint or unstable-RSF qualification is claimed.
+
 # Bulk energetic tip treatment
 
 Start with the [active implementation reading path](ACTIVE_RESEARCH_MODEL.md);
 [consolidation evidence](TIP_CONSOLIDATION_REPORT.md) closes the midpoint repair
 attempt and compact-loading experiment. BE remains the reference.
 
-Current implementation: `e8b6dd091` plus midpoint and active-path consolidation, 9 November 2026. This guide
+Current implementation: `5f1fc6f3c` plus the separately recorded material and scalar-solver patches, 10 November 2026. This guide
 describes `Bulk tip solver = ASPECT` with the active native Bernstein DGQ2 phase
 fixtures. DG Bernstein is the supported phase basis. Numerical reports
 identify their tested executables separately from this source revision.
+
+The [specimen assessment](PROPAGATION_SPECIMEN_ASSESSMENT.md) rejects the current
+4×2 m fixture for the next growth test. It remains useful as a numerical control;
+its toughness/size and loading evidence do not establish a propagation specimen.
+The new [synthetic verification benchmark](SYNTHETIC_PROPAGATION_BENCHMARK.md)
+selects a different joint calibration and passes one fixed-phase uniform-shear
+preflight. It is retained for a bounded growth check, without claiming propagation
+or work accuracy from that screen.
 
 The selected propagation control solves damage in the **bulk**, including intact
 material ahead of a finite damaged patch. The diffuse fracture force competes

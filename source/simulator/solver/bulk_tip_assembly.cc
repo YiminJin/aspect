@@ -59,7 +59,7 @@ namespace aspect
       AssertThrow(!midpoint || physical_dt*parent->parameters.G/parent->parameters.eta<=2.,
                   ExcMessage("Midpoint control requires dt*G/eta<=2 to exclude sign-changing free Maxwell relaxation; no BE fallback."));
       G=parent->parameters.G;
-      beta=1./(1.+dt*G/parent->parameters.eta);
+      beta=MaterialModel::BulkCohesive::Tip::relaxation_factor(G,parent->parameters.eta,dt);
       const double ell=this->get_phase_field_handler().get_length_scale();
       Kf=model.critical_energy_release_rates[0]/((8./3.)*ell);
       boundary.copy_from(constraints);
@@ -256,7 +256,9 @@ namespace aspect
       fractions[0]=1.;
       for (unsigned int k=0; k<ns; ++k)
         e->laws[k]=model.fault_friction.section_endpoint(fractions,free_rate[k],mobility[k],parent->sections[k].age,
-                                                         dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0],midpoint);
+                                                         dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0],
+            midpoint ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                     : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
       if (tangent)
         {
           local_matrix=0.;
@@ -396,7 +398,9 @@ namespace aspect
           e->radiation+=physical_dt*ds*law.law.radiation*law.rate;
           e->section_defect=std::max(e->section_defect,std::abs(e->rate[k]-law.rate));
           e->functional+=beta*dt*ds*model.fault_friction.section_primitive(fractions,law.rate,parent->sections[k].age,
-                                                                           dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0],midpoint);
+                                                                           dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0],
+            midpoint ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                     : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
         }
       e->adjoint_error=e->Df-section_work;
       e->ledger_error=e->internal_work-e->storage_change-e->Db-e->Dc-e->Df-e->stress_loss-e->traction_loss

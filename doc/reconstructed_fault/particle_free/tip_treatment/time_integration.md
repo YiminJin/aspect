@@ -155,3 +155,39 @@ checks conditional endpoint stationarity separately from stage acceptance.
 [Hairer and Lubich's gradient-system analysis](https://www.unige.ch/~hairer/preprints/gradientflow.pdf)
 provides context on energy decrease and stiff damping, not a proof for this
 constrained nonlocal RSF system.
+
+## Shared age and stage coefficients
+
+The [equation-to-function table](friction_and_direction.md#shared-rheology-ownership)
+identifies the common age/partial/section-law owners. Midpoint mechanics requests
+`constant_rate_exact` over the half-stage duration, while accepted age requests
+the same method over the full physical duration from the original incoming age.
+BE requests `backward_euler`. Mature surface histories retain their exact aging
+wrapper and existing timing. The method enum changes neither checkpoint text
+nor the physical meaning of accepted observations.
+
+`Tip::relaxation_factor(G,eta,stage_dt)` supplies the rational BE/half-stage
+factor used by the point update, its tangent, the coupled assembly and material
+reference viscosity. The mature material exponential propagator remains a
+different time discretization. Tip accounting shares the endpoint-safe inverse
+compliance with `cohesive_energy`; the rational elimination still handles intact
+and fully damaged limits without evaluating a singular h(1).
+
+## Accuracy of the scalar search solve
+
+`PhaseField::solve_obstacle` solves the positive quadratic search problem,
+including zero-clock seed equilibration and the shifted phase search metric.
+It receives the assembled matrix, load and explicit bounds. Its CG step solves
+the restricted correction equation A delta=b−A x about the current iterate;
+selected active values are imposed exactly. The roundoff scale belongs to that
+correction load. A floor based on the full absolute load could stop above the
+unchanged final VI certificate when prescribed bound values dominate the norm.
+The retained reference and independent analytic/captured-QP checks are in
+`bulk_tip/phase_obstacle_replay.cc` and its benchmark support.
+
+This is a numerical accuracy correction to the same quadratic problem. The
+physical nonlinear residual, time update, phase obstacle, final acceptance and
+history publication are unchanged. Newton/CG iterations never age or publish
+the incoming material state. The [material and overnight report](../MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md)
+distinguishes the preserved material milestone, scalar correction, repaired
+finite interval and remaining spatial/nonlinear cost limits.

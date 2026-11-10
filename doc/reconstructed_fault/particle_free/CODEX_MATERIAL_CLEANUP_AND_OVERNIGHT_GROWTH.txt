@@ -1,0 +1,131 @@
+TASK: Consolidate material-law calculations and qualify synthetic growth with improved time integration
+Target agent: Sol-6.1, reasoning effort xhigh.
+
+Complete the implementation and the applicable experiments below. This is an execution handoff, not a request for another plan. Work sequentially, retain concise progress notes, and make routine implementation decisions without waiting for the user. The user has authorized overnight computation. Use an approximately eight-hour total wall-time budget, including builds and diagnosis; prioritize completed comparisons over starting every optional run. Use at most FOUR aggregate build workers/MPI ranks, one numerical thread per rank, with only one substantial numerical job running at a time. Two MPI ranks are the established baseline. Overnight permission increases duration, not the laptop's thermal/thread limit. No server submission is required.
+
+PURPOSE AND CURRENT EVIDENCE
+
+The paper ultimately needs fault propagation coupled to unstable RSF, alongside the mature-fault/BP3 and transported-fault examples. The present synthetic specimen is a controlled test of fracture growth and numerical coupling; its stiffness/radiation parameters do not target an RSF instability. Do not reinterpret smooth sliding as the final event experiment. This task should deliver understandable material code and an affordable, better-qualified growth calculation before a new instability calibration.
+
+Read the current local AGENTS instructions and these existing documents:
+- SYNTHETIC_FREE_EVOLUTION.md and its synthetic_growth evidence;
+- SYNTHETIC_PROPAGATION_BENCHMARK.md;
+- ACTIVE_RESEARCH_MODEL.md;
+- TIP_CONSOLIDATION_REPORT.md and the midpoint portions of TIP_TIME_UPDATE_AND_GROWTH_REPORT.md;
+- tip_treatment/friction_and_direction.md and time_integration.md.
+Locate them by filename if their directories differ. Use the latest local worktree, including the user's uncommitted changes. The remote reviewed for this handoff was 5f1fc6f3c656dfb7e1ea03e2a6507258929dbca2. The new specimen, checks and reports may be ahead of that commit as uncommitted work. Do not reset to the remote or discard the incoming worktree.
+
+The retained core executable SHA is 5d8f9ab1adc94662f7b96a9b63267657a18bc0674dfb51693e763f5877c18e3e; the synthetic checker SHA is 1086b40397853e164ca9a93b41101f4621546ccf476018797d59a883f89d70ea. Record actual entry identities. Preserve those binaries, raw outputs, checkpoints and failed attempts. Build new binaries separately and associate every result with its actual source/input/executable identity.
+
+Both existing free-phase BE runs start at t=0 and reach .06 s on h=.125 m:
+- dt=.0025: 24 intervals, 652.91 s; added fracture .010274270 J/m; physical-work remainder .213323993 J/m.
+- dt=.00125: 48 intervals, 1235.38 s; added fracture .010247118 J/m; remainder .106743927 J/m.
+- Fine-grid late-window (.04-.06) remainder .034163849 J/m is 3.5008 times added fracture; the full-history ratio is 10.4170. These are factors, not percentages.
+- Bulk BE stress loss dominates. The two-grid phase-increment relative L2 difference is only .00184754, added fracture differs by .265%, and section-rate relative L2 differs by 1.092%. Large global work error is not itself proof of a similarly large local phase error.
+- Broadening begins near .03 s; meaningful initially intact axial damage begins near .055 s. About 67.84% of added fracture is assigned to the old central band, 27.07% to the old tip band, 5.09% to initially intact axial cells. Remote and boundary increments are zero.
+- Low phase contours advance less than one cell; phi=.5 has no axial advance. Do not require visibly large growth to declare an informative result.
+
+Do not spend this night repeating a long BE timestep-halving sequence. Retain those two histories as controls. The primary numerical candidate is the already implemented midpoint option, with its known nonlinear-search limitation explicitly tracked.
+
+A. MATERIAL-MODEL AUDIT AND CONSOLIDATION
+
+Start with a short inventory: operation, authoritative implementation, active callers, intentional alternatives, and proposed action. Limit the inventory to the PhaseFieldFault material model, its FaultFriction rheology and directly coupled phase/history/solver consumers. Act on verified findings in this task; do not finish with an audit alone. Separate behavior-preserving changes from correctness fixes and nonlinear-solver changes in reviewable commits or patches. Do not overwrite the user's incoming edits.
+
+Confirmed audit leads from the reviewed source:
+
+1. Aging is duplicated between source/material_model/rheology/fault_friction.cc::signed_endpoint and update_state. The former selects BE or exact constant-rate aging; the latter implements only the exponential formula and rejects rates below Vmin. The exact-age derivative already has its own function. The reconstructed mature surface calls update_state through PhaseFieldFault::compute_surface_state_candidates in history.cc. The bulk-tip accepted candidate instead calls signed_endpoint merely to obtain its .age in bulk_cohesive_history.cc.
+
+2. Effective RSF parameters mu0/a/b are mixed repeatedly in signed_endpoint, section_endpoint, section_primitive, friction_coefficient, its partial derivatives, initial-state inversion and compute_time_step. The positive-rate and signed interfaces also repeat the regularized friction algebra. Consolidate genuine shared calculations, preserving the distinction between a partial derivative at fixed theta and a total derivative after time-discrete aging.
+
+3. friction_coefficient_derivative_wrt_state computes dmu/dV * (b/a) * V/theta. The parser permits a=0 for NONregularized RSF, where the correct state derivative is b/theta; that implementation divides by zero. This is a latent API defect, not evidence that the current regularized a=.015 runs are wrong. Establish its callers across the full repository. Either implement the supported state derivative correctly through the shared evaluator, or remove an unused redundant public helper after proving no retained dependency. Do not tighten the physical a restriction merely to hide the defect. Check stateful/stateless guards and vector sizes before indexing material parameters.
+
+4. Tip::account in bulk_tip.cc repeats inverse-compliance and old cohesive-energy algebra already represented by Tip::cohesive_energy. Tip::update and derivative repeat the BE relaxation factor; material evaluation and BulkTipCoupling also construct related stage coefficients. Consolidate where this improves ownership and clarity, retaining stable intact/fully damaged limits and the exact derivative of the residual.
+
+5. phase_field_fault.cc contains a repeated identical midpoint/native-Bernstein restriction and computes exponential Maxwell coefficients even when it selects the BE bulk viscosity. Review configuration validation and coefficient selection together. Do not move a necessary early guard after an unsafe calculation. The mature exponential Maxwell law and the bulk-tip BE/half-stage law are intentional different discretizations, not interchangeable duplicates.
+
+6. Trace phase-law calibration and rational formulas through initialize_bulk_cohesive_history, bulk_tip.cc, BulkCohesive::compliance, PhaseFieldHandler's degradation/energy functions, and diagnostic callers. Check K=Gc/[(8/3)ell], m=2GK/c^2, h=m phi(1+phi)/(1-phi)^2, derivatives and tensor factors. The rational endpoint-safe tip formulas must not be replaced by a singular direct evaluation of h at phi=1. Independent test oracles should remain independent.
+
+Implement a compact shared aging interface in the existing rheology owner:
+- Explicit enum: backward_euler versus constant_rate_exact, rather than bool exact_aging. Preserve existing input/checkpoint method meanings; the enum need not create a new user parameter.
+- One authoritative evaluation of age and its derivative with respect to NONNEGATIVE speed. A small result structure is appropriate if it prevents separate value/derivative implementations from drifting. Avoid a new class hierarchy or a file for every helper.
+- BE: theta=(theta_old+dt)/(1+speed*dt/Dc).
+- Exact constant-rate: theta=theta_old*exp(-x)+dt*(-expm1(-x))/x, x=speed*dt/Dc, with the analytic x=0 limit. Use numerically stable expressions/Taylor limits where required.
+- speed=0 gives theta_old+dt; dt=0 gives theta_old. Derivatives must have their proper limits. Do not use a rate floor in this kernel. Existing positive-rate surface guards may stay in their public wrapper.
+- signed_endpoint (or its clearer replacement) obtains age and its derivative here and applies the signed-law chain rule. Accepted history obtains age directly here rather than evaluating unused friction and traction derivatives.
+- Mature surface: keep its existing exact constant-rate method and state-update timing. BE tip: keep BE aging. Midpoint tip: exact constant-rate age at the half-stage for mechanics and full interval for accepted age. Always use the immutable accepted incoming age; never successively age it during Newton or line-search trials.
+- Keep section slip elimination, constitutive evaluation, and the search primitive as distinct operations. Names such as evaluate_time_discrete_friction, solve_section_slip_rate and friction_search_primitive are reasonable; choose names consistent with surrounding ASPECT code. Update active callers and equation-to-code documentation together.
+- The search primitive integrates traction over trial RATE with incoming history fixed; it is not physical energy or fV work. Preserve its current quadrature unless a separately evidenced optimization is made. Preserve method-dependent monotonicity guards and signed zero-rate behavior.
+
+Extend the audit to duplicate state publication, tensor/deviator conventions, material averaging, stage versus physical timestep and stale documentation within this scope. Distinguish confirmed bugs, redundant code and intentional alternatives in the report. Remove or move a retired helper only with a checked dependency map; do not resurrect old routes or rewrite historical Coulomb/tensor experiments to resemble the active tip model. Preserve independent reference calculations needed by tests. Aim for fewer authoritative formulas and clearer ownership, not merely more forwarding functions.
+
+Use ASPECT formatting and Doxygen on touched interfaces: meaning, units, admissible inputs, stage/endpoint timing, partial/total derivative and whether history is mutated. Keep methods in the existing rheology/material owners where practical. No single-step driver, new orchestration framework, unrelated core advection edits, or broad file rearrangement.
+
+B. VERIFY THE CLEANUP BEFORE CHANGING NUMERICS
+
+Use existing tests plus focused mathematical checks:
+- Both aging methods at zero, tiny and finite speed, zero/finite dt, and their derivatives (one-sided at speed=0). Verify exponential semigroup behavior for fixed speed where useful, not for BE.
+- Positive/negative/zero signed traction, old positive-rate API at fixed state, partial versus total derivatives, and the nonregularized a=0 edge if retained. Check mixtures with an inactive material component.
+- Section root residual/condensed derivative, primitive derivative, work adjoint and unchanged time-location conventions.
+- Tip constitutive residual/tangent and physical accounting at phi=0, near zero, intermediate phi and phi=1; full plane-strain tensor metric.
+- A short preserved BE restart interval including evolution; a short mature transported-fault check; and a short existing midpoint control. Compare with protected pre-refactor binaries at identical inputs and incoming history. Reuse existing MPI/restart tests for touched publication code. Do not rerun every historical suite or both full synthetic BE histories solely for the refactor.
+
+A correctness fix may legitimately change an affected result; isolate and explain it rather than weakening comparison tolerances or claiming the change is behavior-preserving. New test references must not simply call the production helper to generate expected answers. Record a buildable cleanup milestone before any solver repair.
+
+C. MIDPOINT QUALIFICATION AND BOUNDED NONLINEAR REPAIR
+
+Use the existing midpoint method; do not invent another constitutive model or integrator this night. Read its implementation and previous qualification before changing it. It evaluates the constitutive/phase equations at the midpoint stage, reconstructs endpoint tau/A/phi, and uses exact constant-stage-rate aging. Accepted history remains at the full physical endpoint. The nonlinear cohesive chain-rule remainder is still measured; midpoint does not guarantee an exact nonlinear energy identity or second-order convergence across active-set transitions.
+
+Run the existing inexpensive point/small-coupled midpoint checks once against the refactored binary. These already cover much of the method; extend only for an uncovered change. Repeat the preserved old .0575 -> .06 failure once if its exact parent is available. That case previously stalled at phase KKT about 6.34e-7 while mechanics was about 2.5e-15, against an unchanged phase gate 1e-7. It is a tracked nonlinear-search limitation, not a reason to block every new specimen until all older cases work.
+
+Then proceed to the new synthetic midpoint history below. If it encounters the same type of failure, save the exact failed parent and diagnose that interval. Up to about TWO HOURS of focused repair are authorized:
+- Verify the actual tangent and phase natural-map behavior near the newly active, almost-intact coefficients; incoming state and constraints must remain immutable.
+- Distinguish true nonlinear stiffness/active-set transition from cancellation in differences of large search-functional values. Existing old failures showed tiny predicted decreases and severe full-step residual amplification; do not assume roundoff is the only cause.
+- Prefer a small correction to the existing globalization/active-set implementation, justified by the isolated failing interval. A cancellation-safe functional difference or a consistent safeguarded search may be appropriate when supported by evidence. No positive-phase floor, clipping of physical residuals, weakened KKT gate, hidden BE fallback, changed physics or automatic increase of the iteration budget as the sole remedy.
+- Verify the repair on that interval and an existing successful control, then resume from an unchanged-method accepted parent. Use a separate numerical-change commit/patch.
+
+If midpoint still cannot complete after this bounded effort, stop dependent long growth runs. Deliver the completed material cleanup plus a reproducible numerical obstruction and one concrete proposed remedy. Do not consume the rest of the night launching near-identical failures. A still-failing old sentinel alone does not forbid studying a completed new midpoint history; state the limited scope honestly.
+
+D. OVERNIGHT EXPERIMENT ORDER
+
+Keep the selected synthetic specimen fixed: 8x4 m, centered seed half-length 2 m/plateau half-length 1.5 m, peak .95, normal input half-support .25 m; G=1e6 Pa, eta=1e8 Pa s, c=1000 Pa, Gc=2/3 J/m^2, ell=.125 m, m=4; pN=200 Pa, a=.015, b=.02, mu0=.6, V0=.001 m/s, Dc=.0005 m, age0=.5 s, radiation=1000 Pa s/m. Native DGQ2 Bernstein, uniform boundary v=(.01(y-2),0), same quadrature, phase active from t=0. No compact perturbation, seed/history reset or parameter sweep.
+
+Before launching, fix the BENCHMARK's observation/termination geometry: old --remote-margin/--boundary-stop code still contains 4x2 m coordinates. Use the actual 8x4 geometry and the documented seed/region definitions. Keep the independent growth analysis, disjoint fracture partition and both DG traces. Benchmark changes should not alter production residuals. Use distinct labels; never overwrite old runs.
+
+Run M1: midpoint, h=.125 m, dt=.0025 s, fresh t=0 -> .06 (24 physical intervals).
+Run M2: midpoint, same h, dt=.00125 s, fresh t=0 -> .06 (48 physical intervals).
+Use the SAME equilibrated zero-clock seed at a given mesh, and verify it. Do not import the frozen .04 preflight or silently convert a BE checkpoint into a midpoint history. Existing method-safe restart may be used to resume an interrupted midpoint run.
+
+Analyze M1/M2 immediately with the retained BE pair. Prefer completing these two histories over a longer single trajectory. Compare physical endpoint tau/A/phi, cumulative slip, age, added fracture and onset. Compare midpoint rates at their actual stage times, using a documented common-time reconstruction or average; do not equate a midpoint observation with a BE endpoint rate. Report phase-increment norms relative to the change from the seed. Keep state accuracy separate from energy quadrature/accounting accuracy.
+
+For each method/grid report, over 0-.06 and .04-.06:
+- R_phys = Wext - Delta(E_bulk+E_cohesive+E_fracture) - D_bulk - D_cohesive - D_friction - D_radiation.
+- Signed sum and sum of absolute INTERVAL remainders; numerical stress/traction/fracture losses where applicable; nonlinear cohesive remainder; phase residual/constraint work; external-internal mechanical work defect; full ledger closure.
+- Use physical endpoint storage and the work quadrature actually associated with the method. Do not subtract a numerical loss/remainder and rename the remainder physical accuracy. Do not substitute the search primitive for dissipation. Check dissipation channels are not counted twice.
+- Full SIPG added fracture and the same disjoint regional attribution. Report global error versus total added fracture, but also state that this does not bound the small axial-growth error.
+
+Use the following declared PRACTICAL SCREEN for spending time on spatial refinement, not as a new solver tolerance or a universal publication standard:
+- Both midpoint histories pass the unchanged mechanics/KKT/ledger gates and preserve remote/boundary integrity.
+- Fine midpoint accumulated absolute R_phys is at most 10% of added fracture in BOTH reporting windows, with an improving trend under halving. A small signed sum produced by cancellation is insufficient.
+- Phase-increment relative L2 and total added-fracture changes are each about 1% or less between time grids, with the same qualitative broadening/axial-growth classification. Report slip/rate/age differences and onset brackets too; do not demand smooth second-order ratios at activation.
+If close but outside this screen and the trend is clear, one dt=.000625 midpoint history on the SAME mesh is authorized within budget. Otherwise diagnose the dominant error and close the temporal assessment; do not start an endless refinement ladder. Do not alter the declared screen after seeing results.
+
+Run S1, only after the temporal screen passes and cost permits: midpoint, h=.0625 m (128x64 cells), the qualified fine timestep, fresh t=0 -> .06. Hold ell and the physical seed/material/loading fixed. Re-equilibrate the same continuum seed obstacle on this mesh; report initial-state discretization differences instead of importing coarse coefficients as a new physical seed. Compare at common physical coordinates with integration-based norms, not matching raw DoF arrays. This is one spatial sensitivity check, not a proved convergence order. Measure cost early, remembering the old onset steps were much more expensive than preflight steps; reserve enough budget to finish and analyze the run.
+
+Optional continuation, after M1/M2 and S1 are useful and within budget: continue the accepted fine-mesh midpoint history to at most .08 s. Stop earlier for actual boundary/remote activation, loss of admissibility or solver failure. Specify numerical observation thresholds before running and use geometry-correct diagnostics. Do not extend time or increase loading to force a visible crack or an RSF event. If mesh sensitivity changes the physical interpretation materially, use the remaining time to analyze that difference instead of extending the trajectory.
+
+Allow roughly 2 hours for cleanup/build/short checks, up to 2 hours for any needed focused midpoint repair, and the remaining budget for the ordered histories. These are scheduling guides, not reasons to stop early after success. Use per-run time limits that fit the remaining budget, preserving last accepted checkpoints and a complete run-status record on timeout. Finish with analysis and a report rather than leaving an untracked background job. The required comparison order takes precedence over optional work.
+
+E. DOCUMENTATION, DELIVERY AND COMPLETION
+
+Update the existing friction/time-integration documentation with a compact equation -> function -> caller table. Explain the shared age owner, each method's time location, partial/total derivatives, scalar section elimination, search primitive versus work, and accepted-history publication. Include a short active-call overview; avoid copying the same formulas into many status pages. Link from existing guides. Keep Markdown prose for reading; use JSON/CSV for numerical evidence only.
+
+Deliver a concise report MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md with:
+1. Material audit: actual duplications removed, correctness fixes, intentional differences retained, and any unresolved item with its active reachability.
+2. Source and executable identities, staged changes, exact reproduction commands, tests and numerical costs. State which previous results remain reproducible.
+3. BE/midpoint comparison, full and late-window energy tables, phase/slip/state sensitivity, spatial comparison if completed, and reason for each deferred stage.
+4. Native phase and increment plots, axial/normal traces and threshold positions, clearly distinguishing band broadening, low-amplitude tails and resolved extension. No smoothing or inflated visual-growth claims.
+5. A firm conclusion: useful midpoint growth with stated limits; a specific temporal/globalization obstruction; or material/spatial behavior requiring the next change. Do not end with another generic audit recommendation.
+
+Archive enough RAW data for independent checking: accepted-step energy tables, section histories, initial/final and selected transition point/native-coefficient exports, failing-parent identity if any, input files, scripts and logs. A collection of hashes or reduced JSON alone is not a substitute for those data. Retain existing checkpoints locally; avoid unnecessary copies of large binaries/repositories. Preserve failures honestly.
+
+Complete authorized code and tests without an extra permission round. Do not claim that consolidating the aging API fixes BE work loss, that a closed ledger proves physical accuracy, or that this deliberately stiff synthetic specimen demonstrates an unstable RSF event. The useful outcome is shared, readable rheology and a clear numerical decision that advances the eventual propagation experiment.

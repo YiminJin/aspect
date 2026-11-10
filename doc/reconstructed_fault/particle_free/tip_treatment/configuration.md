@@ -95,6 +95,10 @@ command, runtime and status; a source revision alone does not identify a binary.
 | `--unloaded` | Replace the supported fixtures' boundary shear by zero |
 | `--intact` | Replace the original `finite_tip.prm` seed expression by zero; not a generic seed override for `localized.prm` |
 | `--remote-margin` | Add the benchmark remote-driving diagnostic stop |
+| `--phase-balance` | Export native fracture/driving rows, independently of using a driving-margin termination |
+| `--integrity-stop` | Stop if actual phase exceeds 1e-6 in the documented remote or boundary region; uses the actual box geometry and implies the required observer |
+| `--rheology-audit` | Run the focused aging/RSF mathematical audit through the benchmark checker |
+| `--wall-hours` | Add ASPECT's graceful wall-time limit; retain the runner's outer `--seconds` cap and last accepted checkpoint |
 | `--tangent`, `--tangent-step` | Coupled derivative check at the chosen step |
 | `--linear-oracle`, `--linear-oracle-step` | Small integrated-system direct/manufactured-direction check |
 | `--rejection`, `--rejection-step` | Checker trial/rollback/retry test at the chosen step |
@@ -131,3 +135,31 @@ remain right-endpoint sampled and are outside the midpoint accuracy claim.
 previously intact .25 m boundary strip acquires phase above 1e-12. This is a
 benchmark diagnostic stop, alongside the retained remote gate, not a phase cap.
 Fixed-phase screens export these margins without using them to terminate.
+
+## Selected synthetic uniform-shear preflight
+
+The [synthetic benchmark](../SYNTHETIC_PROPAGATION_BENCHMARK.md) specifies
+`bulk_tip/synthetic_propagation.prm`, its scales, expected range, mesh and cost.
+Use the documented runner with `--fixed-phase --phase-balance`: the former
+freezes the accepted obstacle in the integrated solver, the latter exports
+actual fracture/driving rows without assuming the old 4×2 m region definitions.
+The new postprocessing script uses explicit masks for the selected 8×4 m box.
+Bare execution without the fixed-phase hook would enable growth and is not
+the completed preflight. Existing checkpoints must not be resumed under its
+changed Gc, length, confinement, Dc, age or geometry.
+
+The overnight growth controls use `--phase-balance --integrity-stop`, with no
+fixed-phase flag. The checker now obtains box origin and extents from the
+geometry model. For the selected 8×4 m synthetic body the remote region is
+`abs(x-4)>3 || abs(y-2)>1`; the boundary strip is within .25 m of any wall.
+The actual-integrity threshold is distinct from the older .95 normalized-driving
+margin and from `--boundary-stop`'s tighter historical threshold. None changes
+the phase obstacle or caps the physical field. See the
+[material cleanup and midpoint/spatial comparison](../MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md)
+for tested binary identities, run labels and current limits.
+
+For exact failed-parent recovery, `--end-step N` selects ASPECT's existing
+maximum-timestep termination criterion and `--checkpoint-steps N` selects its
+existing accepted-step checkpoint frequency. Keep the physical `--end` equal
+to the original trajectory when recovering a parent: changing it can change
+final-step clipping. These are benchmark controls, not new physical parameters.

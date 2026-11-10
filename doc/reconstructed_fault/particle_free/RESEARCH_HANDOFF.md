@@ -1,3 +1,70 @@
+> **Material cleanup and bounded midpoint assessment closed — 10 November 2026.**
+> [Results, implementation and decision](MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md):
+> shared age/RSF calculations and isolated edge fixes pass retained controls.
+> Three coarse midpoint histories reach .06 s; the final M2/M3 screen passes,
+> but substantial spatial sensitivity prevents resolved-growth qualification.
+> S1 stops at .045625 s; the verified scalar stopping-floor correction advances
+> its exact parent through .04625 s with unchanged tolerances. The fine .06
+> endpoint remains missing. BE stays default and midpoint selectable. No job
+> remains; longer growth, .08 continuation and instability calibration are
+> deferred. The next selected experiment should complete the fine comparison
+> from the retained repaired endpoint, after checking final-kernel restart.
+> Historical entries below retain their original scope.
+
+> **Free-phase synthetic control complete — 9 November 2026.**
+> [Response, timestep comparison and decision](SYNTHETIC_FREE_EVOLUTION.md):
+> both fresh BE histories (24/48 intervals, dt=.0025/.00125, h=.125) reach .06 s
+> from the identical equilibrated t=0 seed. Central-band evolution is detected
+> at .03 s; weak axial extension at .055 s. The phi=.01 tip shift is about .61h,
+> while phi=.5 has no axial advance; most added fracture energy stays in the
+> original band. Halving dt changes added fracture by .265%, but fine physical
+> work error still exceeds it 10.42x overall and 3.50x in .04–.06 s.
+> The refinement sequence is closed. Next issue: time-integration accuracy and
+> cost; mesh refinement, longer growth and extra cases remain deferred.
+> Solver/source/binary identities and tolerances are unchanged. Two sequential
+> two-rank runs total 31.47 min; no jobs remain. Older entries retain their
+> historical scope and do not authorize further runs.
+
+> **Storage availability — 9 November 2026.**
+> [Cleanup report and restoration commands](DISK_CLEANUP_20261109.md) supersede
+> older storage-size estimates. Completed dense CSVs were losslessly archived;
+> consult each affected run’s `ARCHIVED_FIELDS_20261109.md` before raw-field
+> analysis. All checkpoint sets, current synthetic preflight and runtime
+> identities remain unchanged. No scientific run was launched or resumed.
+
+> **Synthetic specimen selected and preflight complete — 9 November 2026.**
+> [Selected input and report](SYNTHETIC_PROPAGATION_BENCHMARK.md): Gc=2/3 J/m²,
+> c=1000 Pa, ell=.125 m, m=4; 8×4 m box, 2 m seed half-length; prescribed
+> confinement 200 Pa, Dc=.0005 m, initial age .5 s. This is a synthetic
+> verification specimen, not natural-fault calibration. Uniform shear has
+> compatible side velocities; no compact perturbation.
+> One fixed-phase physical preflight completes eight BE intervals to .08 s in
+> 80 s on two ranks. Tip/boundary Y/K=2.751/.934; ahead-of-seed native phase
+> rows become favorable between .05–.06 s while boundary rows remain unfavorable.
+> Cancellation is 1.06%, with small signed local reversals explicitly retained.
+> The selected specimen is retained for a bounded growth verification focused
+> on .04–.06 s. No growth run or refinement was launched; coarse BE work error
+> remains large, so time/spatial accuracy are not qualified. Two startup failures
+> and checker corrections are preserved. The old large-toughness specimen remains
+> rejected. Solver equations, gates, checkpoints and protected binaries are unchanged.
+>
+> Older entries below retain their historical scope and do not select new runs.
+
+> **Specimen selection closed — 9 November 2026.**
+> The present 4×2 m, a=.8 m, Gc=26.6667 specimen is **rejected for the next
+> growth test**. The actual AT1/cohesive calibration gives G Gc/c²=26.67 m,
+> versus a=.8 m; positive sliding resistance increases that screening length.
+> Retained fields confirm remote/boundary driving dominates the tip and compact
+> loading hides substantial opposite-sign fault deformation through cancellation.
+> The conditional baseline/perturbation pair was not launched: the scaling gate
+> fails. No new coupled runs, builds, parameter changes or solver edits.
+> See [assessment and definite decision](PROPAGATION_SPECIMEN_ASSESSMENT.md).
+> Next: select a calibrated toughness-to-strength ratio and compatible seed/body
+> size before another fixed-phase loading pair. BE accuracy and midpoint
+> convergence limits remain separate; long growth campaigns remain deferred.
+>
+> Older entries below are historical evidence and do not select further work.
+
 > **Consolidation complete — 9 November 2026.**
 > Native DG Bernstein is now the supported fault phase representation. BE remains
 > the reference/default; the shared midpoint option remains experimental. The

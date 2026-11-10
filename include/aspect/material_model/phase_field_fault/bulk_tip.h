@@ -15,6 +15,11 @@ namespace aspect
        * All tensors use the full three-dimensional plane-strain metric. */
       namespace Tip
       {
+        /** Rational Maxwell relaxation for a stage of duration dt (s), G (Pa)
+         * and eta (Pa s). BE uses the physical duration; midpoint uses half.
+         * This is not the mature material exponential propagator. */
+        double relaxation_factor(double G, double eta, double dt);
+
         struct State
         {
           Tensor stress; ///< Physical deviatoric stress, Pa.

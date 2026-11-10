@@ -1,3 +1,132 @@
+## Material-law consolidation and overnight assessment — 10 November 2026
+
+Entry HEAD `5f1fc6f3c` and incoming dirty science/docs/storage work are preserved.
+The [report](MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md) and
+[source/command/raw-data entry](../../../benchmarks/reconstructed_fault/particle_free/evidence/material_overnight/README.md)
+separate behavior-preserving consolidation, admitted edge fixes and benchmark
+diagnostics in ordered patches. Core SHA `bc9d14c1…99eec` and growth checker
+`3cf15b09…95a35` are retained independently of HEAD. Extended mixture checks use
+a separate checker; its source is not assumed to identify the growth DSO.
+The original core `5d8f9ab1…c18e3e` and checker `1086b403…d70ea` remain protected.
+
+`FaultFriction` now owns one age/value-derivative kernel with an explicit method
+enum, checked RSF mixing and fixed-state partials. Accepted tip age uses the
+kernel directly; mature exact aging, tip BE/full endpoint and midpoint half/full
+timing remain distinct. Rational stage relaxation and old cohesive storage are
+shared at their material owner. The a=0 nonregularized state partial, constant
+a=b=0 splitting limit and exact-aging underflow limit are isolated correctness
+fixes. Native phase, stress history/layout, spin, quadrature, publication,
+checkpoint laws and default integrator are unchanged. Solver/globalization was
+unchanged at this cleanup milestone. A subsequent, separately recorded scalar
+CG residual-correction fix addresses the absolute-load stopping-floor
+defect; it keeps all final tolerances and iteration budgets fixed.
+
+Units, point controls, signed/mixture/derivative guards, BE and midpoint recovery,
+and short layered mature transport pass. The old sentinel still fails its
+original phase gate. Three new coarse midpoint histories complete; the one
+fine spatial run stops after step73, with a verified accepted .04 comparison,
+complete accepted-prefix reduction and a retained costly-window checkpoint.
+Its scalar obstacle failure at step74 is distinct from the old outer-Newton
+sentinel. The bounded exact-parent retry passes as recorded below; the complete
+fine endpoint remains missing. Runtime libraries are checked and original
+data-loss records are unchanged. Final status and costs are retained in the
+closeout evidence.
+
+**Closeout:** all three coarse midpoint histories are complete under cleanup
+core bc9d14c1…99eec. S1's original scalar subproblem fails after .045625 s;
+actual-matrix replay proves its absolute-load CG floor can exceed the VI gate.
+The separate scalar residual-correction patch passes the exact failed interval
+through .04625 s (six corrections, KKT9.34664e-8), and final clean core
+b2300f6b…7b32 passes units, scalar 1/2-rank oracles and BE/midpoint controls.
+BE restart endpoint matches the cleanup endpoint bitwise. Full fine .06 remains
+missing; the old outer80 sentinel was not repeated under the final kernel.
+No physical law, tolerance, iteration cap, quadrature, checkpoint meaning or
+publication ownership changed. `final-runtime-identities.json` separates actual
+final source/binaries from the earlier growth baseline. No jobs remain.
+
+
+## Freely evolving synthetic BE pair — 9 November 2026
+
+[Report](SYNTHETIC_FREE_EVOLUTION.md) and
+[reproduction/evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/synthetic_growth/README.md).
+Entry/exit HEAD `5f1fc6f3c` plus retained dirty benchmark/documentation work.
+No core, checker or fixture edit/rebuild; core `5d8f9ab1…c18e3e`, checker
+`1086b403…d70ea` match the selected preflight before and after both runs.
+The new Python reducer checks identical initial fields/native coordinates,
+exact quadratic SIPG energy partitions, section power, phase bounds and two-grid
+phase/slip/work comparisons. Q2 trace roots quantify sub-cell threshold motion.
+No phase freeze or checkpoint import; physical steps evolve from the t=0 seed.
+
+24 and 48 BE intervals complete to .06 s, sequential two-rank wall time 1888.29 s.
+Original mechanics/phase gates pass; source and numerical conventions unchanged.
+A sandbox MPI socket startup failed before simulation and remains recorded.
+Both runs show broadening plus weak late extension; no remote/boundary growth.
+Fine physical-work error is 10.42x/3.50x added fracture over full/late histories.
+Stop further refinement here; time integration is the next issue. Existing
+midpoint limitations and historical losses remain; no production qualification.
+
+## Storage-only maintenance — 9 November 2026
+
+At unchanged HEAD `5f1fc6f3c`, preserved the incoming dirty science work.
+[Cleanup report](DISK_CLEANUP_20261109.md): removed 1006 regenerable comparison
+build products; losslessly archived 8624 dense exports into 92 indexed shards.
+All 197926 retained files passed hash/mode/mtime verification; 302 symlink
+targets are unchanged. Three isolated restorations and four runtime dependency
+checks passed. Current `bulk-tip/native` incremental cache is retained.
+No source, physical input, checkpoint semantics or executable was changed.
+Only documentation annotations follow the exhaustive check; their hashes and
+unchanged original bodies are recorded in the maintenance audit.
+
+## Selected synthetic uniform-shear benchmark — 9 November 2026
+
+Entry `5f1fc6f3c` plus the preserved specimen-assessment documentation and analysis.
+No core source change/rebuild. Current core remains `5d8f9ab1…c18e3e`.
+`bulk_tip/synthetic_propagation.prm` selects a new synthetic material/geometry
+calibration (Gc=2/3, c=1000, ell=.125, m=4, pN=200, Dc=.0005, theta0=.5,
+8×4 m body and 2 m half-seed), not a conversion of an earlier trajectory.
+
+Benchmark-only changes: `--phase-balance` exposes native fracture/driving rows
+without the old fixture's region stops; the existing fixed-phase hook retains
+upper=accepted lower. The startup derivative checker now uses configured age,
+initial dt, compression, radiation and Dc. Its zero-rate finite-difference probe
+is scaled to the configured slope; exact-aging quadrature uses the actual Dc.
+Derivative error tolerances remain unchanged. Initial failures are retained:
+the first proposal violated g''(0)>0, then a hard-coded checker probe/reference
+failed before any physical step. The selected input preserves m>3; no guard is
+removed. Protected prior checkers remain intact, including the failed checker.
+
+One physical preflight, `synthetic-preflight03`, passes eight BE intervals on two
+ranks in 80 s. Exact phase invariance, configured law derivatives, native SIPG
+energy/Hessian checks, single publication, mechanics and ledger gates pass.
+`analyze_synthetic_preflight.py` reads actual K/G/eta from the generated input,
+checks the native row identity and discrete power adjoint, and reports tip,
+ahead, core, remote and boundary fields plus signed cancellation. No row or
+field is clipped. See [report](SYNTHETIC_PROPAGATION_BENCHMARK.md) and its local
+closeout manifest for identities, input, figures, failures, cost and limits.
+This selects a numerical specimen; it does not verify propagation, time accuracy,
+spatial convergence, contact, or mature-fault production physics.
+
+## Propagation specimen assessment — 9 November 2026
+
+Entry `5f1fc6f3c`, clean tracked worktree, current core `5d8f9ab1…c18e3e`.
+No solver/material/operator edits or builds. The native Bernstein BE model,
+quadrature, section work adjoint and retained endpoint criteria are unchanged.
+`bulk_tip/assess_specimen.py` reads the actual fixture and retained exports,
+derives K, m, the exact BE driving factor and energy/strength lengths, and
+checks the transverse AT1 profile by independent quadrature. Point driving
+identity errors are ≤5.69e-14 Pa, local/section step work errors ≤2.78e-17 J/m;
+the two retained fixed-phase fields remain exactly unchanged. This is analysis
+of existing evidence, not a fresh coupled baseline/perturbation comparison.
+
+[PROPAGATION_SPECIMEN_ASSESSMENT.md](PROPAGATION_SPECIMEN_ASSESSMENT.md) rejects
+the existing specimen for the next growth test. The nominal 800 Pa homogeneous
+stress estimate was correct but insufficient: it did not establish propagation
+energy or tip concentration. Toughness relative to strength and geometric size
+must be reconsidered before another loading experiment. No chosen replacement
+material values or new propagation qualification are implied. Original run
+identities and per-file hashes are retained in the local assessment manifest.
+All historical outputs, checkpoints and documented data losses are preserved.
+
 ## Active-path consolidation — 9 November 2026
 
 The existing `e8b6dd091` worktree, completed midpoint implementation and manual

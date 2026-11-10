@@ -15,7 +15,22 @@ Start at [tip treatment](TIP_TREATMENT.md) for the bulk closure and
 [mature moving fault](MATURE_MOVING_FAULT.md) for the distinct mature law.
 [Consolidation evidence](TIP_CONSOLIDATION_REPORT.md) records the supported
 settings, regression endpoints and retired-path boundaries. The compact-loading
-experiment is closed. Midpoint remains selectable, not adopted in place of BE.
+experiment is closed. The [specimen assessment](PROPAGATION_SPECIMEN_ASSESSMENT.md)
+rejects the current small specimen for the next physical growth test; its
+numerical-control evidence remains valid. The subsequently selected
+[synthetic specimen](SYNTHETIC_PROPAGATION_BENCHMARK.md) uses a new explicit
+material/geometry calibration. Its fixed-phase preflight is followed by
+[two freely evolving BE histories](SYNTHETIC_FREE_EVOLUTION.md), both starting
+from the equilibrated t=0 seed. They show central broadening and weak sub-cell
+extension with small timestep sensitivity, but numerical work loss still exceeds
+added fracture energy. The subsequent [midpoint assessment](MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md)
+completes three coarse histories with much smaller physical-work errors and a
+passing final temporal screen. Fine-mesh accepted-prefix growth differs strongly;
+its scalar-solver failure is repaired through one interval, not through the full
+.06 s trajectory. BE remains default and midpoint selectable. Complete that
+spatial comparison before longer growth or instability calibration. Shared
+age/RSF ownership and scalar residual correction are documented in the material
+and [time-integration](tip_treatment/time_integration.md) guides.
 
 ## One bulk-tip step
 

@@ -4,6 +4,7 @@
 #include <aspect/termination_criteria/interface.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_internal.h>
 #include <aspect/phase_field.h>
+#include <aspect/geometry_model/box.h>
 #include <aspect/simulator/solver/bulk_tip.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/lac/sparse_direct.h>
@@ -49,6 +50,27 @@ namespace aspect
            for(double x:{p.rate,p.q,p.signed_shear,p.absolute_shear})a.push_back(x);}
         return a;
       }
+      /** Read-only benchmark map from scalar phase rows to native cell shapes. */
+      void dump_phase_row_map() const
+      {
+        const auto dump=std::getenv("ASPECT_PHASE_OBSTACLE_DUMP");
+        if (!dump)return;
+        const auto &element=this->get_fe();
+        const auto pc=this->introspection().phase_field().first_component_index;
+        const auto count=element.base_element(element.component_to_base_index(pc).first).n_dofs_per_cell();
+        std::vector<types::global_dof_index> ids(element.n_dofs_per_cell());
+        std::ofstream out(std::string(dump)+"/phase-map-resume-r"+std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator()))+".csv");
+        out<<"index,cell,i,x,y\n"<<std::setprecision(17);
+        for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+          if (cell->is_locally_owned())
+            {
+              cell->get_dof_indices(ids);
+              for (unsigned int i=0;i<count;++i)
+                out<<this->get_solution().get_block_indices().global_to_local(ids[element.component_to_system_index(pc,i)]).second
+                   <<','<<cell->id().to_string()<<','<<i<<','<<cell->center()[0]<<','<<cell->center()[1]<<'\n';
+            }
+      }
+
       /** Narrow same-mesh benchmark import, never a production restart. All
        * components are keyed by CellId/component/local shape; physical history
        * uses its existing material archive and validates geometry/law on restore.
@@ -251,6 +273,100 @@ namespace aspect
         out<<"free_unknowns,relative_krylov_direct,relative_manufactured,relative_weighted_symmetry\n"<<std::setprecision(17)
            <<free.size()<<','<<relative<<','<<direction.l2_norm()/exact.l2_norm()<<','<<symmetry<<'\n';
       }
+      void check_rheology() const
+      {
+        using Law=MaterialModel::Rheology::FaultFriction<dim>;
+        using Method=typename Law::AgingMethod;
+        const auto &law=model().fault_friction;
+        const double Dc=law.get_characteristic_slip_distance(),old=.5;
+        for (const auto method:{Method::backward_euler,Method::constant_rate_exact})
+          for (const double speed:{0.,1e-320,1e-20,.001,.01,.1})
+            for (const double dt:{0.,.0005,.01})
+              {
+                const auto result=law.evaluate_age(speed,old,dt,method);
+                double reference=(old+dt)/(1.+speed*dt/Dc);
+                if (method==Method::constant_rate_exact)
+                  {
+                    // Independent Simpson integral of the exact forcing, not
+                    // a call to the production exponential-kernel expression.
+                    double integral=0.;
+                    for (unsigned int j=0;j<=1000;++j)
+                      integral+=(j==0 || j==1000 ? 1. : j%2 ? 4. : 2.)*std::exp(-speed*dt*j/(1000.*Dc));
+                    reference=old*std::exp(-speed*dt/Dc)+dt*integral/3000.;
+                    const double half=law.evaluate_age(speed,old,.5*dt,method).age;
+                    gate("exact aging semigroup",std::abs(law.evaluate_age(speed,half,.5*dt,method).age-result.age)<1e-12);
+                  }
+                gate("aging value independent reference",std::abs(result.age-reference)<1e-11);
+                const double eps=1e-7*Dc/std::max(dt,.01);
+                const auto value=[&](const double v){return law.evaluate_age(v,old,dt,method).age;};
+                const double derivative=speed<eps ? (-3.*value(speed)+4.*value(speed+eps)-value(speed+2.*eps))/(2.*eps)
+                                                  : (value(speed+eps)-value(speed-eps))/(2.*eps);
+                gate("aging derivative including zero",std::abs(derivative-result.speed_derivative)<2e-6*std::max(1.,std::abs(result.speed_derivative)));
+              }
+        std::vector<double> fractions(model().elastic_shear_moduli.size(),0.);fractions[0]=1.;
+        // Copies retain only read-only simulator access. Parsing here configures
+        // independent test laws; it never changes the model's physical law.
+        for (const bool regularized:{false,true})
+          {
+            auto test=law;
+            ParameterHandler prm;Law::declare_parameters(prm);
+            prm.set("Use regularized formulation",regularized ? "true" : "false");
+            prm.set("Direct effect parameters",regularized ? ".015" : "0");
+            prm.set("Evolution effect parameters",".02");
+            test.parse_parameters(prm);
+            const double speed=.001,age=.5,eps=1e-6*age;
+            const double partial=test.friction_coefficient_derivative_wrt_state(fractions,speed,age);
+            const double fd=(test.friction_coefficient(fractions,speed,age+eps)-test.friction_coefficient(fractions,speed,age-eps))/(2.*eps);
+            gate("fixed-state partial including nonregularized a=0",std::abs(partial-fd)<1e-8);
+            if (!regularized)
+              {
+                gate("a=0 state derivative is b/theta",std::abs(partial-.02/age)<1e-14);
+                auto constant=test;prm.set("Evolution effect parameters","0");constant.parse_parameters(prm);
+                gate("constant friction has no state splitting timestep restriction",
+                     constant.compute_time_step(fractions,speed,.5,true)==std::numeric_limits<double>::max());
+              }
+            const double rate_eps=1e-6*speed;
+            const double rate_fd=(test.friction_coefficient(fractions,speed+rate_eps,age)-test.friction_coefficient(fractions,speed-rate_eps,age))/(2.*rate_eps);
+            gate("fixed-age rate partial",std::abs(rate_fd-test.friction_coefficient_derivative_wrt_slip_rate(fractions,speed,age))<1e-5);
+            if (fractions.size()>1)
+              {
+                prm.set("Reference friction coefficients",".6,.4");
+                prm.set("Direct effect parameters",regularized ? ".015,.025" : "0,.025");
+                prm.set("Evolution effect parameters",".02,.01");
+                test.parse_parameters(prm);
+                for (const double background:{0.,.3,1.})
+                  {
+                    fractions[0]=background;fractions[1]=1.-background;
+                    const double reference=.6*background+.4*(1.-background);
+                    const double direct=(regularized ? .015 : 0.)*background+.025*(1.-background);
+                    const double evolution=.02*background+.01*(1.-background);
+                    const double V0=test.get_reference_slip_rate(),length=test.get_characteristic_slip_distance();
+                    const double expected=regularized
+                      ? direct*std::asinh(speed/(2.*V0)*std::exp((reference+evolution*std::log(age*V0/length))/direct))
+                      : reference+direct*std::log(speed/V0)+evolution*std::log(age*V0/length);
+                    gate("distinct and inactive mixture parameters",std::abs(test.friction_coefficient(fractions,speed,age)-expected)<2e-13);
+                    const double recovered=test.initial_state_for_friction_coefficient(fractions,speed,expected);
+                    gate("mixture initial state inversion",std::abs(recovered-age)<1e-11);
+                    const double expected_dt=direct>evolution ? std::numeric_limits<double>::max() : .5*direct*length/(evolution*speed);
+                    const double actual_dt=test.compute_time_step(fractions,speed,.5,true);
+                    gate("mixture state splitting timestep",expected_dt==std::numeric_limits<double>::max()
+                         ? actual_dt==expected_dt : std::abs(actual_dt-expected_dt)<1e-12*std::max(1.,expected_dt));
+                  }
+                fractions[0]=1.;fractions[1]=0.;
+              }
+          }
+        auto stateless=law;ParameterHandler prm;Law::declare_parameters(prm);
+        prm.set("Friction law","rate dependent");stateless.parse_parameters(prm);
+        bool rejected=false;
+        try {stateless.friction_coefficient_derivative_wrt_state(fractions,.001,.5);}
+        catch (const std::exception &) {rejected=true;}
+        gate("state partial rejects stateless law before indexing",rejected);
+        rejected=false;
+        try {law.friction_coefficient_derivative_wrt_state(std::vector<double>(fractions.size()+1,0.),.001,.5);}
+        catch (const std::exception &) {rejected=true;}
+        gate("state partial rejects wrong mixture size",rejected);
+      }
+
       void export_step()
       {
         const auto &s=*model().bulk_cohesive_state;
@@ -263,6 +379,12 @@ namespace aspect
         std::vector<Tensor<1,dim>> phase_gradient(fe.n_quadrature_points);
         const double ell=this->get_phase_field_handler().get_length_scale();
         const double Kf=model().critical_energy_release_rates[0]/((8./3.)*ell);
+        const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
+        const auto origin=box.get_origin(),extent=box.get_extents();
+        const double center_x=origin[0]+.5*extent[0],center_y=origin[1]+.5*extent[1];
+        // Synthetic masks match the independent 8x4 analysis. Other retained
+        // controls keep their dimensionless old x-only remote marker.
+        const bool synthetic=std::abs(extent[0]-8.)<1e-12 && std::abs(extent[1]-4.)<1e-12;
         double remote_driving=0.,remote_phase=0.,boundary_driving=0.,boundary_phase=0.;
         for(const auto &entry:s.native_cells)
           {
@@ -277,9 +399,9 @@ namespace aspect
                 const double fraction=c/(c+d);
                 const double driving=sim().bulk_tip_coupling && sim().bulk_tip_coupling->accepted_evaluation
                     ? sim().bulk_tip_coupling->accepted_evaluation->points.at(entry.first)[q].driving : 0.;
-                if(std::min({p[0],4.-p[0],p[1],2.-p[1]})<=.25)
+                if(std::min({p[0]-origin[0],origin[0]+extent[0]-p[0],p[1]-origin[1],origin[1]+extent[1]-p[1]})<=.25)
                   {boundary_driving=std::max(boundary_driving,driving);boundary_phase=std::max(boundary_phase,phi);}
-                if(std::abs(p[0]-2.)>1.3)
+                if(synthetic ? (std::abs(p[0]-center_x)>3. || std::abs(p[1]-center_y)>1.) : std::abs(p[0]-center_x)>.325*extent[0])
                   { remote_driving=std::max(remote_driving,driving); remote_phase=std::max(remote_phase,phi); }
                 points<<entry.first<<','<<q<<','<<p[0]<<','<<p[1]<<','<<fe.JxW(q)<<','<<phase[q]<<','
                       <<h.stress[0][0]<<','<<h.stress[1][1]<<','<<h.stress[2][2]<<','<<h.stress[0][1]<<','
@@ -302,8 +424,10 @@ namespace aspect
         if(std::getenv("ASPECT_TIP_REMOTE_MARGIN") && s.step>0)
           {
             const double Kf=sim().bulk_tip_coupling->fracture_scale();
-            tip_remote_margin_reached=remote_driving/Kf>=.95 || remote_phase>1e-12
-              || (std::getenv("ASPECT_TIP_BOUNDARY_STOP") && boundary_phase>1e-12);
+            tip_remote_margin_reached=std::getenv("ASPECT_TIP_INTEGRITY_STOP")
+              ? remote_phase>1e-6 || boundary_phase>1e-6
+              : remote_driving/Kf>=.95 || remote_phase>1e-12
+                || (std::getenv("ASPECT_TIP_BOUNDARY_STOP") && boundary_phase>1e-12);
             if(rank==0)
               {
                 std::ofstream remote(directory+"tip-remote.csv",std::ios::app);
@@ -315,7 +439,7 @@ namespace aspect
           {
             LinearAlgebra::Vector gradient;
             const double energy=this->get_phase_field_handler().assemble_dg_fracture(this->get_solution(),gradient);
-            if(std::getenv("ASPECT_TIP_REMOTE_MARGIN"))
+            if(std::getenv("ASPECT_TIP_REMOTE_MARGIN") || std::getenv("ASPECT_TIP_PHASE_BALANCE"))
               {
                 // Native seed coordinates and the authoritative SIPG derivative
                 // permit an exact quadratic energy-change partition afterwards.
@@ -395,7 +519,7 @@ namespace aspect
             // separately; arbitrary saddle-point directions cannot certify it.
             if(rank==0){std::ofstream out(directory+"bulk-tangent.csv");out<<"time,relative_action_error,functional_directional_reference,functional_derivative_error,lagrangian_derivative_error\n"<<std::setprecision(17)<<this->get_time()<<','<<error<<','<<expected<<','<<functional_error<<','<<lagrangian_error<<'\n';}
           }
-        if(std::getenv("ASPECT_TIP_REMOTE_MARGIN"))
+        if(std::getenv("ASPECT_TIP_REMOTE_MARGIN") || std::getenv("ASPECT_TIP_PHASE_BALANCE"))
           {
             LinearAlgebra::Vector gradient;
             this->get_phase_field_handler().assemble_dg_fracture(this->get_solution(),gradient);
@@ -409,6 +533,12 @@ namespace aspect
             std::vector<types::global_dof_index> ids(element.n_dofs_per_cell());
             std::ofstream balance(directory+"tip-balance-"+Utilities::int_to_string(s.step,4)+"-r"+std::to_string(rank)+".csv");
             balance<<std::setprecision(17)<<"cell,i,x,y,B,lower,mass,fracture_gradient,driving_load,residual,stage_B,stage_fracture_gradient\n";
+            std::ofstream row_map;
+            if (const auto dump=std::getenv("ASPECT_PHASE_OBSTACLE_DUMP"))
+              {
+                row_map.open(std::string(dump)+"/phase-map-r"+std::to_string(rank)+".csv");
+                row_map<<"index,cell,i,x,y\n"<<std::setprecision(17);
+              }
             for(const auto &entry:s.native_cells)
               {
                 const auto cell=entry.second;cell->get_dof_indices(ids);
@@ -418,6 +548,7 @@ namespace aspect
                     for(unsigned int i=0;i<basis.expansion.m();++i)
                       fracture+=basis.expansion(i,j)*gradient[ids[element.component_to_system_index(pc,i)]-offset];
                     const auto index=ids[element.component_to_system_index(pc,j)]-offset;
+                    if (row_map)row_map<<index<<','<<entry.first<<','<<j<<','<<cell->center()[0]<<','<<cell->center()[1]<<'\n';
                     const double residual=op.fracture_scale()*e.raw.block(pb)[index];
                     balance<<entry.first<<','<<j<<','<<cell->center()[0]<<','<<cell->center()[1]<<','<<this->get_solution().block(pb)[index]<<','<<op.obstacle()[index]<<','<<op.phase_mass()[index]<<','<<fracture<<','<<stage_gradient[index]-residual<<','<<residual<<','<<op.accepted_coordinates.block(pb)[index]<<','<<stage_gradient[index]<<'\n';
                   }
@@ -471,7 +602,8 @@ namespace aspect
         for(unsigned int k=0;k<s.sections.size();++k)
           {
             const auto &v=s.sections[k];const auto raw=model().fault_friction.signed_endpoint(fractions,v.rate,op.accepted_parent()->sections[k].age,
-                op.stage_timestep(),this->get_parameters().surface_pressure,model().radiation_damping_coefficients[0],op.uses_midpoint());
+                op.stage_timestep(),this->get_parameters().surface_pressure,model().radiation_damping_coefficients[0],op.uses_midpoint() ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                                   : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
             sections<<v.coordinate<<','<<v.weight<<','<<v.age<<','<<v.slip<<','<<v.rate<<','<<v.force<<','<<e.absolute_rate[k]<<','<<e.positive_rate[k]<<','<<e.negative_rate[k]<<','<<e.laws[k].rate<<','<<v.rate-e.laws[k].rate<<','<<raw.traction<<'\n';
           }
         std::ofstream work(directory+"tip-power.csv",std::ios::app);
@@ -517,6 +649,7 @@ namespace aspect
           { if(const auto file=std::getenv("ASPECT_TIP_IMPORT_PARENT"))import_parent(file); });
         this->get_signals().post_resume_time_step.connect([this](const SimulatorAccess<dim>&,double &dt)
           {
+            dump_phase_row_map();
             if(const auto file=std::getenv("ASPECT_TIP_EXPORT_PARENT"))export_parent(file);
             if(const auto value=std::getenv("ASPECT_TIP_RESTART_DT"))dt=std::stod(value);
           });
@@ -541,40 +674,55 @@ namespace aspect
         gate("single publication",s.step==this->get_timestep_number() && s.publications==s.step);
         if(model().uses_integrated_bulk_tip())export_step();
         if(s.step>0)return {"Bulk tip","accepted histories checked"};
+        if(std::getenv("ASPECT_RHEOLOGY_AUDIT"))check_rheology();
         std::vector<double> fractions(model().elastic_shear_moduli.size(),0.);fractions[0]=1.;
         const auto &law=model().fault_friction;
+        const double test_age=model().bulk_tip_initial_age, test_dt=model().initial_time_step;
+        const double test_pressure=this->get_parameters().surface_pressure;
+        const double test_radiation=model().radiation_damping_coefficients[0];
+        const double test_Dc=law.get_characteristic_slip_distance();
         for(bool exact:{false,true}) for(double v:{0.,1e-20,-1e-20,.001,-.001,.01,-.01})
           {
-            const auto r=law.signed_endpoint(fractions,v,10.,.005,1000.,1000.,exact);
-            const double eps=v==0.?1e-24:std::abs(v)*1e-5;
-            const auto a=law.signed_endpoint(fractions,v+eps,10.,.005,1000.,1000.,exact);
-            const auto b=law.signed_endpoint(fractions,v-eps,10.,.005,1000.,1000.,exact);
+            const auto r=law.signed_endpoint(fractions,v,test_age,test_dt,test_pressure,test_radiation,exact ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                               : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
+            // Resolve the configured zero-rate asinh scale; a fixed rate probe
+            // can leave its linear range when age or Dc changes.
+            const double eps=v==0.?1e-6/std::max(1.,std::abs(r.derivative)):std::abs(v)*1e-5;
+            const auto a=law.signed_endpoint(fractions,v+eps,test_age,test_dt,test_pressure,test_radiation,exact ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                               : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
+            const auto b=law.signed_endpoint(fractions,v-eps,test_age,test_dt,test_pressure,test_radiation,exact ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                               : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
             gate("signed RSF derivative",std::abs((a.traction-b.traction)/(2*eps)-r.derivative)<2e-6*std::max(1.,std::abs(r.derivative)));
             gate("positive age and signed dissipation",r.age>0. && r.traction*v>=0.);
             if(exact)
               {
                 // Independent Simpson integration of the positive aging kernel.
-                double integral=0.;const double h=.005/1000.,k=std::abs(v)/.01;
+                double integral=0.;const double h=test_dt/1000.,k=std::abs(v)/test_Dc;
                 for(unsigned int j=0;j<=1000;++j) integral+=(j==0 || j==1000 ? 1. : j%2 ? 4. : 2.)*std::exp(-k*j*h);
-                const double expected=10.*std::exp(-k*.005)+h*integral/3.;
+                const double expected=test_age*std::exp(-k*test_dt)+h*integral/3.;
                 gate("exact aging independent quadrature",std::abs(r.age-expected)<2e-13);
               }
             if(v!=0.)
               {
-                const double primitive_plus=law.section_primitive(fractions,v+eps,10.,.005,1000.,1000.,exact);
-                const double primitive_minus=law.section_primitive(fractions,v-eps,10.,.005,1000.,1000.,exact);
+                const double primitive_plus=law.section_primitive(fractions,v+eps,test_age,test_dt,test_pressure,test_radiation,exact ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                               : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
+                const double primitive_minus=law.section_primitive(fractions,v-eps,test_age,test_dt,test_pressure,test_radiation,exact ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                               : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
                 gate("section search primitive derivative",std::abs((primitive_plus-primitive_minus)/(2*eps)-r.traction)<2e-6*std::max(1.,std::abs(r.traction)));
               }
           }
         for(bool exact:{false,true}) for(double free:{0.,.001,-.001,.1,-.1})for(double mobility:{0.,1e-7,1e-4})
           {
-            const auto r=law.section_endpoint(fractions,free,mobility,10.,.005,1000.,1000.,exact);
+            const auto r=law.section_endpoint(fractions,free,mobility,test_age,test_dt,test_pressure,test_radiation,exact ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                               : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
             gate("implicit section balance",std::abs(r.rate+mobility*r.law.traction-free)<1e-14);
             if(free!=0.)
               {
                 const double eps=1e-6*std::abs(free);
-                const auto a=law.section_endpoint(fractions,free+eps,mobility,10.,.005,1000.,1000.,exact);
-                const auto b=law.section_endpoint(fractions,free-eps,mobility,10.,.005,1000.,1000.,exact);
+                const auto a=law.section_endpoint(fractions,free+eps,mobility,test_age,test_dt,test_pressure,test_radiation,exact ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                               : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
+                const auto b=law.section_endpoint(fractions,free-eps,mobility,test_age,test_dt,test_pressure,test_radiation,exact ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                               : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
                 gate("implicit section derivative",std::abs((a.law.traction-b.law.traction)/(2*eps)-r.force_derivative)<2e-6*std::max(1.,std::abs(r.force_derivative)));
               }
           }

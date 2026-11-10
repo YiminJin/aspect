@@ -99,3 +99,34 @@ f*w and the exact discrete integration adjoint. Their agreement is checked in
 qualification; tiny rates need absolute resistance and Y errors as well as slip
 errors. The native-basis control's near-roundoff agreement does not erase the
 older tolerance-sensitivity evidence from a different solver comparison.
+
+## Shared rheology ownership
+
+`FaultFriction::evaluate_age` owns the aging value and its derivative with respect
+to **nonnegative speed**. `AgingMethod::backward_euler` and
+`AgingMethod::constant_rate_exact` replace the former boolean argument. This is
+an internal API choice; input and checkpoint method identities are unchanged.
+Zero speed gives incoming age plus duration, zero duration gives incoming age,
+and neither case introduces a rate floor. Exact forcing and its derivative use
+`expm1` and the analytic small-argument kernel. The old positive-rate
+`update_state` wrapper keeps its Vmin guard and exact constant-rate convention.
+
+| Equation or operation | Function in the existing owner | Active caller / time location |
+|---|---|---|
+| Aging value and speed derivative | `FaultFriction::evaluate_age` | Signed friction trials; mature `update_state`; accepted bulk-tip candidate |
+| Mixed mu0, a, b | `rate_state_parameters` | Coefficient, inversion, timestep, signed traction, section root and search primitive; checks law and vector sizes before indexing |
+| mu(V,theta), partial mu_V at fixed theta, partial mu_theta at fixed V | `rate_state_coefficient` through positive-state public APIs | Mature material/surface friction and diagnostic APIs; no aging or history mutation |
+| f(V) and total df/dV = p(mu_V + mu_theta theta_speed) + eta_rad | `signed_endpoint` | Coupled stage at BE full duration or midpoint half duration, always from immutable incoming age; signed chain rule includes V=0 |
+| V + mobility f(V) = free_rate | `section_endpoint` | `BulkTipCoupling::evaluate`; condensed resistance derivative, method-specific monotonicity admission |
+| Integral from zero to trial rate of f(v) dv | `section_primitive` | Coupled search functional; Gauss48 rate quadrature and incoming age held fixed; never physical energy or dissipation |
+| Accepted section age and slip | `prepare_bulk_tip_candidate` | BE aging at full duration, or exact constant-stage-rate aging at full duration; physical slip uses full dt times stage rate |
+| Accepted mature surface age | `compute_surface_state_candidates` → `update_state` | Existing surface state-update timing, exact constant-rate aging and positive-rate guard |
+
+The nonregularized state partial is b/theta, including the admitted a=0 case;
+it must not be formed by multiplying mu_V by b/a. The state partial rejects a
+stateless law before touching stateful arrays. Constant a=b=0 friction imposes
+no state-splitting timestep restriction. These edge fixes do not change the
+selected regularized synthetic parameters. Fixed-state partials are distinct
+from the total derivative after time-discrete aging. Every Newton/line-search
+trial starts from the same accepted age; accepted publication evaluates aging
+directly rather than computing an unused traction.

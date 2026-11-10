@@ -21,7 +21,8 @@ namespace aspect
     {
       const auto owned = state.locally_owned_elements();
       LinearAlgebra::Vector gradient(owned, communicator), active(owned, communicator), fixed(owned, communicator),
-                    load(owned, communicator), candidate(owned, communicator);
+                    load(owned, communicator), candidate(owned, communicator),
+                    correction(owned,communicator),correction_rhs(owned,communicator);
       LinearAlgebra::Vector active_ghost(owned, relevant, communicator), fixed_ghost(owned, relevant, communicator);
       unsigned int invalid = 0;
       for (const auto i : owned)
@@ -91,11 +92,22 @@ namespace aspect
           data.higher_order_elements = true;
           data.smoother_sweeps = 2;
           preconditioner.initialize(restricted, data);
-          const double roundoff = 64 * std::numeric_limits<double>::epsilon() * load.l2_norm();
+          // Solve for the correction about the current candidate. Prescribed
+          // active values can dominate the absolute load while the unresolved
+          // free-row residual is tiny. Their load norm must not set a stopping
+          // floor above the unchanged projected-gradient certificate.
+          candidate = state;
+          for (const auto i:owned)if (active[i]!=0.)candidate[i]=fixed[i];
+          candidate.compress(VectorOperation::insert);
+          restricted.vmult(correction_rhs,candidate);
+          correction_rhs*=-1.;
+          correction_rhs+=load;
+          const double roundoff = 64 * std::numeric_limits<double>::epsilon() * correction_rhs.l2_norm();
           SolverControl control(max_linear_iterations, std::max(.05 * tolerance, roundoff));
           SolverCG<LinearAlgebra::Vector> solver(control);
-          candidate = state;
-          solver.solve(restricted, candidate, load, preconditioner);
+          correction=0.;
+          solver.solve(restricted, correction, correction_rhs, preconditioner);
+          candidate+=correction;
           result.linear_iterations += control.last_step();
           // Enforce active Dirichlet rows exactly before rechecking the VI.
           // This is part of the subproblem, not post-certificate clipping.

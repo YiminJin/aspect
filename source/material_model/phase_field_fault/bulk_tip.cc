@@ -11,6 +11,20 @@ namespace aspect
     {
       namespace Tip
       {
+        namespace
+        {
+          double inverse_compliance(const double phi, const double m)
+          {
+            return (1.-phi)*(1.-phi)/(m*phi*(1.+phi));
+          }
+        }
+
+        double relaxation_factor(const double G, const double eta, const double dt)
+        {
+          AssertThrow(G>0. && eta>0. && dt>=0., dealii::ExcMessage("Invalid Maxwell stage coefficients."));
+          return 1./(1.+dt*G/eta);
+        }
+
         Response update(const Parameters &p, const State &old, const Tensor &increment,
                         const double phi, const double dt, const Tensor &S, const double f)
         {
@@ -20,7 +34,7 @@ namespace aspect
           AssertThrow((old.cohesive_strain-2.*(old.cohesive_strain*S)*S).norm()<1e-12
                       && (old.phi!=0. || old.cohesive_strain.norm()==0.),
                       dealii::ExcMessage("Bulk tip memory must remain in the prescribed Mode-II space; intact A=0."));
-          const double beta=1./(1.+dt*p.G/p.eta);
+          const double beta=relaxation_factor(p.G,p.eta,dt);
           const double c=p.m*phi*(1.+phi), d=(1.-phi)*(1.-phi), denominator=c+d;
           const double cp=p.m*(1.+2.*phi), dp=-2.*(1.-phi), denominator_derivative=cp+dp;
           Response r;
@@ -32,7 +46,7 @@ namespace aspect
           const Tensor predictor=beta*(old.stress+2.*p.G*increment);
           r.force=predictor*S+p.G*beta*old_e-f;
           const double e=r.fraction*r.force/p.G, q=(d/denominator)*r.force;
-          r.state={predictor-2.*p.G*(e-beta*old_e)*S, e*S, phi};
+          r.state= {predictor-2.*p.G *(e-beta*old_e) *S, e*S, phi};
           r.Q=2.*q*S;
           r.rate=(e/beta-old_e)/dt;
           r.driving=r.driving_factor*r.force*r.force/(2.*p.G);
@@ -47,7 +61,8 @@ namespace aspect
         {
           return {2.*stage.state.stress-old.stress,
                   2.*stage.state.cohesive_strain-old.cohesive_strain,
-                  2.*stage.state.phi-old.phi};
+                  2.*stage.state.phi-old.phi
+                 };
         }
 
         double cohesive_energy(const Parameters &p, const State &state)
@@ -58,7 +73,7 @@ namespace aspect
               return 0.;
             }
           return p.G*(state.cohesive_strain*state.cohesive_strain)
-                 *(1.-state.phi)*(1.-state.phi)/(p.m*state.phi*(1.+state.phi));
+                 *inverse_compliance(state.phi,p.m);
         }
 
         StepAccounting midpoint_account(const Parameters &p, const State &old, const Response &stage,
@@ -78,7 +93,7 @@ namespace aspect
         Variation derivative(const Parameters &p, const Response &r, const Tensor &increment,
                              const double dphi, const double dt, const Tensor &S, const double df)
         {
-          const double beta=1./(1.+dt*p.G/p.eta);
+          const double beta=relaxation_factor(p.G,p.eta,dt);
           const double dz=2.*p.G*beta*(increment*S)-df;
           const double de=(r.fraction*dz+r.fraction_derivative*r.force*dphi)/p.G;
           Variation a;
@@ -94,11 +109,9 @@ namespace aspect
         StepAccounting account(const Parameters &p, const State &old, const Response &r,
                                const Tensor &increment, const double dt, const double f)
         {
-          const auto inverse=[&](const double phi)
-          {return (1.-phi)*(1.-phi)/(p.m*phi*(1.+phi));};
-          const double rp=r.state.phi>0.?inverse(r.state.phi):0.;
-          const double rn=old.phi>0.?inverse(old.phi):0.;
-          const double old_cohesive=old.phi>0.?p.G*rn*(old.cohesive_strain*old.cohesive_strain):0.;
+          const double rp=r.state.phi>0.?inverse_compliance(r.state.phi,p.m):0.;
+          const double rn=old.phi>0.?inverse_compliance(old.phi,p.m):0.;
+          const double old_cohesive=cohesive_energy(p,old);
           StepAccounting a;
           a.internal_work=r.state.stress*increment;
           a.storage_change=r.bulk_energy+r.cohesive_energy
@@ -106,7 +119,7 @@ namespace aspect
           a.physical_dissipation=dt*(r.bulk_viscosity+r.cohesive_viscosity+f*r.rate);
           const Tensor change=r.state.stress-old.stress;
           a.stress_loss=(change*change)/(4.*p.G);
-          if(old.phi>0. && old.phi<1.)
+          if (old.phi>0. && old.phi<1.)
             {
               const Tensor dq=r.Q-2.*p.G*rn*old.cohesive_strain;
               a.traction_loss=(dq*dq)/(4.*p.G*rn);

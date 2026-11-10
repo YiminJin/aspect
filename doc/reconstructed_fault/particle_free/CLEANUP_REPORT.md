@@ -1,3 +1,15 @@
+> **10 November 2026 availability update:** new overnight intermediate fields
+> were losslessly compressed with verified member hashes and metadata; see the
+> [material/growth evidence](MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md).
+> Raw anchors, checkpoints, protected binaries and failed attempts remain.
+> Earlier stated data losses below are unchanged, not reconstructed.
+
+> **Latest storage maintenance — 9 November 2026.** See the
+> [current cleanup report](DISK_CLEANUP_20261109.md): 19.37 GiB recovered;
+> build storage 71.43 → 52.03 GiB. Completed dense CSV exports are losslessly
+> archived with selective restoration; current outputs, all checkpoints and
+> executables remain. The October report below retains its historical losses.
+
 # Cleanup and closeout — 30 October 2026
 
 The cleanup was executed within the worktree-only deletion scope, with the legacy animation-data loss documented below. **38.22 GiB of filesystem space recovered.** No constitutive, solver, parameter or scientific conclusion changed; no simulation/server job was launched or terminated. No symlink target or other worktree was deleted. Useful pending implementation changes and this handoff are committed separately on the existing branch.

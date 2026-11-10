@@ -22,7 +22,11 @@ namespace aspect
      * endpoint still supplies its own energy, tangent and acceptance criteria.
      * All vectors are uniquely owned; relevant contains readable matrix columns.
      * The caller supplies positive-basis coordinates when whole-cell bounds are
-     * required. No global dense matrices or rank-zero direct factors are used. */
+     * required. Restricted linear systems are solved as corrections about the
+     * current primal iterate, with active values imposed exactly. The linear
+     * roundoff scale uses the correction right-hand side, so large prescribed
+     * bounds cannot mask the unchanged final primal/dual certificate.
+     * No global dense matrices or rank-zero direct factors are used. */
     ObstacleResult solve_obstacle(const LinearAlgebra::SparseMatrix &matrix,
                                   const LinearAlgebra::Vector &rhs,
                                   const LinearAlgebra::Vector &lower,

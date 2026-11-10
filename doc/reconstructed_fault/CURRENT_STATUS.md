@@ -1,3 +1,38 @@
+> **Material cleanup and bounded midpoint assessment closed — 10 November 2026.**
+> [Results, implementation and decision](particle_free/MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md):
+> shared age/RSF calculations and isolated edge fixes pass retained controls.
+> Three coarse midpoint histories reach .06 s; the final M2/M3 screen passes,
+> but substantial spatial sensitivity prevents resolved-growth qualification.
+> S1 stops at .045625 s; the verified scalar stopping-floor correction advances
+> its exact parent through .04625 s with unchanged tolerances. The fine .06
+> endpoint remains missing. BE stays default and midpoint selectable. No job
+> remains; longer growth, .08 continuation and instability calibration are
+> deferred. The next selected experiment should complete the fine comparison
+> from the retained repaired endpoint, after checking final-kernel restart.
+> Historical entries below retain their original scope.
+
+> **9 November 2026 — free-phase synthetic control closed:** both BE time grids
+> reach .06 s from the equilibrated t=0 seed. Broadening precedes weak axial
+> extension; tip motion is sub-cell and threshold-dependent. State differences
+> are small, but fine work loss still exceeds added fracture energy (10.42x full,
+> 3.50x late window). Time integration is next; mesh/longer growth remain deferred.
+> [Measured response and evidence](particle_free/SYNTHETIC_FREE_EVOLUTION.md).
+
+> **9 November 2026 — synthetic specimen selected:** one fixed-phase uniform-
+> shear preflight passes on the explicit m=4, Gc=2/3, ell=.125, 8×4 m calibration.
+> Tip/ahead driving precedes remote activation; signed cancellation is 1.06%.
+> Retained for the next bounded numerical growth check, with time/spatial work
+> accuracy still unqualified. No growth trajectory launched.
+> [Configuration, measured results and limits](particle_free/SYNTHETIC_PROPAGATION_BENCHMARK.md).
+
+> **9 November 2026 — propagation specimen decision:** the current 4×2 m
+> bulk-tip fixture is rejected for the next growth experiment on toughness/size
+> scaling and retained tip/boundary/signed-deformation evidence. No new coupled
+> tests or material changes. Select a compatible toughness-to-strength and
+> geometric scale before another fixed-phase loading pair.
+> [Assessment](particle_free/PROPAGATION_SPECIMEN_ASSESSMENT.md). The native Bernstein implementation and its numerical
+> controls remain intact; older formulation evidence below is historical.
+
 > **Current propagation selection, 7 November 2026:** the bulk energetic tip
 > control now couples direct physical stress, cohesive tensor history, DGQ2 bulk
 > damage and an explicitly selected cross-section RSF closure. Coarse/half-dt

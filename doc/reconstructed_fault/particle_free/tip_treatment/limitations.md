@@ -126,3 +126,31 @@ positivity. These are measured limits, not reasons to clip rates or modify the
 localization. The subsequent bounded failed-row/search diagnosis is closed without a local
 repair; see [consolidation](../TIP_CONSOLIDATION_REPORT.md). A revised loading
 screen or broader globalization study needs a separate selection.
+
+## Specimen selection boundary
+
+The [scaling and retained-field assessment](../PROPAGATION_SPECIMEN_ASSESSMENT.md)
+rejects the present 4×2 m, .8 m half-seed, Gc=26.6667 input as the next
+propagation specimen. Its 26.67 m energy/strength length, finite wall distances
+and measured tip/remote driving provide no suitable separation of scales.
+The uniform shear control avoids the compact case's final signed cancellation,
+but this alone does not establish an energetically suitable growth test.
+No new fixed-phase pair was run after the failed scaling gate. Revised toughness
+or larger seed/body dimensions require a new calibrated selection; neither
+loading amplification nor a relaxed solver tolerance supplies that selection.
+
+The subsequent [selected synthetic specimen](../SYNTHETIC_PROPAGATION_BENCHMARK.md)
+changes those material/geometric scales explicitly. Its
+[free-phase BE pair](../SYNTHETIC_FREE_EVOLUTION.md) completes 24/48 intervals
+from t=0 to .06 s: broadening begins near .03 s and weak axial extension near
+.055 s. Threshold motion is sub-cell; the high-phase front does not advance.
+At the smaller timestep, physical-work error still exceeds added fracture
+energy by 10.42x over the full history and 3.50x over .04–.06 s, despite small
+phase/slip differences. This is a local response comparison, not energetic or
+spatial qualification. The [subsequent midpoint assessment](../MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md)
+reduces work loss on three complete coarse histories. Its fine-mesh prefix shows
+large growth sensitivity. A verified scalar stopping-floor defect is corrected
+and the failed coupled interval passes, but the full fine endpoint and affordable
+spatial qualification remain outstanding. The older outer80 nonlinear-search
+sentinel remains unqualified under the final kernel. Longer growth and an RSF
+instability campaign remain deferred.

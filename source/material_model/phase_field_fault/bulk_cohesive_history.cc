@@ -193,13 +193,13 @@ namespace aspect
           h.q=r.Q[0][1];h.rate=r.rate;
           h.signed_shear+=dt*r.rate;h.absolute_shear+=dt*std::abs(r.rate);
         }
-      std::vector<double> fractions(elastic_shear_moduli.size(),0.);fractions[0]=1.;
       AssertDimension(rates.size(),next->sections.size());AssertDimension(forces.size(),rates.size());
       for(unsigned int k=0;k<next->sections.size();++k)
         {
           auto &s=next->sections[k];s.rate=rates[k];s.slip+=dt*s.rate;s.force=forces[k];
-          s.age=fault_friction.signed_endpoint(fractions,s.rate,parent->sections[k].age,dt,
-                  this->get_parameters().surface_pressure,radiation_damping_coefficients[0],bulk_tip_midpoint).age;
+          s.age=fault_friction.evaluate_age(std::abs(s.rate),parent->sections[k].age,dt,
+                  bulk_tip_midpoint ? Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                    : Rheology::FaultFriction<dim>::AgingMethod::backward_euler).age;
         }
       return next;
     }

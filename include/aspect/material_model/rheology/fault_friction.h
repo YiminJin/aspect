@@ -34,6 +34,25 @@ namespace aspect
       class FaultFriction : public SimulatorAccess<dim>
       {
         public:
+          /** Time discretization of aging; independent of checkpoint spelling. */
+          enum class AgingMethod
+          {
+            backward_euler, constant_rate_exact
+          };
+
+          struct AgeEvaluation
+          {
+            double age; ///< Age in seconds at the requested time location.
+            double speed_derivative; ///< Partial derivative with respect to nonnegative speed (m/s).
+          };
+
+          /** Evaluate aging from immutable incoming age (s), speed (m/s), and
+           * duration (s). No minimum-rate floor; zero speed and duration have
+           * analytic limits. Does not mutate history. The caller supplies a
+           * half-stage or full endpoint duration explicitly. Stateful law only. */
+          AgeEvaluation evaluate_age(double speed, double incoming_age, double duration,
+                                     AgingMethod method) const;
+
           /** Return whether the selected fault-friction law owns state. */
           bool has_state_variable() const;
 
@@ -44,11 +63,11 @@ namespace aspect
            * @f]
            * Direct time integration gives
            * @f[
-           *  \theta = \frac{D_c}{V}\left(1 - 
+           *  \theta = \frac{D_c}{V}\left(1 -
            *  \mathrm{e}^{-\frac{V\Delta t}{D_c}}\right) +
            *  \theta^{\text{old}}\mathrm{e}^{-\frac{V\Delta t}{D_c}},
            * @f]
-           * where $\Delta t$ is the time step size, and 
+           * where $\Delta t$ is the time step size, and
            * $\theta^{\text{old}}$ is the slip state at the beginning of
            * the current time step.
            */
@@ -68,7 +87,7 @@ namespace aspect
                                const double               time_step) const;
 
           /**
-           * Compute the friction coefficient $mu$ at the end of the current 
+           * Compute the friction coefficient $mu$ at the end of the current
            * time step.
            */
           double friction_coefficient(const std::vector<double> &volume_fractions,
@@ -83,7 +102,7 @@ namespace aspect
 
           /**Compute the partial derivative of $\mu$ with respect to $V$.
            */
-          double 
+          double
           friction_coefficient_derivative_wrt_slip_rate(const std::vector<double> &volume_fractions,
                                                         const double               slip_rate,
                                                         const double               slip_state) const;
@@ -118,20 +137,22 @@ namespace aspect
                             const double               cfl_number,
                             const bool                 use_operator_splitting) const;
 
-          /** Signed regularized RSF and endpoint aging for the bulk section
-           * control. Unlike the legacy rate API this includes V=0 without a
-           * minimum-rate substitution. Tractions are Pa; age is seconds. */
           /** Exact configured signed-law parameters for restart identity. */
           std::vector<double> signed_parameter_record() const;
 
           struct SignedEndpoint
           {
-            double traction, derivative, age, friction, radiation;
+            double traction; ///< Total signed resistance (Pa).
+            double derivative; ///< Total d traction/d signed rate (Pa s/m), including aging.
+            double age; ///< Age at the requested time location (s), not a committed history.
+            double friction, radiation; ///< Separate signed resistance contributions (Pa).
           };
-          /** Integral from zero to V of the signed endpoint traction. A search
-           * functional only, not stored energy or physical friction power. */
+          /** Integral over trial rate from zero to V (m/s) of the time-discrete
+           * signed traction, with incoming age fixed. Uses the existing Gauss48
+           * search quadrature. Not stored energy or physical fV dissipation;
+           * does not mutate history. dt is the selected stage duration (s). */
           double section_primitive(const std::vector<double> &, double V, double old_age,
-                                   double dt, double pressure, double radiation, bool exact_aging = false) const;
+                                   double dt, double pressure, double radiation, AgingMethod aging = AgingMethod::backward_euler) const;
 
           struct SectionEndpoint
           {
@@ -142,13 +163,18 @@ namespace aspect
            * The admitted control requires a provably monotone endpoint law;
            * this never chooses an arbitrary velocity-weakening root. */
           SectionEndpoint section_endpoint(const std::vector<double> &fractions,
-                                            double free_rate, double mobility,
-                                            double old_age, double dt,
-                                            double compression, double radiation, bool exact_aging = false) const;
+                                           double free_rate, double mobility,
+                                           double old_age, double dt,
+                                           double compression, double radiation, AgingMethod aging = AgingMethod::backward_euler) const;
 
+          /** Evaluate signed regularized traction at V (m/s), allowing V=0.
+           * Age is advanced from old_age over dt (s) using the explicit method.
+           * compression is prescribed positive Pa, radiation is Pa s/m.
+           * The returned derivative includes the aging chain rule, unlike the
+           * fixed-state positive-rate API. No rate floor or history mutation. */
           SignedEndpoint signed_endpoint(const std::vector<double> &fractions,
                                          double velocity, double old_age, double dt,
-                                         double compression, double radiation, bool exact_aging = false) const;
+                                         double compression, double radiation, AgingMethod aging = AgingMethod::backward_euler) const;
 
           double get_reference_slip_rate() const;
 
@@ -162,10 +188,8 @@ namespace aspect
             const std::vector<double> &volume_fractions,
             double slip_rate, double coefficient) const;
 
-          /** Derivatives for noncommitting within-step state evaluation. */
-          double update_state_derivative_wrt_slip_rate(double slip_rate,
-                                                       double old_state,
-                                                       double time_step) const;
+          /** Partial derivative with respect to age (1/s) at fixed positive
+           * speed. Stateful interface only; does not advance age or history. */
           double friction_coefficient_derivative_wrt_state(
             const std::vector<double> &volume_fractions,
             double slip_rate, double slip_state) const;
@@ -178,6 +202,25 @@ namespace aspect
           parse_parameters (ParameterHandler &prm);
 
         private:
+          struct RateStateParameters
+          {
+            double reference = 0., direct = 0., evolution = 0.;
+          };
+
+          struct CoefficientEvaluation
+          {
+            double value, speed_partial, state_partial;
+          };
+
+          /** Mix configured stateful parameters once, skipping inactive materials.
+           * Validate the law and all array sizes before indexing. */
+          RateStateParameters rate_state_parameters(const std::vector<double> &) const;
+
+          /** Positive-speed coefficient and partial derivatives at fixed age.
+           * The regularized branch also admits zero speed. No aging or mutation. */
+          CoefficientEvaluation rate_state_coefficient(const RateStateParameters &,
+                                                       double speed, double age) const;
+
           /** Fault-friction laws supported by the common selector. */
           enum class FrictionLaw
           {
@@ -209,7 +252,7 @@ namespace aspect
 
 
       template <int dim>
-      inline double 
+      inline double
       FaultFriction<dim>::get_reference_slip_rate() const
       {
         AssertThrow(friction_law == FrictionLaw::rate_state,
@@ -219,7 +262,7 @@ namespace aspect
       }
 
       template <int dim>
-      inline double 
+      inline double
       FaultFriction<dim>::get_minimum_slip_rate() const
       {
         return Vmin;
