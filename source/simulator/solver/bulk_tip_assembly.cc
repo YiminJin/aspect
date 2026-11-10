@@ -88,7 +88,7 @@ namespace aspect
       lower=initial.block(pb);
       upper.reinit(sets.system_partitioning[pb],comm);
       upper=1.;
-      if(midpoint) for(const auto i:upper.locally_owned_elements()) upper[i]=.5*(1.+lower[i]);
+      if (midpoint) for (const auto i:upper.locally_owned_elements()) upper[i]=.5*(1.+lower[i]);
       upper.compress(VectorOperation::insert);
       mass.reinit(sets.system_partitioning[pb],comm);
       const auto quadrature = model.mechanical_quadrature();
@@ -170,7 +170,11 @@ namespace aspect
       result=v;
       result.block(0)/=dt;
       result.block(1)*=G;
-      if(midpoint) { result.block(pb)*=2.; result.block(pb)-=lower; }
+      if (midpoint)
+        {
+          result.block(pb)*=2.;
+          result.block(pb)-=lower;
+        }
       return ghost(result);
     }
 
@@ -207,7 +211,7 @@ namespace aspect
       e->raw.reinit(sets.system_partitioning,comm);
       e->residual.reinit(sets.system_partitioning,comm);
       const auto ns=parent->sections.size();
-      e->laws.resize(ns);
+      e->section_solutions.resize(ns);
       for (auto *v:
            {
              &e->rate,&e->absolute_rate,&e->positive_rate,&e->negative_rate
@@ -255,17 +259,17 @@ namespace aspect
       std::vector<double> fractions(model.elastic_shear_moduli.size(),0.);
       fractions[0]=1.;
       for (unsigned int k=0; k<ns; ++k)
-        e->laws[k]=model.fault_friction.section_endpoint(fractions,free_rate[k],mobility[k],parent->sections[k].age,
-                                                         dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0],
-            midpoint ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
-                     : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
+        e->section_solutions[k]=model.fault_friction.solve_section_slip_rate(fractions,free_rate[k],mobility[k],parent->sections[k].age,
+                                                                             dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0],
+                                                                             midpoint ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                                                             : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
       if (tangent)
         {
           local_matrix=0.;
           section_integrals.assign(ns, {});
           section_adjoints.assign(ns, {});
           section_slopes.resize(ns);
-          for (unsigned int k=0; k<ns; ++k)section_slopes[k]=e->laws[k].force_derivative;
+          for (unsigned int k=0; k<ns; ++k)section_slopes[k]=e->section_solutions[k].resistance_derivative_wrt_free_rate;
         }
       for (const auto &cell:this->get_dof_handler().active_cell_iterators()) if (cell->is_locally_owned())
           {
@@ -278,7 +282,7 @@ namespace aspect
               {
                 const auto &h=parent->history.at(cell->id())[q];
                 const auto k=parent->section_ids.at(cell->id())[q];
-                const double f=e->laws[k].law.traction;
+                const double f=e->section_solutions[k].resistance_response.resistance;
                 auto &r=points[q];
                 const Tip::State incoming
                 {
@@ -292,7 +296,7 @@ namespace aspect
                 e->positive_rate[k]+=dn*std::max(0.,r.rate);
                 e->negative_rate[k]+=dn*std::min(0.,r.rate);
                 const auto ledger=midpoint ? Tip::midpoint_account(parameters,incoming,r,2.*increment,physical_dt,f)
-                                           : Tip::account(parameters,incoming,r,increment,dt,f);
+                                  : Tip::account(parameters,incoming,r,increment,dt,f);
                 const auto endpoint=midpoint ? Tip::midpoint_endpoint(incoming,r) : r.state;
                 e->stage_storage+=weight*(r.bulk_energy+r.cohesive_energy);
                 e->bulk+=weight*(midpoint ? (endpoint.stress*endpoint.stress)/(4.*G) : r.bulk_energy);
@@ -357,7 +361,7 @@ namespace aspect
       fracture_matrix.vmult(action,delta);
       e->stage_storage+=e->fracture;
       e->fracture_loss=midpoint ? 0. : .5*(delta*action);
-      if(midpoint)
+      if (midpoint)
         {
           // Quadratic fracture chain rule uses the stage gradient and full change.
           e->fracture+=gradient*delta+.5*(delta*action);
@@ -391,16 +395,16 @@ namespace aspect
       double section_work=0.;
       for (unsigned int k=0; k<ns; ++k)
         {
-          const auto &law=e->laws[k];
+          const auto &section_solution=e->section_solutions[k];
           const auto ds=parent->sections[k].weight;
-          section_work+=physical_dt*ds*law.law.traction*e->rate[k];
-          e->friction+=physical_dt*ds*law.law.friction*law.rate;
-          e->radiation+=physical_dt*ds*law.law.radiation*law.rate;
-          e->section_defect=std::max(e->section_defect,std::abs(e->rate[k]-law.rate));
-          e->functional+=beta*dt*ds*model.fault_friction.section_primitive(fractions,law.rate,parent->sections[k].age,
-                                                                           dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0],
-            midpoint ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
-                     : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
+          section_work+=physical_dt*ds*section_solution.resistance_response.resistance*e->rate[k];
+          e->friction+=physical_dt*ds*section_solution.resistance_response.friction*section_solution.slip_rate;
+          e->radiation+=physical_dt*ds*section_solution.resistance_response.radiation*section_solution.slip_rate;
+          e->section_defect=std::max(e->section_defect,std::abs(e->rate[k]-section_solution.slip_rate));
+          e->functional+=beta*dt*ds*model.fault_friction.compute_resistance_potential(fractions,section_solution.slip_rate,parent->sections[k].age,
+                                                                                      dt,this->get_parameters().surface_pressure,model.radiation_damping_coefficients[0],
+                                                                                      midpoint ? MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                                                                      : MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::backward_euler);
         }
       e->adjoint_error=e->Df-section_work;
       e->ledger_error=e->internal_work-e->storage_change-e->Db-e->Dc-e->Df-e->stress_loss-e->traction_loss
@@ -447,8 +451,8 @@ namespace aspect
     std::shared_ptr<typename BulkTipCoupling<dim>::State>
     BulkTipCoupling<dim>::candidate(const Vector &x,const Evaluation &e) const
     {
-      std::vector<double> forces(e.laws.size());
-      for (unsigned int k=0; k<forces.size(); ++k)forces[k]=e.laws[k].law.traction;
+      std::vector<double> forces(e.section_solutions.size());
+      for (unsigned int k=0; k<forces.size(); ++k)forces[k]=e.section_solutions[k].resistance_response.resistance;
       return model.prepare_bulk_tip_candidate(parent,e.points,e.rate,forces,physical_field(x).block(pb));
     }
 

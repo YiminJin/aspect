@@ -116,8 +116,8 @@ namespace aspect
               const double G = compute_elastic_shear_modulus(volume_fractions);
               const double eta = material_viscosity(in.position[i], compute_creep_viscosity(volume_fractions, in.temperature[i]));
               const double time_step = (uses_integrated_bulk_tip() && bulk_tip_midpoint && this->get_timestep_number()>0 ? .5 : 1.) * (this->get_timestep_number() > 0
-                                        ? this->get_timestep()
-                                        : initial_time_step);
+                                       ? this->get_timestep()
+                                       : initial_time_step);
               out.viscosities[i] = bulk_cohesive_phase
                                    ? G * time_step * BulkCohesive::Tip::relaxation_factor(G, eta, time_step)
                                    : compute_maxwell_coefficients(eta, G, time_step).eta_ve;
@@ -720,7 +720,7 @@ namespace aspect
             material_viscosity_identity += "|constitutive spin:bulk slip subtracted v1";
           if (this->get_parameters().use_discontinuous_phase_discretization)
             material_viscosity_identity += this->get_parameters().use_limiter_for_discontinuous_phase_solution
-                                          ? "|phase:DGQ2 material SSPRK3 BP v1" : "|phase:DGQ2 material SSPRK3 unlimited v1";
+                                           ? "|phase:DGQ2 material SSPRK3 BP v1" : "|phase:DGQ2 material SSPRK3 unlimited v1";
           fe_bulk_normal_quadrature_points = prm.get_integer("FE bulk normal quadrature points");
           consistent_endpoint_phase = prm.get_bool("Consistent endpoint phase solve");
           fe_initial_phase_profile = prm.get("FE initial phase profile file");
@@ -903,7 +903,7 @@ namespace aspect
                         ExcMessage("Bulk experiment requires matched homogeneous G/eta/Gc/cohesion and constant friction."));
           AssertThrow(minimum_viscosity <= reference_viscosities[0] && maximum_viscosity >= reference_viscosities[0],
                       ExcMessage("Bulk experiment requires the configured homogeneous viscosity without clipping."));
-          if(bulk_flow_rule==BulkFlowRule::bulk_tip_sections)
+          if (bulk_flow_rule==BulkFlowRule::bulk_tip_sections)
             AssertThrow(fault_friction.has_state_variable() && bulk_tip_initial_age>0.
                         && this->get_parameters().surface_pressure>0.,
                         ExcMessage("Bulk tip sections require RSF, positive initial age and prescribed compression."));
@@ -913,9 +913,9 @@ namespace aspect
               std::vector<double> fractions(elastic_shear_moduli.size(), 0.);
               fractions[j] = 1.;
               const double rate = fault_friction.get_minimum_slip_rate();
-              const double value = fault_friction.friction_coefficient(fractions, rate);
+              const double value = fault_friction.friction_coefficient(fractions, rate, std::nullopt);
               AssertThrow(value >= 0. && (j == 0 || value == mu)
-                          && fault_friction.friction_coefficient_derivative_wrt_slip_rate(fractions, rate) == 0.,
+                          && fault_friction.friction_coefficient_derivative_wrt_slip_rate(fractions, rate, std::nullopt) == 0.,
                           ExcMessage("Bulk experiment requires a homogeneous constant stateless friction coefficient."));
               mu = value;
             }

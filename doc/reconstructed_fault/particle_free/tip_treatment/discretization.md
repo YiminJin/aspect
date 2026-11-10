@@ -102,7 +102,7 @@ C_s=\sum_{q\in s}\frac{dn_q H_q}{G\beta\Delta t},\quad f_s=R_s(V_s).
 Here B_s denotes a free rate, **not** a Bernstein coefficient. Actual discrete
 measures satisfy \(JxW_q=ds_s\,dn_q\). Only fault deformation w is integrated;
 ordinary elastic and viscous deformation are excluded.
-[`FaultFriction::section_endpoint`](../../../../source/material_model/rheology/fault_friction.cc)
+[`FaultFriction::solve_section_slip_rate`](../../../../source/material_model/rheology/fault_friction.cc)
 solves \(V_s+C_sR_s(V_s)=B_s\). At the current solution,
 \[
 \delta f_s=\frac{R_s'}{1+C_sR_s'}
@@ -254,7 +254,7 @@ state is smoothed.
 | Equation | Executable entry | Independent check |
 |---|---|---|
 | P: tau/A/Q/Y endpoint | `Tip::update`, `Tip::derivative`, `Tip::account` | [point tests](../../../../unit_tests/bulk_tip.cc): endpoint/reversal/finite derivatives/power |
-| S: signed section rate, RSF, age | `FaultFriction::signed_endpoint`, `section_endpoint` | [checker](../../../../benchmarks/reconstructed_fault/particle_free/bulk_tip/checks.cc): signed/condensed derivative, discrete power identity |
+| S: signed section rate, RSF, age | `FaultFriction::evaluate_resistance`, `solve_section_slip_rate` | [checker](../../../../benchmarks/reconstructed_fault/particle_free/bulk_tip/checks.cc): signed/condensed derivative, discrete power identity |
 | R: DG fracture | `PhaseFieldHandler::assemble_dg_fracture` | checker SIPG energy/Hessian derivative and compatibility observer |
 | R: full coupling | `BulkTipCoupling::evaluate`, `vmult` | checker distributed coupled directional derivative; benchmark oracle comparisons in report |
 | B: primal/dual release | `Simulator::compute_bulk_tip_search_direction`, `PhaseField::box_constraint` | point test “Coupled box iteration releases incorrect lower and upper bounds” |

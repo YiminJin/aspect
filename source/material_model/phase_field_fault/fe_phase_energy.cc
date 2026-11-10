@@ -89,9 +89,9 @@ namespace aspect
         {
           const double v = ReconstructedFaultUtilities::interpolate_slip_rate(
                              V[0][p.segment], V[0][p.segment + 1], p.xi);
-          const double mu = fault_friction.friction_coefficient(fractions, v);
-          AssertThrow(mu == fault_friction.friction_coefficient(fractions, minimum_fault_slip_rate())
-                      && fault_friction.friction_coefficient_derivative_wrt_slip_rate(fractions, v) == 0.,
+          const double mu = fault_friction.friction_coefficient(fractions, v, std::nullopt);
+          AssertThrow(mu == fault_friction.friction_coefficient(fractions, minimum_fault_slip_rate(), std::nullopt)
+                      && fault_friction.friction_coefficient_derivative_wrt_slip_rate(fractions, v, std::nullopt) == 0.,
                       ExcMessage("Endpoint variational solve requires fixed Coulomb friction."));
           const auto bg = reconstructed_fault_background_tractions(0, p.segment, p.xi);
           AssertThrow(bg.first == 0., ExcMessage("Endpoint verification prohibits an external shear-traction offset."));

@@ -123,7 +123,7 @@ pressure residual blocks. With the positive phase weights
 The fixture gates are mechanics ≤1e-9 and κ≤1e-7. The outer solver uses their
 maximum after division by these respective tolerances. This is neither a
 relative reaction-force tolerance nor a guarantee of accuracy at tiny rates.
-Every section root must separately satisfy `section_endpoint`'s roundoff-scaled
+Every section root must separately satisfy `solve_section_slip_rate`'s roundoff-scaled
 scalar equation; the difference between its resolved rate and the subsequently
 integrated point rate is also reported.
 

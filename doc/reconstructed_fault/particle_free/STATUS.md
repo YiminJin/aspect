@@ -1,3 +1,23 @@
+> **FaultFriction public-interface review complete.**
+> [Interface, callers and equivalence](FAULT_FRICTION_INTERFACE_REVIEW.md):
+> one operation per coefficient quantity, explicit optional age, internal law
+> dispatch, and zero stateless age derivative. The mature mechanics block is
+> 10 lines instead of 21, with one history test instead of three law tests.
+> Core/plugins build and all seven short controls pass; compared physical fields,
+> histories and energy ledgers are unchanged. Both cleanup passes are included
+> in the accompanying ASPECT-baseline source commit; generated evidence stays local.
+> Scientific limits and deferred campaigns are unchanged.
+
+> **Fault-friction API cleanup complete.**
+> [API, caller map and verification](FAULT_FRICTION_API_CLEANUP_REPORT.md):
+> one explicit-method `update_state` computes candidate age and speed derivative;
+> resistance evaluation, section root solve and search potential have distinct
+> names and derivative fields. Mature rate guards and all time locations remain.
+> Units, focused laws, mature transport, coupled recovery and the two-rank state
+> limiter pass; compared physical endpoints are identical. A historical unused
+> aggregate checker dependency remains documented. Growth qualification and
+> the deferred fine continuation retain their previous scope.
+
 > **Material cleanup and bounded midpoint assessment closed — 10 November 2026.**
 > [Results, implementation and decision](MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md):
 > shared age/RSF calculations and isolated edge fixes pass retained controls.

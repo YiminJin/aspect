@@ -46,7 +46,7 @@ and [time-integration](tip_treatment/time_integration.md) guides.
    assembles physical mechanics, phase VI and work using native Bernstein
    coefficients directly. [`Tip::update/derivative`](../../../source/material_model/phase_field_fault/bulk_tip.cc)
    supplies the rational local tau/A elimination;
-   [`FaultFriction::section_endpoint`](../../../source/material_model/rheology/fault_friction.cc)
+   [`FaultFriction::solve_section_slip_rate`](../../../source/material_model/rheology/fault_friction.cc)
    condenses signed section friction and its age-dependent derivative.
 4. [`compute_bulk_tip_search_direction`](../../../source/simulator/solver/bulk_tip_linear.cc)
    solves the release-capable linearized box VI with the existing ASPECT Stokes

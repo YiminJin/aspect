@@ -44,8 +44,8 @@ namespace aspect
       signals.post_nonlinear_solver.connect([](const SolverControl &control)
       {
         coupled_solve_converged = control.last_check() == SolverControl::success
-          && std::isfinite(control.last_value())
-          && control.last_value() < control.tolerance();
+                                  && std::isfinite(control.last_value())
+                                  && control.last_value() < control.tolerance();
       });
     }
     // Included lifecycle fixtures register their own connectors. The macro
@@ -70,8 +70,8 @@ namespace aspect
                                  "execution after solver failure is not a pass."));
           const auto &model =
             Plugins::get_plugin_as_type<
-              const MaterialModel::PhaseFieldFault<dim>>(
-                this->get_material_model());
+            const MaterialModel::PhaseFieldFault<dim>>(
+              this->get_material_model());
           ReconstructedFaultManager<dim> &fault_manager =
             this->get_reconstructed_fault_manager();
           AssertThrow(fault_manager.slip_rates_are_initialized(),
@@ -144,7 +144,7 @@ namespace aspect
                 }
 
               const unsigned int property = fault_manager.get_property_index(
-                "phase field fault state");
+                                              "phase field fault state");
               const unsigned int position =
                 fault_manager.get_property_information()[property].position;
               double minimum_state = std::numeric_limits<double>::max();
@@ -153,37 +153,35 @@ namespace aspect
                    fault_index < fault_manager.get_faults().size(); ++fault_index)
                 {
                   const auto &fault = fault_manager.get_fault(fault_index);
-                for (unsigned int vertex = 0; vertex < fault.n_vertices(); ++vertex)
-                  {
-                    const double state = fault.get_properties(vertex)[position];
-                    AssertThrow(std::isfinite(state) && state > 0.0,
-                                ExcMessage("The projected initial Theta is inadmissible."));
-                    minimum_state = std::min(minimum_state, state);
-                    maximum_state = std::max(maximum_state, state);
-                    if (this->get_timestep_number() == 0)
-                      {
-                        AssertThrow(state == expected_initial_state[fault_index][vertex],
-                                    ExcMessage("Theta_0 was changed by the artificial "
-                                               "initial timestep."));
-                      }
-                    else if (this->get_timestep_number() == 1)
-                      {
-                        const double expected =
-                          MaterialModel::internal::PhaseFieldFaultTestAccess<dim>
-                          ::fault_friction(model).update_state(
+                  for (unsigned int vertex = 0; vertex < fault.n_vertices(); ++vertex)
+                    {
+                      const double state = fault.get_properties(vertex)[position];
+                      AssertThrow(std::isfinite(state) && state > 0.0,
+                                  ExcMessage("The projected initial Theta is inadmissible."));
+                      minimum_state = std::min(minimum_state, state);
+                      maximum_state = std::max(maximum_state, state);
+                      if (this->get_timestep_number() == 0)
+                        {
+                          AssertThrow(state == expected_initial_state[fault_index][vertex],
+                                      ExcMessage("Theta_0 was changed by the artificial "
+                                                 "initial timestep."));
+                        }
+                      else if (this->get_timestep_number() == 1)
+                        {
+                          const double expected =
                             MaterialModel::internal::PhaseFieldFaultTestAccess<dim>
-                            ::surface_material_fractions_at_vertex(
-                              model, fault_manager, fault_index, vertex),
-                            fault_manager.get_timestep_committed_slip_rate(
-                              fault_index)[vertex],
-                            theta_zero[fault_index][vertex],
-                            this->get_timestep());
-                        AssertThrow(std::abs(state-expected)
-                                    <= 1.e-10*std::max(state, expected),
-                                    ExcMessage("Theta_1 does not equal the exact "
-                                               "accepted-state aging update."));
-                      }
-                  }
+                            ::fault_friction(model).update_state(
+                              fault_manager.get_timestep_committed_slip_rate(
+                                fault_index)[vertex],
+                              theta_zero[fault_index][vertex],
+                              this->get_timestep(),
+                              aspect::MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact).age;
+                          AssertThrow(std::abs(state-expected)
+                                      <= 1.e-10*std::max(state, expected),
+                                      ExcMessage("Theta_1 does not equal the exact "
+                                                 "accepted-state aging update."));
+                        }
+                    }
                 }
               if (this->get_timestep_number() == 0)
                 theta_zero = expected_initial_state;
@@ -209,13 +207,13 @@ namespace aspect
                 {
                   const ArrayView<const double> properties = particle.get_properties();
                   maxwell_stress_evolved = maxwell_stress_evolved
-                    || std::abs(properties[stress_position]-4.e6) > 1.e-6
-                    || std::abs(properties[stress_position+1]
-                                -(-4.e6+8.e6*particle.get_location()[0])) > 1.e-6
-                    || std::abs(properties[stress_position+2]-1.e6) > 1.e-6;
+                                           || std::abs(properties[stress_position]-4.e6) > 1.e-6
+                                           || std::abs(properties[stress_position+1]
+                                                       -(-4.e6+8.e6*particle.get_location()[0])) > 1.e-6
+                                           || std::abs(properties[stress_position+2]-1.e6) > 1.e-6;
                   AssertThrow(std::isfinite(properties[H_position])
                               && properties[H_position]
-                                 >= H_zero.at(particle.get_id()),
+                              >= H_zero.at(particle.get_id()),
                               ExcMessage("The irreversible H history decreased."));
                 }
               AssertThrow(maxwell_stress_evolved,
@@ -265,7 +263,7 @@ namespace aspect
                      vertex < current_I_h[fault].size(); ++vertex)
                   AssertThrow(
                     fault_manager.get_fault(fault).get_properties(vertex)
-                      [previous_I_h_position] == current_I_h[fault][vertex],
+                    [previous_I_h_position] == current_I_h[fault][vertex],
                     ExcMessage("I_h,0 was not retained as the previous-I_h snapshot."));
             }
           model.validate_reconstructed_fault_constitutive_state();

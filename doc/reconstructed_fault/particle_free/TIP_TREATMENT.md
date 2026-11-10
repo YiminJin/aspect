@@ -1,3 +1,9 @@
+> Current friction API: [interface/caller review](FAULT_FRICTION_INTERFACE_REVIEW.md).
+> Coefficient operations take explicit optional age and dispatch internally;
+> stateless age derivatives are zero. Aging and endpoint conventions are unchanged.
+
+> **Current friction API:** [single updater, resistance operations and checked callers](FAULT_FRICTION_API_CLEANUP_REPORT.md).
+
 > **Latest numerical evidence:** [material consolidation and midpoint growth](MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md). Coarse midpoint histories reduce work loss; spatial growth remains unresolved. The scalar stopping-floor fix passes the failed fine interval. BE remains default; no fine .06 endpoint or unstable-RSF qualification is claimed.
 
 # Bulk energetic tip treatment

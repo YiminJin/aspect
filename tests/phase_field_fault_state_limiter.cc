@@ -18,7 +18,7 @@ namespace aspect
         std::pair<std::string,std::string> execute(TableHandler &) override
         {
           const auto &model = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
-            this->get_material_model());
+                                this->get_material_model());
           const auto &law = model.get_fault_friction();
           TimeStepping::ReconstructedFault<dim> limiter;
           limiter.initialize_simulator(this->get_simulator());
@@ -36,7 +36,9 @@ namespace aspect
             limiter.parse_parameters(prm);
           };
           const auto old_proposal = [&]()
-          { return model.compute_reconstructed_fault_time_step(this->get_parameters().CFL_number); };
+          {
+            return model.compute_reconstructed_fault_time_step(this->get_parameters().CFL_number);
+          };
           AssertThrow(limiter.execute() == old_proposal(), ExcMessage("Default limiter changed the old proposal."));
 
           if (!law.has_state_variable())
@@ -49,7 +51,7 @@ namespace aspect
 
           auto &manager = this->get_reconstructed_fault_manager();
           const auto position = manager.get_property_information()[manager.get_property_index(
-            "phase field fault state")].position;
+                                                                     "phase field fault state")].position;
           std::vector<std::vector<double>> saved_velocity, saved_theta, velocity;
           const double Dc = law.get_characteristic_slip_distance();
           for (unsigned int f=0; f<manager.get_faults().size(); ++f)
@@ -87,34 +89,41 @@ namespace aspect
           auto &fault = manager.get_fault(velocity.size()-1);
           const auto last = fault.n_vertices()-1;
           const double V = velocity.back().back(), steady = Dc/V;
-          for (const double theta : {0.01, 10.*steady, 1e-30})
-            {
-              steady_state();
-              fault.get_properties(last)[position]=theta;
-              const double dt=limiter.execute();
-              const double direction=theta<steady ? 1. : -1.;
-              // Independent inverse of the constant-rate ODE solution, using
-              // log1p/expm1 to resolve very small initial state and timestep.
-              const double expected=-steady*std::log1p(theta*std::expm1(direction*.1)/(theta-steady));
-              AssertThrow(std::abs(dt/expected-1.)<2e-12,
-                          ExcMessage("State limiter differs from the unweighted analytic bound."));
-              AssertThrow(std::abs(std::log(law.update_state(V,theta,dt)/theta))<=.1,
-                          ExcMessage("State limiter returned an unsafe bracket end."));
-              AssertThrow(fault.get_properties(last)[position]==theta,
-                          ExcMessage("State prediction changed committed Theta."));
-              AssertThrow(limiter.execute()==dt, ExcMessage("State prediction was not repeatable."));
-              manager.begin_slip_rate_nonlinear_solve();
-              manager.begin_slip_rate_trial();
-              auto trial=velocity;
-              for (auto &rates:trial) for (double &rate:rates) rate*=100.;
-              manager.set_slip_rate_trial_values(trial);
-              AssertThrow(limiter.execute()==dt, ExcMessage("State predictor read trial instead of committed velocity."));
-              manager.rollback_slip_rate_trial();
-              manager.rollback_slip_rate_nonlinear_solve();
-              AssertThrow(Utilities::MPI::min(dt,this->get_mpi_communicator())
-                          ==Utilities::MPI::max(dt,this->get_mpi_communicator()),
-                          ExcMessage("Replicated state predictions differ across ranks."));
-            }
+          for (const double theta :
+          {
+            0.01, 10.*steady, 1e-30
+          })
+          {
+            steady_state();
+            fault.get_properties(last)[position]=theta;
+            const double dt=limiter.execute();
+            const double direction=theta<steady ? 1. : -1.;
+            // Independent inverse of the constant-rate ODE solution, using
+            // log1p/expm1 to resolve very small initial state and timestep.
+            const double expected=-steady*std::log1p(theta*std::expm1(direction*.1)/(theta-steady));
+            AssertThrow(std::abs(dt/expected-1.)<2e-12,
+                        ExcMessage("State limiter differs from the unweighted analytic bound."));
+            AssertThrow(std::abs(std::log(law.update_state(
+                                            V,
+                                            theta,
+                                            dt,
+                                            aspect::MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact).age/theta))<=.1,
+                        ExcMessage("State limiter returned an unsafe bracket end."));
+            AssertThrow(fault.get_properties(last)[position]==theta,
+                        ExcMessage("State prediction changed committed Theta."));
+            AssertThrow(limiter.execute()==dt, ExcMessage("State prediction was not repeatable."));
+            manager.begin_slip_rate_nonlinear_solve();
+            manager.begin_slip_rate_trial();
+            auto trial=velocity;
+            for (auto &rates:trial) for (double &rate:rates) rate*=100.;
+            manager.set_slip_rate_trial_values(trial);
+            AssertThrow(limiter.execute()==dt, ExcMessage("State predictor read trial instead of committed velocity."));
+            manager.rollback_slip_rate_trial();
+            manager.rollback_slip_rate_nonlinear_solve();
+            AssertThrow(Utilities::MPI::min(dt,this->get_mpi_communicator())
+                        ==Utilities::MPI::max(dt,this->get_mpi_communicator()),
+                        ExcMessage("Replicated state predictions differ across ranks."));
+          }
           // A finite large bound must not be spuriously activated merely
           // because forming predicted/old overflows double precision.
           steady_state();
@@ -130,7 +139,7 @@ namespace aspect
                 manager.get_fault(f).get_properties(i)[position]=saved_theta[f][i];
             }
           this->get_pcout() << "State limiter: maximum finite double, equilibrium, increasing/decreasing state, tiny timestep, "
-                           << "all vertices, committed velocity, nonmutation and MPI agreement PASS" << std::endl;
+                            << "all vertices, committed velocity, nonmutation and MPI agreement PASS" << std::endl;
           return {};
         }
     };

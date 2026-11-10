@@ -78,27 +78,30 @@ namespace aspect
             return -(mu_s - mu_d) * Vc / ((Vc + V) * (Vc + V));
           };
 
-          for (const double V : {1.e-10, Vc, 1.e-2, 1.e4})
-            assert_close(friction.friction_coefficient(fractions, V),
-                         coefficient(V), 1.e-13,
-                         "Rate-dependent friction coefficient");
+          for (const double V :
+          {
+            1.e-10, Vc, 1.e-2, 1.e4
+          })
+          assert_close(friction.friction_coefficient(fractions, V, std::nullopt),
+                       coefficient(V), 1.e-13,
+                       "Rate-dependent friction coefficient");
 
-          assert_close(friction.friction_coefficient_derivative_wrt_slip_rate(fractions, Vc),
+          assert_close(friction.friction_coefficient_derivative_wrt_slip_rate(fractions, Vc, std::nullopt),
                        derivative(Vc), 1.e-13,
                        "Rate-dependent analytic derivative");
 
           const double dV = 1.e-5 * Vc;
           const double finite_difference =
-            (friction.friction_coefficient(fractions, Vc + dV)
-             - friction.friction_coefficient(fractions, Vc - dV)) / (2.0 * dV);
-          assert_close(friction.friction_coefficient_derivative_wrt_slip_rate(fractions, Vc),
+            (friction.friction_coefficient(fractions, Vc + dV, std::nullopt)
+             - friction.friction_coefficient(fractions, Vc - dV, std::nullopt)) / (2.0 * dV);
+          assert_close(friction.friction_coefficient_derivative_wrt_slip_rate(fractions, Vc, std::nullopt),
                        finite_difference, 1.e-9,
                        "Rate-dependent finite-difference derivative");
 
           const std::vector<double> background = {1.0, 0.0, 0.0};
-          assert_close(friction.friction_coefficient(background, 1.e-10),
+          assert_close(friction.friction_coefficient(background, 1.e-10, std::nullopt),
                        0.6, 1.e-13, "Rate-dependent zero-weakening coefficient");
-          assert_close(friction.friction_coefficient_derivative_wrt_slip_rate(background, 1.e-10),
+          assert_close(friction.friction_coefficient_derivative_wrt_slip_rate(background, 1.e-10, std::nullopt),
                        0.0, 1.e-13, "Rate-dependent zero-weakening derivative");
 
           AssertThrow(friction.compute_time_step(fractions, Vc, 0.5, false)
@@ -108,35 +111,25 @@ namespace aspect
                       == std::numeric_limits<double>::max(),
                       ExcMessage("Stateless fault friction imposed an operator-split timestep restriction."));
 
-          bool rejected_stateful_interface = false;
-          try
-            {
-              friction.friction_coefficient(fractions, Vc, 1.0);
-            }
-          catch (const std::exception &)
-            {
-              rejected_stateful_interface = true;
-            }
-          AssertThrow(rejected_stateful_interface,
-                      ExcMessage("The stateless law accepted the stateful coefficient interface."));
-
-          bool rejected_stateful_derivative = false;
-          try
-            {
-              friction.friction_coefficient_derivative_wrt_slip_rate(
-                fractions, Vc, 1.0);
-            }
-          catch (const std::exception &)
-            {
-              rejected_stateful_derivative = true;
-            }
-          AssertThrow(rejected_stateful_derivative,
-                      ExcMessage("The stateless law accepted the stateful derivative interface."));
+          assert_close(friction.friction_coefficient(fractions, Vc, 1.0),
+                       friction.friction_coefficient(fractions, Vc, std::nullopt),
+                       0.0, "Stateless coefficient ignores supplied age");
+          assert_close(friction.friction_coefficient_derivative_wrt_slip_rate(fractions, Vc, 1.0),
+                       friction.friction_coefficient_derivative_wrt_slip_rate(fractions, Vc, std::nullopt),
+                       0.0, "Stateless speed derivative ignores supplied age");
+          assert_close(friction.friction_coefficient_derivative_wrt_state(fractions, Vc, std::nullopt),
+                       0.0, 0.0, "Stateless state derivative with absent age");
+          assert_close(friction.friction_coefficient_derivative_wrt_state(fractions, Vc, 1.0),
+                       0.0, 0.0, "Stateless state derivative with supplied age");
 
           bool rejected_state_update = false;
           try
             {
-              friction.update_state(Vc, 1.0, 1.0);
+              friction.update_state(
+                Vc,
+                1.0,
+                1.0,
+                aspect::MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact).age;
             }
           catch (const std::exception &)
             {
@@ -212,7 +205,11 @@ namespace aspect
           const double x = V * dt / Dc;
           const double expected_state =
             -Dc / V * std::expm1(-x) + theta * std::exp(-x);
-          assert_close(friction.update_state(V, theta, dt),
+          assert_close(friction.update_state(
+                         V,
+                         theta,
+                         dt,
+                         aspect::MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact).age,
                        expected_state, 1.e-13,
                        "Rate-and-state aging update");
 
@@ -224,29 +221,29 @@ namespace aspect
                        cfl * a * Dc / (b * V), 1.e-13,
                        "Rate-and-state operator-split timestep");
 
-          bool rejected_stateless_interface = false;
+          bool rejected_missing_age = false;
           try
             {
-              friction.friction_coefficient(fractions, V);
+              friction.friction_coefficient(fractions, V, std::nullopt);
             }
           catch (const std::exception &)
             {
-              rejected_stateless_interface = true;
+              rejected_missing_age = true;
             }
-          AssertThrow(rejected_stateless_interface,
-                      ExcMessage("The rate-and-state law accepted the stateless interface."));
+          AssertThrow(rejected_missing_age,
+                      ExcMessage("The rate-and-state law accepted an absent age."));
 
-          bool rejected_stateless_derivative = false;
+          bool rejected_missing_derivative_age = false;
           try
             {
-              friction.friction_coefficient_derivative_wrt_slip_rate(fractions, V);
+              friction.friction_coefficient_derivative_wrt_slip_rate(fractions, V, std::nullopt);
             }
           catch (const std::exception &)
             {
-              rejected_stateless_derivative = true;
+              rejected_missing_derivative_age = true;
             }
-          AssertThrow(rejected_stateless_derivative,
-                      ExcMessage("The rate-and-state law accepted the stateless derivative interface."));
+          AssertThrow(rejected_missing_derivative_age,
+                      ExcMessage("The rate-and-state law accepted an absent derivative age."));
         }
     };
 

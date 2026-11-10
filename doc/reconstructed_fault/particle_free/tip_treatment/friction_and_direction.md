@@ -75,13 +75,13 @@ constitutive law or mechanical/phase quadrature.
 
 ## Implementation and cancellation diagnostics
 
-[`FaultFriction::section_endpoint`](../../../../source/material_model/rheology/fault_friction.cc)
+[`FaultFriction::solve_section_slip_rate`](../../../../source/material_model/rheology/fault_friction.cc)
 uses a safeguarded scalar Newton/bisection solve in an asinh rate coordinate,
 with the sign of the free section rate. It verifies the root to a tolerance of
 32 double-precision machine epsilons times the absolute free rate, with explicit zero-rate and
-zero-mobility cases. `signed_endpoint` supplies traction, derivative, age and
+zero-mobility cases. `evaluate_resistance` supplies traction, derivative, age and
 separate friction/radiation parts; no minimum-slip-rate floor enters this law.
-`section_primitive` uses Gauss48 in a logarithmic rate coordinate only for the
+`compute_resistance_potential` uses Gauss48 in a logarithmic rate coordinate only for the
 line-search functional.
 
 `BulkTipCoupling::evaluate` first integrates the fixed-force-free point response
@@ -102,31 +102,58 @@ older tolerance-sensitivity evidence from a different solver comparison.
 
 ## Shared rheology ownership
 
-`FaultFriction::evaluate_age` owns the aging value and its derivative with respect
+`FaultFriction::update_state` owns the aging value and its derivative with respect
 to **nonnegative speed**. `AgingMethod::backward_euler` and
 `AgingMethod::constant_rate_exact` replace the former boolean argument. This is
 an internal API choice; input and checkpoint method identities are unchanged.
 Zero speed gives incoming age plus duration, zero duration gives incoming age,
 and neither case introduces a rate floor. Exact forcing and its derivative use
-`expm1` and the analytic small-argument kernel. The old positive-rate
-`update_state` wrapper keeps its Vmin guard and exact constant-rate convention.
+`expm1` and the analytic small-argument kernel. The mature publication and timestep-predictor callers enforce Vmin themselves
+and explicitly select the exact constant-rate convention. The common updater
+accepts zero speed and returns `StateUpdate {age, derivative_wrt_speed}` without
+publishing history. There is no mixture argument: Dc is global.
 
 | Equation or operation | Function in the existing owner | Active caller / time location |
 |---|---|---|
-| Aging value and speed derivative | `FaultFriction::evaluate_age` | Signed friction trials; mature `update_state`; accepted bulk-tip candidate |
+| Aging value and speed derivative | `FaultFriction::update_state` | Signed resistance trials; mature publication and timestep predictor; accepted bulk-tip candidate |
 | Mixed mu0, a, b | `rate_state_parameters` | Coefficient, inversion, timestep, signed traction, section root and search primitive; checks law and vector sizes before indexing |
 | mu(V,theta), partial mu_V at fixed theta, partial mu_theta at fixed V | `rate_state_coefficient` through positive-state public APIs | Mature material/surface friction and diagnostic APIs; no aging or history mutation |
-| f(V) and total df/dV = p(mu_V + mu_theta theta_speed) + eta_rad | `signed_endpoint` | Coupled stage at BE full duration or midpoint half duration, always from immutable incoming age; signed chain rule includes V=0 |
-| V + mobility f(V) = free_rate | `section_endpoint` | `BulkTipCoupling::evaluate`; condensed resistance derivative, method-specific monotonicity admission |
-| Integral from zero to trial rate of f(v) dv | `section_primitive` | Coupled search functional; Gauss48 rate quadrature and incoming age held fixed; never physical energy or dissipation |
+| f(V) and total df/dV = p(mu_V + mu_theta theta_speed) + eta_rad | `evaluate_resistance` | Coupled stage at BE full duration or midpoint half duration, always from immutable incoming age; signed chain rule includes V=0 |
+| V + mobility f(V) = free_rate | `solve_section_slip_rate` | `BulkTipCoupling::evaluate`; condensed resistance derivative, method-specific monotonicity admission |
+| Integral from zero to trial rate of f(v) dv | `compute_resistance_potential` | Coupled search functional; Gauss48 rate quadrature and incoming age held fixed; never physical energy or dissipation |
 | Accepted section age and slip | `prepare_bulk_tip_candidate` | BE aging at full duration, or exact constant-stage-rate aging at full duration; physical slip uses full dt times stage rate |
 | Accepted mature surface age | `compute_surface_state_candidates` → `update_state` | Existing surface state-update timing, exact constant-rate aging and positive-rate guard |
 
 The nonregularized state partial is b/theta, including the admitted a=0 case;
-it must not be formed by multiplying mu_V by b/a. The state partial rejects a
-stateless law before touching stateful arrays. Constant a=b=0 friction imposes
+it must not be formed by multiplying mu_V by b/a. The state partial is exactly
+zero for a stateless law. All three coefficient
+operations accept an explicit optional age: supply seconds for rate-and-state
+friction or `std::nullopt` when no state exists. The object dispatches on its
+configured law, independently of whether age is supplied. Stateful evaluation
+rejects missing, nonpositive or nonfinite age; stateless evaluation ignores
+supplied age. Coefficient evaluation and both partials retain the finite
+speed-at-or-above-Vmin contract. The signed section evaluator separately
+admits zero speed. No dummy zero age represents absent state. Constant a=b=0
+friction imposes
 no state-splitting timestep restriction. These edge fixes do not change the
 selected regularized synthetic parameters. Fixed-state partials are distinct
 from the total derivative after time-discrete aging. Every Newton/line-search
 trial starts from the same accepted age; accepted publication evaluates aging
 directly rather than computing an unused traction.
+
+
+The public interface is ordered as configuration, candidate aging, coefficient
+and fixed-state partials (then initialization inversion), signed resistance,
+section solve, search potential, and timestep/identity utilities. There is one
+public operation per quantity. `coefficient_at_state` is the private common
+validation/dispatch boundary; law-specific parameter mixing and
+`rate_state_coefficient` retain the mathematics. The latter is also used by
+signed resistance without imposing the mature minimum speed.
+
+The mature mechanics caller `evaluate_reconstructed_fault_point` gathers
+optional age once, then calls the coefficient and speed partial unconditionally.
+Its remaining state test protects the absent history property. Other state tests
+own initialization, storage, publication or timestep policy, not coefficient
+dispatch. `update_state` remains explicitly stateful-only; a stateless law has
+no age to evolve. See the [interface review](../FAULT_FRICTION_INTERFACE_REVIEW.md)
+for caller changes and numerical comparisons.

@@ -61,8 +61,8 @@ namespace aspect
     {
       phase_field_fault =
         &Plugins::get_plugin_as_type<
-          const MaterialModel::PhaseFieldFault<dim>>(
-            this->get_material_model());
+        const MaterialModel::PhaseFieldFault<dim>>(
+          this->get_material_model());
     }
 
 
@@ -73,7 +73,7 @@ namespace aspect
     {
       Assert(phase_field_fault != nullptr, ExcInternalError());
       double time_step = phase_field_fault->compute_reconstructed_fault_time_step(
-        this->get_parameters().CFL_number);
+                           this->get_parameters().CFL_number);
       const auto &law = phase_field_fault->get_fault_friction();
       if (maximum_logarithmic_state_change == std::numeric_limits<double>::max()
           || !law.has_state_variable())
@@ -84,7 +84,7 @@ namespace aspect
       time_step = std::min(time_step, this->get_parameters().maximum_time_step);
       const auto &manager = this->get_reconstructed_fault_manager();
       const unsigned int state_position = manager.get_property_information()[
-        manager.get_property_index("phase field fault state")].position;
+                                            manager.get_property_index("phase field fault state")].position;
       struct Node
       {
         double velocity, theta;
@@ -106,9 +106,12 @@ namespace aspect
       {
         for (const auto &node : nodes)
           {
-            // Dc is global; this is also the implementation called by the
-            // mixture overload when committing the nodal aging-law update.
-            const double predicted = law.update_state(node.velocity, node.theta, dt);
+            // The mature predictor uses the same full-duration update as publication.
+            AssertThrow(std::isfinite(node.velocity) && node.velocity >= law.get_minimum_slip_rate(),
+                        ExcMessage("The mature slip rate is below the minimum admissible rate."));
+            const double predicted = law.update_state(
+                                       node.velocity, node.theta, dt,
+                                       MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact).age;
             AssertThrow(std::isfinite(predicted) && predicted > 0.0,
                         ExcMessage("The reconstructed-fault state prediction is inadmissible."));
             const double ratio = predicted / node.theta;

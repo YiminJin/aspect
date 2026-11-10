@@ -38,7 +38,7 @@ There is no accepted half step or second material law.
 For k=|V_m|/Dc, theta(s)=theta_n exp(−ks)−expm1(−ks)/k, with the continuous
 zero-rate limit theta_n+s. Friction uses s=h; accepted age uses s=Δt.
 This is exact for a constant stage rate, not for arbitrary varying physical V.
-[`FaultFriction::signed_endpoint`, `section_endpoint` and `section_primitive`](../../../../source/material_model/rheology/fault_friction.cc)
+[`FaultFriction::evaluate_resistance`, `solve_section_slip_rate` and `compute_resistance_potential`](../../../../source/material_model/rheology/fault_friction.cc)
 share their existing friction and root algebra with a local exact-aging choice.
 The derivative uses an expm1/Taylor kernel near zero, with no minimum-rate floor.
 
@@ -162,8 +162,8 @@ The [equation-to-function table](friction_and_direction.md#shared-rheology-owner
 identifies the common age/partial/section-law owners. Midpoint mechanics requests
 `constant_rate_exact` over the half-stage duration, while accepted age requests
 the same method over the full physical duration from the original incoming age.
-BE requests `backward_euler`. Mature surface histories retain their exact aging
-wrapper and existing timing. The method enum changes neither checkpoint text
+BE requests `backward_euler`. Mature surface histories and timestep prediction explicitly select exact aging
+over the full requested duration, enforcing their own positive-rate guard. The method enum changes neither checkpoint text
 nor the physical meaning of accepted observations.
 
 `Tip::relaxation_factor(G,eta,stage_dt)` supplies the rational BE/half-stage

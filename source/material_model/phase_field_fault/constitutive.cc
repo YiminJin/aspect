@@ -231,27 +231,16 @@ namespace aspect
 
       // Mechanics uses the committed nodal state, interpolated in the same
       // continuous Q1 space. Aging is applied once after the accepted solve.
-      const double theta = fault_friction.has_state_variable()
-                           ? interpolate_fault_scalar(
-                             fault, inputs.segment_index, inputs.xi,
-                             fault_manager.get_property_information()[
-                               fault_property_indices.state].position,
-                             "phase field fault state")
-                           : 0.0;
-      const double mu = fault_friction.has_state_variable()
-                        ? fault_friction.friction_coefficient(
-                          localization.surface_material_fractions,
-                          inputs.slip_rate, theta)
-                        : fault_friction.friction_coefficient(
-                          localization.surface_material_fractions,
-                          inputs.slip_rate);
-      const double dmu_dV = fault_friction.has_state_variable()
-                            ? fault_friction.friction_coefficient_derivative_wrt_slip_rate(
-                              localization.surface_material_fractions,
-                              inputs.slip_rate, theta)
-                            : fault_friction.friction_coefficient_derivative_wrt_slip_rate(
-                              localization.surface_material_fractions,
-                              inputs.slip_rate);
+      std::optional<double> age;
+      if (fault_friction.has_state_variable())
+        age = interpolate_fault_scalar(
+                fault, inputs.segment_index, inputs.xi,
+                fault_manager.get_property_information()[fault_property_indices.state].position,
+                "phase field fault state");
+      const double mu = fault_friction.friction_coefficient(
+                          localization.surface_material_fractions, inputs.slip_rate, age);
+      const double dmu_dV = fault_friction.friction_coefficient_derivative_wrt_slip_rate(
+                              localization.surface_material_fractions, inputs.slip_rate, age);
       const auto background = reconstructed_fault_background_tractions(
                                 inputs.fault_index, inputs.segment_index, inputs.xi);
       const double background_shear = background.first, background_normal = background.second;
@@ -534,8 +523,8 @@ namespace aspect
 
     template <int dim>
     std::vector<std::vector<double>>
-    PhaseFieldFault<dim>::compute_surface_cohesive_candidates(
-      const double time_step, const std::vector<std::vector<double>> &rates) const
+                                  PhaseFieldFault<dim>::compute_surface_cohesive_candidates(
+                                    const double time_step, const std::vector<std::vector<double>> &rates) const
     {
       AssertThrow(surface_cohesive_history || (uses_independent_bulk_history() && mature_frictional_fault),
                   ExcMessage("Surface history or mature FE history is not selected."));

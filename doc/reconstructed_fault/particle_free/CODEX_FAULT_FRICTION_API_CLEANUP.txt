@@ -1,0 +1,149 @@
+CODEX: COMPLETE FAULT-FRICTION API CLEANUP
+Reviewed remote: pf-rsf-particle-free, 3928edaf7e6a59383ef4bf65aeb22f34ff723a4c
+Task type: implement a bounded, behavior-preserving cleanup; no new propagation campaign.
+
+PURPOSE AND PRIORITIES
+
+The user's priorities are correctness > efficiency > readability > closeness to ASPECT. The scientific goal remains a usable phase-field/RSF model for the paper. These priorities resolve concrete conflicts; they do not make readability optional after numerical tests pass. A cleanup is complete only when it preserves behavior AND leaves a simpler, understandable interface. Prefer ASPECT conventions where they support that outcome; do not force reuse that obscures the mathematics or modifies unrelated core classes.
+
+The previous work consolidated formulas but retained the confusing public operations signed_endpoint, section_endpoint, and section_primitive, and added evaluate_age underneath the older update_state wrappers. Finish the interface and caller cleanup now. Do not answer with another audit or a plan to perform it later. Ordinary implementation decisions within this task are authorized.
+
+Inspect the current branch, local changes, applicable AGENTS.md and refactoring.md. The reviewed SHA is a reference, not a reset target. Preserve user edits, existing evidence, binaries, checkpoints, and running jobs. Do not roll back the useful previous material consolidation or scalar-obstacle correction.
+
+1. MAKE update_state THE SINGLE AGING OPERATION
+
+Current implementation:
+- evaluate_age owns the backward-Euler/exact aging formulas and speed derivative.
+- update_state(speed, old_state, dt) validates the mature positive-rate convention, then returns evaluate_age(...constant_rate_exact).age.
+- update_state(fractions, speed, old_state, dt) only checks a vector size and calls the other overload.
+- Signed trial resistance and bulk-tip accepted-history preparation bypass update_state and call evaluate_age.
+- The mature surface caller constructs compositions and fractions solely for the unused mixture argument.
+
+Replace this chain with ONE canonical update_state operation that directly contains the existing common aging implementation. A suitable interface is:
+
+  struct StateUpdate
+  {
+    double age;                  // theta at the requested duration, seconds
+    double derivative_wrt_speed; // d theta / d nonnegative slip speed
+  };
+
+  StateUpdate update_state(double slip_speed,
+                           double old_state,
+                           double duration,
+                           AgingMethod method) const;
+
+Retain the existing explicit AgingMethod enum. All maintained callers must select the method explicitly. Returning a value and derivative together is justified by their common computation and the Newton chain rule; this small result record is not a new history owner.
+
+Remove evaluate_age and the old forwarding update_state overloads after migrating callers. Do not leave compatibility aliases, another same-purpose helper, a second age evaluator, or a new state-update class. The function is const and computes a candidate; it does not commit history. Explain this in its documentation.
+
+Preserve:
+- theta_dot = 1 - speed*theta/Dc with the existing global Dc;
+- both backward-Euler and constant-rate exact updates;
+- zero-speed aging, zero-duration identity, stable expm1 evaluation, the small-argument derivative and subnormal-speed limit;
+- immutable incoming age for every Newton and line-search trial;
+- nonnegative speed as input: signed callers pass abs(V), with the correct signed chain rule handled in resistance evaluation;
+- stateful-law rejection and finite/positive input checks.
+
+The common mathematical update accepts zero speed. Preserve the mature positive-rate/Vmin restriction at its actual mature caller or existing owning validation boundary, rather than imposing it on the common zero-speed-capable aging law. Do not silently clamp rates. Document the unified API's input domain and retain checks on mature production paths. This is an interface consolidation, not permission to change the mature constitutive convention.
+
+Keep each time location unchanged:
+- mature surface history and its timestep-state predictor: exact update over the requested full duration;
+- bulk-tip BE trial and publication: BE over full dt;
+- midpoint resistance trial: exact constant-stage-rate aging from the accepted old age over dt/2;
+- midpoint endpoint publication: exact aging from the SAME accepted old age over full dt, using the accepted integrated section rate.
+Do not substitute the root-resolved rate for the independently integrated rate used by accepted section history.
+
+Remove the mixture-taking aging overload: fractions do not enter the current global-Dc equation. In compute_surface_state_candidates, remove the composition gathering and fraction construction performed solely for this call. Retain composition data and mixture evaluation where they actually affect friction or other material properties. Do not add future heterogeneous-Dc machinery.
+
+2. NAME THE THREE DISTINCT RESISTANCE OPERATIONS BY WHAT THEY DO
+
+Use this interface mapping, updating result records, all consumers, comments, and active documentation together:
+
+  signed_endpoint   -> evaluate_resistance
+  section_endpoint  -> solve_section_slip_rate
+  section_primitive -> compute_resistance_potential
+  SignedEndpoint    -> ResistanceResponse
+  SectionEndpoint   -> SectionSlipSolution
+
+Their responsibilities remain distinct:
+- evaluate_resistance evaluates signed friction plus radiation resistance at a supplied signed rate, after the selected trial aging update. Return resistance, total derivative with respect to signed slip rate, trial age, and separate friction/radiation contributions.
+- solve_section_slip_rate solves V + mobility*f(V) = free_rate. Return the solved rate, its evaluated resistance response, and the derivative df/d(free_rate) required by the condensed coupling.
+- compute_resistance_potential evaluates the integral from 0 to V of f(v) dv, holding incoming history and other parameters fixed. It is used for nonlinear search; it is NOT stored energy or physical dissipation f(V)*V.
+
+Use explicit member names for different derivatives. Avoid the current law.law nesting and ambiguous derivative/force_derivative naming in the changed caller code. For example, resistance_response, slip_rate, derivative_wrt_slip_rate, and resistance_derivative_wrt_free_rate make the meanings visible. Avoid renaming unrelated physical history fields merely to match these temporary result names.
+
+These are different mathematical operations, not duplicate algorithms to inline into one large function. Retain their separation. Also retain genuine shared private computations, such as effective RSF parameters and the coefficient with fixed-state partial derivatives. The target is fewer redundant interfaces and clearer responsibilities, not a minimum function count.
+
+Preserve the existing root bracket, asinh coordinate, monotonicity guard, convergence criterion, iteration budget, signed/zero-rate behavior, and Gauss48 search quadrature. Do not change physical quadrature or friction laws during this cleanup. The default old names and endpoint labels should disappear from maintained code after migration. Historical archived evidence may retain its original names.
+
+3. COMPLETE THE CALLER AND DUPLICATION CLEANUP
+
+Primary files and call sites identified at the reviewed revision:
+- include/aspect/material_model/rheology/fault_friction.h
+- source/material_model/rheology/fault_friction.cc
+- source/material_model/phase_field_fault/history.cc: compute_surface_state_candidates
+- source/material_model/phase_field_fault/bulk_cohesive_history.cc: prepare_bulk_tip_candidate
+- include/aspect/simulator/solver/bulk_tip.h: current SectionEndpoint/Law use
+- source/simulator/solver/bulk_tip_assembly.cc: root solve, tangent, search functional and diagnostics
+- source/time_stepping/reconstructed_fault.cc: logarithmic-state-change predictor
+- benchmarks/reconstructed_fault/particle_free/bulk_tip/checks.cc
+
+Search the complete maintained source/test/benchmark tree. Other callers already found include BP3 disturbance/within-step diagnostics, BP5 startup/normal-stress diagnostics, and tests/phase_field_fault_friction.cc, phase_field_fault_stage_i.cc, phase_field_fault_state_limiter.cc and bp3_length_scale_checks.h. Do not miss the timestep predictor because it lives outside the material model. Update supported source callers; do not rewrite old logs or archived result packages.
+
+Within FaultFriction, inspect the remaining real duplication. In particular, the stateless coefficient and its slip-rate derivative repeat the same effective mu_s, mu_d, Vc mixture loop. Share that actual computation with a small private implementation if appropriate, following the existing stateful parameter/coefficient pattern. Preserve the law's behavior, inactive-material treatment and existing supported API. Do not create a generic strategy/factory framework or merge stateless and stateful contracts just to reduce lines.
+
+Reconcile redundant assertions where one canonical implementation already establishes the same condition. Keep checks that enforce a distinct public contract. Preserve:
+- partial derivatives at fixed age versus total derivatives through trial aging;
+- nonregularized a=0 state derivative b/theta;
+- constant a=b=0 timestep behavior;
+- initialization/inversion and parameter/checkpoint identity;
+- history publication, rollback and restart semantics.
+Classify any newly suspected numerical defect separately; do not disguise a constitutive or numerical change as renaming.
+
+4. MAKE THE RESULT READABLE IN THE CODE
+
+Keep this work in the existing rheology owner and its callers. No new driver, file-per-helper, general solver framework, or broad reorganization of phase-field infrastructure.
+
+Organize the header and source in matching logical order: parameter handling, state evolution, coefficient evaluation, signed resistance, section solve, search potential, and other existing utilities, as appropriate to neighboring ASPECT rheology classes. Read representative neighboring classes before choosing formatting. Apply the repository's formatting procedure to changed files; avoid unrelated whole-tree formatting.
+
+Document the class's role and each nontrivial public operation: mathematical quantity, input units/domain, returned quantities and derivative convention, time location, and whether history is mutated. In source, explain the reasons for the small-speed limit, signed chain rule, safeguarded root coordinate, and search integral. Expand dense multi-statement lines in the touched rheology and relevant caller blocks. Do not replace compact mathematics with dozens of trivial helpers.
+
+The finished code must let a reader trace:
+  accepted theta -> trial theta -> friction coefficient/resistance
+                 -> section rate solution -> accepted theta
+without following an obsolete wrapper or guessing which "endpoint" is meant.
+
+Use minimal explicit local aliases if long dependent type names impair readability. Do not introduce mutable caches, extra allocations, or type-erasure machinery merely to shorten a call. Remove unused argument preparation, especially the per-vertex aging mixture construction.
+
+5. VERIFY THE REFACTOR WITH SHORT, RELEVANT CHECKS
+
+Record a pre-change reference using the existing build and selected short controls, or reuse retained reference outputs whose source/binary identity is established. Rebuild affected checker/plugin targets after changing the public API.
+
+Run the existing focused aging/friction checks covering BE and exact age, zero speed/duration, finite-difference derivatives, exact-aging composition, signed symmetry/zero-rate tangent, fixed-state versus total derivatives, mixture handling, a=0, and stateless-interface rejection. Keep independent mathematical references independent. Adapt tests to the deliberate API consolidation instead of preserving old wrappers for test convenience.
+
+Run short mature history/timestep-limiter comparisons and existing successful BE/midpoint coupled intervals. Include a short restart/rollback or existing lifecycle control sufficient to show accepted history and time locations are unchanged. Use existing one/two-rank controls where they exercise the affected callers. Compile maintained diagnostic consumers, or explicitly report any unavailable historical build dependency; do not retain a redundant API solely to conceal an unbuilt caller.
+
+Preserve the tested responses to roundoff-level numerical differences appropriate to the existing checks. Investigate larger changes. Do not relax tolerances or assert that a passing test suite alone establishes readability. Add a test only for an actual uncovered risk introduced by the interface migration.
+
+This is not a new overnight experiment. Do not rerun the full M1/M2/M3 histories, the expensive failing fine interval, BP3 events, or launch a new refinement/propagation campaign. Keep at most four aggregate local build workers/MPI ranks and one numerical thread per rank. Existing independently running jobs are outside this cleanup; do not stop or replace them.
+
+6. UPDATE DOCUMENTATION AND FINISH
+
+Update the current tip-treatment friction/time-integration pages and any current mature/time-stepping references affected by the API. Replace the evaluate_age/update_state-wrapper narrative with the single state-update operation. Provide one compact equation -> function -> active caller table, distinguishing stage evaluation from accepted publication and potential from physical work. Preserve original historical reports as historical evidence.
+
+Deliver the code changes and a concise cleanup report containing:
+- old-to-new API table and deleted wrappers/unused argument preparation;
+- remaining helpers and a concrete reason for each non-obvious one;
+- confirmation that state aging has one implementation and all maintained callers use it;
+- relevant checks and before/after numerical differences;
+- any remaining concrete readability issue or unsupported caller.
+
+Completion requires all of the following:
+- evaluate_age is gone from maintained implementation and current API documentation.
+- The former aging wrappers and unused mixture-taking interface are gone.
+- evaluate_resistance, solve_section_slip_rate and compute_resistance_potential express the three distinct operations.
+- The state predictor, mature publication, BE trial/publication and midpoint trial/publication use the correct common updater.
+- The changed header/source/callers are formatted and understandable without consulting a historical task report.
+- Numerical equivalence is checked with bounded tests; existing scientific limitations remain accurately stated.
+
+Do not call the task complete merely because formulas are shared or tests pass. Also do not interpret "ASPECT-style" as a requirement to modify unrelated ASPECT core classes. Complete this existing module coherently, following the branch's commit/push policy and preserving unrelated work.

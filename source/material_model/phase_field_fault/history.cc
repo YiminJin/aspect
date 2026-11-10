@@ -1106,25 +1106,12 @@ namespace aspect
               for (unsigned int vertex = 0;
                    vertex < faults[fault].n_vertices(); ++vertex)
                 {
-                  // Construct the surface mixture at the same Q1 vertex used
-                  // by friction. Dc is global in the current aging law.
-                  std::vector<double> surface_compositions(
-                    fault_property_indices.chemical_compositions.size());
-                  for (unsigned int c = 0; c < surface_compositions.size(); ++c)
-                    {
-                      const auto &property = fault_manager.get_property_information()[
-                                               fault_property_indices.chemical_compositions[c]];
-                      surface_compositions[c] =
-                        faults[fault].get_properties(vertex)[property.position];
-                    }
-                  const std::vector<double> surface_fractions =
-                    MaterialUtilities::compute_composition_fractions(
-                      surface_compositions);
+                  const double speed = fault_manager.get_slip_rate(fault)[vertex];
+                  AssertThrow(std::isfinite(speed) && speed >= fault_friction.get_minimum_slip_rate(),
+                              ExcMessage("The mature slip rate is below the minimum admissible rate."));
                   state_candidates[fault][vertex] = fault_friction.update_state(
-                                                      surface_fractions,
-                                                      fault_manager.get_slip_rate(fault)[vertex],
-                                                      faults[fault].get_properties(vertex)[state_position],
-                                                      time_step);
+                                                      speed, faults[fault].get_properties(vertex)[state_position], time_step,
+                                                      Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact).age;
                   AssertThrow(std::isfinite(state_candidates[fault][vertex])
                               && state_candidates[fault][vertex] > 0.0,
                               ExcMessage("The accepted rate-and-state history is "

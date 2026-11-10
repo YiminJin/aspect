@@ -9,7 +9,10 @@
 
 namespace aspect
 {
-  namespace Postprocess { template <int dim> class MomentCycle; }
+  namespace Postprocess
+  {
+    template <int dim> class MomentCycle;
+  }
   namespace internal
   {
     /** Fixed-reference bulk-tip residual and exact condensed tangent.
@@ -27,7 +30,7 @@ namespace aspect
         using Model = MaterialModel::PhaseFieldFault<dim>;
         using State = typename Model::BulkCohesiveState;
         using Point = MaterialModel::BulkCohesive::Tip::Response;
-        using Law = typename MaterialModel::Rheology::FaultFriction<dim>::SectionEndpoint;
+        using SectionSolution = typename MaterialModel::Rheology::FaultFriction<dim>::SectionSlipSolution;
 
         /** Noncommitting response; all scalar energies use the physical 3-D
          * tensor metric and actual JxW. Only small section arrays are replicated. */
@@ -35,7 +38,7 @@ namespace aspect
         {
           Vector residual, raw;
           std::map<CellId, std::vector<Point>> points;
-          std::vector<Law> laws;
+          std::vector<SectionSolution> section_solutions;
           std::vector<double> rate, absolute_rate, positive_rate, negative_rate;
           double mechanical = 0., kkt = 0., section_defect = 0.;
           double bulk = 0., cohesive = 0., fracture = 0., functional = 0.;
@@ -73,8 +76,14 @@ namespace aspect
         {
           return upper;
         }
-        double stage_timestep() const { return dt; }
-        bool uses_midpoint() const { return midpoint; }
+        double stage_timestep() const
+        {
+          return dt;
+        }
+        bool uses_midpoint() const
+        {
+          return midpoint;
+        }
         const LinearAlgebra::Vector &phase_mass() const
         {
           return mass;

@@ -22,9 +22,9 @@ namespace aspect
       // reduced cancellation; it changes neither the source nor its projection.
       template <int dim>
       std::vector<SymmetricTensor<2, dim>> memory_strain(
-        const FEValues<dim> &fe, const LinearAlgebra::BlockVector &memory,
-        const std::array<unsigned int, dim> &components,
-        const typename DoFHandler<dim>::active_cell_iterator &cell)
+                                          const FEValues<dim> &fe, const LinearAlgebra::BlockVector &memory,
+                                          const std::array<unsigned int, dim> &components,
+                                          const typename DoFHandler<dim>::active_cell_iterator &cell)
       {
         std::vector<types::global_dof_index> ids(fe.get_fe().n_dofs_per_cell());
         cell->get_dof_indices(ids);
@@ -110,8 +110,8 @@ namespace aspect
 
     template <int dim>
     std::vector<SymmetricTensor<2, dim>>
-    PhaseFieldFault<dim>::BulkCohesiveState::evaluate_tensor(
-      const PhaseFieldFault<dim> &model, const CellId &id, const Quadrature<dim> &quadrature)const
+                                      PhaseFieldFault<dim>::BulkCohesiveState::evaluate_tensor(
+                                        const PhaseFieldFault<dim> &model, const CellId &id, const Quadrature<dim> &quadrature)const
     {
       auto result = model.evaluate_history_tensor(*tensor, id, quadrature);
       const auto projected = model.evaluate_history_tensor(*native_projection, id, quadrature);
@@ -181,25 +181,34 @@ namespace aspect
                   ExcMessage("Tip candidate must use the current immutable accepted parent."));
       const double dt=this->get_timestep();
       auto next=std::make_shared<BulkCohesiveState>(*parent);
-      next->tip_phase=phase;next->step=this->get_timestep_number();
-      next->time=this->get_time();next->publications=parent->publications+1;
-      for(const auto &cell:points)for(unsigned int q=0;q<cell.second.size();++q)
+      next->tip_phase=phase;
+      next->step=this->get_timestep_number();
+      next->time=this->get_time();
+      next->publications=parent->publications+1;
+      for (const auto &cell:points)for (unsigned int q=0; q<cell.second.size(); ++q)
+          {
+            const auto &r=cell.second[q];
+            auto &h=next->history.at(cell.first)[q];
+            const auto &old=parent->history.at(cell.first)[q];
+            h.stress=bulk_tip_midpoint ? 2.*r.state.stress-old.stress : r.state.stress;
+            h.A=bulk_tip_midpoint ? 2.*r.state.cohesive_strain-old.A : r.state.cohesive_strain;
+            // Rate and reaction are last-stage observations, not endpoint laws.
+            h.q=r.Q[0][1];
+            h.rate=r.rate;
+            h.signed_shear+=dt*r.rate;
+            h.absolute_shear+=dt*std::abs(r.rate);
+          }
+      AssertDimension(rates.size(),next->sections.size());
+      AssertDimension(forces.size(),rates.size());
+      for (unsigned int k=0; k<next->sections.size(); ++k)
         {
-          const auto &r=cell.second[q];auto &h=next->history.at(cell.first)[q];
-          const auto &old=parent->history.at(cell.first)[q];
-          h.stress=bulk_tip_midpoint ? 2.*r.state.stress-old.stress : r.state.stress;
-          h.A=bulk_tip_midpoint ? 2.*r.state.cohesive_strain-old.A : r.state.cohesive_strain;
-          // Rate and reaction are last-stage observations, not endpoint laws.
-          h.q=r.Q[0][1];h.rate=r.rate;
-          h.signed_shear+=dt*r.rate;h.absolute_shear+=dt*std::abs(r.rate);
-        }
-      AssertDimension(rates.size(),next->sections.size());AssertDimension(forces.size(),rates.size());
-      for(unsigned int k=0;k<next->sections.size();++k)
-        {
-          auto &s=next->sections[k];s.rate=rates[k];s.slip+=dt*s.rate;s.force=forces[k];
-          s.age=fault_friction.evaluate_age(std::abs(s.rate),parent->sections[k].age,dt,
-                  bulk_tip_midpoint ? Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
-                                    : Rheology::FaultFriction<dim>::AgingMethod::backward_euler).age;
+          auto &s=next->sections[k];
+          s.rate=rates[k];
+          s.slip+=dt*s.rate;
+          s.force=forces[k];
+          s.age=fault_friction.update_state(std::abs(s.rate),parent->sections[k].age,dt,
+                                            bulk_tip_midpoint ? Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact
+                                            : Rheology::FaultFriction<dim>::AgingMethod::backward_euler).age;
         }
       return next;
     }
@@ -217,7 +226,7 @@ namespace aspect
       const double Kf = Gc / ((8. / 3.) * this->get_phase_field_handler().get_length_scale());
       std::vector<double> fractions(elastic_shear_moduli.size(), 0.);
       fractions[0] = 1.;
-      const double mu = s->direct_tip()?0.:fault_friction.friction_coefficient(fractions, fault_friction.get_minimum_slip_rate());
+      const double mu = s->direct_tip()?0.:fault_friction.friction_coefficient(fractions, fault_friction.get_minimum_slip_rate(), std::nullopt);
       s->parameters = {G, reference_viscosities[0], Kf / (cohesions[0]*cohesions[0] / (2 * G)),
                        mu *this->get_parameters().surface_pressure
                       };
@@ -238,21 +247,21 @@ namespace aspect
       else
         s->phase = aspect::internal::endpoint_values(initial.block(b), this->get_mpi_communicator());
       for (unsigned int i = 0; i < s->phase.size(); ++i)
-        if(s->direct_tip()) AssertThrow(s->phase[i]>=0. && s->phase[i]<=1.,ExcMessage("Invalid initial tip phase."));
+        if (s->direct_tip()) AssertThrow(s->phase[i]>=0. && s->phase[i]<=1.,ExcMessage("Invalid initial tip phase."));
         else BulkCohesive::compliance(s->phase[i], s->parameters.m);
       s->mesh = this->get_triangulation().get_vertices();
       s->quadrature = fe_bulk_normal_quadrature_points;
-      if(!s->direct_tip())
+      if (!s->direct_tip())
         {
-      s->tensor = std::make_shared<TensorField>();
-      s->tensor->space = std::make_shared<typename TensorField::Space>(this->get_triangulation());
-      for (auto &component : s->tensor->coefficients)
-        {
-          component.reinit(s->tensor->space->dofs.locally_owned_dofs(), this->get_mpi_communicator());
-          component = 0.;
-        }
-      s->native_history.reinit(initial);
-      s->native_history = 0.;
+          s->tensor = std::make_shared<TensorField>();
+          s->tensor->space = std::make_shared<typename TensorField::Space>(this->get_triangulation());
+          for (auto &component : s->tensor->coefficients)
+            {
+              component.reinit(s->tensor->space->dofs.locally_owned_dofs(), this->get_mpi_communicator());
+              component = 0.;
+            }
+          s->native_history.reinit(initial);
+          s->native_history = 0.;
         }
       const unsigned int nq = mechanical_quadrature().size();
       for (const auto &cell : this->get_dof_handler().active_cell_iterators())
@@ -261,7 +270,7 @@ namespace aspect
             s->history[cell->id()].resize(nq);
             s->native_cells.emplace(cell->id(), cell);
           }
-      if(s->direct_tip())
+      if (s->direct_tip())
         {
           // Freeze the native quadrature-point material representation. No
           // projection of true stress or cohesive strain onto uncut DGQ2.
@@ -269,34 +278,41 @@ namespace aspect
                            update_quadrature_points|update_JxW_values);
           const QGauss<1> line(s->quadrature);
           const auto section_x=[&](const auto &cell,const unsigned int q)
-            {return cell->vertex(0)[0]+(cell->vertex(1)[0]-cell->vertex(0)[0])*line.point(q%s->quadrature)[0];};
+          {
+            return cell->vertex(0)[0]+(cell->vertex(1)[0]-cell->vertex(0)[0])*line.point(q%s->quadrature)[0];
+          };
           std::map<double,double> local;
           double minimum_y=std::numeric_limits<double>::infinity(),maximum_y=-minimum_y;
-          for(const auto &entry:s->native_cells)
+          for (const auto &entry:s->native_cells)
             {
               const auto cell=entry.second;
               minimum_y=std::min(minimum_y,cell->vertex(0)[1]);
               maximum_y=std::max(maximum_y,cell->vertex(GeometryInfo<dim>::vertices_per_cell-1)[1]);
-              for(const auto v:cell->vertex_indices())for(unsigned int d=0;d<dim;++d)
-                AssertThrow(cell->vertex(v)[d]==cell->vertex(0)[d]
-                            || cell->vertex(v)[d]==cell->vertex(GeometryInfo<dim>::vertices_per_cell-1)[d],
-                            ExcMessage("The first section control requires Cartesian aligned cells."));
+              for (const auto v:cell->vertex_indices())for (unsigned int d=0; d<dim; ++d)
+                  AssertThrow(cell->vertex(v)[d]==cell->vertex(0)[d]
+                              || cell->vertex(v)[d]==cell->vertex(GeometryInfo<dim>::vertices_per_cell-1)[d],
+                              ExcMessage("The first section control requires Cartesian aligned cells."));
               fe.reinit(cell);
-              for(unsigned int q=0;q<fe.n_quadrature_points;++q)
+              for (unsigned int q=0; q<fe.n_quadrature_points; ++q)
                 local[section_x(cell,q)]=(cell->vertex(1)[0]-cell->vertex(0)[0])*line.weight(q%s->quadrature);
             }
           std::map<double,double> global;
-          for(const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local))
-            for(const auto &entry:part)
-              {const auto inserted=global.emplace(entry);
-               AssertThrow(inserted.first->second==entry.second,ExcMessage("Section tangential measures disagree across normal cells."));}
+          for (const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local))
+            for (const auto &entry:part)
+              {
+                const auto inserted=global.emplace(entry);
+                AssertThrow(inserted.first->second==entry.second,ExcMessage("Section tangential measures disagree across normal cells."));
+              }
           std::map<double,unsigned int> index;
-          for(const auto &entry:global)
-            {index[entry.first]=s->sections.size();s->sections.push_back({entry.first,entry.second,bulk_tip_initial_age,0.,0.,0.});}
-          for(const auto &entry:s->native_cells)
+          for (const auto &entry:global)
+            {
+              index[entry.first]=s->sections.size();
+              s->sections.push_back({entry.first,entry.second,bulk_tip_initial_age,0.,0.,0.});
+            }
+          for (const auto &entry:s->native_cells)
             {
               fe.reinit(entry.second);
-              for(unsigned int q=0;q<fe.n_quadrature_points;++q)
+              for (unsigned int q=0; q<fe.n_quadrature_points; ++q)
                 {
                   const auto k=index.at(section_x(entry.second,q));
                   s->section_ids[entry.first].push_back(k);
@@ -305,12 +321,12 @@ namespace aspect
             }
 
           Vector<double> normal_measure(s->sections.size());
-          for(const auto &cell:s->section_ids)for(unsigned int q=0;q<cell.second.size();++q)
-            normal_measure[cell.second[q]]+=s->normal_weights.at(cell.first)[q];
+          for (const auto &cell:s->section_ids)for (unsigned int q=0; q<cell.second.size(); ++q)
+              normal_measure[cell.second[q]]+=s->normal_weights.at(cell.first)[q];
           BulkCohesive::sum(normal_measure,this->get_mpi_communicator());
           const double height=Utilities::MPI::max(maximum_y,this->get_mpi_communicator())
                               -Utilities::MPI::min(minimum_y,this->get_mpi_communicator());
-          for(const auto value:normal_measure)
+          for (const auto value:normal_measure)
             AssertThrow(std::abs(value-height)<1e-12*height,
                         ExcMessage("Bulk tip sections must span the complete normal extent with matching tangential cells."));
         }
@@ -325,14 +341,17 @@ namespace aspect
     {
       AssertThrow(bulk_cohesive_phase, ExcInternalError());
       auto record = std::make_shared<BulkCohesiveArchive>();
-      if(bulk_flow_rule==BulkFlowRule::bulk_tip_sections)
+      if (bulk_flow_rule==BulkFlowRule::bulk_tip_sections)
         {
           record->signature="bulk tip physical tau A DGQ2 sections BE v1";
           if constexpr(Archive::is_saving::value)
             {
               const auto &s=*bulk_cohesive_state;
               AssertThrow(s.step+1==this->get_timestep_number(),ExcMessage("Tip checkpoint requires accepted state."));
-              record->step=s.step;record->time=s.time;record->publications=s.publications;record->quadrature=s.quadrature;
+              record->step=s.step;
+              record->time=s.time;
+              record->publications=s.publications;
+              record->quadrature=s.quadrature;
               record->material=s.material_record();
               record->material.push_back(critical_energy_release_rates[0]);
               record->material.push_back(this->get_phase_field_handler().get_length_scale());
@@ -342,24 +361,40 @@ namespace aspect
               // Include full configured friction law identity, not just an age.
               const auto law=fault_friction.signed_parameter_record();
               record->material.insert(record->material.end(),law.begin(),law.end());
-              for(const auto &a:s.sections)
-                for(double value:{a.coordinate,a.weight,a.age,a.slip,a.rate,a.force})record->phase.push_back(value);
+              for (const auto &a:s.sections)
+                for (double value:
+                     {
+                       a.coordinate,a.weight,a.age,a.slip,a.rate,a.force
+                     })record->phase.push_back(value);
               std::map<std::string,std::vector<double>> local;
               std::vector<types::global_dof_index> ids(this->get_fe().n_dofs_per_cell());
               const auto pc=this->introspection().phase_field().first_component_index;
               const auto po=this->get_solution().get_block_indices().block_start(this->introspection().phase_field().block_index);
-              for(const auto &entry:s.native_cells)
+              for (const auto &entry:s.native_cells)
                 {
-                  auto &row=local[entry.first.to_string()];entry.second->get_dof_indices(ids);
-                  for(const auto v:entry.second->vertex_indices())for(unsigned int d=0;d<dim;++d)row.push_back(entry.second->vertex(v)[d]);
-                  for(unsigned int i=0;i<ids.size();++i)if(this->get_fe().system_to_component_index(i).first==pc)row.push_back(uses_integrated_bulk_tip() ? s.tip_phase[ids[i]-po] : s.phase[ids[i]-po]);
-                  for(const auto &h:s.history.at(entry.first))
-                    {for(const auto *t:{&h.stress,&h.A})for(unsigned int i=0;i<3;++i)for(unsigned int j=i;j<3;++j)row.push_back((*t)[i][j]);
-                     for(double v:{h.signed_shear,h.absolute_shear,h.rate,h.q})row.push_back(v);}
+                  auto &row=local[entry.first.to_string()];
+                  entry.second->get_dof_indices(ids);
+                  for (const auto v:entry.second->vertex_indices())for (unsigned int d=0; d<dim; ++d)row.push_back(entry.second->vertex(v)[d]);
+                  for (unsigned int i=0; i<ids.size(); ++i)if (this->get_fe().system_to_component_index(i).first==pc)row.push_back(uses_integrated_bulk_tip() ? s.tip_phase[ids[i]-po] : s.phase[ids[i]-po]);
+                  for (const auto &h:s.history.at(entry.first))
+                    {
+                      for (const auto *t:
+                      {
+                        &h.stress,&h.A
+                      })for (unsigned int i=0; i<3; ++i)for (unsigned int j=i; j<3; ++j)row.push_back((*t)[i][j]);
+                      for (double v:
+                           {
+                             h.signed_shear,h.absolute_shear,h.rate,h.q
+                           })row.push_back(v);
+                    }
                 }
               std::map<std::string,std::vector<double>> global;
-              for(const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local))for(const auto &entry:part)global.emplace(entry);
-              for(const auto &entry:global){record->cells.push_back(entry.first);record->local.insert(record->local.end(),entry.second.begin(),entry.second.end());}
+              for (const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local))for (const auto &entry:part)global.emplace(entry);
+              for (const auto &entry:global)
+                {
+                  record->cells.push_back(entry.first);
+                  record->local.insert(record->local.end(),entry.second.begin(),entry.second.end());
+                }
             }
           ar &record->signature;
           AssertThrow(record->signature=="bulk tip physical tau A DGQ2 sections BE v1",ExcMessage("Tip checkpoint law mismatch; no conversion."));
@@ -456,38 +491,61 @@ namespace aspect
       initialize_bulk_cohesive_history(this->get_solution());
       auto &s = *bulk_cohesive_state;
       const auto &a = *bulk_cohesive_archive;
-      if(s.direct_tip())
+      if (s.direct_tip())
         {
           AssertThrow(a.signature==s.checkpoint_signature() && a.quadrature==s.quadrature,ExcMessage("Tip checkpoint representation/quadrature mismatch."));
           std::vector<double> material=s.material_record();
           material.push_back(critical_energy_release_rates[0]);
           material.push_back(this->get_phase_field_handler().get_length_scale());
           material.push_back(bulk_tip_initial_age);
-          material.push_back(this->get_parameters().surface_pressure);material.push_back(radiation_damping_coefficients[0]);
+          material.push_back(this->get_parameters().surface_pressure);
+          material.push_back(radiation_damping_coefficients[0]);
           const auto law=fault_friction.signed_parameter_record();
           material.insert(material.end(),law.begin(),law.end());
           AssertThrow(material==a.material,ExcMessage("Tip checkpoint material/RSF law changed."));
           AssertDimension(a.phase.size(),6*s.sections.size());
-          for(unsigned int i=0;i<s.sections.size();++i)
-            {auto &v=s.sections[i];AssertThrow(v.coordinate==a.phase[6*i] && v.weight==a.phase[6*i+1],ExcMessage("Tip section geometry changed."));
-             v.age=a.phase[6*i+2];v.slip=a.phase[6*i+3];v.rate=a.phase[6*i+4];v.force=a.phase[6*i+5];}
-          const auto &fe=this->get_fe();const auto pc=this->introspection().phase_field().first_component_index;
+          for (unsigned int i=0; i<s.sections.size(); ++i)
+            {
+              auto &v=s.sections[i];
+              AssertThrow(v.coordinate==a.phase[6*i] && v.weight==a.phase[6*i+1],ExcMessage("Tip section geometry changed."));
+              v.age=a.phase[6*i+2];
+              v.slip=a.phase[6*i+3];
+              v.rate=a.phase[6*i+4];
+              v.force=a.phase[6*i+5];
+            }
+          const auto &fe=this->get_fe();
+          const auto pc=this->introspection().phase_field().first_component_index;
           const auto po=this->get_solution().get_block_indices().block_start(this->introspection().phase_field().block_index);
           const auto nd=fe.base_element(fe.component_to_base_index(pc).first).n_dofs_per_cell();
           const unsigned int stride=GeometryInfo<dim>::vertices_per_cell*dim+nd+16*mechanical_quadrature().size();
           AssertDimension(a.local.size(),stride*a.cells.size());
-          std::map<std::string,unsigned int> offsets;for(unsigned int i=0;i<a.cells.size();++i)offsets[a.cells[i]]=i*stride;
+          std::map<std::string,unsigned int> offsets;
+          for (unsigned int i=0; i<a.cells.size(); ++i)offsets[a.cells[i]]=i*stride;
           std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
-          for(const auto &entry:s.native_cells)
-            {unsigned int k=offsets.at(entry.first.to_string());entry.second->get_dof_indices(ids);
-             for(const auto v:entry.second->vertex_indices())for(unsigned int d=0;d<dim;++d)AssertThrow(a.local[k++]==entry.second->vertex(v)[d],ExcMessage("Tip mesh changed."));
-             for(unsigned int i=0;i<ids.size();++i)if(fe.system_to_component_index(i).first==pc)AssertThrow(a.local[k++]==(uses_integrated_bulk_tip() ? s.tip_phase[ids[i]-po] : s.phase[ids[i]-po]),ExcMessage("Tip phase obstacle changed."));
-             for(auto &h:s.history[entry.first])
-               {for(auto *t:{&h.stress,&h.A})for(unsigned int i=0;i<3;++i)for(unsigned int j=i;j<3;++j)(*t)[i][j]=a.local[k++];
-                h.signed_shear=a.local[k++];h.absolute_shear=a.local[k++];h.rate=a.local[k++];h.q=a.local[k++];}}
-          s.step=a.step;s.time=a.time;s.publications=a.publications;
+          for (const auto &entry:s.native_cells)
+            {
+              unsigned int k=offsets.at(entry.first.to_string());
+              entry.second->get_dof_indices(ids);
+              for (const auto v:entry.second->vertex_indices())for (unsigned int d=0; d<dim; ++d)AssertThrow(a.local[k++]==entry.second->vertex(v)[d],ExcMessage("Tip mesh changed."));
+              for (unsigned int i=0; i<ids.size(); ++i)if (fe.system_to_component_index(i).first==pc)AssertThrow(a.local[k++]==(uses_integrated_bulk_tip() ? s.tip_phase[ids[i]-po] : s.phase[ids[i]-po]),ExcMessage("Tip phase obstacle changed."));
+              for (auto &h:s.history[entry.first])
+                {
+                  for (auto *t:
+                       {
+                         &h.stress,&h.A
+                       })for (unsigned int i=0; i<3; ++i)for (unsigned int j=i; j<3; ++j)(*t)[i][j]=a.local[k++];
+                  h.signed_shear=a.local[k++];
+                  h.absolute_shear=a.local[k++];
+                  h.rate=a.local[k++];
+                  h.q=a.local[k++];
+                }
+            }
+          s.step=a.step;
+          s.time=a.time;
+          s.publications=a.publications;
           AssertThrow(s.step+1==this->get_timestep_number(),ExcMessage("Tip restart endpoint clock mismatch."));
-          bulk_cohesive_archive.reset();return;
+          bulk_cohesive_archive.reset();
+          return;
         }
       if (a.signature == s.checkpoint_signature())
         {
