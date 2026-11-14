@@ -106,6 +106,7 @@ In-place resume is allowed only when its output is no newer than the selected
 checkpoint. To branch from an older checkpoint, preserve the parent and run:
 
 ```sh
+# From benchmarks/reconstructed_fault/bp3 (the helper is outside plugin/):
 bash branch_output.sh /absolute/parent 2 /absolute/new-branch
 ```
 
@@ -118,6 +119,25 @@ metadata, not the growing payload trees. Keep the parent available: an index
 alone cannot restore missing profile payloads. Missing or newer/conflicting
 profiles fail instead of silently appending mixed histories. An old checkpoint
 without a growth snapshot starts a new growth table with a header.
+
+If resume reports `Cannot seem to deserialize the data previously stored`,
+read the nested exception. `Output is newer than the loaded checkpoint` from
+`check_series_prefix` means that a CSV row's step or time exceeds the accepted
+state restored by the BP3 plugin. The outer deserialization message wraps this
+intentional output-history check; it does not by itself indicate archive
+corruption or a compiler mismatch. This can happen when a run writes outputs
+after its last checkpoint and then fails, or when selecting an older checkpoint.
+
+For the automatically selected checkpoint, read the parent directory's
+`restart/last_good_checkpoint.txt`; its numbered subdirectory contains
+`bp3_accepted_state.txt` (accepted step and time in seconds) and
+`bp3_output_metadata/` (the matching output prefix). Pass that ID to the helper
+above and use the new branch as the resumed run's `Output directory`. Keep the
+original physical settings, including default full bottom loading. Do not
+disable the prefix check or delete/truncate the parent's outputs. If the label,
+metadata or referenced profile payloads are missing, obtain the matching files
+from the original run before preparing the branch; the checkpoint's physical
+history must not be reconstructed from CSVs.
 
 ## Source ownership
 

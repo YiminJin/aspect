@@ -7,6 +7,8 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parent
 
@@ -43,6 +45,16 @@ def main():
     if not args.restore:
         print('Preview only. Add --restore to move these files back into BP3.')
         return
+
+    # Older loose payloads may have been losslessly packed to reclaim disk space.
+    compressed = args.manifest.resolve().parent/'compressed-payload'
+    if (compressed/'manifest.json').exists():
+        if not (compressed/'verified.json').exists():
+            raise SystemExit('Payload packing is incomplete; consult compressed-payload/completed.jsonl.')
+        packed = json.loads((compressed/'manifest.json').read_text())['files']
+        if any(not prefix or r['path'] == prefix or r['path'].startswith(prefix+'/') for r in packed):
+            subprocess.run([sys.executable, str(compressed/'restore.py'), prefix, '--restore'],
+                           check=True)
 
     # Validate every target and payload before the first move. Equal existing
     # files are left untouched, making a partially restored group resumable.

@@ -1,4 +1,108 @@
+# Phase-field / RSF disk cleanup — October 15
+
+Cleaned only the original `aspect` worktree (`pf-rsf`, `3af7c2aa2`). Reclaimed
+approximately **44.07 GiB** from phase-field build intermediates and
+lossless compression of old loose archives; disk availability is approximately
+**56.17 GiB**, up from 12.09 GiB. Other worktrees were not changed.
+
+- Removed 259 compiler `.o`/`.gch` files from `CMakeFiles` beneath
+  `build-pf-rsf`, `build-pf-cpdi`, and `build-tmp` (6.06 GiB).
+  Executables, plugins, CMake configuration, test data and checkpoints remain;
+  rebuilding regenerates the missing intermediates.
+- Packed all 16,000 remaining regular files in the September 14/15 archive
+  `payload/` trees: 53.52 GiB became 15.52 GiB. Each chunk was decompressed
+  and every member SHA256-verified before deleting its unchanged loose original.
+  All 12 historical symlinks and directory skeletons remain in place.
+- Kept current BP3/BP5 outputs/checkpoints and every earlier compressed archive.
+  The existing September 14/15 restoration commands automatically recover
+  packed payloads before their original restoration step.
+
+See [cleanup/recovery details](../../benchmarks/reconstructed_fault/CLEANUP.md).
+Local audit material, before-state snapshots and isolated recovery checks are in
+`.benchmark-cleanup-20261015-disk/`; packed chunks/manifests and helpers are under
+`compressed-payload/` in each of the two older archives. These are local copies,
+not an off-machine backup. Pre-existing changes to this note and the BP3 plugin
+README were preserved. No scientific source or parameter was changed; no
+simulation, C++ rebuild, or numerical test was run. The failure-analysis findings
+and next bounded scientific task below remain applicable.
+
 # Phase-field / RSF current status
+
+## Resumed first-event failure analysis — October 1
+
+The copied `bp3/output-first-event-resumed-2/` data and corrected error filename
+`bp3/BP3.e3552915` have been analyzed offline. See the
+[report](../../benchmarks/reconstructed_fault/bp3/resumed_diagnostics/REPORT.md)
+and [C++/VTK/gnuplot workflow](../../benchmarks/reconstructed_fault/bp3/resumed_diagnostics/README.md).
+Five PNG/PDF figure pairs and extracted metrics are in the run's `diagnosis/`.
+No Python, simulation, numerical-code or PRM change was used.
+
+Verified: step 603 at 142.93250358 yr mechanically converges, publishes its
+histories and outputs, then aborts in `BP3RestoredMonitor` because the friction
+normal input loses compression. It is not a rejected Newton trial or a fully
+completed postprocessing/checkpoint cycle. `restored_growth.csv` ends at 602
+because the monitor asserts before appending. Eight failed attempts across
+601–603 precede this result. The PRM changes the failure strategy to timestep
+cutback; the nonlinear tolerance remains 1e-8.
+
+The largest saved bulk velocity is 2.52033e-5 m/s at `(28910.15625,1.953125)` m,
+42.643 m right of the fault endpoint (normal distance 37.906 m). Pressure peaks
+at +49.6533 GPa nearby. Mapped history τxx reaches +112.206 GPa, compared with
+the preceding step's maximum committed particle component of 0.210608 GPa.
+The endpoint itself reaches V=1.59950e-6 m/s and normal input -15.6111 MPa;
+the next fault node reaches the rate lower bound. This confirms an off-fault
+bulk hotspot and a distinct endpoint friction failure in the same step.
+
+Leading hypothesis, **not yet a verified root cause**: excessive particle-to-FE
+history reconstruction, potentially a poorly conditioned unlimited LLS fit.
+Native all-field unlimited LLS remains selected. Source ordering shows saved
+compositional τ is retained history, not newly committed particle stress; the
+amplification is therefore a more specific lead than simply blaming the bottom
+boundary. Offending-cell particle coverage, pre-publication proposals and the
+server source/binary identity are not established by the volume outputs.
+
+The state forecast parameter is 0.2. At the final accepted dt, the prior V/Θ
+predict max log change ≈0.003515, but the newly solved V produces actual change
+6.21616. The exact exponential update audit passes. This is a predictor versus
+acceptance distinction, not evidence of an exponential-update bug. It does not
+authorize an implicit policy change or bypass of the compression guard.
+
+**Next bounded task:** obtain particle position/stress outputs for 601–603
+(only particle output 00000 is copied here), or preserve the last server
+pre-failure checkpoint and build provenance. Audit occupancy, LLS conditioning
+and stress-transfer proposals near x=28.7–29.1 km, y=0–0.3 km. Prepare a narrowly
+instrumented continuation only if saved particle evidence is unavailable and
+that follow-up is requested. Do not repeat the loading run, change the bottom
+option, or claim the earlier boundary hypotheses have been resolved.
+
+## Server first-event resume diagnosis — September 30
+
+`benchmarks/reconstructed_fault/bp3/BP3.e3552624` identifies an intentional
+output-prefix rejection in `BP3::check_series_prefix`: the server's
+`output-first-event/accepted_steps.csv` has a row whose step or time exceeds
+the BP3 accepted state loaded from the selected checkpoint. The plugin reaches
+this check after reading its v5 history. `resume_from_snapshot()` wraps the
+exception in the generic deserialization error; this failure does not establish
+archive corruption, an Intel/GMG issue, or a boundary-mode mismatch.
+
+The user confirms the current server restart data were **not** copied locally.
+Existing local `output-first-event/restart/` files therefore cannot identify
+the server's selected checkpoint or rollback time. The server's stdout resume
+line, checkpoint marker, `bp3_accepted_state.txt`, and tail of the accepted-step
+CSV are sufficient to confirm that detail; no large archive upload is needed
+to explain the reported failure.
+
+Use the maintained `bp3/branch_output.sh PARENT ID NEW_OUTPUT_DIRECTORY` on the
+server to copy the selected checkpoint and its matching metadata/profile
+prefix into a new output branch. Point the existing production PRM at that
+branch with `Resume computation = true`; retain full bottom loading and the
+existing physical configuration. Preserve the original run and later outputs.
+Do not bypass the prefix assertion or alter checkpoint histories. See
+`bp3/plugin/README.md` for the procedure and missing-metadata conditions.
+
+This task inspected the error and restart/helper code and checked helper shell
+syntax. No restart, simulation, checkpoint mutation or numerical code change
+was performed; the server recovery itself remains untested here.
 
 ## Local rotated-bottom A/B experiment — September 28
 

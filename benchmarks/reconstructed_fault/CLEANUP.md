@@ -1,3 +1,41 @@
+# Disk-space cleanup — 2026-10-15
+
+Reclaimed approximately **44.07 GiB** in the original worktree; available
+space increased from 12.09 GiB to approximately 56.17 GiB. All source,
+parameters, current outputs, checkpoints and other worktrees were preserved.
+
+| Action | Reclaimed |
+|---|---:|
+| Remove 259 generated compiler objects/precompiled headers from the phase-field builds | 6.06 GiB |
+| Losslessly compress September 14 loose archive: 10,406 files | 30.26 GiB |
+| Losslessly compress September 15 loose archive: 5,594 files | 7.74 GiB |
+
+The old `payload/` data now reside in `compressed-payload/part-*.tar.zst`
+inside their original archive directories. Original manifests remain intact;
+new per-file SHA256 manifests, verified-chunk journals, compression/restore
+scripts and completion records accompany the chunks. Every archived member was
+decompressed and hash-checked, and the original rechecked before removal.
+All 12 old symlinks remain unchanged. The September 17/20/24 compressed archives
+and the current BP3/BP5 evidence were not repacked or removed.
+
+The existing restoration commands below still work. The September 14 archive's
+`restore.py` and BP3 `restore_archived.py` first recover selected packed files,
+then apply their original no-overwrite/move rules. Recovery requires Python and
+`zstd`, plus enough free space for the selected uncompressed data. Raw checkpoint
+bytes were preserved; no checkpoint restart was attempted during this cleanup.
+
+Only `.o` and `.gch` files under `CMakeFiles` in `build-pf-rsf`, `build-pf-cpdi`
+and `build-tmp` were discarded as rebuildable products. Executables, libraries,
+configuration and test outputs remain. The next build will regenerate missing
+compiler intermediates.
+
+The local [audit record](../../.benchmark-cleanup-20261015-disk/README.md) contains
+before-state snapshots, exact selected compiler paths, per-archive totals and
+recovery/preservation checks. Recovery checks used real archived PRMs in isolated
+temporary directories through both original entrypoints, verified bytes and
+idempotence, and confirmed refusal to overwrite differing files. No simulations,
+C++ rebuilds, or numerical tests were run. Historical cleanup notes follow.
+
 # Latest cleanup — reconstructed-fault artifacts, 2026-09-24 UTC
 
 Lossless archival reclaimed **11.62 GiB (12.47 GB)** of actual disk space.
