@@ -1,3 +1,49 @@
+> **Storage maintenance — 12 November 2026.**
+
+## 17 November 2026 build storage update
+
+The propagation replay finished before cleanup. Allocated space under
+`build-particle-free` fell from 70.07 to 63.69 GiB, freeing 6.38 GiB.
+The home filesystem had roughly 6.6 GiB available at closeout.
+
+| Verified payloads | Original paths | Physical archives | Input GiB | Archive GiB |
+|---|---:|---:|---:|---:|
+| Closed Stage 4 checkpoint members | 414 | 60 | 7.06 | 3.17 |
+| Bulk-tip tables and generated parameter listings | 780 | 41 | 1.77 | 0.24 |
+| Historical reference fields and negative controls | 3,236 | 13 | 1.39 | 0.33 |
+
+All 4,430 indexed paths were hashed before archival. Each of the 114 physical
+archives was read back after cleanup and verified against the corresponding
+original member hashes. Nine duplicate native generations share canonical
+members. Isolated restoration of a shared checkpoint slot verified hashes,
+modes and mtimes. An individual field restoration and conflicting-file
+refusal also passed. Three guard68 compiler object files were discarded
+after retaining both linked executables and their build recipe.
+
+The native accepted step 68, new step 72, original executable, checker and
+two guarded executables were verified. Compact replay outputs and the latest
+restart now live on disk independently of the temporary simulation directory.
+The archived native outputs retain the intermediate generations. The 5.52
+and 5.60 ms JSON and CSV comparisons reproduced byte-for-byte from the durable
+paths. Previous scientific data losses remain as recorded below.
+
+The build still holds about 30 GiB of compressed archives and 18 GiB in the
+bulk-tip family, much of it already compressed quadrature evidence. Original
+server data, earlier archive catalogs, native incremental build, unresolved
+failures and live parent checkpoints retain their established locations.
+[Storage guide](../../../build-particle-free/README.md) ·
+[Archive and restoration instructions](../../../build-particle-free/archive/disk-cleanup-20261117/README.md) ·
+[Verification record](../../../build-particle-free/archive/disk-cleanup-20261117/verification.json).
+
+> [Cleanup report and recovery guide](DISK_CLEANUP_20261112.md): **14.74 GiB
+> recovered; 15.11 GiB free.** Closed dense fields, inactive restart payloads and
+> generated parameter dumps are losslessly indexed; current free-turn/refinement/
+> Stage 4 runs and their parents remain expanded. Restore an archived complete
+> restart prefix before use. All scientific data, runtimes and incoming source
+> work are preserved; only 179 regenerable compiler intermediates were discarded.
+> No numerical run or scientific conclusion changed. Earlier stated data losses
+> remain unchanged; no deferred experiment is selected by this cleanup.
+
 > **10 November 2026 availability update:** new overnight intermediate fields
 > were losslessly compressed with verified member hashes and metadata; see the
 > [material/growth evidence](MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md).

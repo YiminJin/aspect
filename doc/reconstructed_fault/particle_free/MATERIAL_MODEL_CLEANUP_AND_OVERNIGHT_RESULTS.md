@@ -1,3 +1,8 @@
+> Subsequent bounded continuation: [fine-mesh results](FINE_MESH_GROWTH_CONTINUATION_REPORT.md)
+> advance the repaired parent through .055 s. The .06 target remains incomplete
+> because of constrained-search cost. This report retains its original milestone
+> and failed evidence; current status is in the linked continuation report.
+
 # Material cleanup and bounded midpoint growth — 10 November 2026
 
 Entry: pf-rsf-particle-free at 5f1fc6f3c, with the incoming dirty synthetic
