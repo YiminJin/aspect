@@ -10,6 +10,7 @@ p.add_argument('--fixture',type=Path,default=Path(__file__).with_name('finite_ti
 p.add_argument('label');p.add_argument('--dt',type=float,default=.005);p.add_argument('--end',type=float,default=.08)
 p.add_argument('--ranks',type=int,choices=[1,2,4],default=1);p.add_argument('--refinement',type=int,default=0)
 p.add_argument('--seconds',type=int,default=600);p.add_argument('--wall-hours',type=float,help='Existing graceful ASPECT wall-time termination, before wrapper timeout');p.add_argument('--unloaded',action='store_true')
+p.add_argument('--bind-cores',action='store_true',help='Bind each MPI rank to a distinct physical core and record the binding')
 p.add_argument('--end-step',type=int,help='Existing ASPECT end-step criterion; preserve the physical end-time input for exact window replay')
 p.add_argument('--checkpoint-steps',type=int,help='Override only checkpoint frequency for a bounded recovery window')
 p.add_argument('--remote-margin',action='store_true')
@@ -24,6 +25,7 @@ p.add_argument('--load-factor',type=float,default=1.)
 p.add_argument('--phase-basis',choices=['Bernstein'])
 p.add_argument('--export-parent',type=Path)
 p.add_argument('--import-parent',type=Path)
+p.add_argument('--copy-selected-snapshot-only',action='store_true',help='Copy only the selected accepted snapshot into a fresh continuation; preserve the source checkpoint tree')
 p.add_argument('--restart-dt',type=float,help='Reduce only the pending restart interval using the existing simulator signal')
 p.add_argument('--linear-oracle',action='store_true');p.add_argument('--tangent',action='store_true');p.add_argument('--intact',action='store_true');p.add_argument('--rejection',action='store_true')
 p.add_argument('--linear-oracle-step',type=int,default=1)
@@ -61,9 +63,15 @@ if a.resume_from:
     # The restored run writes to a fresh directory. Its checkpoint files remain untouched.
     import shutil
     (run/'output').mkdir()
-    for file in a.resume_from.glob('restart*'):
-        if file.is_dir():shutil.copytree(file,run/'output'/file.name)
-        else:shutil.copy2(file,run/'output'/file.name)
+    if a.copy_selected_snapshot_only:
+        chosen=a.snapshot_id or int((a.resume_from/'restart/last_good_checkpoint.txt').read_text().strip())
+        target=run/'output/restart'/f'{chosen:02d}'
+        shutil.copytree(a.resume_from/'restart'/f'{chosen:02d}',target)
+        (target.parent/'last_good_checkpoint.txt').write_text(str(chosen))
+    else:
+        for file in a.resume_from.glob('restart*'):
+            if file.is_dir():shutil.copytree(file,run/'output'/file.name)
+            else:shutil.copy2(file,run/'output'/file.name)
     if a.snapshot_id is not None:
         selected=run/'output/restart'/f'{a.snapshot_id:02d}'
         assert selected.is_dir(),f'Missing requested snapshot {selected}'
@@ -88,6 +96,7 @@ if a.tangent:
 if a.linear_oracle:
     env['ASPECT_TIP_LINEAR_ORACLE']='1';env['ASPECT_TIP_LINEAR_ORACLE_STEP']=str(a.linear_oracle_step)
 command=['/opt/openmpi/5.0.6/bin/mpirun','-np',str(a.ranks),str(exe),str(run/'input.prm')]
+if a.bind_cores:command[1:1]=['--map-by','core','--bind-to','core','--report-bindings']
 sha=lambda file:hashlib.sha256(file.read_bytes()).hexdigest()
 files=subprocess.check_output(['git','diff','--name-only'],cwd=root,text=True).splitlines()
 files+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','include','source','unit_tests'],cwd=root,text=True).splitlines()

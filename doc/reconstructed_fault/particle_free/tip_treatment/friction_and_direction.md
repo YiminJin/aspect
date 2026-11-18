@@ -1,5 +1,17 @@
 # Cross-section closure
 
+The straight default below is retained. The user-selected, opt-in native
+[material-strip closure](../FIRST_FREE_TURN_FORMULATION.md) uses physical area
+per reference arclength, uniform section resistance and a coherent virgin-plane
+Y0 criterion. It preserves formed planes and full tensor histories. The earlier
+[single-turn proposal](../SINGLE_TURN_RSF_FORMULATION.md) and
+[reference comparison](../SINGLE_TURN_RSF_REPORT.md) retain the alternative law
+and historical evidence; they no longer describe the only enabled native path.
+
+The [first native free-turn result](../FIRST_FREE_TURN_REPORT.md) accepts through
+.075 s with subcell asymmetric extension, then fails the phase KKT gate at .080 s.
+The reflected case has not run; a resolved free turn is not qualified.
+
 This page describes the retained **BE default**. The selectable midpoint stage,
 exact aging, endpoint publication and work identity are in
 [time integration](time_integration.md); do not apply BE loss formulas to that mode.
@@ -157,3 +169,14 @@ own initialization, storage, publication or timestep policy, not coefficient
 dispatch. `update_state` remains explicitly stateful-only; a stateless law has
 no age to evolve. See the [interface review](../FAULT_FRICTION_INTERFACE_REVIEW.md)
 for caller changes and numerical comparisons.
+
+
+The [free-turn recovery](../RECOVER_FREE_TURN_STEP16_REPORT.md) now supplies a
+measured nonlocal-sign example: both reflected histories reach .080 s, with88
+mixed-sign sections and maximum section cancellation .727%. Negative local power
+is .0136% of positive power; integrated section powers remain nonnegative. Native
+quadrature samples contain multiple same-sign components in some sections. The
+reported counts use no phase/rate cutoff and do not infer continuous branching
+from sampled signs. Old planes/measures remain unchanged and prospective age is
+not reset at registration. Tiny-positive-phase registration remains an explicit
+limitation of the material-plane closure and its finite solver accuracy.

@@ -1,5 +1,20 @@
 # Geometry and physical history
 
+For the opt-in native turning experiment, also read
+[material-strip ownership and quadrature](../FIRST_FREE_TURN_FORMULATION.md).
+The default straight law below is retained. The experimental branch keeps every
+native point's material section, stores its formed plane and reference-arclength
+quadrature measure, and uses JxW/ds with the matching uniform-force adjoint.
+Prospective ages evolve from t=0. Physical tau/A and phase stay with their native
+owners; the diagnostic phase contour carries no history or additional work.
+Its checkpoint law is distinct and forbids conversion from the straight law.
+
+
+The [single-turn proposal](../SINGLE_TURN_RSF_FORMULATION.md) and
+[reference comparison](../SINGLE_TURN_RSF_REPORT.md) now identify the curved
+material-carrier choice. They do not change the fixed-direction implementation
+described on this page.
+
 This page describes the retained **BE default**. The selectable midpoint stage,
 exact aging, endpoint publication and work identity are in
 [time integration](time_integration.md); do not apply BE loss formulas to that mode.

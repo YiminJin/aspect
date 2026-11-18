@@ -105,7 +105,12 @@ def energy(rows, initial_fracture, start):
     return result
 
 
-def analyze(label, accepted_end=.06, allow_stopped=False):
+def analyze(label, accepted_end=.06, allow_stopped=False, cached_steps=None):
+    """Reduce a history; a provenance-checked prefix may reuse per-step observations.
+
+    The caller must verify cached rows against their original run identity. All
+    energy sums and acceptance gates are still reduced from joined raw tables.
+    """
     global H
     directory = RUNS / label / 'output'
     command = json.loads((directory.parent / 'command.json').read_text())
@@ -139,6 +144,18 @@ def analyze(label, accepted_end=.06, allow_stopped=False):
     saved = {0: initial}
     for row in rows:
         step = int(row.step)
+        if cached_steps is not None and step in cached_steps:
+            item = cached_steps[step]
+            assert abs(item['time'] - float(row.time)) < 1e-12
+            assert abs(item['added_fracture'] - float(row.fracture - initial_energy)) < 1e-12
+            for threshold in (1e-6, 1e-4, .001):
+                for name, increment in [('any', item['max_delta_phi'])] + [(k, v['max_delta_phi']) for k, v in item['regions'].items()]:
+                    if increment > threshold:
+                        result['onset'].setdefault(f'{name}>{threshold:g}', float(row.time))
+            if abs(row.time - .04) < 1e-10 or step == int(rows.step[-1]):
+                saved[float(row.time)] = frame(directory, step)
+            result['steps'].append(item)
+            continue
         p = frame(directory, step)
         b = balance(directory, f'tip-balance-{step:04d}-r*.csv')
         assert len(np.unique(b.x)) == 64 * 2**refinement and len(np.unique(b.y)) == 32 * 2**refinement

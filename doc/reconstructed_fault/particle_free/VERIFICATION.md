@@ -1,8 +1,86 @@
+> **Complete — loaded-seed preparation and bounded friction/growth comparison.**
+> [Overnight report and figures](STAGE4_OVERNIGHT_PREPARATION_REPORT.md): native
+> zero-clock preparation, both fixed32 histories, both free76 histories through
+> 6.08 ms and a paired local 40-microsecond check through 5.44 ms are complete.
+> Weakening gives earlier detected right-contour motion; halving the local
+> timestep changes the law difference in advance by 6.43%, preserving its sign.
+> The detected timing gap changes from .24 to .16 ms. All changes remain in the
+> inherited diffuse band/tail: exactly intact and remote material is unchanged,
+> with no new formed section or turning. Retain this preparation for controlled
+> spatial validation; finite propagation and an autonomous event are unqualified.
+> The next recommendation is a matched 256x256 normal-refinement pair, not
+> launched. No job remains active. The local fine pair reached sixteen intervals
+> per law under its time caps, rather than the planned twenty. This entry
+> supersedes earlier next-action text; historical preparations/results remain
+> evidence. Incoming source, protected runtimes, checkpoints and previously
+> documented cleanup losses are preserved.
+
+> **Completed: near-tip preparation and fixed-phase law comparison.**
+> [Report](STAGE4_NEAR_TIP_SLIP_REPORT.md): zero-interval native preflight plus
+> two successful eight-interval histories, four ranks sequentially, unchanged
+> criteria and exact held phase. Initial margin mismatch is below 5.9e-14 Pa;
+> maximum mechanical residual is 1.024e-11. Physical-work errors are 8.865e-11
+> and 6.753e-11 J/m (signed and accumulated absolute). Native signed section
+> rates expose left-taper cancellation; all exactly intact and remote rows
+> remain unfavorable. No free-phase pair, new restart, convergence or production
+> qualification is claimed. No solver change was required.
+
+> **Completed: Stage 4 native preload calibration and tip-discrimination pair.**
+> [Report](STAGE4_PRELOAD_CALIBRATION_REPORT.md): three native static amplitudes,
+> independent selected-preload affine-response verification (max row error
+> 2.40e-11 Pa), one-sided directional checks, full native Bernstein margin scan,
+> analytic virgin-plane objective/envelope, and two eight-interval fixed-phase
+> histories. All runs exit zero with unchanged gates. Every checked axial-tip
+> row has lower driving in weakening than b=a; release is not selected.
+> Fixed-phase KKT=0 is not physical growth stability. No new free-growth,
+> restart, temporal/spatial convergence or production qualification is claimed.
+
 # Verification cases and evidence
 
 These are specifications, not completed tests. The repository session supplies
 real source paths, executable commands, and measured results. Run cases relevant
 to the current phase and implementation scope.
+
+## Bounded phase-release pair (13 November 2026)
+
+[Report](STAGE4_PHASE_RELEASE_REPORT.md) records two successful eight-interval
+256×128 histories with the existing midpoint/section law and unchanged tolerances.
+The new benchmark observer checks admissible positive Bernstein directions at
+t=0 against three one-sided native-fracture/reduced-cohesive energy differences,
+then observes actual accepted-stage driving. Exact SIPG row partitions, physical
+irreversibility and single publication pass throughout. Polynomial contour
+positions agree between connectivity searches with four/eight samples per cell.
+The native phase initial coefficients are identical across laws. Both connected
+phi=.05 ends remain fixed; exactly intact cells stay zero. Signed and absolute
+physical-work errors are small compared with the net added fracture inventory.
+This verifies the diagnostic and bounded comparison, not time/mesh convergence,
+restart observation, autonomous instability or production propagation.
+
+## Matched short-wave continuation and native pilot (13 November 2026)
+
+[Report](STAGE4_SHORTWAVE_CONTINUATION_REPORT.md) records the matched .0625 m
+sine/cosine refinement, new .03125 m pair, full-age spectra and independently
+compatible short-wave limit. Native-root dispersion checks pass at 1.13e-15;
+knot-matched limit quadrature agrees to roundoff. All eight fresh native
+fixed-phase histories completed, spanning both meshes, weakening/b=a and
+background/perturbed cases. The common four-interval bulk comparisons agree
+within 3.4e-7 relative; publication, work and signed cancellation are retained.
+Failed preflight and interrupted-wrapper evidence remain explicitly identified.
+The protected executable and incoming production sources are unchanged.
+No time convergence, autonomous instability, selected spacing or new growth is
+qualified. A bounded matched phase-release pair is proposed, not executed.
+
+## Stage 4 bulk RSF stability (12 November 2026)
+
+[Report](STAGE4_RSF_STABILITY_REPORT.md) records the capped fine .080 attempt,
+retained .0775 mesh comparison, native fixed-phase restoring response and
+benchmark-only implementation. Seven native actions pass mixed residual,
+full bulk/cohesive energy-work, symmetric point-update and preservation checks.
+Independent friction/Jacobian tests and reduced midpoint/half-step/variational
+comparisons pass. The augmented cell-scale spectrum changes the fastest mode;
+this is an explicit spatial limitation, not an instability qualification.
+No production source or physical acceptance criterion changes. Native unstable
+pair/free-growth and outstanding refined .080 endpoints remain unverified.
 
 ## Measurement rules
 
@@ -238,3 +316,16 @@ iterations. Add runtime/memory and remaining particle dependencies.
 Judge against a predeclared error budget and refinement trend. Particle output
 is a control, not automatically ground truth. Start with a near-onset or short
 transient; a full BP3 event is unnecessary. A smoother plot alone is insufficient.
+
+
+## Overnight free-turn controls (12 November 2026)
+
+[Report and reproducible evidence](OVERNIGHT_FREE_TURN_VALIDATION_REPORT.md)
+cover the original protected physical executable, native Bernstein phase and
+midpoint: late timestep sensitivity and128×256 normal refinement through .0775,
+and a fresh horizontal-plane control under matched off-axis loading through .080.
+Independent native contour/DG-trace/L2 references, accepted bounds/obstacles,
+frozen formed planes, age, original gates and ordinary restart readback pass.
+The missing refined .080 endpoints and first-positive-phase registration
+sensitivity remain explicit. These controls qualify neither general turning nor
+unstable RSF or production propagation. No solver or constitutive change is made.

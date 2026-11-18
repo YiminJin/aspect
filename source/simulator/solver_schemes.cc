@@ -33,6 +33,8 @@
 #include <aspect/reconstructed_fault/manager.h>
 
 #include <deal.II/numerics/vector_tools.h>
+#include <cstdlib>
+#include "solver/bulk_tip_search_trace.h"
 
 #include <aspect/simulator/solver/stokes_matrix_free.h>
 
@@ -1221,9 +1223,24 @@ namespace aspect
             nonlinear_iteration=0;
             bool converged=false;
             bool prefer_shifted_search=false;
+            // Bounded benchmark comparison; defaults and physical gates remain.
+            const bool positive_metric_first=std::getenv("ASPECT_TIP_POSITIVE_METRIC_FIRST")!=nullptr;
+            const bool trace_search=std::getenv("ASPECT_TIP_TRACE_SEARCH")!=nullptr;
+            const bool trace_rows=trace_search && std::getenv("ASPECT_TIP_TRACE_ROWS")!=nullptr;
+            if (trace_search)pcout<<std::setprecision(17);
+            if (trace_search || positive_metric_first)
+              pcout<<"   Bulk tip search order: "<<(positive_metric_first ? "positive metric first, exact polishing" : "adaptive exact first")<<std::endl;
+            const char *probe_row=std::getenv("ASPECT_TIP_PROBE_ROW");
+            const types::global_dof_index probe_index=probe_row ? std::stoul(probe_row) : numbers::invalid_dof_index;
+            AssertThrow(!probe_row || probe_index<x.block(coupling.phase_block()).size(),
+                        ExcMessage("Phase tangent probe row out of range."));
+            bool probed_contact=false;
             double last_exact_residual=std::numeric_limits<double>::infinity();
             for (; nonlinear_iteration<=parameters.max_nonlinear_iterations; ++nonlinear_iteration)
               {
+                if (trace_rows && std::getenv("ASPECT_TIP_TRACE_STOP_ITERATION"))
+                  AssertThrow(nonlinear_iteration<static_cast<unsigned int>(std::atoi(std::getenv("ASPECT_TIP_TRACE_STOP_ITERATION"))),
+                              ExcMessage("Selected diagnostic replay stop; trial not accepted or published."));
                 current=coupling.evaluate(x,true);
                 const double residual=std::max(current->mechanical/parameters.nonlinear_tolerance,
                                                current->kkt/phase_settings.nonlinear_solver_tolerance);
@@ -1231,6 +1248,11 @@ namespace aspect
                      <<", phase KKT="<<current->kkt<<", section rate defect="<<current->section_defect<<std::endl;
                 if (control.check(nonlinear_iteration,residual)==SolverControl::success)
                   {
+                    if (coupling.finish_strip_active_bounds(x,*current))continue;
+                    // Material planes are an additional constitutive closure.
+                    // Converge their virgin-section selection with mechanics/VI
+                    // before the existing single publication transaction.
+                    if (coupling.update_virgin_planes(x))continue;
                     converged=true;
                     break;
                   }
@@ -1253,7 +1275,9 @@ namespace aspect
                 // Within one decade of the final physical gates, retain the
                 // original exact-first polishing order. A small decrease of an
                 // already small residual must not indefinitely postpone Newton.
-                if (residual<=std::max(10.,0.1*last_exact_residual))prefer_shifted_search=false;
+                if (positive_metric_first)
+                  prefer_shifted_search=residual>10.;
+                else if (residual<=std::max(10.,0.1*last_exact_residual))prefer_shifted_search=false;
                 std::vector<double> shifts;
                 if (!prefer_shifted_search)shifts.push_back(0.);
                 for (unsigned int power=0; power<9; ++power)
@@ -1270,6 +1294,18 @@ namespace aspect
                       { ++coupling.search_failures; ++failed_linear; continue; }
                     const double slope=coupling.directional_work(*current,direction);
                     const double roundoff=128*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(current->functional));
+                    if (trace_rows && nonlinear_iteration==36 && shift==0.)
+                      for (const double fraction:{1e-5,1e-6,1e-7,1e-8,1e-9,1e-10})
+                        {
+                          auto probe=x; probe.add(fraction,direction);
+                          const auto pb=coupling.phase_block();
+                          for (const auto i:probe.block(pb).locally_owned_elements())
+                            probe.block(pb)[i]=PhaseField::box_trial_value(x.block(pb)[i],direction.block(pb)[i],coupling.obstacle()[i],coupling.upper_bound()[i],fraction);
+                          probe.compress(VectorOperation::insert);
+                          const auto response=coupling.evaluate(probe,false);
+                          internal::trace_bulk_tip_rows(coupling,x,*current,direction,probe,*response,
+                                                        introspection.phase_field().first_component_index,nonlinear_iteration,shift,fraction);
+                        }
                     least_slope=std::min(least_slope,slope);
                     if (slope>=roundoff)
                       {
@@ -1294,10 +1330,12 @@ namespace aspect
                           }
                         continue;
                       }
+                    bool try_interior_contact=false;
                     for (unsigned int line=0; line<phase_settings.max_newton_line_search_iterations; ++line)
                       {
                         ++coupling.line_trials;
-                        const double alpha=std::ldexp(1.,-int(line));
+                        const auto dyadic_line=line-(try_interior_contact && line>0 ? 1u : 0u);
+                        const double alpha=try_interior_contact && line==1 ? .99 : std::ldexp(1.,-int(dyadic_line));
                         auto trial=x;
                         trial.add(alpha,direction);
                         unsigned int feasible=1;
@@ -1308,26 +1346,104 @@ namespace aspect
                             feasible &= trial.block(pb)[i]>=coupling.obstacle()[i] && trial.block(pb)[i]<=coupling.upper_bound()[i];
                           }
                         trial.compress(VectorOperation::insert);
-                        if (!Utilities::MPI::min(feasible,mpi_communicator)){++infeasible;continue;}
+                        if (!Utilities::MPI::min(feasible,mpi_communicator))
+                          {++infeasible; if (trace_search)pcout<<"   Tip search infeasible: shift="<<shift<<", alpha="<<alpha<<std::endl; continue;}
                         const auto candidate=coupling.evaluate(trial,false);
                         const double trial_residual=std::max(candidate->mechanical/parameters.nonlinear_tolerance,
                                                              candidate->kkt/phase_settings.nonlinear_solver_tolerance);
                         ++evaluated;
                         best_trial=std::min(best_trial,trial_residual);
                         least_change=std::min(least_change,candidate->functional-current->functional);
+                        if (trace_search)
+                          pcout<<"   Tip search trial: shift="<<shift<<", alpha="<<alpha
+                               <<", merit="<<trial_residual<<", functional change="<<candidate->functional-current->functional
+                               <<", slope="<<slope<<", Armijo="<<1e-4*alpha*slope
+                               <<", roundoff="<<roundoff<<", phase="<<candidate->kkt
+                               <<", mechanics="<<candidate->mechanical<<std::endl;
+                        if (trace_rows && nonlinear_iteration>=30 && nonlinear_iteration<=39
+                            && (line<2 || line==4 || line>=8))
+                          internal::trace_bulk_tip_rows(coupling,x,*current,direction,trial,*candidate,
+                                                        introspection.phase_field().first_component_index,nonlinear_iteration,shift,alpha);
                         // When energy differences are below summation accuracy,
                         // do not accept a KKT spike merely through the roundoff
                         // allowance. The physical natural-map merit breaks ties;
                         // resolvable steps still obey the functional Armijo test.
                         const bool resolved_decrease=candidate->functional<current->functional-roundoff;
+                        if (probe_row && !probed_contact && shift==0. && line==0
+                            && !resolved_decrease && trial_residual>residual)
+                          {
+                            const auto row=probe_index;
+                            const bool releases=trial.block(pb).locally_owned_elements().is_element(row)
+                                                && trial.block(pb)[row]==coupling.obstacle()[row]
+                                                && candidate->residual.block(pb)[row]<0.;
+                            if (Utilities::MPI::max(unsigned(releases),mpi_communicator))
+                              {
+                                internal::probe_bulk_tip_tangent(coupling,x,*current,direction,row);
+                                probed_contact=true;
+                              }
+                          }
                         if (candidate->functional<=current->functional+1e-4*alpha*slope+roundoff
                             && (resolved_decrease || trial_residual<residual))
                           {
+                            // Read-only comparison at the reproduced plateau:
+                            // evaluate the already available metric family without
+                            // changing which direction this diagnostic replay takes.
+                            if (trace_rows && nonlinear_iteration==38 && shift==0.)
+                              {
+                                auto alternative=direction;
+                                if (compute_bulk_tip_search_direction(x,current->residual,1.,alternative))
+                                  {
+                                    const double alternative_slope=coupling.directional_work(*current,alternative);
+                                    for (unsigned int test=0;test<8;++test)
+                                      {
+                                        const double fraction=std::ldexp(1.,-int(test));
+                                        auto probe=x; probe.add(fraction,alternative);
+                                        for (const auto i:probe.block(pb).locally_owned_elements())
+                                          probe.block(pb)[i]=PhaseField::box_trial_value(x.block(pb)[i],alternative.block(pb)[i],coupling.obstacle()[i],coupling.upper_bound()[i],fraction);
+                                        probe.compress(VectorOperation::insert);
+                                        const auto response=coupling.evaluate(probe,false);
+                                        const double merit=std::max(response->mechanical/parameters.nonlinear_tolerance,response->kkt/phase_settings.nonlinear_solver_tolerance);
+                                        const bool admissible=alternative_slope<roundoff
+                                          && response->functional<=current->functional+1e-4*fraction*alternative_slope+roundoff
+                                          && (response->functional<current->functional-roundoff || merit<residual);
+                                        pcout<<"   Tip alternative comparison: iteration="<<nonlinear_iteration<<", shift=1, alpha="<<fraction
+                                             <<", merit="<<merit<<", functional change="<<response->functional-current->functional
+                                             <<", slope="<<alternative_slope<<", admissible="<<admissible<<std::endl;
+                                        internal::trace_bulk_tip_rows(coupling,x,*current,alternative,probe,*response,
+                                                                      introspection.phase_field().first_component_index,nonlinear_iteration,1.,fraction);
+                                        if (admissible)break;
+                                      }
+                                  }
+                              }
                             x=trial;
                             found=true;
                             prefer_shifted_search=shift>0.;
                             pcout<<"   Bulk tip accepted search: shift="<<shift<<", alpha="<<alpha<<std::endl;
                             break;
+                          }
+                        // An exact direction can hit a phase bound at which the
+                        // reassembled section response releases that very row.
+                        // Keep 1% of the gap for one trial before halving the
+                        // entire coupled direction. Both physical search tests
+                        // apply to this trial too.
+                        if (line==0 && shift==0. && coupling.accepted_parent()->material_strips
+                            && candidate->kkt>phase_settings.nonlinear_solver_tolerance
+                            && std::abs(candidate->functional-current->functional)<=roundoff
+                            && trial_residual>=residual)
+                          {
+                            double contact_residual=0.;
+                            for (const auto i:trial.block(pb).locally_owned_elements())
+                              {
+                                const auto value=trial.block(pb)[i];
+                                const auto lower=coupling.obstacle()[i], upper=coupling.upper_bound()[i];
+                                if (value!=x.block(pb)[i] && (value==lower || value==upper))
+                                  {
+                                    const auto bound=PhaseField::box_constraint(value,candidate->residual.block(pb)[i],
+                                                        coupling.phase_mass()[i],lower,upper);
+                                    contact_residual=std::max(contact_residual,std::abs(bound.projected_residual));
+                                  }
+                              }
+                            try_interior_contact=Utilities::MPI::max(contact_residual,mpi_communicator)==candidate->kkt;
                           }
                       }
                   }

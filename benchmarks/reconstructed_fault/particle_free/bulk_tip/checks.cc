@@ -60,6 +60,10 @@ namespace aspect
                                                {
                                                  v.coordinate,v.weight,v.age,v.slip,v.rate,v.force
                                                })a.push_back(x);
+          if (s.material_strips)for (const auto &v:s.sections)
+              {a.push_back(v.angle);a.push_back(v.formed?1.:0.);}
+          if (s.material_strips)for (const auto &cell:s.section_ids)for (unsigned int q=0;q<cell.second.size();++q)
+              {a.push_back(cell.second[q]);a.push_back(s.normal_weights.at(cell.first)[q]);}
           for (const auto &cell:s.history)for (const auto &p:cell.second)
               {
                 for (const auto *t:
@@ -73,6 +77,72 @@ namespace aspect
               }
           return a;
         }
+        /** Observe a restored accepted parent before any trial preparation.
+         * Stage caches are not checkpoint state; export only physical history,
+         * native phase coefficients and section endpoint memory for comparison.
+         */
+        void observe_restored_parent()
+        {
+          if (!std::getenv("ASPECT_TIP_RESTORE_AUDIT"))return;
+          const auto before=persistent();
+          const auto &s=*model().bulk_cohesive_state;
+          const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
+          // Ordinary postprocessing needs stage owners that are not rebuilt at
+          // this signal. Observe native FE values and material history directly.
+          std::ofstream points(this->get_output_directory()+"restore-points-r"+std::to_string(rank)+".csv");
+          points<<"cell,q,x,y,phi,tauxx,tauyy,tauzz,tauxy,Axx,Ayy,Azz,Axy,qcoh,w,signed_shear,absolute_shear\n"<<std::setprecision(17);
+          FEValues<dim> fe(this->get_mapping(),this->get_fe(),model().mechanical_quadrature(),update_values|update_quadrature_points);
+          std::vector<double> values(fe.n_quadrature_points);
+          for (const auto &entry:s.native_cells)
+            {
+              fe.reinit(entry.second);
+              fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(this->get_solution(),values);
+              for (unsigned int q=0; q<values.size(); ++q)
+                {
+                  const auto &h=s.history.at(entry.first)[q];
+                  const auto x=fe.quadrature_point(q);
+                  points<<entry.first<<','<<q<<','<<x[0]<<','<<x[1]<<','<<values[q]<<','
+                        <<h.stress[0][0]<<','<<h.stress[1][1]<<','<<h.stress[2][2]<<','<<h.stress[0][1]<<','
+                        <<h.A[0][0]<<','<<h.A[1][1]<<','<<h.A[2][2]<<','<<h.A[0][1]<<','
+                        <<h.q<<','<<h.rate<<','<<h.signed_shear<<','<<h.absolute_shear<<'\n';
+                }
+            }
+          const auto &element=this->get_fe();
+          const auto pc=this->introspection().phase_field().first_component_index;
+          const auto pb=this->introspection().phase_field().block_index;
+          const auto offset=this->get_solution().get_block_indices().block_start(pb);
+          const auto count=element.base_element(element.component_to_base_index(pc).first).n_dofs_per_cell();
+          std::vector<types::global_dof_index> ids(element.n_dofs_per_cell());
+          std::ofstream phase(this->get_output_directory()+"restore-phase-r"+std::to_string(rank)+".csv");
+          phase<<"cell,i,B,solution_B\n"<<std::setprecision(17);
+          for (const auto &entry:s.native_cells)
+            {
+              entry.second->get_dof_indices(ids);
+              for (unsigned int i=0; i<count; ++i)
+                {
+                  const auto index=ids[element.component_to_system_index(pc,i)];
+                  phase<<entry.first<<','<<i<<','<<s.tip_phase[index-offset]<<','<<this->get_solution()[index]<<'\n';
+                }
+            }
+          if (rank==0)
+            {
+              std::ofstream sections(this->get_output_directory()+"restore-sections.csv");
+              sections<<"s,ds,age,slip,V,force\n"<<std::setprecision(17);
+              for (const auto &v:s.sections)
+                sections<<v.coordinate<<','<<v.weight<<','<<v.age<<','<<v.slip<<','<<v.rate<<','<<v.force<<'\n';
+              if (s.material_strips)
+                {
+                  std::ofstream planes(this->get_output_directory()+"restore-planes.csv");
+                  planes<<"x,ds,angle,formed\n"<<std::setprecision(17);
+                  for (const auto &v:s.sections)planes<<v.coordinate<<','<<v.weight<<','<<v.angle<<','<<v.formed<<'\n';
+                }
+              std::ofstream clock(this->get_output_directory()+"restore-clock.csv");
+              clock<<"accepted_step,accepted_time,publications,pending_step,pending_time,pending_dt\n"<<std::setprecision(17)
+                   <<s.step<<','<<s.time<<','<<s.publications<<','<<this->get_timestep_number()<<','<<this->get_time()<<','<<this->get_timestep()<<'\n';
+            }
+          gate("restore observation does not mutate accepted history",before==persistent());
+        }
+
         /** Read-only benchmark map from scalar phase rows to native cell shapes. */
         void dump_phase_row_map() const
         {
@@ -560,7 +630,12 @@ namespace aspect
           const auto &s=*model().bulk_cohesive_state;
           const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
           const auto directory=this->get_output_directory();
-          std::ofstream points(directory+"tip-points-"+Utilities::int_to_string(s.step,4)+"-r"+std::to_string(rank)+".csv");
+          std::ofstream points;
+          // Compact selected campaign output: retain all phase/section/energy
+          // records, but emit full point histories only at declared milestones.
+          const auto stride=std::getenv("ASPECT_TIP_POINT_EXPORT_STRIDE");
+          if (!stride || s.step%std::max(1,std::stoi(stride))==0)
+            points.open(directory+"tip-points-"+Utilities::int_to_string(s.step,4)+"-r"+std::to_string(rank)+".csv");
           points<<std::setprecision(17)<<"cell,q,x,y,weight,phi,tauxx,tauyy,tauzz,tauxy,Axx,Ayy,Azz,Axy,qcoh,w,signed_shear,absolute_shear,section,H,Y,fracture_density,Y_endpoint,stage_phi,stage_tauxy,stage_Axy,stage_pressure,stage_normal_x,stage_normal_y\n";
           FEValues<dim> fe(this->get_mapping(),this->get_fe(),model().mechanical_quadrature(),update_values|update_gradients|update_quadrature_points|update_JxW_values);
           std::vector<double> phase(fe.n_quadrature_points),pressure(fe.n_quadrature_points);
@@ -603,7 +678,7 @@ namespace aspect
                         <<h.stress[0][0]<<','<<h.stress[1][1]<<','<<h.stress[2][2]<<','<<h.stress[0][1]<<','
                         <<h.A[0][0]<<','<<h.A[1][1]<<','<<h.A[2][2]<<','<<h.A[0][1]<<','<<h.q<<','<<h.rate<<','
                         <<h.signed_shear<<','<<h.absolute_shear<<','<<s.section_ids.at(entry.first)[q]<<','<<fraction<<','<<driving<<','<<Kf*(phi+ell*ell*phase_gradient[q].norm_square())<<','
-                        <<(phi>0. ? 2.*s.parameters.G*h.A[0][1]*h.A[0][1]*s.parameters.m*(1.+3.*phi)*(1.-phi)/(c*c) : std::numeric_limits<double>::quiet_NaN())<<',';
+                        <<(phi>0. ? s.parameters.G*(s.material_strips ? h.A*h.A : 2.*h.A[0][1]*h.A[0][1])*s.parameters.m*(1.+3.*phi)*(1.-phi)/(c*c) : std::numeric_limits<double>::quiet_NaN())<<',';
                   if (sim().bulk_tip_coupling && sim().bulk_tip_coupling->accepted_evaluation)
                     {
                       const auto &stage=sim().bulk_tip_coupling->accepted_evaluation->points.at(entry.first)[q];
@@ -836,6 +911,16 @@ namespace aspect
               sections<<v.coordinate<<','<<v.weight<<','<<v.age<<','<<v.slip<<','<<v.rate<<','<<v.force<<','<<e.absolute_rate[k]<<','<<e.positive_rate[k]<<','<<e.negative_rate[k]<<','<<e.section_solutions[k].slip_rate<<','<<v.rate-e.section_solutions[k].slip_rate<<','<<raw.resistance<<'\n';
             }
           std::ofstream work(directory+"tip-power.csv",std::ios::app);
+          if (s.material_strips)
+            {
+              std::ofstream planes(directory+"tip-planes-"+Utilities::int_to_string(s.step,4)+".csv");
+              planes<<std::setprecision(17)<<"section,x,reference_dx,ds,angle,formed,parent_formed,parent_age,age,parent_slip,slip\n";
+              for (unsigned int k=0;k<s.sections.size();++k)
+                {
+                  const auto &v=s.sections[k];const auto &old=op.accepted_parent()->sections[k];
+                  planes<<k<<','<<v.coordinate<<','<<v.weight*std::cos(v.angle)<<','<<v.weight<<','<<v.angle<<','<<v.formed<<','<<old.formed<<','<<old.age<<','<<v.age<<','<<old.slip<<','<<v.slip<<'\n';
+                }
+            }
           if (work.tellp()==0)work<<"step,power_adjoint_error,friction,radiation,section_residual_work\n";
           work<<std::setprecision(17)<<s.step<<','<<e.adjoint_error<<','<<e.friction<<','<<e.radiation<<','<<e.Df-e.friction-e.radiation<<'\n';
           std::ofstream out(directory+"bulk-accepted.csv",std::ios::app);
@@ -878,6 +963,34 @@ namespace aspect
           gate("second rollback unchanged",before==persistent() && original==sim().solution);
           rejected=true;
         }
+        void extend_terminal_pending_interval(double &requested_dt)
+        {
+          const auto value=std::getenv("ASPECT_TIP_EXTEND_TERMINAL_RESTART_DT");
+          if (!value)return;
+          gate("terminal restart has native accepted parent",model().uses_integrated_bulk_tip() && bool(model().bulk_cohesive_state));
+          const auto &parent=*model().bulk_cohesive_state;
+          const double dt=std::stod(value),saved_dt=sim().time_step,saved_time=sim().time;
+          const double physical_dt=sim().old_time_step;
+          const double roundoff=64*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(parent.time));
+          gate("terminal restart clock is clipped",model().uses_integrated_bulk_tip()
+               && sim().timestep_number==parent.step+1 && saved_dt>0. && saved_dt<=roundoff
+               && std::abs(saved_time-saved_dt-parent.time)<=roundoff);
+          gate("terminal continuation preserves physical timestep",std::isfinite(dt) && dt>saved_dt
+               && dt<=physical_dt && parent.time+dt>saved_time);
+          // Benchmark-only scheduling of the next interval when extending an
+          // ended run. Accepted fields, material clock and old_time_step stay put.
+          sim().time=parent.time+dt;
+          sim().time_step=dt;
+          requested_dt=dt;
+          gate("terminal continuation keeps accepted clock",sim().old_time_step==physical_dt
+               && model().bulk_cohesive_state->time==parent.time);
+          if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator())==0)
+            {
+              std::ofstream out(this->get_output_directory()+"terminal-restart-clock.csv");
+              out<<"accepted_step,accepted_time,saved_pending_time,saved_pending_dt,last_physical_dt,new_pending_time,new_pending_dt\n"
+                 <<std::setprecision(17)<<parent.step<<','<<parent.time<<','<<saved_time<<','<<saved_dt<<','<<physical_dt<<','<<sim().time<<','<<dt<<'\n';
+            }
+        }
       public:
         void initialize()override
         {
@@ -887,8 +1000,10 @@ namespace aspect
           });
           this->get_signals().post_resume_time_step.connect([this](const SimulatorAccess<dim> &,double &dt)
           {
+            observe_restored_parent();
             dump_phase_row_map();
             if (const auto file=std::getenv("ASPECT_TIP_EXPORT_PARENT"))export_parent(file);
+            extend_terminal_pending_interval(dt);
             if (const auto value=std::getenv("ASPECT_TIP_RESTART_DT"))dt=std::stod(value);
           });
           this->get_signals().set_assemblers.connect([this](const SimulatorAccess<dim> &,Assemblers::Manager<dim> &)

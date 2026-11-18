@@ -440,6 +440,10 @@ namespace aspect
 
           prm.declare_entry("Bulk tip time update", "backward Euler", Patterns::Selection("backward Euler|midpoint"),
                             "Numerical update for the integrated native Bernstein tip control. Midpoint uses stage mechanics and exact constant-stage-rate aging; it is not L-stable.");
+          prm.declare_entry("Bulk tip section closure", "fixed direction", Patterns::Selection("fixed direction|material strips"),
+                            "Experimental material-area/reference-arclength closure on immutable full-height Cartesian strips. "
+                            "Virgin sections select a coherent plane by integrated intact-reaction driving; formed planes and state persist. "
+                            "Restricted to a single forward graph, fixed reference geometry, scalar confinement and midpoint.");
           prm.declare_entry("Bulk tip solver", "ASPECT", Patterns::Selection("ASPECT"),
                             "Distributed coupled solver. Historical replicated solvers are retired; the independent direct oracle lives in benchmark support.");
           prm.declare_entry("Equilibrate bulk tip seed", "false", Patterns::Bool(),
@@ -660,6 +664,7 @@ namespace aspect
           bulk_cohesive_phase = prm.get("Fault constitutive mode") == "bulk cohesive";
           const auto bulk_rule = prm.get("Bulk cohesive flow rule");
           bulk_tip_midpoint = prm.get("Bulk tip time update") == "midpoint";
+          bulk_tip_material_strips = prm.get("Bulk tip section closure") == "material strips";
           bulk_tip_equilibrate_seed = prm.get_bool("Equilibrate bulk tip seed");
           bulk_tip_initial_age=prm.get_double("Bulk tip initial age");
           bulk_flow_rule = bulk_rule == "bulk tip sections" ? BulkFlowRule::bulk_tip_sections : bulk_rule == "fixed scalar" ? BulkFlowRule::scalar
@@ -684,6 +689,8 @@ namespace aspect
           material_direct_stress = prm.get("Material stress representation") == "direct physical stress";
           AssertThrow(!bulk_tip_midpoint || (uses_integrated_bulk_tip() && this->get_parameters().use_bernstein_phase_basis),
                       ExcMessage("Midpoint is restricted to the integrated native Bernstein bulk-tip route."));
+          AssertThrow(!bulk_tip_material_strips || (uses_integrated_bulk_tip() && bulk_tip_midpoint),
+                      ExcMessage("Material strips require native bulk tip and midpoint; no checkpoint conversion."));
           AssertThrow(!material_direct_stress || dg_material_transport,
                       ExcMessage("Direct physical stress requires Jaumann DG material Lie."));
           legacy_bounded_profile_identity = prm.get("Material profile transport") == "bounded MacCormack";

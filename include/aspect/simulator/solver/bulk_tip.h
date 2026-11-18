@@ -63,6 +63,13 @@ namespace aspect
         Vector physical_field(const Vector &coordinates) const;
         Vector coordinates(const Vector &physical) const;
         std::shared_ptr<Evaluation> evaluate(const Vector &, bool tangent);
+        /** After a converged frozen-map solve, update only virgin planes using
+         * coherent section Y0. True requests another ordinary coupled solve.
+         * The accepted material owner is never modified here. */
+        bool update_virgin_planes(const Vector &);
+        /** Finish active bounds inside the opt-in constrained solve, then
+         * require a fresh coupled residual check before material registration. */
+        bool finish_strip_active_bounds(Vector &,const Evaluation &);
         /** Exact derivative at the most recently assembled tangent point. */
         void vmult(Vector &destination, const Vector &source) const;
         /** Positive phase search/preconditioner matrix, distinct from physics. */
@@ -125,6 +132,12 @@ namespace aspect
           return physical_dt;
         }
         double directional_work(const Evaluation &, const Vector &) const;
+        /** Read-only search diagnostic: independently accumulated functional
+         * difference, 32/64-point resistance-integral difference, and a floating
+         * point scale estimate. The increment is the actual feasible trial. */
+        std::array<double,3> trace_functional_difference(const Vector &increment,
+                                                        const Evaluation &from,
+                                                        const Evaluation &to) const;
         std::uint64_t sparse_entries() const
         {
           return local_matrix.n_nonzero_elements();
@@ -153,6 +166,9 @@ namespace aspect
         std::vector<std::map<types::global_dof_index,double>> section_integrals, section_adjoints;
         std::vector<double> section_slopes;
         std::shared_ptr<Evaluation> linearization;
+        std::vector<double> section_angles, section_measures;
+        std::vector<bool> formed_sections;
+        unsigned int orientation_updates=0;
         Vector ghost(const Vector &) const;
     };
   }

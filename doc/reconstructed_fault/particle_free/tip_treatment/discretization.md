@@ -1,5 +1,15 @@
 # Discrete equations and executable operations
 
+For the opt-in native turning experiment, also read
+[material-strip ownership and quadrature](../FIRST_FREE_TURN_FORMULATION.md).
+The default straight law below is retained. The experimental branch keeps every
+native point's material section, stores its formed plane and reference-arclength
+quadrature measure, and uses JxW/ds with the matching uniform-force adjoint.
+Prospective ages evolve from t=0. Physical tau/A and phase stay with their native
+owners; the diagnostic phase contour carries no history or additional work.
+Its checkpoint law is distinct and forbids conversion from the straight law.
+
+
 This page describes the retained **BE default**. The selectable midpoint stage,
 exact aging, endpoint publication and work identity are in
 [time integration](time_integration.md); do not apply BE loss formulas to that mode.
@@ -196,6 +206,21 @@ The Newton retry condition \(r\le\max(10,0.1r_{last\,Newton})\) does not
 change acceptance at r≤1. Line search remains on the restricted functional,
 with the existing scaled-residual tie-break for roundoff-sized energy changes.
 
+Before changing a classification, the solver reapplies the exact restricted
+operator to the returned free correction and requires the explicit residual
+norm to meet the requested linear tolerance. A failed check advances to the
+next search family. Within a shifted search, the restricted phase CG systems
+and the fixed-phase mechanics correction each use their own matrix and load
+for this check. The full phase metric VI is also certified.
+
+For material strips, a full exact trial can reach an obstacle where a freshly
+computed section response releases the leading phase row. When the full trial
+fails the search within the energy roundoff band, the line search tests 0.99
+of that same direction before ordinary halving. It reassembles all coupled
+terms and applies both search gates. The converged state undergoes the physical
+VI, mechanics and plane checks. The [step-68 replay](../STAGE4_PROPAGATION_LINEAR_RESIDUAL.md)
+records the full directional-derivative test and measured costs.
+
 ## Bounds, search and physical acceptance
 
 <a id="bounds"></a> **(B) Linearized box subproblem**
@@ -206,7 +231,7 @@ Every pass reclassifies both signs; previously constrained coordinates may
 release. Fixed-bound displacements enter **all** coupled right-hand-side blocks.
 The free equations are solved with flexible Krylov, not the SPD obstacle solver.
 
-At the first iteration of each physical step, try the exact coupled Newton VI.
+By default, at the first iteration of each physical step, try the exact coupled Newton VI.
 If it fails to supply an accepted correction, prefer the positive phase-search
 family on subsequent iterations, testing its least restrictive metric first.
 Retry exact Newton when the scaled mechanics/KKT residual falls tenfold since
@@ -214,7 +239,20 @@ its previous attempt, or is within one decade of the unchanged final gates.
 Successful exact corrections restore exact-first ordering; an exhausted shifted
 family also falls back to exact Newton. This is a search-order policy, reset at
 each physical step. Every trial still receives fresh bounds, coupled correction,
-constitutive evaluation and globalization; no active set or direction is cached.
+constitutive evaluation and globalization; no active set or direction is cached
+between searches or physical steps. Within one exact linearized search, FGMRES
+reuses the previous active-set direction minus the new prescribed displacement,
+with constrained free rows zeroed, as its initial guess. The first guess is zero.
+The tangent, right-hand side, linear tolerance, iteration/pass limits and complete
+linearized VI certificate are unchanged. The [fine continuation report](../FINE_MESH_GROWTH_CONTINUATION_REPORT.md)
+records the focused oracle/tangent and endpoint comparison; this is a numerical
+initial-guess change, not a constitutive or acceptance change.
+The bounded [step-89 comparison](../TIP_STEP89_SEARCH_REPORT.md) adds a
+benchmark-only `ASPECT_TIP_POSITIVE_METRIC_FIRST` override: positive metric first
+at scaled merit >10, exact first for polishing at merit ≤10. The same fallback
+families and physical gates remain. With the variable absent, the default policy
+above is unchanged. `ASPECT_TIP_TRACE_SEARCH` optionally exposes the true
+linearized VI and line-trial merit; it changes no criterion or checkpoint state.
 See the [efficiency report](../TIP_EFFICIENCY_AND_GROWTH_REPORT.md) for validation
 and rejected variants. The positive phase search metric is
 \(P_B=H_f/K_f+\mu D_m\), with \(\mu>0\). Here \(D_m=\operatorname{diag}(m_i)\), with

@@ -1,3 +1,468 @@
+**The bulk-tip solver now checks each returned correction with the operator
+and load used for that solve before it updates the constraints.** The exact
+active-set solve and shifted mechanics solve live in `bulk_tip_linear.cc`.
+The shifted obstacle solve uses the checked overload in `phase_field/obstacle.cc`.
+The outer solver retains the physical KKT and mechanics gates. Its revised
+contact trial and the coupled tangent test are documented with four accepted
+40 μs intervals. [Guarded replay report, figures and measurements](STAGE4_PROPAGATION_LINEAR_RESIDUAL.md).
+
+The original one-hour attempt stopped before the first 40 μs interval was
+accepted. Its diagnostic replay matched 134 logged observations and found
+14 returned corrections above the explicit linear tolerance. Both records
+are retained. [Original timeout](STAGE4_PROPAGATION_TIMESTEP_CHECK.md) ·
+[Phase-row audit](STAGE4_PROPAGATION_PHASE_ROW_AUDIT.md).
+
+
+> **Complete — loaded-seed preparation and bounded friction/growth comparison.**
+> [Overnight report and figures](STAGE4_OVERNIGHT_PREPARATION_REPORT.md): native
+> zero-clock preparation, both fixed32 histories, both free76 histories through
+> 6.08 ms and a paired local 40-microsecond check through 5.44 ms are complete.
+> Weakening gives earlier detected right-contour motion; halving the local
+> timestep changes the law difference in advance by 6.43%, preserving its sign.
+> The detected timing gap changes from .24 to .16 ms. All changes remain in the
+> inherited diffuse band/tail: exactly intact and remote material is unchanged,
+> with no new formed section or turning. Retain this preparation for controlled
+> spatial validation; finite propagation and an autonomous event are unqualified.
+> The next recommendation is a matched 256x256 normal-refinement pair, not
+> launched. No job remains active. The local fine pair reached sixteen intervals
+> per law under its time caps, rather than the planned twenty. This entry
+> supersedes earlier next-action text; historical preparations/results remain
+> evidence. Incoming source, protected runtimes, checkpoints and previously
+> documented cleanup losses are preserved.
+
+The new `stage4_preparation/` package remains benchmark support. Its static
+helper receives the native coupling, coordinates and prescribed common section
+force; it reuses distributed mechanics, native fracture assembly and the native
+Bernstein obstacle solver. It minimizes storage plus prescribed-force work and
+fracture at zero physical clock. The accepted production timestep/solver scheme
+is unchanged. `prepared_observation.h` writes physical native tau/A evidence and
+rebuilds only a read-only initial phase reference for restart diagnostics.
+`phase.py` locates diagnostic connected contours; it owns no physical geometry.
+The reducers use native residual/gradient rows and actual measures, including
+endpoint fracture partitions for selected free runs. Runtime versions and failed
+export evidence are preserved separately in `build-particle-free/stage4-preparation/`.
+`compose.py` provides labelled analysis views of native restart segments;
+`compare_time.py` compares endpoints at common physical times. The read-only
+`audit_restore.py` checks actual Gauss/section measures and history meanings.
+`compress_closed_frames.py` selects only this task's closed diagnostic files,
+with SHA-verified lossless compression and a separate retention manifest.
+None changes production source or checkpoint payloads. The report distinguishes
+completed preparation and fixed/free comparisons from numerical accuracy,
+connected growth and production qualification; KKT alone establishes none of
+the latter.
+
+> **Complete — near-tip prepared-slip experiment; preload calibration closed.**
+> [Report and figures](STAGE4_NEAR_TIP_SLIP_REPORT.md): the new state supplies
+> about .2 mm/s through x=5.5..6 at gamma_e=.000365, with age support x=3..6.
+> Preflight and both eight-interval fixed-phase laws completed with four ranks.
+> Weakening raises final peak rate 30.16% and integrated slip 13.15%, but its
+> right-tip driving excess is only .000168959 Pa: .342% of the remaining deficit.
+> The ahead-tip probe instead has a small negative difference; neither effect
+> changes favorability. No free-phase pair is selected. Close this preparation.
+> Three left-tip rows were already favorable initially; opposing left-taper
+> deformation nearly cancels in integrated slip. These are explicit limitations.
+> Source, protected runtimes and checkpoints are preserved; no job remains active.
+> This entry supersedes earlier next-action paragraphs: no further preload tuning
+> or longer continuation is selected. A future specimen must pass a fresh
+> phase-stability and signed-deformation check at both tips before growth testing.
+
+The near-tip task adds only `stage4_near_tip/` benchmark preparation, sequential
+run supervision, native-observer reduction and compact retention. Its generated
+checker moves the age-support expression; its input table changes the nominal
+sliding profile. Native mechanics, histories, fracture assembly and criteria are
+unchanged. Incoming source and all protected runtime hashes are verified by
+`retain.py`; `preservation.json` records exact new input/checker/checkpoint hashes.
+The physical law comparison is a bounded fixed-phase result, not free-growth,
+restart or convergence qualification. Earlier cleanup losses remain unchanged.
+
+> **Complete — native preload calibration and tip discrimination.**
+> [Report and figures](STAGE4_PRELOAD_CALIBRATION_REPORT.md): three static
+> preparations and both eight-interval fixed-phase laws completed in 36.1 minutes
+> of numerical work, with four ranks sequentially. The selected gamma_e=.000365
+> is below the first axial-tip-cell row threshold (~.00037533). Weakening raises
+> final peak slip rate by 29.42%, but every checked axial-tip row has less driving
+> than b=a; the limiting-row difference is -22.6 microPa against a .040 Pa deficit.
+> No release criterion is met. Preload tuning is closed; next prepare slip nearer
+> the formed tip, then check a short fixed-phase pair before free growth.
+> Source, protected runtimes, inputs and checkpoints are preserved. No numerical
+> job remains active; earlier cleanup losses and qualification limits remain.
+
+The preceding preload task added benchmark-only `stage4_preload/scan.h` and preparation,
+run/supervision, reduction and retention scripts. The generated preload header
+changes one parameter-read line; native mechanics and material APIs are untouched.
+The scan reads the accepted stage and native fracture gradient, and its virgin
+plane calculation is observational. Runtime and incoming-source identities are
+checked in the report's preservation manifest. No global-solver or history-owner
+change is introduced.
+
+> **Complete — bounded 256×128 phase-release pair.**
+> [Report and figures](STAGE4_PHASE_RELEASE_REPORT.md): both laws accepted all
+> eight midpoint intervals through .00064 s, using four ranks sequentially.
+> Peak stage rates reached 2.135 mm/s (weakening) and 1.650 mm/s (b=a), but neither
+> connected phi=.05 endpoint advanced and exactly intact cells stayed unchanged.
+> Small central/taper adjustment and off-axis changes within the old diffuse tail
+> are retained explicitly. Ahead-tip admissible driving is negative at t=0 and
+> throughout; the fully intact probe reaches only 8.27% of its fracture derivative.
+> Added fracture inventory is 8.98e-8 J/m; absolute physical-work errors are
+> .0270%/.0118% of that change. Production source, protected runtimes and checkpoint
+> meanings are unchanged. No numerical job remains active. The next proposed
+> work is preload calibration against the measured tip/remote driving margins,
+> not continuation of this under-driven pair. Earlier cleanup losses remain.
+
+> **Complete — matched short-wave comparison and native pilot.**
+> [Continuation report](STAGE4_SHORTWAVE_CONTINUATION_REPORT.md) and
+> [compatible limit](SHORTWAVE_COMPATIBILITY.md) supersede the shutdown pause
+> and the older requirement to settle patch spacing before a native pilot.
+> Resolving the .0625 m pair changes growth 37.62→33.90/s; the new .03125 m
+> pair gives 39.86/s. Compatible actual-profile mechanics gives a 41.13219/s
+> fixed-patch limit, distinct from the 61.67/s localized edge and 155.2/s bound.
+> All eight native histories completed. Common-window integrated-rate/slip mesh
+> differences are below 3.4e-7 relative; relative perturbation amplification is
+> 1.04426 for weakening and .95642 for matched b=a, each against its own background.
+> The next proposed experiment is the bounded fresh phase-release pair specified
+> in the report. Patch spacing, temporal accuracy and autonomous-event claims
+> remain open. No free-growth run is launched; no numerical job remains active.
+> Production sources, protected runtimes, checkpoints and acceptance criteria
+> are unchanged. Earlier cleanup losses remain documented.
+>
+> All entries below retain their historical scope; their pause/next-action
+> statements do not override this completed task.
+
+> **Wavelength diagnostic audit — 12 November 2026.**
+> [Report](STAGE4_RSF_WAVELENGTH_REPORT.md), benchmark
+> `benchmarks/reconstructed_fault/particle_free/stage4_wavelength/`, and its
+> compact evidence directory record the new work. Root/branch verified;
+> HEAD b32a2d4f6e21 with incoming changes retained. No production source or
+> existing checker was edited. A separate checker reuses the complete retained
+> native restoring implementation with configurable patterns and exact frozen
+> phase import. New checker SHA256:
+> `901bbdc65691c48b75be74aafcbd23d95c3ed86ec58ebc31afce2877c16d89c8`.
+> Entry/exit hashes verify the protected executable/checkers and incoming
+> production files. The seven old responses reproduce within 2.25e-15; 30
+> actions pass equilibrium/work/point-update gates. This tests a frozen
+> derivative, not restart conversion or a preloaded native slipping state.
+> Both mesh runs exited 0; no physical interval or production job was advanced.
+
+> **Storage-only cleanup — 12 November 2026.**
+> [Report](DISK_CLEANUP_20261112.md) records exact preservation of incoming tracked
+> and staged patches, 145,575 retained file hashes/modes/mtimes, 589 symlinks and
+> every newly archived member. No production source or runtime changed. Inactive
+> checkpoint/field paths now require selective restoration; active Stage 4 and
+> free-turn parents remain expanded. Only 179 regenerable compiler products
+> were discarded. Tests verified byte/metadata recovery, not numerical restart.
+
+> **Stage 4 diagnostic only — production source preserved.**
+> [Report and provenance](STAGE4_RSF_STABILITY_REPORT.md),
+> `evidence/stage4_rsf/preservation.json` and the entry patch identify unchanged
+> incoming source/manual work, protected binaries and exact checkpoint copies.
+> New `stage4_rsf/stiffness.h` is included only in a separately built benchmark
+> checker. It freezes phase/planes, removes friction slopes for restoring actions,
+> supplies the Stokes inverse's homogeneous-increment context, and restores the
+> simulator context and accepted state. Initial diagnostic failures are retained.
+> Native mixed residual/energy/adjoint checks pass; independent reduced RSF
+> analysis is explicitly separate from a native coupled trajectory. No core
+> source/header/CMake change, default change or commit was made in Stage 4.
+
+> **Overnight validation closed — source and physical pair preserved.**
+> [Report](OVERNIGHT_FREE_TURN_VALIDATION_REPORT.md) and
+> `evidence/overnight_free_turn/completed-preservation.json` record the unchanged
+> incoming source patch, four protected binary/checker identities, original
+> parent/failure and byte-identical copied checkpoints. No C++/CMake change or
+> rebuild occurred. `overnight_free_turn/` adds benchmark fixtures/runners,
+> native-Q2 observations, analytic measurement checks, restore/lifecycle readback
+> and verified archival support. It changes neither the solver nor the law.
+> A/C qualify only their common .0775 endpoints; B reaches .080. The first
+> registration time changes for 12 sections under normal refinement, affecting
+> later slipping material. The fine .080 and quarter-step .080 endpoints remain
+> unavailable. No overnight job remains; old reports below are historical.
+
+> **Free-turn recovery complete: both signs accepted through .080 s.**
+> [Report, endpoint table and figures](RECOVER_FREE_TURN_STEP16_REPORT.md).
+> Two .0025 midpoint steps recover the failed .075–.080 interval using the
+> original protected solver, tolerances and cap. The original .005 failure remains
+> evidence; no derivative or search-rule correction is adopted. A fresh reflected
+> history uses the matching schedule and reverses initial shear from t0.
+> Connected phi=.05 extension is .243096 m, with lateral displacement ±.0482614 m
+> (3.89 hx, ±1.54 hy). Reflected phase/stress errors are small; this is a bounded
+> symmetry result, not time/space qualification of a turn. Full-history signed/
+> absolute physical-work errors are .06685%/.08627% of added fracture.
+> Negative local work, mixed-sign sections and tiny-phase registrations remain
+> explicit. Protected parents/binaries/failures and historical cleanup losses are
+> preserved. Next proposed test: four .00125 intervals from the same .075 parent.
+> No further simulation is launched; no job remains; no commit was requested.
+
+## Step16 recovery observations and physical baseline
+
+New C++ changes are diagnostic only: `bulk_tip_search_trace.h` samples current,
+trial and predicted natural-map rows and their native section contributions;
+`BulkTipCoupling::trace_functional_difference` evaluates local storage differences,
+the exact quadratic fracture increment, and independent resistance increments.
+`ASPECT_TIP_TRACE_ROWS` enables sparse probes and the read-only existing metric
+comparison; the explicit diagnostic stop leaves all trials unpublished. The
+coarse replay stops at40 after reproducing the stall. No constitutive, tangent,
+acceptance or publication correction was selected. The physical recovery and
+reflected history use the original protected executable, not the diagnostic build.
+
+`recover_free_turn/` provides the one-window runner and reusable analyses. It
+separates accepted physical data from diagnostic trials, compares the physical
+reflection with native measures, checks signed section cancellation and plots
+independent DG contours. The plotting correction breaks prospective-plane curves
+across formed sections rather than connecting the two distant virgin tails.
+`evidence/recover_free_turn_step16/completed-preservation.json` verifies the four
+protected executables/checkers, original parent and failed logs, diagnostic source
+identity and successful run checkpoints. Restore and lifecycle JSONs record exact
+history comparisons and arithmetic bounds. The only cleanup removed the disposable
+854139194-byte regenerated PCH after compilation; its hash and the need to regenerate it
+are recorded. No raw numerical information was discarded: closed CSV compression
+has roundtrip hashes. Historical cleanup losses remain unchanged.
+
+
+> **First native free-turn result reviewed — accepted through .075 s; .080 s failed.**
+> [Report and figures](FIRST_FREE_TURN_REPORT.md) distinguish the accepted positive
+> history from the failed final trial. The native phi=.05 contour extends 2.054 mm
+> beyond the original endpoint and 9.365 mm laterally: .0329 hx and .300 hy.
+> This is a connected asymmetric extension below cell scale, not a resolved turn.
+> Physical-work error is .205% of added fracture; remote material stays quiet.
+> Original planes/history are retained. The final phase KKT stalls at 7.02479e-7
+> against the unchanged 1e-7 gate; mechanics converges. Last accepted15 checkpoint,
+> tested binaries and failed logs are preserved. The reflected case was not run.
+> [Equations and code map](FIRST_FREE_TURN_FORMULATION.md) describe the opt-in
+> material-strip closure; the straight default is unchanged. Next proposed work:
+> locate the obstructing phase rows from the saved .075 parent before another
+> physical comparison. No simulation or commit was made for this reporting review.
+> Older entries below retain their historical scope; no numerical run is active.
+
+## Completed four-rank process review
+
+No C++ source, CMake, executable or physical input changed during this reporting
+pass. `completed-preservation.json` verifies the tested C++ hashes and both
+protected/current executable-checker pairs, and records accepted15 checkpoint
+and failure-log identities. The process exit is1, not successful completion.
+
+`first_free_turn/analyze.py` reduces accepted native Bernstein fields and actual
+integration measures, with versioned derived-data caches and rank-transition
+restore checks. `summarize.py` checks contiguous accepted intervals across the
+three run directories, separates signed/absolute physical-work error, and retains
+interrupted/failed execution cost. `visualize_completed.py` checks accepted15 and
+failed16 explicitly, distinguishes trial convergence from accepted fields, verifies
+native Q2 contour roots and strict DG-trace connectivity, and writes PNG/PDF plus
+CSV/JSON materials. No synthetic reflected endpoint is used. See
+[FIRST_FREE_TURN_REPORT.md](FIRST_FREE_TURN_REPORT.md) for results and gaps.
+
+
+> **Single-turn closure review complete — 11 November 2026.**
+> The user accepts closure of the peak-.60 fixed-direction control for qualitative
+> connected extension. [New formulation](SINGLE_TURN_RSF_FORMULATION.md) and
+> [bounded reference results](SINGLE_TURN_RSF_REPORT.md) distinguish material-plane
+> selection from phase-contour advance. Two work-adjoint curved section laws
+> recover the straight path exactly but differ by .952% in stress, 1.398% in age
+> and 1.487% in added slip; timestep halving preserves the difference.
+> Straight/rotated/reversal, weighted power, full-history and reference lifecycle
+> checks pass, including comparison with the unchanged native point law.
+> The open scientific choice is the material slip carrier/measure at a bend,
+> with an explicit virgin-section extension rule. No native turning option or
+> free-phase turn run is enabled; the current native algorithm remains fixed
+> direction. Unstable sliding and further straight refinement remain deferred.
+> Protected binaries/checkpoints and incoming manual work are preserved; no job
+> remains. Earlier entries below retain their historical scopes.
+
+## Peak-.60 overnight time and axial-mesh comparison — complete
+
+[Report and paper decision](RESOLUTION60_OVERNIGHT_REPORT.md). Branch/revision
+remain `pf-rsf-particle-free`, `b32a2d4f6e21`; incoming source is preserved.
+No core or CMake edit/rebuild. Same protected core for every physical interval;
+protected checker remains intact. The new C-only checker SHA is recorded in the
+report and `terminal-clock-repair.json`.
+
+- `run_resolution_matched.py`: explicit x-only 256×128 `axial` preset, protected
+  defaults, optional checker and explicit terminal-clock flag. Streaming verified
+  compression and two ranks preserve the four-busy-worker limit.
+- `checks.cc`: opt-in scheduling of a roundoff-sized clipped terminal interval,
+  bounded by last physical dt; accepted clocks/fields and old_time_step stay put.
+  This is benchmark startup support, not a new solver or checkpoint converter.
+  Removing the hook/call reproduces incoming checker source SHA exactly.
+- `analyze_resolution60_overnight.py`: reused historical reductions; new native
+  bounds/energy/power checks, common physical Q6 norms and normalization, native
+  section observation, matched-interval V, both-end cuts, full seed-connected
+  absolute contour, signed deformation and 16/32 extraction checks. Exact touching
+  cases use the opt-in strict `intervals` mode; historical default is unchanged.
+- The old contour helper accepts rectangular spacing and an optional cell mask.
+  Common-point/nodal reproduction and exact superlevel tests pass. Raw signed
+  fields and failed startup/search/cap evidence are retained.
+- Budget scripts sequence one simulation, preserve A/.065 outside rolling slots,
+  complete A's single missing interval and retry C after the diagnosed startup
+  issue. They are external benchmark orchestration; ordinary ASPECT owns every
+  physical timestep, solve and publication.
+
+All selected intervals finish: A 7+1, B 16, C 4. Physical KKT/mechanics gates and
+single publications pass; restart observations match exactly. Fixed-direction
+qualitative extension/front passage persists. Quantitative time sensitivity and
+fixed normal spacing remain explicit; no convergence order or speed is claimed.
+`final-verification.json` records unchanged protected/parent hashes, actual
+checker identities, commands, accepted times, endpoint snapshots and source SHA.
+Current evidence: `evidence/resolution60_overnight/`. No numerical job remains;
+no commit, server job or further physical campaign is selected.
+
+## Peak-.60 matched-parent half-steps — 10 November 2026
+
+[Scope and observations](RESOLUTION60_HALFSTEP_REPORT.md). Four selected midpoint
+intervals from the preserved .060 parent, dt=.0025 through .070, same 128×128 mesh.
+No core/checker/CMake edit or rebuild; protected binary pair and incoming manual
+source are preserved. Native Bernstein, true stress, section RSF, quadrature,
+positive-metric-first search and all acceptance gates are unchanged.
+
+- `run_resolution_matched.py`: optional fresh label/evidence directory, copied
+  restart snapshot, existing restart-dt override and end-step guard. Existing
+  fresh-run defaults remain. Two ranks and lossless closed-export compression.
+- `analyze_resolution60_window.py`: exact restored-parent comparison, matched-time
+  field/slip/state and matched-interval rate comparison, regional SIPG energy,
+  native profiles showing phi0/phi/delta together, exact line crossings and
+  cellwise absolute phi=.05 contours. Original t=0 seed remains the reference.
+- Independent quadratic-circle checks distinguish contour rendering error from
+  timestep sensitivity. Both DG traces are retained; no smoothing or clipping.
+- Evidence: `evidence/resolution60_halfstep_window/`, fresh run
+  `build-particle-free/bulk-tip/runs/resolution60-halfstep-window/`.
+  All four steps accept through .070; restored fields match exactly, phase
+  bounds/irreversibility and work adjoint pass. Final phase KKT is 5.03e-8.
+  At .070, phase-increment L2 differs 7.60% while window physical-work error
+  falls 3.75×. This is local timestep sensitivity, not a convergence certificate.
+  No further campaign or core edit; no simulation job remains.
+
+## Peak-.60 freely evolving response — 10 November 2026
+
+[Report](RESOLUTION60_FREE_GROWTH_REPORT.md). No core, header, CMake or checker
+change/rebuild. Incoming work and protected step-89 binary identities remain.
+The one new 128×128 case uses fresh peak-.60 initialization, midpoint dt=.005,
+fixed-direction section RSF and unchanged physical/acceptance criteria.
+
+- `run_resolution_matched.py`: exposes the existing checkpoint-frequency and
+  graceful wall-time options; physical equations and the selected search are unchanged.
+- `analyze_resolution60_growth.py`: caches only accepted closed observations;
+  native rectangular Bernstein profiles, exact polynomial half-height crossings,
+  threshold-sensitive connected supports, interval/cumulative regional phase and
+  telescoping SIPG row-energy increments, section power and physical-work checks.
+  The older directional-work partition remains separately identified.
+- The fresh seed exactly matches the earlier coarse screen in coefficients and
+  fracture gradient. Independent triangular crossing and analytical pulse checks
+  pass; regional energy sums match native solver totals. Both native traces are
+  preserved, including DG face jumps. No field is clipped or smoothed.
+- All 16 intervals accept through .080. Connected axial damage follows central
+  and taper evolution; remote stays quiet. The broadening pulse does not select
+  normal refinement first, but front growth is not spatially qualified. Failed
+  bound classifications and expensive late polishing remain in the log.
+- The .060 parent was copied and hash-verified before its rolling slot was reused.
+  This supports a proposed short matched-parent timestep comparison, not a claim
+  that an additional recovery simulation was performed. No second run or commit.
+  Evidence: `evidence/resolution60_free_growth/` and the original run directory.
+
+## Resolution-matched peak-0.60 tip screen — 10 November 2026
+
+[Report and decision](RESOLUTION_MATCHED_TIP_REPORT.md). Entry remains
+`b32a2d4f6e21` with incoming source/manual work preserved. No core, header or
+checker change/rebuild. Protected step-89 core `034d2a84…3c27` and checker
+`b800ef43…9d84` are used; identity is independent of the cached git banner.
+
+- `bulk_tip/resolution_matched_seed.prm`: peak .60, unchanged physical support,
+  material, RSF and loading, native Bernstein phase, midpoint. Box repetitions
+  128×128 / 128×256 give hx=.0625, hy=.03125/.015625. Each initializes afresh.
+- `run_resolution_matched.py`: existing fixed-phase driver, explicit identities,
+  unchanged gates, bounded MPI, fresh labels and lossless new-export compression.
+  Two ranks coarse; four fine with analysis/compression deferred until MPI exits.
+- `analyze_resolution_matched.py`: native rectangular Bernstein evaluation,
+  excess-compliance width/integral, geometry/Q6/mass/section checks, signed
+  admissible phase derivative including native SIPG, fault-only signed rates,
+  cancellation/band diagnostics and work errors. No square-cell reductions.
+- `compare_resolution_matched.py`: exact normal subdivision and its force
+  adjoint compare identical positive phase variations, plus section slip/state.
+  Seeds agree to 2.22e-16 in coefficients. Power-adjoint defect ≤3.82e-14 J/(m s).
+- Source inspection: section ds uses actual x width and dn=JxW/ds;
+  `dg_sipg.cc` penalties use mapped face/cell Jacobians. Tested Q6 mechanical
+  and Q5 SIPG quadrature remain unchanged. Fixed-phase KKT is not a free-growth
+  certificate; native and common-variation driving are reported separately.
+- Coarse completes eight steps; fine caps at 2400.37 s after six. Both favor
+  central damage before the tips; no growth run is launched. Closely agreeing
+  slip does not qualify phase evolution or dt=.01. No old .95 continuation.
+  Exact inputs, commands, hashes, accepted prefixes, missing endpoints and
+  preservation checks are in `evidence/resolution_matched_tip/`.
+
+## Saved step 88→89 search-order comparison — 10 November 2026
+
+[Report](TIP_STEP89_SEARCH_REPORT.md). Entry remains `b32a2d4f6e21` with the
+preceding continuation's dirty work preserved. Incoming core/checker copies are
+in `build-particle-free/tip-step89/reference/`; current instrumented core is
+`034d2a84…3c27`, checker unchanged `b800ef43…9d84`. Detailed hashes and incoming
+patch are in `evidence/tip_step89_search/`; the cached git banner is not identity.
+
+- `source/simulator/solver_schemes.cc`: opt-in benchmark environment selector
+  tries the existing positive-metric family first at physical merit >10 and
+  retains exact-first polishing below that threshold. No flag means the retained
+  adaptive exact-first policy. Optional line-trial merit/functional/slope traces
+  do not modify evaluation, acceptance, bounds, history or checkpoint laws.
+- `source/simulator/solver/bulk_tip_linear.cc`: optional true VI/feasibility and
+  mechanical/continuity residual logs before exact active-set classifications.
+  The preceding within-search Krylov warm start remains in both variants.
+  No inner tolerance, pass limit, matrix or preconditioner change in this task.
+- `bulk_tip/run_step89_search.py`: two sequential, two-rank, 2400 s capped
+  replays of the identical copied step-88 snapshot; explicit end-step 89.
+- `bulk_tip/analyze_step89_search.py`: residual/search/cost reduction, native
+  bounds, physical-work error, same-grid endpoint comparison when available,
+  and diagnostic PNG/PDF. Missing endpoints are not inferred from trial data.
+- Parent restore checks match all compared fields exactly in both variants.
+  All 36 prior successful exact-solve iteration counts reproduce in the default
+  replay. The positive-first variant accepts 89 in 443.510 s interval time;
+  default is capped at 2400.315 s without accepting. The accepted snapshot 03
+  restores exactly; original snapshot hashes remain unchanged and no jobs remain.
+  The candidate is locally verified, but no default endpoint exists for a
+  search-order field/energy comparison. Keep the option benchmark-only; no
+  production default or physical qualification changes. Tested pair is preserved
+  separately in `build-particle-free/tip-step89/tested/`.
+
+## Fine-mesh continuation and one bounded numerical correction — 10 November 2026
+
+Entry source `b32a2d4f6e21c219f9af786d1b6e3725ea78a5a4`, branch
+`pf-rsf-particle-free`, clean tracked entry; retained untracked evidence/input
+files were preserved. The [report](FINE_MESH_GROWTH_CONTINUATION_REPORT.md) and
+[evidence manifest](../../../benchmarks/reconstructed_fault/particle_free/evidence/fine_growth_continuation/README.md)
+identify executable and checker hashes independently of the cached git banner.
+The entry core `5e9bd062…40da` and checker remain in
+`build-particle-free/fine-growth/reference/`. Current candidate core is
+`b4625dc8…1a38`; checker is `b800ef43…9d84`. No commit or server job was made.
+
+- `source/simulator/solver/bulk_tip_linear.cc`: the sole numerical correction
+  reuses the previous active-set direction minus new fixed-bound displacement as
+  an FGMRES initial guess, resetting constrained free rows. Reuse is within one
+  search only. Operator/RHS/preconditioner, iteration limits, linearized VI,
+  functional search and physical gates remain. Successful linear solves log
+  residual estimates and timing; these do not replace true VI/physical checks.
+- `bulk_tip/checks.cc`: opt-in, read-only post-resume observation of native phase,
+  stress/A and section histories. It avoids uninitialized stage caches. The
+  initial diagnostic-only failed observer log is preserved. No history owner,
+  serialization, parameter or publication meaning changed.
+- `bulk_tip/check_restored_tip.py`: reusable endpoint/restore comparator. Original
+  step 74 and final step 88 restore with exactly zero numerical differences,
+  matching accepted/pending clocks and publication counts.
+- `bulk_tip/analyze_synthetic_growth.py` accepts a caller-verified cached prefix;
+  `analyze_fine_growth_continuation.py` verifies original provenance, contiguous
+  accepted steps and raw-table joins, then applies existing spatial/SIPG/work
+  reducers. Original 73-step reductions reproduce exactly. New reports preserve
+  endpoint versus midpoint clocks and signed/absolute errors.
+- `bulk_tip/diagnose_fine_growth_layer.py`: retained-output kinematic and local
+  compliance-width diagnostic, with reconstruction checks; no extra simulation.
+
+The native build and two short midpoint controls pass the existing direct,
+manufactured and tangent oracles. Krylov work is 696→529; matched endpoint
+maximum differences are phase 1.25e-14, stress 2.82e-6 Pa, A 1.39e-11, age
+6.32e-13 s and slip 6.49e-16 m. New accepted steps 75–88 pass unchanged gates.
+Step 89's first exact search exhausts 24 passes, then a shifted correction and
+an exact correction leave phase KKT .064212; a second expensive search is stopped
+for affordability. This is not the former scalar roundoff-floor failure.
+The joined history ends at .055 s, not .06 s; checkpoint
+`fine-growth-warm01/output/restart/02/` is the current verified restart.
+Physics, bounds, quadrature, integrator, API cleanup and legacy controls remain.
+Spatial convergence, general propagation and production readiness are unqualified.
+Current design and the tip discretization guide describe the initial-guess scope;
+historical reports and cleanup availability/loss records remain evidence.
+
 > **FaultFriction public-interface review complete.**
 > [Interface, callers and equivalence](FAULT_FRICTION_INTERFACE_REVIEW.md):
 > one operation per coefficient quantity, explicit optional age, internal law

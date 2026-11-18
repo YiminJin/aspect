@@ -4391,4 +4391,30 @@ Physical-law, basis and numerical-method guards remain independent; no automatic
 checkpoint conversion is introduced. See \texttt{ACTIVE\_RESEARCH\_MODEL.md}
 and \texttt{TIP\_CONSOLIDATION\_REPORT.md} for current code entry points and tests.
 
+
+\subsection{Selected experimental material-strip RSF closure (November 2026)}
+The native bulk-tip midpoint option may select \texttt{material strips} while
+fixed direction remains the default. Complete vertical reference-material
+sections retain their quadrature membership. A section with structural angle
+$a_s$ has reference measure $d s_s=d x_s/\cos a_s$ and
+\[
+ V_s=\frac{\sum_{q\in s}J_q w_q}{d s_s},\qquad
+ \sum_q J_q f_s w_q=\sum_s d s_s f_s V_s.
+\]
+Only fault shear enters $w$. The weighted transpose returns uniform resistance
+$f_s$ to all points of the section, including intact material. This generalized
+slip is an additional constitutive assumption. It is not a displacement jump
+on the diagnostic phase contour. Formed membership, plane, age/slip and full
+physical stress/cohesive tensors are retained. Virgin sections age from the
+initial time; a coherent plane maximizes the native-area integral of the
+intact-reaction driving $Y_0=m(\tau_m:S-f_s)^2/(2G)$, using the actual trial
+physical stress and consistent section friction. The conjugate sector closest
+to the horizontal seed is $|a_s|<\pi/4$; reaching its edge rejects admission.
+Plane selection and the unchanged phase variational inequality are iterated
+within the existing coupled solver before single publication. A distinct
+checkpoint signature forbids conversion from the straight law. This experiment
+has no material transport, branching or general contact capability. Details
+and the formulation-to-code map are maintained in
+\texttt{particle\_free/FIRST\_FREE\_TURN\_FORMULATION.md}.
+
 \end{document}

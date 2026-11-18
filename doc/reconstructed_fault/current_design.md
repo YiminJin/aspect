@@ -1,3 +1,17 @@
+> **Selected native free-turn experiment (11 November 2026).**
+> The straight production/control path remains unchanged. The opt-in bulk-tip
+> `material strips` closure uses V=sum(JxW w)/ds with ds=dx/cos(angle), fixed
+> complete vertical material membership, and its exact weighted force adjoint.
+> Formed planes and full physical tau/A persist; virgin planes maximize a
+> full-section physical Y0 integral within the forward conjugate sector.
+> Mechanics/phase VI and plane selection iterate before one joint publication.
+> This is an additional constitutive assumption, with a distinct checkpoint law,
+> not a transformation or general propagation qualification. Equations, ownership,
+> admission limits and current evidence: [first native free turn](particle_free/FIRST_FREE_TURN_FORMULATION.md).
+> [Reviewed result](particle_free/FIRST_FREE_TURN_REPORT.md): positive load accepts
+> through .075 s with subcell asymmetric extension; .080 fails phase KKT.
+> The reflected comparison has not run; no resolved turning qualification follows.
+
 # Reconstructed Fault — Current Design
 
 **Status:** Current implementation decisions.  
@@ -3691,9 +3705,12 @@ Search ordering is local to a physical step: start exact-first, prefer the
 positive-metric family after an accepted shifted correction, and retry exact
 when scaled mechanics/KKT merit r <= max(10, 0.1 r_last_exact). Shifted attempts
 always restart at the least original shift; exact remains fallback. No active
-classification, search direction or physical history is cached. The near-gate
-clause restores exact-first polishing without changing final gates or linear
-accuracy. The retained preconditioner remains block diagonal; a tested triangular
+classification or physical history is cached, and directions are reset between
+searches. Within one exact linearized search, successive active-set solves reuse
+the previous direction minus the new prescribed-bound displacement as the FGMRES
+initial guess, with constrained free rows zeroed. The same tangent, right-hand
+side, linear tolerance and full linearized VI are checked. The near-gate clause
+restores exact-first polishing without changing final gates or linear accuracy. The retained preconditioner remains block diagonal; a tested triangular
 candidate cost more. See the [efficiency/growth report](particle_free/TIP_EFFICIENCY_AND_GROWTH_REPORT.md)
 for bounded cost, near-intact reaction sensitivity and time/growth limits.
 

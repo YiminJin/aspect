@@ -2,6 +2,7 @@
 #ifndef ASPECT_PHASE_FIELD_OBSTACLE_H
 #define ASPECT_PHASE_FIELD_OBSTACLE_H
 #include <aspect/global.h>
+#include <functional>
 
 namespace aspect
 {
@@ -35,6 +36,18 @@ namespace aspect
                                   const IndexSet &relevant, MPI_Comm communicator,
                                   double tolerance, unsigned int max_iterations,
                                   unsigned int max_linear_iterations);
+
+    /** Additionally verify each restricted CG correction before reclassification.
+     * Report iteration, estimate, explicit residual and requested tolerance. */
+    ObstacleResult solve_obstacle(const LinearAlgebra::SparseMatrix &matrix,
+                                  const LinearAlgebra::Vector &rhs,
+                                  const LinearAlgebra::Vector &lower,
+                                  const LinearAlgebra::Vector &upper,
+                                  LinearAlgebra::Vector &state,
+                                  const IndexSet &relevant, MPI_Comm communicator,
+                                  double tolerance, unsigned int max_iterations,
+                                  unsigned int max_linear_iterations,
+                                  const std::function<void(unsigned int,double,double,double)> &observe_linear_solve);
   }
 }
 #endif

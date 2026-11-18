@@ -1,3 +1,281 @@
+**Step-68 solver repair and timestep comparison complete.** Both matched
+endpoints are available. The local phase increment was most sensitive at
+5.52 ms (12.82% in L²). A further time-resolution experiment, if selected,
+would use four 20 μs intervals from step 68 through 5.52 ms. The subcell
+contour motion leaves a propagation claim open. [Guarded replay report, figures and measurements](STAGE4_PROPAGATION_LINEAR_RESIDUAL.md).
+
+The original one-hour attempt stopped before the first 40 μs interval was
+accepted. Its diagnostic replay matched 134 logged observations and found
+14 returned corrections above the explicit linear tolerance. Both records
+are retained. [Original timeout](STAGE4_PROPAGATION_TIMESTEP_CHECK.md) ·
+[Phase-row audit](STAGE4_PROPAGATION_PHASE_ROW_AUDIT.md).
+
+
+> **Complete — loaded-seed preparation and bounded friction/growth comparison.**
+> [Overnight report and figures](STAGE4_OVERNIGHT_PREPARATION_REPORT.md): native
+> zero-clock preparation, both fixed32 histories, both free76 histories through
+> 6.08 ms and a paired local 40-microsecond check through 5.44 ms are complete.
+> Weakening gives earlier detected right-contour motion; halving the local
+> timestep changes the law difference in advance by 6.43%, preserving its sign.
+> The detected timing gap changes from .24 to .16 ms. All changes remain in the
+> inherited diffuse band/tail: exactly intact and remote material is unchanged,
+> with no new formed section or turning. Retain this preparation for controlled
+> spatial validation; finite propagation and an autonomous event are unqualified.
+> The next recommendation is a matched 256x256 normal-refinement pair, not
+> launched. No job remains active. The local fine pair reached sixteen intervals
+> per law under its time caps, rather than the planned twenty. This entry
+> supersedes earlier next-action text; historical preparations/results remain
+> evidence. Incoming source, protected runtimes, checkpoints and previously
+> documented cleanup losses are preserved.
+
+> **Complete — near-tip prepared-slip experiment; preload calibration closed.**
+> [Report and figures](STAGE4_NEAR_TIP_SLIP_REPORT.md): the new state supplies
+> about .2 mm/s through x=5.5..6 at gamma_e=.000365, with age support x=3..6.
+> Preflight and both eight-interval fixed-phase laws completed with four ranks.
+> Weakening raises final peak rate 30.16% and integrated slip 13.15%, but its
+> right-tip driving excess is only .000168959 Pa: .342% of the remaining deficit.
+> The ahead-tip probe instead has a small negative difference; neither effect
+> changes favorability. No free-phase pair is selected. Close this preparation.
+> Three left-tip rows were already favorable initially; opposing left-taper
+> deformation nearly cancels in integrated slip. These are explicit limitations.
+> Source, protected runtimes and checkpoints are preserved; no job remains active.
+> This entry supersedes earlier next-action paragraphs: no further preload tuning
+> or longer continuation is selected. A future specimen must pass a fresh
+> phase-stability and signed-deformation check at both tips before growth testing.
+
+> **Complete — native preload calibration and tip discrimination.**
+> [Report and figures](STAGE4_PRELOAD_CALIBRATION_REPORT.md): three static
+> preparations and both eight-interval fixed-phase laws completed in 36.1 minutes
+> of numerical work, with four ranks sequentially. The selected gamma_e=.000365
+> is below the first axial-tip-cell row threshold (~.00037533). Weakening raises
+> final peak slip rate by 29.42%, but every checked axial-tip row has less driving
+> than b=a; the limiting-row difference is -22.6 microPa against a .040 Pa deficit.
+> No release criterion is met. Preload tuning is closed; next prepare slip nearer
+> the formed tip, then check a short fixed-phase pair before free growth.
+> Source, protected runtimes, inputs and checkpoints are preserved. No numerical
+> job remains active; earlier cleanup losses and qualification limits remain.
+
+> **Complete — bounded 256×128 phase-release pair.**
+> [Report and figures](STAGE4_PHASE_RELEASE_REPORT.md): both laws accepted all
+> eight midpoint intervals through .00064 s, using four ranks sequentially.
+> Peak stage rates reached 2.135 mm/s (weakening) and 1.650 mm/s (b=a), but neither
+> connected phi=.05 endpoint advanced and exactly intact cells stayed unchanged.
+> Small central/taper adjustment and off-axis changes within the old diffuse tail
+> are retained explicitly. Ahead-tip admissible driving is negative at t=0 and
+> throughout; the fully intact probe reaches only 8.27% of its fracture derivative.
+> Added fracture inventory is 8.98e-8 J/m; absolute physical-work errors are
+> .0270%/.0118% of that change. Production source, protected runtimes and checkpoint
+> meanings are unchanged. No numerical job remains active. The next proposed
+> work is preload calibration against the measured tip/remote driving margins,
+> not continuation of this under-driven pair. Earlier cleanup losses remain.
+
+> **Complete — matched short-wave comparison and native pilot.**
+> [Continuation report](STAGE4_SHORTWAVE_CONTINUATION_REPORT.md) and
+> [compatible limit](SHORTWAVE_COMPATIBILITY.md) supersede the shutdown pause
+> and the older requirement to settle patch spacing before a native pilot.
+> Resolving the .0625 m pair changes growth 37.62→33.90/s; the new .03125 m
+> pair gives 39.86/s. Compatible actual-profile mechanics gives a 41.13219/s
+> fixed-patch limit, distinct from the 61.67/s localized edge and 155.2/s bound.
+> All eight native histories completed. Common-window integrated-rate/slip mesh
+> differences are below 3.4e-7 relative; relative perturbation amplification is
+> 1.04426 for weakening and .95642 for matched b=a, each against its own background.
+> The next proposed experiment is the bounded fresh phase-release pair specified
+> in the report. Patch spacing, temporal accuracy and autonomous-event claims
+> remain open. No free-growth run is launched; no numerical job remains active.
+> Production sources, protected runtimes, checkpoints and acceptance criteria
+> are unchanged. Earlier cleanup losses remain documented.
+>
+> All entries below retain their historical scope; their pause/next-action
+> statements do not override this completed task.
+
+> **Paused for laptop shutdown — Stage 4 short-wave continuation.**
+> [Resume record](STAGE4_SHORTWAVE_PAUSE.md): the 512×128 run completed six smooth
+> actions; short-wave pairs and spectrum/limit analysis remain unfinished. Raw
+> outputs and the partial buffered tail are preserved explicitly. PRTE and all
+> four solver ranks were verified stopped. The new Fourier reference is an
+> unvalidated draft. No pilot or further calculation will run until resumed.
+
+> **Selected wavelength task closed — 12 November 2026.**
+> `CODEX_STAGE4_RSF_WAVELENGTH.txt` is completed under its explicit early-stop
+> provision. [Measured comparison](STAGE4_RSF_WAVELENGTH_REPORT.md) shows faster
+> newly accessible short wavelengths on the refined mesh, with both controls
+> non-growing. The candidate Dc is not qualified for a native instability pilot.
+> The conditional 512 mesh and physical-background preparation were not run.
+> The next proposed work is a short-wave-limit derivation and targeted frozen
+> 512×128 comparison, subject to a later selection. No historical campaign,
+> outstanding time interval or native free-growth run is resumed by this plan.
+
+> **Storage maintenance — 12 November 2026.**
+> [Cleanup report and recovery guide](DISK_CLEANUP_20261112.md): **14.74 GiB
+> recovered; 15.11 GiB free.** Closed dense fields, inactive restart payloads and
+> generated parameter dumps are losslessly indexed; current free-turn/refinement/
+> Stage 4 runs and their parents remain expanded. Restore an archived complete
+> restart prefix before use. All scientific data, runtimes and incoming source
+> work are preserved; only 179 regenerable compiler intermediates were discarded.
+> No numerical run or scientific conclusion changed. Earlier stated data losses
+> remain unchanged; no deferred experiment is selected by this cleanup.
+
+> **Stage 4 RSF assessment closed — 12 November 2026.**
+> [Report, measured responses and figures](STAGE4_RSF_STABILITY_REPORT.md).
+> The fine .080 attempt reached its 90-minute cap without acceptance; the
+> retained matched .0775 comparison and all checkpoints remain intact. Native
+> fixed-phase restoring measurements give 1.242–2.972 MPa/m for six smooth modes,
+> with a full-profile cohesive lower bound .510 MPa/m versus nominal kc=.002.
+> A synthetic Dc=3.221e-7 m gives clear weakening/b=a separation in a temporally
+> checked reduced diagnostic, but one cell-scale mode raises growth from 15.1
+> to 25.8/s. This is not a native unstable event or a qualified free-growth pilot.
+> Next: resolve the unstable spatial mode at fixed phase and establish compatible
+> native preparation before a long trajectory. Cold-start inputs are prepared,
+> not launched; estimated native cost and limitations are in the report.
+> No production source/solver/gate or protected physical binary changed. All
+> Stage 4 jobs are closed. Outstanding .00125 intervals remain deferred.
+> Older proposals below are historical; cleanup availability losses remain.
+
+> **Overnight free-turn validation closed.**
+> [Results and next experiment](OVERNIGHT_FREE_TURN_VALIDATION_REPORT.md):
+> A/C are partial through .0775, B completes .080. Steering survives the completed
+> time/normal comparisons and disappears for horizontal planes under matched
+> loading. First-positive-phase direction registration remains resolution
+> sensitive in material that later slips. The proposed next test is one fine
+> .0025 interval from accepted16/.0775 to .080; it is not automatically selected.
+> No overnight solver remains. The fixed budget, original source/binaries,
+> checkpoints, failed evidence and historical cleanup losses are preserved.
+> The other physical campaigns remain deferred.
+
+> **Free-turn recovery complete: both signs accepted through .080 s.**
+> [Report, endpoint table and figures](RECOVER_FREE_TURN_STEP16_REPORT.md).
+> Two .0025 midpoint steps recover the failed .075–.080 interval using the
+> original protected solver, tolerances and cap. The original .005 failure remains
+> evidence; no derivative or search-rule correction is adopted. A fresh reflected
+> history uses the matching schedule and reverses initial shear from t0.
+> Connected phi=.05 extension is .243096 m, with lateral displacement ±.0482614 m
+> (3.89 hx, ±1.54 hy). Reflected phase/stress errors are small; this is a bounded
+> symmetry result, not time/space qualification of a turn. Full-history signed/
+> absolute physical-work errors are .06685%/.08627% of added fracture.
+> Negative local work, mixed-sign sections and tiny-phase registrations remain
+> explicit. Protected parents/binaries/failures and historical cleanup losses are
+> preserved. Next proposed test: four .00125 intervals from the same .075 parent.
+> No further simulation is launched; no job remains; no commit was requested.
+
+> **First native free-turn result reviewed — accepted through .075 s; .080 s failed.**
+> [Report and figures](FIRST_FREE_TURN_REPORT.md) distinguish the accepted positive
+> history from the failed final trial. The native phi=.05 contour extends 2.054 mm
+> beyond the original endpoint and 9.365 mm laterally: .0329 hx and .300 hy.
+> This is a connected asymmetric extension below cell scale, not a resolved turn.
+> Physical-work error is .205% of added fracture; remote material stays quiet.
+> Original planes/history are retained. The final phase KKT stalls at 7.02479e-7
+> against the unchanged 1e-7 gate; mechanics converges. Last accepted15 checkpoint,
+> tested binaries and failed logs are preserved. The reflected case was not run.
+> [Equations and code map](FIRST_FREE_TURN_FORMULATION.md) describe the opt-in
+> material-strip closure; the straight default is unchanged. Next proposed work:
+> locate the obstructing phase rows from the saved .075 parent before another
+> physical comparison. No simulation or commit was made for this reporting review.
+> Older entries below retain their historical scope; no numerical run is active.
+
+> **Single-turn closure review complete — 11 November 2026.**
+> The user accepts closure of the peak-.60 fixed-direction control for qualitative
+> connected extension. [New formulation](SINGLE_TURN_RSF_FORMULATION.md) and
+> [bounded reference results](SINGLE_TURN_RSF_REPORT.md) distinguish material-plane
+> selection from phase-contour advance. Two work-adjoint curved section laws
+> recover the straight path exactly but differ by .952% in stress, 1.398% in age
+> and 1.487% in added slip; timestep halving preserves the difference.
+> Straight/rotated/reversal, weighted power, full-history and reference lifecycle
+> checks pass, including comparison with the unchanged native point law.
+> The open scientific choice is the material slip carrier/measure at a bend,
+> with an explicit virgin-section extension rule. No native turning option or
+> free-phase turn run is enabled; the current native algorithm remains fixed
+> direction. Unstable sliding and further straight refinement remain deferred.
+> Protected binaries/checkpoints and incoming manual work are preserved; no job
+> remains. Earlier entries below retain their historical scopes.
+
+> **Overnight peak-.60 comparison complete: close the fixed-direction control for qualitative propagation.**
+> [Report, common-time table and endpoint figures](RESOLUTION60_OVERNIGHT_REPORT.md).
+> All eight A quarter-steps, sixteen fresh x-refined B steps, and four late C
+> half-steps accept. Both meshes cross absolute phi=.05 in (.075,.080]; the
+> half-step trajectory narrows this to (.075,.0775]. At .080, contour advance
+> spans .1868–.1962 m, with quiet remote material. Axial-mesh growth L2 differs
+> 1.07%; late temporal difference is 9.82% of the change since .070. Third-time
+> finer-pair ratios shrink at .065/.070 (.467/.600). No precise onset, converged
+> displacement, general order or rupture speed is qualified; hy stayed fixed.
+> A's cap/restart and C's failed terminal-clock startup remain evidence. C uses
+> a separate guarded benchmark clock checker; core/protected binaries, accepted
+> histories, solver/physical criteria and original checkpoint parents are intact.
+> Next model question: general direction and RSF-state mapping with the actual
+> work adjoint and full bulk cohesive energy. No further experiment is launched.
+> Final examples, free-direction, unstable RSF and old .95 continuation remain
+> deferred. No numerical job remains; no commit was requested or made.
+
+> **Four matched-parent half-steps completed through .070 s.**
+> [Report, profiles and absolute-contour tracking](RESOLUTION60_HALFSTEP_REPORT.md):
+> all four midpoint dt=.0025 intervals accept from the saved .060 parent on
+> 128×128. Restore fields match exactly; protected binaries and core are unchanged.
+> At .070, phase-increment L2 differs 7.60% from dt=.005, stress .0314%, slip
+> .1215%; the window physical-work remainder drops 3.75× to .0584% of added fracture.
+> Remote stays quiet. Connected low-amplitude damage crosses the original end,
+> but absolute phi=.05 remains inside it: x=5.93732 versus original endpoint 6 m.
+> Figures show original-seed phi0, current phi and delta phi together.
+> Cost: 27.90 process minutes, 2 MPI ranks; unchanged acceptance gates.
+> Next proposed: eight dt=.00125 intervals over the same .060–.070 window,
+> to assess remaining phase sensitivity. This is not yet full temporal/spatial
+> qualification. No further run is launched; no numerical job remains.
+> Old peak-.95 continuation and longer campaigns remain deferred.
+
+> **Peak-.60 free response complete through .080 s.**
+> [Report and endpoint profiles](RESOLUTION60_FREE_GROWTH_REPORT.md): all 16
+> midpoint dt=.005 intervals accept on 128×128. Central damage appears at .045,
+> taper damage at .060, connected axial damage at .065; remote remains quiet.
+> W/hy broadens from 1.394 to 2.094. Physical-work error is
+> 0.127% of added fracture. Retain the specimen; the held-phase screen's
+> rejection is superseded by this free response. These are sequence observations,
+> not precise onset or mesh/time qualification. Process cost: 95.60 minutes;
+> late constrained-search cost remains substantial, with original gates preserved.
+> Its proposed four half-steps have now been completed; see the newer report above.
+> Protected binaries, incoming source and old peak-.95 checkpoints are unchanged;
+> old 89→96 and longer campaigns remain deferred. No numerical job remains.
+
+> **Resolution-matched peak-0.60 screen closed — 10 November 2026.**
+> [Report and growth decision](RESOLUTION_MATCHED_TIP_REPORT.md): independently
+> equilibrated seeds give W=.043565 m, W/hy=1.394/2.788 with fixed hx=.0625 m.
+> Both meshes favor central-band damage before the outer tips; remote and intact
+> axial material remain subcritical through the shared .06 s endpoint. Integrated
+> slip differs .03921%, but native phase-row driving still depends on resolution.
+> No conditional growth run: this loading is not selected for tip-led onset.
+> Coarse reaches .08 in 19.39 minutes; fine accepts .06 before its 40-minute cap
+> during trial seven. Later fine outputs/checkpoint are absent; no job remains.
+> Next: assess central-versus-tip driving before selecting a changed specimen;
+> short timestep qualification is also needed for quantitative onset. No new
+> physical inputs or longer trajectory are selected. Old peak-.95 step-89 data
+> remain preserved and **89→96 is deferred**, superseding the proposal below.
+> Core physics, quadrature and acceptance gates are unchanged.
+
+> **Saved step 88→89 comparison closed — 10 November 2026.**
+> [Results, checkpoint and convergence figure](TIP_STEP89_SEARCH_REPORT.md):
+> opt-in positive-metric-first accepts step 89 / .055625 s in 454.630 s;
+> default adaptive exact-first reaches its 2400 s cap without acceptance.
+> Physical equations, bounds and gates are unchanged; candidate KKT is 7.04e-8,
+> physical-work error is .00597% of this interval's added fracture, and its
+> snapshot 03 restores exactly. No default endpoint exists for field equivalence
+> or a completed-step speedup. Keep defaults unchanged and the option benchmark-only.
+> Next proposed experiment: bounded 89→96 from that verified checkpoint, then the
+> retained coarse/fine .06 comparison if successful. It has not run. No job remains;
+> third mesh, new loading, .08 and instability work remain deferred.
+> Earlier entries below retain their historical scope.
+
+> **Fine-mesh continuation closed with a quantified cost obstruction — 10 November 2026.**
+> [Results, checkpoint, figures and next experiment](FINE_MESH_GROWTH_CONTINUATION_REPORT.md):
+> 14 new midpoint intervals reach step 88 / .055 s. The .06 s target remains
+> incomplete. Step 89 was deliberately stopped during a second expensive exact
+> active-set search; total continuation cost was 95.61 minutes, with no timeout
+> or failed physical acceptance claimed. The final snapshot 02 restores exactly.
+> One Krylov warm-start change passes matched short controls but does not resolve
+> constrained-search cost. At .055 s, phase-increment L2 differs 189.14%; fine
+> axial onset is .0475 s versus coarse .055 s. Fine physical-work error is only
+> .01181% of added fracture: growth is not quantitatively mesh-resolved.
+> Next proposed experiment: the single saved step 88→89, comparing exact-first
+> and existing positive-metric-first search with all physical/VI gates retained.
+> No job remains. Longer growth, .08, third mesh and instability work stay deferred.
+> Earlier status entries below retain their historical scope.
+
 > **FaultFriction public-interface review complete.**
 > [Interface, callers and equivalence](FAULT_FRICTION_INTERFACE_REVIEW.md):
 > one operation per coefficient quantity, explicit optional age, internal law

@@ -5,6 +5,7 @@
 #include <aspect/phase_field/obstacle.h>
 #include <deal.II/lac/solver_gmres.h>
 #include <deal.II/lac/trilinos_precondition.h>
+#include <cstdlib>
 
 namespace aspect
 {
@@ -19,6 +20,16 @@ namespace aspect
         action(dst,src);
       }
     };
+
+    double explicit_residual(const TipLinearAction &matrix,
+                             const LinearAlgebra::BlockVector &correction,
+                             const LinearAlgebra::BlockVector &rhs)
+    {
+      LinearAlgebra::BlockVector defect(rhs);
+      matrix.vmult(defect,correction);
+      defect-=rhs;
+      return defect.l2_norm();
+    }
   }
 
   template <int dim>
@@ -90,6 +101,7 @@ namespace aspect
                                                   LinearAlgebra::BlockVector &direction)
   {
     TimerOutput::Scope timer(computing_timer,shift>0. ? "Tip shifted search" : "Tip exact search");
+    const bool trace_search=std::getenv("ASPECT_TIP_TRACE_SEARCH")!=nullptr;
     using Vector=LinearAlgebra::BlockVector;
     auto &coupling=*bulk_tip_coupling;
     const auto pb=coupling.phase_block();
@@ -115,8 +127,24 @@ namespace aspect
         double minimum_mass=std::numeric_limits<double>::max();
         for (const auto i:owned)minimum_mass=std::min(minimum_mass,double(mass[i]));
         minimum_mass=Utilities::MPI::min(minimum_mass,mpi_communicator);
-        PhaseField::solve_obstacle(metric,load,lower,upper,phase,relevant,mpi_communicator,
-                                   1e-10*minimum_mass,100,1000);
+        try
+          {
+            const auto metric_result=PhaseField::solve_obstacle(metric,load,lower,upper,phase,relevant,mpi_communicator,
+                                      1e-10*minimum_mass,100,1000,
+                                      [&](unsigned int iterations,double estimate,double explicit_norm,double tolerance)
+            {
+              if (trace_search || !(explicit_norm<=tolerance))
+                pcout<<"   Tip shifted phase CG: shift="<<shift<<", iterations="<<iterations
+                     <<", estimate="<<estimate<<", explicit="<<explicit_norm<<", tolerance="<<tolerance<<std::endl;
+            });
+            if (trace_search)
+              pcout<<"   Tip shifted metric VI: shift="<<shift<<", residual="<<metric_result.residual
+                   <<", tolerance="<<1e-10*minimum_mass<<std::endl;
+          }
+        catch (const SolverControl::NoConvergence &)
+          {
+            return false;
+          }
         direction.block(pb)=phase;
         direction.block(pb)-=x.block(pb);
         Vector action(direction),rhs(direction),correction(direction);
@@ -146,16 +174,22 @@ namespace aspect
         SolverControl control(600,std::max(1e-16,1e-10*rhs.l2_norm()));
         SolverFGMRES<Vector> solver(control,typename SolverFGMRES<Vector>::AdditionalData(80));
         correction=0.;
+        bool krylov_converged=true;
         try
           {
             solver.solve(matrix,correction,rhs,preconditioner);
           }
         catch (const SolverControl::NoConvergence &)
           {
-            coupling.linear_iterations+=control.last_step();
-            return false;
+            krylov_converged=false;
           }
         coupling.linear_iterations+=control.last_step();
+        const double explicit_norm=explicit_residual(matrix,correction,rhs);
+        if (trace_search || !krylov_converged || !(explicit_norm<=control.tolerance()))
+          pcout<<"   Tip shifted mechanics solve: shift="<<shift<<", iterations="<<control.last_step()
+               <<", estimate="<<control.last_value()<<", explicit="<<explicit_norm
+               <<", tolerance="<<control.tolerance()<<std::endl;
+        if (!krylov_converged || !(explicit_norm<=control.tolerance()))return false;
         direction+=correction;
         return true;
       }
@@ -187,6 +221,10 @@ namespace aspect
         coupling.active_releases+=Utilities::MPI::sum(released,mpi_communicator);
         feasible=Utilities::MPI::min(feasible,mpi_communicator);
         violation=Utilities::MPI::max(violation,mpi_communicator);
+        if (trace_search)
+          pcout<<"   Tip linearized VI: pass="<<pass<<", feasible="<<feasible
+               <<", phase="<<violation<<", mechanics="<<gradient.block(0).l2_norm()
+               <<", continuity="<<gradient.block(1).l2_norm()<<std::endl;
         if (pass>0 && feasible && violation<1e-9)return true;
         std::vector<int> classification;
         for (const auto i:owned)classification.push_back(int(active[i]));
@@ -252,17 +290,32 @@ namespace aspect
         const double tolerance=std::max(1e-16,std::min(1e-10*rhs.l2_norm(),1e-10*minimum_mass));
         SolverControl control(600,tolerance);
         SolverFGMRES<Vector> solver(control,typename SolverFGMRES<Vector>::AdditionalData(80));
-        free=0.;
+        // Neighboring active-set problems share the tangent and most free rows.
+        // Reuse the last direction, removing the newly prescribed displacement;
+        // active rows solve identity equations with exactly zero right-hand side.
+        // This is only a Krylov initial guess. Recompute the same residual and
+        // retain the full linearized VI and nonlinear acceptance certificates.
+        free=direction;
+        free-=fixed;
+        for (const auto i:owned)if (active[i]!=0.)free.block(pb)[i]=0.;
+        free.compress(VectorOperation::insert);
+        Timer linear_timer;
+        linear_timer.restart();
+        bool krylov_converged=true;
         try
           {
             solver.solve(matrix,free,rhs,preconditioner);
           }
         catch (const SolverControl::NoConvergence &)
           {
-            coupling.linear_iterations+=control.last_step();
-            return false;
+            krylov_converged=false;
           }
+        const double explicit_norm=explicit_residual(matrix,free,rhs);
+        pcout<<"   Tip bound linear solve: pass="<<pass<<", iterations="<<control.last_step()
+             <<", residual="<<control.last_value()<<", seconds="<<linear_timer.wall_time()
+             <<", explicit="<<explicit_norm<<", tolerance="<<tolerance<<std::endl;
         coupling.linear_iterations+=control.last_step();
+        if (!krylov_converged || !(explicit_norm<=tolerance))return false;
         // Prescribed active rows are exact algebraic data, not approximate
         // Krylov unknowns. Recheck the complete linearized VI after enforcing them.
         for (const auto i:owned)if (active[i]!=0.)free.block(pb)[i]=0.;

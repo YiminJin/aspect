@@ -222,6 +222,7 @@ namespace aspect
                   ExcMessage("Bulk cohesive history initializes once on a fixed mesh."));
       auto s = std::make_shared<BulkCohesiveState>();
       s->flow_rule = bulk_flow_rule;
+      s->material_strips = bulk_tip_material_strips;
       const double G = elastic_shear_moduli[0], Gc = critical_energy_release_rates[0];
       const double Kf = Gc / ((8. / 3.) * this->get_phase_field_handler().get_length_scale());
       std::vector<double> fractions(elastic_shear_moduli.size(), 0.);
@@ -343,7 +344,7 @@ namespace aspect
       auto record = std::make_shared<BulkCohesiveArchive>();
       if (bulk_flow_rule==BulkFlowRule::bulk_tip_sections)
         {
-          record->signature="bulk tip physical tau A DGQ2 sections BE v1";
+          record->signature=bulk_tip_material_strips ? "bulk tip physical tau A material strips midpoint v1" : "bulk tip physical tau A DGQ2 sections BE v1";
           if constexpr(Archive::is_saving::value)
             {
               const auto &s=*bulk_cohesive_state;
@@ -362,10 +363,17 @@ namespace aspect
               const auto law=fault_friction.signed_parameter_record();
               record->material.insert(record->material.end(),law.begin(),law.end());
               for (const auto &a:s.sections)
-                for (double value:
+                {
+                  for (double value:
                      {
                        a.coordinate,a.weight,a.age,a.slip,a.rate,a.force
                      })record->phase.push_back(value);
+                  if (s.material_strips)
+                    {
+                      record->phase.push_back(a.angle);
+                      record->phase.push_back(a.formed?1.:0.);
+                    }
+                }
               std::map<std::string,std::vector<double>> local;
               std::vector<types::global_dof_index> ids(this->get_fe().n_dofs_per_cell());
               const auto pc=this->introspection().phase_field().first_component_index;
@@ -397,7 +405,7 @@ namespace aspect
                 }
             }
           ar &record->signature;
-          AssertThrow(record->signature=="bulk tip physical tau A DGQ2 sections BE v1",ExcMessage("Tip checkpoint law mismatch; no conversion."));
+          AssertThrow(record->signature==(bulk_tip_material_strips ? "bulk tip physical tau A material strips midpoint v1" : "bulk tip physical tau A DGQ2 sections BE v1"),ExcMessage("Tip checkpoint law mismatch; no conversion."));
           ar &record->quadrature &record->step &record->publications &record->time &record->material &record->phase &record->cells &record->local;
           if constexpr(Archive::is_loading::value)bulk_cohesive_archive=std::move(record);
           return;
@@ -503,16 +511,31 @@ namespace aspect
           const auto law=fault_friction.signed_parameter_record();
           material.insert(material.end(),law.begin(),law.end());
           AssertThrow(material==a.material,ExcMessage("Tip checkpoint material/RSF law changed."));
-          AssertDimension(a.phase.size(),6*s.sections.size());
+          const unsigned int section_stride=s.material_strips?8:6;
+          AssertDimension(a.phase.size(),section_stride*s.sections.size());
           for (unsigned int i=0; i<s.sections.size(); ++i)
             {
               auto &v=s.sections[i];
-              AssertThrow(v.coordinate==a.phase[6*i] && v.weight==a.phase[6*i+1],ExcMessage("Tip section geometry changed."));
-              v.age=a.phase[6*i+2];
-              v.slip=a.phase[6*i+3];
-              v.rate=a.phase[6*i+4];
-              v.force=a.phase[6*i+5];
+              const auto offset=section_stride*i;
+              if (s.material_strips)
+                {
+                  v.angle=a.phase[offset+6];
+                  AssertThrow(std::isfinite(v.angle) && std::abs(v.angle)<numbers::PI/4.
+                              && (a.phase[offset+7]==0. || a.phase[offset+7]==1.)
+                              && std::abs(v.weight-a.phase[offset+1]*std::cos(v.angle))<1e-13*v.weight,
+                              ExcMessage("Material-strip frame/reference length mismatch."));
+                  v.formed=a.phase[offset+7]==1.;
+                  v.weight=a.phase[offset+1];
+                }
+              AssertThrow(v.coordinate==a.phase[offset] && v.weight==a.phase[offset+1],ExcMessage("Tip section geometry changed."));
+              v.age=a.phase[offset+2];
+              v.slip=a.phase[offset+3];
+              v.rate=a.phase[offset+4];
+              v.force=a.phase[offset+5];
             }
+          if (s.material_strips)
+            for (auto &entry:s.normal_weights)for (unsigned int q=0;q<entry.second.size();++q)
+                entry.second[q]*=std::cos(s.sections[s.section_ids.at(entry.first)[q]].angle);
           const auto &fe=this->get_fe();
           const auto pc=this->introspection().phase_field().first_component_index;
           const auto po=this->get_solution().get_block_indices().block_start(this->introspection().phase_field().block_index);

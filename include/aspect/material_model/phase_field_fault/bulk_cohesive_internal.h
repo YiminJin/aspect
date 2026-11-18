@@ -42,7 +42,10 @@ namespace aspect
       struct Section
       {
         double coordinate=0., weight=0., age=0., slip=0., rate=0., force=0.;
+        double angle=0.; ///< Recorded material plane, radians from the positive x axis.
+        bool formed=false; ///< Exact positive accepted phase support, including the declared seed.
       };
+      bool material_strips=false;
       std::vector<Section> sections;
       std::map<CellId,std::vector<unsigned int>> section_ids;
       std::map<CellId,std::vector<double>> normal_weights;
@@ -52,7 +55,7 @@ namespace aspect
       }
       std::string checkpoint_signature() const
       {
-        if (direct_tip()) return "bulk tip physical tau A DGQ2 sections BE v1";
+        if (direct_tip()) return material_strips ? "bulk tip physical tau A material strips midpoint v1" : "bulk tip physical tau A DGQ2 sections BE v1";
         if (flow_rule == BulkFlowRule::coulomb_fixed_phase)
           return "bulk cohesive closed Coulomb fixed phase cell history v1";
         if (flow_rule == BulkFlowRule::fixed_tensor)

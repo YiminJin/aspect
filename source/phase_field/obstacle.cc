@@ -19,6 +19,20 @@ namespace aspect
                                   const double tolerance, const unsigned int max_iterations,
                                   const unsigned int max_linear_iterations)
     {
+      return solve_obstacle(matrix,rhs,lower,upper,state,relevant,communicator,tolerance,
+                            max_iterations,max_linear_iterations,{});
+    }
+
+    ObstacleResult solve_obstacle(const LinearAlgebra::SparseMatrix &matrix,
+                                  const LinearAlgebra::Vector &rhs,
+                                  const LinearAlgebra::Vector &lower,
+                                  const LinearAlgebra::Vector &upper,
+                                  LinearAlgebra::Vector &state,
+                                  const IndexSet &relevant, const MPI_Comm communicator,
+                                  const double tolerance, const unsigned int max_iterations,
+                                  const unsigned int max_linear_iterations,
+                                  const std::function<void(unsigned int,double,double,double)> &observe_linear_solve)
+    {
       const auto owned = state.locally_owned_elements();
       LinearAlgebra::Vector gradient(owned, communicator), active(owned, communicator), fixed(owned, communicator),
                     load(owned, communicator), candidate(owned, communicator),
@@ -106,7 +120,26 @@ namespace aspect
           SolverControl control(max_linear_iterations, std::max(.05 * tolerance, roundoff));
           SolverCG<LinearAlgebra::Vector> solver(control);
           correction=0.;
-          solver.solve(restricted, correction, correction_rhs, preconditioner);
+          if (!observe_linear_solve)
+            solver.solve(restricted, correction, correction_rhs, preconditioner);
+          else
+            {
+              bool krylov_converged=true;
+              try
+                {
+                  solver.solve(restricted,correction,correction_rhs,preconditioner);
+                }
+              catch (const SolverControl::NoConvergence &)
+                {
+                  krylov_converged=false;
+                }
+              restricted.vmult(gradient,correction);
+              gradient-=correction_rhs;
+              const double explicit_norm=gradient.l2_norm();
+              observe_linear_solve(control.last_step(),control.last_value(),explicit_norm,control.tolerance());
+              if (!krylov_converged || !(explicit_norm<=control.tolerance()))
+                throw SolverControl::NoConvergence(control.last_step(),explicit_norm);
+            }
           candidate+=correction;
           result.linear_iterations += control.last_step();
           // Enforce active Dirichlet rows exactly before rechecking the VI.
