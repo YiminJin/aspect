@@ -1,3 +1,5 @@
+**Resume the coarse branch from accepted step 76 at 6.08 ms.** The separate 40 μs branch ends at step 75 at 5.92 ms. Native generations, hashes and analysis paths are listed in the report. [Repaired propagation window and focused timestep comparison](STAGE4_PROPAGATION_REPAIRED_80US.md).
+
 **The four-rank replay exited successfully at accepted step 72, 5.60 ms.**
 The native restart and its member hashes are archived under
 `build-particle-free/guard68/window/`. The separate 80 μs reference ends at

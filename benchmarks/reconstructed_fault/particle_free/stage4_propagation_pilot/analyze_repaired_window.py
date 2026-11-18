@@ -21,6 +21,7 @@ evidence=root/'benchmarks/reconstructed_fault/particle_free/evidence/stage4_prop
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('segments',nargs='+',type=Path,help='Ordered repaired run directories')
 parser.add_argument('--through-step',type=int,help='Last completed native snapshot to include')
+parser.add_argument('--refinement',type=Path,help='Optional native output directory for the local 40 μs branch')
 parser.add_argument('--destination',type=Path,default=evidence/'guard80')
 args=parser.parse_args()
 dest=args.destination;dest.mkdir(parents=True,exist_ok=True)
@@ -136,28 +137,36 @@ rates=np.asarray(rates)*1e3
 t=np.array([r['time'] for r in history])*1e3
 fig,ax=plt.subplots(2,2,figsize=(12,8),layout='constrained')
 im=ax[0,0].pcolormesh(times,x,rates.T,rasterized=True,shading='nearest',cmap='RdBu_r',norm=SymLogNorm(linthresh=.3,vmin=-max(abs(rates).max(),1),vmax=max(abs(rates).max(),1)))
+iso=ax[0,0].contour(times,x,rates.T,levels=[5,10],colors=['#e6c985','white'],linewidths=.75)
+ax[0,0].clabel(iso,fmt='%g mm/s',fontsize=7,manual=[(2.9,5.80),(4.8,5.58)])
 ax[0,0].axvline(5.44,color='k',ls=':',lw=1)
 ax[0,0].axhline(initial_front['right_x'],color='k',ls='--',lw=.7)
 ax[0,0].set(ylabel='Material station x (m)',xlabel='Midpoint time (ms)',title='Signed section slip rate')
 fig.colorbar(im,ax=ax[0,0],label='mm/s')
 for k in ['upper','lower']:
     ax[0,1].plot(t,[r[k+'_advance_mm'] for r in history],'-o',ms=3,label=k.capitalize()+' flank')
+if args.refinement:
+    refined=read(args.refinement/'pilot-summary.csv')
+    assert np.all(abs(refined['dt']-4e-5)<1e-14)
+    points=[flanks(coefficients(args.refinement,int(row['step'])),16) for row in refined]
+    for positions,origin,color,caption in zip(np.array(points).T,(u0,l0),('C0','C1'),('40 μs endpoints',None)):
+        ax[0,1].scatter(1e3*refined['time'],1e3*(positions-origin),s=35,facecolors='white',edgecolors=color,marker='D',zorder=4,label=caption)
 ax[0,1].set(title='Connected right φ = 0.05 contour',ylabel='Advance from prepared seed (mm)',xlabel='Endpoint time (ms)');ax[0,1].legend()
 stations=(3.01,4.5,5.5,5.9,6.)
 for pos in stations:
     ax[1,0].plot(times,[np.interp(pos,x,v) for v in rates],label=f'{pos:g} m')
 ax[1,0].axvline(5.44,color='k',ls=':',lw=1)
 ax[1,0].set(title='Slip at fixed material stations',xlabel='Midpoint time (ms)',ylabel='Signed rate (mm/s)');ax[1,0].legend(fontsize=8)
-gx,gy=np.meshgrid(np.linspace(5.89,6.22,385),np.linspace(1.94,2.23,317))
+gx,gy=np.meshgrid(np.linspace(5.89,6.22,385),np.linspace(1.825,2.19,385))
 at68,final=[value(a,gx,gy) for a in (parent,b)]
 im=ax[1,1].pcolormesh(gx,gy,final-at68,rasterized=True,cmap='magma',shading='auto',vmin=0)
 fig.colorbar(im,ax=ax[1,1],label='Phase increment since 5.44 ms')
 for vals,color,style in [(at68,'cyan','dashed'),(final,'white','solid')]:
     ax[1,1].contour(gx,gy,vals,levels=[.05],colors=color,linestyles=style,linewidths=1.4)
 from matplotlib.patches import Rectangle
-for y,i in np.argwhere(active & upper):
+for y,i in np.argwhere(active & (xx>=6)):
     ax[1,1].add_patch(Rectangle((i*H,y*H),H,H,fill=False,edgecolor='lime',lw=1.0))
-ax[1,1].set(title='Right flank and initially intact cells (green)',xlabel='x (m)',ylabel='y (m)',aspect='equal')
+ax[1,1].set(title='Right tip and newly damaged intact cells (green)',xlabel='x (m)',ylabel='y (m)',aspect='equal')
 from matplotlib.lines import Line2D
 ax[1,1].legend(handles=[Line2D([],[],color=c,ls=s,label=l) for c,s,l in [('cyan','--','5.44 ms'),('white','-',f'{t[-1]:.2f} ms')]],facecolor='.22',labelcolor='white',fontsize=8)
 for ext in ('png','pdf'):fig.savefig(dest/('slip-and-upper-flank.'+ext),dpi=180)

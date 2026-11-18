@@ -1,3 +1,5 @@
+**The repaired executable reproduced the 80 μs control through 5.60 ms and continued through 6.08 ms.** The local comparison at 5.92 ms uses the same executable, original physical convergence gates and the same accepted parent. The two reduction scripts distinguish midpoint section rates, accepted endpoint data and the full physical-work ledger. [Repaired propagation window and focused timestep comparison](STAGE4_PROPAGATION_REPAIRED_80US.md).
+
 **The bulk-tip solver now checks each returned correction with the operator
 and load used for that solve before it updates the constraints.** The exact
 active-set solve and shifted mechanics solve live in `bulk_tip_linear.cc`.

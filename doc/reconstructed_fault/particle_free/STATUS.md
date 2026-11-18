@@ -1,4 +1,4 @@
-**80 μs replay verified through 5.60 ms.** The four-rank continuation starts from repaired step 70. The hard replay interval cost 32 minutes, down from 110. The 20 μs check is deferred. [Replay and local resistance comparison](STAGE4_PROPAGATION_REPAIRED_80US.md).
+**The repaired 80 μs pilot reached 6.08 ms.** The matched 40 μs check reproduced the first two additional damaged cells by 5.92 ms. Integrated slip differed by 0.089% and the connected contour advance by 36.44 μm. No new section formed. The 20 μs check is deferred. [Repaired propagation window and focused timestep comparison](STAGE4_PROPAGATION_REPAIRED_80US.md).
 
 **The guarded step-68 replay reached 5.60 ms.** Four 40 μs intervals passed
 the original physical residual and publication checks in 69 min 10 s on four

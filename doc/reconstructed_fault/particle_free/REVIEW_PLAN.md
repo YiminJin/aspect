@@ -1,3 +1,5 @@
+**The repaired replay and local refinement are complete.** The next candidate is four 80 μs intervals from step 76 to 6.40 ms, observing the connected 0.01 contour in initially intact material and the 5 mm/s slip front. The earlier proposed 20 μs check is deferred. [Repaired propagation window and focused timestep comparison](STAGE4_PROPAGATION_REPAIRED_80US.md).
+
 **Step-68 solver repair and timestep comparison complete.** Both matched
 endpoints are available. The local phase increment was most sensitive at
 5.52 ms (12.82% in L²). A further time-resolution experiment, if selected,

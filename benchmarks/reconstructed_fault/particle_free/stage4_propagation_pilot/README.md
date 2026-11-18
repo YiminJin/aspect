@@ -57,3 +57,13 @@ bounded40-microsecond check. `compare_half68.py` compares endpoint phase, age an
 slip at5.52/5.60 ms and averages stage rates/resistance over matching80-microsecond
 intervals. Common-reference section error norms and each state physical measures
 are distinguished. Missing matched endpoints remain explicitly missing.
+
+For the repaired 80 μs pilot, pass the two chronological run directories
+to `analyze_repaired_window.py` and the 40 μs branch's native output directory
+to `--refinement`. The reducer uses the common step-68 parent and retained
+prehistory, then produces a space-time slip plot, independent upper and lower
+contours, and initially intact cell and work tables. To compare the 5.92 ms
+endpoints, run `compare_flank_interval.py PARENT_OUTPUT 73 COARSE_OUTPUT
+FINE_OUTPUT RESULT.json`. The coarse output contains the step-73 parent and
+its next 80 μs step. The fine output contains two accepted 40 μs steps from
+that same parent.
