@@ -26,6 +26,7 @@ LinearAlgebra::BlockVector prepared_phase_reference() const
 void export_prepared_history() const
 {
   const auto &state=*model().bulk_cohesive_state;
+  AssertThrow(!state.section_geometry->cut,ExcMessage("This prepared horizontal specimen requires its original Cartesian section quadrature."));
   const auto suffix="-r"+std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator()));
   std::ofstream map(this->get_output_directory()+"prepared-history"+suffix+".csv");
   std::ofstream binary(this->get_output_directory()+"prepared-history"+suffix+".bin",std::ios::binary);

@@ -1,4 +1,8 @@
+The localized forward-tip option uses compact area sampling for direction and complete material sections for RSF response. The original full-section experiments retain their historical law and archive identity. [Current option, admission and bounded comparison](TIP_DIRECTION_AND_STRIP_RESOLUTION.md).
+
 # First native free-turn closure
+
+The horizontal-frame equations below describe the original control. The [fixed-reference section guide](tip_treatment/reference_sections.md) extends them to a declared incoming orientation.
 
 The user selects material-area/reference-arclength RSF for this experiment
 ([task](CODEX_FIRST_FREE_TURN.txt)). This is an opt-in constitutive assumption,

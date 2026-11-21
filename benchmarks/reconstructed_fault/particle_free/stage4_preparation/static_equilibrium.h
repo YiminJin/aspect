@@ -6,6 +6,7 @@ void settle_loaded_seed(internal::BulkTipCoupling<dim> &op,
                         const std::vector<double> &force)
 {
   using Vector=LinearAlgebra::BlockVector;
+  AssertThrow(!(*op.parent).section_geometry->cut,ExcMessage("This prepared horizontal specimen requires its original Cartesian section quadrature."));
   using Scalar=LinearAlgebra::Vector;
   namespace Tip=MaterialModel::BulkCohesive::Tip;
   using Tensor=MaterialModel::BulkCohesive::Tensor;
@@ -76,7 +77,7 @@ void settle_loaded_seed(internal::BulkTipCoupling<dim> &op,
               const auto r=Tip::update(parameters,{Tensor(),Tensor(),0.},E,phi[q],op.dt,S,force[k]);
               storage+=values.JxW(q)*(r.bulk_energy+r.cohesive_energy+force[k]*2.*(r.state.cohesive_strain*S));
               for(unsigned int j=0;j<op.basis.expansion.m();++j)
-                result.gradient[ids[fe.component_to_system_index(op.pc,j)]-po]-=values.JxW(q)*op.phase_values(q,j)*r.driving;
+                result.gradient[ids[fe.component_to_system_index(op.pc,j)]-po]-=values.JxW(q)*values.shape_value_component(fe.component_to_system_index(op.pc,j),q,op.pc)*r.driving;
             }
         }
       result.gradient.compress(VectorOperation::add);result.gradient*=1./op.Kf;

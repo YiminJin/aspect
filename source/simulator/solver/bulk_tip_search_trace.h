@@ -107,7 +107,7 @@ namespace aspect { namespace internal {
     rows<<std::setprecision(17); points<<std::setprecision(17);
     const auto &fe=op.get_fe();
     const auto parent=op.accepted_parent();
-    FEValues<dim> values(op.get_mapping(),fe,QGauss<dim>(parent->quadrature),update_values|update_JxW_values);
+    MaterialModel::BulkCohesive::Tip::SectionValues<dim> cell_values(op.get_mapping(),fe,*parent->section_geometry,parent->quadrature,update_values|update_JxW_values);
     std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
     const auto offset=x.get_block_indices().block_start(pb);
     unsigned int nphase=1; for (unsigned int d=0;d<dim;++d)nphase*=3;
@@ -127,7 +127,7 @@ namespace aspect { namespace internal {
             const auto actual=PhaseField::box_constraint(trial.block(pb)[i],candidate.residual.block(pb)[i],mass[i],lower[i],upper[i]);
             const auto prediction=PhaseField::box_constraint(trial.block(pb)[i],predicted.block(pb)[i],mass[i],lower[i],upper[i]);
             rows<<iteration<<','<<shift<<','<<alpha<<','<<i<<','<<cell->id().to_string()<<','<<j<<','<<position[0]<<','<<position[1]<<','<<lower[i]<<','<<upper[i]<<','<<x.block(pb)[i]<<','<<trial.block(pb)[i]<<','<<x.block(pb)[i]-lower[i]<<','<<mass[i]<<','<<current.residual.block(pb)[i]/mass[i]<<','<<candidate.residual.block(pb)[i]/mass[i]<<','<<op.fracture_scale()*candidate.residual.block(pb)[i]/mass[i]<<','<<incoming.projected_residual<<','<<actual.projected_residual<<','<<prediction.projected_residual<<','<<incoming.status<<','<<actual.status<<','<<direction.block(pb)[i]<<','<<action.block(pb)[i]/mass[i]<<','<<(candidate.residual.block(pb)[i]-predicted.block(pb)[i])/mass[i]<<'\n';
-            values.reinit(cell);
+            const auto &values=cell_values.reinit(cell);
             for (unsigned int q=0;q<values.n_quadrature_points;++q)
               {
                 const auto k=parent->section_ids.at(cell->id())[q];

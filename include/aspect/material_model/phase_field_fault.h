@@ -1376,6 +1376,12 @@ namespace aspect
         const char *tip_checkpoint_signature() const;
         bool bulk_tip_equilibrate_seed = false; ///< Zero-clock fracture equilibration before history initialization.
         double bulk_tip_initial_age = 1.; ///< Virgin and initially damaged section age, seconds.
+        unsigned int oblique_strip_subdivisions = 1; ///< Equal subdivisions of each mesh-scale material strip.
+        bool exact_oblique_sections = false;
+        bool localize_tip_direction = false;
+        dealii::Point<2> initial_selection_tip;
+        double selection_radius_in_lengths = 2.;
+        double tip_reference_degrees = 0.; ///< Fixed incoming tangent measured CCW from positive x.
         /**
          * @}
          */

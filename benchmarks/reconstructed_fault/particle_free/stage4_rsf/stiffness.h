@@ -13,6 +13,7 @@ void measure_restoring_response()
   const auto original_coordinates=op.accepted_coordinates;
   const auto original_evaluation=op.accepted_evaluation;
   const auto &state=*model().bulk_cohesive_state;
+  AssertThrow(!state.section_geometry->cut,ExcMessage("This prepared horizontal specimen requires its original Cartesian section quadrature."));
   gate("restoring diagnostic requires frozen phase",bool(std::getenv("ASPECT_TIP_FIXED_PHASE")));
   const auto comm=this->get_mpi_communicator();
   const unsigned int rank=Utilities::MPI::this_mpi_process(comm),ns=state.sections.size(),nm=7;

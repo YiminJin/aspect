@@ -440,8 +440,22 @@ namespace aspect
 
           prm.declare_entry("Bulk tip time update", "backward Euler", Patterns::Selection("backward Euler|midpoint"),
                             "Numerical update for the integrated native Bernstein tip control. Midpoint uses stage mechanics and exact constant-stage-rate aging; it is not L-stable.");
+          prm.declare_entry("Bulk tip reference angle", "0", Patterns::Double(-180.,180.),
+                            "Signed counterclockwise degrees from positive x to the declared incoming fault tangent. "
+                            "The fixed material sections span the specimen perpendicular to this tangent.");
+          prm.declare_entry("Bulk tip oblique integration", "local strips", Patterns::Selection("local strips|exact lines"),
+                            "Nonaligned affine cells use complete material strips, or the projected-vertex line reference.");
+          prm.declare_entry("Bulk tip strip subdivisions", "1", Patterns::Integer(1),
+                            "Divide each mesh-scale longitudinal strip into this many equal material strips. "
+                            "Only applies to nonaligned local-strip integration.");
+          prm.declare_entry("Localize prospective tip direction", "false", Patterns::Bool(),
+                            "Sample the direction score near the accepted forward tip. Applies only to material strip plane laws.");
+          prm.declare_entry("Initial direction selection tip", "0,0", Patterns::List(Patterns::Double(),2,2),
+                            "Physical Cartesian position of the positive reference-direction tip of the initial seed.");
+          prm.declare_entry("Direction selection radius in phase lengths", "2", Patterns::Double(0.),
+                            "Trial radius of compact direction sampling, divided by the phase length.");
           prm.declare_entry("Bulk tip section closure", "fixed direction", Patterns::Selection("fixed direction|material strips|material strips Coulomb formation"),
-                            "Experimental material-area/reference-arclength closure on immutable full-height Cartesian strips. "
+                            "Experimental material-area/reference-arclength closure on complete sections of a fixed material reference frame. "
                             "Material strips select virgin planes by integrated intact-reaction driving. The Coulomb formation "
                             "option selects from accepted strip-mean stress and reference friction. Formed planes and state persist. "
                             "Restricted to a single forward graph, fixed reference geometry, scalar confinement and midpoint.");
@@ -665,6 +679,13 @@ namespace aspect
           bulk_cohesive_phase = prm.get("Fault constitutive mode") == "bulk cohesive";
           const auto bulk_rule = prm.get("Bulk cohesive flow rule");
           bulk_tip_midpoint = prm.get("Bulk tip time update") == "midpoint";
+          tip_reference_degrees = prm.get_double("Bulk tip reference angle");
+          exact_oblique_sections = prm.get("Bulk tip oblique integration")=="exact lines";
+          oblique_strip_subdivisions = prm.get_integer("Bulk tip strip subdivisions");
+          localize_tip_direction = prm.get_bool("Localize prospective tip direction");
+          const auto tip_coordinates=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial direction selection tip")));
+          initial_selection_tip=dealii::Point<2>(tip_coordinates[0],tip_coordinates[1]);
+          selection_radius_in_lengths=prm.get_double("Direction selection radius in phase lengths");
           const auto closure = prm.get("Bulk tip section closure");
           tip_section_closure = closure == "material strips" ? TipSectionClosure::intact_driving :
                                 closure == "material strips Coulomb formation" ? TipSectionClosure::coulomb_formation :
@@ -693,6 +714,8 @@ namespace aspect
           material_direct_stress = prm.get("Material stress representation") == "direct physical stress";
           AssertThrow(!bulk_tip_midpoint || (uses_integrated_bulk_tip() && this->get_parameters().use_bernstein_phase_basis),
                       ExcMessage("Midpoint is restricted to the integrated native Bernstein bulk-tip route."));
+          AssertThrow(!localize_tip_direction || (tip_section_closure!=TipSectionClosure::fixed_direction && selection_radius_in_lengths>0.),
+                      ExcMessage("Localized direction requires a prospective-plane law and a positive radius."));
           AssertThrow(tip_section_closure == TipSectionClosure::fixed_direction || (uses_integrated_bulk_tip() && bulk_tip_midpoint),
                       ExcMessage("Material strips require native bulk tip and midpoint; no checkpoint conversion."));
           AssertThrow(!material_direct_stress || dg_material_transport,

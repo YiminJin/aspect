@@ -15,15 +15,45 @@ namespace aspect
   {
     namespace
     {
-      MaterialModel::BulkCohesive::Tensor strip_direction(const double angle)
+      // Only the contiguous initial material seed behind the declared tip
+      // owns an incoming plane. A disconnected positive tail has no such
+      // history. This test has no phase-amplitude cutoff.
+      template <class Sections>
+      void restrict_to_initial_seed(std::vector<unsigned int> &support,const Sections &sections,
+                                    const double tip_xi,const double length)
       {
-        MaterialModel::BulkCohesive::Tensor S;
-        if (angle==0.) { S[0][1]=.5; return S; }
-        S[0][0]=-.5*std::sin(2.*angle);
-        S[1][1]=-S[0][0];
-        S[0][1]=.5*std::cos(2.*angle);
-        return S;
+        const auto anchor=std::lower_bound(sections.begin(),sections.end(),tip_xi-length,
+                                           [](const auto &s,double xi){return s.coordinate<xi;});
+        const auto i=static_cast<std::size_t>(anchor-sections.begin());
+        AssertThrow(anchor!=sections.end() && anchor->coordinate<=tip_xi && support[i],
+                    ExcMessage("The forward tip requires an initially supported station one phase length inside the seed."));
+        auto first=i,last=i+1;
+        while (first>0 && support[first-1]) --first;
+        while (last<support.size() && sections[last].coordinate<=tip_xi && support[last]) ++last;
+        std::fill(support.begin(),support.begin()+first,0);
+        std::fill(support.begin()+last,support.end(),0);
       }
+
+      // Center the two traction moments before squaring. In cold creep the
+      // integrated resistance can cancel essentially the entire predictor.
+      struct SectionShearVariance
+      {
+        double weight=0., mean_u=0., mean_v=0., uu=0., uv=0., vv=0.;
+
+        void add(const double a,const double u,const double v)
+        {
+          if (a==0.) return;
+          const double du=u-mean_u, dv=v-mean_v, sum=weight+a;
+          const double scale=a*(weight/sum);
+          uu+=scale*du*du;
+          uv+=scale*du*dv;
+          vv+=scale*dv*dv;
+          mean_u+=(a/sum)*du;
+          mean_v+=(a/sum)*dv;
+          weight=sum;
+        }
+      };
+
       template <int dim>
       MaterialModel::BulkCohesive::Tensor embed_tip_strain(const SymmetricTensor<2,dim> &strain)
       {
@@ -106,43 +136,38 @@ namespace aspect
       if (midpoint) for (const auto i:upper.locally_owned_elements()) upper[i]=.5*(1.+lower[i]);
       upper.compress(VectorOperation::insert);
       mass.reinit(sets.system_partitioning[pb],comm);
-      const auto quadrature = model.mechanical_quadrature();
-      phase_values.reinit(quadrature.size(), nphase);
-      const auto &phase_element = fe.base_element(fe.component_to_base_index(pc).first);
-      for (unsigned int q = 0; q < quadrature.size(); ++q)
-        for (unsigned int j = 0; j < nphase; ++j)
-          phase_values(q,j) = basis.native_bernstein
-                              ? phase_element.shape_value(j, quadrature.point(q))
-                              : basis.basis_value(j, quadrature.point(q));
       LinearAlgebra::Vector old_coefficients(sets.system_partitioning[pb], sets.system_relevant_partitioning[pb], comm);
       old_coefficients = lower;
-      FEValues<dim> values(this->get_mapping(), fe, quadrature, update_JxW_values);
+      MaterialModel::BulkCohesive::Tip::SectionValues<dim> cell_values(this->get_mapping(),fe,*parent->section_geometry,
+                                                                      parent->quadrature,update_values|update_JxW_values);
       for (const auto &cell : this->get_dof_handler().active_cell_iterators())
         if (cell->is_locally_owned())
           {
             cell->get_dof_indices(ids);
-            values.reinit(cell);
+            const auto &values=cell_values.reinit(cell);
             auto &samples = parent_phase_values[cell->id()];
-            samples.assign(quadrature.size(), 0.);
-            for (unsigned int q = 0; q < quadrature.size(); ++q)
+            samples.assign(values.n_quadrature_points, 0.);
+            for (unsigned int q = 0; q < values.n_quadrature_points; ++q)
               for (unsigned int j = 0; j < nphase; ++j)
                 {
                   const auto index = ids[fe.component_to_system_index(pc,j)]-po;
-                  mass[index] += values.JxW(q)*phase_values(q,j);
-                  samples[q] += phase_values(q,j)*old_coefficients[index];
+                  mass[index] += values.JxW(q)*values.shape_value_component(fe.component_to_system_index(pc,j),q,pc);
+                  samples[q] += values.shape_value_component(fe.component_to_system_index(pc,j),q,pc)*old_coefficients[index];
                 }
           }
       mass.compress(VectorOperation::add);
-      if (parent->material_strips)
+      if (parent->material_strips && (!model.localize_tip_direction || parent->step==0))
         {
           std::vector<unsigned int> formed(formed_sections.size(),0);
-          for (const auto &cell:parent_phase_values)for (unsigned int q=0;q<cell.second.size();++q)
-              if (cell.second[q]>0.)formed[parent->section_ids.at(cell.first)[q]]=1;
+          for (const auto &cell:parent_phase_values)
+            for (unsigned int q=0;q<cell.second.size();++q)
+              if (cell.second[q]>0.) formed[parent->section_ids.at(cell.first)[q]]=1;
           Utilities::MPI::max(formed,comm,formed);
-          for (unsigned int k=0;k<formed.size();++k)formed_sections[k]=formed_sections[k] || formed[k];
+          if (model.localize_tip_direction)
+            restrict_to_initial_seed(formed,parent->sections,parent->section_geometry->frame.xi(model.initial_selection_tip),ell);
+          for (unsigned int k=0;k<formed.size();++k) formed_sections[k]=formed_sections[k] || formed[k];
         }
-      if (model.tip_section_closure==Model::TipSectionClosure::coulomb_formation && this->get_timestep_number()>0)
-        prepare_coulomb_planes();
+
       LinearAlgebra::Vector native_gradient;
       LinearAlgebra::SparseMatrix native_hessian;
       this->get_phase_field_handler().assemble_dg_fracture(parent_field,native_gradient,&native_hessian);
@@ -244,15 +269,16 @@ namespace aspect
       // sampled from Bernstein coordinates below on both compatibility paths;
       // no nodal copy or second ghost exchange is needed for this evaluation.
       const auto field=ghost(x);
-      FEValues<dim> values(this->get_mapping(),fe,model.mechanical_quadrature(),
+      MaterialModel::BulkCohesive::Tip::SectionValues<dim> cell_values(this->get_mapping(),fe,*parent->section_geometry,parent->quadrature,
                            update_values|update_gradients|update_JxW_values);
-      const unsigned int nq=values.n_quadrature_points,dpc=fe.n_dofs_per_cell();
+      const unsigned int dpc=fe.n_dofs_per_cell();
       std::vector<types::global_dof_index> ids(dpc);
-      std::vector<SymmetricTensor<2,dim>> strains(nq);
-      std::vector<double> phis(nq),old_phis(nq),pressures(nq);
-      auto sample=[&](const auto &cell)
+      std::vector<SymmetricTensor<2,dim>> strains;
+      std::vector<double> phis,old_phis,pressures;
+      auto sample=[&](const auto &cell,const FEValues<dim> &values)
       {
-        values.reinit(cell);
+        const auto nq=values.n_quadrature_points;
+        strains.resize(nq); phis.resize(nq); pressures.resize(nq);
         cell->get_dof_indices(ids);
         values[intro.extractors.velocities].get_function_symmetric_gradients(field,strains);
         std::fill(phis.begin(),phis.end(),0.);
@@ -260,18 +286,20 @@ namespace aspect
         for (unsigned int q=0; q<nq; ++q)for (unsigned int j=0; j<basis.expansion.m(); ++j)
             {
               const auto index=ids[fe.component_to_system_index(pc,j)];
-              phis[q]+=phase_values(q,j)*field[index];
+              phis[q]+=values.shape_value_component(fe.component_to_system_index(pc,j),q,pc)*field[index];
             }
         values[intro.extractors.pressure].get_function_values(field,pressures);
       };
       for (const auto &cell:this->get_dof_handler().active_cell_iterators()) if (cell->is_locally_owned())
           {
-            sample(cell);
+            const auto &values=cell_values.reinit(cell);
+            const auto nq=values.n_quadrature_points;
+            sample(cell,values);
             for (unsigned int q=0; q<nq; ++q)
               {
                 const auto &h=parent->history.at(cell->id())[q];
                 const auto k=parent->section_ids.at(cell->id())[q];
-                const auto S=strip_direction(section_angles[k]);
+                const auto S=parent->section_geometry->frame.shear(section_angles[k]);
                 const auto r=Tip::update(parameters, {h.stress,h.A,old_phis[q]},embed_tip_strain(strains[q]),phis[q],dt,S,0.);
                 const auto dn=parent->material_strips ? values.JxW(q)/section_measures[k] : parent->normal_weights.at(cell->id())[q];
                 free_rate[k]+=dn*r.rate;
@@ -297,7 +325,9 @@ namespace aspect
         }
       for (const auto &cell:this->get_dof_handler().active_cell_iterators()) if (cell->is_locally_owned())
           {
-            sample(cell);
+            const auto &values=cell_values.reinit(cell);
+            const auto nq=values.n_quadrature_points;
+            sample(cell,values);
             auto &points=e->points[cell->id()];
             points.resize(nq);
             FullMatrix<double> cell_matrix(dpc,dpc);
@@ -306,7 +336,7 @@ namespace aspect
               {
                 const auto &h=parent->history.at(cell->id())[q];
                 const auto k=parent->section_ids.at(cell->id())[q];
-                const auto S=strip_direction(section_angles[k]);
+                const auto S=parent->section_geometry->frame.shear(section_angles[k]);
                 const double f=e->section_solutions[k].resistance_response.resistance;
                 auto &r=points[q];
                 const Tip::State incoming
@@ -343,7 +373,7 @@ namespace aspect
                     P[i]=values[intro.extractors.pressure].value(i,q);
                   }
                 for (unsigned int j=0; j<basis.expansion.m(); ++j)
-                  N[fe.component_to_system_index(pc,j)]=phase_values(q,j);
+                  N[fe.component_to_system_index(pc,j)]=values.shape_value_component(fe.component_to_system_index(pc,j),q,pc);
                 for (unsigned int i=0; i<dpc; ++i)
                   {
                     cell_residual[i]+=weight*((r.state.stress*E[i])/G-pressures[q]*div[i]-P[i]*trace(strains[q])-N[i]*r.driving/Kf);
@@ -444,12 +474,12 @@ namespace aspect
     {
       const auto &fe=this->get_fe();
       const auto field=ghost(increment);
-      FEValues<dim> values(this->get_mapping(),fe,model.mechanical_quadrature(),update_values|update_JxW_values);
+      MaterialModel::BulkCohesive::Tip::SectionValues<dim> cell_values(this->get_mapping(),fe,*parent->section_geometry,parent->quadrature,update_values|update_JxW_values);
       std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
       long double storage=0.,driving=0.,scale=0.;
       for (const auto &cell:this->get_dof_handler().active_cell_iterators())if (cell->is_locally_owned())
         {
-          values.reinit(cell);cell->get_dof_indices(ids);
+          const auto &values=cell_values.reinit(cell);cell->get_dof_indices(ids);
           for (unsigned int q=0;q<values.n_quadrature_points;++q)
             {
               const auto &a=from.points.at(cell->id())[q],&b=to.points.at(cell->id())[q];
@@ -459,7 +489,7 @@ namespace aspect
               scale+=weight*(std::abs(a.bulk_energy)+std::abs(b.bulk_energy)+std::abs(a.cohesive_energy)+std::abs(b.cohesive_energy));
               double dphi=0.;
               for (unsigned int j=0;j<basis.expansion.m();++j)
-                dphi+=phase_values(q,j)*field[ids[fe.component_to_system_index(pc,j)]];
+                dphi+=values.shape_value_component(fe.component_to_system_index(pc,j),q,pc)*field[ids[fe.component_to_system_index(pc,j)]];
               driving+=weight*a.driving*dphi;
             }
         }
@@ -533,6 +563,130 @@ namespace aspect
     }
 
     template <int dim>
+    bool BulkTipCoupling<dim>::can_register(const unsigned int k) const
+    {
+      return !model.localize_tip_direction || eligible_sections[k];
+    }
+
+    template <int dim>
+    dealii::Point<2> BulkTipCoupling<dim>::accepted_selection_center(const State &accepted) const
+    {
+      const auto &seed=model.initial_selection_tip;
+      if (accepted.step==0) return seed;
+      const auto &frame=accepted.section_geometry->frame;
+      const double seed_xi=frame.xi(seed);
+      const double anchor=seed_xi-this->get_phase_field_handler().get_length_scale();
+      const double seed_zeta=-frame.tangent[1]*seed[0]+frame.tangent[0]*seed[1];
+      const auto &sections=accepted.sections;
+      const auto station_at=[&](double x)
+      {
+        return std::lower_bound(sections.begin(),sections.end(),x,
+                                [](const auto &v,double xi){return v.coordinate<xi;})-sections.begin();
+      };
+      const unsigned int first=station_at(anchor), beyond=station_at(std::nextafter(seed_xi,std::numeric_limits<double>::infinity()));
+      if (beyond==sections.size() || !sections[beyond].formed) return seed;
+      unsigned int end=beyond;
+      while (end<sections.size() && sections[end].formed) ++end;
+      std::vector<dealii::Point<2>> graph(end-first);
+      std::vector<double> phase(graph.size(),0.);
+      double z=seed_zeta,last=seed_xi;
+      for (unsigned int k=first;k<end;++k)
+        {
+          const double xi=sections[k].coordinate;
+          if (xi>seed_xi)
+            {
+              z+=(xi-last)*std::tan(sections[k].angle);
+              last=xi;
+            }
+          graph[k-first]={xi*frame.tangent[0]-z*frame.tangent[1],xi*frame.tangent[1]+z*frame.tangent[0]};
+        }
+      // Evaluate the accepted Bernstein field on the retained graph. At a DG
+      // face take the larger of its two traces, deterministically across ranks.
+      const auto &fe=this->get_fe();
+      const auto &phase_fe=fe.base_element(fe.component_to_base_index(pc).first);
+      std::vector<types::global_dof_index> indices(fe.n_dofs_per_cell());
+      for (const auto &entry:accepted.native_cells)
+        {
+          const auto &cell=entry.second;
+          const auto origin=cell->vertex(0);
+          const auto a=cell->vertex(1)-origin,b=cell->vertex(2)-origin;
+          const double det=a[0]*b[1]-a[1]*b[0];
+          const double center=frame.xi(cell->center()),diameter=cell->diameter();
+          const unsigned int begin=std::max<unsigned int>(first,station_at(center-diameter));
+          const unsigned int finish=std::min<unsigned int>(end,station_at(center+diameter));
+          if (begin>=finish) continue;
+          cell->get_dof_indices(indices);
+          for (unsigned int k=begin;k<finish;++k)
+            {
+              const auto &p=graph[k-first];
+              const double dx=p[0]-origin[0],dy=p[1]-origin[1];
+              dealii::Point<dim> unit;
+              unit[0]=(dx*b[1]-dy*b[0])/det;
+              unit[1]=(dy*a[0]-dx*a[1])/det;
+              if (!GeometryInfo<dim>::is_inside_unit_cell(unit,1e-12)) continue;
+              double value=0.;
+              for (unsigned int j=0;j<phase_fe.n_dofs_per_cell();++j)
+                value+=phase_fe.shape_value(j,unit)*accepted.tip_phase[indices[fe.component_to_system_index(pc,j)]-po];
+              phase[k-first]=std::max(phase[k-first],value);
+            }
+        }
+      Utilities::MPI::max(phase,this->get_mpi_communicator(),phase);
+      auto center=seed;
+      for (unsigned int k=first;k<end;++k)
+        {
+          if (phase[k-first]<.05) break;
+          if (sections[k].coordinate>seed_xi) center=graph[k-first];
+        }
+      return center;
+    }
+
+    template <int dim>
+    void BulkTipCoupling<dim>::prepare_tip_neighborhood()
+    {
+      const auto center=accepted_selection_center(*parent);
+      const double radius=this->get_phase_field_handler().get_length_scale()*model.selection_radius_in_lengths;
+      const auto ns=parent->sections.size();
+      const QGauss<dim> standard(parent->quadrature);
+      const auto &geometry=*parent->section_geometry;
+      const auto visit_points=[&](const auto &entry,const auto &visit)
+      {
+        const auto &cell=entry.second;
+        const auto &points=geometry.cut ? geometry.rules.at(entry.first).get_points() : standard.get_points();
+        const auto a=cell->vertex(1)-cell->vertex(0), b=cell->vertex(2)-cell->vertex(0);
+        const auto &ids=parent->section_ids.at(entry.first);
+        for (unsigned int q=0;q<points.size();++q)
+          visit(q,ids[q],cell->vertex(0)+points[q][0]*a+points[q][1]*b);
+      };
+      eligible_sections.assign(ns,0);
+      for (const auto &entry:parent->native_cells)
+        {
+          const auto cell_center=entry.second->center();
+          if (std::hypot(cell_center[0]-center[0],cell_center[1]-center[1])>radius+entry.second->diameter()) continue;
+          auto &weights=direction_weights[entry.first];
+          visit_points(entry,[&](unsigned int,unsigned int k,const auto &p)
+          {
+            const double dx=p[0]-center[0],dy=p[1]-center[1];
+            const double kernel=std::max(0.,1.-(dx*dx+dy*dy)/(radius*radius));
+            weights.push_back(kernel*kernel);
+            if (kernel>0. && !formed_sections[k]) eligible_sections[k]=1;
+          });
+        }
+      Utilities::MPI::max(eligible_sections,this->get_mpi_communicator(),eligible_sections);
+      this->get_pcout()<<"   Direction neighborhood: center="<<center<<", radius="<<radius
+                       <<", eligible="<<std::count(eligible_sections.begin(),eligible_sections.end(),1U)<<std::endl;
+    }
+
+    template <int dim>
+    void BulkTipCoupling<dim>::prepare_direction()
+    {
+      const double start=MPI_Wtime();
+      if (model.localize_tip_direction) prepare_tip_neighborhood();
+      if (!prescribed_direction_replay && model.tip_section_closure==Model::TipSectionClosure::coulomb_formation)
+        prepare_coulomb_planes();
+      direction_seconds+=MPI_Wtime()-start;
+    }
+
+    template <int dim>
     void BulkTipCoupling<dim>::prepare_coulomb_planes()
     {
       TimerOutput::Scope timer(this->get_computing_timer(),"Tip Coulomb plane selection");
@@ -540,22 +694,25 @@ namespace aspect
       // strip area and the angle-independent isotropic pressure cancel in argmax.
       const auto count=parent->sections.size();
       std::vector<double> moments(2*count,0.);
-      FEValues<dim> values(this->get_mapping(),this->get_fe(),model.mechanical_quadrature(),update_JxW_values);
+      MaterialModel::BulkCohesive::Tip::SectionValues<dim> cell_values(this->get_mapping(),this->get_fe(),*parent->section_geometry,parent->quadrature,update_JxW_values);
       for (const auto &cell:this->get_dof_handler().active_cell_iterators())
         if (cell->is_locally_owned())
           {
-            values.reinit(cell);
+            if (model.localize_tip_direction && !direction_weights.count(cell->id())) continue;
+            const auto &values=cell_values.reinit(cell);
             const auto &indices=parent->section_ids.at(cell->id());
             const auto &history=parent->history.at(cell->id());
             for (unsigned int q=0;q<values.n_quadrature_points;++q)
               {
                 const auto k=indices[q];
-                if (formed_sections[k])continue;
+                if (formed_sections[k] || (model.localize_tip_direction && !eligible_sections[k]))continue;
                 AssertThrow(history[q].A.norm()==0. && history[q].absolute_shear==0.,
                             ExcMessage("A Coulomb formation plane cannot reorient a section with fault history."));
                 const auto &tau=history[q].stress;
-                moments[2*k]+=values.JxW(q)*.5*(tau[1][1]-tau[0][0]);
-                moments[2*k+1]+=values.JxW(q)*tau[0][1];
+                const auto uv=parent->section_geometry->frame.traction_moments(tau);
+                const double area=values.JxW(q)*(model.localize_tip_direction ? direction_weights.at(cell->id())[q] : 1.);
+                moments[2*k]+=area*uv[0];
+                moments[2*k+1]+=area*uv[1];
               }
           }
       Utilities::MPI::sum(moments,this->get_mpi_communicator(),moments);
@@ -587,43 +744,66 @@ namespace aspect
     template <int dim>
     bool BulkTipCoupling<dim>::update_virgin_planes(const Vector &x)
     {
-      if (model.tip_section_closure!=Model::TipSectionClosure::intact_driving || this->get_timestep_number()==0)return false;
+      if (prescribed_direction_replay || model.tip_section_closure!=Model::TipSectionClosure::intact_driving || this->get_timestep_number()==0)return false;
+      const double start=MPI_Wtime();
       TimerOutput::Scope timer(this->get_computing_timer(),"Tip virgin plane selection");
       const auto ns=parent->sections.size();
       // Moments of the actual native physical-stress predictor and phase.
       // All points in a section participate, including quiescent intact bulk.
       // For virgin A=0: tau_m:S-f=(1-F)*(predictor:S-f).
       std::vector<double> moments(9*ns,0.);
+      std::vector<SectionShearVariance> variance(ns);
       const auto field=ghost(x);
       const auto &fe=this->get_fe();
-      FEValues<dim> values(this->get_mapping(),fe,model.mechanical_quadrature(),
+      MaterialModel::BulkCohesive::Tip::SectionValues<dim> cell_values(this->get_mapping(),fe,*parent->section_geometry,parent->quadrature,
                            update_values|update_gradients|update_JxW_values);
-      std::vector<SymmetricTensor<2,dim>> strains(values.n_quadrature_points);
+      std::vector<SymmetricTensor<2,dim>> strains;
       std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
       for (const auto &cell:this->get_dof_handler().active_cell_iterators())if (cell->is_locally_owned())
           {
-            values.reinit(cell);
+            const auto &stations=parent->section_ids.at(cell->id());
+            if (model.localize_tip_direction &&
+                std::none_of(stations.begin(),stations.end(),[&](const auto k){return eligible_sections[k];})) continue;
+            const auto weights=direction_weights.find(cell->id());
+            const auto &values=cell_values.reinit(cell);
             cell->get_dof_indices(ids);
+            strains.resize(values.n_quadrature_points);
             values[this->introspection().extractors.velocities].get_function_symmetric_gradients(field,strains);
             for (unsigned int q=0;q<values.n_quadrature_points;++q)
               {
                 const auto k=parent->section_ids.at(cell->id())[q];
-                if (formed_sections[k])continue;
+                if (formed_sections[k] || (model.localize_tip_direction && !eligible_sections[k]))continue;
                 const auto &old=parent->history.at(cell->id())[q];
                 AssertThrow(old.A.norm()==0. && old.absolute_shear==0.,
                             ExcMessage("Virgin plane selection cannot reassign existing fault tensor history."));
                 double phi=0.;
                 for (unsigned int j=0;j<basis.expansion.m();++j)
-                  phi+=phase_values(q,j)*field[ids[fe.component_to_system_index(pc,j)]];
+                  phi+=values.shape_value_component(fe.component_to_system_index(pc,j),q,pc)*field[ids[fe.component_to_system_index(pc,j)]];
                 const double c=parent->parameters.m*phi*(1.+phi),d=(1.-phi)*(1.-phi),F=c/(c+d);
                 const auto predictor=beta*(old.stress+2.*G*embed_tip_strain(strains[q]));
-                const double u=-.5*(predictor[0][0]-predictor[1][1]),v=predictor[0][1];
-                const double w=values.JxW(q),a=w*(1.-F)*(1.-F);
+                const auto uv=parent->section_geometry->frame.traction_moments(predictor);
+                const double u=uv[0],v=uv[1];
+                const double w=values.JxW(q);
+                const double rho=model.localize_tip_direction ? (weights==direction_weights.end() ? 0. : weights->second[q]) : 1.;
+                const double a=w*(1.-F)*(1.-F)*rho;
+                variance[k].add(a,u,v);
                 const std::array<double,9> local{{w*F*u,w*F*v,w*F,a*u*u,a*v*v,a*u*v,a*u,a*v,a}};
                 for (unsigned int j=0;j<9;++j)moments[9*k+j]+=local[j];
               }
           }
       Utilities::MPI::sum(moments,this->get_mpi_communicator(),moments);
+      std::vector<double> centered(3*ns,0.);
+      for (unsigned int k=0;k<ns;++k)
+        if (variance[k].weight>0.)
+          {
+            const auto &v=variance[k];
+            const auto m=&moments[9*k];
+            const double du=v.mean_u-m[6]/m[8], dv=v.mean_v-m[7]/m[8];
+            centered[3*k]=v.uu+v.weight*du*du;
+            centered[3*k+1]=v.uv+v.weight*du*dv;
+            centered[3*k+2]=v.vv+v.weight*dv*dv;
+          }
+      Utilities::MPI::sum(centered,this->get_mpi_communicator(),centered);
       std::vector<double> fractions(model.elastic_shear_moduli.size(),0.);
       fractions[0]=1.;
       auto angles=section_angles;
@@ -632,21 +812,36 @@ namespace aspect
       for (unsigned int k=0;k<ns;++k)if (!formed_sections[k])
           {
             const auto m=&moments[9*k];
-            if (m[3]+m[4]==0.)continue; // No force: retain the incoming preference.
+            // Remote slip in this same section can induce a nonzero f even
+            // when the local stress vanishes everywhere inside the disk.
+            if (m[8]==0. || (m[3]+m[4]==0. && m[0]==0. && m[1]==0.)) continue;
             const double dx=parent->sections[k].weight*std::cos(parent->sections[k].angle);
             const auto objective=[&](const double angle)
             {
               const double s=std::sin(2.*angle),c=std::cos(2.*angle),ds=dx/std::cos(angle);
               const double free=(m[0]*s+m[1]*c)/(G*beta*dt*ds),mobility=m[2]/(G*beta*dt*ds);
-              const auto law=model.fault_friction.solve_section_slip_rate(fractions,free,mobility,parent->sections[k].age,
+              ++candidate_scores;
+              // Zero free rate has the exact zero-resistance regularized RSF solution.
+              double f=0.;
+              if (free!=0.)
+                {
+                  ++candidate_rsf_solves;
+                  const auto law=model.fault_friction.solve_section_slip_rate(fractions,free,mobility,parent->sections[k].age,
                                                                          dt,this->get_parameters().surface_pressure,
                                                                          model.radiation_damping_coefficients[0],
                                                                          MaterialModel::Rheology::FaultFriction<dim>::AgingMethod::constant_rate_exact);
-              const double f=law.resistance_response.resistance;
-              return m[3]*s*s+m[4]*c*c+2.*m[5]*s*c-2.*f*(m[6]*s+m[7]*c)+m[8]*f*f;
+                  f=law.resistance_response.resistance;
+                }
+              const double expanded=m[3]*s*s+m[4]*c*c+2.*m[5]*s*c-2.*f*(m[6]*s+m[7]*c)+m[8]*f*f;
+              if (expanded>std::sqrt(std::numeric_limits<double>::epsilon())*(m[3]+m[4]+m[8]*f*f))
+                return expanded;
+              // Same weighted sum of squares, evaluated without subtracting
+              // nearly equal O(tau^2) quantities. No change to branch gates.
+              const double mean=(m[6]*s+m[7]*c)/m[8]-f;
+              return centered[3*k]*s*s+2.*centered[3*k+1]*s*c+centered[3*k+2]*c*c+m[8]*mean*mean;
             };
             // A single forward graph: choose the conjugate sector closest to
-            // the declared horizontal seed. No projection of old tensor memory.
+            // the declared incoming tangent. No projection of old tensor memory.
             const unsigned int intervals=128;
             const double limit=numbers::PI/4.,spacing=2.*limit/intervals;
             unsigned int best=0;
@@ -657,8 +852,8 @@ namespace aspect
                 if (value>maximum) { maximum=value; best=j; }
               }
             if (best==0 || best==intervals)
-              this->get_pcout()<<"   Virgin branch conflict: section="<<k<<", x="<<parent->sections[k].coordinate
-                               <<", angle="<<(-limit+best*spacing)<<", dx="<<dx
+              this->get_pcout()<<"   Virgin branch conflict: section="<<k<<", xi="<<parent->sections[k].coordinate
+                               <<", angle="<<(-limit+best*spacing)<<", dxi="<<dx
                                <<", Y0 integral="<<maximum*parent->parameters.m/(2.*G)
                                <<", fraction volume="<<m[2]<<", age="<<parent->sections[k].age
                                <<", slip="<<parent->sections[k].slip<<std::endl;
@@ -683,11 +878,12 @@ namespace aspect
           }
       this->get_pcout()<<"   Tip virgin planes: changed="<<changed<<", max angle change="<<largest_change
                        <<", integrated Y0 gain="<<largest_gain<<std::endl;
-      if (changed==0)return false;
+      if (changed==0) { direction_seconds+=MPI_Wtime()-start; return false; }
       AssertThrow(++orientation_updates<=12,ExcMessage("Virgin-plane/mechanics outer iteration failed to converge; accepted histories preserved."));
       section_angles=angles;
       for (unsigned int k=0;k<ns;++k)if (!formed_sections[k])
           section_measures[k]=parent->sections[k].weight*std::cos(parent->sections[k].angle)/std::cos(section_angles[k]);
+      direction_seconds+=MPI_Wtime()-start;
       return true;
     }
 
@@ -736,13 +932,19 @@ namespace aspect
       if (parent->material_strips)
         {
           std::vector<unsigned int> formed(formed_sections.size(),0);
+          unsigned int detached=0;
           for (const auto &cell:e.points)for (unsigned int q=0;q<cell.second.size();++q)
               {
                 const auto k=parent->section_ids.at(cell.first)[q];
-                if (cell.second[q].state.phi>0.)formed[k]=1;
-                next->history.at(cell.first)[q].q=cell.second[q].Q*strip_direction(section_angles[k]);
+                if (cell.second[q].state.phi>0. && can_register(k)) formed[k]=1;
+                const auto &physical=next->history.at(cell.first)[q];
+                if (!formed_sections[k] && !can_register(k) && (physical.A.norm()!=0. || physical.absolute_shear!=0.))
+                  detached=1;
+                next->history.at(cell.first)[q].q=cell.second[q].Q*parent->section_geometry->frame.shear(section_angles[k]);
                 next->normal_weights.at(cell.first)[q]*=parent->sections[k].weight/section_measures[k];
               }
+          AssertThrow(!Utilities::MPI::max(detached,this->get_mpi_communicator()),
+                      ExcMessage("Fault deformation outside the forward tip neighborhood requires a detached formation law."));
           Utilities::MPI::max(formed,this->get_mpi_communicator(),formed);
           for (unsigned int k=0;k<formed.size();++k)
             {
@@ -795,18 +997,23 @@ namespace aspect
                   std::vector<unsigned int> formed(parent->sections.size(),0);
                   const auto &fe=this->get_fe();
                   std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
+                  MaterialModel::BulkCohesive::Tip::SectionValues<dim> cell_values(this->get_mapping(),fe,*parent->section_geometry,parent->quadrature,update_values);
                   for (const auto &cell:parent->section_ids)
                     {
+                      const auto &values=cell_values.reinit(parent->native_cells.at(cell.first));
                       parent->native_cells.at(cell.first)->get_dof_indices(ids);
                       for (unsigned int q=0;q<cell.second.size();++q)
                         {
                           double phi=0.;
                           for (unsigned int j=0;j<basis.expansion.m();++j)
-                            phi+=phase_values(q,j)*field[ids[fe.component_to_system_index(pc,j)]];
-                          if (phi>0.)formed[cell.second[q]]=1;
+                            phi+=values.shape_value_component(fe.component_to_system_index(pc,j),q,pc)*field[ids[fe.component_to_system_index(pc,j)]];
+                          if (phi>0.) formed[cell.second[q]]=1;
                         }
                     }
                   Utilities::MPI::max(formed,this->get_mpi_communicator(),formed);
+                  if (model.localize_tip_direction)
+                    restrict_to_initial_seed(formed,parent->sections,parent->section_geometry->frame.xi(model.initial_selection_tip),
+                                             this->get_phase_field_handler().get_length_scale());
                   for (unsigned int k=0;k<formed.size();++k)model.bulk_cohesive_state->sections[k].formed=formed[k];
                 }
               return;

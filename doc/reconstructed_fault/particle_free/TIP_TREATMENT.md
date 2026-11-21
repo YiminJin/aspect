@@ -1,4 +1,8 @@
+The localized forward-tip option uses compact area sampling for direction and complete material sections for RSF response. The original full-section experiments retain their historical law and archive identity. [Current option, admission and bounded comparison](TIP_DIRECTION_AND_STRIP_RESOLUTION.md).
+
 The material-strip midpoint experiment now has two selectable virgin-plane rules. Both formed new sections in the small positive turning fixture. The sampling, conjugate selection, joint publication and limits are described in the [formation guide](tip_treatment/friction_and_direction.md#optional-coulomb-plane-selection-on-material-strips) and [matched comparison](STAGE4_RECOVERY_AND_COULOMB_FORMATION.md).
+
+[Fixed material sections](tip_treatment/reference_sections.md) gives the native geometry, measures, force return and checkpoint identity for horizontal, vertical and oblique incoming faults.
 
 > **Complete — loaded-seed preparation and bounded friction/growth comparison.**
 > [Overnight report and figures](STAGE4_OVERNIGHT_PREPARATION_REPORT.md): native

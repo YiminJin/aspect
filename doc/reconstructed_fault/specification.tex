@@ -4394,9 +4394,15 @@ and \texttt{TIP\_CONSOLIDATION\_REPORT.md} for current code entry points and tes
 
 \subsection{Selected experimental material-strip RSF closure (November 2026)}
 The native bulk-tip midpoint option may select \texttt{material strips} while
-fixed direction remains the default. Complete vertical reference-material
-sections retain their quadrature membership. A section with structural angle
-$a_s$ has reference measure $d s_s=d x_s/\cos a_s$ and
+fixed direction remains the default. Set $t_0=(\cos\alpha,\sin\alpha)$ from the declared incoming orientation
+and $n_0=(-\sin\alpha,\cos\alpha)$. At fixed $\xi=X\cdot t_0$, the complete
+material section along $n_0$ retains its quadrature membership. The aligned rule retains Gauss stations on complete lines. For nonaligned
+affine cells the default integrates complete projected strips, with one
+constant section response per strip. Each cell splits only at strip boundaries
+and its own projected vertices. Longitudinal and chord Gauss weights multiply
+to give physical area. The earlier global projected-vertex line rule remains
+selectable with its original archive identity. A section with structural angle
+$a_s$ relative to $t_0$ has reference measure $d s_s=d\xi_s/\cos a_s$ and
 \[
  V_s=\frac{\sum_{q\in s}J_q w_q}{d s_s},\qquad
  \sum_q J_q f_s w_q=\sum_s d s_s f_s V_s.
@@ -4409,7 +4415,7 @@ physical stress/cohesive tensors are retained. Virgin sections age from the
 initial time; a coherent plane maximizes the native-area integral of the
 intact-reaction driving $Y_0=m(\tau_m:S-f_s)^2/(2G)$, using the actual trial
 physical stress and consistent section friction. The conjugate sector closest
-to the horizontal seed is $|a_s|<\pi/4$; reaching its edge rejects admission.
+to the incoming tangent is $|a_s|<\pi/4$; reaching its edge rejects admission.
 Plane selection and the unchanged phase variational inequality are iterated
 within the existing coupled solver before single publication. A distinct
 checkpoint signature forbids conversion from the straight law. This experiment
@@ -4430,5 +4436,19 @@ the midpoint solve and persist at first positive accepted phase. Seed planes,
 age, slip, work adjoint and the fracture criterion follow the same strip
 contract. Direction choice is a separate constitutive assumption with its own
 checkpoint signature.
+
+
+For the localized single-forward-tip option, freeze the disk center from the
+accepted seed or connected absolute $0.05$ front on the retained graph. At
+each native point let $\rho_q=[1-|X_q-X_{\rm tip}|^2/R^2]_+^2$.
+Only the direction integral uses $J_q\rho_q$. The stage section solve uses
+full $J_q$ for all candidate angles. The contiguous initial seed owns its prescribed incoming plane. Every
+subsequent admission of a virgin section requires disk support, including
+at the opposite end of a finite seed. Detached nonzero fault history on an unregistered exterior section
+rejects the candidate before publication. This restriction, the radius, seed
+coordinates and selector have explicit restart identity. The same localization
+switch weights accepted signed stress for the alternative Coulomb rule.
+See \texttt{particle\_free/tip\_treatment/reference\_sections.md} for the
+discrete center, integration map and limitations.
 
 \end{document}

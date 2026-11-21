@@ -24,6 +24,7 @@ void observe_phase_release()
 {
   using Field=LinearAlgebra::BlockVector;
   const auto &s=*model().bulk_cohesive_state;
+  AssertThrow(!s.section_geometry->cut,ExcMessage("This prepared horizontal specimen requires its original Cartesian section quadrature."));
   const auto comm=this->get_mpi_communicator();
   const auto rank=Utilities::MPI::this_mpi_process(comm);
   const auto &fe=this->get_fe();

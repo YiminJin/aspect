@@ -27,7 +27,7 @@ namespace aspect
     template<int dim> class MomentCycle:public Interface<dim>,public SimulatorAccess<dim>
     {
         using Model=MaterialModel::PhaseFieldFault<dim>;
-        bool rejected=false;
+        bool rejected=false, remote_direction_checked=false;
         unsigned long inner_stokes=0, inner_A=0, inner_S=0;
         Timer step_timer;
 
@@ -91,11 +91,11 @@ namespace aspect
           // this signal. Observe native FE values and material history directly.
           std::ofstream points(this->get_output_directory()+"restore-points-r"+std::to_string(rank)+".csv");
           points<<"cell,q,x,y,phi,tauxx,tauyy,tauzz,tauxy,Axx,Ayy,Azz,Axy,qcoh,w,signed_shear,absolute_shear\n"<<std::setprecision(17);
-          FEValues<dim> fe(this->get_mapping(),this->get_fe(),model().mechanical_quadrature(),update_values|update_quadrature_points);
-          std::vector<double> values(fe.n_quadrature_points);
+          MaterialModel::BulkCohesive::Tip::SectionValues<dim> cell_values(this->get_mapping(),this->get_fe(),*s.section_geometry,s.quadrature,update_values|update_quadrature_points);
           for (const auto &entry:s.native_cells)
             {
-              fe.reinit(entry.second);
+              const auto &fe=cell_values.reinit(entry.second);
+              std::vector<double> values(fe.n_quadrature_points);
               fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(this->get_solution(),values);
               for (unsigned int q=0; q<values.size(); ++q)
                 {
@@ -127,13 +127,13 @@ namespace aspect
           if (rank==0)
             {
               std::ofstream sections(this->get_output_directory()+"restore-sections.csv");
-              sections<<"s,ds,age,slip,V,force\n"<<std::setprecision(17);
+              sections<<(s.section_geometry->cut ? "xi" : "s")<<",ds,age,slip,V,force\n"<<std::setprecision(17);
               for (const auto &v:s.sections)
                 sections<<v.coordinate<<','<<v.weight<<','<<v.age<<','<<v.slip<<','<<v.rate<<','<<v.force<<'\n';
               if (s.material_strips)
                 {
                   std::ofstream planes(this->get_output_directory()+"restore-planes.csv");
-                  planes<<"x,ds,angle,formed\n"<<std::setprecision(17);
+                  planes<<(s.section_geometry->cut ? "xi,ds,beta,formed\n" : "x,ds,angle,formed\n")<<std::setprecision(17);
                   for (const auto &v:s.sections)planes<<v.coordinate<<','<<v.weight<<','<<v.angle<<','<<v.formed<<'\n';
                 }
               std::ofstream clock(this->get_output_directory()+"restore-clock.csv");
@@ -210,6 +210,7 @@ namespace aspect
         {
           gate("parent import serial Bernstein",dim==2 && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
                && this->get_parameters().use_bernstein_phase_basis && !model().bulk_cohesive_state);
+          AssertThrow(model().tip_reference_degrees==0.,ExcMessage("Historical nodal parent import requires the horizontal control."));
           std::ifstream stream(file,std::ios::binary);
           AssertThrow(stream,ExcMessage("Cannot read parent export."));
           aspect::iarchive archive(stream);
@@ -292,10 +293,15 @@ namespace aspect
           fixed_parent_action();
         }
 
+#ifdef ASPECT_REFERENCE_SECTION_FIXTURE
+#include "../reference_sections/matched_seed.h"
+#endif
+
         void fixed_parent_action()
         {
           sim().compute_current_constraints();
           internal::BulkTipCoupling<dim> op(sim(),model(),sim().current_constraints);
+          if (this->get_timestep_number()>0) op.prepare_direction();
           auto x=op.initial_guess(sim().solution);
           const auto response=op.evaluate(x,true);
           auto direction=x;
@@ -637,11 +643,11 @@ namespace aspect
           if (!stride || s.step%std::max(1,std::stoi(stride))==0)
             points.open(directory+"tip-points-"+Utilities::int_to_string(s.step,4)+"-r"+std::to_string(rank)+".csv");
           points<<std::setprecision(17)<<"cell,q,x,y,weight,phi,tauxx,tauyy,tauzz,tauxy,Axx,Ayy,Azz,Axy,qcoh,w,signed_shear,absolute_shear,section,H,Y,fracture_density,Y_endpoint,stage_phi,stage_tauxy,stage_Axy,stage_pressure,stage_normal_x,stage_normal_y\n";
-          FEValues<dim> fe(this->get_mapping(),this->get_fe(),model().mechanical_quadrature(),update_values|update_gradients|update_quadrature_points|update_JxW_values);
-          std::vector<double> phase(fe.n_quadrature_points),pressure(fe.n_quadrature_points);
-          std::vector<Tensor<1,dim>> phase_gradient(fe.n_quadrature_points);
+          MaterialModel::BulkCohesive::Tip::SectionValues<dim> cell_values(this->get_mapping(),this->get_fe(),*s.section_geometry,s.quadrature,update_values|update_gradients|update_quadrature_points|update_JxW_values);
           const double ell=this->get_phase_field_handler().get_length_scale();
           const double Kf=model().critical_energy_release_rates[0]/((8./3.)*ell);
+          AssertThrow(!s.section_geometry->cut || !std::getenv("ASPECT_TIP_REMOTE_MARGIN"),
+                      ExcMessage("The horizontal specimen remote/boundary masks require a matching reference frame."));
           const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
           const auto origin=box.get_origin(),extent=box.get_extents();
           const double center_x=origin[0]+.5*extent[0],center_y=origin[1]+.5*extent[1];
@@ -651,7 +657,9 @@ namespace aspect
           double remote_driving=0.,remote_phase=0.,boundary_driving=0.,boundary_phase=0.;
           for (const auto &entry:s.native_cells)
             {
-              fe.reinit(entry.second);
+              const auto &fe=cell_values.reinit(entry.second);
+              std::vector<double> phase(fe.n_quadrature_points),pressure(fe.n_quadrature_points);
+              std::vector<Tensor<1,dim>> phase_gradient(fe.n_quadrature_points);
               fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_values(this->get_solution(),phase);
               fe[FEValuesExtractors::Scalar(this->introspection().phase_field().first_component_index)].get_function_gradients(this->get_solution(),phase_gradient);
               fe[this->introspection().extractors.pressure].get_function_values(this->get_solution(),pressure);
@@ -678,7 +686,7 @@ namespace aspect
                         <<h.stress[0][0]<<','<<h.stress[1][1]<<','<<h.stress[2][2]<<','<<h.stress[0][1]<<','
                         <<h.A[0][0]<<','<<h.A[1][1]<<','<<h.A[2][2]<<','<<h.A[0][1]<<','<<h.q<<','<<h.rate<<','
                         <<h.signed_shear<<','<<h.absolute_shear<<','<<s.section_ids.at(entry.first)[q]<<','<<fraction<<','<<driving<<','<<Kf*(phi+ell*ell*phase_gradient[q].norm_square())<<','
-                        <<(phi>0. ? s.parameters.G*(s.material_strips ? h.A*h.A : 2.*h.A[0][1]*h.A[0][1])*s.parameters.m*(1.+3.*phi)*(1.-phi)/(c*c) : std::numeric_limits<double>::quiet_NaN())<<',';
+                        <<(phi>0. ? s.parameters.G*(h.A*h.A)*s.parameters.m*(1.+3.*phi)*(1.-phi)/(c*c) : std::numeric_limits<double>::quiet_NaN())<<',';
                   if (sim().bulk_tip_coupling && sim().bulk_tip_coupling->accepted_evaluation)
                     {
                       const auto &stage=sim().bulk_tip_coupling->accepted_evaluation->points.at(entry.first)[q];
@@ -748,6 +756,7 @@ namespace aspect
           if (!sim().bulk_tip_coupling || !sim().bulk_tip_coupling->accepted_evaluation)return;
           auto &op=*sim().bulk_tip_coupling;
           const auto &e=*op.accepted_evaluation;
+          if (std::getenv("ASPECT_TIP_FRONT_CHECK")) check_accepted_front();
           if (std::getenv("ASPECT_TIP_FIXED_PHASE"))
             {
               auto difference=s.tip_phase;
@@ -899,7 +908,7 @@ namespace aspect
           if (location.tellp()==0)location<<"step,parent_time,stage_time,endpoint_time,midpoint\n";
           location<<std::setprecision(17)<<s.step<<','<<op.accepted_parent()->time<<','<<s.time-(op.uses_midpoint()?.5*op.timestep():0.)<<','<<s.time<<','<<op.uses_midpoint()<<'\n';
           std::ofstream sections(directory+"tip-sections-"+Utilities::int_to_string(s.step,4)+".csv");
-          sections<<std::setprecision(17)<<"s,ds,age,slip,V,force,integral_abs_w,positive_w,negative_w,resolved_V,integral_rate_defect,RSF_of_integral\n";
+          sections<<std::setprecision(17)<<(s.section_geometry->cut ? "xi" : "s")<<",ds,age,slip,V,force,integral_abs_w,positive_w,negative_w,resolved_V,integral_rate_defect,RSF_of_integral\n";
           std::vector<double> fractions(model().elastic_shear_moduli.size(),0.);
           fractions[0]=1.;
           for (unsigned int k=0; k<s.sections.size(); ++k)
@@ -914,7 +923,7 @@ namespace aspect
           if (s.material_strips)
             {
               std::ofstream planes(directory+"tip-planes-"+Utilities::int_to_string(s.step,4)+".csv");
-              planes<<std::setprecision(17)<<"section,x,reference_dx,ds,angle,formed,parent_formed,parent_age,age,parent_slip,slip\n";
+              planes<<std::setprecision(17)<<(s.section_geometry->cut ? "section,xi,reference_dxi,ds,beta" : "section,x,reference_dx,ds,angle")<<",formed,parent_formed,parent_age,age,parent_slip,slip\n";
               for (unsigned int k=0;k<s.sections.size();++k)
                 {
                   const auto &v=s.sections[k];const auto &old=op.accepted_parent()->sections[k];
@@ -932,6 +941,7 @@ namespace aspect
           if (counts.tellp()==0)counts<<"step,nonlinear_iterations,krylov_iterations,stokes_solves,active_releases,search_shifts,sparse_entries,owned_phase_rows\n";
           counts<<s.step<<','<<op.newton_iterations<<','<<op.linear_iterations<<','<<op.stokes_solves<<','<<op.active_releases<<','<<op.search_shifts<<','<<op.sparse_entries()<<','<<op.obstacle().locally_owned_size()<<'\n';
         }
+#include "../reference_sections/prescribed_replay.h"
         void recovery()
         {
           const auto before=persistent();
@@ -996,6 +1006,9 @@ namespace aspect
         {
           this->get_signals().post_set_initial_state.connect([this](const SimulatorAccess<dim> &)
           {
+#ifdef ASPECT_REFERENCE_SECTION_FIXTURE
+            match_reference_seed();
+#endif
             if (const auto file=std::getenv("ASPECT_TIP_IMPORT_PARENT"))import_parent(file);
           });
           this->get_signals().post_resume_time_step.connect([this](const SimulatorAccess<dim> &,double &dt)
@@ -1008,6 +1021,12 @@ namespace aspect
           });
           this->get_signals().set_assemblers.connect([this](const SimulatorAccess<dim> &,Assemblers::Manager<dim> &)
           {
+            if (std::getenv("ASPECT_TIP_REMOTE_DIRECTION_CHECK") && !remote_direction_checked && sim().bulk_tip_coupling)
+              {
+                remote_direction_checked=true;
+                check_remote_direction();
+              }
+            prescribe_replay_angles();
             if (std::getenv("ASPECT_TIP_FIXED_PHASE") && sim().bulk_tip_coupling)
               sim().bulk_tip_coupling->upper=sim().bulk_tip_coupling->lower;
           });

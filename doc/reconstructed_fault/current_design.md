@@ -1,3 +1,5 @@
+The native single-fault closure uses one declared incoming frame. A nonaligned mesh uses cell-local strip integration by default. The opt-in forward-tip law localizes orientation sampling while returning the full-section RSF resistance. [Section construction, work adjoint and restart](particle_free/tip_treatment/reference_sections.md).
+
 > The optional `material strips Coulomb formation` rule uses the reference
 > friction coefficient and the preceding accepted strip-mean physical stress
 > to choose prospective planes. The stage equations use those fixed planes
@@ -5,8 +7,8 @@
 
 > **Selected native free-turn experiment (11 November 2026).**
 > The straight production/control path remains unchanged. The opt-in bulk-tip
-> `material strips` closure uses V=sum(JxW w)/ds with ds=dx/cos(angle), fixed
-> complete vertical material membership, and its exact weighted force adjoint.
+> `material strips` closure uses V=sum(JxW w)/ds with ds=dxi/cos(beta), fixed
+> complete reference-normal material membership, and its exact weighted force adjoint.
 > Formed planes and full physical tau/A persist; virgin planes maximize a
 > full-section physical Y0 integral within the forward conjugate sector.
 > Mechanics/phase VI and plane selection iterate before one joint publication.

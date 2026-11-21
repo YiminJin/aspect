@@ -1,4 +1,8 @@
+The localized forward-tip option uses compact area sampling for direction and complete material sections for RSF response. The original full-section experiments retain their historical law and archive identity. [Current option, admission and bounded comparison](../TIP_DIRECTION_AND_STRIP_RESOLUTION.md).
+
 # Cross-section closure
+
+[Reference-frame geometry and discrete integration](reference_sections.md) applies to all three native section selectors.
 
 The straight default below is retained. The user-selected, opt-in native
 [material-strip closure](../FIRST_FREE_TURN_FORMULATION.md) uses physical area
@@ -191,7 +195,7 @@ section RSF resistance and work adjoint.
 
 At the beginning of each positive-duration attempt, read the **accepted
 endpoint physical deviatoric Cauchy stress** at the native mechanical Gauss
-points. Use the same immutable full-height material strips as the section
+points. Use the same complete fixed-reference material sections as the section
 law. For a strip of area $a_k$, form
 $$
  \bar\tau_k=a_k^{-1}\sum_{q\in k} J_q w_q\,\tau_q^n .
@@ -210,7 +214,7 @@ solve continues to use its own rate, age and prescribed scalar confinement.
 This selection supplies a plane preference. Admission of new damage still
 requires the coupled fracture and mechanics equations.
 
-Write $u=(\bar\tau_{yy}-\bar\tau_{xx})/2,\ v=\bar\tau_{xy}$.
+In the reference basis $(x,y)=(t_0,n_0)$ write $u=(\bar\tau_{yy}-\bar\tau_{xx})/2,\ v=\bar\tau_{xy}$.
 For each shear sign $s=\pm1$, the maximizing unoriented line is
 $$
  \alpha_s=\tfrac12\operatorname{atan2}(su-\mu_0v,\;sv+\mu_0u)
@@ -225,8 +229,8 @@ both arguments cancels.
 
 `BulkTipCoupling::prepare_coulomb_planes` sets the attempt's angles and
 measures before the first mechanical evaluation. Native $JxW/ds$ and
-the work adjoint use $ds=dx/\cos\alpha$ throughout that attempt. At the
-zero-clock equilibrium the seed keeps its prescribed horizontal planes.
+the work adjoint use $ds=d\xi/\cos\alpha$ throughout that attempt. At the
+zero-clock equilibrium the seed keeps its declared reference planes.
 The first accepted positive native phase in a section fixes its angle and
 measure. Previously formed sections keep their frames for life, including
 under unloading. Each section's age and slip have existed since initialization

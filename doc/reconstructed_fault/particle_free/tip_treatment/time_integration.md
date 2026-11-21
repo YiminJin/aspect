@@ -191,3 +191,7 @@ history publication are unchanged. Newton/CG iterations never age or publish
 the incoming material state. The [material and overnight report](../MATERIAL_MODEL_CLEANUP_AND_OVERNIGHT_RESULTS.md)
 distinguishes the preserved material milestone, scalar correction, repaired
 finite interval and remaining spatial/nonlinear cost limits.
+
+The 18-strip restart audit measures identical first-stage contact sets, the fracture-only minimum along the accepted phase direction, and the distribution of the nonlinear midpoint compliance remainder. [Matched interval evidence](../MIDPOINT_PHASE_AND_WORK_AUDIT.md).
+
+For the frozen 18-strip case, the stage equilibrium and reflected endpoint produce step-count-dependent fracture relaxation even at zero mechanical driving. The endpoint inequalities in this guide define the feasible set, while the KKT residual is evaluated at the stage. The reduced endpoint comparison and the scientific reference for refactoring are in the [midpoint closeout](../MIDPOINT_UPDATE_CLOSEOUT.md).

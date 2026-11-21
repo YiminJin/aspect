@@ -5,6 +5,7 @@
 #include <aspect/material_model/history/tensor_field.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive.h>
 #include <aspect/material_model/phase_field_fault/bulk_tip.h>
+#include <aspect/material_model/phase_field_fault/tip_section_geometry.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_tensor.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_coulomb.h>
 #include <aspect/material_model/phase_field_fault/bulk_cohesive_gradient.h>
@@ -36,13 +37,15 @@ namespace aspect
       };
       BulkFlowRule flow_rule = BulkFlowRule::scalar;
       bool direct_tip() const { return flow_rule==BulkFlowRule::bulk_tip_sections; }
-      /** Fixed-direction control: actual x-Gauss sections span the entire box.
+      /** A section spans the specimen at fixed reference coordinate xi.
        * The age is physical everywhere from initialization, including ahead of
        * the initial damage. Geometry observations never create/reset this state. */
       struct Section
       {
-        double coordinate=0., weight=0., age=0., slip=0., rate=0., force=0.;
-        double angle=0.; ///< Recorded material plane, radians from the positive x axis.
+        double coordinate=0.; ///< Fixed material station xi.
+        double weight=0.; ///< Reference arclength quadrature weight dxi/cos(beta).
+        double age=0., slip=0., rate=0., force=0.;
+        double angle=0.; ///< Recorded material plane, radians from the fixed reference tangent.
         bool formed=false; ///< Exact positive accepted phase support, including the declared seed.
       };
       bool material_strips=false;
@@ -104,6 +107,7 @@ namespace aspect
       double background_pressure = 0., coulomb_mu = 0.;
       double slip_length = BulkCohesive::SlipGradient::experimental_length();
       std::shared_ptr<const BulkCohesive::SlipGradient::Space> slip_space;
+      std::shared_ptr<const BulkCohesive::Tip::SectionGeometry<dim>> section_geometry;
       std::vector<double> material_record() const
       {
         std::vector<double> values {parameters.G, parameters.eta, parameters.m, parameters.resistance};

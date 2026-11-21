@@ -7,6 +7,7 @@ void prepare_slipping_background()
   using Tensor=MaterialModel::BulkCohesive::Tensor;
   namespace Tip=MaterialModel::BulkCohesive::Tip;
   auto &state=*model().bulk_cohesive_state;
+  AssertThrow(!state.section_geometry->cut,ExcMessage("This prepared horizontal specimen requires its original Cartesian section quadrature."));
   const auto comm=this->get_mpi_communicator();
   const auto rank=Utilities::MPI::this_mpi_process(comm);
   const auto directory=std::string(std::getenv("ASPECT_WAVELENGTH_INPUT"));
@@ -43,6 +44,7 @@ void prepare_slipping_background()
     entry.second[q]*=std::cos(state.sections[state.section_ids.at(entry.first)[q]].angle);
   sim().bulk_tip_coupling=std::make_shared<internal::BulkTipCoupling<dim>>(sim(),model(),sim().current_constraints);
   auto &op=*sim().bulk_tip_coupling;
+  if (this->get_timestep_number()>0) op.prepare_direction();
   const AffineConstraints<double> saved_constraints(sim().current_constraints);
   const bool saved_system=sim().assemble_newton_stokes_system,saved_matrix=sim().assemble_newton_stokes_matrix;
   const double saved_tolerance=sim().parameters.linear_stokes_solver_tolerance;

@@ -1170,6 +1170,7 @@ namespace aspect
             current_linearization_point=solution;
             return;
           }
+        const double solver_start=MPI_Wtime();
         bulk_tip_coupling=std::make_shared<internal::BulkTipCoupling<dim>>(*this,*bulk_model,current_constraints);
         auto &coupling=*bulk_tip_coupling;
         pcout<<"   Bulk tip accepted parent: step="<<coupling.accepted_parent()->step
@@ -1198,6 +1199,7 @@ namespace aspect
             assemble_newton_stokes_system=false;
             assemble_newton_stokes_matrix=false;
             set_assemblers();
+            coupling.prepare_direction();
             // Ordinary distributed Stokes assembly and AMG use eta_BE from the
             // material model. This is a reference inverse/preconditioner only;
             // the exact cohesive and section tangent stays in the outer operator.
@@ -1236,13 +1238,18 @@ namespace aspect
             AssertThrow(!probe_row || probe_index<x.block(coupling.phase_block()).size(),
                         ExcMessage("Phase tangent probe row out of range."));
             bool probed_contact=false;
+            // A successful line trial already contains the physical residual at x.
+            // Test the prospective map there before assembling a tangent that a
+            // change of direction would immediately invalidate.
+            decltype(current) converged_trial;
             double last_exact_residual=std::numeric_limits<double>::infinity();
             for (; nonlinear_iteration<=parameters.max_nonlinear_iterations; ++nonlinear_iteration)
               {
                 if (trace_rows && std::getenv("ASPECT_TIP_TRACE_STOP_ITERATION"))
                   AssertThrow(nonlinear_iteration<static_cast<unsigned int>(std::atoi(std::getenv("ASPECT_TIP_TRACE_STOP_ITERATION"))),
                               ExcMessage("Selected diagnostic replay stop; trial not accepted or published."));
-                current=coupling.evaluate(x,true);
+                const bool reuse_trial=bool(converged_trial);
+                current=reuse_trial ? std::exchange(converged_trial,nullptr) : coupling.evaluate(x,true);
                 const double residual=std::max(current->mechanical/parameters.nonlinear_tolerance,
                                                current->kkt/phase_settings.nonlinear_solver_tolerance);
                 pcout<<"   Bulk tip coupled Newton "<<nonlinear_iteration<<": mechanics="<<current->mechanical
@@ -1254,6 +1261,14 @@ namespace aspect
                     // Converge their virgin-section selection with mechanics/VI
                     // before the existing single publication transaction.
                     if (coupling.update_virgin_planes(x))continue;
+                    if (reuse_trial)
+                      {
+                        // Retain the ordinary final tangent for native observers.
+                        current=coupling.evaluate(x,true);
+                        AssertThrow(current->mechanical<=parameters.nonlinear_tolerance &&
+                                    current->kkt<=phase_settings.nonlinear_solver_tolerance,
+                                    ExcMessage("Trial and final assembled physical residual gates disagree."));
+                      }
                     converged=true;
                     break;
                   }
@@ -1324,6 +1339,7 @@ namespace aspect
                         if (pressure_response->mechanical<=parameters.nonlinear_tolerance
                             && pressure_response->kkt<=phase_settings.nonlinear_solver_tolerance)
                           {
+                            if (bulk_model->localize_tip_direction) converged_trial=pressure_response;
                             x=pressure_trial;
                             found=true;
                             pcout<<"   Bulk tip accepted multiplier-only correction at full residual gates."<<std::endl;
@@ -1416,6 +1432,7 @@ namespace aspect
                                       }
                                   }
                               }
+                            if (bulk_model->localize_tip_direction && trial_residual<=1.) converged_trial=candidate;
                             x=trial;
                             found=true;
                             // Rebuild the exact tangent direction when backtracked metric
@@ -1494,6 +1511,10 @@ namespace aspect
             };
             restore();
             current_linearization_point=solution;
+            const double wall=Utilities::MPI::max(MPI_Wtime()-solver_start,mpi_communicator);
+            const double direct=Utilities::MPI::max(coupling.direction_seconds,mpi_communicator);
+            pcout<<"   Tip solver timing: step="<<timestep_number<<", wall="<<wall<<", direction="<<direct
+                 <<", scores="<<coupling.candidate_scores<<", RSF="<<coupling.candidate_rsf_solves<<std::endl;
           }
         catch (...)
           {

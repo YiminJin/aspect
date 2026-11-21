@@ -67,6 +67,10 @@ namespace aspect
          * coherent section Y0. True requests another ordinary coupled solve.
          * The accepted material owner is never modified here. */
         bool update_virgin_planes(const Vector &);
+        void prepare_direction();
+        double direction_seconds=0.;
+        unsigned long long candidate_scores=0, candidate_rsf_solves=0;
+
         /** Finish active bounds inside the opt-in constrained solve, then
          * require a fresh coupled residual check before material registration. */
         bool finish_strip_active_bounds(Vector &,const Evaluation &);
@@ -151,6 +155,12 @@ namespace aspect
         friend class Postprocess::MomentCycle<dim>; // Bounded fixed-phase mechanical screen.
         /** Set virgin trial planes from the accepted endpoint stress before the solve. */
         void prepare_coulomb_planes();
+        dealii::Point<2> accepted_selection_center(const State &accepted) const;
+        void prepare_tip_neighborhood();
+        bool can_register(unsigned int section) const;
+        std::map<CellId,std::vector<double>> direction_weights;
+        std::vector<unsigned int> eligible_sections;
+        bool prescribed_direction_replay=false;
         Model &model;
         std::shared_ptr<const State> parent;
         unsigned int pb, pc;
@@ -159,7 +169,6 @@ namespace aspect
         bool midpoint;
         AffineConstraints<double> boundary, homogeneous;
         PhaseField::Q2Bounds<dim> basis;
-        FullMatrix<double> phase_values; ///< Fixed reference quadrature, Bernstein ordering.
         std::map<CellId, std::vector<double>> parent_phase_values; ///< Immutable for this attempt.
         LinearAlgebra::Vector lower, upper, mass, fracture_linear;
         LinearAlgebra::SparseMatrix fracture_matrix;
