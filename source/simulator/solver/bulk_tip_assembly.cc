@@ -141,6 +141,8 @@ namespace aspect
           Utilities::MPI::max(formed,comm,formed);
           for (unsigned int k=0;k<formed.size();++k)formed_sections[k]=formed_sections[k] || formed[k];
         }
+      if (model.tip_section_closure==Model::TipSectionClosure::coulomb_formation && this->get_timestep_number()>0)
+        prepare_coulomb_planes();
       LinearAlgebra::Vector native_gradient;
       LinearAlgebra::SparseMatrix native_hessian;
       this->get_phase_field_handler().assemble_dg_fracture(parent_field,native_gradient,&native_hessian);
@@ -531,9 +533,61 @@ namespace aspect
     }
 
     template <int dim>
+    void BulkTipCoupling<dim>::prepare_coulomb_planes()
+    {
+      TimerOutput::Scope timer(this->get_computing_timer(),"Tip Coulomb plane selection");
+      // Integrate signed stress before forming a Coulomb score. The positive
+      // strip area and the angle-independent isotropic pressure cancel in argmax.
+      const auto count=parent->sections.size();
+      std::vector<double> moments(2*count,0.);
+      FEValues<dim> values(this->get_mapping(),this->get_fe(),model.mechanical_quadrature(),update_JxW_values);
+      for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+        if (cell->is_locally_owned())
+          {
+            values.reinit(cell);
+            const auto &indices=parent->section_ids.at(cell->id());
+            const auto &history=parent->history.at(cell->id());
+            for (unsigned int q=0;q<values.n_quadrature_points;++q)
+              {
+                const auto k=indices[q];
+                if (formed_sections[k])continue;
+                AssertThrow(history[q].A.norm()==0. && history[q].absolute_shear==0.,
+                            ExcMessage("A Coulomb formation plane cannot reorient a section with fault history."));
+                const auto &tau=history[q].stress;
+                moments[2*k]+=values.JxW(q)*.5*(tau[1][1]-tau[0][0]);
+                moments[2*k+1]+=values.JxW(q)*tau[0][1];
+              }
+          }
+      Utilities::MPI::sum(moments,this->get_mpi_communicator(),moments);
+      const double mu=model.fault_friction.reference_friction_coefficient(0);
+      for (unsigned int k=0;k<count;++k)
+        {
+          const double u=moments[2*k],v=moments[2*k+1];
+          if (formed_sections[k] || (u==0. && v==0.))continue;
+          const auto &incoming=parent->sections[k];
+          double best_distance=numbers::PI;
+          // Each signed sinusoid has one maximum modulo pi. The maxima have
+          // equal height. Use the nearest forward branch, positive shear on a tie.
+          for (const double sign:{1.,-1.})
+            {
+              const double angle=.5*std::atan2(sign*u-mu*v,sign*v+mu*u);
+              const double distance=std::abs(angle-incoming.angle);
+              if (std::abs(angle)<numbers::PI/4. && distance<best_distance)
+                {
+                  best_distance=distance;
+                  section_angles[k]=angle;
+                }
+            }
+          AssertThrow(best_distance<numbers::PI,
+                      ExcMessage("No forward Coulomb formation plane in section "+Utilities::to_string(k)+"."));
+          section_measures[k]=incoming.weight*std::cos(incoming.angle)/std::cos(section_angles[k]);
+        }
+    }
+
+    template <int dim>
     bool BulkTipCoupling<dim>::update_virgin_planes(const Vector &x)
     {
-      if (!parent->material_strips || this->get_timestep_number()==0)return false;
+      if (model.tip_section_closure!=Model::TipSectionClosure::intact_driving || this->get_timestep_number()==0)return false;
       TimerOutput::Scope timer(this->get_computing_timer(),"Tip virgin plane selection");
       const auto ns=parent->sections.size();
       // Moments of the actual native physical-stress predictor and phase.

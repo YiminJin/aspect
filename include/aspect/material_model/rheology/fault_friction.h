@@ -170,6 +170,12 @@ namespace aspect
           /** Exact configured signed-law parameters for restart identity. */
           std::vector<double> signed_parameter_record() const;
 
+          /** Reference coefficient of the configured material for plane selection. */
+          double reference_friction_coefficient(const unsigned int material_index) const
+          {
+            return mu0.at(material_index);
+          }
+
           double get_reference_slip_rate() const;
 
           double get_minimum_slip_rate() const;

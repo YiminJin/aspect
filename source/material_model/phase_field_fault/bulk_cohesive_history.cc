@@ -222,7 +222,7 @@ namespace aspect
                   ExcMessage("Bulk cohesive history initializes once on a fixed mesh."));
       auto s = std::make_shared<BulkCohesiveState>();
       s->flow_rule = bulk_flow_rule;
-      s->material_strips = bulk_tip_material_strips;
+      s->material_strips = tip_section_closure != TipSectionClosure::fixed_direction;
       const double G = elastic_shear_moduli[0], Gc = critical_energy_release_rates[0];
       const double Kf = Gc / ((8. / 3.) * this->get_phase_field_handler().get_length_scale());
       std::vector<double> fractions(elastic_shear_moduli.size(), 0.);
@@ -336,6 +336,16 @@ namespace aspect
     }
 
     template <int dim>
+    const char *PhaseFieldFault<dim>::tip_checkpoint_signature() const
+    {
+      if (tip_section_closure == TipSectionClosure::coulomb_formation)
+        return "bulk tip physical tau A material strips accepted-stress Coulomb midpoint v1";
+      if (tip_section_closure == TipSectionClosure::intact_driving)
+        return "bulk tip physical tau A material strips midpoint v1";
+      return "bulk tip physical tau A DGQ2 sections BE v1";
+    }
+
+    template <int dim>
     template<class Archive>
     void
     PhaseFieldFault<dim>::serialize_bulk_cohesive_history(Archive &ar)
@@ -344,7 +354,7 @@ namespace aspect
       auto record = std::make_shared<BulkCohesiveArchive>();
       if (bulk_flow_rule==BulkFlowRule::bulk_tip_sections)
         {
-          record->signature=bulk_tip_material_strips ? "bulk tip physical tau A material strips midpoint v1" : "bulk tip physical tau A DGQ2 sections BE v1";
+          record->signature=tip_checkpoint_signature();
           if constexpr(Archive::is_saving::value)
             {
               const auto &s=*bulk_cohesive_state;
@@ -405,7 +415,7 @@ namespace aspect
                 }
             }
           ar &record->signature;
-          AssertThrow(record->signature==(bulk_tip_material_strips ? "bulk tip physical tau A material strips midpoint v1" : "bulk tip physical tau A DGQ2 sections BE v1"),ExcMessage("Tip checkpoint law mismatch; no conversion."));
+          AssertThrow(record->signature==tip_checkpoint_signature(),ExcMessage("Tip checkpoint law mismatch; no conversion."));
           ar &record->quadrature &record->step &record->publications &record->time &record->material &record->phase &record->cells &record->local;
           if constexpr(Archive::is_loading::value)bulk_cohesive_archive=std::move(record);
           return;
@@ -501,7 +511,7 @@ namespace aspect
       const auto &a = *bulk_cohesive_archive;
       if (s.direct_tip())
         {
-          AssertThrow(a.signature==s.checkpoint_signature() && a.quadrature==s.quadrature,ExcMessage("Tip checkpoint representation/quadrature mismatch."));
+          AssertThrow(a.signature==tip_checkpoint_signature() && a.quadrature==s.quadrature,ExcMessage("Tip checkpoint representation/quadrature mismatch."));
           std::vector<double> material=s.material_record();
           material.push_back(critical_energy_release_rates[0]);
           material.push_back(this->get_phase_field_handler().get_length_scale());

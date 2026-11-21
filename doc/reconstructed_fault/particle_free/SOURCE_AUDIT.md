@@ -1,3 +1,13 @@
+The final local 40 μs comparison used the same certified executable, checker and common fourfold-rate parent as the 80 μs control. A benchmark reducer verifies section quadrature against accepted slip, compares fixed and threshold-selected stations, and samples native phase on newly registered sections. [Matched physical check and reducer](STAGE4_FINAL_LOCAL_40US.md).
+
+**The shifted mechanics search now restarts FGMRES once when the returned vector misses its explicit tolerance after an estimated success.** Both attempts share 600 iterations, and the shifted system is checked again before the physical line trial. The same-parent native replay exercised the restart on the originally rejected shifted mechanics correction. [Test and certificates](STAGE4_TRUE_RESIDUAL_RESTART.md).
+
+**The exact contact-restricted FGMRES now uses modified Gram–Schmidt.** The estimate is computed before vector recombination. The solver continues to certify the returned correction on its actual operator before updating any bound. The same-parent 80 μs test passed the original physical gates at 6.32 and 6.40 ms. [Operator comparison and native evidence](STAGE4_OVERNIGHT_PROPAGATION.md).
+
+**Bounded search recovery and alternate formation law.** Numerical phase-obstacle exhaustion now returns a checked search failure. Repeated stalled shifted trials can retry the exact tangent. The optional Coulomb selector reads the accepted full-strip physical stress and the configured reference friction coefficient before the coupled solve. Its restart identity is distinct from the intact-driving law. [Source behavior, two-rank oracle and native turning results](STAGE4_RECOVERY_AND_COULOMB_FORMATION.md).
+
+**The original repaired executable stopped in the shift-1e6 phase obstacle on step 79.** Numerical exhaustion in `phase_field/obstacle.cc` raises a generic exception. The shifted subproblem caller in `simulator/solver/bulk_tip_linear.cc` catches linear solver nonconvergence. This exception bypassed its fallback. Physical fields and front comparisons end at the preceding checkpoint. [Continuation measurements and step-79 failure](STAGE4_PROPAGATION_REPAIRED_80US.md#four-interval-continuation-from-step-76).
+
 **The repaired executable reproduced the 80 μs control through 5.60 ms and continued through 6.08 ms.** The local comparison at 5.92 ms uses the same executable, original physical convergence gates and the same accepted parent. The two reduction scripts distinguish midpoint section rates, accepted endpoint data and the full physical-work ledger. [Repaired propagation window and focused timestep comparison](STAGE4_PROPAGATION_REPAIRED_80US.md).
 
 **The bulk-tip solver now checks each returned correction with the operator

@@ -55,7 +55,7 @@ namespace aspect
       }
       std::string checkpoint_signature() const
       {
-        if (direct_tip()) return material_strips ? "bulk tip physical tau A material strips midpoint v1" : "bulk tip physical tau A DGQ2 sections BE v1";
+        Assert(!direct_tip(), ExcInternalError()); // Direct tip archives include the configured section closure.
         if (flow_rule == BulkFlowRule::coulomb_fixed_phase)
           return "bulk cohesive closed Coulomb fixed phase cell history v1";
         if (flow_rule == BulkFlowRule::fixed_tensor)

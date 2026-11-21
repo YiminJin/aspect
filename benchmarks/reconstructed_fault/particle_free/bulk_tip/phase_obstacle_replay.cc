@@ -1,6 +1,7 @@
 /* Independent small oracle and captured scalar-QP replay; no coupled solver. */
 #include <aspect/phase_field/obstacle.h>
 #include <deal.II/lac/dynamic_sparsity_pattern.h>
+#include <deal.II/lac/solver_control.h>
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -99,6 +100,20 @@ int main(int argc,char **argv)
        {
          &rhs,&lower,&upper,&initial
        })v->compress(VectorOperation::insert);
+  if (toy)
+    {
+      state=initial;
+      bool exhausted=false;
+      try
+        {
+          PhaseField::solve_obstacle(matrix,rhs,lower,upper,state,relevant,comm,tolerance,0,linear_maximum);
+        }
+      catch (const SolverControl::NoConvergence &failure)
+        {
+          exhausted=failure.last_step==0 && failure.last_residual>tolerance;
+        }
+      AssertThrow(exhausted,ExcMessage("Expected a recoverable active-set budget failure."));
+    }
   bool original_failed=false,original_budget_failure=false;
   for (const bool reference:
   {

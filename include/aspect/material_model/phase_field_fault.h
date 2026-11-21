@@ -1371,7 +1371,9 @@ namespace aspect
         };
         BulkFlowRule bulk_flow_rule = BulkFlowRule::scalar;
         bool bulk_tip_midpoint = false; ///< Coupled stage equations; only endpoints persist.
-        bool bulk_tip_material_strips = false; ///< Opt-in fixed-membership graph closure; no contact or branching.
+        enum class TipSectionClosure : unsigned char { fixed_direction, intact_driving, coulomb_formation };
+        TipSectionClosure tip_section_closure = TipSectionClosure::fixed_direction;
+        const char *tip_checkpoint_signature() const;
         bool bulk_tip_equilibrate_seed = false; ///< Zero-clock fracture equilibration before history initialization.
         double bulk_tip_initial_age = 1.; ///< Virgin and initially damaged section age, seconds.
         /**

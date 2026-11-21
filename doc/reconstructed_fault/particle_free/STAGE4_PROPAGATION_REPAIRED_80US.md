@@ -1,5 +1,7 @@
 # Repaired 80 μs propagation pilot
 
+The later same-parent repair recovered step 79 and advanced the steady branch through 6.40 ms. [Solver, accepted fields and restart](STAGE4_OVERNIGHT_PROPAGATION.md).
+
 The two-interval replay starts at accepted step 68 (5.44 ms) on the 256 × 128
 mesh. Its native parent is slot 03 of `stage4-propagation-pilot-resume51`.
 All six checkpoint member hashes match the common parent of the previous
@@ -165,3 +167,71 @@ reached the tip, new section formed or resolved arrest occurred within this
 window.
 
 [Slip rate, connected contour and flank damage (PNG)](../../../benchmarks/reconstructed_fault/particle_free/evidence/stage4_propagation_pilot/guard80/slip-and-upper-flank.png) · [PDF figure](../../../benchmarks/reconstructed_fault/particle_free/evidence/stage4_propagation_pilot/guard80/slip-and-upper-flank.pdf).
+
+## Four-interval continuation from step 76
+
+**Two intervals were accepted. The last physical endpoint is step 78 at
+6.24 ms.** Step 79 (target 6.32 ms) failed the coupled phase solve. Step 80
+was never entered. The four-rank native process exited with code 1 after
+2 h 1 min 22 s. The source worktree was on `pf-rsf-particle-free` at
+`c07eea8e7` with clean tracked sources. All six native step-76 checkpoint
+members, the five prepared inputs, the protected executable and checker,
+and the five solver source checksums matched their retained identities.
+The new output tree keeps the original step-76 and 40 μs evidence intact.
+The run used the same 256 × 128 mesh, midpoint scheme, 80 μs timestep, load
+and solver tolerances. [Command and identities](../../../benchmarks/reconstructed_fault/particle_free/evidence/stage4_propagation_pilot/through80/command.json) · [Native input](../../../benchmarks/reconstructed_fault/particle_free/evidence/stage4_propagation_pilot/through80/input.prm).
+
+| Endpoint (ms) | Largest phase coefficient in initially intact cells | Right connected φ = 0.01 (m) | Right connected φ = 0.05 (m) | Midpoint time (ms) | Right 5 mm/s crossing (m) |
+|---:|---:|---:|---:|---:|---:|
+| 6.08 | 0.001893 | 6.110103 | 6.004493 | 6.04 | 5.803199 |
+| 6.16 | 0.002009 | 6.111013 | 6.004635 | 6.12 | 5.803942 |
+| 6.24 | 0.002112 | 6.112341 | 6.004680 | 6.20 | 5.804709 |
+
+**The connected 0.01 contour stayed in material with nonzero seed support.**
+It moved 2.24 mm along x. In every initially zero cell the largest Bernstein
+coefficient remained below 0.01. The Bernstein convex-hull property excludes
+a missed threshold crossing between samples. Both 8- and 16-point-per-axis
+connectivity checks found connected 0.001 damage in two initially intact
+cells. Five initially intact cells had mean phase above 1e-12, the same five
+as at the parent. Their integrated phase rose from 5.659e-7 to 7.418e-7 m².
+The right upper and lower 0.05 contours advanced 0.187 and 0.224 mm. The
+remote phase increment and number of newly formed sections were both zero.
+[Threshold measurements](../../../benchmarks/reconstructed_fault/particle_free/evidence/stage4_propagation_pilot/through80/threshold-fronts.csv) · [Cell values](../../../benchmarks/reconstructed_fault/particle_free/evidence/stage4_propagation_pilot/through80/initially-intact-cells.csv).
+
+**The interpolated 5 mm/s crossing drew slightly closer to the tip.** It
+advanced 1.51 mm while staying between the same stations at 5.800603 and
+5.807206 m. Its distance to the corresponding endpoint tip narrowed from
+201.29 to 199.97 mm. The change is smaller than the 6.60 mm station spacing.
+Using the station bracket and the start/end tip positions gives a final gap
+of 197.43–204.08 mm. The peak rate rose from 19.63 to 19.76 mm/s at the
+same x = 3.0011 m. At the right tip the interpolated rate rose from 1.35 to
+1.41 mm/s. Integrated slip increased by 6.902e-6 m² and fracture energy by
+2.694e-5 J/m. The signed and accumulated absolute physical-work errors were
+both 3.575e-11 J/m. These measurements establish continued weak flank damage
+and separation of the strong slipping region from the tip through 6.24 ms.
+[Front comparison](../../../benchmarks/reconstructed_fault/particle_free/evidence/stage4_propagation_pilot/through80/threshold-fronts.png) · [Slip-rate history and flank map](../../../benchmarks/reconstructed_fault/particle_free/evidence/stage4_propagation_pilot/through80/slip-and-upper-flank.png).
+
+### Step 79 failure and restart point
+
+Steps 77 and 78 took 19.33 and 41.52 minutes of native step time. Step 78
+needed 110 line trials. The last step-79 trial, Newton iteration 27, had a
+mechanical residual of 1.88e-13 (gate 1e-9) and projected phase KKT of
+1.02992e-6 (gate 1e-7). Shift-100 searches made progressively smaller
+changes above the tenfold physical-merit threshold for switching back to
+exact polishing. At the last iteration the shift-1e6 phase subproblem
+exhausted its 100 active-set iterations. All 191 logged shifted CG returns
+in step 79 passed their explicit linear checks. The inner obstacle convergence
+failure occurred before another exact search direction could be tried.
+No candidate from that interval was published. [Native log](../../../benchmarks/reconstructed_fault/particle_free/evidence/stage4_propagation_pilot/through80/native.log.gz) · [Linear certificate counts](../../../benchmarks/reconstructed_fault/particle_free/evidence/stage4_propagation_pilot/through80/certificate-counts.json).
+
+**Next experiment.** Use the saved step-78 parent for a single 80 μs
+solver-recovery comparison. The obstacle routine currently signals numerical
+active-set exhaustion with a generic exception, whereas the shifted-direction
+caller handles `SolverControl::NoConvergence` as a failed search. First
+exercise this distinction in a cheap restricted obstacle test. Then test
+returning numerical exhaustion to the existing fallback and trying the exact
+tangent when a shifted search repeatedly accepts vanishing corrections.
+Preserve the explicit linear checks, physical convergence gates and original
+failed executable for comparison. Acceptance at 6.32 ms would justify trying
+step 80. The present outputs give no physical result at either later time.
+[Step-78 checkpoint and member hashes](../../../benchmarks/reconstructed_fault/particle_free/evidence/stage4_propagation_pilot/through80/checkpoint.json).

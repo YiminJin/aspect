@@ -70,7 +70,8 @@ namespace aspect
               result.energy = .5 * (state * gradient) - .5 * (state * rhs);
               return result;
             }
-          AssertThrow(iteration < max_iterations, ExcMessage("Native phase obstacle active-set iteration budget exhausted."));
+          if (iteration == max_iterations)
+            throw SolverControl::NoConvergence(iteration,result.residual);
           active.compress(VectorOperation::insert);
           fixed.compress(VectorOperation::insert);
           active_ghost = active;

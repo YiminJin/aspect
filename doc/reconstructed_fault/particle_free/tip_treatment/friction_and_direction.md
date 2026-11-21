@@ -180,3 +180,57 @@ reported counts use no phase/rate cutoff and do not infer continuous branching
 from sampled signs. Old planes/measures remain unchanged and prospective age is
 not reset at registration. Tiny-positive-phase registration remains an explicit
 limitation of the material-plane closure and its finite solver accuracy.
+
+### Optional Coulomb plane selection on material strips
+
+`Bulk tip section closure = material strips Coulomb formation` selects a
+direction for virgin material in the bounded midpoint single-graph control.
+The existing `material strips` setting maximizes integrated intact driving
+with the current trial mechanics. Both use the same bulk fracture energy,
+section RSF resistance and work adjoint.
+
+At the beginning of each positive-duration attempt, read the **accepted
+endpoint physical deviatoric Cauchy stress** at the native mechanical Gauss
+points. Use the same immutable full-height material strips as the section
+law. For a strip of area $a_k$, form
+$$
+ \bar\tau_k=a_k^{-1}\sum_{q\in k} J_q w_q\,\tau_q^n .
+$$
+Average signed tensors before resolving traction. For tangent
+$t=(\cos\alpha,\sin\alpha)$ and normal
+$n=(-\sin\alpha,\cos\alpha)$, maximize
+$$
+ |t^T\bar\sigma_k n|+\mu_0 n^T\bar\sigma_k n
+$$
+using tension-positive stress. Every isotropic pressure contribution adds a
+constant to the objective. The orientation therefore needs only the stored
+deviator. The orientation coefficient is the configured reference friction
+coefficient of the homogeneous material. The RSF resistance in the stage
+solve continues to use its own rate, age and prescribed scalar confinement.
+This selection supplies a plane preference. Admission of new damage still
+requires the coupled fracture and mechanics equations.
+
+Write $u=(\bar\tau_{yy}-\bar\tau_{xx})/2,\ v=\bar\tau_{xy}$.
+For each shear sign $s=\pm1$, the maximizing unoriented line is
+$$
+ \alpha_s=\tfrac12\operatorname{atan2}(su-\mu_0v,\;sv+\mu_0u)
+ \pmod\pi .
+$$
+Take the admissible conjugate nearest the accepted preference, counting only
+lines strictly within the forward sector $(-\pi/4,\pi/4)$. A distance tie
+takes the positive-shear conjugate. Zero in-plane deviatoric contrast retains
+the incoming preference. Absence of an interior conjugate aborts the bounded
+model. There is no clipping at a sector edge. The positive common area in
+both arguments cancels.
+
+`BulkTipCoupling::prepare_coulomb_planes` sets the attempt's angles and
+measures before the first mechanical evaluation. Native $JxW/ds$ and
+the work adjoint use $ds=dx/\cos\alpha$ throughout that attempt. At the
+zero-clock equilibrium the seed keeps its prescribed horizontal planes.
+The first accepted positive native phase in a section fixes its angle and
+measure. Previously formed sections keep their frames for life, including
+under unloading. Each section's age and slip have existed since initialization
+and advance once at acceptance. Rejection discards the trial map and all trial
+histories. Checkpoints distinguish both formation rules and preserve incoming
+preferences as well as formed flags. See the
+[formation comparison](../STAGE4_RECOVERY_AND_COULOMB_FORMATION.md).

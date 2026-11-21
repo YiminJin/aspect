@@ -141,8 +141,11 @@ namespace aspect
               pcout<<"   Tip shifted metric VI: shift="<<shift<<", residual="<<metric_result.residual
                    <<", tolerance="<<1e-10*minimum_mass<<std::endl;
           }
-        catch (const SolverControl::NoConvergence &)
+        catch (const SolverControl::NoConvergence &failure)
           {
+            if (trace_search)
+              pcout<<"   Tip shifted phase search failed: shift="<<shift<<", iterations="<<failure.last_step
+                   <<", remaining residual="<<failure.last_residual<<std::endl;
             return false;
           }
         direction.block(pb)=phase;
@@ -171,27 +174,41 @@ namespace aspect
             apply_bulk_tip_stokes_inverse(dst,src);
           }
         };
-        SolverControl control(600,std::max(1e-16,1e-10*rhs.l2_norm()));
-        SolverFGMRES<Vector> solver(control,typename SolverFGMRES<Vector>::AdditionalData(80));
+        const double tolerance=std::max(1e-16,1e-10*rhs.l2_norm());
+        unsigned int remaining_iterations=600;
         correction=0.;
-        bool krylov_converged=true;
-        try
+        // FGMRES tests its Arnoldi estimate before recombining the correction.
+        // Starting it again with that vector computes rhs - A*correction on
+        // this same restricted system. Share the original iteration budget.
+        for (unsigned int attempt=0; attempt<2; ++attempt)
           {
-            solver.solve(matrix,correction,rhs,preconditioner);
+            SolverControl control(remaining_iterations,tolerance);
+            SolverFGMRES<Vector> solver(control,typename SolverFGMRES<Vector>::AdditionalData(80));
+            bool krylov_converged=true;
+            try
+              {
+                solver.solve(matrix,correction,rhs,preconditioner);
+              }
+            catch (const SolverControl::NoConvergence &)
+              {
+                krylov_converged=false;
+              }
+            coupling.linear_iterations+=control.last_step();
+            const double explicit_norm=explicit_residual(matrix,correction,rhs);
+            if (trace_search || attempt>0 || !krylov_converged || !(explicit_norm<=tolerance))
+              pcout<<"   Tip shifted mechanics solve: shift="<<shift<<", iterations="<<control.last_step()
+                   <<", estimate="<<control.last_value()<<", explicit="<<explicit_norm
+                   <<", tolerance="<<tolerance<<", restart="<<attempt<<std::endl;
+            if (krylov_converged && explicit_norm<=tolerance)
+              {
+                direction+=correction;
+                return true;
+              }
+            if (!krylov_converged || !std::isfinite(explicit_norm) || control.last_step()>=remaining_iterations)
+              break;
+            remaining_iterations-=control.last_step();
           }
-        catch (const SolverControl::NoConvergence &)
-          {
-            krylov_converged=false;
-          }
-        coupling.linear_iterations+=control.last_step();
-        const double explicit_norm=explicit_residual(matrix,correction,rhs);
-        if (trace_search || !krylov_converged || !(explicit_norm<=control.tolerance()))
-          pcout<<"   Tip shifted mechanics solve: shift="<<shift<<", iterations="<<control.last_step()
-               <<", estimate="<<control.last_value()<<", explicit="<<explicit_norm
-               <<", tolerance="<<control.tolerance()<<std::endl;
-        if (!krylov_converged || !(explicit_norm<=control.tolerance()))return false;
-        direction+=correction;
-        return true;
+        return false;
       }
     ++coupling.exact_attempts;
     std::vector<std::vector<int>> classifications;
@@ -289,7 +306,11 @@ namespace aspect
         minimum_mass=Utilities::MPI::min(minimum_mass,mpi_communicator);
         const double tolerance=std::max(1e-16,std::min(1e-10*rhs.l2_norm(),1e-10*minimum_mass));
         SolverControl control(600,tolerance);
-        SolverFGMRES<Vector> solver(control,typename SolverFGMRES<Vector>::AdditionalData(80));
+        // On changing contact masks a delayed Arnoldi residual can fall below
+        // tolerance while the returned vector still fails the restricted system.
+        // Orthogonalize each new vector before its next Stokes preconditioning.
+        SolverFGMRES<Vector> solver(control,typename SolverFGMRES<Vector>::AdditionalData(
+                                      80,dealii::LinearAlgebra::OrthogonalizationStrategy::modified_gram_schmidt));
         // Neighboring active-set problems share the tangent and most free rows.
         // Reuse the last direction, removing the newly prescribed displacement;
         // active rows solve identity equations with exactly zero right-hand side.

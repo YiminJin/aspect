@@ -149,6 +149,8 @@ namespace aspect
 
       private:
         friend class Postprocess::MomentCycle<dim>; // Bounded fixed-phase mechanical screen.
+        /** Set virgin trial planes from the accepted endpoint stress before the solve. */
+        void prepare_coulomb_planes();
         Model &model;
         std::shared_ptr<const State> parent;
         unsigned int pb, pc;

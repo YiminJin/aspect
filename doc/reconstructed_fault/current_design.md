@@ -1,3 +1,8 @@
+> The optional `material strips Coulomb formation` rule uses the reference
+> friction coefficient and the preceding accepted strip-mean physical stress
+> to choose prospective planes. The stage equations use those fixed planes
+> through acceptance. [Sampling, branch and lifecycle](particle_free/tip_treatment/friction_and_direction.md#optional-coulomb-plane-selection-on-material-strips).
+
 > **Selected native free-turn experiment (11 November 2026).**
 > The straight production/control path remains unchanged. The opt-in bulk-tip
 > `material strips` closure uses V=sum(JxW w)/ds with ds=dx/cos(angle), fixed

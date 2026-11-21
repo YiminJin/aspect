@@ -4417,4 +4417,18 @@ has no material transport, branching or general contact capability. Details
 and the formulation-to-code map are maintained in
 \texttt{particle\_free/FIRST\_FREE\_TURN\_FORMULATION.md}.
 
+
+The alternate \texttt{material strips Coulomb formation} selector evaluates
+the two conjugates of $|t^T\bar\sigma^n n|+\mu_0 n^T\bar\sigma^n n$ with
+tension-positive stress. The signed average uses accepted endpoint stresses
+over the same complete strip with native $JxW$. Isotropic pressure contributes
+an orientation-independent constant. The forward conjugate nearest the accepted
+preference is selected, with positive shear on an equal-distance tie.
+Isotropic in-plane stress retains the preference. Absence of an interior
+conjugate rejects the attempt. The trial plane and $ds$ are prepared before
+the midpoint solve and persist at first positive accepted phase. Seed planes,
+age, slip, work adjoint and the fracture criterion follow the same strip
+contract. Direction choice is a separate constitutive assumption with its own
+checkpoint signature.
+
 \end{document}

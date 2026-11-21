@@ -67,3 +67,13 @@ endpoints, run `compare_flank_interval.py PARENT_OUTPUT 73 COARSE_OUTPUT
 FINE_OUTPUT RESULT.json`. The coarse output contains the step-73 parent and
 its next 80 μs step. The fine output contains two accepted 40 μs steps from
 that same parent.
+
+`measure_propagation_fronts.py INITIAL_OUTPUT PARENT_OUTPUT CONTINUATION_OUTPUT DESTINATION`
+measures entry of connected phase into cells whose initial polynomial is
+identically zero. It reports the connected-cell count at two sampling densities
+and the largest Bernstein coefficient over all initially intact cells. A bound
+below 0.01 excludes that level everywhere in those cells. The second panel
+locates the rightmost positive 5 mm/s crossing between midpoint-rate stations.
+Its distance band uses the bracketing stations and the connected 0.05 tip at
+the two ends of the interval. The plotted point uses linear station interpolation
+and the accepted endpoint tip.

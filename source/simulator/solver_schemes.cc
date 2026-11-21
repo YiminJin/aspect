@@ -1223,6 +1223,7 @@ namespace aspect
             nonlinear_iteration=0;
             bool converged=false;
             bool prefer_shifted_search=false;
+            unsigned int stalled_shifted_trials=0;
             // Bounded benchmark comparison; defaults and physical gates remain.
             const bool positive_metric_first=std::getenv("ASPECT_TIP_POSITIVE_METRIC_FIRST")!=nullptr;
             const bool trace_search=std::getenv("ASPECT_TIP_TRACE_SEARCH")!=nullptr;
@@ -1417,7 +1418,21 @@ namespace aspect
                               }
                             x=trial;
                             found=true;
+                            // Rebuild the exact tangent direction when backtracked metric
+                            // searches make negligible progress on the physical residual.
+                            // This changes only the next search order; every candidate is
+                            // subject to the original linear, Armijo and physical gates.
+                            const bool stalled=shift>0. && alpha<1. && !resolved_decrease
+                                               && trial_residual>=.99*residual;
+                            stalled_shifted_trials=stalled ? stalled_shifted_trials+1 : 0;
                             prefer_shifted_search=shift>0.;
+                            if (!positive_metric_first && stalled_shifted_trials>=2)
+                              {
+                                prefer_shifted_search=false;
+                                stalled_shifted_trials=0;
+                                if (trace_search)
+                                  pcout<<"   Tip retrying exact search after two stalled metric trials."<<std::endl;
+                              }
                             pcout<<"   Bulk tip accepted search: shift="<<shift<<", alpha="<<alpha<<std::endl;
                             break;
                           }

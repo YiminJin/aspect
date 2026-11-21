@@ -1,3 +1,5 @@
+The material-strip midpoint experiment now has two selectable virgin-plane rules. Both formed new sections in the small positive turning fixture. The sampling, conjugate selection, joint publication and limits are described in the [formation guide](tip_treatment/friction_and_direction.md#optional-coulomb-plane-selection-on-material-strips) and [matched comparison](STAGE4_RECOVERY_AND_COULOMB_FORMATION.md).
+
 > **Complete — loaded-seed preparation and bounded friction/growth comparison.**
 > [Overnight report and figures](STAGE4_OVERNIGHT_PREPARATION_REPORT.md): native
 > zero-clock preparation, both fixed32 histories, both free76 histories through

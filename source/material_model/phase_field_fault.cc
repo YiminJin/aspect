@@ -440,9 +440,10 @@ namespace aspect
 
           prm.declare_entry("Bulk tip time update", "backward Euler", Patterns::Selection("backward Euler|midpoint"),
                             "Numerical update for the integrated native Bernstein tip control. Midpoint uses stage mechanics and exact constant-stage-rate aging; it is not L-stable.");
-          prm.declare_entry("Bulk tip section closure", "fixed direction", Patterns::Selection("fixed direction|material strips"),
+          prm.declare_entry("Bulk tip section closure", "fixed direction", Patterns::Selection("fixed direction|material strips|material strips Coulomb formation"),
                             "Experimental material-area/reference-arclength closure on immutable full-height Cartesian strips. "
-                            "Virgin sections select a coherent plane by integrated intact-reaction driving; formed planes and state persist. "
+                            "Material strips select virgin planes by integrated intact-reaction driving. The Coulomb formation "
+                            "option selects from accepted strip-mean stress and reference friction. Formed planes and state persist. "
                             "Restricted to a single forward graph, fixed reference geometry, scalar confinement and midpoint.");
           prm.declare_entry("Bulk tip solver", "ASPECT", Patterns::Selection("ASPECT"),
                             "Distributed coupled solver. Historical replicated solvers are retired; the independent direct oracle lives in benchmark support.");
@@ -664,7 +665,10 @@ namespace aspect
           bulk_cohesive_phase = prm.get("Fault constitutive mode") == "bulk cohesive";
           const auto bulk_rule = prm.get("Bulk cohesive flow rule");
           bulk_tip_midpoint = prm.get("Bulk tip time update") == "midpoint";
-          bulk_tip_material_strips = prm.get("Bulk tip section closure") == "material strips";
+          const auto closure = prm.get("Bulk tip section closure");
+          tip_section_closure = closure == "material strips" ? TipSectionClosure::intact_driving :
+                                closure == "material strips Coulomb formation" ? TipSectionClosure::coulomb_formation :
+                                TipSectionClosure::fixed_direction;
           bulk_tip_equilibrate_seed = prm.get_bool("Equilibrate bulk tip seed");
           bulk_tip_initial_age=prm.get_double("Bulk tip initial age");
           bulk_flow_rule = bulk_rule == "bulk tip sections" ? BulkFlowRule::bulk_tip_sections : bulk_rule == "fixed scalar" ? BulkFlowRule::scalar
@@ -689,7 +693,7 @@ namespace aspect
           material_direct_stress = prm.get("Material stress representation") == "direct physical stress";
           AssertThrow(!bulk_tip_midpoint || (uses_integrated_bulk_tip() && this->get_parameters().use_bernstein_phase_basis),
                       ExcMessage("Midpoint is restricted to the integrated native Bernstein bulk-tip route."));
-          AssertThrow(!bulk_tip_material_strips || (uses_integrated_bulk_tip() && bulk_tip_midpoint),
+          AssertThrow(tip_section_closure == TipSectionClosure::fixed_direction || (uses_integrated_bulk_tip() && bulk_tip_midpoint),
                       ExcMessage("Material strips require native bulk tip and midpoint; no checkpoint conversion."));
           AssertThrow(!material_direct_stress || dg_material_transport,
                       ExcMessage("Direct physical stress requires Jaumann DG material Lie."));
