@@ -1,5 +1,7 @@
 # Directory guide — 2026-10-15
 
+The [research worktree recovery guide](../../doc/reconstructed_fault/WORKTREE_CLEANUP.md) identifies the surviving local payloads for these benchmarks.
+
 Start with [CURRENT_STATUS](../../doc/reconstructed_fault/CURRENT_STATUS.md) for
 the latest scientific results and limitations. The dated task notes below are
 historical evidence, not instructions to launch another experiment.

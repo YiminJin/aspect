@@ -1,5 +1,7 @@
 # Mature moving-step refactor evidence
 
+**Historical procedure.** The mature-step driver was superseded. The pre-cleanup tag `research-pre-worktree-cleanup-20261121` contains the two original comparison scripts and their tracked build transcripts. The equivalence measurements remain here. The old trial directories were retired during [worktree cleanup](../../../../../doc/reconstructed_fault/WORKTREE_CLEANUP.md).
+
 [Current reading guide](../../../../../doc/reconstructed_fault/particle_free/MATURE_MOVING_FAULT.md)
 · [refactor report](../../../../../doc/reconstructed_fault/particle_free/MATURE_STEP_REFACTOR_REPORT.md)
 

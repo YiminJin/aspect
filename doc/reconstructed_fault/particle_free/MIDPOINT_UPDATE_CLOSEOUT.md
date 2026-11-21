@@ -1,5 +1,7 @@
 # Midpoint update closeout and scientific reference
 
+The frozen package now lives in the [sibling reference directory](../../../../aspect-pf-rsf-reference-20261121/README.md). The [storage closeout](../WORKTREE_CLEANUP.md) records the relocated restart check and the local availability of the comparison data.
+
 **Freeze the implemented midpoint update for refactoring. Treat the 18-strip trajectory as a diagnostic of timestep sensitivity.** The phase equation equilibrates at the midpoint under an irreversible obstacle. Publication carries that increment a second time to the endpoint. On this specimen, a second solve therefore has a new direction of decreasing fracture energy even under constant loading. An independent fracture-only solve reproduces the native second phase increment to within 0.014% in spatial L². The scientific limitation is confirmed for this preparation. The audit found no duration, chain-factor, work-accounting or publication defect requiring a native code change.
 
 ## What one physical step computes

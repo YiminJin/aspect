@@ -72,3 +72,7 @@ rules.ninja
 
 # Recoverable local archives from benchmark-artifact cleanup.
 /.benchmark-cleanup-*/
+
+# Python import caches from reconstructed-fault analysis and fixture runners.
+/benchmarks/reconstructed_fault/**/__pycache__/
+/doc/reconstructed_fault/**/__pycache__/

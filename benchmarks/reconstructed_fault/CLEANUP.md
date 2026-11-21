@@ -1,5 +1,7 @@
 # Propagation-worktree disk cleanup — 2026-10-15
 
+For the research worktree after 21 November, consult the [current retention and recovery record](../../doc/reconstructed_fault/WORKTREE_CLEANUP.md). The inventories below describe the earlier cleanup.
+
 This cleanup applies to `/home/ein/repository/aspect-fault-propagation`, branch
 `fault-propagation`, at `c33edaaeb145e5d3dce155bb815552ef80efc5f9` with its
 incoming local edits. It freed **2.32 GiB**, increasing available space from

@@ -1,5 +1,7 @@
 # Small material-section geometry controls
 
+For an exact replay of the frozen localized control, extract the [canonical reference](../../../../doc/reconstructed_fault/WORKTREE_CLEANUP.md) in a fresh directory and use its bundled replay and checker. The following source-tree commands also support new experiments with explicitly supplied, matched binaries. The historical temporary build defaults and timing-matrix directories require reconstruction. The width comparison retains its coarse outputs and pinned runtime in the research worktree.
+
 The fixture generator starts from the native finite-tip input. Its arguments specify the mesh rotation and material angle separately. The supplied covariance check rotates the box, velocity and scalar seed together about the coordinate origin. The checker can copy the same raw scalar FE coefficients by cell/local shape before initialization. Use the same MPI partition for that benchmark hook. ASPECT applies its native limiter, constitutive update, solver and checkpoint machinery. Zero function topography selects the affine-capable Q1 mapping for the rotated box.
 
 The following commands reproduce the bounded checks from the worktree root. Set `exe` and `checker` to freshly built paths and choose unused run labels. The local verification used `build-particle-free/reference-sections/aspect-centered` and `build-particle-free/reference-sections/checks/libbulk_tip_checks.release.so`.

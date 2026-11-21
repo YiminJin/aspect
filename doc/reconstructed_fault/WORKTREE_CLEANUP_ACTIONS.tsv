@@ -1,0 +1,188 @@
+action	path or group	allocated path-bytes	entries	tracked	reason	retained reference
+delete	Archived build transcript directory [exact paths in ledger]	36864	4	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	Disposable editor index [exact paths in ledger]	50823168	5031	0	regenerable import or editor index	source and compilation database
+delete	Historical refactor build and run logs [exact paths in ledger]	331776	15	15	superseded tracked operational material	research-pre-worktree-cleanup-20261121 at original path
+delete	Python caches [exact paths in ledger]	10706944	613	0	regenerable import or editor index	source and compilation database
+delete	benchmarks/reconstructed_fault/particle_free/evidence/bulk_cohesive [Retired bulk_cohesive archive]	309092352	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/bulk_energy [Retired bulk_energy archive]	385720320	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/bulk_parallel [Retired bulk_parallel field samples]	580923392	11	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/bulk_sensitivity [Retired bulk_sensitivity archive]	206983168	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/bulk_source_history [Retired bulk_source_history archive]	450383872	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/cohesive_interface_evolution [Retired cohesive_interface_evolution field samples]	664772608	39	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/cohesive_interface_insertion [Retired cohesive_interface_insertion field samples]	149901312	38	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/material_overnight [Retired material_overnight archive]	1238675456	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/p3_extension [Retired p3_extension archive]	417792	1	1	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/p3_native_completion [Retired p3_native_completion archive]	9281536	1	1	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/p4a_tip [Retired p4a_tip archive]	4403200	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/pf6_domain_free [Retired pf6_domain_free archive]	21491712	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/pf6_hanging [Retired pf6_hanging archive]	4423680	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/pf6_local [Retired pf6_local archive]	22474752	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/pf6_mature_dg [Retired pf6_mature_dg archive]	141996032	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/pf6_mature_pilot [Retired pf6_mature_pilot archive]	1126584320	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/pf6_mature_resolution [Retired pf6_mature_resolution archive]	213114880	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/pf6_transfer [Retired pf6_transfer archive]	19398656	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/pf6a_publication [Retired pf6a_publication archive]	126156800	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/pf6a_reference [Retired pf6a_reference archive]	10821632	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	benchmarks/reconstructed_fault/particle_free/evidence/pf6a_spatial [Retired pf6a_spatial archive]	39698432	1	0	unselected historical raw products or build transcripts	original archive catalogs and study summaries
+delete	Retired tracked instructions [exact paths in ledger]	131072	7	7	superseded tracked operational material	research-pre-worktree-cleanup-20261121 at original path
+delete	Superseded mature-driver comparison scripts [exact paths in ledger]	8192	2	2	superseded tracked operational material	research-pre-worktree-cleanup-20261121 at original path
+delete	build-particle-free/midpoint-closeout	178872320	226	0	verified staging and duplicate replays	../aspect-pf-rsf-reference-20261121/reference.tar.gz
+delete	build-particle-free/archive/disk-cleanup-20261019 [retired subset]	2327085056	8	0	retired cold fields, old checkpoints or superseded binary catalog entries	dated maintenance catalogs; selected mature files restored in place
+delete	build-particle-free/archive/disk-cleanup-20261021 [retired subset]	4093718528	41	0	retired cold fields, old checkpoints or superseded binary catalog entries	dated maintenance catalogs; selected mature files restored in place
+delete	build-particle-free/archive/disk-cleanup-20261022 [retired subset]	616529920	9	0	retired cold fields, old checkpoints or superseded binary catalog entries	dated maintenance catalogs; selected mature files restored in place
+delete	build-particle-free/archive/disk-cleanup-20261028 [retired subset]	3212152832	62	0	retired cold fields, old checkpoints or superseded binary catalog entries	dated maintenance catalogs; selected mature files restored in place
+delete	build-particle-free/archive/disk-cleanup-20261109 [retired subset]	7208984576	93	0	retired cold fields, old checkpoints or superseded binary catalog entries	dated maintenance catalogs; selected mature files restored in place
+delete	build-particle-free/archive/disk-cleanup-20261112 [retired subset]	5958672384	292	0	retired cold fields, old checkpoints or superseded binary catalog entries	dated maintenance catalogs; selected mature files restored in place
+delete	build-particle-free/archive/disk-cleanup-20261117 [retired subset]	4012310528	119	0	retired cold fields, old checkpoints or superseded binary catalog entries	dated maintenance catalogs; selected mature files restored in place
+delete	build-particle-free/archive/executables [retired subset]	503353344	87	0	retired cold fields, old checkpoints or superseded binary catalog entries	dated maintenance catalogs; selected mature files restored in place
+delete	build-particle-free/archive/material-overnight [retired subset]	3411435520	46	0	retired cold fields, old checkpoints or superseded binary catalog entries	dated maintenance catalogs; selected mature files restored in place
+delete	build-particle-free/archive/retired-runtime [retired subset]	504504320	103	0	retired cold fields, old checkpoints or superseded binary catalog entries	dated maintenance catalogs; selected mature files restored in place
+delete	build-particle-free/aspect-architecture [retired subset]	1273856	139	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/baseline-plugin [retired subset]	675840	42	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bp3-optimization [retired subset]	2840834048	4332	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bp3-startup-review [retired subset]	100491264	214	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-angular [retired subset]	77824	5	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-cohesive [retired subset]	37502976	1446	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-continuation [retired subset]	654532608	1043	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-continued [retired subset]	340738048	449	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-energy [retired subset]	27553792	1035	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-fracture [retired subset]	39669760	349	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-orientation [retired subset]	2686976	274	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-parallel [retired subset]	99868672	262	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-sensitivity [retired subset]	4751360	277	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-source-history [retired subset]	23560192	1029	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-spatial [retired subset]	14729216	370	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-stability [retired subset]	3878912	455	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/bulk-tip [retired subset]	19022700544	23116	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/code-readability [retired subset]	2359296	176	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface [retired subset]	569344	9	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-admission [retired subset]	5607424	393	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-boundary [retired subset]	3932160	432	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-bulk-contact [retired subset]	140763136	940	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-candidate-admission [retired subset]	24301568	1922	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-domain [retired subset]	3878912	387	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-energy [retired subset]	266240	6	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-evolution [retired subset]	13000704	1015	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-exact [retired subset]	5836800	620	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-formed-turn [retired subset]	86609920	1136	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-front [retired subset]	5586944	504	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-insertion [retired subset]	11792384	1255	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-kink [retired subset]	10932224	648	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-load-turn [retired subset]	25985024	1418	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-native [retired subset]	11022336	987	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-path [retired subset]	66355200	2794	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-propagation [retired subset]	316424192	5472	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-surface [retired subset]	3457024	148	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-interface-turn [retired subset]	688480256	1004	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/cohesive-rsf-native [retired subset]	652050432	3319	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/constitutive-reconciliation [retired subset]	528384	4	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/coulomb-direction [retired subset]	4820992	464	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/coulomb-gradient [retired subset]	22089728	1843	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/coulomb-localization [retired subset]	12288000	1247	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/coulomb-native [retired subset]	20865024	3190	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/dgq2-phase [retired subset]	130842624	773	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/directional-continuation [retired subset]	544768	7	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/domain-free [retired subset]	26349568	1461	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/evolving-phase [retired subset]	57761792	597	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/feng-direction [retired subset]	3854336	7	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/fine-growth [retired subset]	50655232	4	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/first-free-turn [retired subset]	358387712	131	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/friction-api [retired subset]	63983616	266	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/friction-interface [retired subset]	57266176	56	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/guard68 [retired subset]	407031808	126	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/guard80 [retired subset]	1726578688	351	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/hanging-phase [retired subset]	679936	23	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/localized-sections [retired subset]	57458688	153	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/material-overnight [retired subset]	357699584	1172	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/mature-dg [retired subset]	138616832	2406	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/mature-gradient [retired subset]	196608	5	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/mature-pilot [retired subset]	273735680	3567	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/mature-resolution [retired subset]	94326784	1981	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/native [retired subset]	60887040	5341	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/native-bernstein [retired subset]	1257472	132	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/native-phase-integration [retired subset]	27123712	1291	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/objective-stress [retired subset]	15654912	632	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/overnight-recovery [retired subset]	599162880	119	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/p2-response [retired subset]	45903872	56	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/p3-extension [retired subset]	5378048	72	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/p3-native-completion [retired subset]	11214848	364	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/p4a-tip [retired subset]	815104	104	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/p5a-point [retired subset]	2088960	127	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/p5b-native [retired subset]	187461632	605	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/p5c-axial [retired subset]	826486784	1876	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/p5c-campaign [retired subset]	861409280	1793	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/p5c-native [retired subset]	389423104	1886	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/pf0 [retired subset]	3612672	15	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/pf3 [retired subset]	1949696	29	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/pf4 [retired subset]	2162688	37	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/pf4-limiter [retired subset]	2170880	31	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/pf4-methods [retired subset]	1331200	23	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/pf4-stabilization [retired subset]	2408448	28	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/pf5 [retired subset]	9097216	515	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/pf6a [retired subset]	5894144	138	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/pf6a-reference [retired subset]	31670272	352	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/pf6a-spatial [retired subset]	3035136	77	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/phase-architecture-restoration [retired subset]	245760	30	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/phase-row-audit [retired subset]	60149760	19	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/plugin [retired subset]	4370432	148	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/pranger-feasibility [retired subset]	217088	6	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/publication-diagnosis [retired subset]	3010560	59	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/publication-replay [retired subset]	53518336	2961	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/quad-local [retired subset]	42369024	2038	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/recover78 [retired subset]	342675456	172	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/reference-sections [retired subset]	4915200	119	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/resolution60-free-growth [retired subset]	52940800	12	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/resolution60-overnight [retired subset]	57044992	113	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/restrictions [retired subset]	65536	10	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/runs [retired subset]	833454080	33557	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/shared-scalar-dg [retired subset]	74653696	1341	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/single-turn-reference [retired subset]	491520	44	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/stage4-near-tip [retired subset]	7041024	36	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/stage4-pilot [retired subset]	10903552	39	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/stage4-preload [retired subset]	5890048	32	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/stage4-preparation [retired subset]	159170560	2987	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/stage4-propagation-pilot [retired subset]	1222258688	1427	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/stage4-release [retired subset]	5767168	22	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/stage4-rsf [retired subset]	8970240	20	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/stage4-wavelength [retired subset]	12787712	54	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/stage4-wavelength-resume [retired subset]	3899392	6	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/stress-consolidation-guide [retired subset]	60129280	415	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/stress-history-consolidation [retired subset]	20815872	521	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/structural-sliding [retired subset]	573440	10	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/tip-step89 [retired subset]	101351424	7	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/transfer-qualification [retired subset]	97980416	2875	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/transported-objective [retired subset]	1038884864	18892	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	build-particle-free/weno_cls [retired subset]	3547136	112	0	unselected local trial or superseded build products	scientific and historical evidence indexes; retained subsets below
+delete	benchmarks/reconstructed_fault/particle_free/evidence/bulk_parallel/mixed-diagnostics.tar.xz	116559872	1	0	archived candidate experiments	study report, inputs and summary
+delete	benchmarks/reconstructed_fault/particle_free/evidence/bulk_parallel/qualification.tar.xz	133066752	1	0	archived candidate experiments	study report, inputs and summary
+delete	benchmarks/reconstructed_fault/particle_free/evidence/p2_response/reference.tar.xz	282763264	1	0	archived candidate experiments	study report, inputs and summary
+delete	benchmarks/reconstructed_fault/particle_free/evidence/pf6a/reference.tar.xz	83763200	1	0	archived candidate experiments	study report, inputs and summary
+delete	benchmarks/reconstructed_fault/particle_free/evidence/weno_cls/reference.tar.xz	140951552	1	0	archived candidate experiments	study report, inputs and summary
+delete	build-particle-free/bp3-work-diagnostic/negative-build [generated build machinery]	614400	59	0	disposable CMake products	matched executable and checker retained
+delete	build-particle-free/first-event-package/check-observer [generated build machinery]	659456	74	0	disposable CMake products	matched executable and checker retained
+delete	build-particle-free/first-event-package/plugin-build [generated build machinery]	638976	64	0	disposable CMake products	matched executable and checker retained
+delete	build-particle-free/first-event-package/source-configure [generated build machinery]	3821568	391	0	disposable CMake products	matched executable and checker retained
+delete	build-particle-free/native-bernstein/operators [generated build machinery]	2146304	52	0	disposable CMake products	matched executable and checker retained
+delete	build-particle-free/propagation-recovery/checks [generated build machinery]	434176	38	0	disposable CMake products	matched executable and checker retained
+retain	../aspect-pf-rsf-reference-20261121	51544064			canonical archive, verification subset, entry records and exact ledger	midpoint scientific reference
+retain	build-particle-free/transported-objective	2451886080			four complete rotating sets, compact field samples, selected spin and basis controls	mature temporary closeout
+retain	benchmarks/reconstructed_fault/particle_free/evidence/dgq2_overnight	102146048			four-run numerical evidence and figure sources	mature study
+retain	build-particle-free/native-phase-integration	103845888			seven manifested mature runtimes at original paths	propagation_recovery/entry-preservation.json
+retain	build-particle-free/objective-stress/baseline	95428608			protected baseline binaries and linkage records	original BP3 and cohesive controls
+retain	build-particle-free/review-shared-scalar-dg-3a21d59cf	55406592			frozen reverted architecture and evidence	review/shared-scalar-dg-3a21d59cf
+retain	build-particle-free/overnight-recovery	695394304			full-section endpoint pair, solver, launch provenance	rate-true-residual and rate-final40
+retain	build-particle-free/guard80	314802176			complete prior rotating parent incl. step 78	80/40 µs comparison
+retain	build-particle-free/bulk-tip	427139072			matched controls, reference-frame and width outputs, supporting historical source	tip and Bernstein reports
+retain	build-particle-free/strip-width	51605504			separate width comparison runtime, patches and provenance	prior-verified.json
+retain	build-particle-free/reference-sections	102121472			older reference frame and frozen source identities	baseline.json
+retain	build-particle-free/localized-sections	52645888			prior verified source overlay and binaries also identified by width manifest	strip-width/prior-verified.json
+retain	build-particle-free/archive	52432896			dated provenance and seven historical paper-related compressed runtimes	October runtime catalogs
+retain	build-particle-free/clangd	6217728			editor compilation database and generated headers	worktree .vscode configuration
+retain	benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event	238972928			original server return and inputs	BP3_REVIEW.md
+retain	benchmarks/reconstructed_fault/particle_free/rsf_episode_server	81244160			separate surface-cohesive package and checkpoint	package SHA256SUMS
+retain	build-particle-free/cohesive-rsf-instability	783216640			surface-cohesive episode, event data and associated local contrasts	paper figure sources and recovery
+retain	build-particle-free/first-event-package	191868928			BP3 distribution, provenance and historical qualification	first-event paper package
+retain	build-particle-free/bp3-optimization	159367168			differing historical package revisions and server validation	BP3 prepared fixtures
+retain	build-particle-free/bp3-startup-review	373899264			startup package history, verification results and server fixtures	BP3 startup study
+retain	benchmarks/reconstructed_fault/particle_free/evidence	2290495488			selected histories, inputs, reducers, manuscript figures and dated summaries	particle_free/README.md
+retain	../aspect/.git	589950976			shared Git storage and existing history	research-pre-worktree-cleanup-20261121
