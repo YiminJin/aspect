@@ -44,6 +44,11 @@ namespace aspect
         Tensor<1,dim> tangent, normal;
         Tensor<2,dim> dyad;
       };
+      /** Normal radius of the finite association strip, in metres. */
+      double support_radius() const
+      {
+        return half_width;
+      }
       const Segment &segment(unsigned int j) const;
       /** Fit normal offsets to the initialized FE ridge once. Keep endpoints on
        * their seed contact faces, and retain the seed for constant phase. */
@@ -54,6 +59,11 @@ namespace aspect
                       const std::vector<Point<dim>> &vertices, double age, double rate, double half_width = std::numeric_limits<double>::max());
       /** Find the two neighboring material labels and the local Q1 coordinate. */
       Projection project(const Point<dim> &point) const;
+
+      /** On a Cartesian cell cut by a finite segment or support edge, return
+       * a unit-cell rule split at the association boundaries. An empty rule
+       * selects the usual tensor-product quadrature on smooth cells. */
+      Quadrature<dim> cut_quadrature(const Point<dim> &lower, const Point<dim> &upper) const;
 
       /** Publish one endpoint per label using the same accepted age that
        * entered the Q1 friction law throughout this attempt. */

@@ -3,6 +3,7 @@
   License version 2 or later. See the file LICENSE for details.
 */
 #include <aspect/reconstructed_fault/stationary_fault.h>
+#include <aspect/geometry_model/box.h>
 
 namespace aspect
 {
@@ -81,6 +82,74 @@ namespace aspect
     return segments[j];
   }
 
+  namespace
+  {
+    // Maximize the actual one-sided DGQ2 face polynomial in the seed window.
+    // At an interior face vertex use the interval on its higher-coordinate side.
+    template <int dim>
+    Point<dim> ridge_contact(const SimulatorAccess<dim> &sim, unsigned int field,
+                             const LinearAlgebra::BlockVector &fields, const Point<dim> &seed,
+                             unsigned int axis, double radius)
+    {
+      const unsigned int along=1-axis;
+      const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(sim.get_geometry_model());
+      const auto upper=box.get_origin()+box.get_extents();
+      const bool high=std::abs(seed[axis]-upper[axis])<std::abs(seed[axis]-box.get_origin()[axis]);
+      std::vector<Point<dim>> nodes(3);
+      for (unsigned int i=0; i<3; ++i)
+        {
+          nodes[i][axis]=high ? 1. : 0.;
+          nodes[i][along]=.5*i;
+        }
+      FEValues<dim> fe(sim.get_mapping(),sim.get_fe(),Quadrature<dim>(nodes),update_values);
+      std::vector<double> values(3);
+      std::vector<std::pair<double,double>> candidates;
+      for (const auto &cell:sim.get_dof_handler().active_cell_iterators())
+        if (cell->is_locally_owned() && cell->face(2*axis+high)->at_boundary())
+          {
+            const double a=cell->vertex(0)[along], b=cell->vertex(GeometryInfo<dim>::vertices_per_cell-1)[along];
+            const double left=std::max(a,seed[along]-radius), right=std::min(b,seed[along]+radius);
+            if (left>=right) continue;
+            fe.reinit(cell);
+            fe[sim.introspection().extractors.compositional_fields[field]].get_function_values(fields,values);
+            const double c=2.*(values[0]+values[2]-2.*values[1]), slope=values[2]-values[0]-c;
+            const auto add=[&](const double x)
+            {
+              const double u=(x-a)/(b-a);
+              candidates.emplace_back(values[0]+u*(slope+c*u),x);
+            };
+            add(left);
+            if (right<b || b==upper[along]) add(right);
+            if (c<0.)
+              {
+                const double x=a-(b-a)*slope/(2.*c);
+                if (x>left && x<right) add(x);
+              }
+            // A flat maximal interval has no uniquely observed crossing.
+            if (std::abs(c)+std::abs(slope)<1.e-13) add(.5*(left+right));
+          }
+      const auto shards=Utilities::MPI::all_gather(sim.get_mpi_communicator(),candidates);
+      double peak=-std::numeric_limits<double>::infinity();
+      for (const auto &shard:shards)
+        for (const auto &entry:shard) peak=std::max(peak,entry.first);
+      double left=upper[along], right=box.get_origin()[along];
+      for (const auto &shard:shards)
+        for (const auto &entry:shard)
+          if (entry.first>=peak-1.e-13)
+            {
+              left=std::min(left,entry.second);
+              right=std::max(right,entry.second);
+            }
+      AssertThrow(peak>.1 && right-left<=1.e-8*box.get_extents()[along] &&
+                  std::abs(left-seed[along])<radius,
+                  ExcMessage("Unresolved or ambiguous stationary phase maximum on the seed contact face."));
+      Point<dim> result=seed;
+      result[along]=left;
+      result[axis]=high ? upper[axis] : box.get_origin()[axis];
+      return result;
+    }
+  }
+
   template <int dim>
   void StationaryFault<dim>::fit(const SimulatorAccess<dim> &sim, const unsigned int field,
                                  const LinearAlgebra::BlockVector &fields)
@@ -89,7 +158,21 @@ namespace aspect
     const QGauss<dim> rule(sim.get_fe().degree+1);
     FEValues<dim> fe(sim.get_mapping(),sim.get_fe(),rule,update_values|update_JxW_values|update_quadrature_points);
     std::vector<double> phase(rule.size()), matrix(n*n), rhs(n);
-    double total = 0., cell_margin = 0.;
+    const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(sim.get_geometry_model());
+    const auto upper=box.get_origin()+box.get_extents();
+    double total = 0., cell_margin = 0., ridge_radius=0.;
+    // Estimate the observed transverse extent before taking any centroids.
+    // Missing exterior phase on a cropped normal would bias its first moment.
+    for (const auto &cell : sim.get_dof_handler().active_cell_iterators())
+      if (cell->is_locally_owned())
+        {
+          fe.reinit(cell);
+          fe[sim.introspection().extractors.compositional_fields[field]].get_function_values(fields,phase);
+          for (unsigned int q=0; q<rule.size(); ++q)
+            if (phase[q]>.1)
+              ridge_radius=std::max(ridge_radius,std::abs((fe.quadrature_point(q)-accepted.front().position)*normal));
+        }
+    ridge_radius=std::min(half_width,Utilities::MPI::max(ridge_radius,sim.get_mpi_communicator()));
     double minimum = std::numeric_limits<double>::infinity(), maximum = -minimum;
     for (const auto &cell : sim.get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
@@ -107,6 +190,13 @@ namespace aspect
               const auto foot = project(x);
               const unsigned int j = foot.left;
               const Point<dim> center = accepted[j].position + foot.xi*segments[j].length*segments[j].tangent;
+              bool cropped=false;
+              for (unsigned int d=0; d<dim; ++d)
+                {
+                  const double reach=ridge_radius*std::abs(normal[d]);
+                  cropped |= center[d]-reach < box.get_origin()[d] || center[d]+reach > upper[d];
+                }
+              if (cropped) continue;
               if (center.distance(x) > half_width+cell->diameter()) continue;
               const double N[2] = {1.-foot.xi,foot.xi};
               total += weight;
@@ -123,13 +213,17 @@ namespace aspect
     Utilities::MPI::sum(matrix,comm,matrix);
     Utilities::MPI::sum(rhs,comm,rhs);
     total = Utilities::MPI::sum(total,comm);
+    AssertThrow(total>0. || n==2,ExcMessage("No two-sided interior phase support for ridge fitting."));
+    const double radius=half_width+Utilities::MPI::max(cell_margin,comm);
+    const auto bottom=ridge_contact(sim,field,fields,accepted.front().position,contact_axes[0],radius);
+    const auto top=ridge_contact(sim,field,fields,accepted.back().position,contact_axes[1],radius);
     FullMatrix<double> system(n,n);
     Vector<double> b(n), offsets(n);
     for (unsigned int j=0; j<n; ++j)
       {
-        AssertThrow(matrix[j*n+j] > 0.,ExcMessage("A seed label has no active FE ridge support."));
-        b[j] = rhs[j]/total;
-        for (unsigned int k=0; k<n; ++k) system(j,k) = matrix[j*n+k]/total;
+
+        b[j] = rhs[j]/(total>0. ? total : 1.);
+        for (unsigned int k=0; k<n; ++k) system(j,k) = matrix[j*n+k]/(total>0. ? total : 1.);
       }
     // Donor ridge coefficient one on second differences of normal offsets.
     const double second[3] = {1.,-2.,1.};
@@ -137,23 +231,26 @@ namespace aspect
       for (unsigned int a=0; a<3; ++a)
         for (unsigned int k=0; k<3; ++k)
           system(j-1+a,j-1+k) += second[a]*second[k];
+    // Constrain the normal component of each measured face displacement
+    // during the fit. The second-difference penalty spans the cropped rows.
+    for (const unsigned int j :
+    {
+      0u,n-1
+    })
+    {
+      for (unsigned int k=0; k<n; ++k) system(j,k)=0.;
+      system(j,j)=1.;
+      b[j]=((j==0 ? bottom : top)-accepted[j].position)*normal;
+    }
     system.gauss_jordan();
     system.vmult(offsets,b);
-    const double radius = half_width + Utilities::MPI::max(cell_margin,comm);
-    const double contact[2] = {accepted.front().position[contact_axes[0]], accepted.back().position[contact_axes[1]]};
-    for (unsigned int j=0; j<n; ++j)
+    for (unsigned int j=1; j+1<n; ++j)
       {
         AssertThrow(std::abs(offsets[j]) <= radius,ExcMessage("Fitted label left its phase reconstruction region."));
         accepted[j].position += offsets[j]*normal;
       }
-    // Intersect each fitted end segment with its original physical contact face.
-    for (unsigned int end=0; end<2; ++end)
-      {
-        const unsigned int j = end ? n-1 : 0, neighbor = end ? j-1 : 1, axis = contact_axes[end];
-        const auto edge = accepted[neighbor].position-accepted[j].position;
-        AssertThrow(edge[axis] != 0.,ExcMessage("The fitted trace grazes its contact face."));
-        accepted[j].position += (contact[end]-accepted[j].position[axis])/edge[axis]*edge;
-      }
+    accepted.front().position=bottom;
+    accepted.back().position=top;
     for (const auto &label : accepted)
       AssertThrow(sim.get_geometry_model().point_is_in_domain(label.position),ExcMessage("Fitted fault left the physical box."));
     rebuild_segments();
@@ -186,6 +283,115 @@ namespace aspect
           }
       }
     return closest;
+  }
+
+  template <int dim>
+  Quadrature<dim> StationaryFault<dim>::cut_quadrature(const Point<dim> &lower,const Point<dim> &upper) const
+  {
+    // On a Cartesian cell each segment's finite normal strip is the
+    // intersection of four half planes. Where strips overlap, nearest
+    // distance changes at the two bisectors of their supporting lines.
+    struct Line
+    {
+      double a,b,c;
+      double value(const Point<dim> &p) const
+      {
+        return a*p[0]+b*p[1]+c;
+      }
+    };
+    using Polygon=std::vector<Point<dim>>;
+    const auto extent=upper-lower;
+    const double epsilon=64.*std::numeric_limits<double>::epsilon()*extent.norm();
+    const auto equation=[&](const Tensor<1,dim> &direction,const Point<dim> &origin)
+    {
+      return Line {direction[0] *extent[0],direction[1] *extent[1],direction *(lower-origin)};
+    };
+    std::vector<Line> cuts,normals;
+    for (unsigned int j=0; j<segments.size(); ++j)
+      {
+        const auto station=equation(segments[j].tangent,accepted[j].position);
+        const auto normal_distance=equation(segments[j].normal,accepted[j].position);
+        const auto range=[](const Line &line)
+        {
+          return std::make_pair(line.c+std::min(0.,line.a)+std::min(0.,line.b),
+                                line.c+std::max(0.,line.a)+std::max(0.,line.b));
+        };
+        const auto s=range(station), d=range(normal_distance);
+        if (s.second<=0. || s.first>=segments[j].length || d.second<=-half_width || d.first>=half_width)
+          continue;
+        for (const double face :
+        {
+          0.,segments[j].length
+          })
+        if (s.first<face && s.second>face) cuts.push_back({station.a,station.b,station.c-face});
+        for (const double face :
+        {
+          -half_width,half_width
+        })
+        if (d.first<face && d.second>face) cuts.push_back({normal_distance.a,normal_distance.b,normal_distance.c-face});
+        for (const auto &other:normals)
+          for (const double sign :
+          {
+            -1.,1.
+          })
+        cuts.push_back({normal_distance.a+sign*other.a,normal_distance.b+sign*other.b,normal_distance.c+sign*other.c});
+        normals.push_back(normal_distance);
+      }
+    if (cuts.empty()) return {};
+    Polygon square(4);
+    square[1][0]=square[2][0]=square[2][1]=square[3][1]=1.;
+    std::vector<Polygon> pieces= {square};
+    for (const auto &line:cuts)
+      {
+        const unsigned int old_size=pieces.size();
+        for (unsigned int i=0; i<old_size; ++i)
+          {
+            const auto &piece=pieces[i];
+            double low=0.,high=0.;
+            for (const auto &p:piece)
+              {
+                low=std::min(low,line.value(p));
+                high=std::max(high,line.value(p));
+              }
+            if (low>=-epsilon || high<=epsilon) continue;
+            Polygon positive,negative;
+            auto prev=piece.back();
+            double vp=line.value(prev);
+            for (const auto &p:piece)
+              {
+                const double v=line.value(p);
+                if ((vp<0. && v>0.) || (vp>0. && v<0.))
+                  {
+                    auto cross=prev+(vp/(vp-v))*(p-prev);
+                    positive.push_back(cross);
+                    negative.push_back(cross);
+                  }
+                if (v>=0.) positive.push_back(p);
+                if (v<=0.) negative.push_back(p);
+                prev=p;
+                vp=v;
+              }
+            pieces[i]=std::move(positive);
+            pieces.push_back(std::move(negative));
+          }
+      }
+    if (pieces.size()==1) return {};
+    static const QWitherdenVincentSimplex<2> triangle(5);
+    std::vector<Point<dim>> points;
+    std::vector<double> weights;
+    for (const auto &piece:pieces)
+      for (unsigned int k=1; k+1<piece.size(); ++k)
+        {
+          const auto u=piece[k]-piece[0], v=piece[k+1]-piece[0];
+          const double det=std::abs(u[0]*v[1]-u[1]*v[0]);
+          if (det==0.) continue;
+          for (unsigned int q=0; q<triangle.size(); ++q)
+            {
+              points.push_back(piece[0]+triangle.point(q)[0]*u+triangle.point(q)[1]*v);
+              weights.push_back(triangle.weight(q)*det);
+            }
+        }
+    return Quadrature<dim>(points,weights);
   }
 
   template <int dim>
