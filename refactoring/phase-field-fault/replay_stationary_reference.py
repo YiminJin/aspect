@@ -17,13 +17,29 @@ for name in ("source", "build", "homogeneous_input", "destination"):
     parser.add_argument(name, type=Path)
 args = parser.parse_args()
 src, build, parent, dest = (p.resolve() for p in vars(args).values())
+fault = dest / "fault.txt"
+text = parent.read_text()
+settings = {"Output directory": dest/"output", "Prescribed faults file": fault,
+            "Structural point spacing": ".5", "Stress rotation": "Jaumann DG Lie",
+            "Material profile transport": "Q1 remap", "Material tensor inflow": "zero",
+            "Material stress representation": "separated",
+            "Additional shared libraries": dest/"build/libstationary_checks.release.so",
+            "Composition polynomial degree": "1", "Use discontinuous composition discretization": "false"}
+for key, value in settings.items():
+    text, count = re.subn(rf"(?m)^([ \t]*set[ \t]+{re.escape(key)}[ \t]*=)[^\n]*", lambda m: f"{m[1]} {value}", text)
+    if count == 0:
+        raise ValueError(f"{parent}: missing inline setting {key}")
+# The historical stationary selector retains its continuous Q1 phase.
+text = re.sub(r"(?m)^\s*set Phase basis = Bernstein\s*$", "", text)
+text, count = re.subn(r"(?m)^([ \t]*set Function expression[ \t]*=[ \t]*)0; \.02\+t([ \t]*(?:#.*)?)$",
+                      r"\g<1>0; .02+t+.12*(y-.5)\2", text)
+if count != 1:
+    raise ValueError(f"{parent}: expected one homogeneous shear traction expression, found {count}")
+
 dest.mkdir(parents=True, exist_ok=False)
+fault.write_text(".5 0 .4\n.5 1 .4\n")
 native = src / "benchmarks/reconstructed_fault/particle_free/transported_objective/native"
 observer = (native / "material_checks.cc").read_text()
-observer = observer.replace("model.uses_transported_mature_history()",
-                            "model.uses_jaumann_dg_stress() && !model.uses_transported_mature_history()")
-observer = observer.replace("s.accepted_publications==step && s.geometry_publications==step",
-                            "s.accepted_publications==step && s.geometry_publications==0")
 # The historical stationary route distributes a prescribed value to every
 # phase DoF. This is the same post-constraint hook used by its BP3 fixture.
 hook = """signals.post_constraints_creation.connect([](const SimulatorAccess<dim> &sim, AffineConstraints<double> &constraints)
@@ -44,7 +60,16 @@ hook = """signals.post_constraints_creation.connect([](const SimulatorAccess<dim
             }
       });
     """
-observer = observer.replace("signals.post_simulator_initialization.connect", hook+"signals.post_simulator_initialization.connect")
+for old, new in (
+    ("model.uses_transported_mature_history()",
+     "model.uses_jaumann_dg_stress() && !model.uses_transported_mature_history()"),
+    ("s.accepted_publications==step && s.geometry_publications==step",
+     "s.accepted_publications==step && s.geometry_publications==0"),
+    ("signals.post_simulator_initialization.connect", hook+"signals.post_simulator_initialization.connect"),
+):
+    if observer.count(old) != 1:
+        raise ValueError(f"Expected one occurrence of {old!r} in the historical observer")
+    observer = observer.replace(old, new)
 (dest / "stationary_checks.cc").write_text(observer)
 (dest / "CMakeLists.txt").write_text(f"""cmake_minimum_required(VERSION 3.13.4)
 find_package(Aspect REQUIRED)
@@ -57,21 +82,6 @@ ASPECT_SETUP_PLUGIN(stationary_checks)
 """)
 subprocess.run(["cmake", "-S", dest, "-B", dest/"build", f"-DAspect_DIR={build}"], check=True)
 subprocess.run(["cmake", "--build", dest/"build", "-j1"], check=True)
-fault = dest / "fault.txt"
-fault.write_text(".5 0 .4\n.5 1 .4\n")
-text = parent.read_text()
-settings = {"Output directory": dest/"output", "Prescribed faults file": fault,
-            "Structural point spacing": ".5", "Stress rotation": "Jaumann DG Lie",
-            "Material profile transport": "Q1 remap", "Material tensor inflow": "zero",
-            "Material stress representation": "separated",
-            "Additional shared libraries": dest/"build/libstationary_checks.release.so",
-            "Composition polynomial degree": "1", "Use discontinuous composition discretization": "false"}
-for key, value in settings.items():
-    text, count = re.subn(rf"(?m)^(\s*set {re.escape(key)}\s*=)[^\n]*", lambda m: f"{m[1]} {value}", text)
-    assert count, key
-# The historical stationary selector retains its continuous Q1 phase.
-text = re.sub(r"(?m)^\s*set Phase basis = Bernstein\s*$", "", text)
-text = text.replace("0; .02+t", "0; .02+t+.12*(y-.5)")
 (dest/"input.prm").write_text(text)
 env = dict(os.environ, DEAL_II_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", OMP_NUM_THREADS="1")
 with (dest/"run.log").open("w") as log:
