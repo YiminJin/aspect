@@ -4,6 +4,8 @@ The completed `MIDPOINT_UPDATE_CLOSEOUT.md` freezes the implemented midpoint upd
 
 ## Stationary coupling repair
 
+The subsequent [3A repair specification](INCREMENT_3A_REPAIR.md) defines the fitted-contact, stress-moment, normalization, actual weak-load, support-complement and MPI acceptance checks. Use its fixture-specific numerical budgets for that assignment. Keep the Increment 2 reference values below.
+
 Use the inputs documented for the three-label and homogeneous cases at `e91e801bab`. Both use a fresh physical initial state, explicit DG stress fields, the fault's Maxwell law, and upstream `Enable elasticity = false`. Record the resolved numerical values and commands. Compare at the frozen tolerances.
 
 | Check | Evidence to keep |

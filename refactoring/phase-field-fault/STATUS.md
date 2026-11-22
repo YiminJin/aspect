@@ -1,8 +1,12 @@
 # Phase-field fault working record
 
+## Active assignment · Repair of the reviewed 3A implementation
+
+Start from `707ce9a9a` and follow [the repair and acceptance criteria](INCREMENT_3A_REPAIR.md). The existing 3A results below describe the pre-repair implementation. Record observed repair results here as they become available. Stage 3B begins after repair review.
+
 ## Increment 3A · Stationary phase ridge
 
-[Active assignment](INCREMENT_3A_TASK.md). **Stopped for architecture review.** Base `c27257269`, geometry `e4806f56f`, localized transfer `9e0e2d793`, admissibility and shared-vertex fixes `37269ee45`, fixtures and accepted data `dcfc854a5`. The ordinary Stokes/RSF path solved all 38 rates on the fitted trace. **The inclined fit reproduces the interior ridge more accurately than the boundary contacts. The fitted trace is 1.25372 m long against the 1.15470 m straight reference.** This comparison remains open.
+[Original assignment](INCREMENT_3A_TASK.md). **Stopped for architecture review.** Base `c27257269`, geometry `e4806f56f`, localized transfer `9e0e2d793`, admissibility and shared-vertex fixes `37269ee45`, fixtures and accepted data `dcfc854a5`. The ordinary Stokes/RSF path solved all 38 rates on the fitted trace. **The inclined fit reproduces the interior ridge more accurately than the boundary contacts. The fitted trace is 1.25372 m long against the 1.15470 m straight reference.** This comparison remains open.
 
 ### Geometry and the first discrepancy
 
