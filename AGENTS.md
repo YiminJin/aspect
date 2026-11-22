@@ -61,4 +61,12 @@ The midpoint audit is closed and its discrete update is frozen. Read the active 
 At handoff, update the working record with the exact commands, results and next action. Show the normal call path, the equation and state owner, and the smallest representative public header and implementation a human should read. Keep the active design in one guide as code lands. Use the project's scoped tests and the checkout’s formatter. Default to four or fewer total local workers on the author's laptop and record the rank/thread layout for comparisons. Publishing changes or submitting cluster jobs requires a separate request.
 
 When referring me to a local file, print its full path relative to the worktree root in a fenced text code block, one path per line. Use the actual path in the relevant worktree so I can distinguish the refactor from the donor. Put line numbers and explanations outside the block so I can copy the path directly into my editor. Omit clickable Markdown links for local files. Apply this rule to both progress updates and final replies.
+
+### Architecture guidance
+
+When changing a production interface or introducing a scientific concept, choose its owner from the mathematics, the ASPECT call path, and the accepted project roadmap. The first benchmark that exercises a concept is evidence about how to test it; it does not determine who owns it.
+
+Before settling the interface, try one concrete change already named in the roadmap. Which files would a maintainer have to edit? Which modules would acquire a new dependency? If changing a phase law would require editing fault geometry, or removing the fault would remove a generally useful phase operation, revise the ownership in the current change.
+
+Implement the behavior assigned to this increment. A small function or concrete type in the right module is sufficient until multiple behaviors justify a common interface. If the task suggests a design that conflicts with these principles, point out the conflict and use the simpler durable design when it preserves the assigned physics and scope.
 <!-- phase-field-fault-refactor:end -->
