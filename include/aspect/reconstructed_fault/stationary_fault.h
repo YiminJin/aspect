@@ -6,7 +6,7 @@
 #define _aspect_reconstructed_fault_stationary_fault_h
 
 #include <aspect/global.h>
-#include <aspect/material_model/rheology/mature_fault_friction.h>
+#include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <deal.II/base/symmetric_tensor.h>
 
 namespace aspect
@@ -61,13 +61,13 @@ namespace aspect
       /** Solve the consistent Q1 weak balance at a fixed Stokes iterate.
        * Only the tridiagonal rows are summed across MPI ranks. */
       std::vector<double> solve_rates(const std::vector<BulkPoint> &points,
-                                      const MaterialModel::Rheology::MatureFaultFriction &law,
+                                      const MaterialModel::Rheology::RateAndStateFriction &law,
                                       double kappa, double minimum_speed, MPI_Comm comm) const;
 
       /** Publish one endpoint per label using the same accepted age that
        * entered the Q1 friction law throughout this attempt. */
       void accept(const std::vector<double> &rates, double dt,
-                  const MaterialModel::Rheology::MatureFaultFriction &law);
+                  const MaterialModel::Rheology::RateAndStateFriction &law);
       const std::vector<Label> &labels() const;
       void save(oarchive &archive) const;
       void load(iarchive &archive);

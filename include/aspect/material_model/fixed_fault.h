@@ -7,7 +7,7 @@
 #define _aspect_material_model_fixed_fault_h
 
 #include <aspect/material_model/simple.h>
-#include <aspect/material_model/rheology/mature_fault_friction.h>
+#include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <aspect/reconstructed_fault/stationary_fault.h>
 
 namespace aspect
@@ -48,7 +48,7 @@ namespace aspect
                              const Point<dim> &position, const std::vector<double> &rates) const;
         const FiniteElement<dim> &stress_element() const;
 
-        Rheology::MatureFaultFriction friction;
+        Rheology::RateAndStateFriction friction;
         StationaryFault<dim> fault;
         double viscosity, modulus, background_shear, background_compression;
         double initial_interval, minimum_speed, kappa;

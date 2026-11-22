@@ -85,7 +85,7 @@ namespace aspect
 
   template <int dim>
   std::vector<double> StationaryFault<dim>::solve_rates(const std::vector<BulkPoint> &points,
-                                                        const MaterialModel::Rheology::MatureFaultFriction &law,
+                                                        const MaterialModel::Rheology::RateAndStateFriction &law,
                                                         const double kappa, const double minimum_speed,
                                                         const MPI_Comm comm) const
   {
@@ -107,14 +107,14 @@ namespace aspect
             const double speed = point.foot.interpolate(rates[j],rates[j+1]);
             const double age = point.foot.interpolate(accepted[j].age,accepted[j+1].age);
             const auto resistance = law.resistance(speed,age,point.compression);
-            const double residual = point.driving_shear - stiffness*speed - resistance.first;
-            const double derivative = stiffness + resistance.second;
+            const double residual = point.driving_shear - stiffness*speed - resistance.traction;
+            const double derivative = stiffness + resistance.speed_derivative;
             for (unsigned int i=0; i<2; ++i)
               {
                 const double test = point.weight*N[i];
                 rhs[j+i] += test*residual;
                 diagonal[j+i] += test*N[i]*derivative;
-                scale[j+i] += test*std::max(std::abs(point.driving_shear),std::abs(resistance.first));
+                scale[j+i] += test*std::max(std::abs(point.driving_shear),std::abs(resistance.traction));
               }
             upper[j] += point.weight*N[0]*N[1]*derivative;
           }
@@ -160,7 +160,7 @@ namespace aspect
 
   template <int dim>
   void StationaryFault<dim>::accept(const std::vector<double> &rates, const double dt,
-                                    const MaterialModel::Rheology::MatureFaultFriction &law)
+                                    const MaterialModel::Rheology::RateAndStateFriction &law)
   {
     for (unsigned int j=0; j<accepted.size(); ++j)
       {
