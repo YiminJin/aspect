@@ -20,21 +20,44 @@ namespace aspect
     class FixedFaultProbe : public Interface<dim>, public SimulatorAccess<dim>
     {
       public:
+        static void declare_parameters(ParameterHandler &prm)
+        {
+          prm.enter_subsection("Postprocess");
+          prm.enter_subsection("Fixed fault probe");
+          prm.declare_entry("Compare homogeneous reference","true",Patterns::Bool(),
+                            "Check both equivalent labels and every bulk sample against the homogeneous donor.");
+          prm.leave_subsection();
+          prm.leave_subsection();
+        }
+
+        void parse_parameters(ParameterHandler &prm) override
+        {
+          prm.enter_subsection("Postprocess");
+          prm.enter_subsection("Fixed fault probe");
+          homogeneous = prm.get_bool("Compare homogeneous reference");
+          prm.leave_subsection();
+          prm.leave_subsection();
+        }
+
         std::pair<std::string,std::string> execute(TableHandler &) override
         {
-          const auto &section = Plugins::get_plugin_as_type<const MaterialModel::FixedFault<dim>>(this->get_material_model()).accepted_section();
+          const auto &labels = Plugins::get_plugin_as_type<const MaterialModel::FixedFault<dim>>(this->get_material_model()).labels();
           const unsigned int step = this->get_timestep_number();
           const auto comm = this->get_mpi_communicator();
           const unsigned int rank = Utilities::MPI::this_mpi_process(comm);
           const auto directory = this->get_output_directory();
           std::ofstream snapshot(directory+"fault-"+std::to_string(step)+"-"+std::to_string(rank)+".txt");
-          snapshot << std::setprecision(17) << this->get_time() << ' ' << this->get_timestep() << ' '
-                   << section.age << ' ' << section.slip << ' ' << section.rate << '\n';
+          snapshot << std::setprecision(17) << this->get_time() << ' ' << this->get_timestep();
+          for (const auto &label : labels)
+            snapshot << ' ' << label.position << ' ' << label.age << ' ' << label.slip << ' ' << label.rate;
+          snapshot << '\n';
 
           // The archived one-rank solver sampled QGauss(3) in every cell.
           // For the shortened trajectory the lifecycle checker compares
           // these same fields against the independent clean continuation.
-          const bool reference = (step == 0 || (step <= 2 && this->get_timestep() == .0125 && this->get_time() == step*.0125));
+          if (homogeneous)
+            AssertThrow(labels.size() == 2,ExcMessage("The homogeneous regression requires its two original endpoints."));
+          const bool reference = homogeneous && (step == 0 || (step <= 2 && this->get_timestep() == .0125 && this->get_time() == step*.0125));
           const double rate[] = {0.17074374817067778,0.16359216623205453,0.16724399270585846};
           const double age[] = {10.,7.7554483265394705,5.9829702628709551};
           const double shear_gradient[] = {-0.14972708428112763,0.098036219175796038,-0.063366308920228251};
@@ -47,11 +70,12 @@ namespace aspect
                                    +", expected "+std::to_string(expected)));
           };
           if (reference)
-            {
-              check(section.rate,rate[step]);
-              check(section.age,age[step]);
-              check(section.slip,.0125*((step>=1 ? rate[1] : 0.)+(step>=2 ? rate[2] : 0.)));
-            }
+            for (const auto &section : labels)
+              {
+                check(section.rate,rate[step]);
+                check(section.age,age[step]);
+                check(section.slip,.0125*((step>=1 ? rate[1] : 0.)+(step>=2 ? rate[2] : 0.)));
+              }
 
           const QGauss<dim> rule(3);
           FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_values | update_quadrature_points);
@@ -86,6 +110,9 @@ namespace aspect
             std::ofstream(directory+"fault-checks",step==0 ? std::ios::out : std::ios::app) << step << ' ' << total << '\n';
           return {"Fixed fault probe", "sampled accepted fields"};
         }
+
+      private:
+        bool homogeneous;
     };
 
     ASPECT_REGISTER_POSTPROCESSOR(FixedFaultProbe,"fixed fault probe","Read accepted fields for the fixed fault regression.")

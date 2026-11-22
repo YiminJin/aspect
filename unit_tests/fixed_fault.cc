@@ -3,7 +3,7 @@
   License version 2 or later. See the file LICENSE for details.
 */
 #include "common.h"
-#include <aspect/material_model/fixed_fault.h>
+#include <aspect/material_model/rheology/mature_fault_friction.h>
 
 TEST_CASE("Mature fault resistance and aging")
 {

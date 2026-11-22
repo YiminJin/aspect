@@ -7,44 +7,20 @@
 #define _aspect_material_model_fixed_fault_h
 
 #include <aspect/material_model/simple.h>
+#include <aspect/material_model/rheology/mature_fault_friction.h>
+#include <aspect/reconstructed_fault/stationary_fault.h>
 
 namespace aspect
 {
   namespace MaterialModel
   {
-    namespace Rheology
-    {
-      /** Regularized positive-speed rate-and-state law. Mechanics uses the
-       * incoming age. The exact constant-speed aging solution is applied at
-       * publication. All arguments use SI units. */
-      struct MatureFaultFriction
-      {
-        double reference_coefficient, direct_effect, evolution_effect;
-        double reference_speed, slip_distance, damping;
-
-        /** Resistance (Pa) and its derivative (Pa s/m) at fixed age. */
-        std::pair<double,double> resistance(double speed, double age, double compression) const;
-
-        /** Age in seconds after sliding at constant speed for dt seconds. */
-        double advance_age(double speed, double age, double dt) const;
-      };
-    }
-
-    /** A straight, vertical mature fault in homogeneous plane shear. The
-     * tangent points up and the normal points left. The two ends of the
-     * single Q1 segment share one constant history in this symmetry class.
-     * Physical xx, yy and xy stress occupy static DGQ2 compositional fields.
-     * The missing zz component is -xx-yy. */
+    /** Mature stationary fault in plane strain. Physical spatial stress lives
+     * in the simulator's three static DGQ2 fields. The curve owns the
+     * material labels and their accepted history. */
     template <int dim>
     class FixedFault : public Simple<dim>
     {
       public:
-        /** Accepted surface state in seconds, metres and metres per second. */
-        struct Section
-        {
-          double age, slip, rate;
-        };
-
         static void declare_parameters(ParameterHandler &prm);
         void parse_parameters(ParameterHandler &prm) override;
         void update() override;
@@ -59,35 +35,27 @@ namespace aspect
          * decision. The zero-duration initialization publishes only a rate. */
         void accept_step(LinearAlgebra::BlockVector &solution);
 
-        /** Physical history shared by both endpoints of the fixed section. */
-        const Section &accepted_section() const;
+        /** Ordered geometry and last published age, slip and rate at each label. */
+        const std::vector<typename StationaryFault<dim>::Label> &labels() const;
         void save(std::map<std::string,std::string> &status) const override;
         void load(const std::map<std::string,std::string> &status) override;
 
       private:
-        struct SectionMean
-        {
-          Tensor<2,dim> gradient;
-          double pressure;
-          SymmetricTensor<2,dim> stress;
-        };
-
-        /** Collectively integrate the bulk fields against the normalized
-         * section profile. Check homogeneous shear, stress and phase on
-         * physical parents and endpoints. */
-        SectionMean section_mean(const LinearAlgebra::BlockVector &fields, bool check_symmetry) const;
-        double section_rate(const SectionMean &mean) const;
-        SymmetricTensor<2,dim> stress_offset(double rate) const;
+        using Stress = SymmetricTensor<2,dim>;
+        using BulkPoint = typename StationaryFault<dim>::BulkPoint;
+        std::vector<BulkPoint> sample_bulk(const LinearAlgebra::BlockVector &iterate) const;
+        Stress stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
+                             const Point<dim> &position, const std::vector<double> &rates) const;
+        const FiniteElement<dim> &stress_element() const;
 
         Rheology::MatureFaultFriction friction;
+        StationaryFault<dim> fault;
         double viscosity, modulus, background_shear, background_compression;
-        double initial_interval, minimum_speed, width;
-        /** Last published section, replicated on the simulator communicator. */
-        Section accepted;
-        // Maxwell viscosity (Pa s), assembly speed (m/s) and rotated,
-        // relaxed parent stress (Pa) for the current attempt.
-        double kappa, trial_rate;
-        SymmetricTensor<2,dim> relaxed_parent;
+        double initial_interval, minimum_speed, kappa;
+        std::vector<double> trial_rates;
+        /** Owned cell-local DGQ2 coefficients of the rotated and relaxed
+         * physical parent (Pa). Rebuilt from old_solution on each attempt. */
+        std::map<CellId,std::vector<Stress>> relaxed_parent;
     };
   }
 }

@@ -9,6 +9,7 @@
 #include <aspect/utilities.h>
 #include <deal.II/physics/transformations.h>
 #include <deal.II/fe/fe_values.h>
+#include <deal.II/fe/fe_tools.h>
 
 namespace aspect
 {
@@ -37,155 +38,139 @@ namespace aspect
       return age*std::exp(-x) + dt*(x == 0. ? 1. : -std::expm1(-x)/x);
     }
 
-    template <int dim>
-    typename FixedFault<dim>::SectionMean
-    FixedFault<dim>::section_mean(const LinearAlgebra::BlockVector &fields, const bool check_symmetry) const
-    {
-      // For spatially constant 0 < phi < 1 the normalized profile h/I is
-      // exactly 1/width. This is the constant mode of both Q1 surface rows.
-      // Use the same native quadrature as the mature bulk-work residual.
-      const QGauss<dim> rule(8);
-      FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_values | update_gradients | update_quadrature_points | update_JxW_values);
-      std::vector<Tensor<2,dim>> gradients(rule.size());
-      std::vector<double> pressures(rule.size());
-      std::vector<Tensor<1,dim>> velocities(rule.size());
-      std::array<std::vector<double>,4> compositions;
-      for (auto &values : compositions)
-        values.resize(rule.size());
 
-      // Four gradient entries, p, xx, yy, xy and phase. Every rank takes
-      // part even when it owns no cells.
-      constexpr unsigned int n = 9;
-      double integrals[n+1] = {};
-      double low[n], high[n];
-      std::fill_n(low,n,std::numeric_limits<double>::max());
-      std::fill_n(high,n,std::numeric_limits<double>::lowest());
-      const auto &intro = this->introspection();
-      const double left = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model()).get_origin()[0];
-      double shear_error = 0.;
-      for (const auto &cell : this->get_dof_handler().active_cell_iterators())
-        if (cell->is_locally_owned())
-          {
-            fe.reinit(cell);
-            fe[intro.extractors.velocities].get_function_gradients(fields,gradients);
-            fe[intro.extractors.pressure].get_function_values(fields,pressures);
-            if (check_symmetry)
-              {
-                fe[intro.extractors.velocities].get_function_values(fields,velocities);
-                for (unsigned int c=0; c<4; ++c)
-                  fe[intro.extractors.compositional_fields[c]].get_function_values(fields,compositions[c]);
-              }
-            for (unsigned int q=0; q<rule.size(); ++q)
-              {
-                const double weight = fe.JxW(q)/width;
-                const std::array<double,n> values = {{
-                    gradients[q][0][0],gradients[q][0][1],gradients[q][1][0],gradients[q][1][1],
-                    pressures[q],compositions[0][q],compositions[1][q],compositions[2][q],compositions[3][q]
-                  }
-                };
-                integrals[n] += weight;
-                for (unsigned int i=0; i<(check_symmetry ? n : 5); ++i)
-                  integrals[i] += weight*values[i];
-                if (check_symmetry)
-                  {
-                    // v=(0,gamma*(x-left)) fixes every label on the wall.
-                    // A normal flow or tangential translation would require
-                    // transporting the geometry and its incoming history.
-                    const auto &gradient = gradients[q];
-                    shear_error = std::max({shear_error, std::abs(gradient[0][0]),std::abs(gradient[0][1]),std::abs(gradient[1][1]),
-                                            std::abs(velocities[q][0])/width,
-                                            std::abs(velocities[q][1]-gradient[1][0]*(fe.quadrature_point(q)[0]-left))/width
-                                           });
-                    for (unsigned int i=0; i<n; ++i)
-                      {
-                        low[i] = std::min(low[i],values[i]);
-                        high[i] = std::max(high[i],values[i]);
-                      }
-                  }
-              }
-          }
-      const auto comm = this->get_mpi_communicator();
-      Utilities::MPI::sum(integrals,comm,integrals);
-      if (check_symmetry)
-        {
-          Utilities::MPI::min(low,comm,low);
-          Utilities::MPI::max(high,comm,high);
-          AssertThrow(Utilities::MPI::max(shear_error,comm) < 1.e-9*std::max(1.,std::abs(high[2])),
-                      ExcMessage("The fixed geometry requires tangential shear with zero velocity on the left wall."));
-          for (unsigned int i=0; i<n; ++i)
-            AssertThrow(high[i]-low[i] < 1.e-9*std::max({1.,std::abs(high[i]),std::abs(low[i])}),
-                        ExcMessage("The fixed fault requires homogeneous shear, pressure, stress and phase."));
-          AssertThrow(low[8] > 0. && high[8] < 1., ExcMessage("The constant phase must be strictly between zero and one."));
-        }
-      SectionMean result;
-      for (unsigned int i=0; i<2; ++i)
-        for (unsigned int j=0; j<2; ++j)
-          result.gradient[i][j] = integrals[2*i+j]/integrals[n];
-      result.pressure = integrals[4]/integrals[n];
-      for (unsigned int c=0; c<3; ++c)
-        result.stress.access_raw_entry(c) = integrals[5+c]/integrals[n];
-      return result;
+    template <int dim>
+    const FiniteElement<dim> &FixedFault<dim>::stress_element() const
+    {
+      return this->get_fe().base_element(this->introspection().base_elements.compositional_fields[0]);
     }
 
     template <int dim>
     void FixedFault<dim>::update()
     {
-      const auto parent = section_mean(this->get_old_solution(),true);
-      const double dt = this->get_timestep_number() == 0 ? initial_interval : this->get_timestep();
+      const double physical_dt = this->get_timestep();
+      const double dt = this->get_timestep_number() == 0 ? initial_interval : physical_dt;
+      const double beta = std::exp(-modulus*dt/viscosity);
       kappa = -viscosity*std::expm1(-modulus*dt/viscosity);
-      // Rotate by the accepted bulk spin. With upward tangent and left
-      // normal the slip gradient has yx component -V/width.
-      const double angle = dt*.5*(parent.gradient[1][0]+accepted.rate/width-parent.gradient[0][1]);
-      if constexpr (dim == 2)
-        {
-          const auto rotation = Physics::Transformations::Rotations::rotation_matrix_2d(angle);
-          relaxed_parent = std::exp(-modulus*dt/viscosity)*symmetrize(rotation*static_cast<Tensor<2,dim>>(parent.stress)*transpose(rotation));
-        }
-      trial_rate = accepted.rate;
+      trial_rates.clear();
+      for (const auto &label : fault.labels())
+        trial_rates.push_back(label.rate);
+
+      const QGauss<dim> rule(8);
+      const auto &dg = stress_element();
+      FullMatrix<double> projector(dg.n_dofs_per_cell(),rule.size());
+      FETools::compute_projection_from_quadrature_points_matrix(dg,rule,rule,projector);
+      FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_values | update_gradients | update_quadrature_points);
+      const auto &fields = this->get_old_solution();
+      const auto &extract = this->introspection().extractors;
+      std::vector<Tensor<2,dim>> gradients(rule.size());
+      std::array<std::vector<double>,3> components;
+      for (auto &v : components)
+        v.resize(rule.size());
+      std::vector<Stress> rotated(rule.size());
+      std::vector<double> phase(rule.size());
+      double min_phase = 1., max_phase = 0.;
+      bool aligned = true;
+      relaxed_parent.clear();
+      for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+        if (cell->is_locally_owned())
+          {
+            // With fixed constant phase and resolved Q1 knots the localized
+            // slip stress is already in DGQ2. This makes the physical stress
+            // representation exact also on the stationary donor's split path.
+            aligned &= fault.resolves_segments(cell->vertex(0),cell->vertex(GeometryInfo<dim>::vertices_per_cell-1));
+            fe.reinit(cell);
+            fe[extract.velocities].get_function_gradients(fields,gradients);
+            fe[extract.compositional_fields[3]].get_function_values(fields,phase);
+            for (unsigned int c=0; c<3; ++c)
+              fe[extract.compositional_fields[c]].get_function_values(fields,components[c]);
+            for (unsigned int q=0; q<rule.size(); ++q)
+              {
+                min_phase = std::min(min_phase,phase[q]);
+                max_phase = std::max(max_phase,phase[q]);
+                Stress parent;
+                for (unsigned int c=0; c<3; ++c)
+                  parent.access_raw_entry(c) = components[c][q];
+                const auto foot = fault.project(fe.quadrature_point(q));
+                const double rate = foot.interpolate(trial_rates[foot.left],trial_rates[foot.left+1]);
+                const auto elastic_gradient = gradients[q] - fault.localization()*rate*fault.slip_dyad();
+                if constexpr (dim == 2)
+                  {
+                    // Initialization has a Maxwell interval but no accepted spin interval.
+                    const double angle = .5*physical_dt*(elastic_gradient[1][0]-elastic_gradient[0][1]);
+                    const auto rotation = Physics::Transformations::Rotations::rotation_matrix_2d(angle);
+                    rotated[q] = beta*symmetrize(rotation*static_cast<Tensor<2,dim>>(parent)*transpose(rotation));
+                  }
+              }
+            auto &coefficients = relaxed_parent[cell->id()];
+            coefficients.resize(dg.n_dofs_per_cell());
+            FETools::compute_projection_from_quadrature_points(projector,rotated,coefficients);
+          }
+      const auto comm = this->get_mpi_communicator();
+      min_phase = Utilities::MPI::min(min_phase,comm);
+      max_phase = Utilities::MPI::max(max_phase,comm);
+      AssertThrow(min_phase > 0. && max_phase < 1. && max_phase-min_phase < 1.e-12,
+                  ExcMessage("The stationary section normalization requires a constant phase between zero and one."));
+      AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(aligned),comm),
+                  ExcMessage("Interior fault labels must lie on transverse bulk cell faces."));
     }
 
     template <int dim>
-    SymmetricTensor<2,dim> FixedFault<dim>::stress_offset(const double rate) const
+    std::vector<typename FixedFault<dim>::BulkPoint>
+    FixedFault<dim>::sample_bulk(const LinearAlgebra::BlockVector &iterate) const
     {
-      auto stress = relaxed_parent;
-      stress[0][1] += kappa*rate/width;
-      return stress;
+      const QGauss<dim> rule(8);
+      FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_values | update_gradients | update_quadrature_points | update_JxW_values);
+      FullMatrix<double> basis(rule.size(),stress_element().n_dofs_per_cell());
+      FETools::compute_interpolation_to_quadrature_points_matrix(stress_element(),rule,basis);
+      std::vector<Stress> strain(rule.size());
+      std::vector<double> pressure(rule.size());
+      std::vector<BulkPoint> samples;
+      const auto S = symmetrize(fault.slip_dyad());
+      double min_compression = std::numeric_limits<double>::max();
+      for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+        if (cell->is_locally_owned())
+          {
+            fe.reinit(cell);
+            fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(iterate,strain);
+            fe[this->introspection().extractors.pressure].get_function_values(iterate,pressure);
+            const auto &parent = relaxed_parent.at(cell->id());
+            for (unsigned int q=0; q<rule.size(); ++q)
+              {
+                Stress stress = 2.*kappa*Utilities::Tensors::consistent_deviator(strain[q]);
+                for (unsigned int i=0; i<parent.size(); ++i)
+                  stress += basis(q,i)*parent[i];
+                const double compression = background_compression + pressure[q] - fault.normal_vector()*(stress*fault.normal_vector());
+                min_compression = std::min(min_compression,compression);
+                samples.push_back({fault.project(fe.quadrature_point(q)),fe.JxW(q)*fault.localization(),
+                                   background_shear + stress*S,compression
+                                  });
+              }
+          }
+      AssertThrow(Utilities::MPI::min(min_compression,this->get_mpi_communicator()) > 0.,
+                  ExcMessage("Mature friction requires a closed fault."));
+      return samples;
     }
 
     template <int dim>
-    double FixedFault<dim>::section_rate(const SectionMean &mean) const
+    typename FixedFault<dim>::Stress
+    FixedFault<dim>::stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
+                                   const Point<dim> &position, const std::vector<double> &rates) const
     {
-      const auto trial = relaxed_parent + 2.*kappa*Utilities::Tensors::consistent_deviator(symmetrize(mean.gradient));
-      const double driving = background_shear - trial[0][1];
-      const double compression = background_compression + mean.pressure - trial[0][0];
-      AssertThrow(compression > 0., ExcMessage("Mature friction requires a closed fault."));
-      const double stiffness = kappa/width;
-      double lower = minimum_speed;
-      double upper = driving/(stiffness + friction.damping);
-      AssertThrow(upper >= lower && friction.resistance(lower,accepted.age,compression).first + stiffness*lower <= driving,
-                  ExcMessage("The positive sliding branch has no admissible rate."));
-      double speed = std::clamp(accepted.rate,lower,upper);
-      for (unsigned int iteration=0; iteration<100; ++iteration)
-        {
-          const auto response = friction.resistance(speed,accepted.age,compression);
-          const double residual = response.first + stiffness*speed - driving;
-          if (std::abs(residual) <= 32.*std::numeric_limits<double>::epsilon()*driving)
-            return speed;
-          if (residual > 0.)
-            upper = speed;
-          else
-            lower = speed;
-          const double next = speed-residual/(response.second+stiffness);
-          speed = (lower < next && next < upper) ? next : .5*(lower+upper);
-        }
-      AssertThrow(false, ExcMessage("The fixed-fault section solve did not converge."));
-      return speed;
+      const auto foot = fault.project(position);
+      const double rate = foot.interpolate(rates[foot.left],rates[foot.left+1]);
+      Stress result = -2.*kappa*fault.localization()*rate*symmetrize(fault.slip_dyad());
+      const auto unit = this->get_mapping().transform_real_to_unit_cell(cell,position);
+      const auto &parent = relaxed_parent.at(cell->id());
+      for (unsigned int i=0; i<parent.size(); ++i)
+        result += stress_element().shape_value(i,unit)*parent[i];
+      return result;
     }
 
     template <int dim>
     void FixedFault<dim>::prepare_stokes(const LinearAlgebra::BlockVector &iterate)
     {
-      trial_rate = section_rate(section_mean(iterate,false));
+      trial_rates = fault.solve_rates(sample_bulk(iterate),friction,kappa,minimum_speed,this->get_mpi_communicator());
     }
 
     template <int dim>
@@ -198,7 +183,7 @@ namespace aspect
         {
           out.viscosities[q] = kappa;
           if (force)
-            force->elastic_force[q] = -stress_offset(trial_rate);
+            force->elastic_force[q] = -stress_offset(in.current_cell,in.position[q],trial_rates);
           if (elastic)
             {
               elastic->elastic_shear_moduli[q] = modulus;
@@ -219,53 +204,94 @@ namespace aspect
     template <int dim>
     void FixedFault<dim>::accept_step(LinearAlgebra::BlockVector &solution)
     {
-      const auto mean = section_mean(solution,true);
-      const double rate = section_rate(mean);
-      AssertThrow(std::abs(rate-trial_rate) <= 1.e-8*std::max(rate,trial_rate),
-                  ExcMessage("The converged Stokes field and section rate disagree."));
+      const auto rates = fault.solve_rates(sample_bulk(solution),friction,kappa,minimum_speed,this->get_mpi_communicator());
+      for (unsigned int j=0; j<rates.size(); ++j)
+        AssertThrow(std::abs(rates[j]-trial_rates[j]) <= 1.e-8*std::max(rates[j],trial_rates[j]),
+                    ExcMessage("The converged Stokes field and fault rate disagree."));
+
       const double dt = this->get_timestep();
       if (dt > 0.)
         {
-          const auto stress = stress_offset(rate) + 2.*kappa*Utilities::Tensors::consistent_deviator(symmetrize(mean.gradient));
-          // The L2 projection of this spatial constant has the same value
-          // at every DGQ2 support point on each owned and ghosted cell.
+          // With constant coefficients and cell-resolved Q1 rates the endpoint
+          // is DGQ2 on each cell. Evaluation at DG nodes is its exact projection.
+          const auto &system = this->get_fe();
+          const auto &intro = this->introspection();
+          const Quadrature<dim> nodes(stress_element().get_unit_support_points());
+          FEValues<dim> fe(this->get_mapping(),system,nodes,update_gradients | update_quadrature_points);
+          std::vector<Stress> strain(nodes.size());
+          std::vector<types::global_dof_index> indices(system.n_dofs_per_cell());
+          std::array<LinearAlgebra::Vector,3> owned;
           for (unsigned int c=0; c<3; ++c)
-            solution.block(this->introspection().block_indices.compositional_fields[c]) = stress.access_raw_entry(c);
+            owned[c].reinit(solution.block(intro.block_indices.compositional_fields[c]).locally_owned_elements(),this->get_mpi_communicator());
+          for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+            if (cell->is_locally_owned())
+              {
+                fe.reinit(cell);
+                cell->get_dof_indices(indices);
+                fe[intro.extractors.velocities].get_function_symmetric_gradients(solution,strain);
+                for (unsigned int q=0; q<nodes.size(); ++q)
+                  {
+                    const Stress stress = stress_offset(cell,fe.quadrature_point(q),rates)
+                                          + 2.*kappa*Utilities::Tensors::consistent_deviator(strain[q]);
+                    for (unsigned int c=0; c<3; ++c)
+                      {
+                        const auto local = system.component_to_system_index(intro.component_indices.compositional_fields[c],q);
+                        const auto block = intro.block_indices.compositional_fields[c];
+                        owned[c][indices[local]-solution.get_block_indices().block_start(block)] = stress.access_raw_entry(c);
+                      }
+                  }
+              }
+          for (unsigned int c=0; c<3; ++c)
+            {
+              owned[c].compress(VectorOperation::insert);
+              solution.block(intro.block_indices.compositional_fields[c]) = owned[c];
+            }
         }
-      accepted = {friction.advance_age(rate,accepted.age,dt), accepted.slip+dt*rate, rate};
+      fault.accept(rates,dt,friction);
     }
 
     template <int dim>
-    const typename FixedFault<dim>::Section &FixedFault<dim>::accepted_section() const
+    const std::vector<typename StationaryFault<dim>::Label> &FixedFault<dim>::labels() const
     {
-      return accepted;
+      return fault.labels();
     }
 
     template <int dim>
     void FixedFault<dim>::save(std::map<std::string,std::string> &status) const
     {
-      const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
       std::ostringstream buffer;
       {
         oarchive archive(buffer);
-        archive << box.get_origin() << box.get_extents() << accepted.age << accepted.slip << accepted.rate;
+        fault.save(archive);
       }
-      status["fixed vertical fault, constant section, DGQ2 stress v1"] = buffer.str();
+      status["stationary Q1 labels, DGQ2 stress v2"] = buffer.str();
     }
 
     template <int dim>
     void FixedFault<dim>::load(const std::map<std::string,std::string> &status)
     {
-      const auto record = status.find("fixed vertical fault, constant section, DGQ2 stress v1");
-      AssertThrow(record != status.end(),ExcMessage("Incompatible fixed-fault representation in checkpoint."));
-      std::istringstream buffer(record->second);
+      const auto record = status.find("stationary Q1 labels, DGQ2 stress v2");
+      if (record != status.end())
+        {
+          std::istringstream buffer(record->second);
+          iarchive archive(buffer);
+          fault.load(archive);
+          return;
+        }
+      const auto legacy = status.find("fixed vertical fault, constant section, DGQ2 stress v1");
+      AssertThrow(legacy != status.end(),ExcMessage("Incompatible fixed-fault representation in checkpoint."));
+      std::istringstream buffer(legacy->second);
       iarchive archive(buffer);
+      Point<dim> origin, extent;
+      double age, slip, rate;
+      archive >> origin >> extent >> age >> slip >> rate;
       const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
-      Point<dim> origin, extents;
-      archive >> origin >> extents;
-      AssertThrow(origin == box.get_origin() && extents == box.get_extents(),
-                  ExcMessage("The checkpoint has a different fault geometry."));
-      archive >> accepted.age >> accepted.slip >> accepted.rate;
+      auto end = origin;
+      end[1] += extent[1];
+      AssertThrow(box.get_origin() == origin && box.get_extents() == extent && labels().size() == 2 &&
+                  labels().front().position == origin && labels().back().position == end,
+                  ExcMessage("Incompatible fixed-fault representation in checkpoint."));
+      fault.initialize(origin,extent, {origin,end},age,rate,slip);
     }
 
     template <int dim>
@@ -273,6 +299,9 @@ namespace aspect
     {
       prm.enter_subsection("Material model");
       prm.enter_subsection("Fixed fault");
+      prm.declare_entry("Fault vertices","",Patterns::List(Patterns::List(Patterns::Double(),2,2),0,
+                                                           Patterns::List::max_int_value,";"),"Ordered x,y label positions in metres separated by semicolons. "
+                        "The default joins the ends of the left box boundary.");
       prm.declare_entry("Shear modulus","1e10",Patterns::Double(0.),"Elastic shear modulus in Pa.");
       prm.declare_entry("Initialization interval","1",Patterns::Double(0.),"Maxwell interval in seconds for the initial Stokes solve.");
       prm.declare_entry("Background shear traction","0",Patterns::Double(),"Initial surface shear loading in Pa, positive along the slip sense.");
@@ -297,7 +326,7 @@ namespace aspect
       prm.enter_subsection("Simple model");
       viscosity = prm.get_double("Viscosity");
       AssertThrow(prm.get_double("Thermal viscosity exponent") == 0 && prm.get_double("Composition viscosity prefactor") == 1.,
-                  ExcMessage("The homogeneous fault requires a constant bulk viscosity."));
+                  ExcMessage("The stationary fault requires a constant bulk viscosity."));
       prm.leave_subsection();
       prm.enter_subsection("Fixed fault");
       modulus = prm.get_double("Shear modulus");
@@ -309,13 +338,31 @@ namespace aspect
                   prm.get_double("Slip distance"),prm.get_double("Radiation damping")
                  };
       minimum_speed = prm.get_double("Minimum speed");
-      accepted = {prm.get_double("Initial age"),0.,friction.reference_speed};
+      const double age = prm.get_double("Initial age");
+      const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
+      std::vector<Point<dim>> vertices;
+      for (const auto &entry : Utilities::split_string_list(prm.get("Fault vertices"),';'))
+        {
+          const auto coordinates = Utilities::string_to_double(Utilities::split_string_list(entry));
+          Point<dim> point;
+          point[0] = coordinates.at(0);
+          point[1] = coordinates.at(1);
+          vertices.push_back(point);
+        }
+      if (vertices.empty())
+        {
+          vertices = {box.get_origin(),box.get_origin()};
+          vertices.back()[1] += box.get_extents()[1];
+        }
+      fault.initialize(box.get_origin(),box.get_extents(),vertices,age,friction.reference_speed);
       prm.leave_subsection();
       prm.leave_subsection();
       AssertThrow(std::min({viscosity,modulus,initial_interval,friction.direct_effect,minimum_speed,
-                            friction.reference_speed,friction.slip_distance,accepted.age
+                            friction.reference_speed,friction.slip_distance,age
                            }) > 0.,
                   ExcMessage("The fixed fault requires positive material, time and speed scales."));
+      AssertThrow(friction.reference_speed >= minimum_speed,
+                  ExcMessage("The reference speed must be at least the minimum admissible speed."));
       const auto &p = this->get_parameters();
       AssertThrow(dim == 2 && p.enable_elasticity && p.nonlinear_solver == Parameters<dim>::NonlinearSolver::no_Advection_iterated_Stokes
                   && p.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg && p.stokes_velocity_degree == 2
@@ -333,13 +380,13 @@ namespace aspect
         return method == Parameters<dim>::AdvectionFieldMethod::static_field;
       }),
       ExcMessage("Expected static DGQ2 fields ve_stress_xx, ve_stress_yy, ve_stress_xy and phase_field in this order."));
-      width = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model()).get_extents()[0];
+
       kappa = -viscosity*std::expm1(-modulus*initial_interval/viscosity);
-      trial_rate = accepted.rate;
+
     }
 
     ASPECT_REGISTER_MATERIAL_MODEL(FixedFault,"fixed fault",
-                                   "Homogeneous plane shear across a vertical mature fault on the left side of a box. "
+                                   "Stationary mature fault with independent Q1 labels spanning a Cartesian box. "
                                    "The phase is a spatial constant strictly between zero and one. "
                                    "The Simple model supplies the bulk viscosity and thermal properties.")
   }

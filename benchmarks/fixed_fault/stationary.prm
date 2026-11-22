@@ -1,0 +1,16 @@
+# Three Q1 fault labels in the interior. All begin at the same age and shear
+# loading. Transverse integration of the nonuniform bulk field separates them.
+include $ASPECT_SOURCE_DIR/benchmarks/fixed_fault/fixed_fault.prm
+set Output directory = output-stationary-fault
+subsection Material model
+  subsection Fixed fault
+    set Fault vertices = 0.5,0; 0.5,0.5; 0.5,1
+    set Initial age = 11.682941969615793
+    set Background shear traction = 3.7106105802501554
+  end
+end
+subsection Boundary traction model
+  subsection Function
+    set Function expression = 0; 0.02+t+0.12*(y-0.5)
+  end
+end

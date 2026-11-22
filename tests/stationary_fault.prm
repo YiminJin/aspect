@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/benchmarks/fixed_fault/stationary.prm
+
+subsection Postprocess
+  set List of postprocessors = fixed fault probe
+  subsection Fixed fault probe
+    set Compare homogeneous reference = false
+  end
+end

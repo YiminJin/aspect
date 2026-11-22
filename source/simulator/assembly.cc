@@ -22,6 +22,7 @@
 #include <aspect/simulator.h>
 #include <aspect/utilities.h>
 #include <aspect/simulator_access.h>
+#include <aspect/material_model/fixed_fault.h>
 
 #include <aspect/simulator/assemblers/interface.h>
 #include <aspect/melt.h>
@@ -73,7 +74,11 @@ namespace aspect
     assemblers->stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::StokesPreconditioner<dim>>());
     assemblers->stokes_system.push_back(std::make_unique<aspect::Assemblers::StokesIncompressibleTerms<dim>>());
 
-    if (material_model->is_compressible() || parameters.enable_prescribed_dilation || prescribed_dilation_manager.get_active_plugin_names().size() > 0)
+    // The stationary fault uses the 3-D deviator in plane strain. Its mass
+    // equation is incompressible, but div(u_h) can be nonzero at quadrature points.
+    const bool plane_strain_fault = dynamic_cast<const MaterialModel::FixedFault<dim> *>(material_model.get()) != nullptr;
+    if (material_model->is_compressible() || parameters.enable_prescribed_dilation ||
+        prescribed_dilation_manager.get_active_plugin_names().size() > 0 || plane_strain_fault)
       {
         // The compressible part of the preconditioner is only necessary if we use the simplified A block
         if (parameters.use_full_A_block_preconditioner == false)
