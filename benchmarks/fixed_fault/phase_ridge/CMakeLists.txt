@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect 3.1 REQUIRED HINTS ${Aspect_DIR} $ENV{ASPECT_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(phase_ridge)
+add_library(phase_ridge SHARED phase_ridge.cc)
+ASPECT_SETUP_PLUGIN(phase_ridge)
