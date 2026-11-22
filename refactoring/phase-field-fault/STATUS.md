@@ -1,6 +1,94 @@
 # Phase-field fault working record
 
-## Baseline and source identity
+## Increment 2 · Stationary reconstructed mature fault
+
+The target starts at `2a74e2666` on `pf-rsf`, descended from release `0d97d2d33`. The homogeneous regression retains the input, archived donor values and tolerances from `88cd4eee1`. The stationary implementation handles an ordered, straight, axis-parallel Q1 fault spanning a Cartesian box. Every interior knot is at a transverse bulk face. Phase is fixed at a spatial constant strictly between zero and one. The two tests use the left wall and the interior line x = 0.5 m respectively.
+
+### Stationary donor and independent comparison
+
+The archived mature executable selects transported material history. Its homogeneous reduction remains the reference for increment 1. For the stationary experiment use its ancestor `663937bed9305df2823ac77a3fc2c3925bb94caa`, where the separated stationary DG history, accepted slip-subtracted spin and bulk-work residual are all available together. Reconstruct and build that tree in a separate directory. The replay script adapts the observation plugin's selector and publication checks and prescribes 0.35 on the donor's continuous Q1 phase through the BP3 constraints signal. The compiled equations, geometry, Stokes assembly and time integration come directly from that Git tree.
+
+In the donor, follow `ReconstructedFaultSurfaceSystem::assemble_bulk_work_system` in `source/reconstructed_fault/surface_system_bulk_work.cc`. Each associated bulk quadrature point supplies dynamic pressure, strain, stress history and its two Q1 shapes. The constitutive response uses the interpolated age and rate, and deposits shear minus resistance into both rows with $N_i(h/I)JxW$. The native solver in `source/simulator/solver/reconstructed_fault_stokes.cc` returns the slip stress to the momentum equation and stages the converged endpoint. The repeat decision in `source/simulator/core.cc` controls publication. `phase_field_fault/dg_objective.cc` rotates the accepted split tensors with the spin of the previous bulk velocity minus slip. The physical stress in the donor CSV is $T-R-B(Z)$. With constant viscosity, constant localization and cell-resolved Q1 knots, $B(Z)$ is in the cell DGQ2 space. Linear projection of the rotated physical tensor gives the same endpoint in a single physical-stress representation.
+
+Use the 1 m square, four Q2/Q1 cells and three labels at y = 0, 0.5 and 1 m. They start at the same age (11.682941969615793 s) and background shear (3.7106105802501554 Pa). Apply $0.02+t+0.12(y-0.5)$ Pa tangentially at the right boundary. The donor published two stress endpoints and zero geometry changes. The target reads fixed phase in its native static DGQ2 field. The donor uses continuous Q1 for the same constant. Compare physical velocity, pressure, all three stress components and phase at the same 36 QGauss(3) locations at each time. Temperature is prescribed at 293 K. The donor exports age and rate directly. The slip reference sums recorded endpoint rate times accepted duration.
+
+| Time (s) | Rates from bottom to top (m/s) | Ages from bottom to top (s) |
+| --- | --- | --- |
+| 0 | 0.0966529145, 0.1002292839, 0.0943642083 | 11.68294197, 11.68294197, 11.68294197 |
+| 0.0125 | 0.0912310449, 0.0951036956, 0.0883219360 | 10.14246038, 10.08130943, 10.18864051 |
+| 0.025 | 0.0903738068, 0.0943475169, 0.0874068945 | 8.81843454, 8.71111890, 8.89966709 |
+
+The initial run in `$D/target` differed by up to 5.60e−5 m/s in velocity and 1.43e−4 Pa in pressure at initial equilibrium. Its full incompressible velocity matrix omitted the plane-strain trace term used in the traction and stress. Discrete Q2 velocity is only weakly divergence free. The stationary donor explicitly adds the existing ASPECT strain-rate trace assembler while retaining incompressible continuity. Activating that same assembler closed the comparison with the original donor data. All runs and both sets of snapshots remain separate.
+
+### An ordinary accepted step, in source order
+
+1. `source/simulator/core.cc`, `start_timestep` → `source/material_model/fixed_fault.cc`, `FixedFault::update`. Read accepted velocity and the three physical stress components from `old_solution`, and rates from `StationaryFault::labels()`. Rotate the spatial stress with the accepted slip-subtracted spin, relax it, and L²-project the result onto the owned DGQ2 cells. Initialization uses the Maxwell initialization interval and zero physical duration for rotation, slip and aging.
+2. `source/simulator/solver_schemes.cc`, `assemble_and_solve_stokes` → `FixedFault::prepare_stokes` and `sample_bulk`. At each owned QGauss(8) point form current driving shear and compression from velocity, pressure and the projected parent. `include/aspect/reconstructed_fault/stationary_fault.h` defines the material vertex and projection. `source/reconstructed_fault/stationary_fault.cc`, `project` and `solve_rates`, assemble the two-node work residual, its diagonal and off-diagonal tangent with the same Q1 interpolation. Friction reads the accepted age. Solve the positive tridiagonal Newton correction at fixed bulk iterate.
+3. `FixedFault::stress_offset` interpolates the two current rates back to each Stokes evaluation point and adds $-2\kappa(h/I)V\,\mathrm{sym}(t\otimes n)$ to the projected parent. `evaluate` supplies the negative of this offset via `ElasticOutputs`. `source/simulator/assemblers/stokes.cc` contracts it against the test gradient. `source/simulator/assembly.cc` includes the plane-strain trace correction for this material. The ordinary velocity-pressure solve updates the Picard iterate.
+4. After convergence `Simulator::run` calls `time_stepping_manager.update()`. On a repeat the simulator bypasses the entire publication and rebuilds from the accepted parent at the new duration. On acceptance `FixedFault::accept_step` checks every rate against the converged bulk solution and writes the three owned DG stress blocks. `StationaryFault::accept` advances each vertex's age with the exact aging law and accumulates $\Delta t V_j$ once. Ordered index and fixed coordinates identify each vertex in the versioned material checkpoint. ASPECT checkpoints bulk stress and velocity with the mesh and solution histories.
+
+### Verification and reproduction
+
+The implementation and native regressions are committed at `fba90b134`. The two Release and two Debug fault CTests passed. Both complete unit runs passed 2,302 assertions in 46 cases. The feature-off Release `matrix_nonzeros_1` comparison passed on rerunning with local MPI socket access. Its sandbox run differed only by launcher warnings in screen output. The two fault CTests run with the normal checkout and checked-in controls, independently of the donor.
+
+| Maximum absolute donor difference, all three states | Release | Debug |
+| --- | ---: | ---: |
+| Label rate (m/s) | 4.43e−15 | 4.27e−15 |
+| Age (s) | 3.56e−14 | 3.74e−14 |
+| Cumulative slip (m) | 3.21e−17 | 3.39e−17 |
+| Bulk velocity (m/s) | 2.61e−14 | 2.65e−14 |
+| Pressure (Pa) | 9.88e−16 | 1.04e−15 |
+| Physical DG stress (Pa) | 3.37e−15 | 3.45e−15 |
+
+The homogeneous two-label check uses the original values and tolerances. For both cases in both builds, a fully solved 25 ms attempt was rejected and retried at 12.5 ms. Every sampled field and every label matched the clean trajectory exactly at all three output times. Restoring generation 02 at 12.5 ms and continuing to 25 ms also gave zero difference. Each harness rejected an unknown material schema and a checkpoint with the same label count but different positions. An additional homogeneous compatibility check encoded a generation-02 material record using the `88cd4eee1` Boost types and field order. Loading that v1 record reproduced the final v2 fields within 8.89e−16. This was a format migration test using a reconstructed record.
+
+The one- and two-rank Release runs used global refinement 2, giving 16 cells and 144 sample points (72 per rank for the distributed run). Matching by cell ID and quadrature index gave at most 2.96e−15 in the bulk and 3.56e−15 in the label history across decompositions. All numerical runs used one thread per rank.
+
+From the target root, use fresh replay destinations. The archive manifest and sibling identity are recorded below under increment 0.
+
+```sh
+D=/tmp/stationary-fault
+R=$D/reference
+mkdir -p "$D/stationary-source"
+tar -xzf ../aspect-pf-rsf-reference-20261121/reference.tar.gz -C "$D"
+(cd "$R" && sha256sum --quiet -c SHA256SUMS)
+export OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+python3 refactoring/phase-field-fault/replay_fixed_reference.py "$R" "$D/homogeneous"
+git -C ../aspect-pf-rsf-particle-free archive 663937bed9305df2823ac77a3fc2c3925bb94caa | tar -xf - -C "$D/stationary-source"
+cmake -S "$D/stationary-source" -B "$D/stationary-build" -DCMAKE_BUILD_TYPE=Release \
+  -DDEAL_II_DIR=/opt/dealii/9.6-local -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++ \
+  -DCMAKE_CXX_STANDARD_LIBRARIES=/opt/openmpi/5.0.6/lib/libmpi.so
+cmake --build "$D/stationary-build" --target aspect -j3
+python3 refactoring/phase-field-fault/replay_stationary_reference.py \
+  "$D/stationary-source" "$D/stationary-build" "$D/homogeneous/input.prm" "$D/replay-final"
+diff -qr benchmarks/fixed_fault/stationary-reference "$D/replay-final/comparison"
+
+# Reuse the two native ASPECT builds configured below, or configure them with build_aspect.
+for build in build-slice build-slice-debug; do
+  cmake --build "$build" --target aspect -j2
+  cmake -S tests -B "$build/tests" -DAspect_DIR="$PWD/$build" -DASPECT_BINARY="$PWD/$build/aspect" \
+    -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+  cmake --build "$build/tests" --target fixed_fault stationary_fault -j2
+  "$build/aspect" --test
+  ctest --test-dir "$build/tests" -R '^(fixed_fault|stationary_fault)$' --output-on-failure
+  mode=release
+  if [ "$build" = build-slice-debug ]; then mode=debug; fi
+  for case_name in fixed_fault stationary_fault; do
+    python3 benchmarks/fixed_fault/check_lifecycle.py "$build/aspect" "$build/tests/libfixed_fault.$mode.so" \
+      "$D/final-$mode-$case_name" --case "$case_name"
+  done
+done
+build-slice/aspect --validate benchmarks/fixed_fault/stationary.prm
+ctest --test-dir build-slice/tests -R '^matrix_nonzeros_1$' --output-on-failure
+```
+
+For the rank comparison, both inputs include `tests/stationary_fault.prm`, set the Release probe library, override initial global refinement to 2 and write to their respective fresh destinations. Run `build-slice/aspect "$D/mpi-one/input.prm"` and `/opt/openmpi/5.0.6/bin/mpirun -np 2 build-slice/aspect "$D/mpi-two/input.prm"`. The measured donor executable had SHA256 `3e9d16949fc0d91c2304fada8c6fb0c49c573213d733efb682bd78c793b8179b`. The observing DSO used for the qualified run had SHA256 `738fa8a1e3a4407dd03c1f39e5e2c464d035f1573ff487fa9095c05070f3d7ce`.
+
+**Resource use.** In the four-cell Release case the target stored 108 physical tensor coefficients in three static DGQ2 solution fields and 15 doubles of label positions and accepted physical state. It stores 108 additional rotated-parent coefficients while evaluating the mechanics. Each Picard iterate samples 256 owned quadrature points. Each section Newton iteration reduces four arrays of length proportional to the number of labels (the off-diagonal has one fewer entry). The endpoint stages three owned stress blocks. Bulk fields stay rank-local apart from ordinary ASPECT ghosts. The donor reported 216 owned tensor coefficients and six additional surface scalars. Single checkpointed runs, including startup and the respective observation plugins, measured 1.943 s and 203,836 KiB peak RSS on the target, 4.023 s and 211,572 KiB on the donor. The target performed 46 bulk Picard solves and the donor performed 13 condensed linear solves. Generation 02 occupied 7,601 bytes on the target and 5,600 bytes on the donor, including 701 and 1,782 bytes respectively in the compressed simulator record. ASPECT also checkpoints previous bulk solution vectors. These are single small-run measurements with different observers.
+
+**Next action.** Author architecture review of the label owner, the Q1 work residual, the returned stress and the acceptance boundary. Increment 3 starts with a new comparison for a varying fixed localization or inclined geometry after that review.
+
+## Increment 0 · Baseline and source identity
 
 On 2026-11-21 the target branch `pf-rsf` and the sibling checkout `../aspect-pf-rsf-particle-free` both had HEAD `0d97d2d3311154ca3f01d801b18f3945dc8b8bad`. The peeled release object exists and is the target's ancestor. The local tag `v3.1.0` is absent. The target already had edits to AGENTS.md and the untracked refactoring kit. The sibling had untracked research reports and benchmarks. Its old build directory is gone. The preserved archive is [reference.tar.gz](../../../aspect-pf-rsf-reference-20261121/reference.tar.gz), SHA256 `a82d362c3504be188e9602cf10c93cf51a26544be5e6d4a7677016cc52981c57`. All replays and source overlays went into /tmp/aspect-slice1. Neither sibling was changed.
 
@@ -29,7 +117,7 @@ All 144 files matched. The [archive guide](../../../aspect-pf-rsf-reference-2026
 
 The first fixed reduction used the archive's 1e−8 nonlinear tolerance. Its t=0 rate, 0.17074374609569581 m/s, missed the target by 2.075e−9 m/s (allowance 1.807e−9). At this geometry the independently solvable equation is 5μ(V,10)+V=3.85−0.02 Pa. The donor had a −3.594e−9 Pa residual and its last relative fault residual was 4.323e−9. Tightening **both solvers** to nonlinear 1e−12 and linear 1e−13 gives an archived-core rate of 0.17074374817067778 against independent root 0.17074374817067803. The three exported donor states in $D/fixed-tight supply the test values. The moving control, its thresholds, and its expected outputs were untouched. Failed target evidence is in $D/lifecycle/clean/run.log.
 
-## One ordinary accepted step
+## Increment 1 · Homogeneous accepted step (historical)
 
 [Benchmark input](../../benchmarks/fixed_fault/fixed_fault.prm) → [material and section interface](../../include/aspect/material_model/fixed_fault.h) → [implementation](../../source/material_model/fixed_fault.cc). Scope is the homogeneous mode of one vertical, fixed Q1 section, constant positive phase below unity, affine tangential shear, full normal cross-section. The uniformity check at publication is important. A nonuniform profile, two independently evolving endpoint ages or a curved fault needs a different transfer operation. The target uses block Picard in the ordinary release solver, with a scalar Newton solve at fixed bulk iterate. The archived core solves the coupled equations by condensed Newton. Compare converged fields and independently check the resistance derivative.
 
@@ -124,6 +212,6 @@ On four cells, ASPECT owns 108 scalar DGQ2 stress DoFs and 36 phase DoFs. These 
 
 Three alternating, single-rank Release runs used the fixed-tight donor input and the clean target lifecycle input, each in a fresh directory under `$D/cost`. Mesh, physical steps, tolerances, field sampling and checkpoint frequency matched. Each implementation used its own observer and nonlinear scheme. Median ASPECT wall time was 0.169 s on target and 0.221 s on donor. Median end-to-end wall time was 1.525 s and 1.581 s respectively, including startup. The first target launch took 3.490 s end to end. Median process peak RSS from wait4 was 204,020 and 211,852 KiB respectively. The target used 28, 12 and 13 Picard assemblies. The donor used 13 condensed linear solves in total. These four-cell timings include initialization and do not establish scaling.
 
-### Architecture review
+### Increment 1 architecture review (historical)
 
 Read [the public header](../../include/aspect/material_model/fixed_fault.h), then [the equations, measure and commit](../../source/material_model/fixed_fault.cc). The review decision is whether the fixed material should retain the section reduction and accepted section state when geometry acquires independent labels. The Simulator currently owns the global vectors and the decision to accept. The material exposes a preparation call before assembly, a publication call and read-only accepted section access. The fixed case establishes homogeneous Stokes feedback and transaction lifetime. The next action is the author's review of this implementation at the end of increment 1.

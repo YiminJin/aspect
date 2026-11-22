@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**First assignment. Complete increments 0 and 1 below, then show the author a working implementation to review.** The midpoint audit is closed. Start from its archive and small controls. The architectural question for this review is whether a reader can follow one accepted fault step from the ordinary ASPECT solver into the equations and back to the committed history. Port enough code to answer that question.
+**Current assignment. Increment 2 brings the stationary reconstructed mature fault into the production Stokes solve.** Increment 1 at `88cd4eee1` is the donor-matched homogeneous regression. Preserve its input, reference fields and acceptance bounds as the label discretization changes. The midpoint update remains frozen.
 
 ## Baselines and intended examples
 
@@ -58,6 +58,14 @@ Choose the smallest donor-supported 2-D mature-fault configuration with **fixed 
 
 **Review boundary.** Hand over the design, working code, tests and remaining gaps at the end of this increment. Continue through routine design and implementation choices within it. A header-only skeleton, a copied material-model directory, and a private benchmark driver each leave the central integration question unanswered.
 
+## Increment 2 · Stationary reconstructed mature fault
+
+Keep the homogeneous case at `88cd4eee1` as the regression for the constant mode of the same Q1 operator. For the first independently evolving labels, prescribe a straight axis-parallel curve across a 2-D Cartesian box. Place interior label knots on transverse bulk faces. Constant positive phase gives the donor's exact full-normal localization $h/I=1/W$, where $W$ is the box width across the fault. A spatially varying boundary traction exercises both transfers and the dynamic normal pressure.
+
+Use the old velocity gradient and physical DG stress as the immutable parent. At each ordinary Stokes Picard iterate, project the bulk quadrature points onto the curve and assemble the consistent two-node work residual and tangent, including interpolated accepted age. Return the interpolated slip rate as a spatial stress to the ordinary elastic RHS. Use the same plane-strain deviator in the bulk matrix, traction and committed stress. After the timestep manager accepts, write the converged DG stress and advance each label's age and cumulative slip. Compare every label and interior sample with the historical stationary solver, then repeat the homogeneous, rejection and checkpoint tests through this path.
+
+The review boundary is the stationary transfer and publication. The next geometric increment has its own qualification for nonconstant localization, inclined segments and boundary truncation.
+
 ## Ownership and source entry points
 
 This table assigns decisions and data lifetimes. It does not prescribe a class for every row. Populate links to actual target implementations in the working record during increment 0, then in the maintained source guide as code lands.
@@ -84,8 +92,8 @@ Complete one working increment at a time. Dependencies can justify reordering th
 
 | Increment | Working result | Evidence for review |
 | --- | --- | --- |
-| 2 · Phase field | Selected native DG Bernstein field and its required transport or AT1/SIPG constrained operator, each through its normal owner. Bring in just the part required by the next caller. | Basis/bounds and transport or VI check on the actual solved coefficients. Show parameter registration, field access and any shared-core edit. |
-| 3 · Mature geometry and coupling | Reconstructed curve, stable labels, normalization/transfer, traction return and boundary treatment for Example 1. | Small stationary reference and transfer/work test. Check station mapping and tractions on inclined and vertical geometry as this capability lands. |
+| 2 · Stationary reconstructed mature fault | Prescribed stationary Q1 curve with independent age, slip and rate at each label. Assemble the bulk-work residual from actual Stokes quadrature and return the interpolated rate through the ordinary elastic RHS. Hold phase and geometry fixed. | Match a nonuniform donor case with distinct label rates and matched interior fields. Run the homogeneous comparison, rejection and restarted continuation through this same implementation. Review the history owner, both transfers and acceptance before extending geometry. |
+| 3 · Phase and geometry extensions | Native phase representation and transfer for spatially varying localization, inclined faults and boundary truncation needed by the paper cases. Add the relevant geometry or phase operator as its caller lands. | Compare normalization, station mapping, traction and work on the changed geometry or profile. |
 | 4 · Mature moving fault | Selected DG transport, accepted spin with bulk slip subtracted, projection/reaction and geometry/profile staging in their ASPECT owners. | Reproduce the one-rank layered moving control with two joint publications. Check a nonzero rotation/transport case and continuation of a moving state. |
 | 5 · Single-front coupling for Example 2 | Fixed-section geometry and native point state, eliminated section mechanics and tangent, coupled stage VI, localized selection and admission. Increment internally through the smallest executable controls. | Two-rank oblique control first. Verify work adjoint, tangent and retry/restart, then compare **both** 18-strip trajectories at their original durations. |
 | 6 · Refactor consolidation | Normal configuration, parameter docs, limitations, one source-linked implementation guide, small tests and matched resource measurements. | Feature-on and feature-off regressions, restart diagnostics and reproduction without a donor dependency. Record implementation status and scientific qualification separately for each paper case. |
