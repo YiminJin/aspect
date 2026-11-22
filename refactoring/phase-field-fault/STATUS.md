@@ -1,6 +1,96 @@
 # Phase-field fault working record
 
-## Increment 2 · Stationary reconstructed mature fault
+## Active assignment · Repair the stationary coupling
+
+**Implemented from `e91e801ba`.** The numbered second download contained the requested patch and task, and the unnumbered ZIP contained the earlier kit. Both were extracted under `/tmp/stationary-maintenance.Rai2boDP`. The newer patch passed `git apply --check` and applied cleanly to the author's path instructions and recorded results. Commit `79df67037` moves the unchanged friction and aging equations into paired rheology files and names the traction and fixed-age speed derivative. Commit `49bc11838` implements the coupling repair, removes prototype persistence and adds the discriminating tests. The checked-in donor snapshots, homogeneous expected values and comparison bounds remain frozen. Both ordinary parameter files run with original elasticity disabled. All native fault runs begin at physical time zero in fresh directories.
+
+### One accepted stationary step
+
+1. `source/simulator/core.cc`, `start_timestep` calls `PhaseFieldFault::update`. The material computes the Maxwell relaxation and effective viscosity. `FaultStokesCoupling::prepare_parent` samples accepted velocity, stress and label rate, asks the material for the rotated/relaxed physical tensor, and projects it to owned DGQ2 cells. Spin uses the accepted bulk gradient minus the localized slip gradient. Initialization uses 0.1 s for Maxwell mechanics and zero physical time for rotation, age and slip.
+2. `solve_no_advection_iterated_stokes` emits `prepare_stokes_picard_iteration`. The coupling samples the current bulk solution at 8×8 Gauss points. `solve_rates` uses the two neighboring Q1 labels and the unchanged work measure and consistent tangent. `StationaryFault` owns the oriented vertices, projection and each accepted age, slip and rate. The coupling owns trial rates and cell-local scratch. The material owns these components and the constitutive law. Only the four section vectors are reduced across ranks.
+3. The material supplies $\kappa$ through ordinary viscosity and the spatial offset through `FaultStressOffset` on request. The offset is the projected parent minus $2\kappa(h/I)V\,\mathrm{sym}(t\otimes n)$. The registered `FaultStressLoad::execute` adds $-\sum_q JxW_q\,\tau_{\rm offset}:\varepsilon(v_i)_q$ to the velocity RHS. Each symmetric gradient comes from FEValues at the current quadrature point. The same operation runs on RHS-only assembly. Registration also adds ASPECT's existing $-2\kappa/3\,\mathrm{div}(u)\mathrm{div}(v)$ correction exactly once, using the matching preconditioner when needed. This keeps the 3-D deviator consistent with pointwise traction and physical stress in 2-D plane strain. Continuity remains incompressible.
+4. When the bulk stopping condition succeeds, `check_stokes_picard_convergence` calls `FaultStokesCoupling::check_convergence`. It recomputes rates from the solved velocity and pressure. Each rate must agree with its assembly rate to relative 1e−8. Disagreement continues the ordinary Picard loop under its iteration limit and failure policy. Agreement stages the converged rates. After the timestep manager decides to advance, `post_accept_timestep` calls `accept_step` to write the physical DG stress blocks, then `StationaryFault::accept` accumulates $\Delta t V_j$ and advances accepted age once. A repeat skips publication and reconstructs the next attempt from the same parent.
+5. ASPECT's **named additional outputs** visualizer asks the material for `fault_tau_xx`, `fault_tau_yy` and `fault_tau_xy` (Pa). They read the accepted, named DG components. The material looks up the three stress roles and the generic phase role by name and validates their types. The linearized incompressible EOS receives one output slot for background lithology. No stress or phase value enters density mixing.
+
+**Architecture review.** The normal caller of `PhaseFieldFault` is the material manager/Simulator. Its local Maxwell operations and the paired `RateAndStateFriction` law follow the release material/rheology split. `FaultStokesCoupling` is the FE/MPI owner for prep, coupled convergence and writeback. It connects to the existing assembler registration signal in the same manner as the anisotropic-viscosity example. `FaultStressLoad` uses the additional-output request pattern of `tests/additional_outputs_03.cc`. The three new signals are the shared-core changes relative to release. They expose a pre-assembly point, a check within the solver's stopping decision, and a publication point after the repeat decision. No shared solver or assembler selects a concrete fault material. The named-output reader and label statistics serve normal runs. The analytic probe, prescribed work test, deliberate rejection and snapshot checker live with the fixtures. The straight, mesh-aligned section and single-lithology material are limitations of this increment. The ordinary release checkpoint code and default assembler selection are byte-identical to `0d97d2d33`. The material diagnoses resume, timed/step/scheduled checkpoints and checkpoint-on-termination while its label history is in memory.
+
+### Evidence from fresh runs
+
+| Check | Result |
+| --- | --- |
+| Homogeneous and three-label | Debug and Release fault CTests passed. Each unit suite passed 2,302 assertions in 46 cases. In the nonuniform Release comparison, maximum errors were 4.43e−15 m/s in label rate, 3.56e−14 s in age, 3.21e−17 m in slip, 2.61e−14 m/s in velocity, 9.88e−16 Pa in pressure and 3.37e−15 Pa in physical stress. Debug maximum stress error was 3.45e−15 Pa. All three times and 36 interior samples were checked. |
+| Work and graphical stress | On a Q2 polynomial test velocity the production stress assembler matched independently integrated signed work within 1e−12 for both rebuild flags, with zero pressure load. Two equivalent clamped-wall nonuniform runs gave zero sampled differences with 47 versus 3 preconditioner rebuilds. At 12.5 ms all three named stress outputs equaled the accepted DG values at all 36 graphical points. Homogeneous shear was 0.0325 Pa. The viscous contribution alone was about 0.01218 Pa. |
+| EOS and field order | With a 123 kg/m³ composition contrast, positive xx stresses of 1 and 1e6 Pa at 293 K and fixed pressure both produced density 3300 kg/m³. The clean trajectory also survived permutation to phase, xy, xx, yy with zero numerical differences. |
+| Retry and convergence | Both cases and builds gave zero difference at every clock, label and bulk sample after a rejected 25 ms step retried at 12.5 ms. Bulk tolerance 0.05 exercised the rate veto 20 times on the three-label Release case and 23 on the homogeneous case. A one-iteration cap failed before publication when the bulk criterion passed and rates disagreed. Requests for disk continuation or a checkpoint failed before solving. |
+| Python and MPI | A copied step-1 shear reference perturbed by 0.01 Pa failed in ordinary and optimized Python at the same cell, quadrature point and column. With 16 cells and 144 points, a one-/two-rank match by material vertex and cell/quadrature identity gave maximum differences of 4.49e−16, 3.56e−15 and 2.77e−15 at steps 0, 1 and 2. Each of two ranks owned 72 sample points. |
+
+**Fault-off controls.** The Release `matrix_nonzeros_1` CTest passed. Two original-elasticity CTests completed their solves and failed comparisons with their checked-in regressions. Both local builds, the repair and a fresh archive of unmodified ASPECT 3.1.0 (`0d97d2d33`), agree on the following outputs.
+
+- In `viscoelastic_numerical_elastic_time_step` the complete depth-average files are byte-identical. Both agree with the archive at time zero. At 1,000 years and 10 km depth the reference shear is +0.0967461 Pa and both local binaries give −0.0346938 Pa. The normal stresses agree at ±4.79488e6 Pa. On the pristine source alone, reducing the linear Stokes tolerance from 1e−7 to 1e−12 reduces the maximum absolute shear over the five depths from 0.0618006 to 2.20614e−7 Pa. This isolates the solver-accuracy sensitivity of the near-zero shear. The historical build environment for the checked-in values was not reconstructed.
+- In `visualization_shear_stress_viscoelastic` all 576 numerical rows are identical between local binaries at each of steps 0 and 1. The first checked-in difference at step 1 is the near-zero pressure at (0.5, 0), 6.58453e−14 versus 1.16127e−14. The four shear-stress output columns agree at that point. Both failed diff files and the pristine control outputs are retained under `$D`.
+
+The initial development executable checked the mass-conservation selector before ASPECT resolved its default `ask material model` value and stopped before step zero. The model now accepts either explicit incompressible continuity or the selector resolved from its own incompressible EOS. The rejected run is in `$D/pilot`. The donor comparisons use the corrected executable.
+
+**Cost.** Four owned cells require 108 rotated DG parent coefficients per attempt and 256 owned section quadrature samples per rate solve. The endpoint stages three owned scalar stress blocks. The normal material output allocates the offset only when Stokes requests it. The physical diagnostic allocates three scalar arrays only when a caller requests named outputs. There is no fault checkpoint collection. Ordinary one-rank Release runs with visualization took 53 bulk solves for the homogeneous case and 46 for the three-label case. One process measurement including startup and output gave 1.957 s / 206,296 KiB and 4.543 s / 206,224 KiB respectively during concurrent build activity. These single measurements have different output settings from the historical checkpointed timings.
+
+### Reproduction
+
+The native builds use the existing GNU 12.4.0, deal.II 9.6.2, Open MPI 5.0.6 and ASPECT Release/Debug configurations recorded below. At most four workers total were used and each simulation had one thread per rank. The checkout's `indent_file` from `contrib/utilities/indent` was applied to the changed C++ files with `/opt/astyle/2.04/bin/astyle` and `contrib/utilities/astyle.rc`.
+
+```sh
+D=/tmp/stationary-maintenance.Rai2boDP   # choose a new directory for a replay
+unzip -q "$HOME/Downloads/aspect31-pf-refactor-kit.zip" -d "$D"
+unzip -q "$HOME/Downloads/aspect31-pf-refactor-kit (1).zip" -d "$D/updated"
+# At the original e91e801ba worktree before implementation
+git apply --check "$D/updated/pf-refactor-kit/update-stationary-coupling.patch"
+git apply "$D/updated/pf-refactor-kit/update-stationary-coupling.patch"
+export OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+for mode in release debug; do
+  build=build-slice; config=Release
+  if [ "$mode" = debug ]; then build=build-slice-debug; config=Debug; fi
+  cmake --build "$build" --target aspect -j1
+  cmake -S tests -B "$D/tests-$mode" -DAspect_DIR="$PWD/$build" \
+    -DASPECT_BINARY="$PWD/$build/aspect" -DCMAKE_BUILD_TYPE="$config" \
+    -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+  cmake --build "$D/tests-$mode" --target fixed_fault stationary_fault -j1
+  ctest --test-dir "$D/tests-$mode" -R '^(fixed_fault|stationary_fault)$' --output-on-failure
+  (cd "$build/unit_tests" && ../aspect --test)
+  python3 benchmarks/fixed_fault/check_lifecycle.py "$build/aspect" \
+    "$D/tests-$mode/libfixed_fault.$mode.so" "$D/$mode-finish-fixed"
+  python3 -O benchmarks/fixed_fault/check_lifecycle.py "$build/aspect" \
+    "$D/tests-$mode/libfixed_fault.$mode.so" "$D/$mode-finish-stationary" --case stationary_fault
+done
+build-slice/aspect --validate benchmarks/fixed_fault/fixed_fault.prm
+build-slice/aspect --validate benchmarks/fixed_fault/stationary.prm
+python3 benchmarks/fixed_fault/compare_snapshots.py benchmarks/fixed_fault/stationary-reference "$D/release-finish-stationary/clean/output"
+ctest --test-dir "$D/tests-release" -R '^(matrix_nonzeros_1|viscoelastic_numerical_elastic_time_step)$' --output-on-failure
+ctest --test-dir "$D/tests-release" -R '^visualization_shear_stress_viscoelastic$' --output-on-failure
+```
+
+The rank input files under `$D/one-rank` and `$D/two-ranks` include `tests/stationary_fault.prm`, load the Release probe, set initial global refinement to 2 and use separate output directories. Run `build-slice/aspect "$D/one-rank/input.prm"` and `/opt/openmpi/5.0.6/bin/mpirun -np 2 build-slice/aspect "$D/two-ranks/input.prm"`, then `python3 benchmarks/fixed_fault/compare_snapshots.py "$D/one-rank/output" "$D/two-ranks/output" --points 144`. For the negative Python check, copy the checked-in three files to `$D/perturbed` and add 0.01 to the xy column of the first bulk point in step 1. Run the same comparison in `python3` and `python3 -O` using that reference directory and the clean three-label output.
+
+For the independent fault-off control, the two pristine input files include the original test input by absolute path and set a fresh output directory. The third includes the original numerical test with only the linear Stokes tolerance changed to 1e−12. The raw CTest differences are in `$D/upstream-release.log` and `$D/upstream-viz.log`.
+
+```sh
+mkdir "$D/release-source"
+git archive 0d97d2d33 | tar -xf - -C "$D/release-source"
+cmake -S "$D/release-source" -B "$D/pristine-build" -DCMAKE_BUILD_TYPE=Release \
+  -DDEAL_II_DIR=/opt/dealii/9.6-local -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++ \
+  -DCMAKE_CXX_STANDARD_LIBRARIES=/opt/openmpi/5.0.6/lib/libmpi.so
+cmake --build "$D/pristine-build" --target aspect -j2
+for run in pristine-numerical pristine-viz pristine-tight; do
+  "$D/pristine-build/aspect" "$D/$run/input.prm" > "$D/$run/run.log" 2>&1
+done
+cmp "$D/pristine-numerical/output/depth_average.txt" "$D/tests-release/output-viscoelastic_numerical_elastic_time_step/depth_average.txt"
+for step in 00000 00001; do
+  file=solution/solution-$step.0000.gnuplot
+  diff <(rg -v '^#' "$D/pristine-viz/output/$file") <(rg -v '^#' "$D/tests-release/output-visualization_shear_stress_viscoelastic/$file")
+done
+```
+
+**Next action.** Author architecture review of the stationary stress return, immutable parent and publication points above. Inclined geometry starts in a subsequent assignment.
+
+## Increment 2 · Stationary reconstructed mature fault (historical result)
 
 The target starts at `2a74e2666` on `pf-rsf`, descended from release `0d97d2d33`. The homogeneous regression retains the input, archived donor values and tolerances from `88cd4eee1`. The stationary implementation handles an ordered, straight, axis-parallel Q1 fault spanning a Cartesian box. Every interior knot is at a transverse bulk face. Phase is fixed at a spatial constant strictly between zero and one. The two tests use the left wall and the interior line x = 0.5 m respectively.
 
@@ -86,7 +176,7 @@ For the rank comparison, both inputs include `tests/stationary_fault.prm`, set t
 
 **Resource use.** In the four-cell Release case the target stored 108 physical tensor coefficients in three static DGQ2 solution fields and 15 doubles of label positions and accepted physical state. It stores 108 additional rotated-parent coefficients while evaluating the mechanics. Each Picard iterate samples 256 owned quadrature points. Each section Newton iteration reduces four arrays of length proportional to the number of labels (the off-diagonal has one fewer entry). The endpoint stages three owned stress blocks. Bulk fields stay rank-local apart from ordinary ASPECT ghosts. The donor reported 216 owned tensor coefficients and six additional surface scalars. Single checkpointed runs, including startup and the respective observation plugins, measured 1.943 s and 203,836 KiB peak RSS on the target, 4.023 s and 211,572 KiB on the donor. The target performed 46 bulk Picard solves and the donor performed 13 condensed linear solves. Generation 02 occupied 7,601 bytes on the target and 5,600 bytes on the donor, including 701 and 1,782 bytes respectively in the compressed simulator record. ASPECT also checkpoints previous bulk solution vectors. These are single small-run measurements with different observers.
 
-**Next action.** Author architecture review of the label owner, the Q1 work residual, the returned stress and the acceptance boundary. Increment 3 starts with a new comparison for a varying fixed localization or inclined geometry after that review.
+**Review at this revision.** The stationary comparison qualified the aligned constant-phase case. The resulting architecture repair is the active assignment above.
 
 ## Increment 0 · Baseline and source identity
 

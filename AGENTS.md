@@ -31,7 +31,7 @@ These project instructions apply to the research transplant. Read the [migration
 
 1. Preserve the selected equations, discretization, and accepted history. Compare against a reproducible small case and state what it establishes.
 2. Make the change readable to an ASPECT maintainer. Ownership, public interfaces, comments and consistency with neighboring code are acceptance criteria on every increment.
-3. Measure resource use where the change affects it. Account for candidate copies, MPI replication and checkpoint size.
+3. Measure resource use where the change affects it. Account for candidate copies and MPI replication.
 4. Carry an experimental option only when a paper example or a discriminating test needs it.
 
 The implementation belongs in this worktree. The research donor is `../aspect-pf-rsf-particle-free/`, relative to this root. Treat its source, dirty changes, executables, build trees and checkpoints as evidence. Direct new builds, outputs, patches and replays to separate destinations. Linked worktrees can share Git refs. Preserve the donor and any incoming work. Installed code, regression tests and normal runs must work without that sibling.
@@ -45,9 +45,16 @@ The implementation belongs in this worktree. The research donor is `../aspect-pf
 - Prefer a small public interface with visible data flow. A short top-level call that hides an entire second timestep driver fails review. An optional handler earns its place by owning a coherent resource or operation. Keep experimental selectors, environment hooks and run-specific names out of production interfaces.
 - Preserve the ordinary ASPECT path when the feature is off. Keep fixes to the scientific method distinguishable from code movement and shared API changes. Keep worktree planning material separate from patches prepared for upstream review.
 
+### Phase-field fault architecture
+
+- The fault owns its Maxwell update, stress history, stress contribution to Stokes and physical stress diagnostics. Fault cases run with ASPECT's original elasticity disabled. Use its generic Stokes assembly, material output base interfaces, FE infrastructure and compositional storage where their contracts match. All fault-specific physics remains independent of the original elasticity rheology, its stress conventions and its two output types.
+- Give each public production type a durable physical or numerical responsibility. Match declaration and definition paths under `include/aspect/` and `source/`. At handoff, name its normal caller and the nearest release analogue. Keep global FE/MPI operations and accepted-state publication out of local constitutive evaluation.
+- Trace each reused field or output to its consumer. Check units, stress frame, time level and weak form on an input where a wrong match changes the answer. Resolve coupled convergence before deciding to accept. Review the release-to-worktree diff and answer “Which production class or core edit exists only because of this test specimen?” Give the caller and the physical reason for each disputed edit.
+- Fault verification currently starts from initial conditions in fresh output directories. Retire prototype disk checkpoints and migration code. In-memory retry always rebuilds from the same accepted parent. Preserve the donor as read-only scientific evidence.
+
 ### Working agreement
 
-The midpoint audit is closed and its discrete update is frozen. Start with the first assignment in the plan. Continue through the first working slice when its reference and dependencies permit, then present the actual code for the author's architecture review. Make routine implementation decisions locally. Record a missing scientific reference, ambiguous model choice, or failed comparison against the exact path it affects. Proceed with independent work. Preserve failed evidence and explain a difference before changing a reference value.
+The midpoint audit is closed and its discrete update is frozen. Read the active assignment at the top of the working record. Finish that increment and present the code for the author's architecture review. Make routine implementation decisions locally. Record a missing scientific reference, ambiguous model choice, or failed comparison against the exact path it affects. Proceed with independent work. Preserve failed evidence and explain a difference before changing a reference value.
 
 At handoff, update the working record with the exact commands, results and next action. Show the normal call path, the equation and state owner, and the smallest representative public header and implementation a human should read. Keep the active design in one guide as code lands. Use the project's scoped tests and the checkout’s formatter. Default to four or fewer total local workers on the author's laptop and record the rank/thread layout for comparisons. Publishing changes or submitting cluster jobs requires a separate request.
 
