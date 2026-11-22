@@ -23,8 +23,10 @@ namespace aspect
   {
     public:
       explicit FaultStokesCoupling(MaterialModel::PhaseFieldFault<dim> &material);
-      /** Register the stress load, plane-strain correction and timestep hooks. */
+      /** Register plane-strain Stokes assembly and accepted-state publication. */
       void initialize();
+      /** Couple trial rates and convergence to the fixed-age RSF section solve. */
+      void connect_section_balance();
       /** Rotate, relax and project the accepted physical stress on owned cells. */
       void prepare_parent(double relaxation);
       /** Spatial stress (Pa) added to the implicit plane-strain viscous stress. */
@@ -43,7 +45,9 @@ namespace aspect
                          std::vector<double> &upper, std::vector<double> &scale) const;
       };
 
-      /** Evaluate section quadrature loads in owned-cell order, omitting zero support. */
+      /** Collectively sample the supplied iterate against the current attempt's
+       * relaxed parent. Every simulator rank participates in the closed-fault
+       * check. The returned nonzero-support points are locally owned. */
       std::vector<BulkPoint> sample_bulk(const LinearAlgebra::BlockVector &iterate) const;
     private:
       friend class MaterialModel::PhaseFieldFault<dim>;

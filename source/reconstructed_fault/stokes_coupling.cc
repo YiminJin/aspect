@@ -66,24 +66,32 @@ namespace aspect
       assemblers.stokes_system.push_back(std::make_unique<Assemblers::StokesCompressibleStrainRateViscosityTerm<dim>>());
       assemblers.stokes_system.push_back(std::make_unique<Assemblers::FaultStressLoad<dim>>());
     });
-    using namespace std::placeholders;
-    signals.prepare_stokes_picard_iteration.connect(std::bind(&FaultStokesCoupling::prepare_iteration,this,_1,_2));
-    signals.check_stokes_picard_convergence.connect(std::bind(&FaultStokesCoupling::check_convergence,this,_1,_2));
-    signals.post_accept_timestep.connect(std::bind(&FaultStokesCoupling::accept_step,this,_1));
+    signals.prepare_stokes_picard_iteration.connect([this](const LinearAlgebra::BlockVector &,bool &rebuild)
+    {
+      if (this->get_nonlinear_iteration()==0) rebuild=true; // kappa depends on the attempt duration.
+    });
+    signals.post_accept_timestep.connect(std::bind(&FaultStokesCoupling::accept_step,this,std::placeholders::_1));
   }
 
   template <int dim>
-  void FaultStokesCoupling<dim>::prepare_iteration(const LinearAlgebra::BlockVector &iterate, bool &rebuild)
+  void FaultStokesCoupling<dim>::connect_section_balance()
   {
-    if (this->get_nonlinear_iteration() == 0)
-      rebuild = true; // The Maxwell coefficient depends on this attempt's duration.
-    trial_rates = material.section_rates(iterate);
+    auto &signals = this->get_signals();
+    using namespace std::placeholders;
+    signals.prepare_stokes_picard_iteration.connect(std::bind(&FaultStokesCoupling::prepare_iteration,this,_1,_2));
+    signals.check_stokes_picard_convergence.connect(std::bind(&FaultStokesCoupling::check_convergence,this,_1,_2));
+  }
+
+  template <int dim>
+  void FaultStokesCoupling<dim>::prepare_iteration(const LinearAlgebra::BlockVector &iterate, bool &)
+  {
+    trial_rates = solve_rates(iterate);
   }
 
   template <int dim>
   void FaultStokesCoupling<dim>::check_convergence(const LinearAlgebra::BlockVector &solution, bool &converged)
   {
-    auto rates = material.section_rates(solution);
+    auto rates = solve_rates(solution);
     for (unsigned int j=0; j<rates.size(); ++j)
       if (std::abs(rates[j]-trial_rates[j]) > 1.e-8*std::max(rates[j],trial_rates[j]))
         {
@@ -226,13 +234,29 @@ namespace aspect
         for (const auto &cell : this->get_dof_handler().active_cell_iterators())
           if (cell->is_locally_owned())
             {
-              fe.reinit(cell);
+              const auto cut=material.fault.cut_quadrature(cell->vertex(0),cell->vertex(GeometryInfo<dim>::vertices_per_cell-1));
+              const auto project=[&](FEValues<dim> &values, const FullMatrix<double> &projection)
+              {
+                values.reinit(cell);
+                strain.resize(values.n_quadrature_points);
+                phase.resize(values.n_quadrature_points);
+                physical.resize(values.n_quadrature_points);
+                values[intro.extractors.velocities].get_function_symmetric_gradients(solution,strain);
+                values[intro.extractors.compositional_fields[material.phase_field]].get_function_values(solution,phase);
+                for (unsigned int q=0; q<values.n_quadrature_points; ++q)
+                  physical[q]=material.endpoint_stress(cell,values.quadrature_point(q),phase[q],strain[q]);
+                FETools::compute_projection_from_quadrature_points(projection,physical,coefficients);
+              };
+              if (cut.size())
+                {
+                  FEValues<dim> cut_fe(this->get_mapping(),system,cut,fe.get_update_flags());
+                  FullMatrix<double> cut_projector(coefficients.size(),cut.size());
+                  FETools::compute_projection_from_quadrature_points_matrix(stress_element(),rule,cut,cut_projector);
+                  project(cut_fe,cut_projector);
+                }
+              else
+                project(fe,projector);
               cell->get_dof_indices(indices);
-              fe[intro.extractors.velocities].get_function_symmetric_gradients(solution,strain);
-              fe[intro.extractors.compositional_fields[material.phase_field]].get_function_values(solution,phase);
-              for (unsigned int q=0; q<rule.size(); ++q)
-                physical[q] = material.endpoint_stress(cell,fe.quadrature_point(q),phase[q],strain[q]);
-              FETools::compute_projection_from_quadrature_points(projector,physical,coefficients);
               for (unsigned int q=0; q<coefficients.size(); ++q)
                 {
                   const auto &stress=coefficients[q];

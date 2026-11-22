@@ -5,6 +5,8 @@
 #include <aspect/initial_composition/interface.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/postprocess/interface.h>
+#include <aspect/simulator/assemblers/fault_stress.h>
+#include <aspect/simulator_signals.h>
 #include <fstream>
 #include <iomanip>
 #include <numeric>
@@ -109,14 +111,104 @@ namespace aspect
   namespace MaterialModel
   {
     template <int dim>
-    class PrescribedRidge : public PhaseFieldFault<dim>
+    class ObservedRidge : public PhaseFieldFault<dim>
     {
       public:
         static void declare_parameters(ParameterHandler &) {}
-      protected:
-        std::vector<double> section_rates(const LinearAlgebra::BlockVector &) const override
+        // All ranks in RidgeProbe enter after acceptance and before the next
+        // attempt replaces the relaxed parent. No collective on material reads.
+        auto collect_attempt_samples(const LinearAlgebra::BlockVector &fields) const
         {
-          return std::vector<double>(this->labels().size(),.005);
+          return this->coupling.sample_bulk(fields);
+        }
+    };
+    ASPECT_REGISTER_MATERIAL_MODEL(ObservedRidge,"observed ridge","Unmodified free RSF solve with a collective fixture probe.")
+
+    // Observe the actual Q3 assembly on the cell containing an interior inclined knot. At initialization the prescribed DG parent stress is zero.
+    template <int dim>
+    class MeasuredStressLoad : public Assemblers::FaultStressLoad<dim>
+    {
+      public:
+        void execute(internal::Assembly::Scratch::ScratchBase<dim> &scratch_base,
+                     internal::Assembly::CopyData::CopyDataBase<dim> &data_base) const override
+        {
+          auto &scratch=dynamic_cast<internal::Assembly::Scratch::StokesSystem<dim>&>(scratch_base);
+          auto &data=dynamic_cast<internal::Assembly::CopyData::StokesSystem<dim>&>(data_base);
+          const auto &m=Plugins::get_plugin_as_type<const PhaseFieldFault<dim>>(this->get_material_model());
+          const auto &profile=m.phase_profile();
+          const auto &knot=m.labels()[m.labels().size()/2].position;
+          const auto lo=scratch.cell->vertex(0), hi=scratch.cell->vertex(GeometryInfo<dim>::vertices_per_cell-1);
+          if (this->get_timestep_number()!=0 || std::abs(profile.geometry.segment(0).tangent[0])<1.e-8 ||
+              knot[0]<lo[0] || knot[1]<lo[1] || knot[0]>=hi[0] || knot[1]>=hi[1])
+            {
+              Assemblers::FaultStressLoad<dim>::execute(scratch_base,data_base);
+              return;
+            }
+          const unsigned int n=data.local_dof_indices.size();
+          internal::Assembly::CopyData::StokesSystem<dim> isolated(n,false);
+          Assemblers::FaultStressLoad<dim>::execute(scratch_base,isolated);
+          data.local_rhs+=isolated.local_rhs;
+          const auto &fe=scratch.finite_element_values;
+          const auto &intro=this->introspection();
+          const auto field=intro.compositional_index_for_name("phase_field");
+          std::vector<double> phase(fe.n_quadrature_points);
+          fe[intro.extractors.compositional_fields[field]].get_function_values(this->get_old_solution(),phase);
+          AssertThrow(profile.geometry.cut_quadrature(lo,hi).size()>0,ExcInternalError());
+          AssertThrow(*std::max_element(phase.begin(),phase.end())>*std::min_element(phase.begin(),phase.end()),ExcInternalError());
+          // v=(y+xy,0.4x) belongs to Q2. Apply its nodal coefficients to
+          // the assembled vector and its analytic gradient to the raw FE load.
+          double actual=0.,reference=0.,scale=0.;
+          for (unsigned int i=0; i<n; ++i)
+            {
+              const auto idx=intro.stokes_dof_info[i].local_dof_index;
+              const auto component=this->get_fe().system_to_component_index(idx).first;
+              if (component!=intro.component_indices.velocities[0] && component!=intro.component_indices.velocities[1]) continue;
+              const auto x=this->get_mapping().transform_unit_to_real_cell(scratch.cell,this->get_fe().unit_support_point(idx));
+              actual+=isolated.local_rhs(i)*(component==intro.component_indices.velocities[0] ? x[1]*(1.+x[0]) : .4*x[0]);
+            }
+          for (unsigned int q=0; q<phase.size(); ++q)
+            {
+              const auto x=fe.quadrature_point(q);
+              const auto foot=profile.geometry.project(x);
+              if (!foot.active) continue;
+              const auto &f=profile.geometry.segment(foot.left);
+              const auto &I=profile.normal_integrals();
+              const double chi=profile.weight(phase[q])/foot.interpolate(I[foot.left],I[foot.left+1]);
+              SymmetricTensor<2,dim> strain;
+              strain[0][0]=x[1];
+              strain[0][1]=.5*(1.4+x[0]);
+              const double work=2.*scratch.material_model_outputs.viscosities[q]*.005*chi*fe.JxW(q)*(f.tangent*(strain*f.normal));
+              reference+=work;
+              scale+=std::abs(work);
+            }
+          AssertThrow(scale>0. && std::abs(actual-reference)<512.*std::numeric_limits<double>::epsilon()*scale,
+                      ExcMessage("Localized Q3 Stokes RHS failed the signed slip-work check."));
+          std::ofstream out(this->get_output_directory()+"rhs-action.txt");
+          out<<std::setprecision(17)<<actual<<' '<<reference<<' '<<scale<<'\n';
+        }
+    };
+
+    template <int dim>
+    class PrescribedRidge : public ObservedRidge<dim>
+    {
+      public:
+        static void declare_parameters(ParameterHandler &) {}
+        void initialize() override
+        {
+          // Retain the prescribed initial rate on every label. Only the free
+          // material registers the RSF preparation and convergence callbacks.
+          this->coupling.initialize_simulator(this->get_simulator());
+          this->coupling.initialize();
+          this->get_signals().set_assemblers.connect([](const SimulatorAccess<dim> &, Assemblers::Manager<dim> &assemblers)
+          {
+            for (auto &assembler:assemblers.stokes_system)
+              if (dynamic_cast<Assemblers::FaultStressLoad<dim> *>(assembler.get()))
+                {
+                  assembler=std::make_unique<MeasuredStressLoad<dim>>();
+                  return;
+                }
+            AssertThrow(false,ExcMessage("Missing fault stress assembler in prescribed fixture."));
+          });
         }
     };
     ASPECT_REGISTER_MATERIAL_MODEL(PrescribedRidge,"prescribed ridge diagnostic","Fixed 0.005 m/s diagnostic with the ordinary Maxwell and Stokes operators.")
@@ -126,7 +218,7 @@ namespace aspect
     template <int dim>
     class RidgeProbe : public Interface<dim>, public SimulatorAccess<dim>
     {
-        using Material = MaterialModel::PhaseFieldFault<dim>;
+        using Material = MaterialModel::ObservedRidge<dim>;
         using Stress = SymmetricTensor<2,dim>;
         using PointLoad = typename FaultStokesCoupling<dim>::BulkPoint;
         double initial_age,compression,shear,eta,G,initial_dt;
@@ -175,9 +267,10 @@ namespace aspect
               geometry<<j<<' '<<l.position<<' '<<profile.normal_integrals()[j]<<' '<<l.age<<' '<<l.slip<<' '<<l.rate<<' '<<this->get_time()<<'\n';
             }
           if (parent_age.empty()) parent_age.assign(n,initial_age);
-          const auto points=m.section_points(this->get_solution());
+          const auto points=m.collect_attempt_samples(this->get_solution());
           std::ofstream metrics(prefix+"checks-"+suffix);
           metrics<<std::setprecision(17);
+          metrics<<"imposed_balance "<<(dynamic_cast<const MaterialModel::PrescribedRidge<dim>*>(&m)!=nullptr)<<'\n';
           section_checks(m,points,rates,kappa,metrics);
           // Three interior samples per coordinate determine every DGQ2 history
           // coefficient on its own cell, even where the adjacent DG trace differs.
@@ -278,7 +371,7 @@ namespace aspect
           const auto yy=this->introspection().compositional_index_for_name("fault_stress_yy");
           const auto xy=this->introspection().compositional_index_for_name("fault_stress_xy");
           std::ofstream bulk(path);
-          bulk<<std::setprecision(17)<<"cell q x y phi h chi seg xi rate p xx yy xy exx eyy exy tau compression gradxx gradxy gradyx gradyy\n";
+          bulk<<std::setprecision(17)<<"cell q x y phi h chi seg xi rate p xx yy xy exx eyy exy tau compression gradxx gradxy gradyx gradyy associated\n";
           std::vector<double> balance(rates.size()),forces(rates.size());
           double normal_error=0.,shear_error=0.,moment=0.,moment_scale=0.,total_moment=0.;
           unsigned int count=0,cut_cells=0;
@@ -331,7 +424,7 @@ namespace aspect
                           bulk<<cell->id()<<' '<<q<<' '<<x<<' '<<phi[q]<<' '<<profile.weight(phi[q])<<' '<<s.chi<<' '<<s.foot.left<<' '<<s.foot.xi<<' '<<s.rate(rates)<<' '<<p[q];
                           for (const auto &v:dg) bulk<<' '<<v[q];
                           for (unsigned int c=0; c<3; ++c) bulk<<' '<<stress.access_raw_entry(c);
-                          bulk<<' '<<tau<<' '<<sigma<<' '<<grad[q][0][0]<<' '<<grad[q][0][1]<<' '<<grad[q][1][0]<<' '<<grad[q][1][1]<<'\n';
+                          bulk<<' '<<tau<<' '<<sigma<<' '<<grad[q][0][0]<<' '<<grad[q][0][1]<<' '<<grad[q][1][0]<<' '<<grad[q][1][1]<<' '<<s.foot.active<<'\n';
                         }
                       else if (order==8)
                         {

@@ -33,19 +33,14 @@ namespace aspect
     }
 
     template <int dim>
-    PhaseFieldFault<dim>::PhaseFieldFault() : profile(fault), coupling(*this) {}
-
-    template <int dim>
-    std::vector<double> PhaseFieldFault<dim>::section_rates(const LinearAlgebra::BlockVector &iterate) const
-    {
-      return coupling.solve_rates(iterate);
-    }
+    PhaseFieldFault<dim>::PhaseFieldFault() : coupling(*this), profile(fault) {}
 
     template <int dim>
     void PhaseFieldFault<dim>::initialize()
     {
       coupling.initialize_simulator(this->get_simulator());
       coupling.initialize();
+      coupling.connect_section_balance();
     }
 
     template <int dim>
@@ -140,7 +135,7 @@ namespace aspect
       prm.declare_entry("Fault vertices","",Patterns::List(Patterns::List(Patterns::Double(),2,2),0,
                                                            Patterns::List::max_int_value,";"),"Ordered x,y label positions in metres separated by semicolons. "
                         "The default joins the ends of the left box boundary.");
-      prm.declare_entry("Degradation magnitude","1",Patterns::Double(0.),"Dimensionless m in the mature AT1 degradation law with curvature one.");
+      prm.declare_entry("Degradation magnitude","1",Patterns::Double(0.),"Positive energetic degradation magnitude m for the measured mature AT1 distance profile with curvature one.");
       prm.declare_entry("Fit trace to phase","true",Patterns::Bool(),"Fit the ordered seed to the initialized FE ridge. Constant phase retains the seed.");
       prm.declare_entry("Profile half width","0",Patterns::Double(0.),"Normal association support in metres. Zero uses the full physical cross-section.");
       prm.declare_entry("Shear modulus","1e10",Patterns::Double(0.),"Elastic shear modulus in Pa.");

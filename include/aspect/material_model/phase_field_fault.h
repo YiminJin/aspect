@@ -38,18 +38,9 @@ namespace aspect
         /** Instantaneous physical endpoint before projection into DG history. */
         SymmetricTensor<2,dim> endpoint_stress(const typename DoFHandler<dim>::active_cell_iterator &cell,
                                                const Point<dim> &x, double phase, const SymmetricTensor<2,dim> &strain) const;
-        /** Work-conjugate samples at the supplied velocity and pressure, using
-         * this attempt's immutable Maxwell parent (SI units). */
-        std::vector<typename FaultStokesCoupling<dim>::BulkPoint>
-        section_points(const LinearAlgebra::BlockVector &iterate) const
-        {
-          return coupling.sample_bulk(iterate);
-        }
-
       protected:
-        /** Constitutive closure for the section rates at a given bulk iterate.
-         * The mature material solves the Q1 traction balance against accepted age. */
-        virtual std::vector<double> section_rates(const LinearAlgebra::BlockVector &iterate) const;
+        /** FE operations shared by materials with the same Maxwell response. */
+        FaultStokesCoupling<dim> coupling;
       private:
         friend class aspect::FaultStokesCoupling<dim>;
         using Stress = SymmetricTensor<2,dim>;
@@ -67,7 +58,6 @@ namespace aspect
         bool fit_trace, trace_initialized = false;
         double conductivity, viscosity, modulus, background_shear, background_compression;
         double initial_interval, minimum_speed, kappa;
-        FaultStokesCoupling<dim> coupling;
     };
   }
 }

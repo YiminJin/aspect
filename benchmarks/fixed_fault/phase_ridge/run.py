@@ -90,11 +90,15 @@ subsection Time stepping
   end
 end
 """
+    # A bounded quadratic cell interpolant spreads a compact analytic edge
+    # into its last cut cell. Include that cell in the DG association strip.
+    width = distance[-1] + (0 if args.case == "inclined-q1" else math.sqrt(2)/args.grid)
     prm = dest / "input.prm"
     prm.write_text(f"""include $ASPECT_SOURCE_DIR/benchmarks/fixed_fault/stationary.prm
 set Additional shared libraries = {libraries}
 set Output directory = {dest / 'output'}
 set End time = {end}
+{'set Max nonlinear iterations = 180' if free else ''}
 subsection Geometry model
   subsection Box
     set Box origin X coordinate = -0.5
@@ -127,12 +131,13 @@ subsection Initial composition model
   end
 end
 subsection Material model
-  set Model name = {'phase field fault' if free else 'prescribed ridge diagnostic'}
+  set Model name = {'observed ridge' if free else 'prescribed ridge diagnostic'}
   subsection Phase field fault
     set Fault vertices = {vertices}
     set Fit trace to phase = {'false' if args.case in ('inclined', 'inclined-q1') else 'true'}
+    {'' if free else 'set Reference speed = 0.005'}
     set Degradation magnitude = {20/ell}
-    set Profile half width = {distance[-1]:.17g}
+    set Profile half width = {width:.17g}
   end
 end
 subsection Postprocess
