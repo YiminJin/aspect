@@ -43,6 +43,7 @@ namespace aspect
         StationaryFault<dim> fault;
         std::array<unsigned int,3> stress_fields; // xx, yy, xy by role
         unsigned int phase_field;
+        bool fit_trace, trace_initialized = false;
         double conductivity, viscosity, modulus, background_shear, background_compression;
         double initial_interval, minimum_speed, kappa;
         FaultStokesCoupling<dim> coupling;

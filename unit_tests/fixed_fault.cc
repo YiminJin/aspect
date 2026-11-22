@@ -37,3 +37,17 @@ TEST_CASE("Stationary fault spans decimal box faces")
   labels.front()[1] = .299;
   REQUIRE_THROWS(fault.initialize(origin,extent,labels,10.,.001));
 }
+
+TEST_CASE("Finite normal association on an inclined stationary trace")
+{
+  using dealii::Point;
+  aspect::StationaryFault<2> fault;
+  const double x = .5/std::sqrt(3.);
+  fault.initialize(Point<2>(-.5,-.5),Point<2>(1.,1.), {{-x,-.5},{0.,0.},{x,.5}},1.,1.,.2);
+  const auto &edge = fault.segment(1);
+  CHECK(edge.length+edge.station == Approx(2./std::sqrt(3.)));
+  CHECK(edge.normal[0] == Approx(-std::sqrt(3.)/2.));
+  CHECK(fault.project(Point<2>(.5*x,.25)).xi == Approx(.5));
+  CHECK_FALSE(fault.project(Point<2>(.49,.49)).active);
+  CHECK_FALSE(fault.project(Point<2>(-.4,.3)).active);
+}

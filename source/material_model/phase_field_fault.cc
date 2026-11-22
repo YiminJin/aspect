@@ -47,6 +47,12 @@ namespace aspect
     {
       const double dt = this->get_timestep_number() == 0 ? initial_interval : this->get_timestep();
       kappa = -viscosity*std::expm1(-modulus*dt/viscosity);
+      if (!trace_initialized)
+        {
+          if (fit_trace)
+            fault.fit(*this,phase_field,this->get_old_solution());
+          trace_initialized = true;
+        }
       coupling.prepare_parent(std::exp(-modulus*dt/viscosity));
     }
 
@@ -126,6 +132,8 @@ namespace aspect
       prm.declare_entry("Fault vertices","",Patterns::List(Patterns::List(Patterns::Double(),2,2),0,
                                                            Patterns::List::max_int_value,";"),"Ordered x,y label positions in metres separated by semicolons. "
                         "The default joins the ends of the left box boundary.");
+      prm.declare_entry("Fit trace to phase","true",Patterns::Bool(),"Fit the ordered seed to the initialized FE ridge. Constant phase retains the seed.");
+      prm.declare_entry("Profile half width","0",Patterns::Double(0.),"Normal association support in metres. Zero uses the full physical cross-section.");
       prm.declare_entry("Shear modulus","1e10",Patterns::Double(0.),"Elastic shear modulus in Pa.");
       prm.declare_entry("Initialization interval","1",Patterns::Double(0.),"Maxwell interval in seconds for the initial Stokes solve.");
       prm.declare_entry("Background shear traction","0",Patterns::Double(),"Initial surface shear loading in Pa, positive along the slip sense.");
@@ -201,7 +209,10 @@ namespace aspect
           vertices = {box.get_origin(),box.get_origin()};
           vertices.back()[1] += box.get_extents()[1];
         }
-      fault.initialize(box.get_origin(),box.get_extents(),vertices,age,friction.reference_speed);
+      fit_trace = prm.get_bool("Fit trace to phase");
+      const double support = prm.get_double("Profile half width");
+      fault.initialize(box.get_origin(),box.get_extents(),vertices,age,friction.reference_speed,
+                       support > 0. ? support : std::numeric_limits<double>::max());
       prm.leave_subsection();
       prm.leave_subsection();
       AssertThrow(std::min({viscosity,modulus,initial_interval,friction.direct_effect,minimum_speed,
