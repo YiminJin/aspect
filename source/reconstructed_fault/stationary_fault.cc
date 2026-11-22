@@ -16,11 +16,17 @@ namespace aspect
     const unsigned int axis = std::abs(direction[0]) > std::abs(direction[1]) ? 0 : 1;
     const unsigned int transverse = 1-axis;
     const double length = std::abs(direction[axis]);
+    // A face entered as a decimal may round differently from origin + extent.
+    const auto face_tolerance = [&](const unsigned int d)
+    {
+      return 4.*std::numeric_limits<double>::epsilon() *
+             std::max({std::abs(origin[d]), std::abs(origin[d]+extent[d]), extent[d]});
+    };
     AssertThrow(length > 0. && direction[transverse] == 0. &&
-                std::min(vertices.front()[axis],vertices.back()[axis]) == origin[axis] &&
-                std::max(vertices.front()[axis],vertices.back()[axis]) == origin[axis]+extent[axis] &&
-                vertices.front()[transverse] >= origin[transverse] &&
-                vertices.front()[transverse] <= origin[transverse]+extent[transverse],
+                std::abs(std::min(vertices.front()[axis],vertices.back()[axis])-origin[axis]) <= face_tolerance(axis) &&
+                std::abs(std::max(vertices.front()[axis],vertices.back()[axis])-(origin[axis]+extent[axis])) <= face_tolerance(axis) &&
+                vertices.front()[transverse] >= origin[transverse]-face_tolerance(transverse) &&
+                vertices.front()[transverse] <= origin[transverse]+extent[transverse]+face_tolerance(transverse),
                 ExcMessage("The stationary fault must span the Box parallel to a coordinate axis."));
     tangent = direction/length;
     normal[0] = -tangent[1];

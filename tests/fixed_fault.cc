@@ -44,6 +44,14 @@ namespace aspect
         {
           const auto &labels = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model()).labels();
           const unsigned int step = this->get_timestep_number();
+          if (homogeneous)
+            {
+              AssertThrow(labels.size() == 2,ExcMessage("The homogeneous regression requires its two original endpoints."));
+              AssertThrow(step <= 2 && this->get_time() == step*.0125 && this->get_timestep() == (step == 0 ? 0. : .0125),
+                          ExcMessage("Unexpected homogeneous donor clock at step "+std::to_string(step)
+                                     +" (time "+std::to_string(this->get_time())+", dt "+std::to_string(this->get_timestep())+")."));
+            }
+
           const auto comm = this->get_mpi_communicator();
           const unsigned int rank = Utilities::MPI::this_mpi_process(comm);
           const auto directory = this->get_output_directory();
@@ -53,12 +61,6 @@ namespace aspect
             snapshot << ' ' << label.position << ' ' << label.age << ' ' << label.slip << ' ' << label.rate;
           snapshot << '\n';
 
-          // The archived one-rank solver sampled QGauss(3) in every cell.
-          // For the shortened trajectory the lifecycle checker compares
-          // these same fields against the independent clean continuation.
-          if (homogeneous)
-            AssertThrow(labels.size() == 2,ExcMessage("The homogeneous regression requires its two original endpoints."));
-          const bool reference = homogeneous && (step == 0 || (step <= 2 && this->get_timestep() == .0125 && this->get_time() == step*.0125));
           const double rate[] = {0.17074374817067778,0.16359216623205453,0.16724399270585846};
           const double age[] = {10.,7.7554483265394705,5.9829702628709551};
           const double shear_gradient[] = {-0.14972708428112763,0.098036219175796038,-0.063366308920228251};
@@ -70,7 +72,7 @@ namespace aspect
                         ExcMessage("Fixed-fault donor comparison failed: measured "+std::to_string(actual)
                                    +", expected "+std::to_string(expected)));
           };
-          if (reference)
+          if (homogeneous)
             for (const auto &section : labels)
               {
                 check(section.rate,rate[step]);
@@ -78,6 +80,7 @@ namespace aspect
                 check(section.slip,.0125*((step>=1 ? rate[1] : 0.)+(step>=2 ? rate[2] : 0.)));
               }
 
+          // Use the same QGauss(3) sample locations as the archived one-rank solver.
           const QGauss<dim> rule(3);
           FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_values | update_quadrature_points);
           std::vector<Vector<double>> values(rule.size(),Vector<double>(this->get_fe().n_components()));
@@ -109,7 +112,7 @@ namespace aspect
                       })
                     snapshot << ' ' << v[component];
                     snapshot << '\n';
-                    if (reference)
+                    if (homogeneous)
                       {
                         check(v[intro.velocities[0]],0.);
                         check(v[intro.velocities[1]],shear_gradient[step]*fe.quadrature_point(q)[0]);

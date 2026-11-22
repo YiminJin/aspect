@@ -6,6 +6,7 @@
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/simulator/assemblers/fault_stress.h>
 #include <aspect/geometry_model/box.h>
+#include <aspect/geometry_model/initial_topography_model/zero_topography.h>
 #include <deal.II/physics/transformations.h>
 
 namespace aspect
@@ -144,6 +145,10 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::parse_parameters(ParameterHandler &prm)
     {
+      // Some wrappers parse their base material without forwarding initialize().
+      AssertThrow(&this->get_material_model() == this,
+                  ExcMessage("Phase field fault must be the top-level material model so Stokes and "
+                             "the fault use the same Maxwell coefficient."));
       this->model_dependence.viscosity = NonlinearDependence::none;
       this->model_dependence.density = NonlinearDependence::temperature;
       this->model_dependence.compressibility = NonlinearDependence::none;
@@ -179,6 +184,9 @@ namespace aspect
       minimum_speed = prm.get_double("Minimum speed");
       const double age = prm.get_double("Initial age");
       const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
+      AssertThrow(Plugins::plugin_type_matches<InitialTopographyModel::ZeroTopography<dim>>(this->get_initial_topography_model()),
+                  ExcMessage("The stationary fault requires the zero initial topography model "
+                             "because its normalization uses the rectangular box width."));
       std::vector<Point<dim>> vertices;
       for (const auto &entry : Utilities::split_string_list(prm.get("Fault vertices"),';'))
         {

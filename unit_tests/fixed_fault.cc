@@ -4,6 +4,7 @@
 */
 #include "common.h"
 #include <aspect/material_model/rheology/rate_and_state_friction.h>
+#include <aspect/reconstructed_fault/stationary_fault.h>
 
 TEST_CASE("Mature fault resistance and aging")
 {
@@ -19,4 +20,20 @@ TEST_CASE("Mature fault resistance and aging")
   REQUIRE(law.advance_age(rate,age,.0125) == Approx(7.7554483265394705));
   REQUIRE(law.advance_age(0.,age,.0125) == Approx(age+.0125));
   REQUIRE(law.advance_age(1.e-20,age,.0125) == Approx(age+.0125));
+}
+
+TEST_CASE("Stationary fault spans decimal box faces")
+{
+  using dealii::Point;
+  const Point<2> origin(.1,.1), extent(.2,.2);
+  std::vector<Point<2>> labels = {{.2,.1},{.2,.2},{.2,.3}};
+  aspect::StationaryFault<2> fault;
+  fault.initialize(origin,extent,labels,10.,.001);
+  CHECK(fault.labels().size() == 3);
+  CHECK(fault.project(labels.back()).xi == Approx(1.));
+  std::reverse(labels.begin(),labels.end());
+  fault.initialize(origin,extent,labels,10.,.001);
+  CHECK(fault.project(labels.back()).xi == Approx(1.));
+  labels.front()[1] = .299;
+  REQUIRE_THROWS(fault.initialize(origin,extent,labels,10.,.001));
 }

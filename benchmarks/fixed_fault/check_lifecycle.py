@@ -124,6 +124,43 @@ end
 for step in range(3):
     print("Reordered fields", step, "maximum absolute difference", compare_step(clean, permuted, step))
 
+if args.case == "fixed_fault":
+    # The frozen homogeneous table is indexed by accepted step and time.
+    clock_output, _ = run("wrong_clock", """
+subsection Time stepping
+  subsection Function
+    set Function expression = 0.015
+  end
+end
+""", expected_error="Unexpected homogeneous donor clock at step 1")
+    if (clock_output / "fault-checks").read_text() != "0 36\n":
+        raise RuntimeError("The off-clock endpoint was reported as checked")
+
+    run("scaled_viscosity", """
+subsection Material model
+  set Model name = depth dependent
+  subsection Depth dependent model
+    set Base model = phase field fault
+    set Reference viscosity = 10
+    set Depth dependence method = Function
+    subsection Viscosity depth function
+      set Function expression = 20
+    end
+  end
+end
+""", expected_error="Phase field fault must be the top-level material model")
+
+    # This wrapper parses its base but does not forward initialize().
+    run("averaging_wrapper", """
+subsection Material model
+  set Model name = averaging
+  subsection Averaging
+    set Base model = phase field fault
+    set Averaging operation = arithmetic average
+  end
+end
+""", expected_error="Phase field fault must be the top-level material model")
+
 if args.case == "stationary_fault":
     # Two equivalent clamped-wall problems. Prescribed velocity functions
     # force a fresh matrix even when zero. A zero-velocity boundary lets
@@ -150,3 +187,80 @@ end
                              expected_error="failed to converge")
     if "Coupled Stokes unknowns require another Picard iteration" not in failed_log or (failed / "fault-checks").exists():
         raise RuntimeError("Inconsistent rates at the iteration limit must fail before publication")
+
+    closed = """
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right x:function, top y:function, bottom y:function
+end
+"""
+    for pressure in (0, 0.1):
+        run(f"closed_{pressure}", closed + f"set Surface pressure = {pressure}\n",
+            expected_error="Stationary fault friction requires a pressure datum")
+
+    run("periodic_closed", """
+subsection Geometry model
+  subsection Box
+    set Y periodic = true
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators =
+  set Zero velocity boundary indicators = left
+  set Tangential velocity boundary indicators = right
+end
+subsection Boundary traction model
+  set Prescribed traction boundary indicators =
+end
+""", expected_error="Stationary fault friction requires a pressure datum")
+
+    run("topography", """
+subsection Geometry model
+  subsection Initial topography model
+    set Model name = function
+    subsection Function
+      set Function expression = 0.25
+      set Maximum topography value = 0.25
+    end
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set Fault vertices = 0,0.5; 0.5,0.5; 1,0.5
+  end
+end
+""", expected_error="The stationary fault requires the zero initial topography model")
+
+    # Opposite tensile tractions on the horizontal faces shift the pressure
+    # by -3 Pa at 12.5 ms. Extrapolating to 25 ms opens the trial fault.
+    traction_boundaries = """
+subsection Boundary traction model
+  set Prescribed traction boundary indicators = right y:function, top y:function, bottom y:function
+  subsection Function
+    set Function expression = 0; if(x==1,0.02+t+0.12*(y-0.5),(2*y-1)*({tension}))
+  end
+end
+"""
+    opened, _ = run("open_initial_state", traction_boundaries.format(tension="6"),
+                    expected_error="Stationary fault trial requires finite, positive normal compression")
+    if (opened / "fault-checks").exists():
+        raise RuntimeError("Published an open initial fault")
+    pulse = traction_boundaries.format(tension="3*max(0,1-abs(t/0.0125-1))")
+    recovered, log = run("pulse_cutback", pulse + "set Nonlinear solver failure strategy = cut timestep size\n")
+    if (log.count("Stationary fault trial requires finite, positive normal compression") != 1 or
+            log.count("Repeating the current time step") != 1):
+        raise RuntimeError("Expected one recoverable closed-fault violation")
+    split, _ = run("pulse_clean", pulse + """
+subsection Time stepping
+  subsection Function
+    set Function expression = if(time==0,0.0125,0.00625)
+  end
+end
+""")
+    for output in (recovered, split):
+        if (output / "fault-checks").read_text() != "0 36\n1 36\n2 36\n3 36\n":
+            raise RuntimeError("Unexpected number of accepted pulse endpoints")
+    for step, clock in enumerate((0., .0125, .01875, .025)):
+        time = float((split / f"fault-{step}-0.txt").read_text().split()[0])
+        if not math.isclose(time, clock, rel_tol=1.e-14):
+            raise ValueError(f"Unexpected pulse reference time {time} at step {step}")
+        print("Tensile pulse", step, "maximum absolute difference", compare_step(split, recovered, step))

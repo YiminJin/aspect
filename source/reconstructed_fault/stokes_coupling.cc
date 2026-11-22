@@ -4,6 +4,7 @@
 */
 
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/boundary_velocity/interface.h>
 #include <aspect/simulator/assemblers/fault_stress.h>
 #include <aspect/simulator/assemblers/stokes.h>
 #include <aspect/simulator.h>
@@ -12,6 +13,36 @@
 
 namespace aspect
 {
+  namespace
+  {
+    // A constant pressure changes the weak momentum balance if an exterior
+    // face admits normal test velocity. A prescribed tangential component
+    // still allows this flux. A periodic pair cancels it.
+    template <int dim>
+    bool has_normal_traction_boundary(const SimulatorAccess<dim> &sim)
+    {
+      const auto &geometry = sim.get_geometry_model();
+      const auto &velocity = sim.get_boundary_velocity_manager();
+      auto faces = geometry.get_used_boundary_indicators();
+      for (const auto &pair : geometry.get_periodic_boundary_pairs())
+        {
+          faces.erase(pair.first.first);
+          faces.erase(pair.first.second);
+        }
+      for (const auto face : faces)
+        {
+          // Opposite faces of the supported Cartesian box are 2*d and 2*d+1.
+          const auto normal_component = sim.introspection().component_indices.velocities[face/2];
+          if (!velocity.get_zero_boundary_velocity_indicators().count(face) &&
+              !velocity.get_tangential_boundary_velocity_indicators().count(face) &&
+              (!velocity.get_prescribed_boundary_velocity_indicators().count(face) ||
+               !velocity.get_component_mask(face)[normal_component]))
+            return true;
+        }
+      return false;
+    }
+  }
+
   template <int dim>
   FaultStokesCoupling<dim>::FaultStokesCoupling(MaterialModel::PhaseFieldFault<dim> &material)
     : material(material)
@@ -23,6 +54,9 @@ namespace aspect
     auto &signals = this->get_signals();
     signals.set_assemblers.connect([](const SimulatorAccess<dim> &sim, Assemblers::Manager<dim> &assemblers)
     {
+      AssertThrow(has_normal_traction_boundary(sim),
+                  ExcMessage("Stationary fault friction requires a pressure datum from a nonperiodic box face "
+                             "with unconstrained normal velocity (prescribed or natural normal traction)."));
       // For the 3-D deviator in plane strain the velocity matrix needs
       // -2*kappa/3 div(u) div(v), even with incompressible continuity.
       AssertThrow(sim.get_prescribed_dilation_manager().get_active_plugin_names().empty(),
@@ -137,7 +171,7 @@ namespace aspect
     std::vector<double> pressure(rule.size());
     std::vector<BulkPoint> samples;
     const auto S = symmetrize(material.fault.slip_dyad());
-    double min_compression = std::numeric_limits<double>::max();
+    bool locally_closed = true;
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
         {
@@ -151,14 +185,19 @@ namespace aspect
               for (unsigned int i=0; i<parent.size(); ++i)
                 stress += basis(q,i)*parent[i];
               const double compression = material.background_compression + pressure[q] - material.fault.normal_vector()*(stress*material.fault.normal_vector());
-              min_compression = std::min(min_compression,compression);
+              locally_closed &= std::isfinite(compression) && compression > 0.;
               samples.push_back({material.fault.project(fe.quadrature_point(q)),fe.JxW(q)*material.fault.localization(),
                                  material.background_shear + stress*S,compression
                                 });
             }
         }
-    AssertThrow(Utilities::MPI::min(min_compression,this->get_mpi_communicator()) > 0.,
-                ExcMessage("Mature friction requires a closed fault."));
+    // The extrapolated Picard predictor can open an otherwise closed fault.
+    // All ranks reject this trial before evaluating friction or staging rates.
+    if (!Utilities::MPI::min(static_cast<unsigned int>(locally_closed),this->get_mpi_communicator()))
+      {
+        this->get_pcout() << "Stationary fault trial requires finite, positive normal compression." << std::endl;
+        throw ExcNonlinearSolverNoConvergence();
+      }
     return samples;
   }
 
