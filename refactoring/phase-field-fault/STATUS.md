@@ -1,5 +1,9 @@
 # Phase-field fault working record
 
+## Increment 3A · Stationary phase ridge
+
+[Active assignment](INCREMENT_3A_TASK.md). Base `c27257269`.
+
 ## Stationary review fixes · From `0928a0fa6`
 
 The seven review findings are addressed on `pf-rsf`. Commit `4d579d91d` covers the fault configuration, admissibility, geometry, homogeneous clock and regression cases. Commit `a8222c3e9` covers replay validation. Both donor references and their comparison bounds are frozen. The geometry and phase are still stationary.

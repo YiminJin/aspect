@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**Current assignment on pf-rsf.** Repair the stationary coupling from `e91e801bab` before starting increment 3. The [implementation and review prompts](STATIONARY_COUPLING_TASK.md) and [verification checks](VERIFICATION.md#stationary-coupling-repair) define the work. The midpoint update is frozen.
+**Current assignment on pf-rsf.** [Increment 3A](INCREMENT_3A_TASK.md) reconstructs one stationary mature trace from fixed FE phase and verifies the localized Stokes/RSF transfer. Start from the closed Increment 2 review at `c27257269`. Stop after the inclined free-rate control for architecture review.
 
 ## Baselines and intended examples
 
