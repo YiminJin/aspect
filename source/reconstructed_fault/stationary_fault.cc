@@ -9,7 +9,7 @@ namespace aspect
   template <int dim>
   void StationaryFault<dim>::initialize(const Point<dim> &origin, const Point<dim> &extent,
                                         const std::vector<Point<dim>> &vertices,
-                                        const double age, const double rate, const double slip)
+                                        const double age, const double rate)
   {
     AssertThrow(dim == 2 && vertices.size() >= 2, ExcMessage("A stationary fault requires at least two ordered vertices in 2-D."));
     const auto direction = vertices.back()-vertices.front();
@@ -35,7 +35,7 @@ namespace aspect
         AssertThrow(vertex[transverse] == vertices.front()[transverse] &&
                     (arclength.empty() || s > arclength.back()),
                     ExcMessage("Stationary fault labels must be straight and strictly ordered."));
-        accepted.push_back({vertex,age,slip,rate});
+        accepted.push_back({vertex,age,0.,rate});
         arclength.push_back(s);
       }
   }
@@ -84,81 +84,6 @@ namespace aspect
   }
 
   template <int dim>
-  std::vector<double> StationaryFault<dim>::solve_rates(const std::vector<BulkPoint> &points,
-                                                        const MaterialModel::Rheology::RateAndStateFriction &law,
-                                                        const double kappa, const double minimum_speed,
-                                                        const MPI_Comm comm) const
-  {
-    const unsigned int n = accepted.size();
-    std::vector<double> rates(n);
-    for (unsigned int j=0; j<n; ++j)
-      rates[j] = accepted[j].rate;
-
-    // The derivative of the localized shear stress with respect to V is
-    // -2 kappa (h/I) S:S = -kappa h/I for S=sym(t x n).
-    const double stiffness = kappa*localization();
-    for (unsigned int iteration=0; iteration<100; ++iteration)
-      {
-        std::vector<double> rhs(n), diagonal(n), upper(n-1), scale(n);
-        for (const auto &point : points)
-          {
-            const unsigned int j = point.foot.left;
-            const double N[2] = {1.-point.foot.xi,point.foot.xi};
-            const double speed = point.foot.interpolate(rates[j],rates[j+1]);
-            const double age = point.foot.interpolate(accepted[j].age,accepted[j+1].age);
-            const auto resistance = law.resistance(speed,age,point.compression);
-            const double residual = point.driving_shear - stiffness*speed - resistance.traction;
-            const double derivative = stiffness + resistance.speed_derivative;
-            for (unsigned int i=0; i<2; ++i)
-              {
-                const double test = point.weight*N[i];
-                rhs[j+i] += test*residual;
-                diagonal[j+i] += test*N[i]*derivative;
-                scale[j+i] += test*std::max(std::abs(point.driving_shear),std::abs(resistance.traction));
-              }
-            upper[j] += point.weight*N[0]*N[1]*derivative;
-          }
-
-        for (auto *row :
-             {
-               &rhs,&diagonal,&upper,&scale
-             })
-          Utilities::MPI::sum(*row,comm,*row);
-        double residual = 0.;
-        for (unsigned int j=0; j<n; ++j)
-          {
-            AssertThrow(scale[j] > 0.,ExcMessage("A stationary fault label has no resolved bulk support."));
-            residual = std::max(residual,std::abs(rhs[j])/scale[j]);
-          }
-        if (residual <= 64.*std::numeric_limits<double>::epsilon())
-          return rates;
-
-        // Eliminate the symmetric positive tridiagonal Q1 tangent in place.
-        for (unsigned int j=1; j<n; ++j)
-          {
-            AssertThrow(diagonal[j-1] > 0.,ExcMessage("Singular stationary fault tangent."));
-            const double multiplier = upper[j-1]/diagonal[j-1];
-            diagonal[j] -= multiplier*upper[j-1];
-            rhs[j] -= multiplier*rhs[j-1];
-          }
-        AssertThrow(diagonal.back() > 0.,ExcMessage("Singular stationary fault tangent."));
-        rhs.back() /= diagonal.back();
-        for (unsigned int j=n-1; j>0; --j)
-          rhs[j-1] = (rhs[j-1]-upper[j-1]*rhs[j])/diagonal[j-1];
-
-        double fraction = 1.;
-        for (unsigned int j=0; j<n; ++j)
-          if (rates[j]+rhs[j] < minimum_speed)
-            fraction = std::min(fraction,.9*(rates[j]-minimum_speed)/(-rhs[j]));
-        AssertThrow(fraction > 0.,ExcMessage("No admissible positive sliding solution on the stationary fault."));
-        for (unsigned int j=0; j<n; ++j)
-          rates[j] += fraction*rhs[j];
-      }
-    AssertThrow(false,ExcMessage("Stationary fault Q1 balance did not converge."));
-    return rates;
-  }
-
-  template <int dim>
   void StationaryFault<dim>::accept(const std::vector<double> &rates, const double dt,
                                     const MaterialModel::Rheology::RateAndStateFriction &law)
   {
@@ -175,32 +100,6 @@ namespace aspect
   const std::vector<typename StationaryFault<dim>::Label> &StationaryFault<dim>::labels() const
   {
     return accepted;
-  }
-
-  template <int dim>
-  void StationaryFault<dim>::save(oarchive &archive) const
-  {
-    archive << accepted.size() << width;
-    for (const auto &label : accepted)
-      archive << label.position << label.age << label.slip << label.rate;
-  }
-
-  template <int dim>
-  void StationaryFault<dim>::load(iarchive &archive)
-  {
-    std::size_t n;
-    double saved_width;
-    archive >> n >> saved_width;
-    AssertThrow(n == accepted.size() && saved_width == width,ExcMessage("Incompatible stationary fault geometry."));
-    auto restored = accepted;
-    for (auto &label : restored)
-      {
-        Point<dim> position;
-        archive >> position >> label.age >> label.slip >> label.rate;
-        AssertThrow(position == label.position && label.age > 0. && label.rate > 0. && std::isfinite(label.slip),
-                    ExcMessage("Incompatible stationary fault label in checkpoint."));
-      }
-    accepted.swap(restored);
   }
 
 #define INSTANTIATE(dim) template class StationaryFault<dim>;

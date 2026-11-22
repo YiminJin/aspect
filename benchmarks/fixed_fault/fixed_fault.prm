@@ -9,7 +9,7 @@ set Max nonlinear iterations = 80
 set Pressure normalization = no
 set Output directory = output-fixed_fault
 subsection Formulation
-  set Enable elasticity = true
+  set Enable elasticity = false
 end
 subsection Geometry model
   set Model name = box
@@ -49,7 +49,7 @@ subsection Discretization
 end
 subsection Compositional fields
   set Number of fields = 4
-  set Names of fields = ve_stress_xx, ve_stress_yy, ve_stress_xy, phase_field
+  set Names of fields = fault_stress_xx, fault_stress_yy, fault_stress_xy, phase_field
   set Types of fields = stress, stress, stress, generic
   set Compositional field methods = static
 end
@@ -69,11 +69,11 @@ subsection Temperature field
   set Temperature method = static
 end
 subsection Material model
-  set Model name = fixed fault
+  set Model name = phase field fault
   subsection Simple model
     set Viscosity = 10
   end
-  subsection Fixed fault
+  subsection Phase field fault
     set Shear modulus = 10
     set Initialization interval = 0.1
     set Background compression = 5
@@ -94,5 +94,11 @@ subsection Solver parameters
   end
 end
 subsection Postprocess
-  set List of postprocessors = fixed fault statistics, velocity statistics
+  # fault_tau_xx, fault_tau_yy and fault_tau_xy report the accepted spatial
+  # deviatoric stress in Pa from the fault model.
+  set List of postprocessors = fixed fault statistics, velocity statistics, visualization
+  subsection Visualization
+    set List of output variables = named additional outputs
+    set Time between graphical output = 0
+  end
 end

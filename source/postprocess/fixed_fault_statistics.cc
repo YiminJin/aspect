@@ -3,7 +3,7 @@
   License version 2 or later. See the file LICENSE for details.
 */
 
-#include <aspect/material_model/fixed_fault.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/postprocess/interface.h>
 #include <fstream>
 #include <iomanip>
@@ -19,7 +19,7 @@ namespace aspect
       public:
         std::pair<std::string,std::string> execute(TableHandler &statistics) override
         {
-          const auto &model = Plugins::get_plugin_as_type<const MaterialModel::FixedFault<dim>>(this->get_material_model());
+          const auto &model = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
           const auto &labels = model.labels();
           const double length = labels.front().position.distance(labels.back().position);
           double age = 0., slip = 0., rate = 0.;

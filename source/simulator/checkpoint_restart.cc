@@ -399,12 +399,6 @@ namespace aspect
         aspect::oarchive oa (oss);
         save_critical_parameters (this->parameters, oa);
         oa << (*this);
-        // A single material plugin has no ManagerBase to archive its state.
-        // Keep the release checkpoint layout for stateless materials.
-        std::map<std::string,std::string> material_state;
-        material_model->save(material_state);
-        if (!material_state.empty())
-          oa << std::string(typeid(*material_model).name()) << material_state;
       }
 
       // compress with zlib and write to file on the root processor
@@ -652,16 +646,6 @@ namespace aspect
           aspect::iarchive ia (ss);
           load_and_check_critical_parameters(this->parameters, ia);
           ia >> (*this);
-          std::map<std::string,std::string> material_state;
-          if (ss.peek() != std::char_traits<char>::eof())
-            {
-              std::string material_type;
-              ia >> material_type;
-              AssertThrow(material_type == typeid(*material_model).name(),
-                          ExcMessage("Checkpoint contains state for a different material model."));
-              ia >> material_state;
-            }
-          material_model->load(material_state);
         }
 #else
         AssertThrow (false,

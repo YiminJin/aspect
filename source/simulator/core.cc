@@ -20,7 +20,6 @@
 
 
 #include <aspect/simulator.h>
-#include <aspect/material_model/fixed_fault.h>
 #include <aspect/global.h>
 #include <aspect/linear_algebra_types.h>
 #include <aspect/utilities.h>
@@ -2319,8 +2318,7 @@ namespace aspect
         const double new_time_step_size = time_stepping_manager.get_next_time_step_size();
 
         if (!time_stepping_manager.should_repeat_time_step())
-          if (auto *fault = dynamic_cast<MaterialModel::FixedFault<dim> *>(material_model.get()))
-            fault->accept_step(solution);
+          signals.post_accept_timestep(solution);
 
         // if we postprocess nonlinear iterations, this function is called within
         // solve_timestep () in the individual solver schemes

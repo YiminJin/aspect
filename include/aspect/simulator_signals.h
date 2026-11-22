@@ -312,6 +312,20 @@ namespace aspect
      */
     boost::signals2::signal<void (const SimulatorAccess<dim> &)> pre_nonlinear_solver;
 
+    /** Before assembly in the iterated Stokes-only scheme, prepare any
+     * coupled unknowns from the current Picard iterate. A slot may request
+     * that the velocity matrix and preconditioner be rebuilt. */
+    boost::signals2::signal<void (const LinearAlgebra::BlockVector &, bool &)> prepare_stokes_picard_iteration;
+
+    /** When bulk Picard convergence is reached, check and stage the coupled
+     * endpoint. Slots may set the second argument to false to request another
+     * iteration. The usual nonlinear iteration limit and failure policy apply. */
+    boost::signals2::signal<void (const LinearAlgebra::BlockVector &, bool &)> check_stokes_picard_convergence;
+
+    /** Publish staged physical history into the accepted solution after the
+     * repeat decision and before postprocessing or advancing solution history. */
+    boost::signals2::signal<void (LinearAlgebra::BlockVector &)> post_accept_timestep;
+
     /**
      * A signal that is triggered at the end of the set_assemblers() function that
      * allows modification of the assembly objects active in this simulation.

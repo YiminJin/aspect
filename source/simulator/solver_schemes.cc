@@ -20,7 +20,6 @@
 
 
 #include <aspect/simulator.h>
-#include <aspect/material_model/fixed_fault.h>
 #include <aspect/global.h>
 #include <aspect/mesh_deformation/free_surface.h>
 #include <aspect/volume_of_fluid/handler.h>
@@ -482,13 +481,6 @@ namespace aspect
           }
       }
 
-    if (auto *fault = dynamic_cast<MaterialModel::FixedFault<dim> *>(material_model.get()))
-      {
-        if (nonlinear_iteration == 0)
-          rebuild_stokes_matrix = rebuild_stokes_preconditioner = true; // Maxwell viscosity uses the attempt duration.
-        fault->prepare_stokes(current_linearization_point);
-      }
-
     // Re-compute the pressure scaling factor for the Stokes assembly
     pressure_scaling = compute_pressure_scaling_factor();
     assemble_stokes_system ();
@@ -847,8 +839,13 @@ namespace aspect
 
     double relative_residual = std::numeric_limits<double>::max();
     nonlinear_iteration = 0;
-    do
+    while (true)
       {
+        bool rebuild = false;
+        signals.prepare_stokes_picard_iteration(current_linearization_point, rebuild);
+        if (rebuild)
+          rebuild_stokes_matrix = rebuild_stokes_preconditioner = true;
+
         relative_residual =
           assemble_and_solve_stokes(initial_stokes_residual,
                                     nonlinear_iteration == 0 ? &initial_stokes_residual : nullptr);
@@ -861,11 +858,18 @@ namespace aspect
         if (parameters.run_postprocessors_on_nonlinear_iterations)
           postprocess ();
 
-        ++nonlinear_iteration;
+        const auto state = nonlinear_solver_control.check(++nonlinear_iteration, relative_residual);
+        AssertThrow(state != SolverControl::failure, ExcNonlinearSolverNoConvergence());
+        if (state == SolverControl::success)
+          {
+            bool converged = true;
+            signals.check_stokes_picard_convergence(solution, converged);
+            if (converged)
+              break;
+            pcout << "      Coupled Stokes unknowns require another Picard iteration." << std::endl;
+            AssertThrow(nonlinear_iteration < max_nonlinear_iterations, ExcNonlinearSolverNoConvergence());
+          }
       }
-    while (nonlinear_solver_control.check(nonlinear_iteration, relative_residual) == SolverControl::iterate);
-
-    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
     signals.post_nonlinear_solver(nonlinear_solver_control);
   }
 

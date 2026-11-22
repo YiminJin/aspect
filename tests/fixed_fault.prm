@@ -1,5 +1,8 @@
 include $ASPECT_SOURCE_DIR/benchmarks/fixed_fault/fixed_fault.prm
 
 subsection Postprocess
-  set List of postprocessors = fixed fault probe
+  set List of postprocessors = fixed fault probe, visualization
+  subsection Visualization
+    set Output format = gnuplot
+  end
 end

@@ -35,17 +35,9 @@ namespace aspect
         double interpolate(double a, double b) const;
       };
 
-      /** One owned bulk quadrature point in the section balance. The weight
-       * is (h/I) JxW. Driving shear excludes the current slip increment. */
-      struct BulkPoint
-      {
-        Projection foot;
-        double weight, driving_shear, compression;
-      };
-
       /** Set the prescribed geometry and uniform initial state in physical units. */
       void initialize(const Point<dim> &origin, const Point<dim> &extent,
-                      const std::vector<Point<dim>> &vertices, double age, double rate, double slip = 0.);
+                      const std::vector<Point<dim>> &vertices, double age, double rate);
       /** True if a cell spans only one Q1 segment in the tangential direction. */
       bool resolves_segments(const Point<dim> &lower, const Point<dim> &upper) const;
       /** Find the two neighboring material labels and the local Q1 coordinate. */
@@ -58,19 +50,11 @@ namespace aspect
       /** Unit left normal to the oriented label sequence. */
       const Tensor<1,dim> &normal_vector() const;
 
-      /** Solve the consistent Q1 weak balance at a fixed Stokes iterate.
-       * Only the tridiagonal rows are summed across MPI ranks. */
-      std::vector<double> solve_rates(const std::vector<BulkPoint> &points,
-                                      const MaterialModel::Rheology::RateAndStateFriction &law,
-                                      double kappa, double minimum_speed, MPI_Comm comm) const;
-
       /** Publish one endpoint per label using the same accepted age that
        * entered the Q1 friction law throughout this attempt. */
       void accept(const std::vector<double> &rates, double dt,
                   const MaterialModel::Rheology::RateAndStateFriction &law);
       const std::vector<Label> &labels() const;
-      void save(oarchive &archive) const;
-      void load(iarchive &archive);
 
     private:
       std::vector<Label> accepted;
