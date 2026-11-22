@@ -2,7 +2,200 @@
 
 ## Increment 3A · Stationary phase ridge
 
-[Active assignment](INCREMENT_3A_TASK.md). Base `c27257269`.
+[Active assignment](INCREMENT_3A_TASK.md). **Stopped for architecture review.** Base `c27257269`, geometry `e4806f56f`, localized transfer `9e0e2d793`, admissibility and shared-vertex fixes `37269ee45`, fixtures and accepted data `dcfc854a5`. The ordinary Stokes/RSF path solved all 38 rates on the fitted trace. **The inclined fit reproduces the interior ridge more accurately than the boundary contacts. The fitted trace is 1.25372 m long against the 1.15470 m straight reference.** This comparison remains open.
+
+### Geometry and the first discrepancy
+
+The fixed 60° control has length 1.154700538379252 m, tangent (0.5, √3/2) and maximum label error normal to the line 2.78e−17 m on both grids. The displaced seeds translate by 0.015625 m in x. The initial normal error is 0.015625 m for the vertical line and 0.01353165 m for the incline. Post-fit errors below are absolute distances from the known line. Core means |y| ≤ 0.25 m. Interior includes every label except the two contacts.
+
+| Displaced seed | Grid | Maximum core / interior error (m) | Bottom / top contact error (m) | Fitted length (m) |
+|---|---:|---:|---:|---:|
+| Vertical ridge at x = 0.07 | 32² | 8.00e−6 / 8.00e−6 | 8.00e−6 / 8.00e−6 | 1 |
+| Vertical ridge at x = 0.07 | 64² | 5.78e−6 / 5.78e−6 | 5.78e−6 / 5.78e−6 | 1 |
+| Inclined ridge | 32² | 0.002684 / 0.042562 | 0.066618 / 0.067879 | 1.253589 |
+| Inclined ridge | 64² | 0.002684 / 0.042547 | 0.066591 / 0.067854 | 1.253546 |
+
+The exact centered seed in the free run provides the clearest diagnosis. Before regularization, an independent sum of the donor fit's Q3 weights gives a mean signed normal offset of **+0.084377 m at seed label 0** and −0.0000175 m at label 19. The box clips the normal profile near its lower face. Even the exact line therefore has a nonzero right-hand side in the weighted least-squares fit. Reintersecting the fitted end segments with the original horizontal faces preserves y = ±0.5 m. The resulting x coordinates are ±0.366402 m, versus ±0.288675 m for the reference. The cropped-end bias persists under bulk refinement and precedes normalization, friction and the Stokes solve. The pinned donor's inclined control explicitly disables fitting. Retain this result for the author's decision on the contact fit.
+
+### One accepted step in source order
+
+1. `Simulator::start_timestep → PhaseFieldFault::update` reads the static DGQ2 `phase_field` from the accepted FE solution. On first entry `StationaryFault::fit` assembles the donor normal-offset fit with cell weights JxW max(φ−0.1,0), Q1 hats, and the unit second-difference penalty. Constant phase retains the seed. Permanent ID is the index in the ordered label vector. A single owner holds position, age (s), cumulative slip (m) and rate (m/s). One segment supplies both consumers with arclength, tangent, normal and projection. The two production consumers are `FaultPhaseProfile` for normal integrals and transfer, and `FaultStokesCoupling` for traction in the local frame and accepted history.
+2. `FaultPhaseProfile::initialize` evaluates the owning cell's DG shape functions on physical box-clipped normals. It integrates h = mφ(1+φ)/(1−φ)² with 12 points per cell interval, then consistently projects three Gauss station values per segment onto the Q1 labels. The finite-segment normal foot and profile half width determine mechanical admission. The legacy donor uses stationary-profile support and both available physical ray lengths. At a contact it integrates the in-box portion and supplies no exterior extension. Zero-weight samples carry zero slip. Active samples require a finite positive interpolated integral. A ray coincident with a cell face takes the higher-coordinate DG trace, except at the upper box boundary.
+3. `prepare_parent` evaluates and projects the rotated/relaxed accepted stress with spin from the accepted velocity gradient minus the accepted slip gradient. At each Picard preparation, `sample_bulk → BulkPoint::add_balance → solve_rates` computes the Q1 rows and the tridiagonal fixed-age tangent. In each row one χ = h/I enters the integration weight and a second χ enters κχV in the local traction. The material returns −2κ sym(χ V t⊗n) plus the relaxed parent to the fault-owned weak stress load. Generic ASPECT assembles velocity and pressure. The constitutive rate closure is virtual so the diagnostic material can supply 0.005 m/s in the same Stokes assembly. The production material always solves the RSF balance. 3A adds no Simulator hook.
+4. The coupled convergence veto checks the updated bulk iterate. After the repeat decision, `post_accept_timestep → accept_step` evaluates the full physical stress at 8×8 points, L²-projects it into the three owned DGQ2 blocks, and calls `StationaryFault::accept`. The xy block receives the xy component of the projected tensor. The label update uses Δs = VΔt and exact constant-rate aging. Initialization commits rate at zero physical duration. One fully solved 25 ms attempt was discarded and repeated at 12.5 ms. Every exported label and bulk value matched the clean free trajectory exactly at all three accepted clocks.
+
+Representative interface, geometry, normal integral, bidirectional transfer and commit, in the refactor worktree:
+
+```text
+include/aspect/reconstructed_fault/stationary_fault.h
+include/aspect/reconstructed_fault/phase_profile.h
+source/material_model/phase_field_fault.cc
+source/reconstructed_fault/stationary_fault.cc
+source/reconstructed_fault/phase_profile.cc
+source/reconstructed_fault/stokes_coupling.cc
+source/simulator/assemblers/fault_stress.cc
+```
+
+### Independent bulk and section checks
+
+The fixture initializes the donor's tabulated AT1 distance profile at peak 0.6. The first direct nodal DGQ2 interpolant on 32² cells reached −1.99e−4 on the incline and −2.51e−4 after vertical translation. Both exceed the donor's empirical −1e−4 undershoot bound. The final initializer converts the local quadratic nodal values to Bernstein controls and bounds those controls to [0,0.6] before writing ASPECT's DGQ2 support values. Only the initializer knows the analytic ridge. Production checks sampled phase collectively and diagnoses an inadmissible negative field. Prior unbounded runs remain under the evidence root. Exported DG phase was identical at all physical times and across retry.
+
+| 64² central transect | Peak returned engineering slip shear rate (s⁻¹) | Physical integral (m/s) | Independent integral (m/s) |
+|---|---:|---:|---:|
+| Vertical, ℓ = 0.15625 m | 0.03534196 | 0.004999998685 | 0.004999998947 |
+| Vertical, ℓ = 0.078125 m | 0.07068562 | 0.004999998927 | 0.004999998599 |
+| Translated, ℓ = 0.15625 m | 0.03509342 | 0.004999996474 | 0.004999996171 |
+
+The independent checker reconstructs each cell polynomial from nine interior FE samples, splits every ray at all Cartesian faces, and uses 32-point Gauss integration with a separate dense Q1 mass solve. Across the controls the maximum nodal I difference is 2.14e−13 m at scales up to about 109 m. At 64² on the fixed incline the central raw ray integral and its interpolated Q1 value are 108.65228 and 108.62350 m. At the first, boundary-truncated Gauss station they are 58.83819 and 59.63594 m. These differences measure the station projection. The direct transect uses 24 points per cell and can straddle the compact support edge. Its tolerance is the independent edge-panel weight bound plus 1e−13 m/s. The plot uses the actual upper DG trace on y = 0.
+
+For the fixed incline at 64² the two common-Q8 work contractions differ by 1.25e−16 on a scale of 0.008740. They use a nonconstant Q1 label vector, a nonconstant virtual traction, the actual section scatter and the returned bulk slip gradient. The work bound is 256 machine epsilons times its magnitude. Sampling that bulk work with the ordinary Q3 Stokes rule gives Q3−Q8 differences of −7.73e−6 and −1.43e−6 on 32² and 64². The assembled positive section tangent differs from a centered residual difference by 6.91e−7 on a scale of 97.87 at 64². The fixed-parent directional probe uses a 1e−5 perturbation and a relative bound of 2e−8, allowing cancellation in the two assembled residuals.
+
+The moment probe integrates the three accepted DG components minus the raw endpoint stress against all nine cell monomials using a separate 16×16 rule. On the straight prescribed incline the largest absolute moment on knot-crossed cells drops from 0.006577 Pa m² (scale 3.922, 496 cells) to 0.00002253 Pa m² (scale 0.8520, 1,288 cells). On the displaced fitted incline the maximum drops from 0.2018 to 0.05724 Pa m², while the maximum cell-area times stress scale drops from 6.440 to 1.468 Pa m². The worst scaled discrepancy therefore remains about 4% at 64². A second observer build used a 32×32 moment rule with the same production Q8 update. It measured 0.006283 and 0.00002193 Pa m² on the straight incline, and 0.2769 and 0.06249 Pa m² on the fitted incline. The fine fitted value is 4.25% of its 1.4714 Pa m² stress scale. This second rule confirms the local discrepancy and the decrease in absolute moment with refinement. Neither quadrature comparison bounds the pointwise stress error on a discontinuous segment boundary.
+
+### Donor comparison
+
+The pinned `abbc9b0c0` builds. Its supplied inclined input aborts during parsing because the four particle compositions omit the now-required DG Bernstein phase field. Adding that field in a separate diagnostic run reaches the explicit rejection of retired particle/CPDI mechanics. The original parameter file SHA-256 is `65da7510a975238d6990445542a8a580065a0279b522df58b4c8fcb499c65f53`, identical to the archived successful input. The archive identifies a historical executable with working changes, reporting `33228369d`. A separately built compatible revision `82e43c2669b92ac92a1c62d47f5dd79ac3b29c06` reproduced the four 0.1 s steps. Across all 36,864 bulk points and five clocks, coordinates and weights matched exactly, maximum velocity difference was 2.26e−17 m/s and maximum physical stress difference was 1.59e−10 Pa. `CleanStressCycle::initialize` prescribes all 38 rates in its temperature `post_advection_solver` callback. Its phase constraints initialize the continuous Q1 profile at support points.
+
+The target prescribed incline matches the box, grid, 38 vertices, support, analytic profile, clock, rate, modulus, viscosity and corresponding prescribed velocity components. It opens the bottom normal component to establish a traction datum and adds 50,000 Pa compression in the fixture. The archived donor prescribes every velocity, normalizes mechanical pressure to volume mean zero, and uses 1,000 Pa adiabatic pressure for strength. The comparison below holds the donor's actual velocity gradient, incoming tensor and mechanical pressure fixed and substitutes the measured target source at matched cell IDs and Q3 indices. The two independently solved pressure fields have different boundary data.
+
+* With the new bounded quadratic phase, the maximum / RMS χ differences on the 23,984 donor-associated points are 0.08934 / 0.01051 m⁻¹ on a peak of 13.3048 m⁻¹. The maximum corresponding shear difference is 44.67 Pa at κ ≈ 100,000 Pa s. On the same historical Q1 phase embedded in DGQ2, these become 5.88e−6 / 5.58e−7 m⁻¹ and 0.00294 Pa. A second donor replay changing only remote-point integration to its cell-interval backend gives the same 5.88e−6 m⁻¹ spread. Against that backend the matched Q1 target differs by just 2.38e−13 m⁻¹. Both the original and matched-backend differences are retained.
+* The historical `MomentCycle` diagnostic passes the full symmetric strain directly to its Maxwell stress calculator. The target retains the increment-2 plane-strain deviator. At identical donor gradients this explains a maximum normal-traction difference of 362.498 Pa, equal pointwise to 2κ div(u)/3. Accounting for that term leaves at most 4.61e−11 Pa. The shear contraction has no trace term. The common-input normal and shear identities use a 1e−8 Pa absolute bound. The pinned input supplies no matched free-RSF trajectory.
+
+### Accepted free-RSF states
+
+The applied right-face traction is 0.02 + t + 0.12y Pa in the centered box. Every accepted label, coordinate and normalization is in the CSV below. At 25 ms labels 0, 19 and 37 have rates 0.0744834, 0.0814777 and 0.0716577 m/s. The columns below give the range over all 38 labels and measured values at one actual section Q8 point, x = y = 0.000620470992226 m. DG stress carries the accepted projection. Friction uses the pointwise tensor prior to that projection with σ = 5 + p − n·Tn and τ = 3.71061058025 + t·Tn in Pa.
+
+| Time (ms) | V (m/s) | Age (s) | Slip (m) | DG xx, yy, xy (Pa) | p / σ / τ (Pa) | Independent scaled section residual |
+|---:|---|---|---|---|---|---:|
+| 0 | 0.03277–0.12319 | 11.68294 | 0 | 0, 0, 0 | −0.085007 / 4.910587 / 3.582045 | 1.31e−16 |
+| 12.5 | 0.07953–0.10042 | 9.99799–10.32952 | 0.00099410–0.00125523 | 0.024872, −0.025205, 0.038711 | −0.023337 / 4.997602 / 3.669536 | 8.00e−17 |
+| 25 | 0.07166–0.10479 | 8.49954–9.24719 | 0.00188982–0.00256506 | 0.039591, −0.040232, 0.056899 | −0.033363 / 4.995913 / 3.647508 | 4.36e−16 |
+
+A paired run removed only the time-dependent right-face traction term. All initialization rates matched exactly. At label 26, restoring the ramp changed the 12.5 ms rate from 0.0927200 to 0.0869955 m/s and the 25 ms rate from 0.0937409 to 0.0823767 m/s. This isolates a loading response with identical initial geometry, phase and history.
+
+Both ranks contributed 20,850 active Q8 points and exported 4,608 Q3 points each per endpoint. Across all clocks the largest one-/two-rank differences were 3.74e−15 m/s in label rate, 1.25e−14 s in age, 9.76e−18 m in slip, and 6.44e−15 Pa in accepted DG components. Label IDs, cell IDs, sample indices and phase matched. At every active free Q8 point, independent normal and shear contractions agreed with the section loads to 1.78e−15 Pa. Per-label age and slip use independent time-update checks with absolute bounds 2e−13 s and 2e−16 m. The independent section residual bound is 128 machine epsilons.
+
+The instrumented 32² one-rank free run used 226,764 KiB peak RSS and 20.450 s elapsed including startup and diagnostic output. It has 50,628 global DoFs, including 9,216 per DG component. The attempt stores 27 physical relaxed-parent coefficients per owned cell and three owned DG blocks during publication. The 41,700 active section samples are partitioned. Each rank replicates 38 label records, 38 normal integrals and trial rates. Initialization temporarily assembles 38² fit/mass entries and 111 ray integrals. The section solve reduces four linear-sized row arrays per Newton iteration. No full bulk candidate or disk checkpoint is needed.
+
+```text
+refactoring/phase-field-fault/results/3a-free-labels.csv
+refactoring/phase-field-fault/results/3a-transects.png
+benchmarks/fixed_fault/phase_ridge/phase_ridge.cc
+benchmarks/fixed_fault/phase_ridge/run.py
+benchmarks/fixed_fault/phase_ridge/check.py
+```
+
+### Reproduction and retained evidence
+
+Actual scratch root was `/tmp/fault-3a.1B1UmQr7`. Final runs are in `qualification`, with the complete per-rank fields, metrics and inputs. `final-evidence.log` contains the numerical report. `donor-native` and `donor-native-dg` retain the two pinned-revision diagnostics. The initial unbounded runs and the inactive shared-vertex MPI tie are preserved separately. Two neighboring finite segments could name the same nearest clamped vertex differently by rounding when neither admitted the point. Using its stored coordinates on both segments resolved this. The final comparison includes every exported field, including the foot at inactive points.
+
+All solvers used one OpenMP, BLAS and deal.II thread per rank, and at most four total local workers. Build the existing fixed-fault test DSO using the Release regression commands below before the new retry run. Use fresh destinations.
+
+```sh
+D=$(mktemp -d /tmp/fault-3a.XXXXXXXX)
+Q=$D/qualification
+B=benchmarks/fixed_fault/phase_ridge
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+cmake --build build-slice --target aspect -j2
+cmake -S "$B" -B "$D/plugin" -DAspect_DIR="$PWD/build-slice"
+cmake --build "$D/plugin" -j1
+so=$D/plugin/libphase_ridge.release.so
+for c in vertical narrow translated inclined inclined-fit; do
+  for g in 32 64; do python3 "$B/run.py" build-slice/aspect "$so" "$Q/$c-$g" "$c" "$g"; done
+done
+python3 "$B/run.py" build-slice/aspect "$so" "$Q/inclined-q1-64" inclined-q1 64
+python3 "$B/run.py" build-slice/aspect "$so" "$Q/free-32" free 32
+PATH=/opt/openmpi/5.0.6/bin:$PATH python3 "$B/run.py" build-slice/aspect "$so" "$Q/free-32-mpi2" free 32 --ranks 2
+python3 "$B/run.py" build-slice/aspect "$so" "$Q/free-32-retry" free 32 --retry-plugin "$D/tests-release/libfixed_fault.release.so"
+python3 -O "$B/check.py" "$Q" --retry --plot "$D/transects.png" --history "$D/labels.csv"
+r=$Q/free-32-steady-load
+mkdir "$r"
+cat > "$r/input.prm" <<PRM
+include $Q/free-32/input.prm
+set Output directory = $r/output
+subsection Boundary traction model
+  subsection Function
+    set Function expression = 0;0.02+0.12*y
+  end
+end
+PRM
+build-slice/aspect "$r/input.prm" > "$r/run.log" 2>&1
+```
+
+To reproduce the donor comparison, extract each revision to a fresh source tree, leaving all sibling worktrees untouched. In the following commands `D` is the same scratch root. The archived output is optional for normal target tests.
+
+```sh
+mkdir "$D/donor" "$D/q1-source"
+git archive abbc9b0c0574c9f4de7a64d9662d539b93599f2b | tar -xf - -C "$D/donor"
+git archive 82e43c2669b92ac92a1c62d47f5dd79ac3b29c06 | tar -xf - -C "$D/q1-source"
+cmake -S "$D/q1-source" -B "$D/q1-build" -DCMAKE_BUILD_TYPE=Release \
+  -DDEAL_II_DIR=/opt/dealii/9.6-local -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++ \
+  -DCMAKE_CXX_STANDARD_LIBRARIES=/opt/openmpi/5.0.6/lib/libmpi.so \
+  -DASPECT_WITH_VORO=ON -DVORO_DIR=/home/ein/local/voro++/0.4.6
+cmake --build "$D/q1-build" --target aspect -j2
+bp=benchmarks/reconstructed_fault/bp5
+cmake -S "$D/q1-source/$bp" -B "$D/q1-plugin" -DAspect_DIR="$D/q1-build"
+cmake --build "$D/q1-plugin" --target bp5_moment_cycle -j1
+. "$D/q1-source/$bp/stress_cycle_env.sh"
+export ASPECT_FAULT_COMPATIBILITY_DIAGNOSTIC=1
+for mode in remote-voro cell; do
+  r=$D/q1-$mode
+  mkdir "$r"
+  cat > "$r/input.prm" <<PRM
+include $D/donor/$bp/inclined_native_history_reference.prm
+set Additional shared libraries = $D/q1-plugin/libbp5_moment_cycle.release.so
+set Output directory = $r/output
+PRM
+  if [ "$mode" = cell ]; then
+    cat >> "$r/input.prm" <<'PRM'
+subsection Material model
+  subsection Phase field fault
+    set I h integration backend = cell intervals
+  end
+end
+PRM
+  fi
+  (cd "$r" && "$D/q1-build/aspect" input.prm > run.log 2>&1)
+done
+archive=../aspect/$bp/moment-inclined/native_history_reference/output-native_history_reference
+python3 -O "$B/check.py" "$Q" --retry --donor "$archive" --donor-cell "$D/q1-cell/output"
+```
+
+For the independent Q32 moment audit, copy the fixture CMake file and source into a fresh directory. The sole source delta changes the observer's moment rule and its matching order checks. Use the same target executable and unchanged inputs.
+
+```sh
+mkdir "$D/moments32"
+cp "$B/CMakeLists.txt" "$D/moments32/"
+sed -e 's/16u/32u/g' -e 's/order==16/order==32/g' -e 's/order!=16/order!=32/g' "$B/phase_ridge.cc" > "$D/moments32/phase_ridge.cc"
+cmake -S "$D/moments32" -B "$D/moments32-build" -DAspect_DIR="$PWD/build-slice"
+cmake --build "$D/moments32-build" -j1
+for c in inclined inclined-fit; do
+  for g in 32 64; do python3 "$B/run.py" build-slice/aspect "$D/moments32-build/libphase_ridge.release.so" "$D/q32/$c-$g" "$c" "$g"; done
+done
+```
+
+The original homogeneous and three-label lifecycle harnesses, both scoped CTests and the complete unit suite passed in Debug and Release (2,311 assertions, 48 cases per build). The separate frozen three-label snapshot comparison had maximum absolute errors 5.69e−14 in Release and 1.14e−13 in Debug. Both original forced repeats matched every output exactly. The tensile predictor retry matched its clean trajectory within 9.44e−16. The Python replay-isolation regression passed in both Python modes, both original parameter files validated, and the Release feature-off matrix regression passed. A Debug 32² vertical run also completed. No original clock, tolerance or reference file changed.
+
+```sh
+for mode in debug release; do
+  build=build-slice; config=Release
+  if [ "$mode" = debug ]; then build=build-slice-debug; config=Debug; fi
+  cmake --build "$build" --target aspect -j1
+  cmake -S tests -B "$D/tests-$mode" -DAspect_DIR="$PWD/$build" -DASPECT_BINARY="$PWD/$build/aspect" \
+    -DCMAKE_BUILD_TYPE="$config" -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+  cmake --build "$D/tests-$mode" --target fixed_fault stationary_fault -j1
+  for c in fixed_fault stationary_fault; do
+    python3 -O benchmarks/fixed_fault/check_lifecycle.py "$build/aspect" "$D/tests-$mode/libfixed_fault.$mode.so" "$Q/$c-$mode" --case "$c"
+  done
+  python3 -O benchmarks/fixed_fault/compare_snapshots.py benchmarks/fixed_fault/stationary-reference "$Q/stationary_fault-$mode/clean/output"
+  ctest --test-dir "$D/tests-$mode" -R '^(fixed_fault|stationary_fault)$' --output-on-failure
+  (cd "$build/unit_tests" && ../aspect --test)
+done
+python3 refactoring/phase-field-fault/test_replay_stationary_reference.py -v
+build-slice/aspect --validate benchmarks/fixed_fault/fixed_fault.prm
+build-slice/aspect --validate benchmarks/fixed_fault/stationary.prm
+ctest --test-dir "$D/tests-release" -R '^matrix_nonzeros_1$' --output-on-failure
+```
 
 ## Stationary review fixes · From `0928a0fa6`
 
