@@ -1,6 +1,93 @@
 # Phase-field fault working record
 
-## Active assignment · Repair the stationary coupling
+## Stationary review fixes · From `0928a0fa6`
+
+The seven review findings are addressed on `pf-rsf`. Commit `4d579d91d` covers the fault configuration, admissibility, geometry, homogeneous clock and regression cases. Commit `a8222c3e9` covers replay validation. Both donor references and their comparison bounds are frozen. The geometry and phase are still stationary.
+
+| Finding | Fix and discriminating evidence |
+| --- | --- |
+| Closed-fault predictor | `FaultStokesCoupling::sample_bulk` collectively checks for finite, strictly positive normal compression before evaluating friction, on the predictor and again on the solved fields. Failure throws ASPECT's recoverable nonlinear exception. A triangular 3 Pa tensile traction peaked at 12.5 ms. At the 25 ms predictor ASPECT cut the 12.5 ms step to 6.25 ms and accepted 18.75 and 25 ms. The clean run prescribed these steps explicitly. Both produced exactly four publications including initialization. All labels and 36 bulk samples matched exactly through 18.75 ms. At 25 ms the largest Release differences were 5.56e−17 m/s in label rate, zero in cumulative slip, 2.20e−15 m/s in velocity, 1.91e−17 Pa in pressure and 1.67e−16 Pa in physical stress. The overall Debug maximum was 8.94e−15. A 6 Pa tensile initial load aborted before any publication. |
+| Pressure datum | During assembler registration, after BC parsing, `has_normal_traction_boundary` checks the box faces and ASPECT's prescribed velocity component masks. At least one nonperiodic face must admit normal test velocity, so total normal traction fixes the pressure used by friction. This includes a zero natural traction. The original case prescribes tangential velocity on the horizontal faces and passes. Changing only its initial surface pressure from 0 to 0.1 Pa changed the sampled values by at most 1.05e−14 across the three clocks. Closing the normal boundaries failed during setup at initial surface pressures of 0 and 0.1 Pa. A box closed by no-slip, free-slip and periodicity also failed. The release pressure-RHS compatibility flag serves a different purpose and does not resolve component masks. |
+| Maxwell ownership | `PhaseFieldFault::parse_parameters` requires the fault to be the simulator's top-level material. The 2× depth-dependent viscosity test failed before Stokes assembly. The averaging wrapper parses its base and does not forward initialization. The first initialization-only guard missed it in the development Debug run. The parse-time check diagnoses both wrappers. This increment supports direct material use. |
+| Initial topography | The same parser requires the release zero-topography model before computing the box measure. This uses the same plugin identification as the box mapping. A horizontal section in a unit box with +0.25 m initial topography failed before a width or history was used in a solve. |
+| Homogeneous clock | `FixedFaultProbe::execute` checks both time and duration before writing a snapshot or indexing the donor table. A first step of 15 ms failed at step 1. Only the initial publication was recorded. Cases exercising an independent trajectory explicitly disable this table. |
+| Replay validation | Every required inline parameter is checked before destination creation, compilation or launch. The script also validates the homogeneous shear expression and the three pinned observer substitutions. Separate trials inherited either the output directory or stress rotation through an include. Both ordinary and optimized Python diagnosed the missing key. All four trials using the real archived parent preserved its output-tree digest `a94031b969011a92d9ae991600f428a0012054a6a9e434c3359d574b4165a1fa`. A standalone Python test covers both modes without donor dependencies. |
+| Box endpoints | `StationaryFault::initialize` compares endpoint coordinates to the box faces at a tolerance scaled by coordinate magnitude and extent. The test accepts labels 0.1, 0.2, 0.3 m in both orientations for a 0.1 m origin and 0.2 m extent. The ordinary Release run on this translated box published all three clocks. Both the unit test and the native run rejected a section truncated to 0.299 m. The stored material coordinates and strict ordering are preserved. |
+
+**One ordinary timestep.** The public state is still `StationaryFault::Label` in `include/aspect/reconstructed_fault/stationary_fault.h`. `PhaseFieldFault::update` prepares the Maxwell coefficient and immutable stress parent. At each Picard preparation `sample_bulk` validates the dynamic normal traction and `solve_rates` uses the accepted ages to assemble Q1 label forces. `FaultStressLoad::execute` returns the spatial stress offset to the velocity RHS using the test gradient at each quadrature point. After bulk convergence, the ordinary solver asks the coupling to check and stage the rates. The existing timestep manager decides on repeat or advance. Only the advance calls `accept_step` and then `StationaryFault::accept` for DG stress, age, slip and rate. The first donor-matched physical timestep at 12.5 ms retained rates 0.09123104, 0.09510370 and 0.08832194 m/s from bottom to top. No change to a public interface, generic Simulator hook, weak form or aging equation was required. A single integer closure reduction replaces the previous minimum-double reduction. There are no additional persistent or candidate field copies.
+
+**Native regression results.** Both parameter files validated. Both scoped CTests and both lifecycle trajectories passed in Release and Debug. Each unit suite passed 2,306 assertions in 47 cases. Against the nonuniform Release donor, the largest differences were 4.43e−15 m/s in rate, 3.56e−14 s in age, 3.21e−17 m in slip, 2.61e−14 m/s in bulk velocity, 9.88e−16 Pa in pressure and 3.37e−15 Pa in physical stress. The original forced repeat retained exact clean-run values at all three clocks in both builds. The one-/two-rank 16-cell comparison checked 144 points at each clock, distributed 72/72. Its maximum differences were 4.49e−16, 3.56e−15 and 2.77e−15. On the four-cell pulse (36/0 points on two ranks), both ranks returned from the recoverable failure. The run published four endpoints, agreeing with the clean serial fields to 2.20e−15.
+
+**Reproduction.** Fresh outputs and logs are under `/tmp/fault-review.tVp3VSMv` for this run. Set `D` to a new directory to reproduce. The two native build trees use the GNU 12.4.0 / deal.II 9.6.2 / Open MPI 5.0.6 configurations below. Each process used one thread. The changed C++ files were formatted with the checkout's `indent_file` and astyle 2.04.
+
+```sh
+D=$(mktemp -d /tmp/fault-review.XXXXXXXX)
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+for mode in release debug; do
+  build=build-slice; config=Release
+  if [ "$mode" = debug ]; then build=build-slice-debug; config=Debug; fi
+  cmake --build "$build" --target aspect -j1
+  cmake -S tests -B "$D/final-tests-$mode" -DAspect_DIR="$PWD/$build" \
+    -DASPECT_BINARY="$PWD/$build/aspect" -DCMAKE_BUILD_TYPE="$config" \
+    -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+  cmake --build "$D/final-tests-$mode" --target fixed_fault stationary_fault -j1
+  for test_case in stationary_fault fixed_fault; do
+    python3 -O benchmarks/fixed_fault/check_lifecycle.py "$build/aspect" \
+      "$D/final-tests-$mode/libfixed_fault.$mode.so" "$D/final-$test_case-$mode" --case "$test_case"
+  done
+  ctest --test-dir "$D/final-tests-$mode" -R '^(fixed_fault|stationary_fault)$' --output-on-failure
+  (cd "$build/unit_tests" && ../aspect --test)
+done
+build-slice/aspect --validate benchmarks/fixed_fault/fixed_fault.prm
+build-slice/aspect --validate benchmarks/fixed_fault/stationary.prm
+python3 refactoring/phase-field-fault/test_replay_stationary_reference.py -v
+ctest --test-dir "$D/final-tests-release" -R '^(matrix_nonzeros_1|viscoelastic_numerical_elastic_time_step)$' --output-on-failure
+```
+
+The MPI input files include `tests/stationary_fault.prm`, set the Release probe library shown above and use separate outputs. The 16-cell pair sets initial global refinement to 2. The four-cell two-rank pulse includes the lifecycle harness's pulse-cutback input with its own output directory. For the native decimal check, set the box's Y origin to 0.1 and Y extent to 0.2, with vertices at x = 0.5 and y = 0.1, 0.2, 0.3. The short variant replaces only the final y with 0.299.
+
+```sh
+build-slice/aspect "$D/rank1/input.prm"
+/opt/openmpi/5.0.6/bin/mpirun -np 2 build-slice/aspect "$D/rank2/input.prm"
+python3 -O benchmarks/fixed_fault/compare_snapshots.py "$D/rank1/output" "$D/rank2/output" --points 144
+/opt/openmpi/5.0.6/bin/mpirun -np 2 build-slice/aspect "$D/pulse-rank2/input.prm"
+PYTHONPATH=benchmarks/fixed_fault python3 - "$D" <<'PYTHON'
+from compare_snapshots import compare_step
+from pathlib import Path
+import sys
+d = Path(sys.argv[1])
+for step in range(4):
+    print(compare_step(d/"final-stationary_fault-release/pulse_clean/output", d/"pulse-rank2/output", step))
+PYTHON
+build-slice/aspect "$D/decimals/input.prm"
+build-slice/aspect "$D/short/input.prm"   # rejected before step 0
+build-slice/aspect "$D/open-datum/input.prm"   # stationary fixture, initial surface pressure 0.1 Pa
+python3 benchmarks/fixed_fault/compare_snapshots.py "$D/final-stationary_fault-release/clean/output" "$D/open-datum/output"
+```
+
+The Release matrix control passed with ordinary MPI socket access. A preliminary sandbox run differed in eight launcher-warning lines. The original-elasticity depth-average CTest again failed its checked-in shear at 1,000 years. The five depth averages match the local pristine 3.1.0 results investigated in the preceding maintenance record. The top bin is −0.0346938 Pa against +0.0967461 Pa in the checked-in reference. Both normal stresses agree at ±4.79488e6 Pa.
+
+
+**Independent positive replay.** The retained sibling archive passed its manifest check. The archived mature executable produced a fresh homogeneous parent. Rebuilding the stationary donor at `663937bed` and running the repaired replay script under optimized Python regenerated all three checked-in three-label snapshots byte for byte. Both the donor source extraction and all generated outputs lived under `$D`.
+
+```sh
+mkdir "$D/stationary-source"
+git archive 663937bed9305df2823ac77a3fc2c3925bb94caa | tar -xf - -C "$D/stationary-source"
+cmake -S "$D/stationary-source" -B "$D/stationary-build" -DCMAKE_BUILD_TYPE=Release \
+  -DDEAL_II_DIR=/opt/dealii/9.6-local -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++ \
+  -DCMAKE_CXX_STANDARD_LIBRARIES=/opt/openmpi/5.0.6/lib/libmpi.so
+cmake --build "$D/stationary-build" --target aspect -j2
+tar -xzf ../aspect-pf-rsf-reference-20261121/reference.tar.gz -C "$D"
+(cd "$D/reference" && sha256sum --quiet -c SHA256SUMS)
+python3 refactoring/phase-field-fault/replay_fixed_reference.py "$D/reference" "$D/homogeneous"
+python3 -O refactoring/phase-field-fault/replay_stationary_reference.py \
+  "$D/stationary-source" "$D/stationary-build" "$D/homogeneous/input.prm" "$D/replay-verified"
+diff -qr benchmarks/fixed_fault/stationary-reference "$D/replay-verified/comparison"
+```
+
+**Next action.** Author review of the stationary configuration checks and the predictor failure path. Inclined geometry remains a separate increment.
+
+## Stationary coupling repair · Initial implementation
 
 **Implemented from `e91e801ba`.** The numbered second download contained the requested patch and task, and the unnumbered ZIP contained the earlier kit. Both were extracted under `/tmp/stationary-maintenance.Rai2boDP`. The newer patch passed `git apply --check` and applied cleanly to the author's path instructions and recorded results. Commit `79df67037` moves the unchanged friction and aging equations into paired rheology files and names the traction and fixed-age speed derivative. Commit `49bc11838` implements the coupling repair, removes prototype persistence and adds the discriminating tests. The checked-in donor snapshots, homogeneous expected values and comparison bounds remain frozen. Both ordinary parameter files run with original elasticity disabled. All native fault runs begin at physical time zero in fresh directories.
 
