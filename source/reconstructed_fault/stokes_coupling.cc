@@ -77,13 +77,13 @@ namespace aspect
   {
     if (this->get_nonlinear_iteration() == 0)
       rebuild = true; // The Maxwell coefficient depends on this attempt's duration.
-    trial_rates = solve_rates(iterate);
+    trial_rates = material.section_rates(iterate);
   }
 
   template <int dim>
   void FaultStokesCoupling<dim>::check_convergence(const LinearAlgebra::BlockVector &solution, bool &converged)
   {
-    auto rates = solve_rates(solution);
+    auto rates = material.section_rates(solution);
     for (unsigned int j=0; j<rates.size(); ++j)
       if (std::abs(rates[j]-trial_rates[j]) > 1.e-8*std::max(rates[j],trial_rates[j]))
         {
@@ -120,16 +120,11 @@ namespace aspect
       v.resize(rule.size());
     std::vector<Stress> rotated(rule.size());
     std::vector<double> phase(rule.size());
-    double min_phase = 1., max_phase = 0.;
-    bool aligned = true;
+
     relaxed_parent.clear();
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
         {
-          // With fixed constant phase and resolved Q1 knots the localized
-          // slip stress is already in DGQ2. This makes the physical stress
-          // representation exact also on the stationary donor's split path.
-          aligned &= material.fault.resolves_segments(cell->vertex(0),cell->vertex(GeometryInfo<dim>::vertices_per_cell-1));
           fe.reinit(cell);
           fe[extract.velocities].get_function_gradients(fields,gradients);
           fe[extract.compositional_fields[material.phase_field]].get_function_values(fields,phase);
@@ -137,26 +132,18 @@ namespace aspect
             fe[extract.compositional_fields[material.stress_fields[c]]].get_function_values(fields,components[c]);
           for (unsigned int q=0; q<rule.size(); ++q)
             {
-              min_phase = std::min(min_phase,phase[q]);
-              max_phase = std::max(max_phase,phase[q]);
               Stress parent;
               for (unsigned int c=0; c<3; ++c)
                 parent.access_raw_entry(c) = components[c][q];
-              const auto foot = material.fault.project(fe.quadrature_point(q));
-              const double rate = foot.interpolate(trial_rates[foot.left],trial_rates[foot.left+1]);
-              rotated[q] = material.relaxed_parent(parent,gradients[q],rate,physical_dt,beta);
+              const auto transfer = material.profile.sample(fe.quadrature_point(q),phase[q]);
+              const auto slip = material.profile.slip_gradient(transfer, transfer.rate(trial_rates));
+              rotated[q] = material.relaxed_parent(parent,gradients[q],slip,physical_dt,beta);
             }
           auto &coefficients = relaxed_parent[cell->id()];
           coefficients.resize(dg.n_dofs_per_cell());
           FETools::compute_projection_from_quadrature_points(projector,rotated,coefficients);
         }
-    const auto comm = this->get_mpi_communicator();
-    min_phase = Utilities::MPI::min(min_phase,comm);
-    max_phase = Utilities::MPI::max(max_phase,comm);
-    AssertThrow(min_phase > 0. && max_phase < 1. && max_phase-min_phase < 1.e-12,
-                ExcMessage("The stationary section normalization requires a constant phase between zero and one."));
-    AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(aligned),comm),
-                ExcMessage("Interior fault labels must lie on transverse bulk cell faces."));
+
   }
 
   template <int dim>
@@ -168,9 +155,8 @@ namespace aspect
     FullMatrix<double> basis(rule.size(),stress_element().n_dofs_per_cell());
     FETools::compute_interpolation_to_quadrature_points_matrix(stress_element(),rule,basis);
     std::vector<Stress> strain(rule.size());
-    std::vector<double> pressure(rule.size());
+    std::vector<double> pressure(rule.size()), phase(rule.size());
     std::vector<BulkPoint> samples;
-    const auto S = symmetrize(material.fault.slip_dyad());
     bool locally_closed = true;
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
@@ -178,17 +164,19 @@ namespace aspect
           fe.reinit(cell);
           fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(iterate,strain);
           fe[this->introspection().extractors.pressure].get_function_values(iterate,pressure);
+          fe[this->introspection().extractors.compositional_fields[material.phase_field]].get_function_values(iterate,phase);
           const auto &parent = relaxed_parent.at(cell->id());
           for (unsigned int q=0; q<rule.size(); ++q)
             {
               Stress stress = material.viscous_stress(strain[q]);
               for (unsigned int i=0; i<parent.size(); ++i)
                 stress += basis(q,i)*parent[i];
-              const double compression = material.background_compression + pressure[q] - material.fault.normal_vector()*(stress*material.fault.normal_vector());
+              const auto transfer = material.profile.sample(fe.quadrature_point(q),phase[q]);
+              if (transfer.chi==0.) continue;
+              const auto &frame = material.fault.segment(transfer.foot.left);
+              const double compression = material.background_compression + pressure[q] - frame.normal*(stress*frame.normal);
               locally_closed &= std::isfinite(compression) && compression > 0.;
-              samples.push_back({material.fault.project(fe.quadrature_point(q)),fe.JxW(q)*material.fault.localization(),
-                                 material.background_shear + stress*S,compression
-                                });
+              samples.push_back({transfer,fe.JxW(q),material.background_shear + stress*symmetrize(frame.dyad),compression});
             }
         }
     // The extrapolated Picard predictor can open an otherwise closed fault.
@@ -204,11 +192,10 @@ namespace aspect
   template <int dim>
   typename FaultStokesCoupling<dim>::Stress
   FaultStokesCoupling<dim>::stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
-                                          const Point<dim> &position) const
+                                          const Point<dim> &position, const double phase) const
   {
-    const auto foot = material.fault.project(position);
-    const double rate = foot.interpolate(trial_rates[foot.left],trial_rates[foot.left+1]);
-    Stress result = material.slip_stress(rate);
+    const auto transfer = material.profile.sample(position,phase);
+    Stress result = -2.*material.kappa*symmetrize(material.profile.slip_gradient(transfer,transfer.rate(trial_rates)));
     const auto unit = this->get_mapping().transform_real_to_unit_cell(cell,position);
     const auto &parent = relaxed_parent.at(cell->id());
     for (unsigned int i=0; i<parent.size(); ++i)
@@ -222,13 +209,16 @@ namespace aspect
     const double dt = this->get_timestep();
     if (dt > 0.)
       {
-        // With constant coefficients and cell-resolved Q1 rates the endpoint
-        // is DGQ2 on each cell. Evaluation at DG nodes is its exact projection.
+        // Project the complete physical response: localized slip and cut Q1
+        // knots generally lie outside DGQ2. The Cartesian cell Jacobian is constant.
         const auto &system = this->get_fe();
         const auto &intro = this->introspection();
-        const Quadrature<dim> nodes(stress_element().get_unit_support_points());
-        FEValues<dim> fe(this->get_mapping(),system,nodes,update_gradients | update_quadrature_points);
-        std::vector<Stress> strain(nodes.size());
+        const QGauss<dim> rule(8);
+        FullMatrix<double> projector(stress_element().n_dofs_per_cell(),rule.size());
+        FETools::compute_projection_from_quadrature_points_matrix(stress_element(),rule,rule,projector);
+        FEValues<dim> fe(this->get_mapping(),system,rule,update_values | update_gradients | update_quadrature_points);
+        std::vector<Stress> strain(rule.size()), physical(rule.size()), coefficients(stress_element().n_dofs_per_cell());
+        std::vector<double> phase(rule.size());
         std::vector<types::global_dof_index> indices(system.n_dofs_per_cell());
         std::array<LinearAlgebra::Vector,3> owned;
         for (unsigned int c=0; c<3; ++c)
@@ -239,10 +229,13 @@ namespace aspect
               fe.reinit(cell);
               cell->get_dof_indices(indices);
               fe[intro.extractors.velocities].get_function_symmetric_gradients(solution,strain);
-              for (unsigned int q=0; q<nodes.size(); ++q)
+              fe[intro.extractors.compositional_fields[material.phase_field]].get_function_values(solution,phase);
+              for (unsigned int q=0; q<rule.size(); ++q)
+                physical[q] = material.endpoint_stress(cell,fe.quadrature_point(q),phase[q],strain[q]);
+              FETools::compute_projection_from_quadrature_points(projector,physical,coefficients);
+              for (unsigned int q=0; q<coefficients.size(); ++q)
                 {
-                  const Stress stress = stress_offset(cell,fe.quadrature_point(q))
-                                        + material.viscous_stress(strain[q]);
+                  const auto &stress=coefficients[q];
                   for (unsigned int c=0; c<3; ++c)
                     {
                       const auto local = system.component_to_system_index(intro.component_indices.compositional_fields[material.stress_fields[c]],q);
@@ -261,6 +254,25 @@ namespace aspect
   }
 
   template <int dim>
+  void FaultStokesCoupling<dim>::BulkPoint::add_balance(const std::vector<double> &rates, const double age,
+                                                        const double kappa, const MaterialModel::Rheology::RateAndStateFriction &law, std::vector<double> &rhs,
+                                                        std::vector<double> &diagonal, std::vector<double> &upper, std::vector<double> &scale) const
+  {
+    const auto j=transfer.foot.left;
+    const double N[2]= {1.-transfer.foot.xi,transfer.foot.xi};
+    const double speed=transfer.rate(rates);
+    const auto resistance=law.resistance(speed,age,compression);
+    // One chi enters local slip stress, another enters the virtual-work measure.
+    const double stiffness=kappa*transfer.chi;
+    transfer.add_load(volume*(driving_shear-stiffness*speed-resistance.traction),rhs);
+    transfer.add_load(volume*std::max(std::abs(driving_shear),std::abs(resistance.traction)),scale);
+    const double tangent=volume*transfer.chi*(stiffness+resistance.speed_derivative);
+    for (unsigned int i=0; i<2; ++i)
+      diagonal[j+i]+=tangent*N[i]*N[i];
+    upper[j]+=tangent*N[0]*N[1];
+  }
+
+  template <int dim>
   std::vector<double> FaultStokesCoupling<dim>::solve_rates(const LinearAlgebra::BlockVector &iterate) const
   {
     const auto points = sample_bulk(iterate);
@@ -270,29 +282,14 @@ namespace aspect
     for (unsigned int j=0; j<n; ++j)
       rates[j] = accepted[j].rate;
 
-    // The derivative of the localized shear stress with respect to V is
-    // -2 kappa (h/I) S:S = -kappa h/I for S=sym(t x n).
-    const double stiffness = material.kappa*material.fault.localization();
     for (unsigned int iteration=0; iteration<100; ++iteration)
       {
         std::vector<double> rhs(n), diagonal(n), upper(n-1), scale(n);
         for (const auto &point : points)
           {
-            const unsigned int j = point.foot.left;
-            const double N[2] = {1.-point.foot.xi,point.foot.xi};
-            const double speed = point.foot.interpolate(rates[j],rates[j+1]);
-            const double age = point.foot.interpolate(accepted[j].age,accepted[j+1].age);
-            const auto resistance = material.friction.resistance(speed,age,point.compression);
-            const double residual = point.driving_shear - stiffness*speed - resistance.traction;
-            const double derivative = stiffness + resistance.speed_derivative;
-            for (unsigned int i=0; i<2; ++i)
-              {
-                const double test = point.weight*N[i];
-                rhs[j+i] += test*residual;
-                diagonal[j+i] += test*N[i]*derivative;
-                scale[j+i] += test*std::max(std::abs(point.driving_shear),std::abs(resistance.traction));
-              }
-            upper[j] += point.weight*N[0]*N[1]*derivative;
+            const auto &foot=point.transfer.foot;
+            const double age=foot.interpolate(accepted[foot.left].age,accepted[foot.left+1].age);
+            point.add_balance(rates,age,material.kappa,material.friction,rhs,diagonal,upper,scale);
           }
 
         for (auto *row :

@@ -52,17 +52,8 @@ namespace aspect
       /** Set the prescribed geometry and uniform initial state in physical units. */
       void initialize(const Point<dim> &origin, const Point<dim> &extent,
                       const std::vector<Point<dim>> &vertices, double age, double rate, double half_width = std::numeric_limits<double>::max());
-      /** True if a cell spans only one Q1 segment in the tangential direction. */
-      bool resolves_segments(const Point<dim> &lower, const Point<dim> &upper) const;
       /** Find the two neighboring material labels and the local Q1 coordinate. */
       Projection project(const Point<dim> &point) const;
-
-      /** Full-normal h/I in 1/m for a spatially constant positive phase. */
-      double localization() const;
-      /** Slip dyad t (x) n with the positive slip sense along t. */
-      const Tensor<2,dim> &slip_dyad() const;
-      /** Unit left normal to the oriented label sequence. */
-      const Tensor<1,dim> &normal_vector() const;
 
       /** Publish one endpoint per label using the same accepted age that
        * entered the Q1 friction law throughout this attempt. */
@@ -78,8 +69,6 @@ namespace aspect
       double half_width;
       std::vector<double> arclength;
       Tensor<1,dim> tangent, normal;
-      Tensor<2,dim> slip_gradient;
-      double width;
   };
 }
 #endif

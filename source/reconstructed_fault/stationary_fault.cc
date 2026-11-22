@@ -14,7 +14,6 @@ namespace aspect
     AssertThrow(dim == 2 && vertices.size() >= 2, ExcMessage("A stationary fault requires at least two ordered vertices in 2-D."));
     const auto direction = vertices.back()-vertices.front();
     const unsigned int axis = std::abs(direction[0]) > std::abs(direction[1]) ? 0 : 1;
-    const unsigned int transverse = 1-axis;
     const double length = direction.norm();
     // A face entered as a decimal may round differently from origin + extent.
     const auto face_tolerance = [&](const unsigned int d)
@@ -43,8 +42,6 @@ namespace aspect
     tangent = direction/length;
     normal[0] = -tangent[1];
     normal[1] = tangent[0];
-    slip_gradient = outer_product(tangent,normal);
-    width = extent[transverse];
     half_width = support;
     accepted.clear();
     for (const auto &vertex : vertices)
@@ -155,16 +152,6 @@ namespace aspect
   }
 
   template <int dim>
-  bool StationaryFault<dim>::resolves_segments(const Point<dim> &lower, const Point<dim> &upper) const
-  {
-    const double a = (lower-accepted.front().position)*tangent;
-    const double b = (upper-accepted.front().position)*tangent;
-    const double tolerance = 64.*std::numeric_limits<double>::epsilon()*arclength.back();
-    const auto next = std::upper_bound(arclength.begin()+1,arclength.end()-1,std::min(a,b)+tolerance);
-    return next == arclength.end()-1 || *next >= std::max(a,b)-tolerance;
-  }
-
-  template <int dim>
   typename StationaryFault<dim>::Projection StationaryFault<dim>::project(const Point<dim> &point) const
   {
     Projection closest {0,0.,false};
@@ -191,24 +178,6 @@ namespace aspect
   double StationaryFault<dim>::Projection::interpolate(const double a, const double b) const
   {
     return (1.-xi)*a + xi*b;
-  }
-
-  template <int dim>
-  double StationaryFault<dim>::localization() const
-  {
-    return 1./width;
-  }
-
-  template <int dim>
-  const Tensor<2,dim> &StationaryFault<dim>::slip_dyad() const
-  {
-    return slip_gradient;
-  }
-
-  template <int dim>
-  const Tensor<1,dim> &StationaryFault<dim>::normal_vector() const
-  {
-    return normal;
   }
 
   template <int dim>

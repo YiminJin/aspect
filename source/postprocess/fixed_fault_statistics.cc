@@ -21,7 +21,8 @@ namespace aspect
         {
           const auto &model = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
           const auto &labels = model.labels();
-          const double length = labels.front().position.distance(labels.back().position);
+          const auto &last = model.phase_profile().geometry.segment(labels.size()-2);
+          const double length = last.station+last.length;
           double age = 0., slip = 0., rate = 0.;
           for (unsigned int j=1; j<labels.size(); ++j)
             {

@@ -33,7 +33,13 @@ namespace aspect
     }
 
     template <int dim>
-    PhaseFieldFault<dim>::PhaseFieldFault() : coupling(*this) {}
+    PhaseFieldFault<dim>::PhaseFieldFault() : profile(fault), coupling(*this) {}
+
+    template <int dim>
+    std::vector<double> PhaseFieldFault<dim>::section_rates(const LinearAlgebra::BlockVector &iterate) const
+    {
+      return coupling.solve_rates(iterate);
+    }
 
     template <int dim>
     void PhaseFieldFault<dim>::initialize()
@@ -51,6 +57,7 @@ namespace aspect
         {
           if (fit_trace)
             fault.fit(*this,phase_field,this->get_old_solution());
+          profile.initialize(*this,phase_field,this->get_old_solution(),degradation_magnitude);
           trace_initialized = true;
         }
       coupling.prepare_parent(std::exp(-modulus*dt/viscosity));
@@ -63,21 +70,22 @@ namespace aspect
     }
 
     template <int dim>
-    typename PhaseFieldFault<dim>::Stress PhaseFieldFault<dim>::slip_stress(const double rate) const
+    SymmetricTensor<2,dim> PhaseFieldFault<dim>::endpoint_stress(const typename DoFHandler<dim>::active_cell_iterator &cell,
+                                                                 const Point<dim> &x, const double phase, const Stress &strain) const
     {
-      return -2.*kappa*fault.localization()*rate*symmetrize(fault.slip_dyad());
+      return viscous_stress(strain)+coupling.stress_offset(cell,x,phase);
     }
 
     template <int dim>
     typename PhaseFieldFault<dim>::Stress
     PhaseFieldFault<dim>::relaxed_parent(const Stress &parent, const Tensor<2,dim> &accepted_gradient,
-                                         const double accepted_rate, const double physical_dt, const double relaxation) const
+                                         const Tensor<2,dim> &slip_gradient, const double physical_dt, const double relaxation) const
     {
       if constexpr (dim == 2)
         {
           // Initialization relaxes the parent over its Maxwell interval but has
           // zero physical duration for slip, age and the accepted spin rotation.
-          const auto gradient = accepted_gradient - fault.localization()*accepted_rate*fault.slip_dyad();
+          const auto gradient = accepted_gradient - slip_gradient;
           const double angle = .5*physical_dt*(gradient[1][0]-gradient[0][1]);
           const auto rotation = Physics::Transformations::Rotations::rotation_matrix_2d(angle);
           return relaxation*symmetrize(rotation*static_cast<Tensor<2,dim>>(parent)*transpose(rotation));
@@ -114,7 +122,7 @@ namespace aspect
             for (unsigned int c=0; c<stress_fields.size(); ++c)
               physical->output_values[c][q] = in.composition[q][stress_fields[c]];
           if (offset)
-            offset->stress[q] = coupling.stress_offset(in.current_cell,in.position[q]);
+            offset->stress[q] = coupling.stress_offset(in.current_cell,in.position[q],in.composition[q][phase_field]);
         }
     }
 
@@ -132,6 +140,7 @@ namespace aspect
       prm.declare_entry("Fault vertices","",Patterns::List(Patterns::List(Patterns::Double(),2,2),0,
                                                            Patterns::List::max_int_value,";"),"Ordered x,y label positions in metres separated by semicolons. "
                         "The default joins the ends of the left box boundary.");
+      prm.declare_entry("Degradation magnitude","1",Patterns::Double(0.),"Dimensionless m in the mature AT1 degradation law with curvature one.");
       prm.declare_entry("Fit trace to phase","true",Patterns::Bool(),"Fit the ordered seed to the initialized FE ridge. Constant phase retains the seed.");
       prm.declare_entry("Profile half width","0",Patterns::Double(0.),"Normal association support in metres. Zero uses the full physical cross-section.");
       prm.declare_entry("Shear modulus","1e10",Patterns::Double(0.),"Elastic shear modulus in Pa.");
@@ -209,6 +218,8 @@ namespace aspect
           vertices = {box.get_origin(),box.get_origin()};
           vertices.back()[1] += box.get_extents()[1];
         }
+      degradation_magnitude = prm.get_double("Degradation magnitude");
+      AssertThrow(degradation_magnitude>0.,ExcMessage("Degradation magnitude must be positive."));
       fit_trace = prm.get_bool("Fit trace to phase");
       const double support = prm.get_double("Profile half width");
       fault.initialize(box.get_origin(),box.get_extents(),vertices,age,friction.reference_speed,
@@ -231,6 +242,9 @@ namespace aspect
                                                     Parameters<dim>::Formulation::MassConservation::incompressible || p.formulation_mass_conservation ==
                                                     Parameters<dim>::Formulation::MassConservation::ask_material_model),
                   ExcMessage("Stationary fault mechanics requires incompressible continuity without prescribed dilation."));
+      AssertThrow(p.initial_adaptive_refinement == 0 && p.adaptive_refinement_interval == 0 &&
+                  p.additional_refinement_times.empty(),
+                  ExcMessage("The stationary FE phase profile requires a fixed Cartesian mesh."));
       const auto &intro = this->introspection();
       const std::array<std::string,3> names = {{"fault_stress_xx","fault_stress_yy","fault_stress_xy"}};
       AssertThrow(intro.n_compositional_fields == 4,ExcMessage("Expected three fault stress fields and phase_field."));
@@ -254,7 +268,7 @@ namespace aspect
 
     ASPECT_REGISTER_MATERIAL_MODEL(PhaseFieldFault,"phase field fault",
                                    "Stationary mature fault with independent Q1 labels spanning a Cartesian box. "
-                                   "The phase is a spatial constant strictly between zero and one. "
+                                   "The static DG phase supplies the fitted ridge and its normalized slip distribution. "
                                    "The named additional outputs fault_tau_xx, fault_tau_yy and fault_tau_xy read accepted physical stress in Pa.")
   }
 }

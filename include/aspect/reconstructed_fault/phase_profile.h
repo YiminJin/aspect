@@ -1,0 +1,46 @@
+/*
+  This file is part of ASPECT, distributed under the GNU General Public
+  License version 2 or later. See the file LICENSE for details.
+*/
+#ifndef _aspect_reconstructed_fault_phase_profile_h
+#define _aspect_reconstructed_fault_phase_profile_h
+
+#include <aspect/reconstructed_fault/stationary_fault.h>
+
+namespace aspect
+{
+  /** Static DG phase and its consistent Q1 normal integral on a fitted trace. */
+  template <int dim>
+  class FaultPhaseProfile
+  {
+    public:
+      explicit FaultPhaseProfile(const StationaryFault<dim> &trace) : geometry(trace) {}
+
+      /** The same association and inverse-length weight act in both directions. */
+      struct Sample
+      {
+        typename StationaryFault<dim>::Projection foot;
+        double chi;
+        double rate(const std::vector<double> &rates) const;
+        void add_load(double integrated_traction, std::vector<double> &rows) const;
+      };
+
+      /** Integrate h along both physical normal rays at three Gauss stations
+       * per segment. Reduce only these integrals, then project with Q1 mass. */
+      void initialize(const SimulatorAccess<dim> &sim, unsigned int phase_field,
+                      const LinearAlgebra::BlockVector &fields, double magnitude);
+      double weight(double phase) const;
+      Sample sample(const Point<dim> &x, double phase) const;
+      Tensor<2,dim> slip_gradient(const Sample &sample, double rate) const;
+      const StationaryFault<dim> &geometry;
+      const std::vector<double> &normal_integrals() const
+      {
+        return integrals;
+      }
+
+    private:
+      double magnitude;
+      std::vector<double> integrals;
+  };
+}
+#endif

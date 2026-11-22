@@ -6,7 +6,7 @@
 #ifndef _aspect_reconstructed_fault_stokes_coupling_h
 #define _aspect_reconstructed_fault_stokes_coupling_h
 
-#include <aspect/reconstructed_fault/stationary_fault.h>
+#include <aspect/reconstructed_fault/phase_profile.h>
 #include <aspect/simulator_access.h>
 
 namespace aspect
@@ -29,18 +29,26 @@ namespace aspect
       void prepare_parent(double relaxation);
       /** Spatial stress (Pa) added to the implicit plane-strain viscous stress. */
       SymmetricTensor<2,dim> stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
-                                           const Point<dim> &position) const;
+                                           const Point<dim> &position, double phase) const;
 
-    private:
-      using Stress = SymmetricTensor<2,dim>;
+      /** One bulk quadrature contribution to section balance. The tangent
+       * is minus the fixed-age derivative with respect to label rates. */
       struct BulkPoint
       {
-        typename StationaryFault<dim>::Projection foot;
-        double weight, driving_shear, compression;
+        typename FaultPhaseProfile<dim>::Sample transfer;
+        double volume, driving_shear, compression;
+        void add_balance(const std::vector<double> &rates, double age, double kappa,
+                         const MaterialModel::Rheology::RateAndStateFriction &law,
+                         std::vector<double> &rhs, std::vector<double> &diagonal,
+                         std::vector<double> &upper, std::vector<double> &scale) const;
       };
 
-      const FiniteElement<dim> &stress_element() const;
+      /** Evaluate section quadrature loads in owned-cell order, omitting zero support. */
       std::vector<BulkPoint> sample_bulk(const LinearAlgebra::BlockVector &iterate) const;
+    private:
+      friend class MaterialModel::PhaseFieldFault<dim>;
+      using Stress = SymmetricTensor<2,dim>;
+      const FiniteElement<dim> &stress_element() const;
       std::vector<double> solve_rates(const LinearAlgebra::BlockVector &iterate) const;
       void prepare_iteration(const LinearAlgebra::BlockVector &iterate, bool &rebuild);
       void check_convergence(const LinearAlgebra::BlockVector &solution, bool &converged);
