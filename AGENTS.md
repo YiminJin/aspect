@@ -20,3 +20,34 @@ A parallel, extensible finite element code.
 
 ## Plugins
 New physics is usually added as a plugin under matching directories in ``source/`` and ``include/aspect/``. See ``doc/sphinx/user/extending/write-a-plugin.md`` and ``doc/sphinx/user/extending/idea-of-plugins.md``.
+
+
+<!-- phase-field-fault-refactor:begin -->
+## Phase-field fault development on ASPECT 3.1.0
+
+These project instructions apply to the research transplant. Read the [migration plan](refactoring/phase-field-fault/PLAN.md) and the [working record](refactoring/phase-field-fault/STATUS.md) on arrival. Use the [reference and verification guide](refactoring/phase-field-fault/VERIFICATION.md) for the current increment. A new session should be able to resume from these files and the actual Git diff.
+
+### What counts as a good change
+
+1. Preserve the selected equations, discretization, and accepted history. Compare against a reproducible small case and state what it establishes.
+2. Make the change readable to an ASPECT maintainer. Ownership, public interfaces, comments and consistency with neighboring code are acceptance criteria on every increment.
+3. Measure resource use where the change affects it. Account for candidate copies, MPI replication and checkpoint size.
+4. Carry an experimental option only when a paper example or a discriminating test needs it.
+
+The implementation belongs in this worktree. The research donor is `../aspect-pf-rsf-particle-free/`, relative to this root. Treat its source, dirty changes, executables, build trees and checkpoints as evidence. Direct new builds, outputs, patches and replays to separate destinations. Linked worktrees can share Git refs. Preserve the donor and any incoming work. Installed code, regression tests and normal runs must work without that sibling.
+
+### How to make a change
+
+- Start at the ordinary Simulator call site and identify the owner of each persistent quantity. Let the material model evaluate a local response. Let the Simulator coordinate solves, retries and acceptance. Give geometry, FE operators and physical history the responsibilities described in the plan.
+- Read the nearest release implementation and its callers before adding an interface. Reuse compatible variable declarations, assemblers, FE data, constraints, solver and output infrastructure. For a custom operation, name the actual upstream interface and the mathematical or lifetime mismatch. Keep common-core changes small and independently reviewable.
+- Keep the accepted parent immutable throughout an attempt. Re-evaluation, Jacobian assembly, line search and output may execute more than once. Rebuild trials from the same parent and publish the converged fields together once the step is accepted. A retry with a new duration starts again from that parent.
+- Write code in the style of its neighbors. Read the checkout’s contribution rules, formatter configuration and PR template. Use Doxygen for public interfaces and non-obvious persistent state. Explain units, stress frame, stage factors, measures and collective calls at the point where a wrong interpretation changes the result. Keep related residual and derivative calculations easy to read together.
+- Prefer a small public interface with visible data flow. A short top-level call that hides an entire second timestep driver fails review. An optional handler earns its place by owning a coherent resource or operation. Keep experimental selectors, environment hooks and run-specific names out of production interfaces.
+- Preserve the ordinary ASPECT path when the feature is off. Keep fixes to the scientific method distinguishable from code movement and shared API changes. Keep worktree planning material separate from patches prepared for upstream review.
+
+### Working agreement
+
+The midpoint audit is closed and its discrete update is frozen. Start with the first assignment in the plan. Continue through the first working slice when its reference and dependencies permit, then present the actual code for the author's architecture review. Make routine implementation decisions locally. Record a missing scientific reference, ambiguous model choice, or failed comparison against the exact path it affects. Proceed with independent work. Preserve failed evidence and explain a difference before changing a reference value.
+
+At handoff, update the working record with the exact commands, results and next action. Show the normal call path, the equation and state owner, and the smallest representative public header and implementation a human should read. Keep the active design in one guide as code lands. Use the project's scoped tests and the checkout’s formatter. Default to four or fewer total local workers on the author's laptop and record the rank/thread layout for comparisons. Publishing changes or submitting cluster jobs requires a separate request.
+<!-- phase-field-fault-refactor:end -->
