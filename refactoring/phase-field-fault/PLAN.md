@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**Current assignment on pf-rsf.** [Repair Increment 3A](INCREMENT_3A_REPAIR.md) from reviewed head `707ce9a9a`. Qualify fitted contacts, conservative full-ray transfer, cut-cell stress projection and the actual Stokes load. Establish phase-to-fault dependency direction. The [original 3A assignment](INCREMENT_3A_TASK.md) remains the record for the first implementation.
+**Current review on pf-rsf.** The [Increment 3A repair](INCREMENT_3A_REPAIR.md) from reviewed head `707ce9a9a` is ready for author review. The [working record](STATUS.md) reports the eleven discriminating tests, the fitted-contact and accepted-stress budgets, and the remaining reference gap. The [original 3A assignment](INCREMENT_3A_TASK.md) records the first implementation. Increment 3B starts after this review.
 
 ## Baselines and intended examples
 

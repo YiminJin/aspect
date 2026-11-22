@@ -1,8 +1,162 @@
 # Phase-field fault working record
 
-## Active assignment · Repair of the reviewed 3A implementation
+## Increment 3A repair · Stationary mature AT1 fault
 
-Start from `707ce9a9a` and follow [the repair and acceptance criteria](INCREMENT_3A_REPAIR.md). The existing 3A results below describe the pre-repair implementation. Record observed repair results here as they become available. Stage 3B begins after repair review.
+**Author review.** The [assignment installed from the repair kit](INCREMENT_3A_REPAIR.md) starts at reviewed commit `707ce9a9a`. The historical 3A measurements and CSV below retain their original meaning. The corrected free solution has its own label history. The supported combination is the stationary mature AT1 distance profile, curvature-one energetic degradation with positive magnitude, a frozen generic DGQ2 composition, and finite in-box fault transfer. Increment 3B awaits review.
+
+### Findings and discriminating tests
+
+| Finding | Change and discriminating result |
+| --- | --- |
+| P1 · Fitted contacts | Each crossing is the maximum of the one-sided DGQ2 face trace in the seed window. Both crossings constrain the regularized fit. Only two-sided interior stations contribute centroids. Both along-face errors fell from approximately 0.078 m on the historical free curve to 0.004598 m on 32² and 0.0003832 m on 64². Moving either contact independently to x = ±0.48 m fails. Results for the four adjacent labels are below. |
+| P1 · Fitted stress | Split the accepting DG projection on segment ends, support edges and overlapping-strip distance bisectors. A vertical-slice observer checks nine moments for each of three physical components. At 64² the displaced, imposed-rate fit has E = 9.44e−10. On precisely the same geometry and bulk fields the former unsplit Q8 would give E = 0.01914, exceeding the 0.01 budget. |
+| P2 · Width truncation | Integrate discarded weight independently on both sides of the association strip. Constant phase with a 0.1 m half-width in a 1 m box rejects at segment 0, station 0 with omitted fraction 0.8. Full width passes. Both centered vertical profiles integrate to 0.005 m/s. The translated 32² and 64² transects give 0.004999986842 and 0.004999999942 m/s, consistent with the independently measured central Q1 normalization error. |
+| P2 · Underresolved normal | Each owning-cell interval and each width edge is a quadrature break. Compare Q12 on a panel with its two halves and subdivide to a bounded depth. For the one-cell peak-0.99 quadratic at m = 1, the projected integral is 1534.6965325 m versus 755.6377468 m with unsplit Q12. Maximum error against Q256 is 2.64e−11 m. Exactly singular phase rejects setup. |
+| P2 · Actual Stokes load | The prescribed fixture instruments the installed fault assembler on a knot-crossed cell at initialization, when the physical parent stress is zero. Its actual Q3 RHS dotted with the Q2 nodal values of v = (y+xy, 0.4x) agrees with independent signed contraction using the frozen FE phase. In the fine fitted case both give −0.616531092518. Reversing just the supplied stress and changing only the phase passed to material assembly to zero each trigger the signed-work assertion. Common-point Q8 adjointness and Q3–Q8 differences are reported separately. |
+| P2 · Prescribed rate in convergence | The ordinary Picard preparation and veto call the section solver directly. The imposed fixture uses its configured initial label rate, registers the real assembler and accepted publication, and omits RSF solve/veto registration. Its row imbalance is labelled imposed. All 38 ordinary free rates solve the independent row balance. Switching the observed free material to the built-in material gives byte-identical label files at all three clocks. Both ordinary stationary inputs also run without a test library. |
+| P2 · Collective getter | Removed the collective material getter. The free solver and the all-rank fixture probe call the coupling's documented collective sampling operation during the lifetime of the relaxed parent. Reading accepted labels is local. The probe traversed the same active Q8 samples used by the two-sided traction and independent residual checks. |
+| P2 · Donor complement | Recover the full donor (CellId, q) keys from its Cartesian level-four coordinates, coarse Z-order and Q3 abscissae. Match all 36,864 identities and coordinates. At both compared clocks all 23,984 donor traction points match segment, station and imposed rate. The actual three-component slip stress is exactly zero at every one of the remaining 12,880 points. An injected 1 Pa shear load on one complement sample fails. The independent finite-strip admission check distinguishes associated zero-phase points (zero such points in this Q1 case). The matched cell-interval donor differs in χ by at most 2.37e−13 m⁻¹. The archived remote backend differs by 5.88e−6 m⁻¹. |
+| P2 · Initial history | Independently assert 11.682941969615793 s and zero cumulative slip at all 38 labels at time zero. Advancing just one initial exported age by 0.01 s fails the check. The initialization Maxwell interval is 0.1 s. Compare the analytic fixed-rate age update and Δs = VΔt at 12.5 and 25 ms. One solved 25 ms attempt was rejected. All labels and all published bulk fields by cell/sample match the clean path exactly at all three clocks. |
+| P3 · Distributed work | Each of two ranks contributed 22,365 positive-weight Q8 samples at each clock, summing to the serial 44,730. Setting one rank’s active count to zero fails with both full bulk shards still present. Both replicated label tables and all 9,216 Q3 points were compared by identity. The largest DG component difference was 4.26e−14 Pa. |
+| P3 · Normalization storage | Assemble one diagonal and one off-diagonal and eliminate the consistent Q1 mass in O(n) work and storage on each rank. A single DGQ2 cell, unequal intervals of 0.3 and 0.7 m, and a phase varying in both directions give nodal values 1.95438975, 1.72938523 and 0.50769628 m. They agree with independent Q256 and a dense solve to 4.44e−16 m. Geometry still uses its separate second-difference fit. |
+
+### Contact measurements
+
+Both inclined seeds have analytic length 1.154700538379252 m. The displaced seed starts 0.015625 m off in x and 0.01353165 m off in the normal direction. Reported distances are in metres, with the near-end labels listed in material order (1, 2, 35, 36). The crossing coordinates come from the observed FE face. The remaining contact error measures the discrete phase maximum's displacement from the analytic ridge. A flat bulk phase keeps the supplied trace.
+
+| Seed | Grid | Absolute x error, bottom / top | Near-end normal errors | Maximum interior | Length |
+| --- | --- | --- | --- | ---: | ---: |
+| Centered | 32² | .004598 / .004598 | .003104, .002269, .002269, .003104 | .003104 | 1.150194 |
+| Centered | 64² | .0003832 / .0003832 | .0002555, .0001832, .0001832, .0002555 | .0002555 | 1.154318 |
+| Displaced | 32² | .004598 / .004598 | .003064, .002193, .002303, .003123 | .003123 | 1.150197 |
+| Displaced | 64² | .0003832 / .0003832 | .0002629, .0001968, .0001858, .0002570 | .0002629 | 1.154318 |
+
+The independent Q32 ray integral at the *original* half-width measures the omitted fractions below. The measured historical matched-Q1 tail of 2.033332 parts per million sets the 2.1 ppm relative budget. The bounded quadratic interpolant can spread phase across a whole edge cell. Its benchmark inputs therefore extend the association width by one Cartesian cell diagonal. Every repaired DG run measured zero discarded weight at this wider width. The matched-Q1 run retains the donor's width and both in-box ray lengths. There is no extension past a physical face or finite end.
+
+| Original-width control | 32² omitted (ppm) | 64² omitted (ppm) |
+| --- | ---: | ---: |
+| vertical | 0.2803 | 0.2106 |
+| narrow | 0.3184 | 0.2803 |
+| translated | 3.147 | 0.7657 |
+| inclined | 4.726 | 0.7257 |
+| inclined-fit | 4.897 | 0.6548 |
+| inclined-q1 | — | 2.033 |
+| free | 5.054 | 0.7252 |
+
+### Accepted stress moments
+
+The production rule clips the unit cell into convex regions of constant finite-strip association and triangulates them. Cells with no internal cut keep Q8. The observer instead slices vertically at intersections of the physical strip edges and equal-distance lines. It reconstructs the smooth viscous plus relaxed-parent polynomial from nine FE samples, then evaluates the rate and discontinuous slip tensor on each slice. Q6 and Q10 product rules on these slices provide an independent integration uncertainty estimate. E is the maximum absolute component/monomial defect divided by the maximum cell-area times sampled absolute reference stress on the same cells and clock. Both dimensional columns have units Pa m². The legacy observer column is the original corner-selected Q16 metric, recomputed on the repaired fields. The independent observer includes finite-end and support cuts even in cells whose corner segment IDs agree.
+
+| Case, grid, physical step | Cells | Max defect / scale | Worst defect cell / scale cell | E | Reference uncertainty / scale | Unsplit Q8 E | Legacy Q16 E |
+| --- | ---: | --- | --- | ---: | ---: | ---: | ---: |
+| inclined-32, 1 | 782 | 1.042e-08 / 4.796 | 15_3:221 / 0_3:110 | 2.17e-09 | 5.93e-12 | 0.02176 | 0.0002186 |
+| inclined-64, 1 | 2032 | 2.862e-10 / 1.1242 | 15_4:2303 / 0_4:1011 | 2.55e-10 | 1.24e-13 | 0.01071 | 2.654e-06 |
+| inclined-fit-32, 1 | 782 | 8.491e-09 / 4.1225 | 3_3:303 / 0_3:101 | 2.06e-09 | 5.45e-12 | 0.02142 | 0.006857 |
+| inclined-fit-64, 1 | 2041 | 1.037e-09 / 1.0982 | 15_4:2223 / 15_4:2232 | 9.44e-10 | 1.22e-13 | 0.01914 | 0.005878 |
+| inclined-q1-64, 1 | 1940 | 3.392e-10 / 1.1228 | 15_4:2303 / 0_4:1011 | 3.02e-10 | 3.53e-14 | 0.01071 | 2.614e-06 |
+| free-32, 1 | 782 | 2.54e-13 / 0.00010063 | 15_3:221 / 15_3:223 | 2.52e-09 | 4.96e-12 | 0.008554 | 0.004962 |
+| free-64, 1 | 2032 | 3.439e-15 / 2.7875e-05 | 15_4:2303 / 15_4:2232 | 1.23e-10 | 9.43e-14 | 0.01456 | 0.00346 |
+| free-32, 2 | 782 | 2.769e-13 / 0.00018215 | 15_3:221 / 0_3:110 | 1.52e-09 | 2.51e-12 | 0.005169 | 0.002506 |
+| free-64, 2 | 2032 | 1.817e-15 / 5.1701e-05 | 15_4:2303 / 0_4:1101 | 3.51e-11 | 4.9e-14 | 0.007466 | 0.001761 |
+
+### One accepted step and review boundary
+
+1. ASPECT owns the static generic DGQ2 coefficients and their accepted time levels. At the first material update, `StationaryFault::fit` reads the interior DG traces on the seed faces and the two-sided interior FE samples. `FaultPhaseProfile::initialize` uses the resulting segment frames, the same initialized FE field and the phase-side `excess_compliance` to assemble the full normal integral. The stable curvature-one expression is mφ(1+φ)/(1−φ)². The phase-side function admits the infinite limit at one. The fault enforces the narrower inverse-degradation domain [−1e−4,1) and maps a permitted negative undershoot to zero weight.
+2. For the 12.5 ms attempt, the material evaluates κ and the coupling rotates and relaxes the accepted DG parent with the accepted slip removed from the bulk spin. Picard preparation samples Q8 pressure and strain, gathers Q1 balance against accepted label age, solves rates, and returns the negative slip stress offset through the material to the actual Stokes RHS. The converged iterate must also satisfy the coupling veto. Generic Stokes assembly, fixed-box pressure datum and the plane-strain correction retain their Increment 2 roles.
+3. Only after the simulator's repeat decision does `accept_step` project endpoint stress into the three owned DGQ2 blocks and publish label rate, slip and age together. At the sampled central Q8 point in the 32² free run, the 12.5 ms accepted DG xx, yy and xy are 0.02163087, −0.02198014 and 0.03737990 Pa. Mechanical pressure is −0.02623878 Pa, friction compression 4.99541727 Pa, and driving traction including the slip response 3.67313684 Pa. The scaled independent section residual is 6.02e−15.
+4. At 25 ms the 32² rates at labels 0, 19 and 37 are 0.07301323, 0.08554975 and 0.07116843 m/s. Turning off only the loading ramp leaves initialization identical and changes label 1's 25 ms rate from 0.10509809 to 0.12191597 m/s. The complete corrected 32² trajectory is retained alongside the original CSV. The historical donor prescribes V and disables fitting. It supplies independent common-input source and stress identities, but no independent time trajectory for free rates, DG stress, age or slip.
+
+The rank-local attempt retains one relaxed-parent DG tensor per support point. Publication stages three owned DG blocks. Geometry, ages, slip, rates and O(n) normalizer rows are replicated. Face-maximum candidates are gathered once at initialization. The dense regularized geometry fit and its storage are separate from the tridiagonal normalizer. Cut polygons, quadrature and projection matrices live only for the current owned cell. Instrumented serial runs with one thread used 225,316 KiB / 79.8 s at 32² and 323,088 KiB / 161.1 s at 64², including diagnostics and concurrent local verification. The accepted projection adds no persistent per-cell cut cache.
+
+The coupling's Picard and accept hooks all have production callers. The phase-side law has its own fault-independent unit test. The imposed material and collective observation adapter exist only in the benchmark. The release analogues are ASPECT's existing Stokes assembler interfaces and deal.II's cell-local projection from quadrature points. No Simulator hook was added.
+
+```text
+include/aspect/phase_field/mature_degradation.h
+include/aspect/reconstructed_fault/stationary_fault.h
+source/reconstructed_fault/stationary_fault.cc
+source/reconstructed_fault/phase_profile.cc
+source/material_model/phase_field_fault.cc
+source/reconstructed_fault/stokes_coupling.cc
+source/simulator/assemblers/fault_stress.cc
+benchmarks/fixed_fault/phase_ridge/phase_ridge.cc
+benchmarks/fixed_fault/phase_ridge/moments.py
+refactoring/phase-field-fault/results/3a-repair-free-labels.csv
+refactoring/phase-field-fault/results/3a-repair-transects.png
+```
+
+### Reproduction and preserved discrepancies
+
+The archive contained the instruction patch and its standalone assignment. It was extracted under `/tmp/pf-rsf-3a-repair-wK3AAaA1`. `git apply --check` succeeded on the clean reviewed head before `git apply`. The instruction commit is `efd41ab1b`, the geometry and normalization commit is `15cbc8a88`, the coupling commit is `a91d55f63`, and the verification commit is `26ce90102`.
+
+All new results are fresh starts under the ignored worktree directory below. The independent Q1 donor was built from a Git archive in that directory. The historical donor input and archived output were read without modification. The original free and displaced geometry, pre-fix Q8/Q16/Q32 comparisons, and original label CSV remain in the following historical section. The prior session's temporary run tree was absent on arrival.
+
+```text
+build-3a-repair/qualification-review.log
+build-3a-repair/qualification
+build-3a-repair/preflight
+build-3a-repair/mutations
+build-3a-repair/donor-cell
+```
+
+Both first corrected free initial solves reached the 80-iteration allowance while still decreasing the relative Stokes residual (4.08202e−10 and 4.54965e−10). Only the free fixture allowance was increased to 180. Stokes tolerance 1e−12, section and clock checks were retained. The first vertical-slice observer missed events where a cut entered the *horizontal cell edge*. Its Q6/Q10 difference on the coarse fit reached 1.66%. Including these events before ordering the vertical panels reduced the scaled uncertainty to 5.45e−12 on that control. The initial probe placement at the origin fell between knots on the fine displaced grid. Selecting the cell containing a particular interior material knot exercises an actual cut on both grids. The first sandbox MPI launcher had no usable local socket interface. The two-rank qualification used the local Open MPI launcher with socket access.
+
+The comparison used one deal.II, OpenMP and BLAS thread per rank, one rank unless indicated, and up to four total local workers. Reproduce in a new empty evidence directory. The names below correspond to the completed runs.
+
+```sh
+D=$PWD/build-3a-repair
+Q=$D/qualification
+B=benchmarks/fixed_fault/phase_ridge
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+cmake --build build-slice --target aspect -j2
+cmake -S "$B" -B "$D/plugin" -DAspect_DIR="$PWD/build-slice"
+cmake --build "$D/plugin" -j1
+cmake --build build-slice/tests --target fixed_fault stationary_fault -j1
+so=$D/plugin/libphase_ridge.release.so
+for c in vertical narrow translated inclined inclined-fit free; do
+  for g in 32 64; do python3 "$B/run.py" build-slice/aspect "$so" "$Q/$c-$g" "$c" "$g"; done
+done
+python3 "$B/run.py" build-slice/aspect "$so" "$Q/inclined-q1-64" inclined-q1 64
+PATH=/opt/openmpi/5.0.6/bin:$PATH python3 "$B/run.py" build-slice/aspect "$so" "$Q/free-32-mpi2" free 32 --ranks 2
+python3 "$B/run.py" build-slice/aspect "$so" "$Q/free-32-retry" free 32 --retry-plugin build-slice/tests/libfixed_fault.release.so
+python3 -O "$B/check_normalization.py" build-slice/aspect "$so" "$D/normalization-bounds"
+archive=../aspect/benchmarks/reconstructed_fault/bp5/moment-inclined/native_history_reference/output-native_history_reference
+python3 -u -O "$B/check.py" "$Q" --retry --donor "$archive" --donor-cell "$D/donor-cell/output" \
+  --history "$D/free-labels.csv" --plot "$D/transects.png" > "$D/qualification-review.log"
+python3 refactoring/phase-field-fault/test_replay_stationary_reference.py -v
+```
+
+To regenerate the cell-interval donor, use the historical build commands below with source revision `82e43c2669b92ac92a1c62d47f5dd79ac3b29c06`, the original input from `abbc9b0c0` and the `cell` override. The repaired comparison checks the unmodified archived remote results as well as this fresh interval replay. The known plane-strain convention shift at identical donor gradients remains 362.498 Pa, with a maximum common-convention normal defect of 4.61e−11 Pa. Neither pressure boundary data nor free rates are inferred from this substitution.
+
+The signed RHS mutations used separate copies of the fixture. Immediately before its isolated `FaultStressLoad::execute` call, one negated every actual offset tensor. The other set only the scratch material-input phase values to zero and called `m.evaluate` again. Both copies were built against the same Release executable and run with `run.py … inclined-fit 32`; both aborted at the signed-work assertion. The normal-material comparison included the exact free-32 input, changed only the material name to `phase field fault` and the postprocessors to `fixed fault statistics`, and compared its three `fault-labels` files byte for byte. The steady-load sibling removed just the traction ramp.
+
+### Retained stationary controls
+
+Release and Debug each passed 2,318 unit assertions in 50 cases, including the phase-only law and a strip that spans 20% of a cell whose four corners all have the same segment ID. Each build passed both stationary integration CTests and both lifecycle harnesses. The original tolerances and clocks were used for the homogeneous and three-label donor files, physical DG output, EOS contrast, field reordering, RHS-only assembly, retry and pressure-pulse cutback. The replay substitution checks passed in normal and optimized Python. A Debug 32² inclined fitted, imposed-rate run also completed through physical publication.
+
+The grid, phase, support, compression datum and thermal/elasticity settings for the two original native material inputs are unchanged. The free localized fixture keeps its original friction reference speed of 0.001 m/s. In the imposed diagnostic the fixture sets the initial label rate through the existing reference-speed parameter to 0.005 m/s. Its measured imbalance has no authority over convergence. On the fitted 64² run, common-point Q8 work differed by 1.79e−16 on a 0.008715 scale; the Q3–Q8 difference was −1.15e−6.
+
+The deliberately ambiguous, laterally flat face maximum rejects fitting. An admissible peak of 0.999999999999 tests the bounded quadrature failure, including on two ranks with just one owned cell in total. Both the singular and unresolved paths terminate before the section solve.
+
+The feature-disabled matrix statistics comparator passed with local MPI sockets. The original-elasticity numerical-timestep CTest still differs from its checked-in near-zero shear values under this installation's plain `diff`. A fresh local build of the pinned pristine 3.1.0 commit gave a byte-identical complete depth-average file to the repaired executable (SHA-256 `e203bf08c3b307f6fa248adf53765e15d82362172c72b870253be1f877f7d5b5`). The first shear is −0.0346938 Pa in both local binaries and 0.0967461 Pa in the upstream golden file. This reproduces the pre-repair baseline discrepancy recorded below. All eleven repair checks meet their fixture criteria. An independently solved free-RSF donor trajectory remains unavailable.
+
+```sh
+for mode in release debug; do
+  build=build-slice; tests=build-slice/tests
+  if [ "$mode" = debug ]; then build=build-slice-debug; tests=$D/debug-tests; fi
+  cmake --build "$build" --target aspect -j1
+  (cd "$build/unit_tests" && ../aspect --test)
+  ctest --test-dir "$tests" -R '^(fixed_fault|stationary_fault)$' --output-on-failure
+  for c in fixed_fault stationary_fault; do
+    python3 -O benchmarks/fixed_fault/check_lifecycle.py "$build/aspect" "$tests/libfixed_fault.$mode.so" \
+      "$D/replay-$mode-$c" --case "$c"
+  done
+done
+ctest --test-dir "$D/off-tests" -R '^matrix_nonzeros_1$' --output-on-failure
+ctest --test-dir build-slice/tests -R '^viscoelastic_numerical_elastic_time_step$' --output-on-failure
+cmp "$D/pristine-numerical/output/depth_average.txt" build-slice/tests/output-viscoelastic_numerical_elastic_time_step/depth_average.txt
+```
+
+The Debug and feature-off test trees were configured from `tests` with the matching `Aspect_DIR`, executable and build type, `ASPECT_RUN_ALL_TESTS=ON` and `ASPECT_COMPARE_TEST_RESULTS=ON`. The pristine comparator used release commit `0d97d2d3311154ca3f01d801b18f3945dc8b8bad`, the same GCC 12.4.0, deal.II 9.6 and Open MPI 5.0.6, and the original parameter file with only an output-directory override. The implementation and this review stop at the repaired stationary model.
 
 ## Increment 3A · Stationary phase ridge
 
