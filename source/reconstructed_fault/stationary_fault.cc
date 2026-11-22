@@ -89,10 +89,12 @@ namespace aspect
     const QGauss<dim> rule(sim.get_fe().degree+1);
     FEValues<dim> fe(sim.get_mapping(),sim.get_fe(),rule,update_values|update_JxW_values|update_quadrature_points);
     std::vector<double> phase(rule.size()), matrix(n*n), rhs(n);
-    double total = 0., minimum = 1., maximum = 0.;
+    double total = 0., cell_margin = 0.;
+    double minimum = std::numeric_limits<double>::infinity(), maximum = -minimum;
     for (const auto &cell : sim.get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
         {
+          cell_margin = std::max(cell_margin,cell->diameter());
           fe.reinit(cell);
           fe[sim.introspection().extractors.compositional_fields[field]].get_function_values(fields,phase);
           for (unsigned int q=0; q<rule.size(); ++q)
@@ -137,17 +139,23 @@ namespace aspect
           system(j-1+a,j-1+k) += second[a]*second[k];
     system.gauss_jordan();
     system.vmult(offsets,b);
-    const auto seed = accepted;
+    const double radius = half_width + Utilities::MPI::max(cell_margin,comm);
+    const double contact[2] = {accepted.front().position[contact_axes[0]], accepted.back().position[contact_axes[1]]};
     for (unsigned int j=0; j<n; ++j)
-      accepted[j].position += offsets[j]*normal;
+      {
+        AssertThrow(std::abs(offsets[j]) <= radius,ExcMessage("Fitted label left its phase reconstruction region."));
+        accepted[j].position += offsets[j]*normal;
+      }
     // Intersect each fitted end segment with its original physical contact face.
     for (unsigned int end=0; end<2; ++end)
       {
         const unsigned int j = end ? n-1 : 0, neighbor = end ? j-1 : 1, axis = contact_axes[end];
         const auto edge = accepted[neighbor].position-accepted[j].position;
         AssertThrow(edge[axis] != 0.,ExcMessage("The fitted trace grazes its contact face."));
-        accepted[j].position += (seed[j].position[axis]-accepted[j].position[axis])/edge[axis]*edge;
+        accepted[j].position += (contact[end]-accepted[j].position[axis])/edge[axis]*edge;
       }
+    for (const auto &label : accepted)
+      AssertThrow(sim.get_geometry_model().point_is_in_domain(label.position),ExcMessage("Fitted fault left the physical box."));
     rebuild_segments();
   }
 
@@ -162,7 +170,13 @@ namespace aspect
         const auto offset = point-accepted[j].position;
         const double s = offset*seg.tangent;
         const double bounded = std::clamp(s,0.,seg.length);
-        const double distance = (offset-bounded*seg.tangent).norm_square();
+        // Two segments can share the closest vertex outside their normal fans.
+        // Use its stored coordinates on both sides so a roundoff tie retains
+        // the earlier material segment on every MPI partition.
+        const auto closest_point = (s <= 0. ? accepted[j].position :
+                                    s >= seg.length ? accepted[j+1].position :
+                                    accepted[j].position + s*seg.tangent);
+        const double distance = point.distance_square(closest_point);
         const double tol = 32.*std::numeric_limits<double>::epsilon()*arclength.back();
         const bool active = s >= -tol && s <= seg.length+tol && std::abs(offset*seg.normal) <= half_width;
         if ((active && !closest.active) || (active == closest.active && distance < best))

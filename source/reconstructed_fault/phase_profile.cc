@@ -8,12 +8,22 @@
 
 namespace aspect
 {
+  namespace
+  {
+    // Empirical lower undershoot limit of the mature donor. The upper limit
+    // is singular in h. Never clip a supercritical or nonfinite phase.
+    bool admissible_phase(const double phase)
+    {
+      return std::isfinite(phase) && phase >= -1.e-4 && phase < 1.;
+    }
+  }
+
   template <int dim>
   double FaultPhaseProfile<dim>::weight(const double phase) const
   {
     // Mature AT1, degradation curvature one. The lower tail of a DG
     // interpolant may undershoot at the compact profile edge.
-    AssertThrow(std::isfinite(phase) && phase < 1.,ExcMessage("Fault phase must be finite and below one."));
+    AssertThrow(admissible_phase(phase), ExcMessage("Fault phase is outside the mature degradation domain [-1e-4,1)."));
     const double d = std::max(0.,phase);
     return magnitude*d*(1.+d)/((1.-d)*(1.-d));
   }
@@ -35,9 +45,24 @@ namespace aspect
     const auto block = sim.introspection().block_indices.compositional_fields[field];
     std::vector<types::global_dof_index> indices(system.n_dofs_per_cell());
     std::vector<double> phase(dg.n_dofs_per_cell());
+    // Check the same static FE field at bulk assembly and section quadrature
+    // before any rank can enter the collective Picard solve.
+    FEValues<dim> stokes(sim.get_mapping(),system,QGauss<dim>(3),update_values);
+    FEValues<dim> section(sim.get_mapping(),system,QGauss<dim>(8),update_values);
+    bool locally_admissible = true;
     for (const auto &cell : sim.get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
         {
+          for (auto *fe :
+               {
+                 &stokes,&section
+               })
+            {
+              fe->reinit(cell);
+              std::vector<double> values(fe->n_quadrature_points);
+              (*fe)[sim.introspection().extractors.compositional_fields[field]].get_function_values(fields,values);
+              locally_admissible &= std::all_of(values.begin(),values.end(),admissible_phase);
+            }
           const auto lo = cell->vertex(0);
           const auto hi = cell->vertex(GeometryInfo<dim>::vertices_per_cell-1);
           cell->get_dof_indices(indices);
@@ -76,10 +101,15 @@ namespace aspect
                     for (unsigned int d=0; d<dim; ++d) unit[d]=(x[d]-lo[d])/(hi[d]-lo[d]);
                     double value=0.;
                     for (unsigned int i=0; i<phase.size(); ++i) value+=dg.shape_value(i,unit)*phase[i];
-                    rays[j*stations.size()+k] += (b-a)*ray.weight(q)*weight(value);
+                    if (admissible_phase(value))
+                      rays[j*stations.size()+k] += (b-a)*ray.weight(q)*weight(value);
+                    else
+                      locally_admissible = false;
                   }
               }
         }
+    AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(locally_admissible),sim.get_mpi_communicator()),
+                ExcMessage("The initialized FE phase is outside the mature degradation domain [-1e-4,1)."));
     Utilities::MPI::sum(rays,sim.get_mpi_communicator(),rays);
     FullMatrix<double> mass(n,n);
     Vector<double> rhs(n), solution(n);
