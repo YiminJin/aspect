@@ -21,6 +21,7 @@ def main():
             ("constant", ".35", .5, None),
             ("pole", ".99*(1-4*(x-.5)^2)", .5, None),
             ("unequal", ".55*(1-4*(x-.5)^2)*(1-.4*y^2)", .5, None),
+            ("unresolved", ".999999999999*(1-4*(x-.5)^2)", .5, "did not converge within 16 subdivisions"),
             ("singular", "1", .5, "outside the mature degradation domain"),
             ("ambiguous-contact", ".3+.1*y", .5, "ambiguous stationary phase maximum")]:
         dest=root/case
@@ -60,8 +61,8 @@ end
             log=(dest/"run.log").read_text()
             require(process.returncode!=0 and failure in log,f"Missing rejection in {dest}")
             if case=="discarded":
-                require("segment 0 at station 0 (omitted fraction 0.800000)" in log.replace("\n", " ")
-                        or "omitted fraction 0.800000" in log, "Did not identify the 80% loss")
+                require("segment 0 at station 0 (omitted fraction 0.800000)" in " ".join(log.split()),
+                        "Did not identify the station and its 80% loss")
             print(case, failure,flush=True)
             continue
         process.check_returncode()

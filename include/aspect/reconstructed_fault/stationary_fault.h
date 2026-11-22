@@ -50,8 +50,9 @@ namespace aspect
         return half_width;
       }
       const Segment &segment(unsigned int j) const;
-      /** Fit normal offsets to the initialized FE ridge once. Keep endpoints on
-       * their seed contact faces, and retain the seed for constant phase. */
+      /** Collectively fit normal offsets to two-sided observations of the
+       * initialized FE ridge. Constrain both crossings to the one-sided
+       * phase maxima on their supplied faces. Constant phase retains the seed. */
       void fit(const SimulatorAccess<dim> &sim, unsigned int phase_field,
                const LinearAlgebra::BlockVector &fields);
       /** Set the prescribed geometry and uniform initial state in physical units. */

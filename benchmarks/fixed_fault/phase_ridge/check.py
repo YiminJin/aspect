@@ -300,6 +300,26 @@ def rank_check(root):
         print("  ranges (age,slip,rate)", reference[:, 4:7].min(axis=0), reference[:, 4:7].max(axis=0))
 
 
+def donor_bulk_ids(coordinates):
+    """Recover permanent CellId/Q3 identities for the archived 4x4 box at level four."""
+    # The archived full-field binary contains coordinates and no CellId column.
+    # Its coarse cells use Z ordering; each refinement appends x_bit + 2*y_bit.
+    scaled = (coordinates+.5)*64
+    indices = np.floor(scaled).astype(int)
+    require(np.all((indices>=0)&(indices<64)), "Donor point is outside the reference grid")
+    unit = scaled-indices
+    nodes = gauss(3)[0]
+    nearest = abs(unit[:,:,None]-nodes).argmin(axis=2)
+    near(unit, nodes[nearest], 2.e-14)
+    keys = []
+    for (x,y),(qx,qy) in zip(indices,nearest):
+        digits = [((x>>bit)&1) + 2*((y>>bit)&1) for bit in reversed(range(6))]
+        root = 4*digits[0]+digits[1]
+        path = "".join(map(str,digits[2:]))
+        keys.append((f"{root}_4:{path}", qx+3*qy))
+    return keys
+
+
 def donor_check(root, donor, cell_reference=None):
     geom = np.loadtxt(donor/"geometry.csv", skiprows=1, delimiter=",")
     for case in ("inclined", "inclined-q1"):
@@ -314,10 +334,12 @@ def donor_check(root, donor, cell_reference=None):
             near(b["y"], t["y"], 2.e-15)
             near(b["rate"], .005, 0, 2*np.finfo(float).eps)
             df = np.fromfile(donor/f"fields_{step}_rank0.bin").reshape(-1, 15)
-            coords = {(round(x, 12), round(y, 12)): i for i, (x, y) in enumerate(df[:, :2])}
-            require(len(keys)==len(a)==len(coords)==len(df), "Duplicate or missing bulk point")
-            loc = [(round(x,12),round(y,12)) for x,y in zip(a["x"],a["y"])]
-            require(set(coords)==set(loc), "Donor/target full Q3 point universes differ")
+            donor_ids = donor_bulk_ids(df[:, :2])
+            donor_rows = {key: i for i,key in enumerate(donor_ids)}
+            require(len(keys)==len(a)==len(donor_rows)==len(df) and keys.keys()==donor_rows.keys(),
+                    "Donor and target full (cell,q) universes differ")
+            ordered = [donor_rows[key] for key in zip(a["cell"],a["q"])]
+            near(np.column_stack((a["x"],a["y"])),df[ordered,:2],2.e-15)
             if case=="inclined-q1":
                 selected=np.zeros(len(a), dtype=bool)
                 selected[[keys[cell,q] for cell,q in zip(t["cell"],t["q"])]]=True
@@ -345,7 +367,7 @@ def donor_check(root, donor, cell_reference=None):
                     near(b[key],factor*frame,1.e-8)
                 print(f"  Q1 universe {len(a)}, common {len(t)}, zero-load complement {(~selected).sum()},"
                       f" associated zero-phase {(admitted & ~selected).sum()}")
-            df = df[[coords[round(x,12),round(y,12)] for x, y in zip(t["x"], t["y"])]]
+            df = df[[donor_rows[cell,q] for cell,q in zip(t["cell"],t["q"])]]
             nx, ny = t["nx"], t["ny"]
             tx, ty = ny, -nx
             # Hold the donor's actual gradient, incoming stress and mechanical

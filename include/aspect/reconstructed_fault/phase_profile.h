@@ -9,7 +9,9 @@
 
 namespace aspect
 {
-  /** Static DG phase and its consistent Q1 normal integral on a fitted trace. */
+  /** Finite-strip bulk/section transfer on a stationary trace. ASPECT owns
+   * the static DG phase. This operator owns its replicated Q1 normal
+   * integrals in metres and uses the same inverse-length weight both ways. */
   template <int dim>
   class FaultPhaseProfile
   {
@@ -26,7 +28,8 @@ namespace aspect
       };
 
       /** Integrate h along both physical normal rays at three Gauss stations
-       * per segment. Reduce only these integrals, then project with Q1 mass. */
+       * per segment. Collectively check phase, quadrature convergence and the
+       * discarded fraction before projecting with the consistent Q1 mass. */
       void initialize(const SimulatorAccess<dim> &sim, unsigned int phase_field,
                       const LinearAlgebra::BlockVector &fields, double magnitude);
       double weight(double phase) const;
