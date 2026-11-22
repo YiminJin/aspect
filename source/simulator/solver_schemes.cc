@@ -20,6 +20,7 @@
 
 
 #include <aspect/simulator.h>
+#include <aspect/material_model/fixed_fault.h>
 #include <aspect/global.h>
 #include <aspect/mesh_deformation/free_surface.h>
 #include <aspect/volume_of_fluid/handler.h>
@@ -479,6 +480,13 @@ namespace aspect
 
             rebuild_stokes_matrix = rebuild_stokes_preconditioner = true;
           }
+      }
+
+    if (auto *fault = dynamic_cast<MaterialModel::FixedFault<dim> *>(material_model.get()))
+      {
+        if (nonlinear_iteration == 0)
+          rebuild_stokes_matrix = rebuild_stokes_preconditioner = true; // Maxwell viscosity uses the attempt duration.
+        fault->prepare_stokes(current_linearization_point);
       }
 
     // Re-compute the pressure scaling factor for the Stokes assembly

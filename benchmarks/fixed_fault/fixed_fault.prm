@@ -1,0 +1,98 @@
+# Homogeneous mature section. The left wall holds both material labels.
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = 0.025
+set Nonlinear solver scheme = no Advection, iterated Stokes
+set Nonlinear solver tolerance = 1e-12
+set Nonlinear solver failure strategy = abort program
+set Max nonlinear iterations = 80
+set Pressure normalization = no
+set Output directory = output-fixed_fault
+subsection Formulation
+  set Enable elasticity = true
+end
+subsection Geometry model
+  set Model name = box
+end
+subsection Mesh refinement
+  set Initial global refinement = 1
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right x:function, top x:function, bottom x:function
+  subsection Function
+    set Function expression = 0;0
+  end
+end
+subsection Boundary traction model
+  set Prescribed traction boundary indicators = right y:function
+  subsection Function
+    set Function expression = 0;0.02+t
+  end
+end
+subsection Time stepping
+  set List of model names = function
+  subsection Function
+    set Function expression = 0.0125
+  end
+end
+subsection Discretization
+  set Composition polynomial degree = 2
+  set Use discontinuous composition discretization = true
+end
+subsection Compositional fields
+  set Number of fields = 4
+  set Names of fields = ve_stress_xx, ve_stress_yy, ve_stress_xy, phase_field
+  set Types of fields = stress, stress, stress, generic
+  set Compositional field methods = static
+end
+subsection Initial composition model
+  set List of model names = function
+  subsection Function
+    set Function expression = 0;0;0;0.35
+  end
+end
+subsection Initial temperature model
+  set List of model names = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Material model
+  set Model name = fixed fault
+  subsection Simple model
+    set Viscosity = 10
+  end
+  subsection Fixed fault
+    set Shear modulus = 10
+    set Initialization interval = 0.1
+    set Background compression = 5
+    set Background shear traction = 3.85
+    set Reference friction coefficient = 0.6
+    set Direct effect = 0.025
+    set Evolution effect = 0.015
+    set Slip distance = 0.008
+    set Reference speed = 0.001
+    set Radiation damping = 1
+    set Initial age = 10
+  end
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-13
+  end
+end
+subsection Postprocess
+  set List of postprocessors = fixed fault statistics, velocity statistics
+end
