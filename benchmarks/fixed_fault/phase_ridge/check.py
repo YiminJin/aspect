@@ -79,7 +79,7 @@ class Phase:
         return np.sum(np.diff(cuts)*(h @ w))
 
 
-def normal_projection(phase, vertices, integrals):
+def normal_projection(phase, vertices, integrals, nominal_width):
     # Full dense independent mass/RHS. Retain endpoint and middle station
     # ray integrals separately from their Q1 representation.
     n = len(vertices)
@@ -92,11 +92,13 @@ def normal_projection(phase, vertices, integrals):
         normal = np.array([-t[1], t[0]])
         for xi, w in zip(*gauss(3)):
             shape = np.array([1-xi, xi])
-            exact = phase.ray(shape @ vertices[j:j+2], normal)
+            center = shape @ vertices[j:j+2]
+            exact = phase.ray(center, normal)
+            admitted = phase.ray(center, normal, width=nominal_width)
             rows = slice(j, j+2)
             mass[rows, rows] += w*length*np.outer(shape, shape)
             rhs[rows] += w*length*shape*exact
-            rays.append((exact, shape @ integrals[rows]))
+            rays.append((exact, shape @ integrals[rows], (exact-admitted)/exact))
     return np.linalg.solve(mass, rhs), np.array(rays)
 
 
@@ -105,7 +107,7 @@ def metrics(output, step, rank=0):
         return {key: np.array([float(x) for x in values]) for key, *values in map(str.split, data)}
 
 
-def geometry_error(case, vertices):
+def geometry_error(case, vertices, grid):
     center = .07 if case == "translated" else 0.
     inclined = case.startswith("inclined") or case == "free"
     normal = np.array([-np.sqrt(3)/2, .5]) if inclined else np.array([-1., 0.])
@@ -122,7 +124,18 @@ def geometry_error(case, vertices):
         near(errors, 0., 2.e-15)
     if case in ("translated", "inclined-fit"):
         require(core < .015625*abs(normal[0]), "Displaced seed failed to follow the interior FE ridge")
-    return length, core, errors[1:-1].max(), errors[[0, -1]].max()
+    expected_x = center + (vertices[[0, -1], 1]/np.sqrt(3) if inclined else np.zeros(2))
+    contacts = abs(vertices[[0, -1], 0]-expected_x)
+    near_ends = errors[[1, 2, -3, -2]]
+    require(max(contacts) <= .25/grid, f"Contact errors {contacts} exceed quarter-cell budget")
+    require(max(near_ends) <= .25/grid, f"Near-end errors {near_ends} exceed quarter-cell budget")
+    expected_length = 2/np.sqrt(3) if inclined else 1.
+    require(abs(length/expected_length-1) <= .01, "Relative length error exceeds 1%")
+    require(errors[1:-1].max()<=.25/grid, "Interior ridge misses the quarter-cell budget")
+    if case in ("translated", "inclined-fit"):
+        require(max(near_ends) < .015625*abs(normal[0]) and max(contacts) < .015625,
+                "Displaced seed failed to improve at its ends")
+    return length, core, errors[1:-1].max(), contacts, near_ends
 
 
 def check_case(root, case, grid):
@@ -130,10 +143,12 @@ def check_case(root, case, grid):
     init = labels(output, 0)
     points = bulk(output, 0)
     vertices = init[:, 1:3]
-    geometry = geometry_error(case, vertices)
+    geometry = geometry_error(case, vertices, grid)
     ell = .078125 if case == "narrow" else .15625
     phase = Phase(points, grid, ell)
-    recovered, rays = normal_projection(phase, vertices, init[:, 3])
+    nominal_width = np.loadtxt(output.parent/"profile.txt")[-1,0]
+    recovered, rays = normal_projection(phase, vertices, init[:, 3], nominal_width)
+    print(f"  nominal profile half width {nominal_width:.9g} m: maximum omitted fraction {max(rays[:,2]):.8g}")
     integral_error = max(abs(recovered-init[:, 3]))
     # Compare the actual bulk Q3 points with the Q8 section rule on the same
     # nonconstant manufactured rate and virtual traction used by the probe.
@@ -165,7 +180,7 @@ def check_case(root, case, grid):
     # Both integrate the same bounded degree-two FE representation, split at
     # cell faces. 32-point rays and dense solve are independent of production.
     near(recovered, init[:, 3], 2.e-12, 3.e-13)
-    middle, end = rays[len(rays)//2], rays[0]
+    middle, end = rays[len(rays)//2,:2], rays[0,:2]
     print(f"{case}-{grid} length, core/interior/contact errors {geometry}; "
           f"I defect {integral_error:.3g}; ray/Q1 middle {middle}, clipped {end}")
     if case in ("narrow", "vertical", "translated"):
@@ -173,7 +188,8 @@ def check_case(root, case, grid):
         field = phase.evaluate(line[:, :2])
         near(field, line[:, 3], 2.e-14)
         near(phase.h(field), line[:, 4], 1.e-10, 2.e-13)
-        width = np.loadtxt(output.parent / "profile.txt")[-1, 0]
+        width = float(next(line.split("=")[1] for line in (output.parent/"input.prm").read_text().splitlines()
+                           if "set Profile half width" in line))
         center = vertices[len(vertices)//2, 0]
         normal_i = phase.ray(np.array([center, 0.]), np.array([1., 0.]), width=width)
         actual = line[:, 2] @ line[:, 5]
@@ -182,12 +198,30 @@ def check_case(root, case, grid):
         # Only the compact admission boundary can cut the 24-point cut rule.
         # Bound that edge panel by its measured, nonnegative FE tail.
         edge = np.abs(np.abs(line[:, 0]-center)-width) <= 1/grid
-        allowance = .005/i0*np.max(line[edge, 4])*2/grid
+        allowance = .005/i0*np.max(line[edge, 4],initial=0.)*2/grid
         near(actual, independent, allowance+1.e-13)
+        # The translated face maximum can differ from the interior centroid.
+        # Measure the resulting full-ray Q1 projection error independently.
+        full = phase.ray(np.array([center,0.]),np.array([1.,0.]))
+        projected = np.interp(0., vertices[:,1], recovered)
+        projection_error = .005*abs(full/projected-1)
+        near(actual,.005,projection_error + 2.1e-6*.005 + 1.e-13)
         print(f"  integrated slip {actual:.12g} independent {independent:.12g}, "
               f"peak engineering rate {max(line[:, 5]):.8g}; tail bound {allowance:.2g}")
+    if case in ("free","inclined-fit"):
+        for j,x in ((0,-.48),(-1,.48)):
+            mutation=vertices.copy()
+            mutation[j,0]=x
+            try:
+                geometry_error(case,mutation,grid)
+            except ValueError as error:
+                require("Contact errors" in str(error), "Contact mutation failed an unrelated check")
+            else:
+                raise ValueError("A displaced contact passed the fitted geometry check")
     free = case == "free"
     expected_dt = .0125 if free or case in ("narrow", "vertical", "translated") else .1
+    near(init[:, 4], 11.682941969615793, 0.)
+    near(init[:, 5], 0., 0.)
     previous = init
     outputs = sorted(output.glob("labels-*-0.txt"))
     require(len(outputs) == (3 if free else 2), f"Unexpected clock count for {case}")
@@ -207,6 +241,7 @@ def check_case(root, case, grid):
             require(np.ptp(speed) > .001 and max(abs(speed-previous[:, 6])) > .001, "No resolved free rate response")
         previous = current
         check = metrics(output, step)
+        near(check["imposed_balance"], 0 if free else 1, 0)
         work, dual = check["work"]
         near(work, dual, 256*np.finfo(float).eps*abs(work))
         error, scale = check["tangent"]
@@ -239,6 +274,8 @@ def rank_check(root):
         reference = labels(serial, step)
         for rank in (0, 1):
             near(labels(parallel, step, rank), reference, 1.e-10, 1.e-8)
+        counts = [int(metrics(parallel,step,r)["samples"][0]) for r in (0,1)]
+        require(min(counts)>0 and sum(counts)==metrics(serial,step)["samples"][0], "Distributed active Q8 count mismatch")
         a = np.sort(bulk(serial, step), order=["cell", "q"])
         shards = [bulk(parallel, step, rank) for rank in (0, 1)]
         require(all(len(shard) > 0 for shard in shards), "Empty work partition")
@@ -278,6 +315,36 @@ def donor_check(root, donor, cell_reference=None):
             near(b["rate"], .005, 0, 2*np.finfo(float).eps)
             df = np.fromfile(donor/f"fields_{step}_rank0.bin").reshape(-1, 15)
             coords = {(round(x, 12), round(y, 12)): i for i, (x, y) in enumerate(df[:, :2])}
+            require(len(keys)==len(a)==len(coords)==len(df), "Duplicate or missing bulk point")
+            loc = [(round(x,12),round(y,12)) for x,y in zip(a["x"],a["y"])]
+            require(set(coords)==set(loc), "Donor/target full Q3 point universes differ")
+            if case=="inclined-q1":
+                selected=np.zeros(len(a), dtype=bool)
+                selected[[keys[cell,q] for cell,q in zip(t["cell"],t["q"])]]=True
+                require(selected.sum()==len(t), "Duplicate donor traction identity")
+                # The archive emits positive-slip traction points. Classify
+                # zero-phase associations geometrically on the complement.
+                xy=np.column_stack((a["x"],a["y"]))-geom[0,1:3]
+                direction=(geom[-1,1:3]-geom[0,1:3])
+                length=np.linalg.norm(direction)
+                tangent=direction/length
+                along=xy@tangent
+                eta=xy@np.array([-tangent[1],tangent[0]])
+                width=np.loadtxt(output.parent/"profile.txt")[-1,0]
+                admitted=(along>=-1.e-14)&(along<=length+1.e-14)&(abs(eta)<=width)
+                np.testing.assert_array_equal(a["associated"],admitted)
+                require(b["associated"].all(), "Donor stations outside target support")
+                np.testing.assert_array_equal(b["seg"],t["segment"])
+                near(b["xi"],t["xi"],2.e-13)
+                for key in ("slip_xx","slip_yy","slip_xy"):
+                    near(a[key][~selected],0.,0.)
+                kappa=-1.e20*np.expm1(-1.e6*.1/1.e20)
+                nx,ny=t["nx"],t["ny"]
+                factor=-2*kappa*b["chi"]*b["rate"]
+                for key,frame in zip(("slip_xx","slip_yy","slip_xy"),(ny*nx,-nx*ny,.5*(ny*ny-nx*nx))):
+                    near(b[key],factor*frame,1.e-8)
+                print(f"  Q1 universe {len(a)}, common {len(t)}, zero-load complement {(~selected).sum()},"
+                      f" associated zero-phase {(admitted & ~selected).sum()}")
             df = df[[coords[round(x,12),round(y,12)] for x, y in zip(t["x"], t["y"])]]
             nx, ny = t["nx"], t["ny"]
             tx, ty = ny, -nx
@@ -354,11 +421,22 @@ def main():
     args = parser.parse_args()
     if bool(args.donor) != bool(args.donor_cell):
         parser.error("Supply the archived donor and the cell-interval replay together to check the quadrature difference.")
+    from moments import check_moments
     for case in ("vertical", "narrow", "translated", "inclined", "inclined-fit", "inclined-q1", "free"):
-        grids = [64] if case == "inclined-q1" else [32] if case == "free" else [32, 64]
-        moments = [check_case(args.root, case, n) for n in grids]
-        if case == "inclined":
-            require(moments[1][1]/moments[1][2] < moments[0][1]/moments[0][2], "Cut-cell moment defect did not decrease")
+        grids = [64] if case == "inclined-q1" else [32, 64]
+        for grid in grids:
+            check_case(args.root,case,grid)
+        if case in ("inclined","inclined-fit","inclined-q1"):
+            for grid in grids:
+                actual, reference, scale = np.loadtxt(args.root/f"{case}-{grid}/output/rhs-action.txt")
+                near(actual,reference,512*np.finfo(float).eps*scale)
+            defects = [check_moments(args.root/f"{case}-{grid}",grid,1,.1) for grid in grids]
+            require(len(defects)==1 or defects[1]<defects[0] or max(defects)<=.01, "Cut moments failed refinement")
+            print(f"  signed Q3 load on {case}: {actual:.12g} vs {reference:.12g}, scale {scale:.6g}")
+        if case=="free":
+            for step in (1,2):
+                defects=[check_moments(args.root/f"free-{grid}",grid,step,.0125) for grid in grids]
+                require(defects[1]<defects[0] or max(defects)<=.01,"Free cut moments failed refinement")
     for grid in (32, 64):
         wide, narrow = [np.loadtxt(args.root/f"{c}-{grid}/output/transect-0-0.txt",skiprows=1)
                         for c in ("vertical","narrow")]

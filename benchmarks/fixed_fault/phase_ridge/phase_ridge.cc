@@ -222,12 +222,18 @@ namespace aspect
         using Stress = SymmetricTensor<2,dim>;
         using PointLoad = typename FaultStokesCoupling<dim>::BulkPoint;
         double initial_age,compression,shear,eta,G,initial_dt;
+        bool compare_donor_load;
         MaterialModel::Rheology::RateAndStateFriction law;
         std::vector<double> parent_age;
 
       public:
         void parse_parameters(ParameterHandler &prm) override
         {
+          prm.enter_subsection("Initial composition model");
+          prm.enter_subsection("Stationary ridge");
+          compare_donor_load=prm.get_bool("Bilinear donor phase");
+          prm.leave_subsection();
+          prm.leave_subsection();
           prm.enter_subsection("Material model");
           prm.enter_subsection("Simple model");
           eta=prm.get_double("Viscosity");
@@ -371,7 +377,9 @@ namespace aspect
           const auto yy=this->introspection().compositional_index_for_name("fault_stress_yy");
           const auto xy=this->introspection().compositional_index_for_name("fault_stress_xy");
           std::ofstream bulk(path);
-          bulk<<std::setprecision(17)<<"cell q x y phi h chi seg xi rate p xx yy xy exx eyy exy tau compression gradxx gradxy gradyx gradyy associated\n";
+          bulk<<std::setprecision(17)<<"cell q x y phi h chi seg xi rate p xx yy xy exx eyy exy tau compression gradxx gradxy gradyx gradyy associated";
+          if (compare_donor_load) bulk<<" slip_xx slip_yy slip_xy";
+          bulk<<'\n';
           std::vector<double> balance(rates.size()),forces(rates.size());
           double normal_error=0.,shear_error=0.,moment=0.,moment_scale=0.,total_moment=0.;
           unsigned int count=0,cut_cells=0;
@@ -424,7 +432,18 @@ namespace aspect
                           bulk<<cell->id()<<' '<<q<<' '<<x<<' '<<phi[q]<<' '<<profile.weight(phi[q])<<' '<<s.chi<<' '<<s.foot.left<<' '<<s.foot.xi<<' '<<s.rate(rates)<<' '<<p[q];
                           for (const auto &v:dg) bulk<<' '<<v[q];
                           for (unsigned int c=0; c<3; ++c) bulk<<' '<<stress.access_raw_entry(c);
-                          bulk<<' '<<tau<<' '<<sigma<<' '<<grad[q][0][0]<<' '<<grad[q][0][1]<<' '<<grad[q][1][0]<<' '<<grad[q][1][1]<<' '<<s.foot.active<<'\n';
+                          bulk<<' '<<tau<<' '<<sigma<<' '<<grad[q][0][0]<<' '<<grad[q][0][1]<<' '<<grad[q][1][0]<<' '<<grad[q][1][1]<<' '<<s.foot.active;
+                          if (compare_donor_load)
+                            {
+                              // Isolate the actual returned tensor in Pa. The initial
+                              // parent is identically zero. On a physical step cancel
+                              // the same parent with a zero-phase material evaluation.
+                              Stress slip=m.endpoint_stress(cell,x,phi[q],Stress());
+                              if (this->get_timestep_number())
+                                slip-=m.endpoint_stress(cell,x,0.,Stress());
+                              for (unsigned int c=0; c<3; ++c) bulk<<' '<<slip.access_raw_entry(c);
+                            }
+                          bulk<<'\n';
                         }
                       else if (order==8)
                         {

@@ -51,3 +51,20 @@ TEST_CASE("Finite normal association on an inclined stationary trace")
   CHECK_FALSE(fault.project(Point<2>(.49,.49)).active);
   CHECK_FALSE(fault.project(Point<2>(-.4,.3)).active);
 }
+
+TEST_CASE("Fault strip cuts a cell whose four corners name the same segment")
+{
+  using dealii::Point;
+  aspect::StationaryFault<2> fault;
+  fault.initialize(Point<2>(),Point<2>(1.,1.), {{.5,0.},{.5,1.}},1.,1.,.1);
+  const auto cut=fault.cut_quadrature(Point<2>(),Point<2>(1.,1.));
+  double area=0., admitted=0.;
+  for (unsigned int q=0; q<cut.size(); ++q)
+    {
+      area+=cut.weight(q);
+      if (fault.project(cut.point(q)).active) admitted+=cut.weight(q);
+    }
+  CHECK(area == Approx(1.));
+  CHECK(admitted == Approx(.2));
+  CHECK(fault.cut_quadrature(Point<2>(.45,.2),Point<2>(.55,.3)).size() == 0);
+}
