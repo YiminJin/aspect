@@ -1,5 +1,81 @@
 # Phase-field fault working record
 
+## Increment 4A review closeout
+
+**All six findings are ready for author review.** The baseline is `d5b5f92a3`. Commit `3cc67f81c` isolates the file relocation and include updates. The original 4A evidence remains below. New calculations started from initial conditions under `build-4a-review`, with one thread per MPI rank.
+
+| Finding | Discriminating result |
+| --- | --- |
+| Nonfinite inflow and stage results | With nonlinear cutback enabled, a left-boundary NaN in yy stopped at SSPRK stage 2, 0.0041666666666666666 s. Finite exterior yy of 1e308 Pa in a short pulse overflowed an owned coefficient at stage 3, 0.0020833333333333333 s. Both diagnoses reported one affected rank in the one- and two-rank runs. Separate stage-1 runs put the NaN in xx, yy and xy in turn and identified each component at time zero. Only the initialization clock was published. Each stage-2 and stage-3 case passed in Release, Debug and a Debug probe with hardware invalid/divide-by-zero traps enabled. |
+| Corrupted jump coefficient | Replacing just the 24 ms receiving-cell yy at node 4, (0.75, 0.5) m, from 1.0635950971429828 Pa to NaN failed on file input, in the spatial error check and when both comparison operands contained the same NaN. The mutation runs on fresh copies of both partition layouts. Finite jump errors were at most 7.11e−15 Pa and the largest signed face-transfer defect was 3.56e−14 Pa m²/s. |
+| Rotation after transport | A two-cell ordinary Stokes initialization solved for `u=(8,x²)` and a uniform accepted slip rate of 0.00405664584649 m/s. At 12.5 ms the one-rank Release receiving-center xy, recovered from **published** stress by removing solved strain, Q1 slip and relaxation, was 0.055631043751037494 Pa. The independent P2 projection at the arrival point gave 0.05563104375103742 Pa. Advecting a separately rotated DG field with its matching exterior gave 0.05488335671994341 Pa. The reversed order misses by 7.477e−4 Pa, compared with a 5e−10 Pa acceptance tolerance. Both rank counts and both build modes distinguished the orders. |
+| Quick test without NumPy | The registered shell filter runs with `python3 -S` and just the benchmark directory on its module path. The strong P2 polynomial, Simpson mass, three-point Gauss flux, nodal tolerances and corruption check all ran using the standard library. |
+| CTest cache dependency | The generated screen-output rule depends on the imported checker. With the binary and fixture already current, touching only that checker regenerated the Release run marker from 19:20:13.062717 to 19:20:20.257782 local time. Both CTest invocations passed. |
+| Spatial assembly and advancement | The single public collective `Transport::advect_stress` calls a file-local assembler for cell and face blocks, inflow weights and global CFL rate. Advancement owns the immutable substep parent, current owned coefficients and each stage's separate halo. Each stage reduces six integer flags (exterior/result × xx, yy, xy) before returning. The one- and two-rank spatial coefficients matched exactly. The clean and retried runs matched exactly for every accepted DG coefficient and label at 0, 12.5 and 25 ms. |
+
+**Production path.** `PhaseFieldFault::update → FaultStokesCoupling::prepare_parent → Transport::advect_stress` reads accepted velocity and stress. The coupling rotates the transported field with the accepted bulk-minus-slip spin, relaxes it and projects the attempt parent. `sample_bulk` uses this parent in `solve_rates`. `PhaseFieldFault::evaluate → FaultStressLoad::execute` supplies its negative virtual work to Stokes. After the repeat decision, `accept_step` projects endpoint stress and commits the labels. The new body force and reversed-order solve belong to the spin fixture. The public solver takes the same FE fields if a future caller changes the fault geometry.
+
+```text
+include/aspect/simulator/solver/dg_stress_transport.h
+source/simulator/solver/dg_stress_transport.cc
+source/reconstructed_fault/stokes_coupling.cc
+tests/dg_stress_spin_order.cc
+benchmarks/fixed_fault/check_transport.py
+```
+
+**Regression values.** Release measured −0.2936443700444033 Pa m² in the receiving-cell Stokes RHS, against −0.29364437004440386 analytically and −0.3084580370518121 with the old cell parent. The largest accepted stress defect was 1.621e−14 Pa across the two builds. Fitted 32² runs with advection enabled and disabled each reproduced all six saved bulk and label files byte for byte. The two transports in the advected run took 0.0775 s in ASPECT's timer (previously 0.0773 s). At most three owned stage maps and one halo are live during advancement, alongside the cell blocks. The additional collective carries six integers per rank per stage.
+
+The transported 32² fixed-parent rate tangent was recaptured on one and two ranks. At relative perturbation 5e−5 the maximum relative defect was 1.84e−10 with a 2e−8 budget. Row 19 received 1,260 and 1,447 Q8 contributions on the two ranks. The largest serial/two-rank action difference was 1.533e−17. The seven scoped Release CTests and six scoped Debug CTests passed. Each unit suite passed 2,359 assertions in 51 cases.
+
+### Commands for the review repairs
+
+Run from the worktree root, using a fresh destination for each simulation. `build-4a` contains the preserved 4A controls and ridge plugin.
+
+```sh
+W=$PWD
+D=build-4a-review
+export ASPECT_SOURCE_DIR=$W OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OMP_NUM_THREADS=1
+for mode in Release Debug; do
+  if [ "$mode" = Release ]; then
+    b=build-slice; t=$D/tests; variant=release; matrix='|matrix_nonzeros_1'
+  else
+    b=build-slice-debug; t=$D/debug-tests; variant=debug; matrix=''
+  fi
+  cmake --build "$b" --target aspect -j2
+  cmake -S tests -B "$t" -DAspect_DIR="$W/$b" -DASPECT_BINARY="$W/$b/aspect" \
+    -DCMAKE_BUILD_TYPE="$mode" -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+  cmake --build "$t" --target dg_stress_spin_order dg_stress_transport fixed_fault stationary_fault -j1
+  ctest --test-dir "$t" -R "^(dg_stress_spin_order|dg_stress_transport|fixed_fault|stationary_fault|postprocess/phase_field_surface_energy_at2|phase_field_model_without_reporter${matrix})$" --output-on-failure
+  (cd "$b/unit_tests" && ../aspect --test)
+  python3 benchmarks/fixed_fault/check_transport.py "$b/aspect" "$t" "$D/final-$variant" \
+    --mpiexec /opt/openmpi/5.0.6/bin/mpirun
+done
+ctest --test-dir "$D/tests" -R '^dg_stress_transport$' --output-on-failure
+stat -c '%y %n' "$D/tests/output-dg_stress_transport/runs"
+touch benchmarks/fixed_fault/check_transport.py
+ctest --test-dir "$D/tests" -R '^dg_stress_transport$' --output-on-failure
+stat -c '%y %n' "$D/tests/output-dg_stress_transport/runs"
+rg 'screen-output: .*check_transport.py' "$D/tests/CMakeFiles/tests.dg_stress_transport.dir/build.make"
+
+for case in cost-advected-32 cost-free-32 advected-32 advected-32-mpi2; do
+  mkdir "$D/$case"
+  sed "s|build-4a/$case/output|$D/$case/output|" "build-4a/$case/input.prm" > "$D/$case/input.prm"
+done
+for case in cost-advected-32 cost-free-32; do
+  build-slice/aspect "$D/$case/input.prm" > "$D/$case/run.log"
+  for file in bulk-{0,1,2}-0.txt labels-{0,1,2}-0.txt; do
+    cmp "$D/$case/output/$file" "build-4a/$case/output/$file"
+  done
+done
+mkdir "$D/tangent"
+(cd "$D/tangent" && python3 "$W/refactoring/phase-field-fault/rate_tangent/capture.py" "$W")
+"$D/tangent/aspect-review" "$D/advected-32/input.prm" > "$D/advected-32/run.log"
+/opt/openmpi/5.0.6/bin/mpirun -n 2 "$D/tangent/aspect-review" "$D/advected-32-mpi2/input.prm" > "$D/advected-32-mpi2/run.log"
+python3 -O refactoring/phase-field-fault/rate_tangent/check_row.py "$D/advected-32" "$D/advected-32-mpi2"
+```
+
+Both normal build caches have `ASPECT_USE_FP_EXCEPTIONS=OFF`. For the supplementary trap test the Debug compilation commands for `main.cc` and the DG transport unity translation unit were rerun with `-DASPECT_USE_FP_EXCEPTIONS`. Their two objects were linked in place of the originals into a scratch executable. The usual debug plugin was loaded by this executable. The four `check_invalid_stage` calls (ranks 1 and 2, exterior NaN and stage overflow) returned the same component, stage and time as the ordinary executable. The first spin fixture draft failed parameter parsing because its included fixture selected a different test plugin. The passing fixture includes the homogeneous benchmark directly. Next action is author review of 4A.
+
 ## Increment 4A · Accepted DG stress transport
 
 **Ready for author review.** The [4A assignment](INCREMENT_4A_TASK.md) runs from local `pf-rsf` at `72c5a9c2d`. Both Release and Debug measured the transported stress in an ordinary Stokes assembly and published the independently predicted physical endpoint. A second calculation using the old receiving-cell stress failed at that assembly. The 3B phase-range diagnostic, immutable phase model, affine AT2 CTest and installed canonical CSV remain in the 3B commits. The corrected label CSV still has SHA-256 `98a5e5929b43b7877d8ee3c426c50758c3dc874289dd38ec6315f4022206f662`. The incoming assignment and local FE verification skill were preserved.
@@ -20,8 +96,8 @@
 5. After the repeat decision, `post_accept_timestep → FaultStokesCoupling::accept_step` projects the complete viscous, slip and history response into the simulator solution, then `StationaryFault::accept` commits the label age, slip and rate. The FE transport operation has no fault geometry, friction, crack-law or observer dependency. The numerical load observer and synthetic transport fields live in the test plugin.
 
 ```text
-include/aspect/transport/dg_stress.h
-source/transport/dg_stress.cc
+include/aspect/simulator/solver/dg_stress_transport.h
+source/simulator/solver/dg_stress_transport.cc
 source/material_model/phase_field_fault.cc
 source/reconstructed_fault/stokes_coupling.cc
 source/simulator/assemblers/fault_stress.cc

@@ -340,6 +340,10 @@ function(discover_tests)
       set(_replacement_script "${ASPECT_TEST_SUITE_SOURCE_DIR}/cmake/default")
     endif()
 
+    if(_test_source_name STREQUAL "dg_stress_transport")
+      list(APPEND _testdepends "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/fixed_fault/check_transport.py")
+    endif()
+
     # If a .prm contains the keyword "EXPECT FAILURE", make sure aspect fails
     # with a non-zero return value. Otherwise make sure aspect terminates
     # without errors. The logic for this is in tests/cmake/run_test.sh,

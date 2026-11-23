@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**Ready for 4A review on pf-rsf.** [Increment 4A](INCREMENT_4A_TASK.md) transports the accepted physical DG stress before the ordinary Stokes solve. See the [4A working record](STATUS.md#increment-4a--accepted-dg-stress-transport).
+**Increment 4A review repairs are ready for author review on pf-rsf.** The [six findings and their measured checks](STATUS.md#increment-4a-review-closeout) cover collective stage validity, rotation after transport, the jump regression and ownership of the DG solver. The [original 4A results](STATUS.md#increment-4a--accepted-dg-stress-transport) retain the comparison for the [assignment](INCREMENT_4A_TASK.md).
 
 The [3B closeout](STATUS.md#increment-3b-review-closeout) retains the four review repairs, configured phase model and installed regression evidence.
 
@@ -86,7 +86,7 @@ This table assigns decisions and data lifetimes. It does not prescribe a class f
 
 The mature fault can select **Advect physical stress** and prescribe **Exterior parent stress** in xx, yy, xy order. At attempt entry the operator advances the accepted DG coefficients with the accepted velocity on a fixed, conforming, nonperiodic 2-D Cartesian box. The material rotates and relaxes this candidate using the accepted bulk-slip-subtracted spin. Both the section solve and Stokes assembler read the same projected parent. The normal post-accept signal publishes physical stress and label history. Existing stationary inputs use the original cell parent.
 
-ASPECT’s scalar DG assembly produces a timestep matrix and a scalar boundary load. The explicit stress operator uses mapped deal.II cell and face values, local inverse mass and stage-wise ghost exchange. The [4A record](STATUS.md#increment-4a--accepted-dg-stress-transport) gives the component weak form, release interface decisions, measured receiving-cell action, partition-face transfer and retry results.
+ASPECT’s scalar DG assembly produces a timestep matrix and a scalar boundary load. The explicit stress operator uses mapped deal.II cell and face values, local inverse mass and stage-wise ghost exchange. A file-local assembly builds the mass-inverted blocks and CFL rate from accepted velocity. SSPRK advancement owns each substep parent and collectively validates each new stage before a halo exchange or return. The [4A record](STATUS.md#increment-4a--accepted-dg-stress-transport) gives the component weak form, release interface decisions, measured receiving-cell action, partition-face transfer and retry results.
 
 ## Subsequent increments
 
