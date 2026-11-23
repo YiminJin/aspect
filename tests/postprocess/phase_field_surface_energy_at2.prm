@@ -1,0 +1,9 @@
+# Enable if: QUICK_TEST
+# Analytic AT2 energies on the affine field are 7/3, 5/32 and 239/96 J/m.
+include $ASPECT_SOURCE_DIR/benchmarks/phase_field_surface_energy/affine.prm
+subsection Postprocess
+  set List of postprocessors = phase field surface energy
+  subsection Phase field surface energy
+    set Crack geometry = AT2
+  end
+end

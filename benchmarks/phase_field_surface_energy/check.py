@@ -1,6 +1,6 @@
 """Run the installed phase-only diagnostic against Cartesian integrals in SI units."""
 import argparse
-from math import isclose, pi
+from math import isclose, pi, sqrt
 import os
 from pathlib import Path
 import re
@@ -45,12 +45,13 @@ def run(command, destination, name, settings, diagnostic=None):
     log = case / "run.log"
     with log.open("w") as stream:
         result = subprocess.run([*command, prm], cwd=FIXTURES, env=environment,
-                                stdout=stream, stderr=subprocess.STDOUT)
+                                stdout=stream, stderr=subprocess.STDOUT, timeout=120)
     if diagnostic:
-        if not result.returncode or diagnostic not in " ".join(log.read_text().split()):
+        message = " ".join(log.read_text().split())
+        if not result.returncode or diagnostic not in message:
             raise ValueError(f"{name}: expected a failure containing {diagnostic!r}, see {log}")
         print(f"{name}: diagnosed {diagnostic}", flush=True)
-        return
+        return message
     result.check_returncode()
     return statistics(case / "output" / "statistics")
 
@@ -70,6 +71,27 @@ def check_energy(name, stats, expected, ranks=1, dim=2):
             raise ValueError(f"{name} {term}: {value:.17g}, expected {target:.17g}")
     print(f"{name}: " + ", ".join(f"{value:.16g}" for value in measured)
           + f" {unit}; owned cells min/max {smallest:g}/{largest:g}", flush=True)
+
+
+def phase_input(expression):
+    return AFFINE + f"""subsection Initial composition model
+  subsection Function
+    set Function expression = {expression}
+  end
+end
+"""
+
+
+def check_invalid_phase(command, destination, name, expression, bounds, ranks):
+    message = run(command, destination, name, phase_input(expression),
+                  diagnostic=f"Invalid sampled phase on 1 of {ranks} MPI ranks")
+    match = re.search(r"Finite sampled minimum = ([^,]+), maximum = (\S+?)\. ", message)
+    if not match or not all(isclose(float(x), y, rel_tol=1e-13) for x, y in zip(match.groups(), bounds)):
+        raise ValueError(f"{name}: expected global quadrature extrema {bounds}")
+    table = destination / name / "output" / "statistics"
+    if table.exists() and "Crack surface energy" in table.read_text():
+        raise ValueError(f"{name}: invalid energy was published")
+    print(f"{name}: sampled extrema {match[1]}, {match[2]}", flush=True)
 
 
 def main():
@@ -93,7 +115,25 @@ def main():
         gradient = 2 * 0.25 * (5/8) / c0
         check_energy(law, stats, (local, gradient, local + gradient), ranks)
     if args.mpi:
+        # Only the upper-right cell exceeds 1. The global minimum lies
+        # in the opposite corner. The nearest Q3 point is this fraction
+        # of the entire side from the boundary on the 4x4 mesh.
+        inset = (1 - sqrt(3/5)) / 8
+        check_invalid_phase(command, destination, "one-rank-violation", "1.1*x*y/2",
+                            (1.1 * inset**2, 1.1 * (1-inset)**2), ranks)
         return
+
+    check_invalid_phase(command, destination, "negative-phase", "-0.01", (-0.01, -0.01), ranks)
+    for name, phi in (("unity", 1.), ("upper-roundoff", 1. + 4*sys.float_info.epsilon),
+                      ("lower-roundoff", -4*sys.float_info.epsilon)):
+        stats = run(command, destination, name, phase_input(repr(phi)))
+        # The AT1 local term on this rectangle is 6 phi. A constant field's
+        # mapped gradient contains only interpolation roundoff.
+        for term, target in zip(TERMS, (6*phi, 0., 6*phi)):
+            if not isclose(stats[f"Crack surface energy {term} (J/m)"], target,
+                           rel_tol=4e-14, abs_tol=1e-26):
+                raise ValueError(f"{name}: wrong {term} energy for constant phase {phi}")
+        print(f"{name}: accepted phase {phi:.17g}", flush=True)
 
     # The straight crack also exercises the default law and the finite peak at 1.
     stats = run(command, destination, "straight", "include straight_crack.prm\n")

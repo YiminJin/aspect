@@ -226,7 +226,7 @@ def check_case(root, case, grid):
     outputs = sorted(output.glob("labels-*-0.txt"))
     require(len(outputs) == (3 if free else 2), f"Unexpected clock count for {case}")
     if free and grid == 32:
-        record = Path(__file__).resolve().parents[3] / "refactoring/phase-field-fault/results/3a-repair-free-labels.csv"
+        record = Path(__file__).with_name("3a-repair-free-labels.csv")
         reference = np.loadtxt(record, delimiter=",", skiprows=1)
         history = np.vstack([labels(output, step) for step in range(3)])
         np.testing.assert_array_equal(history[:, 0], np.tile(np.arange(38), 3))
