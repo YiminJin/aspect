@@ -45,6 +45,12 @@ The implementation belongs in this worktree. The research donor is `../aspect-pf
 - Prefer a small public interface with visible data flow. A short top-level call that hides an entire second timestep driver fails review. An optional handler earns its place by owning a coherent resource or operation. Keep experimental selectors, environment hooks and run-specific names out of production interfaces.
 - Preserve the ordinary ASPECT path when the feature is off. Keep fixes to the scientific method distinguishable from code movement and shared API changes. Keep worktree planning material separate from patches prepared for upstream review.
 
+### Editing established ASPECT core
+
+- Read the release implementation, its callers, and the closest existing extension point before changing shared simulator, parameter, assembly, or solver code. Prefer a small opt-in addition or dispatch call. Keep the numerical implementation with its owner and preserve existing defaults and the meaning of old parameter files.
+- Retain existing upstream lines, comments, interfaces, and control flow wherever practical. Revise or remove them only for a concrete correctness or integration need. Avoid incidental renaming, reordering, formatting, and cleanup. A targeted edit or shared extraction is appropriate when an additive workaround would duplicate a solver or introduce a second owner of state.
+- Review the final diff as if the author of each affected line were reviewing the patch. For each substantive core change, identify the release file/symbol, why the existing extension point was insufficient, the existing callers affected, and the regression that exercises their previous behavior. Distinguish changes to upstream ASPECT from refactoring code introduced on this branch. Keep an independently useful core change separately reviewable when practical.
+
 ### Phase-field fault architecture
 
 - Phase-field laws, reference profiles and field operators must be usable without a reconstructed fault. Fault reconstruction consumes the bulk phase. Trace ownership, section membership, normal integrals and slip transfer belong on the fault side. The ASPECT storage mechanism for a field does not decide who owns its physics.

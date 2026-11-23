@@ -1,5 +1,9 @@
 # Phase-field fault working record
 
+## Increment 4B assignment
+
+[Shared explicit DG transport](INCREMENT_4B_TASK.md) starts from the repaired 4A implementation at `3c603715a`. Record measured results here after verification.
+
 ## Increment 4A review closeout
 
 **All six findings are ready for author review.** The baseline is `d5b5f92a3`. Commit `3cc67f81c` isolates the file relocation and include updates. The original 4A evidence remains below. New calculations started from initial conditions under `build-4a-review`, with one thread per MPI rank.
