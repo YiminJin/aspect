@@ -1,5 +1,83 @@
 # Phase-field fault working record
 
+## Increment 4B review repairs
+
+**Repair `835a5ef96` on `pf-rsf` addresses the seven findings against `39912b7da`.** The old 4B results follow below. The scalar selection still requires a fixed 2-D box. All checks started in fresh output directories under `build-4b-repair`, except for explicit continuations from copies of their own checkpoint slots. The unchanged review inputs and saved pre-repair binary were used to verify the failing circulation case and legacy checkpoint behavior.
+
+| Finding | Discriminating test and result |
+| --- | --- |
+| 1. Interior motion and the phase CFL | On the unit square use `u=(x(1−x)(1−2y), −(1−2x)y(1−y))`, `φ₀=1/4+x/2` and `M=∫(1−2y)φ`. There is no physical face flux. Simpson integration of the *published* polynomial is exact for this moment. The analytic initial derivative is −1/36 per second. The measured slopes for 12.5 and 6.25 ms were −0.0277776909722 and −0.0277777560764. With `1000u+(0.001,0)`, the measured velocity and cell dimensions give 63 RK substeps by the interior bound. The repaired moment was 0.080297627525 versus 0.080302600504 at 0.1 ms and 0.080303248345 at 0.05 ms. The original executable returned 0.028123691397 on the coarse interval and failed the new check. A separate two-outflow test with `u=(2x−1,0)` needed two substeps solely from the mean-loss bound. The left value matched the two-step RK polynomial at 0.286964828046 within 1e−13. Using the interior limit alone gives 0.286970666667. |
+| 2. Constrained selected field | The stock initial-composition prescription on `x<0.51` rejected the selected signed tracer by name before RK. The implicit control kept its left value at −0.04. In a mixed system a prescription for the implicit companion gave 0.25 and 0.75 at x=0 and 0.5. The moving Bernstein field matched the unconstrained-phase control within 1e−13. The localized prescription diagnosis also passed on two ranks. |
+| 3. Non-nodal FE and prescribed solution | The stock temperature-function plugin reached ordinary setup and solve in Debug and Release. Temperature attained the prescribed 100 K alongside moving phase. At nodal components the manager maps each base element's support points to its own DoFs. At a non-nodal component its generalized interpolation points serve only to detect plugin requests. A request on the Bernstein component produced a collective diagnosis before inserting a point constraint. The two-rank localized request failed cleanly. |
+| 4. Per-field restart basis | Each selected checkpoint slot records the ordered, actual FE names. Nodal→nodal and Bernstein→Bernstein resumed to 50 ms with mass 0.683333333 (exact 41/60), with the original coefficient vectors recovered to 1e−12. Both cross-basis directions failed before solution transfer. Swapping the bases of two named phase fields failed at the first field although the number of Bernstein elements stayed the same. A two-rank continuation had owners 0 and 1, the same mass, and rejected a changed basis. A real pre-repair Release writer supplied legacy continuous Q2 and DGQ2 slots. Continuous Q2 resumed directly. The unmarked 2-D DGQ2 slot failed for both interpretations. A copy with the verified producer's nodal basis record resumed. Debug also exercised the old two-line metadata layout. |
+| 5. Velocity degree and integration | The selected scalar path admits Q2 velocity. With `u=(x²,0)`, constant phase and exterior value 0.5 remained exactly 0.5. The review's Q7 velocity `(x⁷,0)` was rejected for explicit transport. Clearing the selection with the same Q7 velocity advanced the implicit field and preserved 0.5 exactly. The fixed Gauss and Lobatto rules and the existing 4A stress restriction are preserved. |
+| 6. Physical extrema | For `0.9−0.65(2y−1)²` the ordinary composition statistics reported minimum 0.25, maximum 0.9 and mass 0.683333333. The middle Bernstein coefficient remained 1.55. These are **sampled physical extrema** at the generalized interpolation points, including the center and faces for Q2. A new quick CTest checks those two extrema and the mass alongside the nodally prescribed temperature at 0 and 12.5 ms. |
+| 7. Active MPI partition | The checker requires exactly the requested rank shards, all expected cell owners, stable global cell/field identities and an upwind block with a nonzero action across owners. A false two-rank directory contained all the serial coefficients on rank zero, two correct publication logs and clock-only rank-one files. It failed for the missing owner. The real mixed case had one active interrank face and the translated ridges had four in each direction. The coarse ridge coefficients agreed exactly between one and two ranks. |
+
+**Operator and core review.** At fixed accepted velocity the material derivative still uses the volume divergence, outward upwind flux and local inverse mass specified below. `assemble` now accumulates the largest of the cell rates `Σ max|u_d|/(0.1 h_d)` and, for phase, `mean_loss/0.8` before the global maximum. `advance` tests that rate for zero and computes `ceil(dt × rate)`. The owned stage limiter, exterior clocks, stage halos and accepted-state owners are those in 4B. The new degree and per-block constraint guards belong to the branch's `ExplicitCompositions` and `advance_composition`. The latter scans existing affine-constraint lines and collectively reduces one flag before writing a candidate.
+
+Three upstream consumers required a change. `PrescribedSolution::Manager::constrain_solution` owns plugin evaluation and constraint insertion. A material or composition callback cannot repair its mixed support-point table during DoF setup. The ordinary temperature and companion prescriptions exercise the previous path. The checkpoint writer and `Simulator::resume_from_snapshot` own the slot metadata and the point before FE deserialization. Critical field counts and degrees cannot distinguish the two nine-entry coefficient vectors. The original binary archive layout remains readable. For ambiguous legacy slots the manual describes recovering the FE names **from the producing executable and input** on a copy of the checkpoint. `CompositionStatistics::execute` owns the extrema columns and now evaluates non-nodal fields at physical sample points. Nodal blocks retain their vector extrema and the existing mass quadrature. The two stock default-only DG results were compared against the previous branch. The small CMake test dependency change tracks the mixed parameter file included by the new CTest.
+
+```text
+source/simulator/solver/dg_transport.cc
+source/simulator/solver/explicit_composition.cc
+source/prescribed_solution/interface.cc
+source/simulator/checkpoint_restart.cc
+source/postprocess/composition_statistics.cc
+benchmarks/explicit_dg_transport/check_compatibility.py
+doc/sphinx/user/run-aspect/checkpoint-restart.md
+```
+
+**Retained controls.** Debug and Release exercised both rank layouts with one thread per rank. On the fine translated ridge the normalized ray integral was 0.991949 and the largest physical transect defect was 0.00525963. The added interior bound changes the stage count and the original frozen budgets still pass. The signed tracer defect was 3.05e−16 and the implicit companion retained its default-only solution. All three fields matched the clean run exactly after retry. The signed partition jump, varying-spin ordering, rank-local invalid stress, corrupted checker records and stress/label retry passed in both builds. Release Stokes work in the receiving cell was −0.2936443700444033 Pa m², analytic −0.29364437004440386 and stale-parent prediction −0.3084580370518121. The signed face transfer defect was at most 3.56e−14 Pa m²/s. Both fitted 32² variants reproduced six saved 4A files byte for byte. Stationary free-32 matched all six canonical columns at all three clocks for all 38 labels. Both stationary and transported one-/two-rank tangents gave relative defect 1.838e−10 at a 5e−5 perturbation, within the 2e−8 budget. Both Release lifecycle suites, the one-/two-rank 3B energy suites and both 2,359-assertion unit suites passed.
+
+**Release reference accounting.** The nine distinct scoped Debug CTests passed. Eleven of fifteen distinct Release CTests passed, including all new and prior transport CTests. The saved statistics and reference files were preserved.
+
+* The two previously recorded stock discrepancies reproduced byte for byte against the 4B run. `discontinuous_composition_serial_periodic_amr` first differs at step 15, three composition iterations versus two. `discontinuous_composition_1` first differs at step 2, minimum C_1 −0.191381312 versus −0.191381311.
+* The two supplementary stock checkpoint CTests, `checkpoint_resume_by_slot` and `checkpoint_resume_by_time`, both resumed slot 03. Each produced identical clean and resumed statistics. The installed test harness uses `diff` because `numdiff` is unavailable. Its reference comparison fails first at step 1, reporting time 1.027740563852e6 s versus the stored 1.027740563611e6 s. Both fixtures were rerun with the pre-repair executable. Both statistics files and the selected-slot summaries matched the repaired runs byte for byte.
+
+### Commands for the 4B review repairs
+
+Run from the target root. `D` was `build-4b-repair`. Choose a fresh destination for replay. The initial builds used `-j2` per build and the final incremental builds used `-j1`.
+
+```sh
+W=$PWD
+D=$W/build-4b-repair
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+export ASPECT_SOURCE_DIR=$W OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OMP_NUM_THREADS=1
+common='dg_stress_transport|dg_stress_spin_order|explicit_dg_compositions|explicit_dg_phase|fixed_fault|stationary_fault|phase_field_model_without_reporter|postprocess/phase_field_surface_energy_at2'
+for mode in Release Debug; do
+  if [ "$mode" = Release ]; then b=$W/build-slice; m=release; else b=$W/build-slice-debug; m=debug; fi
+  t=$D/tests-$m
+  cmake --build "$b" --target aspect -j1
+  cmake -S tests -B "$t" -DAspect_DIR="$b" -DASPECT_BINARY="$b/aspect" -DCMAKE_BUILD_TYPE="$mode" \
+    -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+  cmake --build "$t" --target explicit_dg_compositions dg_stress_transport dg_stress_spin_order fixed_fault -j1
+  (cd "$b/unit_tests" && ../aspect --test)
+  if [ "$m" = release ]; then
+    python3 benchmarks/explicit_dg_transport/check_compatibility.py "$b/aspect" "$t" "$D/final-review-$m" \
+      --legacy-aspect "$W/build-4b/final-capture/aspect-review"
+  else
+    python3 benchmarks/explicit_dg_transport/check_compatibility.py "$b/aspect" "$t" "$D/final-review-$m"
+  fi
+  python3 benchmarks/fixed_fault/check_transport.py "$b/aspect" "$t" "$D/final-4a-$m" --mpiexec "$MPI"
+  python3 benchmarks/explicit_dg_transport/check.py "$b/aspect" "$t" "$D/final-4b-$m" --mpiexec "$MPI"
+  ctest --test-dir "$t" -R '^(explicit_dg_phase_statistics|explicit_dg_phase|explicit_dg_compositions)$' --output-on-failure
+done
+ctest --test-dir "$D/tests-debug" -R "^($common)$" --output-on-failure
+# Stock checkpoint fixtures launch ../../aspect themselves.
+ln -s "$W/build-slice/aspect" "$D/aspect"
+ctest --test-dir "$D/tests-release" -R "^($common|matrix_nonzeros_1|discontinuous_composition_bound_preserving_limiter_selected_fields|checkpoint_resume_by_slot|checkpoint_resume_by_time)$" --output-on-failure
+ctest --test-dir "$D/tests-release" -R '^discontinuous_composition_(1|serial_periodic_amr)$' --output-on-failure
+for f in fixed_fault stationary_fault; do
+  python3 -O benchmarks/fixed_fault/check_lifecycle.py build-slice/aspect build-4b/tests-release/libfixed_fault.release.so \
+    "$D/lifecycle-$f" --case "$f"
+done
+python3 -O benchmarks/phase_field_surface_energy/check.py build-slice/aspect "$D/energy-one"
+python3 -O benchmarks/phase_field_surface_energy/check.py build-slice/aspect "$D/energy-two" --mpi "$MPI"
+```
+
+For the fitted controls, the 4B replay commands below were used with `D=build-4b-repair`, the preserved `build-4b/ridge` plugin, scratch executable `$D/tangent/aspect-review` and the directories `$D/{cost-free-32,cost-advected-32,advected-32,advected-32-mpi2}` and `$D/stationary/{free-32,free-32-mpi2}`. The section recorder came from `(cd "$D/tangent" && python3 "$W/refactoring/phase-field-fault/rate_tangent/capture.py" "$W")`. `check_row.py` ran on both serial/MPI pairs. `check_case` and `rank_check` ran on the stationary outputs. The two-rank continuation and localized prescription inputs and logs are in `$D/parallel-compat`, run as `"$MPI" -n 2 "$W/build-slice/aspect" <case>/input.prm`. The false two-rank files are in each scalar suite's `empty-rank` directory. The pre-repair circulation replay and the four stock diff results remain in `$D`. Next action is author review. The 3-D explicit transport and moving-fault assignments are pending.
+
 ## Increment 4B · Shared explicit DG transport
 
 **Ready for author review.** All three callers in the [assignment](INCREMENT_4B_TASK.md) now advance through the same production SSPRK3 loop. The mixed field, moving ridge, stage limiting, retry, stress feedback and fixed-parent tangent comparisons passed. Two stock Release CTests differ from this checkout's reference statistics. The repaired 4A executable reproduced both discrepancies exactly on the same inputs. Their diffs and the original references are preserved.
