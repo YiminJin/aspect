@@ -30,41 +30,46 @@ namespace aspect
       {
         return value;
       }
-      double &entry(SymmetricTensor<2,2> &value, unsigned int c)
+      template <int tensor_dim>
+      double &entry(SymmetricTensor<2,tensor_dim> &value, unsigned int c)
       {
         return value.access_raw_entry(c);
       }
 
+      template <int dim>
       struct Exterior
       {
-        std::function<void(types::boundary_id,const Point<2>&,double,Vector<double>&)> evaluate;
+        std::function<void(types::boundary_id,const Point<dim>&,double,Vector<double>&)> evaluate;
         const char *diagnostic;
       };
 
+      template <int dim>
       struct Inflow
       {
         types::boundary_id boundary;
-        Point<2> position;
+        Point<dim> position;
         Vector<double> weights;
       };
 
       // Blocks of the spatial action on one owned cell, including M_K^{-1}.
+      template <int dim>
       struct CellOperator
       {
         Vector<double> mean_weights;
         FullMatrix<double> self;
         std::vector<std::pair<CellId,FullMatrix<double>>> upstream;
-        std::vector<Inflow> inflow;
+        std::vector<Inflow<dim>> inflow;
       };
 
+      template <int dim>
       struct SpatialOperator
       {
-        std::map<CellId,CellOperator> cells;
+        std::map<CellId,CellOperator<dim>> cells;
         double inverse_time = 0.;
       };
 
-      template <typename Value, std::size_t N>
-      Field<Value> read_fields(const SimulatorAccess<2> &sim, const std::array<unsigned int,N> &fields,
+      template <typename Value, std::size_t N, int dim>
+      Field<Value> read_fields(const SimulatorAccess<dim> &sim, const std::array<unsigned int,N> &fields,
                                const LinearAlgebra::BlockVector &accepted, const unsigned int n)
       {
         Field<Value> result;
@@ -85,40 +90,41 @@ namespace aspect
         return result;
       }
 
-      SpatialOperator assemble(const SimulatorAccess<2> &sim, const FiniteElement<2> &dg,
-                               const LinearAlgebra::BlockVector &accepted, const bool bounded)
+      template <int dim>
+      SpatialOperator<dim> assemble(const SimulatorAccess<dim> &sim, const FiniteElement<dim> &dg,
+                                    const LinearAlgebra::BlockVector &accepted, const bool bounded)
       {
         const auto &system = sim.get_fe();
         const auto &velocity = sim.introspection().extractors.velocities;
         const unsigned int n = dg.n_dofs_per_cell();
-        const Quadrature<2> rule = bounded ? Quadrature<2>(QGaussLobatto<2>(5)) : Quadrature<2>(QGauss<2>(8));
-        const Quadrature<1> face_rule = bounded ? Quadrature<1>(QGaussLobatto<1>(5)) : Quadrature<1>(QGauss<1>(8));
-        std::unique_ptr<FEValues<2>> mass_fe;
+        const Quadrature<dim> rule = bounded ? Quadrature<dim>(QGaussLobatto<dim>(5)) : Quadrature<dim>(QGauss<dim>(8));
+        const Quadrature<dim-1> face_rule = bounded ? Quadrature<dim-1>(QGaussLobatto<dim-1>(5)) : Quadrature<dim-1>(QGauss<dim-1>(8));
+        std::unique_ptr<FEValues<dim>> mass_fe;
         if (bounded)
-          mass_fe = std::make_unique<FEValues<2>>(sim.get_mapping(),dg,QGaussLobatto<2>(4),update_values | update_JxW_values);
-        FEValues<2> flow(sim.get_mapping(),system,rule,update_values | update_gradients);
-        FEValues<2> fe(sim.get_mapping(),dg,rule,update_values | update_gradients | update_JxW_values);
-        FEFaceValues<2> face_flow(sim.get_mapping(),system,face_rule,update_values);
-        FEFaceValues<2> face(sim.get_mapping(),dg,face_rule,update_values | update_normal_vectors |
-                             update_quadrature_points | update_JxW_values);
-        std::vector<Tensor<1,2>> u(rule.size()), face_u(face_rule.size());
+          mass_fe = std::make_unique<FEValues<dim>>(sim.get_mapping(),dg,QGaussLobatto<dim>(4),update_values | update_JxW_values);
+        FEValues<dim> flow(sim.get_mapping(),system,rule,update_values | update_gradients);
+        FEValues<dim> fe(sim.get_mapping(),dg,rule,update_values | update_gradients | update_JxW_values);
+        FEFaceValues<dim> face_flow(sim.get_mapping(),system,face_rule,update_values);
+        FEFaceValues<dim> face(sim.get_mapping(),dg,face_rule,update_values | update_normal_vectors |
+                               update_quadrature_points | update_JxW_values);
+        std::vector<Tensor<1,dim>> u(rule.size()), face_u(face_rule.size());
         std::vector<double> divergence(rule.size());
-        SpatialOperator op;
+        SpatialOperator<dim> op;
         for (const auto &cell : sim.get_dof_handler().active_cell_iterators())
           if (cell->is_locally_owned())
             {
-              const Triangulation<2>::active_cell_iterator mesh_cell = cell;
+              const typename Triangulation<dim>::active_cell_iterator mesh_cell = cell;
               flow.reinit(cell);
               fe.reinit(mesh_cell);
               flow[velocity].get_function_values(accepted,u);
               flow[velocity].get_function_divergences(accepted,divergence);
               auto &row = op.cells[cell->id()];
               double mean_loss = 0.;
-              Tensor<1,2> maximum;
+              Tensor<1,dim> maximum;
               FullMatrix<double> inverse_mass(n,n), local_action(n,n);
               for (unsigned int q=0; q<rule.size(); ++q)
                 {
-                  for (unsigned int d=0; d<2; ++d)
+                  for (unsigned int d=0; d<dim; ++d)
                     maximum[d] = std::max(maximum[d],std::abs(u[q][d]));
                   // Integrate -u.grad(s) by parts. Discrete incompressibility
                   // does not imply pointwise zero divergence.
@@ -161,7 +167,7 @@ namespace aspect
                   double max_outflow = 0.;
                   for (unsigned int q=0; q<face_rule.size(); ++q)
                     {
-                      for (unsigned int d=0; d<2; ++d)
+                      for (unsigned int d=0; d<dim; ++d)
                         maximum[d] = std::max(maximum[d],std::abs(face_u[q][d]));
                       const double flux = face_u[q]*face.normal_vector(q);
                       if (bounded)
@@ -203,7 +209,7 @@ namespace aspect
               row.self.reinit(n,n);
               inverse_mass.mmult(row.self,local_action);
               double cell_inverse_time = 0.;
-              for (unsigned int d=0; d<2; ++d)
+              for (unsigned int d=0; d<dim; ++d)
                 cell_inverse_time += maximum[d]/(cell->vertex(1u<<d)[d]-cell->vertex(0)[d]);
               // Even a solenoidal flow tangent to every face transports cell
               // moments. The mean-loss bound alone cannot resolve this motion.
@@ -216,6 +222,7 @@ namespace aspect
         return op;
       }
 
+      template <int dim>
       bool limit_cell(std::vector<double> &values, const Vector<double> &weights)
       {
         if (!std::all_of(values.begin(),values.end(),[](double v)
@@ -224,14 +231,14 @@ namespace aspect
           }))
         return false;
         const double mean=std::inner_product(values.begin(),values.end(),weights.begin(),0.);
-        return PhaseField::limit_bernstein(values,mean);
+        return PhaseField::limit_bernstein<dim>(values,mean);
       }
 
       // The substep parent and current stage contain only owned coefficients.
       // The halo belongs to this evaluation, even when current aliases parent.
-      template <typename Value, std::size_t N>
-      Field<Value> rk_stage(const SimulatorAccess<2> &sim, const SpatialOperator &op, const Field<Value> &parent,
-                            const Field<Value> &current, const Exterior &exterior, const std::array<std::string,N> &names, const double time,
+      template <typename Value, std::size_t N, int dim>
+      Field<Value> rk_stage(const SimulatorAccess<dim> &sim, const SpatialOperator<dim> &op, const Field<Value> &parent,
+                            const Field<Value> &current, const Exterior<dim> &exterior, const std::array<std::string,N> &names, const double time,
                             const double dt, const double fraction, const unsigned int stage_number)
       {
         using Coefficients = std::vector<Value>;
@@ -246,7 +253,7 @@ namespace aspect
         {
           halo.emplace(cell->id(),data);
         };
-        GridTools::exchange_cell_data_to_ghosts<Coefficients,DoFHandler<2>>(sim.get_dof_handler(),pack,unpack);
+        GridTools::exchange_cell_data_to_ghosts<Coefficients,DoFHandler<dim>>(sim.get_dof_handler(),pack,unpack);
         Field<Value> next;
         Vector<double> value(N);
         // Count affected ranks per component, before any rank can start a new exchange.
@@ -300,7 +307,7 @@ namespace aspect
                     invalid[N+c] = 1;
               }
             if constexpr (N==1)
-              if (row.mean_weights.size() && !limit_cell(result,row.mean_weights))
+              if (row.mean_weights.size() && !limit_cell<dim>(result,row.mean_weights))
                 invalid[2*N]=1;
           }
 
@@ -323,9 +330,9 @@ namespace aspect
         return next;
       }
 
-      template <typename Value, std::size_t N>
-      Field<Value> advance(const SimulatorAccess<2> &sim, const SpatialOperator &op, Field<Value> parent,
-                           const Exterior &exterior, const std::array<std::string,N> &names,
+      template <typename Value, std::size_t N, int dim>
+      Field<Value> advance(const SimulatorAccess<dim> &sim, const SpatialOperator<dim> &op, Field<Value> parent,
+                           const Exterior<dim> &exterior, const std::array<std::string,N> &names,
                            const double start_time, const double duration, const bool bounded)
       {
         if constexpr (N==1)
@@ -333,7 +340,7 @@ namespace aspect
             {
               bool valid=true;
               for (auto &[id,coefficients] : parent)
-                if (!limit_cell(coefficients,op.cells.at(id).mean_weights))
+                if (!limit_cell<dim>(coefficients,op.cells.at(id).mean_weights))
                   valid=false;
               const auto comm=sim.get_mpi_communicator();
               const auto bad_ranks=Utilities::MPI::sum(static_cast<unsigned int>(!valid),comm);
@@ -365,34 +372,37 @@ namespace aspect
                   ExcMessage("DG stress transport requires a finite clock and nonnegative duration."));
       const auto &dg = sim.get_fe().base_element(sim.introspection().base_elements.compositional_fields[fields[0]]);
       const auto op = assemble(sim,dg,accepted,false);
-      const Exterior boundary = { [&](types::boundary_id,const Point<2> &point,double time,Vector<double> &values)
+      const Exterior<2> boundary = { [&](types::boundary_id,const Point<2> &point,double time,Vector<double> &values)
       {
         if (time!=exterior.get_time())
           exterior.set_time(time);
         exterior.vector_value(point,values);
       }, "Nonfinite exterior parent stress "
-                                };
+                                   };
       return advance(sim,op,read_fields<SymmetricTensor<2,2>>(sim,fields,accepted,dg.n_dofs_per_cell()),
       boundary,std::array<std::string,3> {{"xx","yy","xy"}},start_time,duration,false);
     }
 
-    CellScalar advect_scalar(const SimulatorAccess<2> &sim, const unsigned int field,
-                             const ScalarInflow &inflow, const bool bounded)
+    template <int dim>
+    CellScalar advect_scalar(const SimulatorAccess<dim> &sim, const unsigned int field,
+                             const ScalarInflow<dim> &inflow, const bool bounded)
     {
       const auto &accepted=sim.get_old_solution();
       const auto &dg=sim.get_fe().base_element(sim.introspection().base_elements.compositional_fields[field]);
-      AssertThrow(dg.degree==2 && dynamic_cast<const FE_DGQ<2>*>(&dg)!=nullptr &&
-                  (dynamic_cast<const FE_DGQBernstein<2>*>(&dg)!=nullptr)==bounded,
+      AssertThrow(dg.degree==2 && dynamic_cast<const FE_DGQ<dim>*>(&dg)!=nullptr &&
+                  (dynamic_cast<const FE_DGQBernstein<dim>*>(&dg)!=nullptr)==bounded,
                   ExcMessage("Explicit scalar transport requires the selected nodal or Bernstein DGQ2 basis."));
       const auto op=assemble(sim,dg,accepted,bounded);
-      const Exterior boundary = { [&](types::boundary_id id,const Point<2> &point,double time,Vector<double> &values)
+      const Exterior<dim> boundary = { [&](types::boundary_id id,const Point<dim> &point,double time,Vector<double> &values)
       {
         values[0]=inflow(id,point,time);
       }, "Invalid exterior composition "
-                                };
+                                     };
       return advance(sim,op,read_fields<double>(sim,std::array<unsigned int,1> {{field}},accepted,dg.n_dofs_per_cell()),
       boundary,std::array<std::string,1> {{sim.introspection().name_for_compositional_index(field)}},
       sim.get_time()-sim.get_timestep(),sim.get_timestep(),bounded);
     }
+    template CellScalar advect_scalar(const SimulatorAccess<2> &, unsigned int, const ScalarInflow<2> &, bool);
+    template CellScalar advect_scalar(const SimulatorAccess<3> &, unsigned int, const ScalarInflow<3> &, bool);
   }
 }

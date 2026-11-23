@@ -1,0 +1,63 @@
+# Fault-free upper-slab transfer with explicit phase and tracer and an implicit companion.
+set Dimension = 3
+set Use years instead of seconds = false
+set End time = 0.01
+set Nonlinear solver scheme = single Advection, no Stokes
+subsection Time stepping
+  set List of model names = function
+  subsection Function
+    set Function expression = 0.01
+  end
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set Z repetitions = 2
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Gravity model
+  set Model name = vertical
+end
+subsection Material model
+  set Model name = simple
+end
+subsection Initial temperature model
+  set List of model names = function
+end
+subsection Discretization
+  set Composition polynomial degree = 2
+  set Use discontinuous composition discretization = true
+end
+subsection Compositional fields
+  set Number of fields = 3
+  set Names of fields = companion, damage, tracer
+  set Types of fields = generic, phase field, generic
+  set SSPRK3 fields = damage, tracer
+end
+subsection Initial composition model
+  set List of model names = function
+  subsection Function
+    set Function expression = -.25+min(z,.5)/4; .25+min(z,.5)/4; -.25+min(z,.5)/4
+  end
+end
+subsection Boundary composition model
+  set Fixed composition boundary indicators = bottom
+  set List of model names = function
+  subsection Function
+    set Function expression = (1-t)/4-.5; (1-t)/4; (1-t)/4-.5
+  end
+end
+subsection Prescribed Stokes solution
+  set Model name = function
+  subsection Velocity function
+    set Function expression = 0;0;1
+  end
+end
+subsection Postprocess
+  set List of postprocessors = composition statistics
+end

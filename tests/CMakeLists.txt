@@ -342,6 +342,8 @@ function(discover_tests)
 
     if(_test_source_name STREQUAL "dg_stress_transport")
       list(APPEND _testdepends "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/fixed_fault/check_transport.py")
+    elseif(_test_source_name STREQUAL "explicit_dg_slabs")
+      list(APPEND _testdepends explicit_dg_compositions "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/explicit_dg_transport/slabs.prm")
     elseif(_test_source_name MATCHES "^explicit_dg_(compositions|phase|phase_statistics)$")
       list(APPEND _testdepends "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/explicit_dg_transport/mixed.prm")
     endif()

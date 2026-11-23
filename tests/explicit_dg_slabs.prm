@@ -1,0 +1,6 @@
+# Enable if: QUICK_TEST
+include $ASPECT_SOURCE_DIR/benchmarks/explicit_dg_transport/slabs.prm
+set Additional shared libraries = ./libexplicit_dg_compositions.so
+subsection Postprocess
+  set List of postprocessors = DG coefficient samples
+end

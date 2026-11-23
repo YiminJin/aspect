@@ -268,8 +268,7 @@ namespace aspect
         const typename Parameters<dim>::AdvectionFieldMethod::Kind method = adv_field.advection_method(introspection);
         if (parameters.explicit_compositions.selected[c])
           {
-            if constexpr (dim == 2)
-              Transport::advance_composition(SimulatorAccess<dim>(*this), c, solution);
+            Transport::advance_composition(SimulatorAccess<dim>(*this), c, solution);
             SolverControl control;
             signals.post_advection_solver(*this, false, c, control);
             continue;

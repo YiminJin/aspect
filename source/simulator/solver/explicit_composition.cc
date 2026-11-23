@@ -18,7 +18,7 @@ namespace aspect
       prm.declare_entry("SSPRK3 fields","",Patterns::List(Patterns::Anything()),
                         "Names of DGQ2 field-method compositions advanced by pure material advection with "
                         "accepted velocity. Other fields keep their ordinary method. Supports single Advection "
-                        "with Q2 prescribed, single or iterated Stokes velocity, on a fixed conforming nonperiodic 2-D box. "
+                        "with Q2 prescribed, single or iterated Stokes velocity, on a fixed conforming nonperiodic Cartesian box in 2-D or 3-D. "
                         "Prescribe Cartesian boundary composition function data on incoming faces. A selected "
                         "field of type 'phase field' uses bounded quadratic Bernstein transport. Generic and "
                         "chemical tracers are signed. Reactions, operator splitting, ASPECT elasticity and the "
@@ -37,11 +37,11 @@ namespace aspect
         return;
 
       using Scheme=typename Parameters<dim>::NonlinearSolver;
-      AssertThrow(dim==2 && !p.use_operator_splitting && !p.enable_elasticity && !p.include_melt_transport &&
+      AssertThrow(!p.use_operator_splitting && !p.enable_elasticity && !p.include_melt_transport &&
                   (p.nonlinear_solver==Scheme::single_Advection_no_Stokes ||
                    p.nonlinear_solver==Scheme::single_Advection_single_Stokes ||
                    p.nonlinear_solver==Scheme::single_Advection_iterated_Stokes),
-                  ExcMessage("SSPRK3 fields require single Advection on a 2-D box without operator splitting, melt or elasticity."));
+                  ExcMessage("SSPRK3 fields require single Advection on a Cartesian box without operator splitting, melt or elasticity."));
       AssertThrow(p.stokes_velocity_degree==2,
                   ExcMessage("SSPRK3 composition transport is qualified for Stokes velocity degree 2."));
       AssertThrow(p.initial_adaptive_refinement==0 && p.adaptive_refinement_interval==0 && p.additional_refinement_times.empty(),
@@ -75,36 +75,28 @@ namespace aspect
                   ExcMessage("SSPRK3 fields require the function boundary composition model with the add operator."));
       prm.enter_subsection("Function");
       AssertThrow(prm.get("Coordinate system")=="cartesian",ExcMessage("SSPRK3 inflow requires Cartesian coordinates."));
-      // Treat the optional time variable as another independent coordinate.
-      // Both expressions are immutable during assembly, including on retries.
-      if (Utilities::split_string_list(prm.get("Variable names")).size()==dim)
-        {
-          auto spatial=std::make_shared<Functions::ParsedFunction<dim>>(p.n_compositional_fields);
-          spatial->parse_parameters(prm);
-          inflow=[spatial](const Point<dim> &point,unsigned int field,double)
-          {
-            return spatial->value(point,field);
-          };
-        }
-      else if constexpr (dim==2)
-        {
-          auto space_time=std::make_shared<Functions::ParsedFunction<3>>(p.n_compositional_fields);
-          space_time->parse_parameters(prm);
-          const double unit=p.convert_to_years ? year_in_seconds : 1.;
-          inflow=[space_time,unit](const Point<2> &point,unsigned int field,double seconds)
-          {
-            return space_time->value(Point<3>(point[0],point[1],seconds/unit),field);
-          };
-        }
+      // This evaluator is private to the explicit solver. Each evaluation
+      // receives its stage clock, including when an attempt is repeated.
+      auto function=std::make_shared<Functions::ParsedFunction<dim>>(p.n_compositional_fields);
+      function->parse_parameters(prm);
+      const double unit=p.convert_to_years ? year_in_seconds : 1.;
+      inflow=[function,unit](const Point<dim> &point,unsigned int field,double seconds)
+      {
+        const double time=seconds/unit;
+        if (function->get_time()!=time)
+          function->set_time(time);
+        return function->value(point,field);
+      };
       prm.leave_subsection();
       prm.leave_subsection();
     }
 
-    void advance_composition(const SimulatorAccess<2> &sim, const unsigned int field, LinearAlgebra::BlockVector &solution)
+    template <int dim>
+    void advance_composition(const SimulatorAccess<dim> &sim, const unsigned int field, LinearAlgebra::BlockVector &solution)
     {
       const auto &p=sim.get_parameters();
-      AssertThrow(Plugins::plugin_type_matches<GeometryModel::Box<2>>(sim.get_geometry_model()) &&
-                  Plugins::plugin_type_matches<InitialTopographyModel::ZeroTopography<2>>(sim.get_initial_topography_model()) &&
+      AssertThrow(Plugins::plugin_type_matches<GeometryModel::Box<dim>>(sim.get_geometry_model()) &&
+                  Plugins::plugin_type_matches<InitialTopographyModel::ZeroTopography<dim>>(sim.get_initial_topography_model()) &&
                   sim.get_geometry_model().get_periodic_boundary_pairs().empty() && !p.mesh_deformation_enabled,
                   ExcMessage("Explicit DG composition requires an undeformed nonperiodic Cartesian box."));
       const auto &intro=sim.introspection();
@@ -124,10 +116,10 @@ namespace aspect
 
       // The implicit composition RHS tests a whole-step reaction increment at
       // this linearization point and quadrature. Only the selected row matters.
-      const QGauss<2> rule(p.composition_degrees[field]+(p.stokes_velocity_degree+1)/2);
-      FEValues<2> fe(sim.get_mapping(),sim.get_fe(),rule,update_values|update_gradients|update_quadrature_points);
-      MaterialModel::MaterialModelInputs<2> in(rule.size(),intro.n_compositional_fields);
-      MaterialModel::MaterialModelOutputs<2> out(rule.size(),intro.n_compositional_fields);
+      const QGauss<dim> rule(p.composition_degrees[field]+(p.stokes_velocity_degree+1)/2);
+      FEValues<dim> fe(sim.get_mapping(),sim.get_fe(),rule,update_values|update_gradients|update_quadrature_points);
+      MaterialModel::MaterialModelInputs<dim> in(rule.size(),intro.n_compositional_fields);
+      MaterialModel::MaterialModelOutputs<dim> out(rule.size(),intro.n_compositional_fields);
       in.requested_properties=MaterialModel::MaterialProperties::reaction_terms;
       const auto &material=sim.get_material_model();
       const auto &iterate=sim.get_current_linearization_point();
@@ -145,7 +137,7 @@ namespace aspect
       AssertThrow(!Utilities::MPI::max(static_cast<unsigned int>(reacts),comm),
                   ExcMessage("SSPRK3 pure advection cannot omit a reaction increment for "+intro.name_for_compositional_index(field)));
       const auto &fixed=sim.get_fixed_composition_boundary_indicators();
-      const ScalarInflow exterior=[&](types::boundary_id id,const Point<2> &point,const double t)
+      const ScalarInflow<dim> exterior=[&](types::boundary_id id,const Point<dim> &point,const double t)
       {
         if (!fixed.count(id))
           return std::numeric_limits<double>::quiet_NaN();
@@ -173,5 +165,7 @@ namespace aspect
 
     template struct ExplicitCompositions<2>;
     template struct ExplicitCompositions<3>;
+    template void advance_composition(const SimulatorAccess<2> &, unsigned int, LinearAlgebra::BlockVector &);
+    template void advance_composition(const SimulatorAccess<3> &, unsigned int, LinearAlgebra::BlockVector &);
   }
 }

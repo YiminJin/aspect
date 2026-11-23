@@ -27,11 +27,13 @@ namespace aspect
     using CellScalar = std::map<CellId,std::vector<double>>;
 
     /** Physical boundary value at an incoming face point and stage time (s). */
-    using ScalarInflow = std::function<double(types::boundary_id,const Point<2>&,double)>;
+    template <int dim>
+    using ScalarInflow = std::function<double(types::boundary_id,const Point<dim>&,double)>;
 
     /** Collectively advance a DGQ2 scalar from the old solution and velocity. */
-    CellScalar advect_scalar(const SimulatorAccess<2> &sim, unsigned int field,
-                             const ScalarInflow &inflow, bool bounded_bernstein);
+    template <int dim>
+    CellScalar advect_scalar(const SimulatorAccess<dim> &sim, unsigned int field,
+                             const ScalarInflow<dim> &inflow, bool bounded_bernstein);
   }
 }
 #endif

@@ -21,7 +21,7 @@ def require(ok,message):
         raise ValueError(message)
 
 
-def run(args,name,settings='',ranks=1,fail=None,retry=False,checkpoint=None):
+def run(args,name,settings='',ranks=1,fail=None,retry=False,checkpoint=None,template=BASE,dim=2):
     dest=args.directory/name
     dest.mkdir(parents=True)
     output=dest/'output'
@@ -34,7 +34,7 @@ def run(args,name,settings='',ranks=1,fail=None,retry=False,checkpoint=None):
     if retry:
         libraries.append(args.plugins/f'libfixed_fault.{args.mode}.so')
     prm=dest/'input.prm'
-    prm.write_text(BASE+'\n'+settings+'\nset Output directory = '+str(output)+'\nset Additional shared libraries = '+', '.join(map(str,libraries))+'\n')
+    prm.write_text(template+'\n'+settings+'\nset Output directory = '+str(output)+'\nset Additional shared libraries = '+', '.join(map(str,libraries))+'\n')
     cmd=([args.mpiexec,'-n',str(ranks)] if ranks>1 else [])+[args.aspect,prm]
     with (dest/'run.log').open('w') as log:
         status=subprocess.run(cmd,cwd=dest,stdout=log,stderr=subprocess.STDOUT,
@@ -46,10 +46,10 @@ def run(args,name,settings='',ranks=1,fail=None,retry=False,checkpoint=None):
     require(status==0,f'{name} failed: {dest}/run.log')
     if retry:
         require(msg.count('Repeating the current time step')==1,'expected one rejected trial')
-    return read_output(output,ranks)
+    return read_output(output,ranks,dim)
 
 
-def read_output(output,ranks):
+def read_output(output,ranks,dim=2):
     data={}
     shards=set()
     for path in output.glob('coefficients-*-*'):
@@ -60,11 +60,11 @@ def read_output(output,ranks):
         frame=data.setdefault(int(step),(clock,{}))
         require(frame[0]==clock,'partition clocks differ')
         for line in lines[1:]:
-            cell,field,fe,x0,y0,x1,y1,*values=line.split()
-            box=tuple(map(float,(x0,y0,x1,y1)))
-            vals=np.array(values,float)
+            cell,field,fe,*numbers=line.split()
+            box=tuple(map(float,numbers[:2*dim]))
+            vals=np.array(numbers[2*dim:],float)
             key=(cell,field)
-            require(key not in frame[1] and len(vals)==9 and np.isfinite(vals).all(),'bad field record')
+            require(key not in frame[1] and len(vals)==3**dim and np.isfinite(vals).all(),'bad field record')
             frame[1][key]=(box,fe,vals,int(rank))
     require(data and sorted(data)==list(range(len(data))),'missing publication')
     require(shards=={(k,r) for k in data for r in range(ranks)},'unexpected rank shards')
