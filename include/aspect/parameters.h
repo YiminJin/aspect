@@ -26,6 +26,7 @@
 
 #include <aspect/global.h>
 #include <aspect/phase_field/surface_energy_model.h>
+#include <aspect/simulator/solver/explicit_composition.h>
 #include <aspect/material_model/interface.h>
 
 
@@ -840,6 +841,7 @@ namespace aspect
      * field. Consequently the vector has n_compositional_fields entries.
      */
     std::vector<typename AdvectionFieldMethod::Kind> compositional_field_methods;
+    Transport::ExplicitCompositions<dim> explicit_compositions;
 
     /**
      * Map from compositional index to a pair "particle property", "component",

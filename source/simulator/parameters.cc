@@ -52,6 +52,7 @@ namespace aspect
   declare_parameters (ParameterHandler &prm, const unsigned int mpi_rank)
   {
     PhaseField::SurfaceEnergyModel::declare_parameters(prm);
+    Transport::ExplicitCompositions<dim>::declare_parameters(prm);
 
     prm.declare_entry ("Dimension", "2",
                        Patterns::Integer (2,3),
@@ -2461,6 +2462,8 @@ namespace aspect
           (prm.get ("Material averaging"));
     }
     prm.leave_subsection ();
+
+    explicit_compositions.parse_parameters(prm, *this);
 
     // then, finally, let user additions that do not go through the usual
     // plugin mechanism, declare their parameters if they have subscribed

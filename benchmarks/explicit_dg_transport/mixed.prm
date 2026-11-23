@@ -1,0 +1,63 @@
+# Positive material velocity, signed curved tracers and a time-dependent inflow.
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = 0.025
+set Nonlinear solver scheme = single Advection, no Stokes
+subsection Time stepping
+  set List of model names = function
+  subsection Function
+    set Function expression = 0.0125
+  end
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set X repetitions = 2
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Gravity model
+  set Model name = vertical
+end
+subsection Material model
+  set Model name = simple
+end
+subsection Initial temperature model
+  set List of model names = function
+end
+subsection Discretization
+  set Composition polynomial degree = 2
+  set Use discontinuous composition discretization = true
+end
+subsection Compositional fields
+  set Number of fields = 2
+  set Names of fields = companion, tracer
+  set Types of fields = generic, generic
+  set SSPRK3 fields = tracer
+end
+subsection Initial composition model
+  set List of model names = function
+  subsection Function
+    set Function expression = (x-.4)^2-.2; (x-.4)^2-.2
+  end
+end
+subsection Boundary composition model
+  set Fixed composition boundary indicators = left, right, bottom, top
+  set List of model names = function
+  subsection Function
+    set Function expression = (x-t-.4)^2-.2; (x-t-.4)^2-.2
+  end
+end
+subsection Prescribed Stokes solution
+  set Model name = function
+  subsection Velocity function
+    set Function expression = 1;0
+  end
+end
+subsection Postprocess
+  set List of postprocessors = composition statistics
+end

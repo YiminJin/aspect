@@ -342,6 +342,8 @@ function(discover_tests)
 
     if(_test_source_name STREQUAL "dg_stress_transport")
       list(APPEND _testdepends "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/fixed_fault/check_transport.py")
+    elseif(_test_source_name STREQUAL "explicit_dg_compositions")
+      list(APPEND _testdepends "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/explicit_dg_transport/mixed.prm")
     endif()
 
     # If a .prm contains the keyword "EXPECT FAILURE", make sure aspect fails
