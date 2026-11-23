@@ -5,7 +5,6 @@
 #ifndef _aspect_postprocess_phase_field_surface_energy_h
 #define _aspect_postprocess_phase_field_surface_energy_h
 
-#include <aspect/phase_field/crack_geometry.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/simulator_access.h>
 
@@ -23,13 +22,10 @@ namespace aspect
     {
       public:
         std::pair<std::string,std::string> execute(TableHandler &statistics) override;
-        static void declare_parameters(ParameterHandler &prm);
-        void parse_parameters(ParameterHandler &prm) override;
+        void initialize() override;
 
       private:
-        const PhaseField::CrackGeometry *geometry = nullptr;
         unsigned int phase_index;
-        double fracture_energy, length_scale;
     };
   }
 }

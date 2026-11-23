@@ -6,8 +6,6 @@
 
 #include <deal.II/fe/fe_values.h>
 
-#include <cmath>
-
 namespace aspect
 {
   namespace Postprocess
@@ -15,6 +13,7 @@ namespace aspect
     template <int dim>
     std::pair<std::string,std::string> PhaseFieldSurfaceEnergy<dim>::execute(TableHandler &statistics)
     {
+      const auto &model = this->get_parameters().surface_energy_model;
       const auto &intro = this->introspection();
       // For a Q_p phase, alpha(phi) has coordinate degree at most 2p.
       const auto &quadrature = intro.quadratures.compositional_fields[phase_index];
@@ -32,15 +31,15 @@ namespace aspect
             phase.get_function_gradients(this->get_solution(), gradients);
             for (unsigned int q=0; q<quadrature.size(); ++q)
               {
-                local[0] += geometry->value(values[q]) * fe.JxW(q);
+                local[0] += model.geometry.value(values[q]) * fe.JxW(q);
                 local[1] += gradients[q].norm_square() * fe.JxW(q);
               }
           }
 
       Utilities::MPI::sum(local, this->get_mpi_communicator(), global);
-      const double prefactor = fracture_energy / geometry->normalization();
-      const double local_energy = prefactor * global[0] / length_scale;
-      const double gradient_energy = prefactor * global[1] * length_scale;
+      const double prefactor = model.fracture_energy / model.geometry.normalization();
+      const double local_energy = prefactor * global[0] / model.length_scale;
+      const double gradient_energy = prefactor * global[1] * model.length_scale;
       const double total_energy = local_energy + gradient_energy;
       const std::string unit = (dim == 2 ? "J/m" : "J");
       const auto add_energy = [&](const std::string &name, const double energy)
@@ -57,37 +56,11 @@ namespace aspect
     }
 
     template <int dim>
-    void PhaseFieldSurfaceEnergy<dim>::declare_parameters(ParameterHandler &prm)
+    void PhaseFieldSurfaceEnergy<dim>::initialize()
     {
-      prm.enter_subsection("Postprocess");
-      prm.enter_subsection("Phase field surface energy");
-      prm.declare_entry("Crack geometry", "AT1", Patterns::Selection(PhaseField::CrackGeometry::selection_pattern()),
-                        "Crack-geometric law for the measured surface functional.");
-      prm.declare_entry("Phase composition", "phase_field", Patterns::Anything(),
-                        "Name of the compositional field that contains the dimensionless phase.");
-      prm.declare_entry("Fracture energy", "1", Patterns::Double(),
-                        "Positive fracture energy per unit crack area Gc in J/m^2.");
-      prm.declare_entry("Length scale", "1", Patterns::Double(),
-                        "Positive regularization length in metres.");
-      prm.leave_subsection();
-      prm.leave_subsection();
-    }
-
-    template <int dim>
-    void PhaseFieldSurfaceEnergy<dim>::parse_parameters(ParameterHandler &prm)
-    {
-      prm.enter_subsection("Postprocess");
-      prm.enter_subsection("Phase field surface energy");
-      geometry = &PhaseField::CrackGeometry::select(prm.get("Crack geometry"));
-      phase_index = this->introspection().compositional_index_for_name(prm.get("Phase composition"));
-      fracture_energy = prm.get_double("Fracture energy");
-      length_scale = prm.get_double("Length scale");
-      AssertThrow(std::isfinite(fracture_energy) && fracture_energy > 0.,
-                  ExcMessage("Phase field surface energy requires a finite, positive fracture energy in J/m^2."));
-      AssertThrow(std::isfinite(length_scale) && length_scale > 0.,
-                  ExcMessage("Phase field surface energy requires a finite, positive length scale in metres."));
-      prm.leave_subsection();
-      prm.leave_subsection();
+      const auto &model = this->get_parameters().surface_energy_model;
+      model.validate();
+      phase_index = this->introspection().compositional_index_for_name(model.composition);
     }
 
     ASPECT_REGISTER_POSTPROCESSOR(PhaseFieldSurfaceEnergy,

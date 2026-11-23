@@ -40,6 +40,7 @@ namespace aspect
   template <int dim>
   Parameters<dim>::Parameters (ParameterHandler &prm,
                                const MPI_Comm mpi_communicator)
+    : surface_energy_model(PhaseField::SurfaceEnergyModel::parse_parameters(prm))
   {
     parse_parameters (prm, mpi_communicator);
   }
@@ -50,6 +51,8 @@ namespace aspect
   Parameters<dim>::
   declare_parameters (ParameterHandler &prm, const unsigned int mpi_rank)
   {
+    PhaseField::SurfaceEnergyModel::declare_parameters(prm);
+
     prm.declare_entry ("Dimension", "2",
                        Patterns::Integer (2,3),
                        "The number of space dimensions you want to run this program in. "

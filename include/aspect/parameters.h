@@ -25,6 +25,7 @@
 #include <deal.II/base/parameter_handler.h>
 
 #include <aspect/global.h>
+#include <aspect/phase_field/surface_energy_model.h>
 #include <aspect/material_model/interface.h>
 
 
@@ -592,6 +593,9 @@ namespace aspect
      * @name Global parameters
      * @{
      */
+    /** Immutable phase functional shared by consumers through SimulatorAccess. */
+    const PhaseField::SurfaceEnergyModel surface_energy_model;
+
     typename NonlinearSolver::Kind nonlinear_solver;
     typename NonlinearSolverFailureStrategy::Kind nonlinear_solver_failure_strategy;
     typename LinearSolverFailureStrategy::Kind linear_solver_failure_strategy;

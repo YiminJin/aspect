@@ -1,0 +1,20 @@
+# Read the same configuration from assembler setup with the energy reporter off.
+include $ASPECT_SOURCE_DIR/benchmarks/phase_field_surface_energy/affine.prm
+subsection Compositional fields
+  set Number of fields = 2
+  set Names of fields = decoy, damage
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0.9;x/4+y/2
+  end
+end
+subsection Postprocess
+  set List of postprocessors = load balance statistics
+  subsection Phase field surface energy
+    set Crack geometry = CZM
+    set Phase composition = damage
+    set Fracture energy = 3.5
+    set Length scale = 0.125
+  end
+end
