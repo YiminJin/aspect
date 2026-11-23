@@ -43,3 +43,23 @@ combinations are easy to detect, and ASPECT may not always realize immediate wha
 if you change a setting that can’t be changed. However, you will almost invariably get nonsensical
 results after some time.
 :::
+
+### Compositional finite-element bases
+
+Each checkpoint slot records the finite-element name for every composition in
+field order in its `metadata.txt`. A nodal DGQ2 field and a quadratic Bernstein
+phase store nine coefficients per cell in 2-D, but the coefficients represent
+different polynomials. ASPECT checks the saved bases before loading the solution
+vectors. A change of transport method is compatible with this check when the
+field keeps the same basis.
+
+Older slots omit this record. They can resume directly when the saved
+discretization rules out a Bernstein field, for example with continuous
+compositions or DGQ1. An unmarked 2-D DGQ2 field in a configuration that
+could have used Bernstein requires evidence from the *producing* executable
+and input. When that evidence establishes the bases, append a
+`composition_bases` record to a copy of the slot's metadata, giving the field
+count followed by the quoted FE names in their original order. For example,
+a verified one-field nodal DGQ2 checkpoint takes
+`composition_bases 1 "FE_DGQ<2>(2)"`. If the producing bases cannot be
+established, the checkpoint is ambiguous and continuation is rejected.

@@ -18,11 +18,11 @@ namespace aspect
       prm.declare_entry("SSPRK3 fields","",Patterns::List(Patterns::Anything()),
                         "Names of DGQ2 field-method compositions advanced by pure material advection with "
                         "accepted velocity. Other fields keep their ordinary method. Supports single Advection "
-                        "with prescribed, single or iterated Stokes, on a fixed conforming nonperiodic 2-D box. "
+                        "with Q2 prescribed, single or iterated Stokes velocity, on a fixed conforming nonperiodic 2-D box. "
                         "Prescribe Cartesian boundary composition function data on incoming faces. A selected "
                         "field of type 'phase field' uses bounded quadratic Bernstein transport. Generic and "
                         "chemical tracers are signed. Reactions, operator splitting, ASPECT elasticity and the "
-                        "release composition limiter on the selected field are unsupported.");
+                        "release composition limiter on the selected field are unsupported. Selected fields must have no prescribed DoFs.");
       prm.leave_subsection();
     }
 
@@ -42,6 +42,8 @@ namespace aspect
                    p.nonlinear_solver==Scheme::single_Advection_single_Stokes ||
                    p.nonlinear_solver==Scheme::single_Advection_iterated_Stokes),
                   ExcMessage("SSPRK3 fields require single Advection on a 2-D box without operator splitting, melt or elasticity."));
+      AssertThrow(p.stokes_velocity_degree==2,
+                  ExcMessage("SSPRK3 composition transport is qualified for Stokes velocity degree 2."));
       AssertThrow(p.initial_adaptive_refinement==0 && p.adaptive_refinement_interval==0 && p.additional_refinement_times.empty(),
                   ExcMessage("SSPRK3 fields require a fixed mesh."));
       for (const auto &name : names)
@@ -107,6 +109,19 @@ namespace aspect
                   ExcMessage("Explicit DG composition requires an undeformed nonperiodic Cartesian box."));
       const auto &intro=sim.introspection();
       const auto comm=sim.get_mpi_communicator();
+      // A strong interior prescription cannot be imposed only at the end of
+      // the RK step. Inspect global indices of this block, including on retries.
+      const unsigned int block=intro.block_indices.compositional_fields[field];
+      const auto first=solution.get_block_indices().block_start(block);
+      const auto end=first+solution.block(block).size();
+      const auto lines=sim.get_current_constraints().get_lines();
+      const bool constrained=std::any_of(lines.begin(),lines.end(),[&](const auto &line)
+      {
+        return first<=line.index && line.index<end;
+      });
+      AssertThrow(!Utilities::MPI::max(static_cast<unsigned int>(constrained),comm),
+                  ExcMessage("SSPRK3 cannot advance prescribed DoFs on field "+intro.name_for_compositional_index(field)));
+
       // The implicit composition RHS tests a whole-step reaction increment at
       // this linearization point and quadrature. Only the selected row matters.
       const QGauss<2> rule(p.composition_degrees[field]+(p.stokes_velocity_degree+1)/2);
@@ -138,7 +153,6 @@ namespace aspect
       };
 
       const auto candidate=advect_scalar(sim,field,exterior,p.composition_descriptions[field].type==CompositionalFieldDescription::phase_field);
-      const unsigned int block=intro.block_indices.compositional_fields[field];
       LinearAlgebra::Vector owned(intro.index_sets.system_partitioning[block],comm);
       const auto &system=sim.get_fe();
       std::vector<types::global_dof_index> indices(system.n_dofs_per_cell());

@@ -1,0 +1,38 @@
+# Enable if: QUICK_TEST
+include $ASPECT_SOURCE_DIR/benchmarks/explicit_dg_transport/mixed.prm
+set End time = 0.0125
+subsection Geometry model
+  subsection Box
+    set X repetitions = 1
+  end
+end
+subsection Compositional fields
+  set Number of fields = 1
+  set Names of fields = damage
+  set Types of fields = phase field
+  set SSPRK3 fields = damage
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = .9-.65*(2*y-1)^2
+  end
+end
+subsection Boundary composition model
+  subsection Function
+    set Function expression = .9-.65*(2*y-1)^2
+  end
+end
+subsection Prescribed solution
+  set List of model names = temperature function
+  subsection Temperature function
+    subsection Indicator function
+      set Function expression = if(x<.51,1,0)
+    end
+    subsection Function
+      set Function expression = 100
+    end
+  end
+end
+subsection Postprocess
+  set List of postprocessors = temperature statistics, composition statistics
+end

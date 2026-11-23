@@ -4,6 +4,7 @@ import math
 import os
 from pathlib import Path
 import subprocess
+import shutil
 
 import numpy as np
 from reference import Reference, basis, mean_weights, nodes_x, nodes_y, tensor, to_coeff, to_values
@@ -20,10 +21,14 @@ def require(ok,message):
         raise ValueError(message)
 
 
-def run(args,name,settings='',ranks=1,fail=None,retry=False):
+def run(args,name,settings='',ranks=1,fail=None,retry=False,checkpoint=None):
     dest=args.directory/name
     dest.mkdir(parents=True)
     output=dest/'output'
+    if checkpoint is not None:
+        # Copy the entire parent including the accepted output prefix and
+        # checkpoint slot. Each resume is independent of the other variants.
+        shutil.copytree(checkpoint,output)
     so=args.plugins/f'libexplicit_dg_compositions.{args.mode}.so'
     libraries=[so]
     if retry:
@@ -41,9 +46,15 @@ def run(args,name,settings='',ranks=1,fail=None,retry=False):
     require(status==0,f'{name} failed: {dest}/run.log')
     if retry:
         require(msg.count('Repeating the current time step')==1,'expected one rejected trial')
+    return read_output(output,ranks)
+
+
+def read_output(output,ranks):
     data={}
+    shards=set()
     for path in output.glob('coefficients-*-*'):
         _,step,rank=path.name.split('-')
+        shards.add((int(step),int(rank)))
         lines=path.read_text().splitlines()
         clock=tuple(map(float,lines[0].split()))
         frame=data.setdefault(int(step),(clock,{}))
@@ -56,6 +67,7 @@ def run(args,name,settings='',ranks=1,fail=None,retry=False):
             require(key not in frame[1] and len(vals)==9 and np.isfinite(vals).all(),'bad field record')
             frame[1][key]=(box,fe,vals,int(rank))
     require(data and sorted(data)==list(range(len(data))),'missing publication')
+    require(shards=={(k,r) for k in data for r in range(ranks)},'unexpected rank shards')
     clocks=[data[k][0] for k in sorted(data)]
     for rank in range(ranks):
         published=(output/f'publication-{rank}').read_text().splitlines()
@@ -102,8 +114,9 @@ def constant_velocity(u,v):
     return lambda x,y:(np.full_like(x,u),np.full_like(y,v))
 
 
-def oracle(data,field,initial,velocity,divergence,exterior,bounded):
+def oracle(data,field,initial,velocity,divergence,exterior,bounded,*,expected_ranks):
     boxes,stored,ranks=field_data(data,0,field)
+    require(set(ranks)==set(range(expected_ranks)),f'{field}: missing expected cell owner')
     ref=Reference(boxes,velocity,divergence,exterior,bounded)
     vals=np.array([initial(a+(c-a)*nodes_x,b+(d-b)*nodes_y,0.) for a,b,c,d in boxes])
     for (cell,name),(_,fe,_,_) in data[0][1].items():
@@ -111,6 +124,9 @@ def oracle(data,field,initial,velocity,divergence,exterior,bounded):
             require(('Bernstein' in fe)==bounded,'wrong native basis')
     original_mass=np.dot(ref.areas,vals@mean_weights)
     ref.filter(vals)
+    cross=sum(ranks[i]!=ranks[j] and np.any(matrix@vals[j]) for i,j,matrix in ref.upstream)
+    if expected_ranks>1:
+        require(cross>0,'missing active upwind partition face')
     entry_scales=ref.limited
     worst=0.
     for step,(clock,_) in sorted(data.items()):
@@ -119,17 +135,14 @@ def oracle(data,field,initial,velocity,divergence,exterior,bounded):
             vals,_=ref.advance(vals,t-dt,dt)
         else:
             require(clock==(0.,0.),'initialization has a positive physical interval')
-        boxes2,stored,_=field_data(data,step,field)
-        require(boxes2==boxes,'changed mesh')
+        boxes2,stored,owners=field_data(data,step,field)
+        require(boxes2==boxes and owners==ranks,'changed mesh or ownership')
         observed=stored@to_values.T if bounded else stored
         error=np.max(abs(observed-vals))
         require(error<3.e-11,f'{field} step {step}: production/strong-form defect {error}')
         worst=max(worst,error)
         mass_delta=np.dot(ref.areas,observed@mean_weights)-original_mass
         require(abs(mass_delta-ref.balance)<1.e-12,'stage-weighted material balance failed')
-    cross=sum(ranks[i]!=ranks[j] for i,j,m in ref.upstream)
-    if max(ranks):
-        require(cross>0,'missing active upwind partition face')
     print(f'{field}: {len(boxes)} cells, {len(data)-1} intervals, max nodal defect {worst:.3g}, '
           f'entry/stage scales {entry_scales}/{ref.limited-entry_scales}, partition faces {cross}, '
           f'source {ref.integrated_source:.9g}, outward flux {ref.integrated_flux:.9g}, '
@@ -144,8 +157,8 @@ def mixed(args):
     a=run(args,'mixed')
     b=run(args,'default',fields(SSPRK3_fields=''))
     swap=run(args,'swapped',fields(Names_of_fields='tracer, companion'))
-    oracle(a,'tracer',profile,u,zero,profile,False)
-    oracle(swap,'tracer',profile,u,zero,profile,False)
+    oracle(a,'tracer',profile,u,zero,profile,False,expected_ranks=1)
+    oracle(swap,'tracer',profile,u,zero,profile,False,expected_ranks=1)
     separation=[]
     for step in a:
         base=field_data(b,step,'companion')[1]
@@ -157,18 +170,33 @@ def mixed(args):
     require(min(separation)>5.e-5,'methods failed to separate')
     print('implicit/explicit endpoint separations',separation,flush=True)
     parallel=run(args,'mixed-mpi',ranks=2)
-    oracle(parallel,'tracer',profile,u,zero,profile,False)
+    oracle(parallel,'tracer',profile,u,zero,profile,False,expected_ranks=2)
     print('mixed serial/MPI max defect',compare(a,parallel,1.e-12),flush=True)
+    # Two complete sets of clocks and valid coefficients, but one empty owner.
+    false_partition=args.directory/'empty-rank'
+    false_partition.mkdir()
+    for path in (args.directory/'mixed/output').glob('coefficients-*-0'):
+        shutil.copy(path,false_partition/path.name)
+        (false_partition/(path.name[:-1]+'1')).write_text(path.read_text().splitlines()[0]+'\n')
+    for rank in (0,1):
+        shutil.copy(args.directory/'mixed/output/publication-0',false_partition/f'publication-{rank}')
+    try:
+        oracle(read_output(false_partition,2),'tracer',profile,u,zero,profile,False,expected_ranks=2)
+    except ValueError as error:
+        require('missing expected cell owner' in str(error),str(error))
+        print('false two-rank fixture rejected:',error,flush=True)
+    else:
+        raise ValueError('qualified an empty second rank')
     static_boundary=section('Boundary composition model',section('Function',
                     setting('Variable names','x,y')+setting('Function expression','.3;.3')))
     spatial=run(args,'static-inflow',static_boundary)
-    oracle(spatial,'tracer',profile,u,zero,lambda x,y,t:np.full_like(x,.3),False)
+    oracle(spatial,'tracer',profile,u,zero,lambda x,y,t:np.full_like(x,.3),False,expected_ranks=1)
     reaction=section('Material model',setting('Model name','tracer reaction'))
     run(args,'explicit-reaction',reaction,fail='cannot omit a reaction increment for tracer')
     require((args.directory/'explicit-reaction/output/publication-0').read_text().split()==['0','0'],
             'reacting trial reached publication')
     unrelated=run(args,'implicit-reaction',reaction+fields(SSPRK3_fields='companion'))
-    oracle(unrelated,'companion',profile,u,zero,profile,False)
+    oracle(unrelated,'companion',profile,u,zero,profile,False,expected_ranks=1)
     require(np.max(abs(field_data(unrelated,1,'tracer')[1]-field_data(b,1,'tracer')[1]))>.009,
             'implicit reaction was discarded')
 
@@ -238,11 +266,11 @@ def phases(args):
             settings=phase_settings(ridge_expr(sign),ridge_expr(sign),f'{sign};{.4*sign}',level,.15,.025)
             a=run(args,f'ridge-{sign}-{level}',settings)
             f=lambda x,y,t:ridge(x,y,t,sign)
-            oracle(a,'damage',f,constant_velocity(sign,.4*sign),zero,f,True)
+            oracle(a,'damage',f,constant_velocity(sign,.4*sign),zero,f,True,expected_ranks=1)
             defects.append(ridge_metrics(a,sign))
             if level==2:
                 b=run(args,f'ridge-{sign}-mpi',settings,ranks=2)
-                oracle(b,'damage',f,constant_velocity(sign,.4*sign),zero,f,True)
+                oracle(b,'damage',f,constant_velocity(sign,.4*sign),zero,f,True,expected_ranks=2)
                 print('partition defect',compare(a,b,3e-12),flush=True)
         require(defects[1][0]<.006 and defects[1][1]<.012 and defects[1][1]<defects[0][1] and
                 defects[1][2]<.006 and defects[1][3]<.025,f'unresolved translated ridge: {defects}')
@@ -252,7 +280,7 @@ def phases(args):
     settings=phase_settings('.9-.65*(2*y-1)^2','.9-.65*(2*y-1)^2','1;0')
     a=run(args,'enclosure',settings)
     require(field_data(a,0,'damage')[1].max()>1.5,'expected out-of-range coefficient')
-    oracle(a,'damage',profile,constant_velocity(1,0),zero,profile,True)
+    oracle(a,'damage',profile,constant_velocity(1,0),zero,profile,True,expected_ranks=1)
 
     # At entry the in-cell maximum is 1.1 and mean is 14/15. An incoming
     # jump at later stages exercises scaling independently of initialization.
@@ -261,7 +289,7 @@ def phases(args):
     inflow=lambda x,y,t:np.full_like(x,.15+.1*t)
     settings=phase_settings('.6+2*y*(1-y)','.15+.1*t','1+.35*x;0')
     a=run(args,'divergent-limited',settings,ranks=2)
-    changed=oracle(a,'damage',profile,flow,lambda x,y:np.full_like(x,.35),inflow,True)
+    changed=oracle(a,'damage',profile,flow,lambda x,y:np.full_like(x,.35),inflow,True,expected_ranks=2)
     require(changed>0,'stage limiter never activated')
     boxes,stored,_=field_data(a,0,'damage')
     wrong=Reference(boxes,flow,lambda x,y:np.full_like(x,.35),inflow,True)
@@ -286,9 +314,9 @@ def phases(args):
     settings+=fn('Boundary composition model',';'.join([boundary,f,boundary]))
     clean=run(args,'clean',settings)
     oracle(clean,'tracer',lambda x,y,t:(x-t-.4)**2-.2,constant_velocity(1,.4),zero,
-           lambda x,y,t:(x-t-.4)**2-.2,False)
+           lambda x,y,t:(x-t-.4)**2-.2,False,expected_ranks=1)
     oracle(clean,'damage',lambda x,y,t:ridge(x,y,t,1),constant_velocity(1,.4),zero,
-           lambda x,y,t:ridge(x,y,t,1),True)
+           lambda x,y,t:ridge(x,y,t,1),True,expected_ranks=1)
     retry=run(args,'retry',settings+section('Time stepping',setting('List of model names','function, reject long first fault step')+
                section('Function',setting('Function expression','if(time==0,.025,.0125)'))),retry=True)
     print('retry max defect',compare(clean,retry,0.),flush=True)

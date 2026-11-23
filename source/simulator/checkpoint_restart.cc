@@ -39,7 +39,9 @@
 #include <cmath>
 #include <cstring>
 #include <fstream>
+#include <iomanip>
 #include <limits>
+#include <optional>
 
 #ifdef DEAL_II_WITH_ZLIB
 #  include <zlib.h>
@@ -54,6 +56,7 @@ namespace aspect
     {
       double time = numbers::signaling_nan<double>();
       unsigned int timestep_number = numbers::invalid_unsigned_int;
+      std::optional<std::vector<std::string>> composition_bases;
     };
 
     template <int dim>
@@ -74,12 +77,17 @@ namespace aspect
 
     void write_checkpoint_metadata(const std::string &checkpoint_path,
                                    const double time,
-                                   const unsigned int timestep_number)
+                                   const unsigned int timestep_number,
+                                   const std::vector<std::string> &composition_bases)
     {
       std::ofstream metadata_out(checkpoint_path + "metadata.txt");
       metadata_out.precision(17);
       metadata_out << "time " << time << '\n'
                    << "timestep_number " << timestep_number << '\n';
+      metadata_out << "composition_bases " << composition_bases.size();
+      for (const auto &basis : composition_bases)
+        metadata_out << ' ' << std::quoted(basis);
+      metadata_out << '\n';
       metadata_out.close();
 
       AssertThrow(static_cast<bool>(metadata_out),
@@ -104,7 +112,33 @@ namespace aspect
                   ExcMessage("Could not parse checkpoint metadata file <"
                              + checkpoint_path + "metadata.txt>."));
 
+      // Older checkpoints have only the time and timestep records.
+      std::string label;
+      if (metadata_in >> label)
+        {
+          unsigned int fields;
+          AssertThrow(label == "composition_bases" && (metadata_in >> fields),
+                      ExcMessage("Invalid composition basis record in " + checkpoint_path));
+          metadata.composition_bases.emplace();
+          for (unsigned int c=0; c<fields; ++c)
+            {
+              std::string name;
+              AssertThrow(metadata_in >> std::quoted(name),
+                          ExcMessage("Incomplete composition basis record in " + checkpoint_path));
+              metadata.composition_bases->push_back(name);
+            }
+        }
       return metadata;
+    }
+
+    template <int dim>
+    std::vector<std::string> composition_basis_names(const FiniteElement<dim> &fe,
+                                                     const Introspection<dim> &introspection)
+    {
+      std::vector<std::string> names;
+      for (const unsigned int base : introspection.base_elements.compositional_fields)
+        names.push_back(fe.base_element(base).get_name());
+      return names;
     }
 
     /**
@@ -463,7 +497,7 @@ namespace aspect
     // written.
     if (my_id == 0)
       {
-        write_checkpoint_metadata(checkpoint_path, time, timestep_number);
+        write_checkpoint_metadata(checkpoint_path, time, timestep_number, composition_basis_names(finite_element, introspection));
 
         std::ofstream f (parameters.output_directory + "restart/last_good_checkpoint.txt");
         f << last_checkpoint_id;
@@ -663,6 +697,26 @@ namespace aspect
                                  +
                                  e.what()));
       }
+
+    // Degree and DoF count alone cannot distinguish the two DGQ2 bases.
+    // Check the selected slot before loading any FE coefficients.
+    const auto bases = composition_basis_names(finite_element, introspection);
+    const auto metadata = Utilities::fexists(checkpoint_path + "metadata.txt", mpi_communicator)
+                          ? read_checkpoint_metadata(checkpoint_path) : CheckpointMetadata();
+    if (metadata.composition_bases)
+      {
+        AssertThrow(metadata.composition_bases->size() == bases.size(),
+                    ExcMessage("Checkpoint composition basis count differs from the current FE."));
+        for (unsigned int c=0; c<bases.size(); ++c)
+          AssertThrow((*metadata.composition_bases)[c] == bases[c],
+                      ExcMessage("Checkpoint basis for field " + introspection.name_for_compositional_index(c)
+                                 + " is " + (*metadata.composition_bases)[c] + ", current basis is " + bases[c] + "."));
+      }
+    else if (dim == 2 && !parameters.use_operator_splitting && !parameters.include_melt_transport)
+      for (unsigned int c=0; c<bases.size(); ++c)
+        AssertThrow(!(parameters.use_discontinuous_composition_discretization[c] && parameters.composition_degrees[c] == 2),
+                    ExcMessage("Ambiguous legacy DGQ2 checkpoint basis for field " + introspection.name_for_compositional_index(c)
+                               + ". Restore the composition_bases record from verified producer information before resuming."));
 
     // now that we have resumed from the snapshot load the mesh and solution vectors
     try

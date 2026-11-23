@@ -205,7 +205,11 @@ namespace aspect
               double cell_inverse_time = 0.;
               for (unsigned int d=0; d<2; ++d)
                 cell_inverse_time += maximum[d]/(cell->vertex(1u<<d)[d]-cell->vertex(0)[d]);
-              op.inverse_time = std::max(op.inverse_time,bounded ? mean_loss : cell_inverse_time);
+              // Even a solenoidal flow tangent to every face transports cell
+              // moments. The mean-loss bound alone cannot resolve this motion.
+              op.inverse_time = std::max(op.inverse_time,cell_inverse_time/.1);
+              if (bounded)
+                op.inverse_time = std::max(op.inverse_time,mean_loss/.8);
             }
 
         op.inverse_time = Utilities::MPI::max(op.inverse_time,sim.get_mpi_communicator());
@@ -338,7 +342,7 @@ namespace aspect
             }
         if (op.inverse_time==0. || duration==0.)
           return parent;
-        const double count = std::ceil(duration*op.inverse_time/(bounded ? .8 : .1));
+        const double count = std::ceil(duration*op.inverse_time);
         AssertThrow(count<=(bounded ? 65536. : 4096.),ExcMessage("Explicit DG transport exceeds its CFL substep budget."));
         const unsigned int steps = std::max(1u,static_cast<unsigned int>(count));
         const double dt = duration/steps;

@@ -123,7 +123,7 @@ class Reference:
                     else:
                         upstream=tensor(basis(1-fx if axis==0 else fx),basis(1-fy if axis==1 else fy))
                         self.upstream.append((i,nb,lift@upstream))
-            self.rate=max(self.rate,loss/.8 if bounded else (speed[0]/hx+speed[1]/hy)/.1)
+            self.rate=max(self.rate,(speed[0]/hx+speed[1]/hy)/.1,loss/.8 if bounded else 0.)
         self.source=np.array(self.source)
         self.limited=0
         self.balance=0.

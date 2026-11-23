@@ -71,9 +71,8 @@ namespace aspect
                            this->get_mpi_communicator(),
                            global_compositional_integrals);
 
-      // compute min/max by simply
-      // looping over the elements of the
-      // solution vector.
+      // Nodal coefficients are point values. Sample other bases in physical
+      // field values at the element's generalized interpolation points.
       std::vector<double> local_min_compositions (this->n_compositional_fields(),
                                                   std::numeric_limits<double>::max());
       std::vector<double> local_max_compositions (this->n_compositional_fields(),
@@ -81,6 +80,24 @@ namespace aspect
 
       for (unsigned int c=0; c<this->n_compositional_fields(); ++c)
         {
+          const auto &base = this->get_fe().base_element(this->introspection().base_elements.compositional_fields[c]);
+          if (!base.has_support_points())
+            {
+              const Quadrature<dim> samples = base.has_generalized_support_points()
+                                              ? Quadrature<dim>(base.get_generalized_support_points()) : quadrature_formula;
+              FEValues<dim> sample_values(this->get_mapping(), this->get_fe(), samples, update_values);
+              std::vector<double> values(samples.size());
+              for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+                if (cell->is_locally_owned())
+                  {
+                    sample_values.reinit(cell);
+                    sample_values[this->introspection().extractors.compositional_fields[c]].get_function_values(this->get_solution(), values);
+                    const auto extremes = std::minmax_element(values.begin(), values.end());
+                    local_min_compositions[c] = std::min(local_min_compositions[c], *extremes.first);
+                    local_max_compositions[c] = std::max(local_max_compositions[c], *extremes.second);
+                  }
+              continue;
+            }
           IndexSet range = this->get_solution().block(this->introspection().block_indices.compositional_fields[c]).locally_owned_elements();
           for (unsigned int i=0; i<range.n_elements(); ++i)
             {
@@ -161,7 +178,8 @@ namespace aspect
                                   "A postprocessor that computes some statistics about "
                                   "the compositional fields, if present in this simulation. "
                                   "In particular, it computes maximal and minimal values of "
-                                  "each field, as well as the total mass contained in this "
+                                  "each field sampled at its support points (generalized interpolation points for Bernstein fields), "
+                                  "as well as the total mass contained in this "
                                   "field as defined by the integral "
                                   "$m_i(t) = \\int_\\Omega c_i(\\mathbf x,t) \\; \\text{d}x$.")
   }

@@ -68,14 +68,39 @@ namespace aspect
 
       this->get_computing_timer().enter_subsection("Prescribe solution");
 
-      // Create a quadrature at the support points of the finite element
-      // Each quadrature point therefore represent a location where a degree of freedom is defined
-      const Quadrature<dim> quadrature (aspect::Utilities::get_unit_support_points(*this));
       const auto &finite_element = this->get_fe();
-
-      FEValues<dim> fe_values (finite_element, quadrature, update_quadrature_points);
-
-      const unsigned int n_dofs = quadrature.size();
+      const unsigned int n_dofs = finite_element.n_dofs_per_cell();
+      auto points = aspect::Utilities::get_unit_support_points(*this);
+      std::vector<bool> pointwise_dofs(n_dofs, true);
+      bool has_non_nodal_prescription_points = false;
+      if (!finite_element.has_support_points())
+        {
+          // A mixed element can still prescribe its nodal components. For a
+          // non-nodal field ask the plugin at its interpolation points solely
+          // to detect unsupported prescriptions. They are not coefficient values.
+          const bool has_default_points = points.size() == n_dofs;
+          points.resize(n_dofs);
+          for (unsigned int i=0; i<n_dofs; ++i)
+            {
+              const auto index = finite_element.system_to_base_index(i);
+              const auto &base = finite_element.base_element(index.first.first);
+              if (base.has_support_points())
+                points[i] = base.unit_support_point(index.second);
+              else if (base.has_generalized_support_points())
+                {
+                  AssertThrow(base.get_generalized_support_points().size() == base.n_dofs_per_cell(),
+                              ExcMessage("Prescribed solution requires one evaluation point per local DoF for " + base.get_name()));
+                  points[i] = base.get_generalized_support_points()[index.second];
+                  pointwise_dofs[i] = false;
+                  has_non_nodal_prescription_points = true;
+                }
+              else
+                // Keep the release evaluation point for locally conservative pressure.
+                AssertThrow(has_default_points, ExcMessage("Missing prescription points for " + base.get_name()));
+            }
+        }
+      FEValues<dim> fe_values (finite_element, Quadrature<dim>(points), update_quadrature_points);
+      unsigned int unsupported_component = numbers::invalid_unsigned_int;
       std::vector<unsigned int> component_indices(n_dofs);
       std::vector<bool> should_be_constrained(n_dofs);
       std::vector<double> solution(n_dofs);
@@ -106,6 +131,12 @@ namespace aspect
 
             for (unsigned int q=0; q<n_dofs; q++)
               {
+                if (should_be_constrained[q] && !pointwise_dofs[q])
+                  {
+                    unsupported_component = std::min(unsupported_component, component_indices[q]);
+                    continue;
+                  }
+
                 // If it's okay to constrain this DOF
                 if (current_constraints.can_store_line(local_dof_indices[q]) &&
                     !current_constraints.is_constrained(local_dof_indices[q]) &&
@@ -120,6 +151,13 @@ namespace aspect
                   }
               }
           }
+      if (has_non_nodal_prescription_points)
+        {
+          unsupported_component = Utilities::MPI::min(unsupported_component, this->get_mpi_communicator());
+          AssertThrow(unsupported_component == numbers::invalid_unsigned_int,
+                      ExcMessage("Cannot prescribe point values on non-nodal component " +
+                                 std::to_string(unsupported_component) + "."));
+        }
       this->get_computing_timer().leave_subsection("Prescribe solution");
     }
 
