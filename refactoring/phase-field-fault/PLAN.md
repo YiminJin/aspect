@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**[Increment 4B](INCREMENT_4B_TASK.md) is the current assignment.** It shares explicit DG transport across stress, bounded phase and a passive composition. Layered moving-fault qualification follows this transport increment.
+**[Increment 4B](INCREMENT_4B_TASK.md) is ready for author review.** Batched physical stress, a moving Bernstein phase and a passive DG composition use one SSPRK3 advance. The [working record](STATUS.md#increment-4b--shared-explicit-dg-transport) gives the ordinary call paths, operator checks, upstream hunk audit and two stock Release reference discrepancies reproduced on 4A. The next increment binds the transported phase to moving fault geometry and qualifies the layered case.
 
 **Increment 4A review repairs are ready for author review on pf-rsf.** The [six findings and their measured checks](STATUS.md#increment-4a-review-closeout) cover collective stage validity, rotation after transport, the jump regression and ownership of the DG solver. The [original 4A results](STATUS.md#increment-4a--accepted-dg-stress-transport) retain the comparison for the [assignment](INCREMENT_4A_TASK.md).
 

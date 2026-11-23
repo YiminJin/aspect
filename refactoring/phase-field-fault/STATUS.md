@@ -1,8 +1,156 @@
 # Phase-field fault working record
 
-## Increment 4B assignment
+## Increment 4B · Shared explicit DG transport
 
-[Shared explicit DG transport](INCREMENT_4B_TASK.md) starts from the repaired 4A implementation at `3c603715a`. Record measured results here after verification.
+**Ready for author review.** All three callers in the [assignment](INCREMENT_4B_TASK.md) now advance through the same production SSPRK3 loop. The mixed field, moving ridge, stage limiting, retry, stress feedback and fixed-parent tangent comparisons passed. Two stock Release CTests differ from this checkout's reference statistics. The repaired 4A executable reproduced both discrepancies exactly on the same inputs. Their diffs and the original references are preserved.
+
+The local starting point was `3c603715a13525dd8c1138a1cf125f25f5a2a1f8` with an untracked verification skill. The checked handoff is commit `18d20d219`. Review `dd33f5ae6` for the shared numerical operator, `4ce2f19b5` for signed composition dispatch and `47c141063` for the native bounded phase and its tests. The donor Bernstein element, bounds and transport were traced at `3928edaf7e6`. The layered moving-fault control and its joint 12.5/25 ms publications remain the next increment.
+
+### Accepted fields, weak form and publication
+
+For one cell `K`, a scalar component `s` and test polynomial `v` in the same discontinuous Q2 space, the assembled action is
+
+$$
+(v,\dot s)_K=(s,u^n\cdot\nabla v+v\,\nabla\cdot u^n)_K
+-\langle v(u^n\cdot n_K)\widehat s\rangle_{\partial K}.
+$$
+
+The trial values change at every stage. The geometry, mapped gradients, mass, accepted velocity `uⁿ`, and upwind direction stay fixed for the physical attempt. An incoming face uses its neighbor trace at the same physical point or its prescribed exterior value. The cell measure is m² and the face measure is m. The mass-inverted residual is Pa/s for stress or concentration/s for a scalar. In `Transport::assemble`, `FEValues` and `FEFaceValues` use the release mapping, DoF handler and velocity extractor. The release `AdvectionSystem`, `AdvectionSystemInteriorFace` and `AdvectionSystemBoundaryFace` assemble a timestep matrix and RHS including history, stabilization and reaction terms. Their products cannot supply an instantaneous material derivative on a stage halo. The explicit solver reuses the 4A cell-local mass-inverted blocks and `GridTools::exchange_cell_data_to_ghosts`.
+
+| Actual caller | From parent to candidate to accepted output |
+| --- | --- |
+| Batched physical stress | `Simulator::start_timestep → PhaseFieldFault::update → FaultStokesCoupling::prepare_parent → advect_stress` gathers old xx, yy and xy together. QGauss(8) integrates mass, cell and face terms. The signed substep count uses the established component-speed sum and 0.1 budget. The coupling rotates the transported DG field with accepted bulk-minus-slip spin, relaxes and projects it for both `solve_rates` and `PhaseFieldFault::evaluate → FaultStressLoad::execute`. After the repeat decision `post_accept_timestep → accept_step` publishes stress and commits the labels. |
+| Ordinary signed tracer | `Simulator::assemble_and_solve_composition → advance_composition → advect_scalar` reads the selected old nodal DGQ2 field and old velocity. After checking the selected whole-step material reaction increment at the ordinary linearization point and composition quadrature, it advances with the signed operator, inserts owned DOFs and assigns the compressed vector to that field's candidate block. Unselected fields run through the release switch. The usual post-solver signal and final linearization update apply. |
+| Moving phase | The same composition dispatch resolves a selected `phase field` by role and index. `FE_DGQBernstein` converts generalized Lobatto point values to coefficients during ordinary initialization. Lobatto(4) supplies the physical mass and mean, Lobatto(5) the spatial action. With `a_K = 6 Σ_F max_q[(u·n)⁺ J_F]/area(K) + max(0,−min_q div u)`, `ceil(dt max_K a_K / 0.8)` gives its own substep count, at least one during motion. On entry and each blended stage the solver applies `PhaseField::limit_bernstein` to owned cells before they can supply another halo. Quadratic subdivision tightens a crossing hull to depth four. Scaling about the mapped mean preserves its integral. This production caller requires zero faults and reads no crack-law or geometry history. |
+
+All three reach `advance → rk_stage`. Each substep takes an immutable parent, evaluates upstream coefficients and inflow at `t`, `t+h` and `t+h/2` and blends with fractions 1, 1/4 and 2/3. Invalid data are reduced across ranks before the next stage. Composition inflow reads the configured Cartesian boundary function at the stage clock in the user's time units. The ordinary boundary manager continues to use its simulator clock for the implicit companion. Stages stay out of the published solution. On a repeat `Simulator::run` revises the duration and returns to the same `old_solution`. On acceptance postprocessing can see the candidate, and `advance_time` advances the history. At physical time zero only initial phase admissibility can change a polynomial.
+
+```text
+include/aspect/simulator/solver/dg_transport.h
+source/simulator/solver/dg_transport.cc
+source/simulator/solver/explicit_composition.cc
+include/aspect/phase_field/bernstein_bounds.h
+source/simulator/solver_schemes.cc
+source/reconstructed_fault/stokes_coupling.cc
+benchmarks/explicit_dg_transport/mixed.prm
+```
+
+### Operator and lifecycle measurements
+
+All comparisons used fresh calculations from initial conditions with one thread per MPI rank. The minimal mixed input ran with the built-in composition statistics postprocessor and no added library. The coefficient observer, synthetic reaction and forced retry are test plugins. The independent scalar calculation works in nodal coordinates with a separately integrated mass, strong derivative and incoming-jump lifting. Its balance integrates the physical divergence source and the outward upwind boundary flux with stage weights 1/6, 1/6 and 2/3. It reads endpoint coefficients keyed by cell and field from the ordinary simulator. It never reads the assembled production matrices.
+
+| Check | Result and discrimination |
+| --- | --- |
+| Two curved signed tracers | At 12.5 and 25 ms explicit and implicit endpoints differed by 1.60039313e−4 and 2.15871140e−4. The explicit nodal defect was 3.05e−16. The implicit companion matched the empty-selector run exactly at all clocks in Release and Debug, including swapped field names. The Release one-/two-rank difference was 1.39e−16 across a face with nonzero flux. A time-independent boundary with only two variable names passed separately. |
+| Reactions | A nonzero selected whole-step reaction failed with the field name and only time zero published. The same reaction on an implicit neighbor changed its first endpoint by more than 0.009, and the selected passive row retained its strong-form solution. |
+| Inclined translating ridge | At 0.15 s the mid-height crest moved +0.1250 m and −0.1252 m on both 8×4 and 16×8 cells, against ±0.123 m analytically. The fine ray peak was 0.727295 against 0.73, normal FWHM 0.182033 m against 0.182214 m, with coefficient enclosure [0.149226, 0.797905]. Coarse peak, width and hull were 0.700387, 0.186237 m and [0.105899, 0.991044]. Maximum physical transect defect fell from 0.0314114 to 0.00524278 in each direction. At the translated station the in-box integral of the mature m=1 weight φ(1+φ)/(1−φ)² divided by the analytic translated integral rose from 0.864987 (+) or 0.864992 (−) to 0.991919. This is a profile diagnostic with no reconstructed fault. Fine budgets were 0.006 m displacement, 0.012 point value, 0.006 m width and 0.025 integral ratio. Each coarse two-rank run had four active interpartition upwind faces and reproduced all serial coefficients exactly. |
+| Discrete balance and bounds | On the ridges the largest physical-node defect across builds was 6.55e−15 (budget 3e−11), and largest final balance defect 1.59e−15 (budget 1e−12). A bounded quadratic peaked at 0.9 with coefficient 1.55 and required zero scaling. A second profile peaked at 1.1 with mean 14/15. Entry scaling reduced the peak to 1 while preserving that mean within 1e−14. With `u=(1+0.35x,0)` the independent solve scaled two cells at entry and eleven cell-stages later. Integrated divergence source was 0.00808096796 and outward flux 0.0276571526. Release maximum nodal defect was 1.22e−15 and final balance defect −1.04e−16. Limiting only the endpoint missed the first physical result by 0.0060399. One bad mean on one of two ranks produced a collective entry diagnosis. |
+| Retry and publication | Adjacent implicit nodal, bounded Bernstein and explicit nodal fields shared the same FESystem. The two explicit fields required respectively one bounded and two signed substeps per accepted 12.5 ms interval. All three fields matched exactly by cell and coefficient at 0, 12.5 and 25 ms after rejecting a 25 ms attempt. Per-rank publication logs contained exactly those three clocks. Initial fields were checked against their prescribed interpolants and entry bounds independently. |
+| Normal moving-phase CTest | The AT2 reporter measured local/gradient/total energies in J/m of 0.8746666667 / 0.2133333333 / 1.0880000000 at time zero, 0.8562535044 / 0.2664636480 / 1.1227171524 at 12.5 ms, and 0.8395612400 / 0.4646351460 / 1.3041963861 at 25 ms. The mixed CTest separately checks a strong P2 stencil at each signed node with standard-library Python. |
+| Repaired 4A stress | Across the builds and rank counts the signed jump defect was at most 7.11e−15 Pa and the signed face-transfer defect 3.56e−14 Pa m²/s. Receiving-cell Stokes action was −0.2936443700444033 Pa m², analytic −0.29364437004440386, old-cell prediction −0.3084580370518121. Published receiving xy after removing the solved local response was 0.0556310437510 Pa against 0.0548833567199 for reversed rotation. The 24 ms coefficient corruption failed. Rank-local exterior NaN and stage-result overflow failed at stages 2 and 3 before publication. Clean/retried stress and labels matched exactly. |
+| Fitted and homogeneous controls | All six one-rank fitted bulk/label files in each of the free and stress-advected 32² runs were byte-identical to 4A. Stationary free-32 also matched all 38 canonical labels at all three clocks exactly. On one and two ranks, both stationary and transported section tangents gave maximum relative defect 1.838e−10 at a 5e−5 directional perturbation (budget 2e−8). For transported row 19 the partition contributed 1,260 and 1,447 Q8 samples, with serial/MPI action defect 1.53e−17. Both Release lifecycle suites passed, including the homogeneous clock, field reorder, EOS isolation, three-label RHS and cutback tests. |
+| 3B and feature-off | Affine local/gradient/total energies on one rank were AT1 3 / 0.1171875 / 3.1171875, AT2 2.333333333333334 / 0.15625 / 2.489583333333334 and CZM 3.607512043416293 / 0.0994718394324345 / 3.706983882848727 J/m. Two ranks integrated 8+8 cells and agreed to rounding. Negative phase, a rank-local upper excursion, the 3-D case and disabled zero-composition control passed in their respective runners. Both unit suites passed 2,359 assertions in 51 cases. |
+
+**Gross work.** Back-to-back one-rank Release runs of the same fitted 32² advected input used the 4A and 4B executables built with the same section recorder. Each performed 143 Stokes solves, two stress transports and produced identical six label/bulk files. Process wall time / maximum RSS were 22.9268 s / 226,444 KiB on 4A and 23.4865 s / 228,832 KiB on 4B. ASPECT timed the two transports at 0.0570 s and 0.0623 s respectively. These are single observations. On a separate two-cell ordinary Stokes run, debugger counts of the actual non-inlined `rk_stage` were 18 on both versions, including zero scalar stages on 4B. Each invocation exchanges one batched halo for all three components and builds one new owned stage map. From the source and the measured dimensions, each of the two gathers reads 54 doubles (2 cells × 9 DOFs × 3). At most three owned stage maps and one halo are live. The corresponding scalar operation adds one owned distributed block to write its final candidate. These storage counts exclude MPI serialization and allocator overhead.
+
+### Review of upstream core hunks
+
+Compared the increment from `3c603715a` and the protected core files against the recorded peeled `v3.1.0` commit `0d97d2d3311154ca3f01d801b18f3945dc8b8bad`. This checkout lacks the named tag. The selection defaults to an empty list. It supports pure material advection for the selected DGQ2 fields with single Advection, prescribed/single/iterated Stokes, a fixed conforming nonperiodic flat 2-D box and stage-time Cartesian function inflow.
+
+| Release file and symbol | Why this hunk belongs here | Previous caller exercised |
+| --- | --- | --- |
+| `include/aspect/parameters.h`, `source/simulator/parameters.cc`, `Parameters::{declare_parameters,parse_parameters}` | One per-simulation selection must be available to both FE construction and solve dispatch. Field methods already specify how a composition obtains values. The parser signal supplies no per-instance configuration owner. The declaration, member and parse call delegate the implementation. The role selection pattern and its user help admit the native phase. | Empty-selector and swapped-index mixed runs, default-only companion, zero-composition run and matrix sparsity control. |
+| `include/aspect/introspection.h`, `CompositionalFieldDescription` | The type, count and string conversions give phase a semantic identity independent of user name and order. The previous concrete role values retain their numbers. A name convention would couple FE selection to specimen input. | Three-field mixed-basis retry and reordered fault roles, with ordinary generic and chemical paths still using their existing FE. |
+| `source/simulator/introspection.cc`, `construct_default_variables` | Select the Bernstein element before grouping equal adjacent bases. The FE-edit signal sees already-grouped multiplicities and lacks the per-composition parameters needed to split them by role. | Nodal/Bernstein/nodal composition fixture, adjacent release nodal tracers and the static fitted AT1 case. |
+| `source/simulator/initial_conditions.cc`, `set_initial_temperature_and_compositional_fields` | The unit support-point precheck assumed nodal coefficients, before `VectorTools::interpolate` could call the element's conversion. Generalized support points allow ordinary initialization and retain the release interpolation and component mask. An initial-composition plugin supplies physical values only. | Bounded polynomial with coefficient 1.55, ordinary 3B affine energy, nodal companion and old/new periodic AMR field comparison. |
+| `source/simulator/solver_schemes.cc`, `assemble_and_solve_composition` | Eight lines dispatch one opt-in field and emit the ordinary solver signal. The release assembler builds a BDF system. The post-solver signal is too late to select an integrator. Existing dispatch handles the remaining fields, including an independently reacting implicit neighbor. | Companion versus default, selected-fields stock limiter CTest, both Stokes lifecycle suites and 4A receiving-cell load. |
+| `tests/CMakeLists.txt`, `discover_tests` | Register the canonical included mixed parameter file as an input to both generated screen outputs. The release dependency scan knows only the immediate fixture and plugin/filter. | Existing stress checker dependency and its quick CTest, plus the two new quick tests. |
+
+The common stage/halo code refactors the **branch's** 4A stress solver. The old public header forwards to the shared declaration. The Bernstein FE, bound operation, explicit composition helper and tests are additions. The release diff already contained the 3B configured energy model, and the preassembly/acceptance signals, repeat gate and nonlinear veto from earlier fault increments. `core.cc`, the signal interfaces, the implicit assemblers and solver, boundary composition manager, stationary fit and fault history needed no 4B hunk. A future moving geometry can consume the accepted phase without a dependency from the transport solver back to the fault.
+
+### Verification commands and remaining discrepancy
+
+The archive SHA-256 was `36c3bcdea52a2d1aac9680440e0c333d00f4f9f273b6b705237825c7190ddf2c` and the extracted patch SHA-256 was `aa89b51950eddf03a1fbedcb62a742bbcc76897081a4eab466bcb1ff527cb5c9`. The following commands installed the handoff before implementation.
+
+```sh
+git status --short --branch
+T=$(mktemp -d /tmp/pf-rsf-4b.XXXXXXXX)
+unzip -q "$HOME/Downloads/PF_RSF_4B_HANDOFF.zip" -d "$T"
+git apply --check "$T/PF_RSF_4B.patch"
+git apply "$T/PF_RSF_4B.patch"
+cmp "$T/INCREMENT_4B_TASK.md" refactoring/phase-field-fault/INCREMENT_4B_TASK.md
+```
+
+Commands below use the configured ASPECT Release and Debug builds. Choose a fresh `D` on replay. `build-4a` and `build-4a-review` are the preserved inputs and baseline executables from the previous section.
+
+```sh
+W=$PWD
+D=$W/build-4b
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+export ASPECT_SOURCE_DIR=$W OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+common='explicit_dg_compositions|explicit_dg_phase|dg_stress_transport|dg_stress_spin_order|fixed_fault|stationary_fault|phase_field_model_without_reporter|postprocess/phase_field_surface_energy_at2'
+for mode in Release Debug; do
+  if [ "$mode" = Release ]; then b=$W/build-slice; m=release; else b=$W/build-slice-debug; m=debug; fi
+  t=$D/tests-$m
+  cmake -S . -B "$b"
+  cmake --build "$b" --target aspect -j2
+  cmake -S tests -B "$t" -DAspect_DIR="$b" -DASPECT_BINARY="$b/aspect" \
+    -DCMAKE_BUILD_TYPE="$mode" -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+  cmake --build "$t" --target explicit_dg_compositions dg_stress_transport dg_stress_spin_order \
+    fixed_fault stationary_fault phase_field_model_without_reporter -j1
+  (cd "$b/unit_tests" && ../aspect --test)
+  python3 benchmarks/explicit_dg_transport/check.py "$b/aspect" "$t" "$D/qualified-$m" --mpiexec "$MPI"
+  python3 benchmarks/fixed_fault/check_transport.py "$b/aspect" "$t" "$D/4a-$m" --mpiexec "$MPI"
+done
+mkdir "$D/standalone-mixed"
+(cd "$D/standalone-mixed" && "$W/build-slice/aspect" "$W/benchmarks/explicit_dg_transport/mixed.prm")
+ctest --test-dir "$D/tests-debug" -R "^($common)$" --output-on-failure
+ctest --test-dir "$D/tests-release" -R "^($common|matrix_nonzeros_1|discontinuous_composition_serial_periodic_amr)$" --output-on-failure
+ctest --test-dir "$D/tests-release" -R '^discontinuous_composition_(1|bound_preserving_limiter_selected_fields)$' --output-on-failure
+python3 -O benchmarks/phase_field_surface_energy/check.py build-slice/aspect "$D/energy-one"
+python3 -O benchmarks/phase_field_surface_energy/check.py build-slice/aspect "$D/energy-two" --mpi "$MPI"
+for f in fixed_fault stationary_fault; do
+  python3 -O benchmarks/fixed_fault/check_lifecycle.py build-slice/aspect \
+    "$D/tests-release/libfixed_fault.release.so" "$D/lifecycle-$f" --case "$f"
+done
+```
+
+The fitted and tangent replays used the saved 4A parameter files with separate outputs and a rebuilt target plugin.
+
+```sh
+cmake -S benchmarks/fixed_fault/phase_ridge -B "$D/ridge" -DAspect_DIR="$W/build-slice" -DCMAKE_BUILD_TYPE=Release
+cmake --build "$D/ridge" -j1
+mkdir "$D/final-capture"
+(cd "$D/final-capture" && python3 "$W/refactoring/phase-field-fault/rate_tangent/capture.py" "$W")
+for f in cost-free-32 cost-advected-32 advected-32 advected-32-mpi2 free-32 free-32-mpi2; do
+  case "$f" in free-*) to=$D/stationary/$f;; *) to=$D/final-$f;; esac
+  mkdir -p "$to"
+  sed -e "s|$W/build-4a/$f/output|$to/output|" -e "s|$W/build-4a/ridge/|$D/ridge/|" \
+    "build-4a/$f/input.prm" > "$to/input.prm"
+  case "$f" in free-*) cp "build-4a/$f/profile.txt" "$to/";; esac
+  case "$f" in
+    cost-*) build-slice/aspect "$to/input.prm" > "$to/run.log"
+      for n in 0 1 2; do for field in labels bulk; do
+        cmp "$to/output/$field-$n-0.txt" "build-4a/$f/output/$field-$n-0.txt"
+      done; done;;
+    *-mpi2) "$MPI" -n 2 "$D/final-capture/aspect-review" "$to/input.prm" > "$to/run.log";;
+    *) "$D/final-capture/aspect-review" "$to/input.prm" > "$to/run.log";;
+  esac
+done
+python3 -O refactoring/phase-field-fault/rate_tangent/check_row.py "$D/final-advected-32" "$D/final-advected-32-mpi2"
+python3 -O refactoring/phase-field-fault/rate_tangent/check_row.py "$D/stationary/free-32" "$D/stationary/free-32-mpi2"
+PYTHONPATH=benchmarks/fixed_fault/phase_ridge python3 -c \
+  'from pathlib import Path; import sys; from check import check_case,rank_check; p=Path(sys.argv[1]); check_case(p,"free",32); rank_check(p)' "$D/stationary"
+```
+
+For the matched cost run, `matched-cost-4a/input.prm` and `matched-cost-4b/input.prm` derive from `build-4a/cost-advected-32/input.prm` with separate output directories and their respective ridge plugins. Each binary was launched in its run directory with `subprocess.Popen([exe, prm])`, measuring monotonic elapsed time and `os.wait4` maximum RSS. `rg -c 'Solving Stokes system'` and `rg 'Transport DG stress'` on the two run logs give the counts and times above. Separate debugger invocations were `sh build-4b/work/count.sh build-4a-review/tangent/aspect-review build-4b/work/4a-valid` and `sh build-4b/work/count.sh build-slice/aspect build-4b/work/4b`. That scratch probe uses the two-cell 4A parameter file with only fixed fault statistics, selects local `rk_stage` entry addresses via `nm`, and counts hits with non-stopping GDB breakpoints.
+
+**CTest accounting.** All eight scoped Debug CTests passed. Nine of the first ten Release CTests passed. Of the two additional stock Release controls, the selected-fields limiter passed. The two reference discrepancies reproduced with both executables on this toolchain.
+
+* `discontinuous_composition_serial_periodic_amr` first differs at step 15 (0.9375 s), reporting three composition solver iterations against the reference's two. Eleven of 65 rows differ only in that iteration column. Across old/new runs the statistics are byte-identical and all 649 VTU data arrays match at all 65 clocks.
+* `discontinuous_composition_1` first differs at step 2 (0.125 s), with minimum C_1 −0.191381312 against −0.191381311. Eight of 17 printed rows differ in the repository comparison. The 4A and 4B statistics are byte-identical at every clock.
+
+The failed diffs are under `build-4b/tests-release/output-<case>/statistics.diff.failed`. To reproduce the before/after comparison, run each `build-4b/tests-release/<case>.x.prm` from two fresh directories, first with `build-4a-review/tangent/aspect-review` and then with `build-slice/aspect`. Compare `output-<case>/statistics` with `cmp`. For the periodic run compare each `DataArray`'s attributes and binary payload by VTU filename and position, ignoring XML generation comments. These two stock reference comparisons remain open. The new numerical checks pass with the frozen fault references, clocks and tolerances. Next action is author review of 4B.
 
 ## Increment 4A review closeout
 
