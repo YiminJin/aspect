@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**Current review on pf-rsf.** The [Increment 3A repair](INCREMENT_3A_REPAIR.md) from reviewed head `707ce9a9a` is ready for author review. The [working record](STATUS.md) reports the eleven discriminating tests, the fitted-contact and accepted-stress budgets, and the remaining reference gap. The [original 3A assignment](INCREMENT_3A_TASK.md) records the first implementation. Increment 3B starts after this review.
+**Current review on pf-rsf.** [Increment 3B](INCREMENT_3B_TASK.md) is ready for author review. The [working record](STATUS.md#increment-3b--crack-geometry-and-phase-only-surface-energy) gives the installed energy measurements for all three laws and the corrected mature AT1 regression.
 
 ## Baselines and intended examples
 

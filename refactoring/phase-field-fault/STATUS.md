@@ -1,5 +1,104 @@
 # Phase-field fault working record
 
+## Increment 3B · Crack geometry and phase-only surface energy
+
+**Ready for author review.** The [3B assignment](INCREMENT_3B_TASK.md) starts from the completed 3A repair at `5bed31e63`. Commit `3c5b7ddc1` contains the constitutive interface and unit tests. Commit `2e7f0b1e5` contains the installed postprocessor, analytic fixtures and corrected-label regression.
+
+### Measured energies
+
+The phase-only inputs use ASPECT's simple material, zero fault objects, original elasticity disabled and a static DGQ2 composition. Under `Postprocess / Phase field surface energy`, the fixtures use `Phase composition = phase_field`, `Fracture energy = 2` J/m² and `Length scale = 0.25` m. The three affine inputs differ only in `Crack geometry` and output directory. The straight crack uses the AT1 default. The plugin defaults for fracture energy and length scale are 1 J/m² and 1 m.
+
+On the 2 m × 1 m rectangle, φ = x/4 + y/2 has ∫|∇φ|² dx = 5/8 and ∫α dx = 1, 7/12, 17/12 m² for AT1, AT2, CZM. The aligned straight AT1 crack has two flanks, each of width 0.5 m, and a length of 1 m. All entries below are J/m of out-of-plane thickness.
+
+| Case | Analytic (local, gradient, total) | Installed Release local | Gradient | Total |
+| --- | --- | ---: | ---: | ---: |
+| Affine AT1, 1 rank | 3, 15/128, 399/128 | 3 | 0.11718749999999989 | 3.1171875 |
+| Affine AT2, 1 rank | 7/3, 5/32, 239/96 | 2.3333333333333339 | 0.15624999999999986 | 2.4895833333333339 |
+| Affine CZM, 1 rank | 34/(3π), 5/(16π), 559/(48π) | 3.6075120434162926 | 0.09947183943243450 | 3.7069838828487272 |
+| Affine AT1, 2 ranks | 3, 15/128, 399/128 | 3 | 0.11718750000000004 | 3.1171875 |
+| Affine AT2, 2 ranks | 7/3, 5/32, 239/96 | 2.3333333333333330 | 0.15625000000000006 | 2.4895833333333330 |
+| Affine CZM, 2 ranks | 34/(3π), 5/(16π), 559/(48π) | 3.6075120434162953 | 0.09947183943243462 | 3.7069838828487298 |
+| Straight AT1, 1 rank | 1, 1, 2 | 0.99999999999999944 | 0.99999999999999944 | 1.9999999999999989 |
+
+Release used one thread per rank. The one-rank affine mesh had 16 owned cells. The two-rank run had eight on each rank according to ASPECT's load-balance statistics. Every interior quadrature point has positive α and |∇φ|², so each rank contributes to both sums. Maximum affine absolute error across both layouts was 1.78 × 10⁻¹⁵ J/m. Maximum serial–parallel difference was 2.67 × 10⁻¹⁵ J/m. The checker uses relative tolerance (number of cells × 3ᵈ + 32)ε + 0.5 × 10⁻¹⁶ for Q3 accumulation, FE evaluation, the reduction and 16-place scientific output.
+
+The same serial checker passed on Debug. Both builds passed a continuous Q2 second field named `damage` with a constant decoy in the first slot. A 3 m extrusion gave 8.999999999999963, 0.3515625000000066 and 9.351562499999970 J in Release, against 9, 45/128 and 1197/128 J. The feature-disabled zero-composition control passed. Selecting an unknown law, an absent field, zero fracture energy or a negative length each produced the expected diagnostic. The first disabled fixture omitted ASPECT's required gravity model and stopped at initialization. The corrected input specifies zero vertical gravity. The first MPI launch encountered the sandbox's PMIx socket restriction. The recorded two-rank results come from Open MPI 5.0.6 with local sockets enabled.
+
+### Production call path and mathematical ownership
+
+1. ASPECT's postprocessor manager creates the selected plugin and calls `PhaseFieldSurfaceEnergy::parse_parameters`. It resolves the named composition through introspection, validates positive finite Gc and ℓ and retains a reference through a pointer to the selected immutable law. The selector and its parameter grammar use the same table.
+2. `PhaseField::CrackGeometry` owns α, α′, α″ and c₀. The selector maps AT1, AT2 and CZM to the quadratic α(φ) = φ[ξ + (1−ξ)φ] with ξ = 1, 0, 2. The normalization constants are 8/3, 2 and π. The source reference is the donor's `GeometricFunction` in Git object `abbc9b0c0`. The public law needs only its header and a selection name. A phase assembler can retain the same const reference and use its first and second derivatives for residual and tangent. Unit tests cover both endpoints, two interior points and the independent integral 4∫₀¹√α du.
+3. `Simulator::postprocess` calls the release manager, which dispatches `PhaseFieldSurfaceEnergy::execute`. Like the release `CompositionStatistics` plugin, it reads the current solution on locally owned cells. The selected field's Gauss rule has p+1 points per coordinate on the box. The code accumulates α(φ) and the squared mapped gradient with physical JxW, reduces the two scalars together, and applies Gc/(c₀ℓ) and Gcℓ/c₀. It adds the two energies and their sum to the ordinary statistics table. For DG, the gradient is elementwise and the functional omits face jump and flux terms.
+4. ASPECT owns the field and the statistics table. This diagnostic adds two quadrature arrays per rank, a cell-local FEValues object and a two-double reduction per evaluation. The phase law has no mesh or MPI state. The existing Simulator and fault classes acquire no fixture-specific hooks or state.
+
+```text
+include/aspect/phase_field/crack_geometry.h
+source/phase_field/crack_geometry.cc
+include/aspect/postprocess/phase_field_surface_energy.h
+source/postprocess/phase_field_surface_energy.cc
+benchmarks/phase_field_surface_energy/affine.prm
+benchmarks/phase_field_surface_energy/straight_crack.prm
+benchmarks/phase_field_surface_energy/check.py
+```
+
+### Mature control and reproduction
+
+The 32² free 60° AT1 case began from the prescribed initial conditions and solved all 38 label rates. IDs and clocks were exact at 0, 12.5 and 25 ms. Every recorded coordinate, normal integral, age, slip and rate matched the corrected CSV exactly at the retained absolute/relative tolerances of 10⁻¹⁰/10⁻⁸. All 9,216 Q3 bulk records per clock matched the repaired archive by cell and quadrature ID with zero maximum difference. This includes the three accepted DG stress components. The independent Q2 stress-moment observer on 782 cut cells measured scaled errors 2.52440 × 10⁻⁹ and 1.51997 × 10⁻⁹ at the two physical endpoints. Both builds passed the homogeneous and three-label CTests, both lifecycle checkers and the full unit suite (2,359 assertions in 51 cases per build). The forced retry reproduced all three accepted snapshots exactly. At the fourth tensile-pulse endpoint the largest clean/cutback differences were 1.08 × 10⁻¹⁴ in Release and 8.85 × 10⁻¹⁵ in Debug. The stationary replay-isolation test passed.
+
+Commands below run from the worktree root with a fresh destination. Builds used GCC 12.4, deal.II 9.6.2 and at most four local workers. The energy checks use an ordinary installed executable. Only the mature regression loads the existing 3A observer.
+
+```sh
+D=build-3b
+mkdir -p "$D"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+for mode in Release Debug; do
+  build=build-slice
+  suffix=release
+  if [ "$mode" = Debug ]; then
+    build=build-slice-debug
+    suffix=debug
+  fi
+  cmake --build "$build" --target aspect -j2
+  (cd "$build/unit_tests" && ../aspect --test)
+  tests="$D/${suffix}-tests"
+  cmake -S tests -B "$tests" -DAspect_DIR="$PWD/$build" -DASPECT_BINARY="$PWD/$build/aspect" \
+    -DCMAKE_BUILD_TYPE="$mode" -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+  ctest --test-dir "$tests" -R '^(fixed_fault|stationary_fault)$' --output-on-failure
+  for fixture in fixed_fault stationary_fault; do
+    python3 -O benchmarks/fixed_fault/check_lifecycle.py "$build/aspect" "$tests/libfixed_fault.${suffix}.so" \
+      "$D/lifecycle-${suffix}-$fixture" --case "$fixture"
+  done
+done
+cmake --install build-slice --prefix "$PWD/$D/install" --component runtime
+cmake --install build-slice --prefix "$PWD/$D/install" --component includes
+python3 benchmarks/phase_field_surface_energy/check.py "$D/install/bin/aspect-release" "$D/installed"
+python3 benchmarks/phase_field_surface_energy/check.py "$D/install/bin/aspect-release" "$D/mpi" --mpi /opt/openmpi/5.0.6/bin/mpirun
+python3 -O benchmarks/phase_field_surface_energy/check.py build-slice-debug/aspect "$D/debug-final"
+python3 refactoring/phase-field-fault/test_replay_stationary_reference.py -v
+python3 benchmarks/fixed_fault/phase_ridge/run.py build-slice/aspect build-3a-repair/plugin/libphase_ridge.release.so "$D/free-32" free 32
+PYTHONPATH=benchmarks/fixed_fault/phase_ridge python3 - "$D" <<'PY'
+from pathlib import Path
+import sys
+import numpy as np
+from check import bulk, check_case
+from moments import check_moments
+root = Path(sys.argv[1])
+check_case(root, "free", 32)
+for step in (1, 2):
+    check_moments(root/"free-32", 32, step, .0125)
+old = Path("build-3a-repair/qualification/free-32/output")
+for step in range(3):
+    a, b = [np.sort(bulk(output, step), order=["cell", "q"]) for output in (old, root/"free-32/output")]
+    for key in a.dtype.names:
+        if key in ("cell", "q", "phi"):
+            np.testing.assert_array_equal(a[key], b[key])
+        else:
+            np.testing.assert_allclose(a[key], b[key], atol=1e-10, rtol=1e-8)
+PY
+```
+
+All three crack geometries are qualified for the phase-only functional. Coupled coverage remains the mature AT1 case with its established degradation magnitude. The donor relation m = Gc α′(0)/(c₀ℓHc) gives zero for AT2 at positive finite Hc. The old mature localization therefore cannot be assumed for that calibration. The independent free-RSF donor trajectory and the original-elasticity comparison remain the recorded 3A baseline limitations. All 3B criteria are met. The next action is author review.
+
 ## Increment 3A repair · Stationary mature AT1 fault
 
 **Author review.** The [assignment installed from the repair kit](INCREMENT_3A_REPAIR.md) starts at reviewed commit `707ce9a9a`. The historical 3A measurements and CSV below retain their original meaning. The corrected free solution has its own label history. The supported combination is the stationary mature AT1 distance profile, curvature-one energetic degradation with positive magnitude, a frozen generic DGQ2 composition, and finite in-box fault transfer. Increment 3B awaits review.
