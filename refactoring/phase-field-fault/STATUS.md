@@ -1,5 +1,194 @@
 # Phase-field fault working record
 
+## Increment 4A · Accepted DG stress transport
+
+**Ready for author review.** The [4A assignment](INCREMENT_4A_TASK.md) runs from local `pf-rsf` at `72c5a9c2d`. Both Release and Debug measured the transported stress in an ordinary Stokes assembly and published the independently predicted physical endpoint. A second calculation using the old receiving-cell stress failed at that assembly. The 3B phase-range diagnostic, immutable phase model, affine AT2 CTest and installed canonical CSV remain in the 3B commits. The corrected label CSV still has SHA-256 `98a5e5929b43b7877d8ee3c426c50758c3dc874289dd38ec6315f4022206f662`. The incoming assignment and local FE verification skill were preserved.
+
+### From accepted coefficients to a new endpoint
+
+1. `Simulator::start_timestep` calls `PhaseFieldFault::update` once per attempt. Initialization uses the specified Maxwell interval and zero physical transport time. With `Material model / Phase field fault / Advect physical stress = true`, `FaultStokesCoupling::prepare_parent` passes the role-resolved stress fields, ghosted old solution (including accepted velocity), prescribed exterior and physical interval to `Transport::advect_stress`. Its returned map holds locally owned DGQ2 coefficients in Pa. The three static stress compositions are the sole accepted store. The default preserves the stationary control.
+2. For each Cartesian cell, scalar DGQ2 trial stress component $s$ and test $v$, the spatial action is
+
+   $$
+   (v,\dot s)_K=(s,u^n\cdot\nabla v+v\,\nabla\cdot u^n)_K
+        -\langle v (u^n\cdot n_K)\widehat s\rangle_{\partial K}.
+   $$
+
+   Cell and face JxW measure m² and m, respectively. The mass-inverted action has units Pa/s. Q8 evaluates the accepted continuous FE velocity on both cells and faces. Each owned cell assembles its own row. Positive outward flux takes the local trace. Negative flux takes the upstream polynomial at the same physical point, or the exterior parent on a physical face. The material-form divergence term uses the mapped gradient of the accepted FE velocity.
+3. The local inverse mass multiplies the self block, incoming neighbor blocks and prescribed-face loads once per attempt. The substep count is `max(1, ceil(dt * max_K sum_d(max|u_d| / h_d) / 0.1))`, using component maxima over cell **and face** points and an MPI maximum. The donor budget diagnoses more than 4,096 substeps. Every SSPRK3 stage imports the current tensor coefficients using `GridTools::exchange_cell_data_to_ghosts`. An Euler update is blended from the substep parent with coefficients 1, 1/4 and 2/3. The exterior function receives times $t_k$, $t_k+h$ and $t_k+h/2$ in seconds, positions in metres and returns xx, yy, xy in Pa. A quiescent velocity returns the original coefficients exactly.
+4. `prepare_parent` interpolates the transported stress before rotating it with the accepted `grad(u) - slip_gradient`, relaxing by `exp(-G dt / eta)` and projecting onto the existing DG parent. `prepare_iteration → solve_rates → sample_bulk` resolves that parent in the section frame. `PhaseFieldFault::evaluate → stress_offset → FaultStressLoad::execute` adds its signed weak load during the Stokes solve. Both read the same attempt-local coefficients. The Picard convergence veto resamples the converged bulk fields. Each retry rebuilds from the old solution and accepted labels at the revised duration.
+5. After the repeat decision, `post_accept_timestep → FaultStokesCoupling::accept_step` projects the complete viscous, slip and history response into the simulator solution, then `StationaryFault::accept` commits the label age, slip and rate. The FE transport operation has no fault geometry, friction, crack-law or observer dependency. The numerical load observer and synthetic transport fields live in the test plugin.
+
+```text
+include/aspect/transport/dg_stress.h
+source/transport/dg_stress.cc
+source/material_model/phase_field_fault.cc
+source/reconstructed_fault/stokes_coupling.cc
+source/simulator/assemblers/fault_stress.cc
+source/simulator/solver_schemes.cc
+source/simulator/core.cc
+source/reconstructed_fault/stationary_fault.cc
+```
+
+### Donor and release assembly decisions
+
+The sibling donor checkout currently points at the release. The recovered closeout archive in the sibling reference directory passed its SHA-256 check. The frozen mature base is `3928edaf7e6` plus `mature/entry.patch`. Its direct transport and rotation source and distributed tensor operator are Git blobs `69606797c5f1dc171075876f2158f1a8797917de` and `62dcef69abb8923d760be8ce6b78b1c58a29fca2`, also present in `pf-rsf-particle-free`. The mature patch leaves those two files intact. The archived input selects Q8, Jaumann DG material Lie, bulk-slip-subtracted spin and prescribed exterior stress (layered Maxwell provider). In `transport_material_history` the direct stress has zero transport source and zero in-transport relaxation. `TensorAdvection::assemble/advance` uses SSPRK3 with the 0.1 target, below its 0.125 ceiling. `rotate_material_history` consumes the transported primary tensor and the frozen accepted spin. The 4A fixture supplies its own analytic parent exterior.
+
+| Release piece | Required action and implementation decision |
+| --- | --- |
+| `AdvectionField`, advection scratch and `AdvectionSystem::execute` | The release scalar assembly uses a `fem_field`, old scalar fields, current velocity, physical timestep and BDF mass terms. The stress needs an unscaled material residual for three fields at each explicit stage. Reuse the native composition role, FE, mapping, velocity extractor and mapped FEValues. Assemble the signed volume block locally. |
+| `AdvectionSystemInteriorFace::execute` | Its face owner contributes timestep-scaled self and neighbor **matrix** blocks to the global system. The stress requires the neighbor's current SSPRK coefficients. Use the same upwind trace convention, physical normals and face JxW. Assemble only locally owned rows and import stage ghosts before applying the blocks. |
+| `AdvectionSystemBoundaryFace::execute` | The scalar boundary manager supplies Dirichlet composition with the simulator clock. The stress has three exterior physical components on any locally incoming face, sampled at three SSPRK stage times. Reuse FEFaceValues and the parsed-function implementation. Evaluate the prescribed tensor only on inflow. |
+| Local mass and `Simulator::copy_local_to_global_advection_system` | Release scatters the constrained timestep matrix and RHS. DGQ2 stress has disjoint cell coefficients. Use deal.II FullMatrix for the physical cell mass inverse and block products, and the release's deal.II cell-data exchange facility for the halo. This adds no global scalar solve, replicated bulk field, second DoFHandler or release assembler edit. |
+
+The shared-assembler experiment `3a21d59cf` and revert `319b10b94` were inspected. Stage values, clock, boundary data and scatter would all still have required separate handling after extracting a scalar face sign.
+
+### Measured checks
+
+| Check | Discriminating result |
+| --- | --- |
+| Affine translation and material derivative | In the two-cell fixture at 25 ms, slopes differ for all three components. For +8 m/s the Release max nodal errors in xx, yy, xy were 5.55e−16, 7.77e−16 and 1.78e−15 Pa. For −8 m/s they were 6.66e−16, 1.33e−15 and 1.55e−15 Pa. Zero velocity gave three exact identities. For $u=(x,0)$, constant physical stress stayed constant to 8.88e−16 Pa despite nonzero divergence. |
+| Independent face transfer | For $u=(8,0)$ the upstream stress jump is $(1,2,3)(1+y+y^2)$ Pa at $x=0.5$. Three single-substep receiver masses at 1, 2 and 3 ms recover the signed initial derivative exactly for a cubic RK update. Independent face Gauss integration gives +14.6666666667, +29.3333333333 and +44 Pa m²/s. Release errors were −5.33e−15, −1.07e−14 and −3.55e−14 Pa m²/s. A separate strong-form P2 lifting polynomial and cubic Taylor update checked every discontinuous nodal trace at 24 ms over **four** substeps. Maximum error was 7.55e−15 Pa. Each rank owns one of the two cells. All serial and MPI spatial coefficients matched exactly by CellId, component and node. |
+| Ordinary Stokes load | The accepted bulk velocity is $u=(8,0.4x)$ m/s, the section is vertical and the phase is constant. The initial diagonal stresses have a common 0.3 Pa/m slope and a 0.6 Pa difference. In the right cell at 12.5 ms, apply the test displacement $w=(x,0)$ to the actual Q3 local vector contributed to the ordinary Stokes RHS. Slip has zero xx here. Release measured **−0.29364437004440330 Pa m²**, against **−0.29364437004440386** analytically. Disabling advection changed the actual vector action to **−0.30845803705181202**, against the old-parent prediction of −0.30845803705181207, and the same test failed during assembly. The missing translation accounts for 0.0148136670074 Pa m². |
+| Rotation, section and accepted stress | Independent scalar bisection gives the initial label rate 0.108817998188 m/s. In this geometry spin is $(0.4+V^n)/2$. At 12.5 ms the positive rotation angle is 0.003180112489 rad, raising the rotated shear from 0.05 to 0.051907043321 Pa. After relaxation the spin signal is +0.001883353648 Pa. The solved endpoint rate is 0.385391084593 m/s and the accepted xy is 0.148825091104 Pa. The largest error over **all 54 accepted stress coefficients** was 1.62e−14 Pa in Release and 8.88e−15 Pa in Debug. Both labels passed independent age and slip checks. |
+| Retry and MPI | The rejected 25 ms trial reached the receiving-cell assembly. A 12.5 ms retry and the next 12.5 ms interval produced **exactly** the clean stress coefficients, age, slip and rate. A signal subscriber counted one publication at each of 0, 12.5 and 25 ms per rank. Release serial vs two ranks differed by at most 4.67e−15 Pa in accepted stress and 7.36e−16 m/s in label rate. Debug also passed the partition, clock and rollback checks. |
+| Stationary AT1 and section tangent | All 38 corrected labels matched exactly at all three clocks. All six serial label/bulk exports matched the 3B closeout byte for byte. The review's passively captured, globally reduced row 19 action was 0.00559276415135455 Pa m. At $h=10^{-5}$, the independent centered-difference defects over **all 38 rows** were 4.11e−14 and 4.13e−14 Pa m on one and two ranks. Enabling transport with zero exterior on the same fitted case gave an action of 0.00559276562991257 Pa m, defects 4.14e−14 and 4.14e−14 and a serial–MPI action difference of 1.54e−17 Pa m. The two ranks supplied 1,260 and 1,447 points to row 19. Independent dense solves recovered the next damped iterates within 4.17e−17 m/s across the four runs. The 25 ms solved label rates changed by up to 0.00128003793 m/s when advection was enabled. |
+| Existing callers | Release passed six scoped CTests, including the fault-off matrix control. Debug passed five scoped CTests. Both unit suites passed 2,359 assertions in 51 cases. Both Release fault lifecycle suites passed. The three-label tensile cutback differed from its clean endpoint by at most 1.09e−14. |
+
+The Cartesian affine and P2 face references have exact spatial moments at the chosen rules. The nodal budget of 2e−12 Pa allows rounding through the dense mass inverse and RK stages on O(1–5 Pa) stresses. The signed face budget of 2e−11 Pa m²/s includes division of mass differences by 1 ms. The assembled work budget of 2e−11 Pa m² and accepted stress budget of 2e−10 Pa include the Stokes solve and DG projection. The stale-cell work defect is over eight orders larger than the work budget. The tangent uses the existing relative budget of 2e−8 times the action infinity norm and a decreasing-perturbation sweep. Its independent residual takes sampled tractions and support identities as inputs. The direct Stokes and face checks supply independent evidence about the parent entering these mechanics.
+
+In the uninstrumented one-rank 32² fitted case the base and transported runs both took 143 Stokes solves. Elapsed process times were 24.00 and 25.74 s, and peak RSS was 226,908 and 227,452 KiB. The timer attributed 0.0773 s to the two physical transports. This is one timing pair on the laptop. For nine DG nodes, each local tensor field has 27 doubles per cell. At most three RK fields coexist (two can carry halos), plus a scalar 9×9 self block and a 9×9 block per incoming neighbor per owned cell, and nine weights per incoming physical quadrature point. The phase, solver vector and full accepted solution are never cloned by transport.
+
+### Reproduce 4A
+
+The following commands run from the target root. Use a fresh results directory for a new run. Outputs cited above use `D=build-4a`, GNU 12.4, deal.II 9.6.2, Trilinos and Open MPI 5.0.6. Every solve used one thread per rank. The public skill, verification scripts, fixture and references have no runtime role in an installed fault simulation.
+
+```sh
+W=$PWD
+D=build-4a
+export OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OMP_NUM_THREADS=1
+export PATH=/opt/openmpi/5.0.6/bin:$PATH
+mkdir -p "$D"
+(cd ../aspect-pf-rsf-reference-20261121 && sha256sum -c reference.tar.gz.sha256)
+tar -xOzf ../aspect-pf-rsf-reference-20261121/reference.tar.gz reference/mature/input.prm
+git show 3928edaf7e6:source/material_model/phase_field_fault/stress_evolution.cc
+git show 3928edaf7e6:source/material_model/history/tensor_advection_distributed.cc
+git show --stat 3a21d59cf
+git show --stat 319b10b94
+
+for mode in Release Debug; do
+  if [ "$mode" = Release ]; then
+    build=build-slice
+    t="$D/tests"
+    variant=release
+    select='^(dg_stress_transport|fixed_fault|stationary_fault|phase_field_model_without_reporter|postprocess/phase_field_surface_energy_at2|matrix_nonzeros_1)$'
+  else
+    build=build-slice-debug
+    t="$D/debug-tests"
+    variant=debug
+    select='^(dg_stress_transport|fixed_fault|stationary_fault|phase_field_model_without_reporter|postprocess/phase_field_surface_energy_at2)$'
+  fi
+  cmake --build "$build" --target aspect -j2
+  cmake -S tests -B "$t" -DAspect_DIR="$W/$build" -DASPECT_BINARY="$W/$build/aspect" \
+    -DCMAKE_BUILD_TYPE="$mode" -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+  cmake --build "$t" --target dg_stress_transport fixed_fault stationary_fault phase_field_model_without_reporter -j1
+  ctest --test-dir "$t" -R "$select" --output-on-failure
+  (cd "$build/unit_tests" && ../aspect --test)
+  python3 benchmarks/fixed_fault/check_transport.py "$build/aspect" "$t" "$D/sheared-$variant" \
+    --mpiexec /opt/openmpi/5.0.6/bin/mpirun
+done
+for fixture in fixed_fault stationary_fault; do
+  python3 -O benchmarks/fixed_fault/check_lifecycle.py build-slice/aspect \
+    "$D/tests/libfixed_fault.release.so" "$D/${fixture%_fault}-lifecycle" --case "$fixture"
+done
+```
+
+The first sandbox MPI launch failed at the PMIx socket, and UCX permission warnings changed the release matrix control's screen diff. Both ran successfully with local socket access. Re-running the initial transport CTest in the same directory exposed an appended fixture summary. The final plugin opens a fresh publication log and summary per simulation. Repeated CTest runs exercise the corrected observer.
+
+The retained tangent scripts rebuild the review binary in scratch and leave production sources untouched. The captured bands are taken inside `solve_rates` after MPI reduction and before elimination. The checker independently reconstructs the perturbed residual, including phase weights, Q1 interpolation and the direct asinh law. The former scratch scripts remain in `/tmp/pf-rate-tangent-pU2nnuH3`. The worktree copy retains the equations and adds optimized-Python checks for the residual, tangent and next Newton iterate.
+
+```sh
+r=benchmarks/fixed_fault/phase_ridge
+v="$W/refactoring/phase-field-fault/rate_tangent"
+cmake -S "$r" -B "$D/ridge" -DAspect_DIR="$W/build-slice" -DCMAKE_BUILD_TYPE=Release
+cmake --build "$D/ridge" -j1
+mkdir -p "$D/review"
+(cd "$D/review" && python3 "$v/capture.py" "$W")
+for ranks in 1 2; do
+  suffix=
+  if [ "$ranks" = 2 ]; then suffix=-mpi2; fi
+  python3 "$r/run.py" "$D/review/aspect-review" "$D/ridge/libphase_ridge.release.so" \
+    "$D/free-32$suffix" free 32 --ranks "$ranks"
+done
+PYTHONPATH="$r" python3 -c 'from pathlib import Path; import sys; from check import check_case,rank_check; root=Path(sys.argv[1]); check_case(root,"free",32); rank_check(root)' "$D"
+python3 -O "$v/check_row.py" "$D/free-32" "$D/free-32-mpi2"
+python3 - "$D" <<'PY'
+from pathlib import Path
+import sys
+root = Path(sys.argv[1]).resolve()
+original = (root / 'free-32/input.prm').read_text()
+for name in ('advected-32', 'advected-32-mpi2'):
+    dest = root / name
+    dest.mkdir()
+    old = str(root / 'free-32/output')
+    if original.count(old) != 1:
+        raise ValueError('expected one inline output directory')
+    (dest / 'input.prm').write_text(original.replace(old, str(dest/'output')) + """
+subsection Material model
+  subsection Phase field fault
+    set Advect physical stress = true
+    subsection Exterior parent stress
+      set Function expression = 0;0;0
+    end
+  end
+end
+""")
+PY
+"$D/review/aspect-review" "$D/advected-32/input.prm" > "$D/advected-32/run.log"
+mpirun -n 2 "$D/review/aspect-review" "$D/advected-32-mpi2/input.prm" > "$D/advected-32-mpi2/run.log"
+python3 -O "$v/check_row.py" "$D/advected-32" "$D/advected-32-mpi2"
+```
+
+The timing pair used `build-slice/aspect` directly with the same serial parameter files, changing only the output paths to `cost-free-32/output` and `cost-advected-32/output`. Elapsed time and peak RSS came from the individual child's monotonic interval and `wait4().ru_maxrss`. The six accepted label/bulk files in each final uninstrumented run matched its captured run byte for byte.
+
+The following reproduces the timing measurement with a fresh output directory for each case.
+
+```sh
+python3 - "$D" <<'PYTHON'
+import os
+from pathlib import Path
+import subprocess
+import sys
+from time import monotonic
+root = Path(sys.argv[1]).resolve()
+for name in ('free-32', 'advected-32'):
+    previous = root / name
+    dest = root / ('cost-' + name)
+    dest.mkdir()
+    text = (previous/'input.prm').read_text()
+    out = str(previous/'output')
+    if text.count(out) != 1:
+        raise ValueError(out)
+    (dest/'input.prm').write_text(text.replace(out, str(dest/'output')))
+    start = monotonic()
+    with (dest/'run.log').open('w') as log:
+        proc = subprocess.Popen(['build-slice/aspect', dest/'input.prm'],
+                                stdout=log, stderr=subprocess.STDOUT)
+        _, status, usage = os.wait4(proc.pid, 0)
+        proc.returncode = os.waitstatus_to_exitcode(status)
+        if proc.returncode:
+            raise RuntimeError(proc.returncode)
+    print(name, monotonic()-start, usage.ru_maxrss)
+    for step in range(3):
+        for table in ('bulk', 'labels'):
+            filename = f'{table}-{step}-0.txt'
+            if (dest/'output'/filename).read_bytes() != (previous/'output'/filename).read_bytes():
+                raise ValueError(filename)
+PYTHON
+```
+
+**Review boundary.** All stationary 4A acceptance checks passed. Supported production faces are conforming and nonperiodic on the stationary 2-D Cartesian box. The later layered moving-geometry calculation, phase transport and joint moving publications at 12.5 and 25 ms remain open under Increment 4 continued.
+
 ## Increment 3B review closeout
 
 **Ready for author review.** The four findings against `e4338ddfe` are closed. The model ownership change and its reporter-disabled test are isolated in `d748dd201`. Collective phase validation, the AT2 CTest and installed reference lookup are in `9dd92e321`. The original 3B measurements follow this record.

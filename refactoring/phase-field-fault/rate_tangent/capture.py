@@ -1,0 +1,51 @@
+"""In a scratch directory, build a Release unity binary that records the real section matrix.
+Pass the absolute pf-rsf worktree path. Use the configured build-slice objects.
+"""
+from pathlib import Path
+import sys, shlex, subprocess, json
+scratch=Path.cwd()
+repo=Path(sys.argv[1]).resolve(); build=repo/'build-slice'
+source=repo/'source/reconstructed_fault/stokes_coupling.cc'
+original=source.read_text()
+def inject(text, anchor, addition):
+    if text.count(anchor)!=1: raise ValueError(anchor)
+    return text.replace(anchor,addition+anchor)
+s=inject(original,'    bool locally_closed = true;',r'''
+    std::ofstream review_points;
+    if (this->get_timestep_number()==2 && this->get_nonlinear_iteration()==0)
+      {
+        review_points.open(this->get_output_directory()+"review-points-"+std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator())));
+        review_points << std::setprecision(17);
+      }
+''')
+s=inject(s,'              samples.push_back({transfer,fe.JxW(q)',r'''
+              if (review_points.is_open())
+                review_points << cell->id() << ' ' << q << ' ' << fe.quadrature_point(q) << ' ' << phase[q] << ' '
+                              << transfer.foot.left << ' ' << transfer.foot.xi << ' ' << transfer.chi << ' '
+                              << fe.JxW(q) << ' ' << material.background_shear + stress*symmetrize(frame.dyad)
+                              << ' ' << compression << '\n';
+''')
+s=inject(s,'        if (residual <= 64.*std::numeric_limits<double>::epsilon())',r'''
+        if (this->get_timestep_number()==2 && this->get_nonlinear_iteration()==0 && iteration<2)
+          {
+            const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
+            std::ofstream o(this->get_output_directory()+"review-bands-"+std::to_string(iteration)+"-"+std::to_string(rank));
+            o << std::setprecision(17);
+            for (unsigned int j=0;j<n;++j)
+              o << j << ' ' << accepted[j].position << ' ' << material.profile.normal_integrals()[j] << ' '
+                << accepted[j].age << ' ' << rates[j] << ' ' << diagonal[j] << ' ' << (j+1<n?upper[j]:0.)
+                << ' ' << rhs[j] << ' ' << scale[j] << ' ' << material.kappa << '\n';
+          }
+''')
+(scratch/source.name).write_text('#include <fstream>\n#include <iomanip>\n'+s)
+unity=next(p for p in (build/'CMakeFiles/aspect.exe.release.dir/Unity').glob('*.cxx') if str(source) in p.read_text())
+replacement=scratch/unity.name
+replacement.write_text(unity.read_text().replace(str(source),str(scratch/source.name)))
+cfg=next(d for d in json.loads((build/'compile_commands.json').read_text()) if d['file']==str(unity))
+cmd=shlex.split(cfg['command']); obj=cmd[cmd.index('-o')+1]
+cmd[cmd.index('-o')+1]=str(scratch/'capture.o'); cmd[cmd.index(str(unity))]=str(replacement)
+subprocess.run(cmd,cwd=build,check=True)
+cmd=shlex.split((build/'CMakeFiles/aspect.exe.release.dir/link.txt').read_text())
+cmd[cmd.index(obj)]=str(scratch/'capture.o'); cmd[cmd.index('-o')+1]=str(scratch/'aspect-review')
+cmd=[entry if not entry.startswith('-Wl,--dependency-file=') else '-Wl,--dependency-file='+str(scratch/'link.d') for entry in cmd]
+subprocess.run(cmd,cwd=build,check=True)
