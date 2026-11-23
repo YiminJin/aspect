@@ -1,5 +1,142 @@
 # Phase-field fault working record
 
+## 3-D scalar transport qualification
+
+**Ready for author review before Increment 4C.** The starting commit was `a1cd30d1a` on `pf-rsf`. Review `610d6eecc` for checkpoint compatibility, then `63db4899a` for the dimension-templated transport and its regressions. The selector admits signed DGQ2 compositions and bounded quadratic Bernstein phase on fixed, conforming, nonperiodic 2-D and 3-D Cartesian boxes with Q2 velocity. An empty selection uses ASPECT's implicit path. The physical stress adapter and reconstructed-fault mechanics retain their 2-D plane-strain contract.
+
+### Operator and core review
+
+At fixed accepted velocity, for each scalar trial `s` and cell test `v` the material operator is
+
+```text
+M_K ds/dt = ∫K s (u·∇v + v div u) dV − ∫∂K v (u·n) s_up dA .
+```
+
+The inverse physical cell mass gives concentration/s. The upwind value comes from the current owned stage, the ghost at the mapped physical point, or prescribed exterior data on an incoming boundary. The signed rule uses tensor Gauss(8). Bounded transport uses Lobatto(4) for mass/volume mean and Lobatto(5) for the action. The cell interior rate is `Σ_d max|u_d|/(0.1 Δx_d)`, taking component maxima over volume and face samples. Phase also contributes `[max(0,−min div u) + 6 Σ_faces max(u·n,0) A_face/V_cell]/0.8`, with each face maximum taken over its quadrature points. The largest rate over cells and ranks sets the substep count. Each substep uses the same parent for all three blends, private exterior clocks at `t, t+h, t+h/2`, and a fresh stage halo. The limiter checks the entry polynomial and every blended stage. It subdivides the tensor Bernstein coefficients in each direction (strides 1, 3 and 9 in 3-D) and scales about the mapped cell mean when the resulting convex hull exceeds the physical interval.
+
+`Simulator::assemble_and_solve_composition → Transport::advance_composition → advect_scalar → assemble/advance → rk_stage` is the measured path. The selected field and velocity are both read from `old_solution`. The private parsed boundary function receives each RK clock in the configured time units. The call writes only the selected candidate block. The ordinary repeat decision discards a rejected candidate. Accepted output and ASPECT's time advance publish and rotate the fields. The existing `advect_stress` adapter calls this same componentwise machinery with xx/yy/xy and a 2-D simulator.
+
+| Upstream file touched in this assignment | Reason and previous-caller control |
+| --- | --- |
+| Simulator composition dispatch, `source/simulator/solver_schemes.cc` | Removed the dimension guard inside the existing per-field branch. The composition dispatcher owns the choice of solver for each candidate block. The three-field control compares the implicit companion against an empty selector. The unchanged 2-D mixed suite exercises both field orders. |
+| Simulator checkpoint reader, `source/simulator/checkpoint_restart.cc` | A pre-3-D-transport unmarked DGQ2 archive has a known nodal basis. A current DGQ2 archive missing its record is ambiguous. The Boost class version for the 3-D Simulator distinguishes the generations without changing the vector layout or adding a second basis table. The existing per-slot FE-name check runs while the archive version is available, before any mesh coefficients are loaded. Per-field mismatches, a damaged current record, an actual pre-repair writer and the existing 2-D legacy rules have separate checks. |
+| Test discovery, `tests/CMakeLists.txt` | The quick slab CTest depends on the shared coefficient probe target and the included slab parameter file. It integrates the raw accepted coefficients with a standard-library filter and checks the two independent upper-volume moments. |
+
+Other implementation edits are in the transport and phase modules introduced on this branch. The existing Simulator owns publication and time advancement. The scalar element, generalized interpolation and ordinary constraints already supported both dimensions.
+
+```text
+include/aspect/simulator/solver/dg_transport.h
+source/simulator/solver/dg_transport.cc
+source/simulator/solver/explicit_composition.cc
+include/aspect/phase_field/bernstein_bounds.h
+benchmarks/explicit_dg_transport/slabs.prm
+benchmarks/explicit_dg_transport/check_3d.py
+tests/explicit_dg_slabs.sh
+```
+
+### Measurements
+
+One thread per rank throughout. The independent oracle uses the strong nodal P2 derivative in each vertical column with incoming jump lift `(9,−3/2,3)/Δz`. Simpson products integrate all reported cell moments exactly for these polynomials. All coefficient comparisons use cell identity, field and local FE index. The 1e−12 absolute volume budget resolves the 1.225e−5 receiving-volume signal by seven orders of magnitude.
+
+| Check | Measured Release result |
+| --- | --- |
+| Unit cube split at z=1/2, 10 ms | Rank 0 owned the lower slab, rank 1 the upper. Upper phase integral **0.18748774999999998** (defect 2.78e−17). The upper signed integral **−0.062512249999999991** (1.39e−17). The independent RK-weighted partition transfers were +0.0037375 and −0.0012625 across the unit face. A frozen incoming trace leaves the receiver at 0.1875 and −0.0625. The published nodal defects against the column solution were 1.67e−16 and 3.89e−16. The 162 owned coefficients per clock (two cells × three fields × 27) differed by at most 1.94e−16 between serial and MPI. |
+| Asymmetric face, physical inflow clock | For `A(x,y)+(z−t)B(x,y)` the exact nodal defects were 2.22e−16 for phase and 3.05e−16 for the tracer. Transposing only the inner incoming face changed the receiving polynomial by **0.0118875**. Freezing the exterior clock changed the sending polynomial by **0.0002001**. The year-unit replay had maximum defect 5.00e−16. The MPI coefficient difference was 1.80e−16. |
+| Advection in all three directions, mixed dispatch, actual Stokes velocity | On eight cells, translation along (0.5,−0.25,−1) reproduced the asymmetric quadratic to 4.44e−16. In the slab case the implicit companion matched the empty-selector trajectory exactly and differed from the explicit tracer by 0.00019024. Selecting either damage or tracer alone reproduced the corresponding explicit and implicit controls exactly for all three fields. With velocity imposed on the six walls and solved by the ordinary single-Stokes scheme, all three fields matched the prescribed-translation control within 6.49e−15. |
+| Bernstein enclosure and mean | The 27-coefficient input with peak 0.9 and coefficient 1.65 retained its polynomial and mean 0.65. Its independently certified range was [0.15,0.9]. Scaling the peak-1.1 input produced [0.7,1], mean 0.9 (defect 3.33e−16). The independent enclosure interpolates the polynomial on eight child grids independently of the production split. In the incoming-jump run, five cell/stage scalings were active in the independent replay. The largest replay mean defect was 3.33e−16. Production's accepted polynomial matched to 1.11e−15. Deferring limiting to the endpoint caused a 0.00438245 defect. Internal stages are checked through this discriminating endpoint and independent stage calculation. |
+| Both z CFL bounds | For `u_z=z`, both fields selected two steps from the directional rate at 0.15 s (maximum error 2.11e−15, one-step error 9.03e−6). For `u_z=2z−1`, both z faces discharge. At 0.08 s phase required two steps from mean loss, while the signed tracer required one. The analytic RK mode distinguished these counts by 5.84e−6. The maximum measured error 9.44e−16. |
+| Retry and continuation | One deliberately rejected 25 ms step gave exactly the clean coefficients at 0, 12.5 and 25 ms in all three fields, with one publication per accepted clock. Both nodal and Bernstein restarts agreed with their uninterrupted trajectories to 30 ms. Both cross-basis directions failed at the field named damage. The two-rank continuation differed from uninterrupted serial coefficients by at most 1.05e−15. The unmarked legacy 3-D nodal checkpoint was written by the preserved pre-basis Release executable. Its implicit continuation matched exactly. Switching its signed tracer to SSPRK3 matched the independently advanced saved nodal field to 4.44e−16. Legacy-to-Bernstein and a current DGQ2 archive with the slot basis record removed were both rejected. |
+
+The repaired 2-D controls were replayed from initial conditions. The closed-vortex slopes at 12.5 and 6.25 ms were −0.0277776909722 and −0.0277777560764 (analytic −1/36). The strong-circulation moments were 0.080297627525, 0.080302600504 and 0.080303248345. The fine ridge retained normalized integral 0.991949 and maximum transect defect 0.00525963 in both directions. The signed tracer defect was 3.05e−16 and the three-field retry difference was zero. Batched stress retained the receiving-cell Stokes action **−0.2936443700444033 Pa m²**, against −0.29364437004440386 analytically and −0.3084580370518121 for stale receiving-cell stress. The accepted stress error was 1.62e−14 Pa. The signed interrank transfer, spin order, collective invalid-data cases and clean-versus-retried physical stress and label histories also passed. The two stock Release reference discrepancies (periodic AMR iterations and the last digit of the C_1 minimum) are historical results preserved in the 4B repair record. This qualification ran the scoped regressions below.
+
+**Cost.** The scalar state/halo payload is 216 bytes per 3-D cell per field (nine doubles or 72 bytes in 2-D). A dense mass-inverted self or upstream block grows from 81 to 729 doubles. Assembly and stages are local to owned cells plus immediate ghosts. The existing validity and CFL checks reduce scalar flags/rates. A substep holds the parent and stage vectors while building the next owned result. A one-rank, two-cell, three-field Release run with ordinary composition statistics peaked at 206360 KiB for 2-D and 239172 KiB for 3-D, measured with Linux child `ru_maxrss`, including ASPECT and its libraries. These small runs do not establish production-scale performance.
+
+Debug reproduced both upper moments to the same absolute errors as Release. Its serial/MPI slab coefficient defect was 1.11e−16, the two-rank restart defect was 7.22e−16, and the pre-basis Release checkpoint continued in Debug within 1.61e−15 of a clean Debug trajectory. The Debug receiving-cell Stokes action was −0.29364437004440397 Pa m² and its clean/retry stress difference was zero. The six scoped CTests passed in each build, including the new upper-volume regression. The Debug and Release unit suites each passed 2359 assertions in 51 cases.
+
+### Commands and coverage
+
+Run from the worktree root. All simulation runs below used fresh destinations except the explicit restart checks, which copy their own seed. `build-4b-repair/tests-{release,debug}` contains the coefficient and stress probe plugins from the 4B closeout. The legacy writer was `build-4b/final-capture/aspect-review`, SHA-256 `5e00293d7e2da682123d0b0aec4b016634c4d913d5f6f1d810471c3d83591b5a`, with the Release probe. The legacy slot contains only time and timestep metadata.
+
+```sh
+W=$PWD
+D=$W/build-dg3
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+legacy=$W/build-4b/final-capture/aspect-review
+export ASPECT_SOURCE_DIR=$W OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OMP_NUM_THREADS=1
+/opt/astyle/2.04/bin/astyle --options=contrib/utilities/astyle.rc \
+  include/aspect/phase_field/bernstein_bounds.h include/aspect/simulator/solver/dg_transport.h \
+  include/aspect/simulator/solver/explicit_composition.h source/simulator/solver/dg_transport.cc \
+  source/simulator/solver/explicit_composition.cc source/simulator/checkpoint_restart.cc
+scoped='^(explicit_dg_slabs|explicit_dg_compositions|explicit_dg_phase|explicit_dg_phase_statistics|dg_stress_transport|dg_stress_spin_order)$'
+for mode in release debug; do
+  if [ "$mode" = release ]; then
+    b=$W/build-slice; config=Release; all=ON
+  else
+    b=$W/build-slice-debug; config=Debug; all=OFF
+  fi
+  t=$W/build-4b-repair/tests-$mode
+  cmake --build "$b" --target aspect -j1
+  cmake -S tests -B "$D/tests-$mode" -DAspect_DIR="$b" -DASPECT_BINARY="$b/aspect" \
+    -DCMAKE_BUILD_TYPE="$config" -DASPECT_RUN_ALL_TESTS="$all" -DASPECT_COMPARE_TEST_RESULTS=ON
+  python3 benchmarks/explicit_dg_transport/check_3d.py "$b/aspect" "$t" "$D/qualified-$mode" \
+    "$legacy" "$W/build-4b-repair/tests-release" --mpiexec "$MPI"
+  python3 benchmarks/fixed_fault/check_transport.py "$b/aspect" "$t" "$D/4a-$mode" --mpiexec "$MPI"
+  python3 benchmarks/explicit_dg_transport/check.py "$b/aspect" "$t" "$D/4b-$mode" --mpiexec "$MPI"
+  if [ "$mode" = release ]; then
+    python3 benchmarks/explicit_dg_transport/check_compatibility.py "$b/aspect" "$t" "$D/repair-$mode" --legacy-aspect "$legacy"
+  else
+    python3 benchmarks/explicit_dg_transport/check_compatibility.py "$b/aspect" "$t" "$D/repair-$mode"
+  fi
+  ctest --test-dir "$D/tests-$mode" -R "$scoped" --output-on-failure
+  (cd "$b/unit_tests" && ../aspect --test)
+done
+python3 -O benchmarks/explicit_dg_transport/check_3d.py build-slice/aspect build-4b-repair/tests-release \
+  "$D/accept-release" "$legacy" build-4b-repair/tests-release --mpiexec "$MPI"
+git diff --check
+```
+
+The initial Release build used `-j3` and Debug used `-j1`. The first sandboxed two-rank launch could not open a PMIx socket. Local Open MPI then ran the partition cases with socket access. The initial development run in `build-dg3/qualification-release` had the dimension port linked before the checkpoint repair. Its legacy-to-Bernstein attempt reproduced the silent reinterpretation caught by the negative test. Both earlier runs and the final results were retained. The upper-volume check also runs independently under CTest with no legacy archive or NumPy dependency.
+
+The two single-selector cases were added during the Debug suite. They also ran as the following supplement against both sets of saved controls. The current full checker includes these calls.
+
+```sh
+python3 - <<'PY'
+from pathlib import Path
+from argparse import Namespace
+import sys
+sys.path.insert(0,'benchmarks/explicit_dg_transport')
+from check_3d import individual_fields
+for mode, build in [('release','build-slice'),('debug','build-slice-debug')]:
+    args=Namespace(directory=Path('build-dg3','qualified-'+mode).resolve(),aspect=Path(build,'aspect').resolve(),mode=mode,
+                   plugins=Path('build-4b-repair','tests-'+mode).resolve())
+    individual_fields(args)
+PY
+```
+
+The two memory measurements used the same canonical one-step input with the vertical coordinate relabelled in 2-D. Each Python process measured exactly one ASPECT child.
+
+```sh
+for dim in 2 3; do
+  python3 - "$dim" <<'PY'
+from pathlib import Path
+import resource, subprocess, sys, time
+dim = int(sys.argv[1])
+case = Path(f'build-dg3/cost-{dim}').resolve()
+case.mkdir()
+prm = Path('benchmarks/explicit_dg_transport/slabs.prm').read_text()
+if dim == 2:
+    prm = prm.replace('Dimension = 3','Dimension = 2').replace('Z repetitions','Y repetitions').replace('min(z','min(y').replace('0;0;1','0;1')
+(case/'input.prm').write_text(prm+'\nset Output directory = '+str(case/'output')+'\n')
+start = time.monotonic()
+with (case/'run.log').open('w') as log:
+    subprocess.run([Path('build-slice/aspect').resolve(),case/'input.prm'],stdout=log,stderr=subprocess.STDOUT,check=True)
+print(dim, time.monotonic()-start, resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)
+PY
+done
+```
+
+**Review boundary.** The 3-D calculations exercise scalar material advection, an ordinary prescribed or solved velocity, local upwind transfer, two MPI owners, phase bounds and checkpoint continuation. Adaptive/nonconforming or periodic meshes, deforming geometry, reacting selected fields, other velocity degrees, production-scale parallel costs and moving-fault coupling remain outside this qualification. The next action is author review before 4C.
+
 ## Increment 4B review repairs
 
 **Repair `835a5ef96` on `pf-rsf` addresses the seven findings against `39912b7da`.** The old 4B results follow below. The scalar selection still requires a fixed 2-D box. All checks started in fresh output directories under `build-4b-repair`, except for explicit continuations from copies of their own checkpoint slots. The unchanged review inputs and saved pre-repair binary were used to verify the failing circulation case and legacy checkpoint behavior.
