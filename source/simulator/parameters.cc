@@ -1376,7 +1376,7 @@ namespace aspect
                          "can be treated as absent when material models compute composition fractions. "
                          "The default value includes every nonnegative compositional field value.");
       prm.declare_entry ("Types of fields", "unspecified",
-                         Patterns::List (Patterns::Selection("chemical composition|stress|strain|grain size|porosity|density|entropy|reaction progress|generic|unspecified")),
+                         Patterns::List (Patterns::Selection("chemical composition|stress|strain|grain size|porosity|density|entropy|reaction progress|generic|phase field|unspecified")),
                          "A comma separated list denoting a ``type'' for each of the "
                          "compositional fields requested. ASPECT uses these types to "
                          "determine how fields are handled when evaluating the "
@@ -1423,6 +1423,7 @@ namespace aspect
                          "which is coupled to the entropy advection equation "
                          "as described in the paper \\cite{dannberg:etal:2022}."
                          "\n"
+                         "* ``phase field'': A physical phase. Selecting it under SSPRK3 fields uses bounded quadratic Bernstein transport.\n"
                          "* ``reaction progress'': This type of field represents the progress of a "
                          "phase transition controlled by reaction kinetics. It will only be "
                          "considered in material models that include models for time-dependent "

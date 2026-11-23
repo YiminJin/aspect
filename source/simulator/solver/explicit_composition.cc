@@ -19,7 +19,8 @@ namespace aspect
                         "Names of DGQ2 field-method compositions advanced by pure material advection with "
                         "accepted velocity. Other fields keep their ordinary method. Supports single Advection "
                         "with prescribed, single or iterated Stokes, on a fixed conforming nonperiodic 2-D box. "
-                        "Prescribe Cartesian boundary composition function data on incoming faces. Generic and "
+                        "Prescribe Cartesian boundary composition function data on incoming faces. A selected "
+                        "field of type 'phase field' uses bounded quadratic Bernstein transport. Generic and "
                         "chemical tracers are signed. Reactions, operator splitting, ASPECT elasticity and the "
                         "release composition limiter on the selected field are unsupported.");
       prm.leave_subsection();
@@ -52,8 +53,9 @@ namespace aspect
           AssertThrow(!selected[c] && p.compositional_field_methods[c]==Parameters<dim>::AdvectionFieldMethod::fem_field &&
                       p.use_discontinuous_composition_discretization[c] && p.composition_degrees[c]==2 &&
                       !p.use_limiter_for_discontinuous_composition_solution[c] &&
-                      (type==CompositionalFieldDescription::generic || type==CompositionalFieldDescription::chemical_composition),
-                      ExcMessage("SSPRK3 requires a unique scalar DGQ2 field-method tracer without the release limiter: "+name));
+                      (type==CompositionalFieldDescription::generic || type==CompositionalFieldDescription::chemical_composition ||
+                       type==CompositionalFieldDescription::phase_field),
+                      ExcMessage("SSPRK3 requires a unique scalar DGQ2 field-method tracer or phase without the release limiter: "+name));
           selected[c]=true;
         }
 
@@ -135,7 +137,7 @@ namespace aspect
         return p.explicit_compositions.inflow(point,field,t);
       };
 
-      const auto candidate=advect_scalar(sim,field,exterior,false);
+      const auto candidate=advect_scalar(sim,field,exterior,p.composition_descriptions[field].type==CompositionalFieldDescription::phase_field);
       const unsigned int block=intro.block_indices.compositional_fields[field];
       LinearAlgebra::Vector owned(intro.index_sets.system_partitioning[block],comm);
       const auto &system=sim.get_fe();

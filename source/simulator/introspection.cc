@@ -20,6 +20,7 @@
 
 
 #include <aspect/introspection.h>
+#include <aspect/fe_dgq_bernstein.h>
 #include <aspect/global.h>
 #include <aspect/utilities.h>
 
@@ -276,9 +277,15 @@ namespace aspect
     // we also don't want to create n different compositional fields for performance reasons. Instead, we combine
     // consecutive compositions of the same type into the same base element. For example, if the user requests
     // "Q2,Q2,DGQ1,Q2", we actually create "Q2^2, DGQ1, Q2":
+    const auto bounded_phase = [&](const unsigned int field)
+    {
+      return parameters.composition_descriptions[field].type == CompositionalFieldDescription::phase_field
+             && parameters.explicit_compositions.selected[field];
+    };
     for (unsigned int c=0; c<parameters.n_compositional_fields; ++c)
       {
         if (c>0
+            && bounded_phase(c) == bounded_phase(c-1)
             && parameters.use_discontinuous_composition_discretization[c] == parameters.use_discontinuous_composition_discretization[c-1]
             && parameters.composition_degrees[c] == parameters.composition_degrees[c-1])
           {
@@ -288,8 +295,12 @@ namespace aspect
           }
         else
           {
-            std::shared_ptr<FiniteElement<dim>> fe = internal::new_FE_Q_or_DGQ<dim>(parameters.use_discontinuous_composition_discretization[c],
-                                                                                     parameters.composition_degrees[c]);
+            std::shared_ptr<FiniteElement<dim>> fe;
+            if (bounded_phase(c))
+              fe = std::make_shared<FE_DGQBernstein<dim>>(2);
+            else
+              fe = internal::new_FE_Q_or_DGQ<dim>(parameters.use_discontinuous_composition_discretization[c],
+                                                  parameters.composition_degrees[c]);
             variables.push_back(VariableDeclaration<dim>("compositions", fe, 1, 1));
           }
       }

@@ -65,13 +65,14 @@ namespace aspect
       entropy = 6,
       reaction_progress = 7,
       generic = 8,
-      unspecified = 9
+      phase_field = 9,
+      unspecified = 10
     } type;
 
     /**
      * The number of different types defined in Type.
      */
-    constexpr static unsigned int n_types = 9;
+    constexpr static unsigned int n_types = 10;
 
     /**
      * This function translates an input string into the
@@ -99,6 +100,8 @@ namespace aspect
         return CompositionalFieldDescription::reaction_progress;
       else if (input == "generic")
         return CompositionalFieldDescription::generic;
+      else if (input == "phase field")
+        return CompositionalFieldDescription::phase_field;
       else if (input == "unspecified")
         return CompositionalFieldDescription::unspecified;
       else
@@ -133,6 +136,8 @@ namespace aspect
             return "entropy";
           case generic:
             return "generic";
+          case phase_field:
+            return "phase field";
           case unspecified:
             return "unspecified";
           default:

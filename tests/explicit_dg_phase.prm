@@ -1,0 +1,32 @@
+# Enable if: QUICK_TEST
+include $ASPECT_SOURCE_DIR/benchmarks/explicit_dg_transport/mixed.prm
+subsection Compositional fields
+  set Number of fields = 1
+  set Names of fields = damage
+  set Types of fields = phase field
+  set SSPRK3 fields = damage
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = .6+2*y*(1-y)
+  end
+end
+subsection Boundary composition model
+  subsection Function
+    set Function expression = .15+.1*t
+  end
+end
+subsection Prescribed Stokes solution
+  subsection Velocity function
+    set Function expression = 1+.35*x;0
+  end
+end
+subsection Postprocess
+  set List of postprocessors = phase field surface energy
+  subsection Phase field surface energy
+    set Phase composition = damage
+    set Crack geometry = AT2
+    set Fracture energy = 2
+    set Length scale = 1
+  end
+end
