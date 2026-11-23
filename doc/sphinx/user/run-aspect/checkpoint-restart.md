@@ -48,9 +48,9 @@ results after some time.
 
 Each checkpoint slot records the finite-element name for every composition in
 field order in its `metadata.txt`. A nodal DGQ2 field and a quadratic Bernstein
-phase store nine coefficients per cell in 2-D, but the coefficients represent
-different polynomials. ASPECT checks the saved bases before loading the solution
-vectors. A change of transport method is compatible with this check when the
+phase store nine coefficients per cell in 2-D and 27 in 3-D. The same numeric
+entries can represent different polynomials in these two bases. ASPECT checks
+the saved bases before loading the solution vectors. A change of transport method is compatible with this check when the
 field keeps the same basis.
 
 Older slots omit this record. They can resume directly when the saved
@@ -63,3 +63,10 @@ count followed by the quoted FE names in their original order. For example,
 a verified one-field nodal DGQ2 checkpoint takes
 `composition_bases 1 "FE_DGQ<2>(2)"`. If the producing bases cannot be
 established, the checkpoint is ambiguous and continuation is rejected.
+
+Before the introduction of 3-D Bernstein transport, an unmarked 3-D DGQ2
+composition was nodal. A 3-D checkpoint from that generation can resume into
+a nodal field, including a signed explicit tracer. Selecting a Bernstein phase
+for the same stored field is diagnosed before solution transfer. New 3-D
+archives carry a format version. They require the per-field basis record when
+the stored discretization admits a Bernstein field.

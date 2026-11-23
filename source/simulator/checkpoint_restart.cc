@@ -36,6 +36,8 @@
 
 #include <deal.II/fe/mapping_q_cache.h>
 
+#include <boost/serialization/version.hpp>
+
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -139,6 +141,46 @@ namespace aspect
       for (const unsigned int base : introspection.base_elements.compositional_fields)
         names.push_back(fe.base_element(base).get_name());
       return names;
+    }
+
+    // Validate the selected slot before loading any mesh coefficients.
+    template <int dim>
+    void check_composition_bases(const Parameters<dim> &parameters,
+                                 const FiniteElement<dim> &finite_element,
+                                 const Introspection<dim> &introspection,
+                                 const std::string &checkpoint_path,
+                                 const MPI_Comm mpi_communicator,
+                                 const unsigned int archive_version)
+    {
+      const auto bases = composition_basis_names(finite_element, introspection);
+      const auto metadata = Utilities::fexists(checkpoint_path + "metadata.txt", mpi_communicator)
+                            ? read_checkpoint_metadata(checkpoint_path) : CheckpointMetadata();
+      if (metadata.composition_bases)
+        {
+          AssertThrow(metadata.composition_bases->size() == bases.size(),
+                      ExcMessage("Checkpoint composition basis count differs from the current FE."));
+          for (unsigned int c=0; c<bases.size(); ++c)
+            AssertThrow((*metadata.composition_bases)[c] == bases[c],
+                        ExcMessage("Checkpoint basis for field " + introspection.name_for_compositional_index(c)
+                                   + " is " + (*metadata.composition_bases)[c] + ", current basis is " + bases[c] + "."));
+        }
+      else if (!parameters.use_operator_splitting && !parameters.include_melt_transport)
+        for (unsigned int c=0; c<bases.size(); ++c)
+          if (parameters.use_discontinuous_composition_discretization[c] && parameters.composition_degrees[c] == 2)
+            {
+              if constexpr (dim == 3)
+                {
+                  // Only nodal DGQ2 existed in a legacy, unmarked 3-D slot.
+                  AssertThrow(archive_version == 0, ExcMessage("Missing 3-D checkpoint composition basis record."));
+                  AssertThrow(!(parameters.explicit_compositions.selected[c] &&
+                                parameters.composition_descriptions[c].type == CompositionalFieldDescription::phase_field),
+                              ExcMessage("Legacy 3-D checkpoint has nodal basis for field " + introspection.name_for_compositional_index(c)
+                                         + ", current basis is " + bases[c] + "."));
+                }
+              else
+                AssertThrow(false, ExcMessage("Ambiguous legacy DGQ2 checkpoint basis for field " + introspection.name_for_compositional_index(c)
+                                              + ". Restore the composition_bases record from verified producer information before resuming."));
+            }
     }
 
     /**
@@ -698,26 +740,6 @@ namespace aspect
                                  e.what()));
       }
 
-    // Degree and DoF count alone cannot distinguish the two DGQ2 bases.
-    // Check the selected slot before loading any FE coefficients.
-    const auto bases = composition_basis_names(finite_element, introspection);
-    const auto metadata = Utilities::fexists(checkpoint_path + "metadata.txt", mpi_communicator)
-                          ? read_checkpoint_metadata(checkpoint_path) : CheckpointMetadata();
-    if (metadata.composition_bases)
-      {
-        AssertThrow(metadata.composition_bases->size() == bases.size(),
-                    ExcMessage("Checkpoint composition basis count differs from the current FE."));
-        for (unsigned int c=0; c<bases.size(); ++c)
-          AssertThrow((*metadata.composition_bases)[c] == bases[c],
-                      ExcMessage("Checkpoint basis for field " + introspection.name_for_compositional_index(c)
-                                 + " is " + (*metadata.composition_bases)[c] + ", current basis is " + bases[c] + "."));
-      }
-    else if (dim == 2 && !parameters.use_operator_splitting && !parameters.include_melt_transport)
-      for (unsigned int c=0; c<bases.size(); ++c)
-        AssertThrow(!(parameters.use_discontinuous_composition_discretization[c] && parameters.composition_degrees[c] == 2),
-                    ExcMessage("Ambiguous legacy DGQ2 checkpoint basis for field " + introspection.name_for_compositional_index(c)
-                               + ". Restore the composition_bases record from verified producer information before resuming."));
-
     // now that we have resumed from the snapshot load the mesh and solution vectors
     try
       {
@@ -805,6 +827,8 @@ namespace aspect
 //why do we need this?!
 BOOST_CLASS_TRACKING (aspect::Simulator<2>, boost::serialization::track_never)
 BOOST_CLASS_TRACKING (aspect::Simulator<3>, boost::serialization::track_never)
+// Distinguish pre-Bernstein 3-D DGQ2 archives from slots missing their basis record.
+BOOST_CLASS_VERSION (aspect::Simulator<3>, 1)
 
 
 namespace aspect
@@ -812,8 +836,12 @@ namespace aspect
 
   template <int dim>
   template <class Archive>
-  void Simulator<dim>::serialize (Archive &ar, const unsigned int)
+  void Simulator<dim>::serialize (Archive &ar, const unsigned int version)
   {
+    if constexpr (Archive::is_loading::value)
+      check_composition_bases(parameters, finite_element, introspection,
+                              checkpoint_path_from_id(parameters, last_checkpoint_id), mpi_communicator, version);
+
     ar &time;
     ar &time_step;
     ar &old_time_step;
