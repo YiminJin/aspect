@@ -1,8 +1,130 @@
 # Phase-field fault working record
 
+## Increment 3B review closeout
+
+**Ready for author review.** The four findings against `e4338ddfe` are closed. The model ownership change and its reporter-disabled test are isolated in `d748dd201`. Collective phase validation, the AT2 CTest and installed reference lookup are in `9dd92e321`. The original 3B measurements follow this record.
+
+| Finding | Discriminating result |
+| --- | --- |
+| Physical phase domain | The pre-fix installed AT1 run gave −0.06000000000000011 J/m for constant φ = −0.01. The repaired run failed before publishing energy, with finite quadrature extrema −0.010000000000000004 and −0.01. On two ranks the bilinear field 1.1xy/2 exceeds one only in the upper-right cell. The diagnostic counted **1 of 2 ranks** and reported **0.00087323949482400961 to 1.0388873235362321**. The Q3 point nearest the opposite corner supplies the minimum. Both extrema matched an independent calculation from the Gauss abscissa. Exact unity and ±4ε excursions about the relevant endpoints passed. The −4ε case measured −5.32907051820075 × 10⁻¹⁵ J/m, as expected when using the admitted field directly. |
+| Configured model ownership | With the energy reporter disabled, an ordinary assembler-setup callback read the simulation's CZM model, resolved the named second composition `damage` at index 1, and obtained Gc = 3.5 J/m² and ℓ = 0.125 m. At φ = 0.25 its α, α′ and α″ were 0.4375, 1.5 and −2. The existing zero-composition disabled input also passed. |
+| Affine AT2 CTest | The quick-test registration runs an ordinary parameter file. Its oracle reads **local, gradient and total by statistics column name** and compares at 14 significant digits. The analytic values are 7/3, 5/32 and 239/96 J/m. Release measured 2.3333333333333339, 0.15624999999999986 and 2.4895833333333339 J/m. Swapping only the first two columns in an output copy failed the comparator while preserving the total. |
+| Installed free-32 checker | The examples installer ships one regular CSV beside the checker. The historical results path resolves to the same bytes. The installed file, the historical path and the original Git blob have SHA-256 `98a5e5929b43b7877d8ee3c426c50758c3dc874289dd38ec6315f4022206f662`. A fresh 32² free run and checker executed outside the checkout, with inputs and observer from the installation. All 38 IDs at 0, 12.5 and 25 ms matched. Maximum absolute differences for x, y, normal integral, age, slip and rate were all zero. The 38 label records and 9,216 bulk samples per clock were also byte-identical to the previous 3B output. |
+
+### The instance available to an assembler
+
+1. `Simulator` constructs its `Parameters<dim>` member before initializing plugins. The `Parameters` constructor initializes its **const, by-value** `surface_energy_model` member with the sole call to `PhaseField::SurfaceEnergyModel::parse_parameters(prm)`. The phase-side implementation declares and reads the existing `Postprocess / Phase field surface energy` keys, preserving one spelling for each setting. The model stores the named composition, Gc, ℓ and a const reference to the immutable crack law.
+2. `SimulatorAccess::get_parameters()` returns a const reference to those same parameters. An assembler can bind `const auto &model = this->get_parameters().surface_energy_model;` during setup, call `model.validate()`, and resolve `model.composition` through introspection. Normal postprocessor initialization and execution use the same member. The simulator owns its lifetime on each rank, independently of the postprocessor list. The test exercises this access through the release `set_assemblers` signal. The increment adds no signal or simulator-aware handler. The diff against the reviewed base contains no change to `StationaryFault::fit`.
+3. The reporter admits finite **quadrature values** in [−64ε, 1+64ε], with ε the double-precision machine epsilon. It integrates the sampled field and its mapped broken gradient directly. One batched deal.II collective carries the two integrals, extrema and a flag per rank. Every rank receives the range and number of ranks with a violation before the statistics write. The bound applies at the integration points.
+
+```text
+include/aspect/phase_field/surface_energy_model.h
+source/phase_field/surface_energy_model.cc
+include/aspect/parameters.h
+source/simulator/parameters.cc
+source/simulator/simulator_access.cc
+source/postprocess/phase_field_surface_energy.cc
+tests/phase_field_model_without_reporter.cc
+tests/postprocess/phase_field_surface_energy_at2.prm
+benchmarks/fixed_fault/phase_ridge/3a-repair-free-labels.csv
+```
+
+### Closeout verification
+
+The following commands reproduce the checks from the worktree root. The recorded outside directory was `/tmp/pf-rsf-3b-closeout-pVlRDaM0`. Runtime, public headers, the top-level examples data install rule and the ridge observer's own examples install rule were exercised. The outside prefix contained no project working-record directory. Open MPI 5.0.6 used one thread per rank and eight owned cells per rank in the two-rank energy runs. Debug and Release each passed 2,359 unit assertions in 51 cases, the two new CTests, the homogeneous and stationary CTests, and both fault lifecycle checkers. Release also passed the upstream matrix control and the AT2 CTest in a fresh quick-suite configuration (one selected, one passed). All three affine laws passed in Release on one and two ranks and in Debug on one. Straight-crack, named-field, 3D-units and invalid-input controls passed on both builds.
+
+```sh
+W=$PWD
+D=build-3b-closeout
+mkdir -p "$D"
+stage=$(mktemp -d /tmp/pf-rsf-3b-closeout-XXXXXXXX)
+echo "$stage" > "$D/outside-dir"
+export OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+for mode in Release Debug; do
+  build=build-slice
+  variant=release
+  if [ "$mode" = Debug ]; then
+    build=build-slice-debug
+    variant=debug
+  fi
+  if [ "$mode" = Release ]; then
+    cmake --build "$build" --target aspect -j3
+    cmake --build "$build" --target aspect -j1
+  else
+    cmake --build "$build" --target aspect -j1
+    cmake --build "$build" --target aspect -j2
+  fi
+  (cd "$build/unit_tests" && ../aspect --test)
+  t="$D/$variant-tests"
+  cmake -S tests -B "$t" -DAspect_DIR="$W/$build" -DASPECT_BINARY="$W/$build/aspect" \
+    -DCMAKE_BUILD_TYPE="$mode" -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+  cmake --build "$t" --target phase_field_model_without_reporter fixed_fault stationary_fault -j1
+  if [ "$mode" = Release ]; then
+    ctest --test-dir "$t" -R '^(phase_field_model_without_reporter|postprocess/phase_field_surface_energy_at2|fixed_fault|stationary_fault|matrix_nonzeros_1)$' --output-on-failure
+  else
+    ctest --test-dir "$t" -R '^(phase_field_model_without_reporter|postprocess/phase_field_surface_energy_at2|fixed_fault|stationary_fault)$' --output-on-failure
+  fi
+  for fixture in fixed_fault stationary_fault; do
+    python3 -O benchmarks/fixed_fault/check_lifecycle.py "$build/aspect" "$t/libfixed_fault.$variant.so" \
+      "$D/lifecycle-$variant-$fixture" --case "$fixture"
+  done
+done
+ctest --test-dir "$D/release-tests" -R '^matrix_nonzeros_1$' --output-on-failure
+cmake -S tests -B "$D/quick-tests" -DAspect_DIR="$W/build-slice" -DASPECT_BINARY="$W/build-slice/aspect" \
+  -DCMAKE_BUILD_TYPE=Release -DASPECT_RUN_ALL_TESTS=OFF -DASPECT_COMPARE_TEST_RESULTS=ON
+ctest --test-dir "$D/quick-tests" -R '^postprocess/phase_field_surface_energy_at2$' --output-on-failure
+cmake -S . -B "$D/examples" -DDEAL_II_DIR=/opt/dealii/9.6-local -DCMAKE_BUILD_TYPE=Release \
+  -DASPECT_INSTALL_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX="$stage/install"
+cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -DCMAKE_INSTALL_COMPONENT=examples -P "$D/examples/cmake_install.cmake"
+cmake --build "$D/examples" --target phase_ridge -j1
+cmake --install "$D/examples/benchmarks/fixed_fault/phase_ridge" --component examples
+cmake --install build-slice --prefix "$stage/install" --component runtime
+cmake --install build-slice --prefix "$stage/install" --component includes
+energy="$stage/install/benchmarks/phase_field_surface_energy/check.py"
+python3 "$energy" "$stage/install/bin/aspect-release" "$D/serial-final"
+python3 "$energy" "$stage/install/bin/aspect-release" "$D/mpi" --mpi /opt/openmpi/5.0.6/bin/mpirun
+python3 -O benchmarks/phase_field_surface_energy/check.py build-slice-debug/aspect "$D/debug-serial"
+(
+  cd "$stage"
+  export ASPECT_SOURCE_DIR="$stage/install"
+  ridge=install/benchmarks/fixed_fault/phase_ridge
+  python3 -I "$ridge/run.py" install/bin/aspect-release "$ridge/libphase_ridge.release.so" free-32 free 32
+  python3 -I -c 'import sys; from pathlib import Path; sys.path.insert(0,str(Path("install/benchmarks/fixed_fault/phase_ridge").resolve())); from check import check_case; check_case(Path.cwd(),"free",32)'
+)
+ref=refactoring/phase-field-fault/results/3a-repair-free-labels.csv
+sha256sum "$ref" "$stage/install/benchmarks/fixed_fault/phase_ridge/3a-repair-free-labels.csv"
+git cat-file blob "e4338dd:$ref" | sha256sum
+for step in 0 1 2; do
+  for table in bulk labels; do
+    cmp "$stage/free-32/output/$table-$step-0.txt" "build-3b/free-32/output/$table-$step-0.txt"
+  done
+done
+```
+
+The signed negative control and the swapped-column comparator can be replayed using the pre-closeout installation and the completed serial run, respectively. The column test compares an isolated altered row to the tracked analytic CTest output.
+
+```sh
+PYTHONPATH=benchmarks/phase_field_surface_energy python3 - "$D" <<'PY'
+from pathlib import Path
+import sys
+from check import phase_input, run
+old = Path("build-3b/install/bin/aspect-release").resolve()
+s = run([old], Path(sys.argv[1]).resolve(), "old-negative", phase_input("-0.01"))
+print(s["Crack surface energy total (J/m)"])
+PY
+mkdir -p "$stage/swapped-terms/output-phase_field_surface_energy_at2"
+awk '/^#/ {print; next} {tmp=$9; $9=$10; $10=tmp; print}' \
+  "$D/serial-final/AT2/output/statistics" > "$stage/swapped-terms/output-phase_field_surface_energy_at2/statistics"
+(cd "$stage/swapped-terms" && "$W/tests/postprocess/phase_field_surface_energy_at2.sh" screen-output > screen-output)
+diff -u tests/postprocess/phase_field_surface_energy_at2/screen-output "$stage/swapped-terms/screen-output"
+# Expected exit status 1, with differences in local and gradient only.
+```
+
+The first Release closeout run caught a stale unity object compiled while the reporter was being edited. Recompiling that translation unit, relinking and reinstalling produced the measured rejection. The sandbox blocked the MPI launch and added socket warnings to the upstream matrix screen comparison. Both were rerun with local sockets available. The original failed logs are retained under the closeout build directory. All four findings meet their tests. Review stops at 3B. The previously recorded free-RSF donor gap and coupled AT2/CZM calibration boundary still apply.
+
 ## Increment 3B · Crack geometry and phase-only surface energy
 
-**Ready for author review.** The [3B assignment](INCREMENT_3B_TASK.md) starts from the completed 3A repair at `5bed31e63`. Commit `3c5b7ddc1` contains the constitutive interface and unit tests. Commit `2e7f0b1e5` contains the installed postprocessor, analytic fixtures and corrected-label regression.
+**Original results at `e4338ddfe`.** The [3B assignment](INCREMENT_3B_TASK.md) starts from the completed 3A repair at `5bed31e63`. Commit `3c5b7ddc1` contains the constitutive interface and unit tests. Commit `2e7f0b1e5` contains the installed postprocessor, analytic fixtures and corrected-label regression.
 
 ### Measured energies
 

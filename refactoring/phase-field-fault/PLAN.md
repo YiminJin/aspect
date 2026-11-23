@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**Current review on pf-rsf.** [Increment 3B](INCREMENT_3B_TASK.md) is ready for author review. The [working record](STATUS.md#increment-3b--crack-geometry-and-phase-only-surface-energy) gives the installed energy measurements for all three laws and the corrected mature AT1 regression.
+**Current review on pf-rsf.** [Increment 3B](INCREMENT_3B_TASK.md) is ready for author review. The [3B closeout](STATUS.md#increment-3b-review-closeout) records the four review fixes, the phase-model owner, and verification through the installed examples.
 
 ## Baselines and intended examples
 
