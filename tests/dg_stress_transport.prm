@@ -1,0 +1,35 @@
+# Enable if: QUICK_TEST
+include $ASPECT_SOURCE_DIR/benchmarks/fixed_fault/fixed_fault.prm
+subsection Geometry model
+  subsection Box
+    set X repetitions = 2
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+end
+subsection Material model
+  subsection Phase field fault
+    set Advect physical stress = true
+    subsection Exterior parent stress
+      set Function expression = 0.4+0.3*(x-8*t); -0.2+0.3*(x-8*t); 0.05
+    end
+  end
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0.4+0.3*x; -0.2+0.3*x; 0.05; 0.35
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right:function, top x:function, bottom x:function
+  subsection Function
+    set Function expression = 8;0.4*x
+  end
+end
+subsection Boundary traction model
+  set Prescribed traction boundary indicators =
+end
+subsection Postprocess
+  set List of postprocessors = DG stress transport check
+end

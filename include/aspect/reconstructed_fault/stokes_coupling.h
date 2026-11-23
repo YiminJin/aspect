@@ -27,7 +27,7 @@ namespace aspect
       void initialize();
       /** Couple trial rates and convergence to the fixed-age RSF section solve. */
       void connect_section_balance();
-      /** Rotate, relax and project the accepted physical stress on owned cells. */
+      /** Transport (when selected), rotate, relax and project the accepted physical stress on owned cells. */
       void prepare_parent(double relaxation);
       /** Spatial stress (Pa) added to the implicit plane-strain viscous stress. */
       SymmetricTensor<2,dim> stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,

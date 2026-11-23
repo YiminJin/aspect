@@ -5,6 +5,7 @@
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/boundary_velocity/interface.h>
+#include <aspect/transport/dg_stress.h>
 #include <aspect/simulator/assemblers/fault_stress.h>
 #include <aspect/simulator/assemblers/stokes.h>
 #include <aspect/simulator.h>
@@ -121,6 +122,17 @@ namespace aspect
     FETools::compute_projection_from_quadrature_points_matrix(dg,rule,rule,projector);
     FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_values | update_gradients | update_quadrature_points);
     const auto &fields = this->get_old_solution();
+    Transport::CellStress transported;
+    FullMatrix<double> basis;
+    if constexpr (dim == 2)
+      if (physical_dt > 0. && material.inflow_stress)
+        {
+          TimerOutput::Scope timer(this->get_computing_timer(),"Transport DG stress");
+          transported = Transport::advect_stress(*this,material.stress_fields,fields,*material.inflow_stress,
+                                                 this->get_time()-physical_dt,physical_dt);
+          basis.reinit(rule.size(),dg.n_dofs_per_cell());
+          FETools::compute_interpolation_to_quadrature_points_matrix(dg,rule,basis);
+        }
     const auto &extract = this->introspection().extractors;
     std::vector<Tensor<2,dim>> gradients(rule.size());
     std::array<std::vector<double>,3> components;
@@ -136,8 +148,20 @@ namespace aspect
           fe.reinit(cell);
           fe[extract.velocities].get_function_gradients(fields,gradients);
           fe[extract.compositional_fields[material.phase_field]].get_function_values(fields,phase);
-          for (unsigned int c=0; c<3; ++c)
-            fe[extract.compositional_fields[material.stress_fields[c]]].get_function_values(fields,components[c]);
+          if (transported.empty())
+            for (unsigned int c=0; c<3; ++c)
+              fe[extract.compositional_fields[material.stress_fields[c]]].get_function_values(fields,components[c]);
+          else
+            {
+              const auto &coefficients = transported.at(cell->id());
+              for (unsigned int c=0; c<3; ++c)
+                for (unsigned int q=0; q<rule.size(); ++q)
+                  {
+                    components[c][q] = 0.;
+                    for (unsigned int i=0; i<coefficients.size(); ++i)
+                      components[c][q] += basis(q,i)*coefficients[i].access_raw_entry(c);
+                  }
+            }
           for (unsigned int q=0; q<rule.size(); ++q)
             {
               Stress parent;

@@ -8,6 +8,7 @@
 
 #include <aspect/material_model/equation_of_state/linearized_incompressible.h>
 #include <aspect/reconstructed_fault/stokes_coupling.h>
+#include <deal.II/base/parsed_function.h>
 
 namespace aspect
 {
@@ -55,6 +56,9 @@ namespace aspect
         double degradation_magnitude;
         std::array<unsigned int,3> stress_fields; // xx, yy, xy by role
         unsigned int phase_field;
+        /** Exterior physical parent stress (Pa) at SSPRK stage time (seconds).
+         * Present only when the accepted stress is materially advected. */
+        std::unique_ptr<Functions::ParsedFunction<dim>> inflow_stress;
         bool fit_trace, trace_initialized = false;
         double conductivity, viscosity, modulus, background_shear, background_compression;
         double initial_interval, minimum_speed, kappa;

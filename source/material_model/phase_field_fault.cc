@@ -132,6 +132,11 @@ namespace aspect
     {
       prm.enter_subsection("Material model");
       prm.enter_subsection("Phase field fault");
+      prm.declare_entry("Advect physical stress","false",Patterns::Bool(),
+                        "Transport the accepted DG stress with the accepted velocity before rotation and relaxation. Exterior parent stress specifies xx; yy; xy in Pa, at x,y in metres and t in seconds.");
+      prm.enter_subsection("Exterior parent stress");
+      Functions::ParsedFunction<dim>::declare_parameters(prm,3);
+      prm.leave_subsection();
       prm.declare_entry("Fault vertices","",Patterns::List(Patterns::List(Patterns::Double(),2,2),0,
                                                            Patterns::List::max_int_value,";"),"Ordered x,y label positions in metres separated by semicolons. "
                         "The default joins the ends of the left box boundary.");
@@ -185,6 +190,15 @@ namespace aspect
                   ExcMessage("The stationary fault requires a constant bulk viscosity."));
       prm.leave_subsection();
       prm.enter_subsection("Phase field fault");
+      if (prm.get_bool("Advect physical stress"))
+        {
+          AssertThrow(this->get_geometry_model().get_periodic_boundary_pairs().empty(),
+                      ExcMessage("Advected physical stress requires a nonperiodic Cartesian box."));
+          prm.enter_subsection("Exterior parent stress");
+          inflow_stress = std::make_unique<Functions::ParsedFunction<dim>>(3);
+          inflow_stress->parse_parameters(prm);
+          prm.leave_subsection();
+        }
       modulus = prm.get_double("Shear modulus");
       initial_interval = prm.get_double("Initialization interval");
       background_shear = prm.get_double("Background shear traction");
