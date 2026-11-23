@@ -225,6 +225,16 @@ def check_case(root, case, grid):
     previous = init
     outputs = sorted(output.glob("labels-*-0.txt"))
     require(len(outputs) == (3 if free else 2), f"Unexpected clock count for {case}")
+    if free and grid == 32:
+        record = Path(__file__).resolve().parents[3] / "refactoring/phase-field-fault/results/3a-repair-free-labels.csv"
+        reference = np.loadtxt(record, delimiter=",", skiprows=1)
+        history = np.vstack([labels(output, step) for step in range(3)])
+        np.testing.assert_array_equal(history[:, 0], np.tile(np.arange(38), 3))
+        np.testing.assert_array_equal(history[:, 7], np.repeat([0., .0125, .025], 38))
+        np.testing.assert_array_equal(history[:, [0, 7]], reference[:, [0, 7]])
+        near(history[:, 1:7], reference[:, 1:7], 1.e-10, 1.e-8)
+        print(f"  corrected 3A reference: 38 labels at all three clocks; max absolute differences "
+              f"(x, y, I, age, slip, rate) {np.max(np.abs(history[:, 1:7]-reference[:, 1:7]), axis=0)}")
     for step in range(len(outputs)):
         current = labels(output, step)
         near(current[:, 7], expected_dt*step, 1.e-16)

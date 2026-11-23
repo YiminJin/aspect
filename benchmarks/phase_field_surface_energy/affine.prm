@@ -1,0 +1,56 @@
+# Static DGQ2 phase on a 2 m by 1 m rectangle.
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = 0
+set Nonlinear solver scheme = no Advection, no Stokes
+set Output directory = output-affine
+
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set X extent = 2
+    set Y extent = 1
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 2
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Formulation
+  set Enable elasticity = false
+end
+subsection Material model
+  set Model name = simple
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Initial temperature model
+  set List of model names = function
+end
+subsection Discretization
+  set Composition polynomial degree = 2
+  set Use discontinuous composition discretization = true
+end
+subsection Compositional fields
+  set Number of fields = 1
+  set Names of fields = phase_field
+  set Compositional field methods = static
+end
+subsection Initial composition model
+  set List of model names = function
+  subsection Function
+    set Function expression = x/4+y/2
+  end
+end
+subsection Postprocess
+  set List of postprocessors = phase field surface energy, load balance statistics
+  subsection Phase field surface energy
+    set Fracture energy = 2
+    set Length scale = 0.25
+  end
+end

@@ -1,0 +1,14 @@
+# Run from this directory so ASPECT can read the common fixture.
+include affine.prm
+set Output directory = output-straight-crack
+subsection Geometry model
+  subsection Box
+    set Box origin X coordinate = -1
+  end
+end
+subsection Initial composition model
+  subsection Function
+    # Cell faces lie at the ridge (0) and both ends of the profile (+/-0.5 m).
+    set Function expression = max(1-abs(x)/0.5,0)^2
+  end
+end
