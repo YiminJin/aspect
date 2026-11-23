@@ -7,7 +7,7 @@
 #include <aspect/postprocess/interface.h>
 #include <aspect/simulator_signals.h>
 #include <aspect/simulator/assemblers/fault_stress.h>
-#include <aspect/transport/dg_stress.h>
+#include <aspect/simulator/solver/dg_stress_transport.h>
 
 #include <fstream>
 #include <iomanip>

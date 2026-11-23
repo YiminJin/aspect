@@ -3,7 +3,7 @@
   License version 2 or later. See the file LICENSE for details.
 */
 
-#include <aspect/transport/dg_stress.h>
+#include <aspect/simulator/solver/dg_stress_transport.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/grid/grid_tools.h>
 

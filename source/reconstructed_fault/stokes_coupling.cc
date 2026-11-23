@@ -5,7 +5,7 @@
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/boundary_velocity/interface.h>
-#include <aspect/transport/dg_stress.h>
+#include <aspect/simulator/solver/dg_stress_transport.h>
 #include <aspect/simulator/assemblers/fault_stress.h>
 #include <aspect/simulator/assemblers/stokes.h>
 #include <aspect/simulator.h>

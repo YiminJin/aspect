@@ -3,8 +3,8 @@
   License version 2 or later. See the file LICENSE for details.
 */
 
-#ifndef _aspect_transport_dg_stress_h
-#define _aspect_transport_dg_stress_h
+#ifndef _aspect_simulator_solver_dg_stress_transport_h
+#define _aspect_simulator_solver_dg_stress_transport_h
 
 #include <aspect/simulator_access.h>
 
