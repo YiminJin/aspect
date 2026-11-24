@@ -2,6 +2,55 @@
 
 The completed `MIDPOINT_UPDATE_CLOSEOUT.md` freezes the implemented midpoint update. The audit found that the irreversible phase equation equilibrates at the stage. Extrapolating that solution to the endpoint leaves further admissible downhill directions for the next solve. A fracture-only calculation reproduced the native second phase increment within 0.014% in spatial L². Preserve this update and its known timestep sensitivity. The proposed endpoint-equilibrated alternative belongs to a separate numerical-method study.
 
+## Growing fault midpoint control (5A)
+
+Start with the [5A working record](STATUS.md#increment-5a--single-forward-front) for the input identities, reproduced clocks, exact commands and first failing points. The canonical layout is two MPI processes, one thread each. The nine-strip test qualifies one fixed 2-D mesh, constitutive law and short trajectory. The visible arclength change of strip 8 across builds and MPI layouts is retained there.
+
+### Follow one step in source order
+
+1. The input selects the `growing fault` material and the `midpoint fault phase` composition method for the configured AT1 phase. The parameter parser checks the 2-D DGQ2 role. Introspection allocates a Bernstein element. The single-advection iterated Newton scheme solves temperature and dispatches each composition first. It defers this phase row to the material's coupled solve. The mature model and original ASPECT elasticity are off.
+2. `Material::solve_midpoint_fields` gets an immutable parent from its accepted native tensors, strip history and ASPECT's old solution. Initialization constructs the fixed material sections, applies whole-polynomial bounds to the seed, and returns at zero elapsed time. On a physical attempt `solve_midpoint` forms the half-duration, scales wall increments by h, fixes one pressure coefficient, and restores discrete continuity. It freezes the disk from the connected accepted graph, the maximum incident DG trace and the 0.05 threshold. Every residual evaluation gets that same parent.
+3. At native chord points the stage unknowns are evaluated as Q2 displacement increment a, Q1 pressure p/G and Q2 Bernstein coefficients b. The 3-D deviatoric plane-strain predictor is B(τₙ + 2G dev ε(a)), B = 1/(1+hG/η). For each strip the collective free rate and mobility use physical area divided by arclength. Solving V = Vfree − M f(V,θ(h)) supplies the signed resistance f to every native point. The physical rows integrate τₘ:dev ε(test)/G − (p/G) div(test) and −q div(a). On the phase rows the residual is the derivative of the discrete AT1 energy divided by Kf, less the physical-area integral of NᵢY/Kf. FractureRows integrates volume and two-sided interior face derivatives by its own quadrature. Exterior phase flux is natural.
+4. The tangent applies the exact direct derivatives and df = [f′/(1+Mf′)](dVfree − f dM). Each sparse cell/strip border is accumulated on its owner. The root's linear system has one auxiliary increment df per strip. Eliminating those linear increments recovers cross-rank and cross-cell couplings. Wall and pressure constraints are eliminated on the increment, and a primal active set enforces bₙ ≤ b ≤ (1+bₙ)/2. The early positive phase search uses fracture stiffness plus mass. The tested physical Jacobian and convergence residual always include the full coupling. The nonlinear coordinates do not include independent force, age or point history.
+5. At convergence `select_prospective_planes` sums localized squared predictor tractions with weight Jρ(1−F)². Every angle evaluation uses the *whole-strip* signed resistance root and angle-dependent arclength. Formed angles are fixed. A changed trial map requires another assembly. The final call to `assemble_stage` computes the physical residual, tangent, ledger and native history together. ASPECT receives a/h, p, and 2b−bₙ. The simulator's repeat decision runs while the material still owns the old accepted pair. `post_accept_timestep` moves the returned history into place exactly once. The normal checkpoint hooks archive owned native histories by CellId and quadrature index, strip history and clock. A restart checks the fixed physical vertices, quadrature order, material signature and strip edges and obtains phase from the simulator's checked FE checkpoint.
+
+~~~text
+benchmarks/growing_fault/onecut.prm
+include/aspect/reconstructed_fault/material_sections.h
+include/aspect/material_model/growing_fault/section_response.h
+source/simulator/solver_schemes.cc
+source/simulator/solver/midpoint_fault.cc
+source/phase_field/midpoint_fracture.cc
+source/simulator/solver/midpoint_direction.cc
+source/material_model/growing_fault.cc
+~~~
+
+### Verify a change to a row or transfer
+
+Use the distributed oblique integral and remote-force unit tests first. The benchmark observer then applies the same physical matrix used by the solver, eliminates its force borders, and differences independently reassembled residuals at fixed history and geometry. It separately contracts a real velocity test against physical stress. The time-step observer repeats the tangent test on the returned solution before acceptance. The offline material observer reconstructs ∇v from the emitted nodal coefficients, forms the full plane-strain tensor and checks native Maxwell, cohesive and aging increments. Its independent fracture-energy integral reads the endpoint Bernstein coefficients and counts each shared face once. Run both the direct retained-archive comparison and the all-frame replay comparison. Matching one export to another cannot establish the physical weak form on its own.
+
+~~~text
+unit_tests/material_sections.cc
+unit_tests/phase_field.cc
+benchmarks/growing_fault/growing_fault_checks.cc
+benchmarks/growing_fault/check_history.py
+benchmarks/growing_fault/check_admission.py
+benchmarks/growing_fault/compare.py
+benchmarks/growing_fault/run.py
+~~~
+
+### Shared ASPECT edits
+
+| Release symbol or file | Why the ordinary extension point was insufficient | Feature-off coverage |
+| --- | --- | --- |
+| Parameters::AdvectionFieldMethod, parameter declaration and parse | A dedicated composition method declares the phase's sole time integrator. A material evaluate callback cannot prevent a generic second update. The new enum value is appended. | Ordinary parameter parsing, fixed_fault, explicit_dg_compositions and both stock solver schemes. |
+| Introspection FE selection | The existing branch's Bernstein field selection depended on the SSPRK3 selector. The same native element is required for the midpoint obstacle when SSPRK3 is off. | 4C moving phase, independently selected DG tracers, affine AT2. Existing basis metadata is used unchanged. |
+| compositional_field_needs_matrix_block | The dedicated phase contributes to the coupled sparse matrix. Allocating an ordinary transport block would leave an unused solver matrix. | matrix_nonzeros_1 and explicit_dg_compositions. |
+| Simulator::assemble_and_solve_composition and solve_single_advection_iterated_newton_stokes | A local material or Stokes assembly callback cannot own a simultaneous irreversible phase solve, full-strip derivatives and native point recovery. The opt-in dispatch occurs after normal temperature and companion field handling. The existing repeat and acceptance hooks suffice. | Stock prescribed_dilation_newton_singleadvection and iterated_advection_and_stokes_DG compared directly with 4C, plus the layered mature trajectory and mixed explicit/implicit dispatch. |
+| Test registration | The ordinary regression depends on the benchmark parameter file it includes. The compiler tracks the included C++ observer. | growing_fault CTest exercises the parameter-to-publication path without donor data. |
+
+Material sections, the cohesive point law, SIPG fracture rows, direction selection and the midpoint solver are new branch code. None of these operations reads benchmark outputs. The mature MaterialFaultTrace, the generic SSPRK3 kernel and the original elasticity rheology are unchanged. A future phase integration change would touch the coupled time discretization and phase rows. It would leave material-strip membership intact.
+
 ## Layered moving mature fault
 
 The trace unit tests rotate a unit segment through 105° and reject collapsed and self-crossing edges. The corrected 38-label fit exercises the initial boundary-spanning reconstruction independently of moving the donor curve.

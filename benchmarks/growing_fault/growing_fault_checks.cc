@@ -202,3 +202,127 @@ namespace aspect::Postprocess
   };
   ASPECT_REGISTER_POSTPROCESSOR(GrowingFaultSamples,"growing fault samples","Observe the published midpoint bulk and strip histories.")
 }
+
+#include <aspect/time_stepping/interface.h>
+
+namespace aspect::TimeStepping
+{
+  /** Reassemble the returned midpoint against the still-accepted parent at
+   * the ordinary repeat decision. Check the Schur complement applied by the
+   * direct solver at the final plane map on an admissible mixed direction. */
+  template <int dim>
+  class ReturnedMidpoint : public Interface<dim>, public SimulatorAccess<dim>
+  {
+    public:
+      double execute() override
+      {
+        return std::numeric_limits<double>::max();
+      }
+      std::pair<Reaction,double> determine_reaction(const TimeStepInfo &) override
+      {
+        if constexpr(dim==2)
+          if (this->get_timestep_number()==3)
+            {
+              const auto &m=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
+              const auto &v=this->get_solution();
+              GrowingFault::MidpointSystem op(m,v);
+              op.freeze_direction_neighborhood();
+              auto x=op.initial;
+              std::fill(x.begin(),x.end(),0.);
+              for (const unsigned int b:
+              {
+                0u,1u,op.phase_block
+              })
+              for (const auto j:v.block(b).locally_owned_elements())
+                if (b==0) x[j]=op.h*v.block(b)[j];
+                else if (b==1) x[op.nv+j]=v.block(b)[j]/op.G;
+                else x[op.phase_begin+j]=.5*(v.block(b)[j]+op.lower[op.phase_begin+j]);
+              Utilities::MPI::sum(x,op.comm,x);
+              AssertThrow(!op.select_prospective_planes(x),ExcMessage("Returned endpoint would change the plane map."));
+              const auto e=op.assemble_stage(x,true,false);
+              AssertThrow(e.ledger.mechanical<=m.get_parameters().nonlinear_tolerance && e.ledger.kkt<=1.e-7,
+                          ExcMessage("Returned fields fail the physical convergence gate."));
+              std::vector<double> d(op.n,0.),action(op.n,0.),force(op.angles.size(),0.);
+              for (unsigned int i=0; i<op.n; ++i)
+                if (i<op.phase_begin && !op.fixed.count(i)) d[i]=2.e-5*std::sin(i+.3);
+                else if (i>=op.phase_begin && x[i]>op.lower[i]+1.e-7 && x[i]<op.upper[i]-1.e-7) d[i]=.001*std::cos(i);
+              for (const auto &[ij,a]:e.jacobian) if (ij.first>=op.n) force[ij.first-op.n]-=a*d[ij.second];
+              Utilities::MPI::sum(force,op.comm,force);
+              for (const auto &[ij,a]:e.jacobian) if (ij.first<op.n) action[ij.first]+=a*(ij.second>=op.n?force[ij.second-op.n]:d[ij.second]);
+              Utilities::MPI::sum(action,op.comm,action);
+              auto xp=x,xm=x;
+              constexpr double eps=5.e-5;
+              for (unsigned int i=0; i<op.n; ++i)
+                {
+                  xp[i]+=eps*d[i];
+                  xm[i]-=eps*d[i];
+                }
+              const auto plus=op.assemble_stage(xp,false,false),minus=op.assemble_stage(xm,false,false);
+              double defect=0.,norm=0.;
+              for (unsigned int i=0; i<op.n; ++i)
+                if (!op.fixed.count(i))
+                  {
+                    defect+=std::pow((plus.residual[i]-minus.residual[i])/(2.*eps)-action[i],2);
+                    norm+=action[i]*action[i];
+                  }
+              const double relative=std::sqrt(defect/norm);
+              AssertThrow(std::isfinite(relative) && relative<2.e-5,ExcMessage("Returned tangent fails the frozen action budget."));
+              this->get_pcout()<<"   Returned midpoint tangent relative error "<<std::setprecision(12)<<relative<<std::endl;
+            }
+        return {Reaction::advance,std::numeric_limits<double>::max()};
+      }
+  };
+  ASPECT_REGISTER_TIME_STEPPING_MODEL(ReturnedMidpoint,"check returned midpoint","Check the tangent at the returned growing fault solution before publication.")
+
+  /** Reject a solved full step, then reject the half step once at unchanged
+   * duration. Compare every accepted native value and locally owned FE value
+   * across the two rollbacks before permitting publication. */
+  template <int dim>
+  class RetryGrowingFault : public Interface<dim>, public SimulatorAccess<dim>
+  {
+    public:
+      double execute() override
+      {
+        return this->get_timestep_number()==1?.01:.005;
+      }
+      std::pair<Reaction,double> determine_reaction(const TimeStepInfo &) override
+      {
+        if constexpr(dim==2)
+          if (this->get_timestep_number()==2)
+            {
+              const auto &m=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
+              AssertThrow(m.history().step==1,ExcMessage("Premature section publication."));
+              std::map<std::string,std::string> state;
+              m.save(state);
+              const auto coefficients=[](const LinearAlgebra::BlockVector &v)
+              {
+                std::vector<double> data;
+                for (unsigned int b=0; b<v.n_blocks(); ++b)
+                  for (const auto j:v.block(b).locally_owned_elements()) data.push_back(v.block(b)[j]);
+                return data;
+              };
+              const auto parent=coefficients(this->get_old_solution());
+              if (attempt==0)
+                {
+                  accepted=state;
+                  old=parent;
+                }
+              AssertThrow(accepted==state && parent==old,ExcMessage("Rejected attempt changed accepted fields or native history."));
+              ++attempt;
+              if (attempt==1) return {Reaction::repeat_step,.005};
+              if (attempt==2)
+                {
+                  half=coefficients(this->get_solution());
+                  return {Reaction::repeat_step,.005};
+                }
+              AssertThrow(attempt==3 && half==coefficients(this->get_solution()),ExcMessage("Repeated half step differs from identical trial."));
+            }
+        return {Reaction::advance,std::numeric_limits<double>::max()};
+      }
+    private:
+      unsigned int attempt=0;
+      std::map<std::string,std::string> accepted;
+      std::vector<double> old,half;
+  };
+  ASPECT_REGISTER_TIME_STEPPING_MODEL(RetryGrowingFault,"retry growing fault","Exercise two solved midpoint rollbacks.")
+}

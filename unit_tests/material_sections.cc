@@ -2,6 +2,7 @@
 #include "common.h"
 #include <aspect/material_model/growing_fault/section_response.h>
 #include <aspect/reconstructed_fault/material_sections.h>
+#include <aspect/reconstructed_fault/onset_score.h>
 #include <deal.II/distributed/tria.h>
 #include <deal.II/grid/grid_generator.h>
 
@@ -92,4 +93,23 @@ TEST_CASE("Intact cohesive Maxwell response has the analytic locked and phase de
   REQUIRE(response.driving==Approx(law.m*traction*traction/(2.*law.G)));
   const auto derivative=law.derivative(response, {},1.,h,plane,0.);
   REQUIRE(derivative.rate==Approx(law.m*traction*(1.+h*law.G/law.eta)/(law.G*h)));
+}
+
+TEST_CASE("Remote shear controls the resistance inside an onset disk")
+{
+  using namespace aspect::GrowingFault;
+  const Friction law= {.6,.015,.02,.001,.01,1000.};
+  const auto local=onset_moments(.13,.64,.12,0.,0.);
+  const auto remote=onset_moments(.78,0.,.42,30.,220.);
+  for (unsigned int j=3; j<remote.size(); ++j) REQUIRE(remote[j]==0.);
+  auto total=local;
+  for (unsigned int j=0; j<total.size(); ++j) total[j]+=remote[j];
+  const double variance[3]= {};
+  const double angle=.17, h=.0025, length=.21/std::cos(angle), GBh=1.e6*h/(1.+h*.01);
+  const auto cold=candidate_onset(local.data(),variance,law,10.,h,200.,GBh*length,angle);
+  const auto loaded=candidate_onset(total.data(),variance,law,10.,h,200.,GBh*length,angle);
+  REQUIRE(cold.resistance==0.);
+  REQUIRE(loaded.resistance>100.);
+  REQUIRE(loaded.score==Approx(.13*.64*.88*.88*loaded.resistance*loaded.resistance));
+  REQUIRE(loaded.score>100.);
 }

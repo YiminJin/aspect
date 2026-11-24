@@ -14,6 +14,137 @@ Entry was `01575dd15` on pf-rsf. The assignment and local verification skill wer
 | Coupled solve | The ordinary single-advection Stokes scheme needs an opt-in dispatch because a local material evaluation cannot assemble the phase rows, the pressure constraint or cross-rank force derivatives. Temperature and auxiliary compositions retain their normal dispatch. The configured tip phase requires Bernstein coordinates even though SSPRK3 is off. |
 | Acceptance | A returned solution is checked with the final plane map. The material retains the candidate until the simulator's existing post-accept signal. The simulator checkpoints the phase block and the material save/load interface carries native history. |
 
+### Review result
+
+The ordinary two-rank Release run matched the frozen nine-strip control. It starts with the original bounded but unequilibrated seed, then publishes once at 5, 10 and 15 ms. The archived final quadrature frame and three-step ledger pass directly. A replay of the exact donor executable also supplied every intermediate frame. The separate Debug runs completed the three physical steps and the operator checks. Cross-layout agreement of the weakly driven first plane is an open comparison, quantified below.
+
+| Physical time (ms) | Integrated signed slip (m²) | Mechanics norm | Phase natural-map norm | Signed transfer work defect (J/m) | Wall work less storage change and dissipation (J/m) | Cohesive compliance remainder (J/m) |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 5 | 9.20703396413e−16 | 7.998e−13 | 1.418e−11 | −6.77e−28 | 1.94019e−11 | 1.63059e−21 |
+| 10 | 3.94713921110e−5 | 3.044e−12 | 3.461e−10 | −3.24e−18 | 3.98765e−6 | 3.98755e−6 |
+| 15 | 1.69302306477e−4 | 1.235e−16 | 1.324e−12 | −1.73e−17 | 3.76264e−5 | 3.76264e−5 |
+
+At 15 ms, bulk energy is 0.05936788326 J/m, recoverable cohesive energy 0.002274047185 J/m and fracture energy 6.545870654295 J/m. Over that interval wall work is 0.04405813177 J/m. The three losses are 4.662403276e−6 (bulk viscous), 9.224479248e−8 (cohesive viscous) and 0.01873130672 J/m (friction and radiation). The frozen checker compares *added* fracture energy at 10 and 15 ms, 5.86243435e−6 and 1.52158007e−4 J/m. Comparing every native point through 15 ms gave maximum absolute differences of 2.54e−15 in phase, 8.18e−8 Pa in stress and 4.08e−14 in recoverable strain. All nine formed flags agree. The angle of strip 8 is −0.147868802765 rad versus the frozen −0.147868871839 rad. The other angles are zero.
+
+**Independent checks.** A 45° cut of the unit square gives area 1/2 and x moment 1/6. The two squares cover 2 m². Both owners contribute to the middle strip. Perturbing one quadrature point on just one owner changes the resistance returned to the other by 0.28150383 Pa. Signed power with unequal arclengths agrees to the 1e−13 work test. Intact material retains the Maxwell predictor at zero mobility, including zz. The analytic zero-rate and reversed signed roots, the stage-age mobility derivative, and lower/free/upper obstacle signs pass. A remote band has exactly zero direct disk weight but changes the candidate resistance from zero to 160.5028689 Pa and the local squared-traction integral to 1659.794303 Pa² m². At rest, 429 points with phase above 0.05 in a detached band retain unformed strips. Under shear the same band diagnoses unsupported exterior history before the first physical publication.
+
+At a smooth manufactured stage, differences of the assembled residual use relative steps 1e−3, 3e−4 and 1e−4 with incoming history, angle and constraints held fixed. At the smallest step the displacement-to-phase action differs by 2.85e−8 relative and the phase-to-mechanics action by 1.95e−9. Mixed displacement, pressure and phase give 6.36e−11 (mechanics) and 1.22e−11 (phase). For the physical test velocity (x,0), adding back pressure and undoing row scaling gives −72.8466597874761 Pa m² versus −72.8466597874759 integrated independently. Reversing the stress sign gives a 145.69332 Pa m² defect. At the actual returned 15 ms state, an admissible mixed directional difference at 5e−5 differs from the physical tangent by 5.17e−10 relative (budget 2e−5).
+
+An independent observer differentiates the two exported Q2 velocity polynomials, takes the 3-D deviator and recovers slip from signed native history. The maximum defects in the Maxwell and recoverable-strain equations over the three steps were 6.94e−17 and 1.22e−17 s⁻¹. Reversing the slip sign gives 0.03613 s⁻¹ at 15 ms. Exact constant-rate aging, signed/absolute shear and the independent area-to-strip return pass for all three clocks. The most negative incoming Bernstein coefficient is −0.07165469695. Whole-cell subdivision bounds pass at every publication and no coefficient increment is negative beyond roundoff. Q4 integration of the published phase, counting each interior face once, reproduces the Q5 production SIPG energy within 2.7e−14 J/m. Omitting the interior faces changes it by 0.559565 J/m at 15 ms.
+
+**Fixed-plane intermediate.** The second review commit (`9b63d7f5d`) also ran through the ordinary two-rank solve to 15 ms with every angle fixed at zero. Its pre-orientation observer passed the manufactured tangent and stress work tests. At 15 ms its mechanical residual was 1.2355e−16, phase residual 1.3334e−12 and independent Maxwell rate defect 9.46e−17 s⁻¹. For this check the Release compilation database was used to rebuild the affected solver translation unit from the commit, omit direction selection, relink against the unchanged ASPECT objects and build that commit's benchmark plugin. The isolated binary, compile/link script, input and output remain under `$D/standalone-fixed`. The final production parameter file also ran on two ranks through all three steps with the benchmark plugin absent.
+
+**Return, repeat and continuation.** The first step takes three nonlinear corrections and a final plane update/reassembly. The next two steps take three corrections each. The returned residual, tangent and endpoint history come from the final physical assembly. Only the existing simulator acceptance signal promotes the candidate. The ordinary time-step manager rejects the solved 9.55 ms interval from the 5 ms parent, then rejects the 5 ms interval once at unchanged duration. Both rejections preserve every accepted native value and old FE coefficient. The second 5 ms trial reproduces the first trial's FE coefficients exactly. Clean and retried point, strip and FE tables match byte for byte at all common endpoints. Only the simulator's 10 ms clock differs in the ledger, by 1.73e−18 s. A fresh run given only the target's checkpoint generation 03 reproduces all six final CSV files byte for byte. Editing a temporary copy of native zz at the first endpoint by +0.001 Pa makes both normal and optimized Python report cell 0_0:, point 0, step 1. The parent output remains untouched.
+
+**Discrepancies and retained evidence.** In the first canonical comparison the 5 ms native zz value at cell 0_0:, q135 was −1.07841e−9 Pa versus +1.01223515e−6 Pa, outside the 1e−6 Pa absolute budget. The target reached the residual gates along a different Newton trajectory. Restoring the donor's continuity correction and its initial positive fracture-plus-mass search metric resolved the native mismatch. The physical tangent governs Newton polishing and final evaluation. The original outputs and failing comparison are retained under the scratch directories `front1` and `build-5a/frozen1.log`.
+
+Additional comparisons locate build/layout sensitivity at **5 ms, strip 8**, where the donor reports an integrated onset gain of 3.36056e−15. Replaying the unchanged donor on one rank shifts its angle by +1.67024e−6 rad. The one-rank target Release run first misses the frozen two-rank arclength by −4.8303e−8 m (budget 2.5084e−8 m). The two-rank Debug solve first misses it by −5.7189e−8 m. The one-rank Debug solve passes that arclength test and misses the additional angle check by +5.7660e−7 rad (budget 1.1479e−7 rad). Comparing serial donor and serial Release directly leaves an angle difference of −3.7697e−7 rad. These runs establish sensitivity in the weakly driven direction selection. The contributions from the different bulk linear solves, moment summation and scalar root/search arithmetic have not been isolated. Frozen two-rank Release is the qualified layout. The comparisons use the original budgets throughout.
+
+**Cost and regressions.** The 8 × 4 mesh has 4,968 fixed Q6 chord points, 2,484 per owner. Each owner stores 112 bytes per point per native history, with one endpoint candidate at publication. Nine strip histories and vectors of 639 stage coordinates (306 wall/interior velocity, 45 pressure and 288 phase DoFs) are replicated. Each rank assembles sparse rows for its owned cells. Rank zero gathers the entries and factors the 648-row matrix with nine scalar force borders. Checkpoint packing gathers native history on root. The restored archive is transiently available on other ranks. Matrix factors and bulk native point arrays are rank-local during assembly. This direct solver qualifies the small two-dimensional fixed-box case. In the final Release timing the three coupled solves took 1.88 s. Principal, retry and restart including checks took 5.845, 5.198 and 2.858 s. Peak RSS was 249176 and 221420 KiB, including the observer. One thread per rank. Serial Debug took 36.4 s including the checks.
+
+The Release unit suite passed 2,473 assertions in 57 cases. The distributed section, intact and remote-band tests passed 59 assertions on each of two ranks. The new ordinary parameter-file CTest passed. The 4C moving layered principal, zero/reverse translation, crossing MPI, retry and restart comparisons passed. The mature principal rate errors were 1.373e−9 and 1.186e−9 m/s. Other passing scoped CTests were fixed_fault, stationary_fault, layered_moving_fault, layered_fault_traction_step, explicit_dg_compositions, postprocess/phase_field_surface_energy_at2 and matrix_nonzeros_1.
+
+Two stock Release screen comparisons still differ from their checked-in outputs. For iterated_advection_and_stokes_DG all 76 residual lines and the full statistics file match the retained 4C executable byte for byte. Its first tiny Stokes residual is 4.83077e−15 versus the reference 5.21787e−15. For prescribed_dilation_newton_singleadvection all six nonlinear residual lines and all numerical statistics columns match 4C. The screen reference names a Debug plugin and has 7.89667e−13 versus the measured 7.89701e−13. Both statistics CTest comparisons pass. The original reference files are preserved.
+
+### Commands and source handoff
+
+The paths below are relative to the worktree unless absolute. Scratch for this run was `/tmp/pf-rsf-5a.ZICqAr`. Use a fresh scratch directory on replay. The donor input SHA-256 is `225aa17e85f4dbff70bb8906861713e6bf7675f12c56745d45d4f5794fbe8972`. The archived executable SHA-256 is `e640fa627141ea98343fee14526c532f005281d336da32aa2d2f3467c5589b10`. The target parameter-file SHA-256 is `7f54a525fa05d6f250a1a7a05d8127bd3c1d58f6dfd29cc52e5545c6f116e081`.
+
+~~~sh
+W=$PWD
+D=$(mktemp -d /tmp/pf-rsf-5a.XXXXXX)
+R=$D/reference
+A=../aspect-pf-rsf-reference-20261121/reference.tar.gz
+F=benchmarks/growing_fault
+B=build-slice
+T=build-4c/tests
+P=build-5a/plugin/libgrowing_fault_checks.release.so
+PD=build-5a/debug-plugin/libgrowing_fault_checks.debug.so
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+export ASPECT_SOURCE_DIR=$W DEAL_II_NUM_THREADS=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+sha256sum "$A"
+tar -xzf "$A" -C "$D"
+(cd "$R" && sha256sum --quiet -c SHA256SUMS)
+mkdir "$D/source"
+git -C ../aspect-pf-rsf-particle-free archive c407e612bf7c9aa1a9c0fc60fd623208dfd53b39 | tar -x -C "$D/source"
+(cd "$D/source" && patch -p1 < "$R/tip/qualified.patch" && tar -xzf "$R/tip/qualified-additions.tgz")
+python3 "$R/analysis/replay_midpoint_reference.py" "$R" localized-onecut "$D/donor-onecut"
+python3 "$R/analysis/check_midpoint_reference.py" "$R" localized-onecut "$D/donor-onecut/output"
+cmake --build "$B" --target aspect -j2
+cmake --build build-slice-debug --target aspect -j2
+cmake -S "$F" -B build-5a/plugin -DAspect_DIR="$W/$B" -DCMAKE_BUILD_TYPE=Release
+cmake -S "$F" -B build-5a/debug-plugin -DAspect_DIR="$W/build-slice-debug" -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-5a/plugin -j1
+cmake --build build-5a/debug-plugin -j1
+mkdir "$D/uninstrumented"
+cp "$F/onecut.prm" "$D/uninstrumented/input.prm"
+echo "set Output directory = $D/uninstrumented/output" >> "$D/uninstrumented/input.prm"
+"$MPI" --bind-to core --map-by core -np 2 "$B/aspect" "$D/uninstrumented/input.prm" > "$D/uninstrumented/log" 2>&1
+python3 -O "$F/run.py" "$B/aspect" "$P" "$D/review" --mpiexec "$MPI"
+Q=$D/review/principal/output
+python3 -O "$F/compare.py" "$R/runs/localized-onecut/output" "$Q" --archive
+python3 -O "$F/compare.py" "$D/donor-onecut/output" "$Q"
+python3 -O "$F/check_history.py" "$Q"
+python3 -O "$F/check_admission.py" "$B/aspect" "$P" "$D/admission"
+python3 "$F/compare.py" "$D/donor-onecut/output" "$Q" --check-corruption
+python3 -O "$F/compare.py" "$D/donor-onecut/output" "$Q" --check-corruption
+python3 -O "$F/run.py" build-slice-debug/aspect "$PD" "$D/debug" --ranks 1 --principal-only
+python3 -O "$F/run.py" build-slice-debug/aspect "$PD" "$D/debug2" --ranks 2 --principal-only --mpiexec "$MPI"
+python3 -O "$F/run.py" "$B/aspect" "$P" "$D/release1" --ranks 1 --principal-only
+# Each additional comparison below identifies the first mismatch described above.
+for name in debug debug2 release1; do python3 -O "$F/compare.py" "$D/donor-onecut/output" "$D/$name/principal/output"; done
+(cd "$B/unit_tests" && ../aspect --test)
+"$MPI" --bind-to core -np 2 "$B/aspect" --test 'Material sections preserve*,Intact cohesive Maxwell*,Remote shear*'
+cmake -S tests -B "$T"
+cmake --build "$T" --target growing_fault -j1
+ctest --test-dir "$T" -R '^(growing_fault|fixed_fault|stationary_fault|layered_moving_fault|layered_fault_traction_step|postprocess/phase_field_surface_energy_at2|explicit_dg_compositions|matrix_nonzeros_1|iterated_advection_and_stokes_DG|prescribed_dilation_newton_singleadvection)$' --output-on-failure
+L=benchmarks/layered_moving_fault
+python3 "$L/run.py" "$B/aspect" build-4c-closeout/plugin/liblayered_moving_fault.release.so "$T/libfixed_fault.release.so" "$D/layered" --mpiexec "$MPI"
+python3 -O "$L/check.py" "$D/layered" build-4c/donor/output "$D/layered.png" --zero build-4c/donor-zero/output --reverse build-4c/donor-reverse/output
+~~~
+
+For the additional one-rank donor comparison the scratch launcher changes only the argument following `-np`. The archived environment, input substitutions, runtime and plugin identities remain those of localized-onecut.
+
+~~~sh
+cat > "$D/one-rank-launch" <<'PYTHON'
+#!/usr/bin/env python3
+import os, sys
+args = sys.argv[1:]
+args[args.index('-np')+1] = '1'
+os.execv('/opt/openmpi/5.0.6/bin/mpirun', ['mpirun', *args])
+PYTHON
+chmod +x "$D/one-rank-launch"
+python3 "$R/analysis/replay_midpoint_reference.py" "$R" localized-onecut "$D/donor-serial" --launcher "$D/one-rank-launch"
+python3 -O "$F/compare.py" "$D/donor-serial/output" "$D/release1/principal/output"
+~~~
+
+To isolate the stock screen mismatches, replay the generated ordinary inputs from the CTest plugin directory with the retained 4C executable. In the Newton case the visualization filenames contain their respective output-directory prefixes.
+
+~~~sh
+OLD=$W/build-4c-closeout/tangent2/bands/aspect-review
+for test in iterated_advection_and_stokes_DG prescribed_dilation_newton_singleadvection; do
+  cp "$T/$test.x.prm" "$D/$test.prm"
+  echo "set Output directory = $D/$test-4c" >> "$D/$test.prm"
+  (cd "$T" && "$OLD" "$D/$test.prm") > "$D/$test-4c.log" 2>&1
+  rg -a 'nonlinear residual|Nonlinear residual reduction' "$D/$test-4c.log" > "$D/$test-old-residuals"
+  rg -a 'nonlinear residual|Nonlinear residual reduction' "$T/output-$test/screen-output" > "$D/$test-new-residuals"
+  cmp "$D/$test-old-residuals" "$D/$test-new-residuals"
+  sed "s|$D/$test-4c/solution/|output-$test/solution/|g" "$D/$test-4c/statistics" | cmp - "$T/output-$test/statistics"
+done
+~~~
+
+Read the fixed membership, signed law, assembled stage and direction rule first. The [verification guide](VERIFICATION.md#growing-fault-midpoint-control-5a) describes the equation, core edits and acceptance owner.
+
+~~~text
+source/reconstructed_fault/material_sections.cc
+source/material_model/growing_fault/section_response.cc
+source/simulator/solver/midpoint_fault.cc
+source/simulator/solver/midpoint_direction.cc
+source/material_model/growing_fault.cc
+~~~
+
+The qualified mechanics uses fully prescribed velocity walls, zero gravity, fixed Cartesian Q2/Q1 bulk fields, a feasible Bernstein stage obstacle and the monotone signed RSF regime at prescribed normal compression. The next decision is author review of the single-front control and its sensitivity. Increment 5B remains pending.
+
 ## Increment 4C review closeout
 
 The starting commit was `55cf57ece`. The incoming project instructions and the local verification skill were present before the repair. The six findings concern the projected interior section in plane strain, its geometry, and its observer. The earlier two-step results below are retained as measured at that commit.

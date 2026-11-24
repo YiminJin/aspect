@@ -64,6 +64,12 @@ namespace aspect::GrowingFault
     Values initial,lower,upper,mass,angles;
     std::map<Index,double> fixed;
     std::vector<unsigned int> formed,eligible;
+    /** Collective, once per attempt. Track the connected accepted graph and
+     * freeze the material-point weights in the forward disk. */
+    void freeze_direction_neighborhood();
+    /** Collective, after a converged stage. Compare candidate planes at the
+     * returned fields and request a fresh assembly when a trial angle turns. */
+    bool select_prospective_planes(const Values &);
   };
 }
 #endif

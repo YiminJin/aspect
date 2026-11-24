@@ -1,0 +1,8 @@
+# Enable if: QUICK_TEST
+include $ASPECT_SOURCE_DIR/benchmarks/growing_fault/onecut.prm
+subsection Postprocess
+  set List of postprocessors = growing fault samples
+end
+subsection Time stepping
+  set List of model names = convection time step, check returned midpoint
+end

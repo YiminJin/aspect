@@ -488,10 +488,11 @@ namespace aspect::GrowingFault
     TimerOutput::Scope timer(material.get_computing_timer(),"Coupled midpoint fault");
     MidpointSystem system(material,solution);
     auto x=system.initial;
-    std::fill(system.eligible.begin(),system.eligible.end(),1u);
+    system.freeze_direction_neighborhood();
     system.restore_continuity(x);
     double initial_merit=0.;
     bool use_positive_metric=true;
+    unsigned int direction_updates=0;
     const auto &settings=material.get_parameters();
     for (unsigned int iteration=0; iteration<settings.max_nonlinear_iterations; ++iteration)
       {
@@ -500,6 +501,12 @@ namespace aspect::GrowingFault
                             <<", projected phase "<<stage.ledger.kkt<<std::endl;
         if (stage.ledger.mechanical<=settings.nonlinear_tolerance && stage.ledger.kkt<=1.e-7)
           {
+            if (system.select_prospective_planes(x))
+              {
+                if (++direction_updates>12) throw ExcNonlinearSolverNoConvergence();
+                continue;
+              }
+            // Bind publication to a fresh evaluation on the final plane map.
             auto returned=system.assemble_stage(x,true,true);
             if (returned.ledger.mechanical>settings.nonlinear_tolerance || returned.ledger.kkt>1.e-7)
               throw ExcNonlinearSolverNoConvergence();
