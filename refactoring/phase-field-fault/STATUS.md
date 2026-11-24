@@ -1,5 +1,189 @@
 # Phase-field fault working record
 
+## Increment 4C · coupled layered moving fault
+
+Entry was clean at `8712d8fc2` on `pf-rsf`, apart from the incoming assignment and local skills. The reviewed 3-D baseline comprises `610d6eecc` and `63db4899a`; its six scoped CTests in each configuration, 2359 assertions in 51 unit cases, slab moments and 162-coefficient MPI comparison are recorded below. The seven 4B repair gates remain part of that baseline.
+
+**Pre-edit state trace.** The Simulator owns the accepted phase, velocity and physical DG stress in its old solution. Its ordinary composition dispatcher builds the bounded candidate phase from that parent. The material owns the oriented replicated Q1 labels (age, slip and accepted speed), their geometry and derived normal integrals. At entry its update projects the relaxed objective stress into attempt-local coupling storage; both its endpoint spin and its sectional Newton solve read the same stationary trace. The Picard preparation, pressure-inclusive section balance, negative weak stress load and post-repeat acceptance hooks exist on the iterated-Stokes path. Moving mechanics requires the objective spin to read *accepted* geometry and slip, followed by binding the *candidate* geometry and normal integrals after composition and before the first Picard assembly. The material evaluates viscosity at physical points. The benchmark reference provider owns its accepted boundary column and must stage each candidate from that column. The post-accept signal commits DG stress and surface history before ordinary time rotation. Repetitions must replace the trial geometry, boundary column and candidate phase from the original parent.
+
+The preserved sibling evidence archive SHA-256 is `a82d362c3504be188e9602cf10c93cf51a26544be5e6d4a7677016cc52981c57`. All internal checksums passed. The mature executable and three plugins replayed two 12.5 ms endpoints with largest absolute column difference zero. Donor sources are `3928edaf7e6a59383ef4bf65aeb22f34ff723a4c` with the archived entry patch (`7ce705e8eb18d54624b7ceb16bb9853606f803e5052ac23b0d3592ef2dfcca60`). Donor geometry advects the finite prescribed vertices using the accepted bulk velocity and rebinds normal integrals to native phase. Its initial trace is not a centroid fit. Label indices refer to the original oriented material stations.
+
+### Review of the bounded 4C calculation
+
+Implementation and fixtures are in `70f3d3de0`. The native material phase, transported spatial stress and 20 persistent material labels give two accepted joint endpoints at 12.5 and 25 ms. The ordinary Picard solver uses the configured nonlinear tolerance of 1e−8 and linear tolerance of 1e−9. The mature donor uses coupled Newton with the same input tolerances. Both use 192 square 0.5 m cells, Q2 velocity, Q1 pressure, and no pressure normalization. The equilibrium column imposes velocity on the sides and bottom, and horizontal traction and a zero normal traction datum on the top. Gravity is zero. Coordinates are metres, positive y upward. Translation is +2 m/s.
+
+On [−6,6] × [−2,2] m, the initial ridge is φ = 0.35 [1−(x/1.4)²]₊⁴ [1−((y−0.6x)/0.6)²]₊⁴, where [·]₊ is the positive part. The three spatial stress components start at zero. Phase evolves only by material transport.
+
+**First discrepancy and its discriminator.** The first uncorrected port in `build-4c/principal` gave an initial rate defect of 0.00126293 m/s, despite matching native phase to 5.56e−17 and normal integrals to 1.78e−14 m. At initialization the donor integrates the *point law* at Q8 in both Stokes and the section. The first target used Q3 for its Stokes load. At physical endpoints the donor additionally feeds the defect between the Q8 DG projection and the point law back into both equations. These are distinct time levels. At fixed Q2 Stokes test velocity on this Cartesian mesh, its gradient belongs to DGQ2. Thus testing the Q8 mass projection at native Q3 recovers the donor's Q8 weak stress action. The target can retain ASPECT's ordinary Stokes matrix and cell quadrature. During Picard it adds projected stress minus the frozen iterate's pointwise viscous stress to the implicit viscous block. During a physical section solve it freezes the same projection defect, with the accepted age and current bulk iterate fixed in the rate tangent. The initial section solve uses the direct point law. The comparison below uses this correction. The unrepaired target run and all original references are retained.
+
+**Source order and owners**
+
+1. `Simulator::start_timestep → PhaseFieldFault::update → FaultStokesCoupling::prepare_parent` drops a prior trial and reads the accepted native DG components, old velocity, and old normalized section rate. `Transport::advect_stress` performs one componentwise advance for the attempt. The material rotates this tensor with accepted bulk-minus-slip spin. Owned DG coefficients hold the projected objective parent. At time zero the virtual Maxwell interval is 0.1 s and physical transport, rotation, slip and aging have zero duration.
+2. `solve_single_advection_iterated_stokes → assemble_and_solve_composition → Transport::advance_composition` advances the bounded native phase from the same old solution. The first Picard preparation calls `bind_candidate`. The candidate owns a copy of the accepted ordered trace and a fresh profile borrowing that trace. Each old label samples the accepted FE velocity and gradient collectively. Its position advances by Euler and its normal width by dividing by the norm of the inverse-transpose deformation gradient applied to the accepted normal. An inverted map, reversed order or vertex outside the interior fails. Replicated material index follows the vertex across FE owners. The persistent state also carries initial shear, accepted age, cumulative slip, rate and Maxwell slip memory.
+3. `FaultPhaseProfile::initialize` reads the candidate phase once, integrating both cell-split normal rays over eight surface panels with three stations per panel. It solves its consistent Q1 mass system. Subsequent iterations reuse this candidate. At each physical point the material uses η(y) = 5.5 + 4.5 tanh(y/0.35) Pa s, β = exp(−GΔt/η) and κ = −η expm1(−GΔt/η), G = 10 Pa. Initial material data were sampled on the prescribed straight seed between (−0.8,−0.48) and (0.8,0.48). Age is 10 + 2 sin(2x) s, background shear is 3.7 + 0.15 cos(3x) Pa, compression is 5 Pa, m = 50, μ₀ = 0.6, a = 0.025, b = 0.015, Dᶜ = 0.008 m, V₀ = 0.001 m/s and radiation damping is 1 Pa s/m.
+4. `prepare_iteration → sample_bulk → BulkPoint::add_balance → solve_rates → project_reaction` forms pressure-inclusive Q1 section balance and the trial DG reaction. The fixed-age row uses χ Nᵢ JxW times driving shear minus κχV and RSF resistance. κ is stored with the point used to assemble that row. Both transfers use the same projection and χ. The direct endpoint in Pa is β times the objective parent plus 2κ dev₃ D minus 2κ sym(χV t⊗n). `PhaseFieldFault::evaluate → FaultStressLoad::execute` supplies the negative offset work to Stokes. The convergence hook checks the projected response and the solved rates before accepting.
+5. `post_accept_timestep → FaultStokesCoupling::accept_step` projects the complete converged field with the moving donor's Q8 mass rule, writes the three DG fields, advances age and slip, and sets Z⁺ = β(X⁺) Zⁿ + κ(X⁺) V⁺. It publishes the section and profile together. Z, in Pa m, is diagnostic in this direct-stress model. The benchmark's postprocessor publishes the staged boundary column only at accepted output. ASPECT then rotates its solution history. The checkpoint stores material IDs in order and the accepted column through plugin save/load. FE histories use the normal Simulator checkpoint. The first resumed attempt rebuilds the normal integrals from the restored FE field. Stationary verification keeps its fresh-start contract.
+
+| Upstream edit | Need and control for the existing caller |
+| --- | --- |
+| `source/simulator/solver_schemes.cc` | The single-advection Picard loop duplicated the no-advection loop and skipped coupled preparation and vetoes. Delegate its Stokes portion to the existing coupled-capable Picard routine after ordinary composition. The previous caller is exercised by the stock nonlinear-iteration postprocessing control and the earlier mixed-field tests. |
+| `source/simulator/checkpoint_restart.cc` | ASPECT serializes the boundary and postprocess managers, but previously skipped the material plugin's existing save/load methods. Version 2 carries the per-material string map. Earlier archives supply an empty map, which the moving fault diagnoses. Old nodal continuation, reverse basis mismatches and the current 3-D marker guard are exercised separately. |
+| `tests/CMakeLists.txt` | The new quick CTest depends on the included benchmark parameter file. Its filter independently checks the crossing label against both frozen speeds and verifies the history increment. |
+
+The geometry, material and coupling changes are to pf-rsf code. There is no new production simulator hook, solver driver, transport plugin or global state for the specimen. The viscosity override and exterior stress function supply physical constitutive and inflow data. The equilibrated boundary column, load observer and benchmark exports live under `benchmarks/layered_moving_fault`. Future phase growth can consume the native field independently of the material surface histories. Three-dimensional scalar transport does not depend on the reconstructed curve.
+
+### Physical comparison
+
+Donor then target values are shown where two values are given. Bulk maxima compare all 1,728 matching physical Q3 points at each time. Q8 volume reconstructions use the nine exported Q3 values in each cell, with independent Cartesian interpolation. Label comparisons cover all 20 IDs. Surface normal and work-adjoint shear diagnostics are Q1 mass solves on the weighted Q8 bulk measure. The maximum physical phase below samples the reconstructed polynomial on a 9×9 grid per cell.
+
+| Observation | 12.5 ms | 25 ms |
+| --- | ---: | ---: |
+| Phase mass, m² | 0.19430106401371 / 0.19430106401162 | 0.19430131905251 / 0.19430131904967 |
+| Target mean and sampled range | 0.004047938834, [0, 0.34197565] | 0.004047944147, [0, 0.33455938] |
+| Phase centroid x,y, m | (0.02749917, 0.00030734) | (0.05339109, 0.00067187) |
+| Curve length, m; maximum component position defect, m | 1.87053193558; 3.51e−11 | 1.87561819516; 3.89e−11 |
+| Maximum segment tangent component defect | 2.84e−10 | 2.99e−10 |
+| Admitted Q8 points with χ > 1e−10 m⁻¹; integral of χ over the box, m | 1,396; 1.86146219013 | 1,607; 1.88205524519 |
+| I at material ID 9, m | 11.69320643555 / 11.69320643523 | 11.80082645326 / 11.80082645343 |
+| Maximum I defect, m; independent Q1 normal projection defect, m | 8.03e−10; 2.84e−14 | 1.22e−9; 2.13e−14 |
+| Label 9 age, s | 7.63944415038 / 7.63944414762 | 5.99789742005 / 5.99789740991 |
+| Label 9 slip, m; target Z, Pa m | 0.00202992910547; 0.0200561758660 | 0.00398006568919; 0.0388457466775 |
+| Maximum age, Z, solved V defects, s / Pa m / m/s | 1.69e−8 / 1.70e−10 / **1.37e−9** | 2.24e−8 / 2.59e−10 / **1.19e−9** |
+| Donor/target maximum solved V, m/s | 0.162904354400 / 0.162904353028 | 0.160104328446 / 0.160104328159 |
+| Maximum bulk xx, yy, xy defects, Pa | 1.89e−9, 1.77e−9, 9.02e−10 | 2.34e−9, 2.40e−9, 1.43e−9 |
+| Maximum vx, vy, pressure defects, m/s, m/s, Pa | 1.90e−9, 1.64e−9, 3.62e−9 | 3.54e−9, 2.84e−9, 8.25e−10 |
+| Maximum effective normal and work-shear defects, Pa | 3.16e−10, 1.30e−9 | 2.81e−10, 1.73e−9 |
+| Target effective compression range, Pa | 5.04847486–5.05906113 | 5.09453325–5.11363858 |
+| Target DG elastic energy, J/m; viscous dissipation, W/m | 0.008827230782, 0.080959498884 | 0.033367293809, 0.306025596739 |
+| Integrated slip work, W/m; bulk/section contraction defect, W/m | 0.003781096045; 3.04e−18 | 0.007357734189; 1.73e−18 |
+| Assembled signed offset RHS on cell 1_3:300, Pa m² | +0.00470308600006 | −0.0171191554523 |
+| Signed complete stress work, donor Q8 / target assembled RHS minus implicit work, Pa m² | −0.0221151944066 / −0.0221151943619 | −0.0429223517968 / −0.0429223518029 |
+| Same candidate phase and rates, slip action with new / stale curve and I, Pa m² | 0.004703084908 / 0.004645390984 | 0.004689115751 / 0.004615063880 |
+| Layer Maxwell time range at labels, s | 0.15443937–0.94560678 | 0.15443753–0.94567655 |
+| Boundary traction, Pa; target Picard solves / donor Newton residual evaluations | 0.0607273563419; 8 / 21 | 0.118065674882; 8 / 20 |
+
+The Q3 weak check isolates the actual fault assembler's local vector before constraint distribution and applies the nodal coefficients of v = (y(1+x), 0.4x). Its independent Q8 check also reconstructs the unprojected constitutive work on the first physical step, whose old stress is zero. The negative stale-geometry differences are 5.77e−5 and 7.41e−5 Pa m². The pressure-inclusive fixed-age residual reconstructed from the published fields is below 1e−8 relative for every row. The absolute bulk stress/velocity/pressure budgets are 1e−8 in their respective SI units, on fields of order 0.1 Pa, 2 m/s and 0.01 Pa. Friction nonlinearity magnifies rate error in age by a factor of order ΘΔt/Dᶜ. The all-label age budget is 2e−7 s, rate budget 1e−8 m/s and cumulative slip budget 3e−10 m. Surface profiles and their derived positions use separate interpolation and quadrature budgets. Matching >1e−10 support keys is exact. Matching a full 17-digit export to a nonlinear solve differs from checking a single field transfer. The independent 16- and 24-point cell-split ray reconstructions agree with the Q1 projection to <5e−12 m. A single-panel Q12 reference missed it by 1.76e−10 m, which is why the independent oracle verifies convergence.
+
+![Accepted phase, curve and the three crossing labels at all three clocks](results/4c-layered-crossing.png)
+
+### Controls and coverage
+
+- Material ID 9 crosses x = 0 in the second step at x = +0.01004415406 m. IDs 3 and 15 also cross cell faces. Old FE velocity predicts all new vertices to 3e−13 m. At current y, η, its change across the layer, and the exponential age, Z and slip increments pass independent checks. Both signs and the transition are sampled. The homogeneous moving column agrees with the original constant-viscosity material at all common observations through 12.5 ms, when the exterior parent is exactly zero. The existing homogeneous three-clock fixture passes identically with either material in its constant limit.
+- Zero added translation and −2 m/s were separately replayed with the donor executable and boundary plugin. Both time comparisons passed the same physical budgets. At zero added translation the label centroid still moves (+0.00233343,+0.00021086) m in 25 ms under the layered shear flow. The stationary fitted and homogeneous controls separately exercise truly fixed geometry. With reversed translation the label centroid moves (−0.04766894,+0.00021052) m.
+- The exact donor uses the full in-box normal rays. Numerical phase tails reach the exterior even on this short window. The separate 1.65 m initial half-width case keeps the **geometric strip** at least 0.10514, 0.10679 and 0.10856 m from all four walls. Maximum excluded ray weight at the two physical endpoints was 3.55e−9 and 6.33e−8 of the full integral, within the unchanged 3A budget. This control preserves finite tips without cropping the principal reference.
+- One discarded, fully solved 25 ms first attempt is followed by 12.5 and 25 ms publications. All exported phase, velocity, pressure, DG stresses, transfer values, labels and the complete 512-point boundary column agree exactly with the clean series. The independent restart from the 12.5 ms snapshot also reproduces the second publication exactly. The diagnostic retry counter records the rejected call. Initialization has zero physical duration and publishes no slip or stress.
+- On two ranks the principal maximum difference across numerical observations was 2.46e−14. Five phase-carrying partition faces have nonzero normal velocity. The original 20 vertices keep the same supporting rank in this partition. A second, collinear seed places ID 9 at (−1e−5,−6e−6) m and anchors its initial age and shear to its new seed coordinate. That ID crosses from rank 0 to rank 1 during the first step and stays there. Age goes 9.999960 → 7.76828258 → 6.09106077 s, slip goes 0 → 0.00203163227 → 0.00399202109 m, and η goes 5.49992286 → 5.50095159 → 5.50278234 Pa s. Each rank's replicated label list and the owner-keyed native data were independently checked against serial.
+- Release replayed the 4A stress-load and spin-order suite, both 4B ridge and mixed-composition suites, 4B compatibility including the vortex, the 3-D slab/asymmetric/limiter/MPI/legacy-checkpoint suite, stationary and homogeneous lifecycles, both rank layouts for stationary and advected rate tangents, the 3B energy suite and ordinary fault-off controls. The 3-D coverage is the dimension-generic component transport used by scalar fields. The physical stress adapter is plane strain. The two old Release reference discrepancies (periodic AMR iteration count and last digit of the composition minimum) retain their original references and before/after evidence. Neither was a 4C acceptance comparison.
+- Debug independently passed both donor endpoints. The 3-D reconstructed-fault input failed at material initialization with the plane-strain diagnostic. The layered material rejected harmonic averaging of the viscosity used by Stokes.
+- Release passed 2,359 assertions in 51 unit cases. The 4A receiving-cell Stokes load was −0.29364437004440336 Pa m² against −0.29364437004440386 analytically. The 3-D upper-slab phase and tracer moment errors were 2.78e−17 and 1.39e−17. Across 162 scalar coefficients per clock the serial/MPI difference was 1.94e−16. At relative directional step 5e−5 the sectional tangent error was 1.84e−10 for both stationary and transported stress. In the corrected 3A comparison all 38 label positions and normal integrals matched exactly at all three clocks, with a maximum speed difference of 5.135e−16 m/s.
+- Eleven of twelve scoped Release CTests passed, including the layered case and the fault-off matrix control. The twelfth, `postprocess_iterations_iterated_Stokes`, disagreed with the stored near-zero “Pressure at top (Pa)” at nine iteration outputs, with a maximum difference of 5.62050407e−16 Pa. Every other column matched. Repeating the identical case with the retained pre-4C executable (SHA-256 `c7125298542e731ca69d24f4620da17cd18e0ac9a6dcaf48a03c3a286317ab50`) produced byte-identical complete statistics. Both files have SHA-256 `3b88ff19b6b379a4ff81affb0eceb2a0e682285405f1d5626e4941127a2997af`. The stored reference still has SHA-256 `c267dc12b9ba41816d4b3f8105dd379cc668da6ddfad0a0da61000add0004f02`.
+- Scratch is rank-local for bulk histories. On 192 cells, one owned Q2 tensor field has 5,184 doubles (41,472 bytes). The moving correction adds two owned fields of that size for frozen endpoint stress and strain. The shared DG operator retains its existing stage halos. Accepted and trial trace/profile objects each scale linearly in the 20 vertices. The Q1 ray projection has 456 sample stations per copy of its transient ray integrals. The 64-panel boundary fixture keeps 512 physical samples per replicated column. A single-thread final Release process measured 4.34 s and 250,336 KiB peak RSS for the two-step principal trajectory including output (`time.monotonic` and Linux `wait4`).
+
+### Reproduction
+
+Run from the worktree root, using fresh output directories. All physical runs used one thread per rank, with one or two ranks. The first archive verification and fresh mature replay were:
+
+```sh
+W=$PWD
+D=$W/build-4c
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+archive=$W/../aspect-pf-rsf-reference-20261121
+(cd "$archive" && sha256sum -c reference.tar.gz.sha256)
+mkdir -p "$D/reference"
+tar -xzf "$archive/reference.tar.gz" -C "$D/reference" --strip-components=1
+(cd "$D/reference" && sha256sum -c SHA256SUMS)
+python3 "$D/reference/analysis/replay_midpoint_reference.py" "$D/reference" mature "$D/donor"
+python3 "$D/reference/analysis/check_midpoint_reference.py" "$D/reference" mature "$D/donor/output"
+```
+
+The frozen input SHA-256 is `4f773e3a5b2056a6f7874100ac160c697e78e77c9222ae43ae64920489c04a67`. The archive manifest covers the linked dependencies. Its executable hash is `b80ab805067ec9e6e0ebb5cc9766746c7764225505e26e6db25b9dc1fdc88953`, layered plugin `6f7b7071aab6367e6425b4478ca2e149f10cde2216ca237ba06c1b5dc15c7409`, transport observer `26352f3156aa9de191e41bfb79d623f01413b4446a71d333991ceb1e72591d15`, and material observer `4e98ceb2ab54c750bb0475bf3c7d7b0e7f0c957c9096be730e4a4a3d8648ce6e`. Donor control inputs were derived from the isolated replay and launched as follows:
+
+```sh
+export OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 ASPECT_SOURCE_DIR=$W MPLCONFIGDIR=$D/mpl
+for name in zero reverse; do
+  case "$name" in zero) u=0;; reverse) u=-2;; esac
+  dir="$D/donor-$name"
+  mkdir "$dir"
+  sed -e "s|$D/donor/output|$dir/output|g" -e "s/:U=2/:U=$u/g" \
+      -e "s/set Translation = 2.0/set Translation = $u/" "$D/donor/input.prm" > "$dir/input.prm"
+  "$MPI" -n 1 "$D/reference/mature/runtime/aspect-release" "$dir/input.prm" > "$dir/run.log" 2>&1
+done
+
+A=$W/build-slice/aspect
+T=$D/tests
+F=benchmarks/layered_moving_fault
+cmake --build build-slice --target aspect -j2
+cmake -S "$F" -B "$D/plugin" -DAspect_DIR="$W/build-slice" -DCMAKE_BUILD_TYPE=Release
+cmake --build "$D/plugin" -j1
+cmake -S tests -B "$T" -DAspect_DIR="$W/build-slice" -DASPECT_BINARY="$A" \
+  -DCMAKE_BUILD_TYPE=Release -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+cmake --build "$T" --target fixed_fault stationary_fault layered_moving_fault dg_stress_transport dg_stress_spin_order explicit_dg_compositions -j1
+python3 "$F/run.py" "$A" "$D/plugin/liblayered_moving_fault.release.so" "$T/libfixed_fault.release.so" "$D/accept" --mpiexec "$MPI"
+python3 -O "$F/check.py" "$D/accept" "$D/donor/output" refactoring/phase-field-fault/results/4c-layered-crossing.png \
+  --zero "$D/donor-zero/output" --reverse "$D/donor-reverse/output"
+```
+
+Final Release executable SHA-256 is `3157e2f7b17a5c014aca87c4e3f2a78088bc536db51d938cdd2eaf9d3b491417`, benchmark plugin `bc4044684a38ee4c0463a072c43f63d9efc61f68928484642c11d231d80511f4`. Debug executable SHA-256 is `d181c9b85595ec1cdbf2ad6d20fad7e7aa22743a762d8c0eecca613d56d1776a`, benchmark plugin `bba84848afd915bb4e75f83517f2dc05674f0b2dea2c8d116b3e02d191a544f6`. The pre-existing build-tree banner contains an older configure-time Git revision. The hashes identify the binaries actually run.
+
+```sh
+cmake --build build-slice-debug --target aspect -j1
+cmake -S "$F" -B "$D/plugin-debug" -DAspect_DIR="$W/build-slice-debug" -DCMAKE_BUILD_TYPE=Debug
+cmake --build "$D/plugin-debug" -j1
+mkdir "$D/final-debug"
+sed -e "s|$D/accept/principal/output|$D/final-debug/output|" \
+    -e "s|$D/plugin/liblayered_moving_fault.release.so|$D/plugin-debug/liblayered_moving_fault.debug.so|" \
+    "$D/accept/principal/input.prm" > "$D/final-debug/input.prm"
+build-slice-debug/aspect "$D/final-debug/input.prm" > "$D/final-debug/log"
+PYTHONPATH="$F" python3 -c 'from pathlib import Path; from check import endpoint; endpoint(Path("build-4c/final-debug/output"),Path("build-4c/donor/output"))'
+```
+
+```sh
+legacy=$W/build-4b/final-capture/aspect-review
+ctest --test-dir "$T" -R '^(postprocess_iterations_iterated_Stokes|matrix_nonzeros_1|fixed_fault|stationary_fault|dg_stress_transport|dg_stress_spin_order|layered_moving_fault|postprocess/phase_field_surface_energy_at2|explicit_dg_(slabs|compositions|phase|phase_statistics))$' --output-on-failure
+python3 benchmarks/fixed_fault/check_transport.py "$A" "$T" "$D/accept-4a" --mpiexec "$MPI"
+python3 benchmarks/explicit_dg_transport/check.py "$A" "$T" "$D/accept-4b" --mpiexec "$MPI"
+python3 benchmarks/explicit_dg_transport/check_compatibility.py "$A" "$T" "$D/repair" --legacy-aspect "$legacy"
+for f in fixed_fault stationary_fault; do
+  python3 benchmarks/fixed_fault/check_lifecycle.py "$A" "$T/libfixed_fault.release.so" "$D/accept-$f" --case "$f"
+done
+python3 benchmarks/explicit_dg_transport/check_3d.py "$A" "$T" "$D/accept-dg3" "$legacy" "$W/build-4b-repair/tests-release" --mpiexec "$MPI"
+python3 benchmarks/phase_field_surface_energy/check.py "$A" "$D/accept-energy" --mpi "$MPI"
+(cd build-slice/unit_tests && ../aspect --test)
+```
+
+The stock comparison used the generated parameter file and the same test plugin in both runs.
+
+```sh
+stock=postprocess_iterations_iterated_Stokes
+mkdir "$D/stock-old"
+sed "s|./lib$stock.so|$T/lib$stock.release.so|" "$T/$stock.x.prm" > "$D/stock-old/input.prm"
+(cd "$D/stock-old" && "$W/build-4b-repair/tangent/aspect-review" input.prm > log)
+cmp "$D/stock-old/output-$stock/statistics" "$T/output-$stock/statistics"
+sha256sum "$D/stock-old/output-$stock/statistics" "$T/output-$stock/statistics" "tests/$stock/statistics"
+```
+
+The fitted/tangent recorders use the preserved 4A fixture inputs. These scratch inputs reference the existing 5,000-point distance tables; the ordinary moving benchmark has no sibling, archive or fixture-table dependency.
+
+```sh
+V=$W/refactoring/phase-field-fault/rate_tangent
+R=$D/final-tangent
+mkdir -p "$R/tangent"
+(cd "$R/tangent" && python3 "$V/capture.py" "$W")
+cmake -S benchmarks/fixed_fault/phase_ridge -B "$R/ridge" -DAspect_DIR="$W/build-slice" -DCMAKE_BUILD_TYPE=Release
+cmake --build "$R/ridge" -j1
+for f in free-32 free-32-mpi2 advected-32 advected-32-mpi2; do
+  mkdir "$R/$f"
+  sed -e "s|$W/build-4a/$f/output|$R/$f/output|" -e "s|$W/build-4a/ridge/|$R/ridge/|" \
+      "build-4a/$f/input.prm" > "$R/$f/input.prm"
+  case "$f" in *mpi2) "$MPI" -n 2 "$R/tangent/aspect-review" "$R/$f/input.prm" > "$R/$f/run.log";;
+    *) "$R/tangent/aspect-review" "$R/$f/input.prm" > "$R/$f/run.log";; esac
+done
+python3 -O "$V/check_row.py" "$R/free-32" "$R/free-32-mpi2"
+python3 -O "$V/check_row.py" "$R/advected-32" "$R/advected-32-mpi2"
+cp build-4a/free-32/profile.txt "$R/free-32/profile.txt"
+PYTHONPATH=benchmarks/fixed_fault/phase_ridge python3 -c 'from pathlib import Path; from check import check_case,rank_check; r=Path("build-4c/final-tangent"); check_case(r,"free",32); rank_check(r)'
+```
+
 ## 3-D scalar transport qualification
 
 **Ready for author review before Increment 4C.** The starting commit was `a1cd30d1a` on `pf-rsf`. Review `610d6eecc` for checkpoint compatibility, then `63db4899a` for the dimension-templated transport and its regressions. The selector admits signed DGQ2 compositions and bounded quadratic Bernstein phase on fixed, conforming, nonperiodic 2-D and 3-D Cartesian boxes with Q2 velocity. An empty selection uses ASPECT's implicit path. The physical stress adapter and reconstructed-fault mechanics retain their 2-D plane-strain contract.

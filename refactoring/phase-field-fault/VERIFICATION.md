@@ -2,6 +2,12 @@
 
 The completed `MIDPOINT_UPDATE_CLOSEOUT.md` freezes the implemented midpoint update. The audit found that the irreversible phase equation equilibrates at the stage. Extrapolating that solution to the endpoint leaves further admissible downhill directions for the next solve. A fracture-only calculation reproduced the native second phase increment within 0.014% in spatial L². Preserve this update and its known timestep sensitivity. The proposed endpoint-equilibrated alternative belongs to a separate numerical-method study.
 
+## Layered moving mature fault
+
+Use the [4C fixture, immutable donor identity, commands and measured comparisons](STATUS.md#review-of-the-bounded-4c-calculation). The canonical run compares both accepted physical endpoints and twenty material IDs. Reconstruct the Cartesian DG polynomials independently, check both signed transfer contractions, and compare the actual Q3 Stokes vector action with Q8 physical stress work. Initialization tests the direct section law. Physical steps test the projected response shared by mechanics and publication.
+
+The target-only matrix covers fresh starts, rejection of a long first attempt, checkpoint continuation, an actual change of supporting MPI rank, pointwise layer sampling, zero and reversed translations, a compact support disjoint from the walls, and the homogeneous limit. Keep sampled physical extrema and exact geometric clearance distinct. The plot, parameter-file CTest and comparison script belong with their respective record, tests and benchmark. The frozen donor archive is needed only for the external scientific comparison.
+
 ## Stationary coupling repair
 
 The subsequent [3A repair specification](INCREMENT_3A_REPAIR.md) defines the fitted-contact, stress-moment, normalization, actual weak-load, support-complement and MPI acceptance checks. Use its fixture-specific numerical budgets for that assignment. Keep the Increment 2 reference values below.
