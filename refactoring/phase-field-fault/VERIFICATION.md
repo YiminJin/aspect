@@ -8,7 +8,7 @@ Use the [repair matrix and reproduction commands](STATUS.md#increment-5a-review-
 
 ## Growing fault midpoint control (5A)
 
-Start with the [5A working record](STATUS.md#increment-5a--single-forward-front) for the input identities, reproduced clocks, exact commands and first failing points. The canonical layout is two MPI processes, one thread each. The nine-strip test qualifies one fixed 2-D mesh, constitutive law and short trajectory. The visible arclength change of strip 8 across builds and MPI layouts is retained there.
+Start with the [5A working record](STATUS.md#increment-5a--single-forward-front) for the input identities, reproduced clocks, exact commands and first failing points. The canonical layout is two MPI processes, one thread each. The nine-strip test qualifies one fixed 2-D mesh, constitutive law and short trajectory. The [strip 8 evidence and replay instructions](strip8/README.md) compare the pre-turn stage by CellId and quadrature index, replay both selectors on live and ordered moments, and check every endpoint column through 15 ms. The independent control solves the whole-strip resistance and sums the disk-weighted squared traction point by point.
 
 ### Follow one step in source order
 
