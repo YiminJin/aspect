@@ -1,8 +1,138 @@
 # Phase-field fault working record
 
+## Increment 5 closeout
+
+**Closed with the author's fixture-specific exception for strip 15. Increment 6 consolidation is next.** The original angle tolerance is 1e−7 rad absolute plus 1e−7 relative to the donor angle. The first-turn difference at 5 ms is 2.36894413e−7 rad against a budget of 1.14786132e−7 rad. That formed plane persists through the coarse 10 ms and fine 7.5 and 10 ms endpoints. The strict audit exits **1** and records exactly those four failures under `strip/beta`.
+
+**Off-peak control.** On each captured input, `profile()` tests the incoming direction β = 0 rad against the refined maximum. In the saved report, read `probes.incoming.loss` and `threshold` under both `parent` and `donor-parent`. The off-peak choice loses 3.68126e−9 Pa² m², about 3,010 times the 1.22293e−12 Pa² m² update threshold. Both selected angles lie within that score threshold. The score replay command under “Reproduce the closeout” runs this check. The four original strict results are the `ordinary`, `strip/beta` rows in the comparison table.
+
+~~~text
+refactoring/phase-field-fault/results/strip18/peak.py
+refactoring/phase-field-fault/results/strip18/peak.json
+refactoring/phase-field-fault/results/strip18/review-checks.csv
+~~~
+
+The closeout replay regenerated the score report and strict audit tables byte for byte from the retained two-rank outputs. From the worktree root:
+
+~~~bash
+C=$(mktemp -d /tmp/pf-rsf-5-closeout.XXXXXXXX)
+E=refactoring/phase-field-fault/results/strip18
+export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MPLCONFIGDIR="$C/mpl"
+python3 -B "$E/peak.py" "$E/moments.csv" "$C/peak" --common-choices "$E/selector-choices.csv"
+cmp "$C/peak/peak.json" "$E/peak.json"
+python3 -B benchmarks/growing_fault/timestep/audit.py build-5b build-5a-repair/reference "$C/audit" --returned-rows build-5b/rows
+# Expected exit 1, four strip/beta failures.
+diff -qr "$C/audit" build-5b/closeout/final-audit
+~~~
+
+**Example 2 still requires timestep-converged physical front advance.** The accepted 5B result reproduces timestep sensitivity in a window with zero new registrations. The physical example requires a checked initial phase balance, a stated front definition and connected advance beyond the initial diffuse seed, with front positions compared at matched times under timestep and mesh refinement.
+
+## Increment 5B completion · Where does the second timestep change the phase?
+
+Under the same steady loading, how does the accepted phase field change between 5 and 10 ms when the solver takes two 2.5 ms steps instead of one 5 ms step?
+
+![Two cellwise phase-increment maps and the signed difference on the 2 by 1 metre specimen](results/strip18/phase-increments.png)
+
+**Figure 1.** The first two maps subtract the same accepted 5 ms field from their respective 10 ms endpoints. Magenta traces the parent φ = 0.05 contour. Dotted lines mark the actual boundaries of the material strips. Both schedules change the edges of the diffuse band. The two-step run adds phase along more of the band, including near the lower boundary. Neither schedule registers a new strip. The signed difference uses its own zero-centered scale. Each panel evaluates the physical DG Bernstein polynomial separately in each cell.
+
+| Accepted 5–10 ms window | One 5 ms step | Two 2.5 ms steps |
+| --- | ---: | ---: |
+| Signed slip increment (m²) | 3.74890104e−5 | 5.80075452e−5 |
+| Added fracture energy (μJ/m) | 5.550475 | 15.041375 |
+| L² phase increment (m) | 0.0114890942 | 0.0151854967 |
+| Physical-work defect (μJ/m) | +3.96008732 | +6.78295736 |
+| Cohesive compliance remainder (μJ/m) | +3.96008730 | +6.78231512 |
+
+Both native-sampled endpoint increment peaks are about 0.0798. Integrating the squared difference of the two 10 ms polynomials with mapped tensor Gauss(3), exact through degree five per axis, gives an L² distance of **0.007426652667963157 m**. Independently summing over the 19,944 native physical areas gives 0.007426652667963130 m. The compliance remainder accounts for the work defect up to the signed phase and mechanical residual work. The remaining fine-window difference is +0.00064224 μJ/m, almost entirely from its first half-step. Each interval's defect is positive, so the signed and absolute sums agree. The original interval-by-interval donor comparisons follow this closeout.
+
+### Endpoint diagnosis and the four review repairs
+
+The [completion assignment](INCREMENT_5B_COMPLETION.md) uses the runs at reviewed HEAD `101856a63`. Both original schedules used two MPI ranks with one numerical thread per rank. All 96 physical file hashes and 144 reference manifest entries verified. The changes affect the benchmark checks, figures and reporting. The solver comparison still uses the frozen 5A and 5B tolerances.
+
+| Parent → stage → accepted endpoint (ms) | Stage lower/free/upper | Endpoint strict downhill / projected above 1e−7, donor and target | Max target endpoint load (J/m) | Donor / target iterations |
+| --- | --- | ---: | ---: | ---: |
+| 0 → 2.5 → 5 | 913/239/0 | 183 / 183 | 0.000756906599 | 4 / 4 |
+| 5 → 7.5 → 10 | 947/205/0 | 169 / 169 | 0.003132708796 | 4 / 4 |
+| 5 → 6.25 → 7.5 | 947/205/0 | 169 / 169 | 0.001712957298 | 3 / 3 |
+| 7.5 → 8.75 → 10 | 966/186/0 | 169 / 169 | 0.003187101972 | 4 / 4 |
+
+1. **Conditional endpoint load and downhill rows.** For each cell and Bernstein test function, the checker evaluates the endpoint AT1/SIPG fracture gradient less the native physical-area integral of the test function times conditional driving in Pa. On the donor side the damaged points supply archived endpoint driving. Intact points use endpoint resolved stress, the retained signed section root and accepted age. The two initial updates from the common parent also supply archived endpoint fracture gradients. On the target side the checker reconstructs the driving from published stress and cohesive strain at fixed endpoint phase. Both masks, the load and the signed residual passed on every one of the 4,608 rows. The largest load and residual differences across all clocks were each 9.75e−11 J/m. At the fine 7.5 ms **accepted endpoint** the donor maximum load was 0.00171295729771443 J/m, target 0.00171295729770142 J/m. Its closest residual to zero was 2.55586e−4 J/m. The strict negatives and the feasible projected rises above the 1e−7 dimensionless tolerance pick the same 169 keys. Reversing the sign at just that endpoint changed 169 to 983 and failed all 1,152 signed rows. Omitting its drive kept 169 but failed 1,044 load rows and 868 residual rows. Both controls left every stage comparison identical.
+2. **Incoming material state.** All 18 time-zero rows passed by material ID against the donor's virgin zero angle, initial rate and force, first incoming formation, slip and age, and reference widths. Changing only strip 15's angle to 0.1 rad in both target seeds retained their mutual byte equality and added a time-zero failure against the donor. The strip entered its first direction decision at zero in the measured trajectories.
+3. **Selector provenance.** A fresh debugger capture on each indexed executable observed the original reductions on rank zero and every rank-zero store to strip 15's angle. Both made exactly one write, on selector call 1. Its value matched that capture's 5 ms acceptance, the ordinary output and all three continuation frames exactly. The captures regenerated the original moments CSV byte for byte. Changing only the captured target acceptance rejected the provenance check before it could write a moments table.
+4. **Solver effort.** Each physical interval now reports the donor count from its solver table and the target count from its nonlinear completion signal. The checker also requires the target balance to match that signal. Substituting 77 for 3 in the first half-step's target balance produced a 74-iteration mismatch while the signal and donor still reported 3. The seed and iteration controls introduced just their respective failures into the complete frame audit.
+
+**Production and diagnostic call path.** The simulator's midpoint solve calls `MidpointSystem::assemble_stage` with the accepted parent and trial stage. It integrates the negative driving term against each Bernstein test on the owning native rule, adds the fracture mass and SIPG stiffness, and tests the stage projection with its incoming box. The final assembly and native-rate guard precede `write_candidate_fields`. The material installs accepted strip and point history on `post_accept_timestep`. The returned-row observations exercise this stage and publication path. The conditional endpoint residual is an independent virtual increment with the published tensors, age and last stage rate held fixed. It explains why the next solve can increase phase under the same loading.
+
+### Strip 15 and the strict angle result
+
+![Centered direction scores over the forward sector and at the two selected angles](results/strip18/strip15-direction.png)
+
+**Figure 2.** Which plane does the 5 ms selector resolve? The direction β is measured in radians counterclockwise from the 30° seed tangent. The full-sector curves overlap at plotting scale. The close-up subtracts each input's own high-precision maximum in Pa² m² before conversion for display. The loss at the donor's selected angle is 2.2881e−20 Pa² m², and at the target's selection it is 3.4204e−22 Pa² m². Both select the same interior peak.
+
+At each trial angle the replay uses the full candidate arclength Δξ/cos β. It solves V + mobility × f(V,θ(h)) = Vfree with the original 10 s age, h = 0.0025 s and signed RSF plus radiation. The two ends of the rate bracket are 0 and Vfree. It checks the signs at those ends and the resulting residual in the original rate equation to 1e−50 m/s throughout the scan. Only the centered direction score uses the disk-weighted moments. At the donor's selected angle on its own inputs the root is +1.52997631985e−13 m/s, resistance +52.19920385955 Pa and arclength 0.125370816806626 m. At +π/4 the root and resistance are both negative. The tiny preparation rates fall below the field comparison's absolute floor. Their sign and magnitude in the selection replay come from this bracketed constitutive calculation.
+
+| First-call moments | Donor executable β (rad) | Target executable β (rad) | Refined maximum β (rad) | Own selection minus maximum (rad) |
+| --- | ---: | ---: | ---: | ---: |
+| Donor | −0.147861323155402 | −0.147861469456942 | −0.147861588090198 | +2.64935e−7 |
+| Target | −0.147861327459134 | −0.147861560049815 | −0.147861592441906 | +3.23921e−8 |
+
+The diagonal comes from ordinary accepted runs. For each off-diagonal entry both ranks of the other original executable received the same 9 raw and 3 centered binary64 moments for strip 15. Both ranks returned the same angle in the first selector call. These debugger probes stopped at the store, before physical publication. The high-precision maximum moves **−4.35171e−9 rad** between inputs. On fixed donor inputs the compiled choices differ by 1.46302e−7 rad, and on fixed target inputs by 2.32591e−7 rad. These measurements include the compiled resistance solve, score arithmetic and search. They establish the spread of the complete selection on identical data. Attribution within the resistance calculation and score evaluation would require additional internal observations.
+
+A scan of 512 intervals over [−π/4,+π/4] refined both interior maxima to a bracket narrower than 1e−22 rad at 65 decimal digits. Rebracketing the winning peak at 85 digits moved it by 1.31e−23 rad. The other resolved local maximum near −0.764 rad scores about 5.45e−16 Pa² m², and the boundaries about 5.38e−16, against 4.75328e−9 at the winner. Staying at the incoming angle loses 3.68126e−9 Pa² m², about 3,010 times the existing update threshold of 1.22293e−12 Pa² m². The off-peak control and the competing peak both fail that score comparison. On identical donor and target moments the high-precision score differences between the two ordinarily accepted angles are +2.26247e−20 and +2.32968e−20 Pa² m² respectively, target angle minus donor angle.
+
+**Scope of the accepted exception.** Both selectors resolve the same physical peak for this fixture. Every formed flag agrees. Across the four endpoints the largest strip-15 discrepancies in arclength, signed rate, slip and resistance are 4.424e−9 m, 9.961e−15 m/s, 3.284e−17 m and 4.379e−7 Pa, respectively. Each passes its original budget. A general equivalence rule would also need a justified score scale, discrimination of wrong peaks and independent geometry bounds. Alternative time integration belongs to a separate assignment.
+
+### Reproduce the closeout
+
+Run from the worktree root. The recorded scratch directory was `build-5b/closeout`. Choose a fresh destination for another replay. The reviewed target and donor run trees, stage rows and archive remain the inputs. The indexed launcher uses two bound MPI ranks with one numerical thread each. The common-input debugger stops both ranks before MPI finalization and checks both keyed decisions, the returned buffer bytes on both ranks and the absence of a physical endpoint. The ordinary captures run through acceptance.
+
+~~~bash
+F=benchmarks/growing_fault/timestep
+E=refactoring/phase-field-fault/results/strip18
+D=build-5b
+R=build-5a-repair/reference
+C=$D/closeout
+export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 MPLCONFIGDIR=/tmp/5b-mpl
+mkdir -p "$C"
+(cd "$D" && sha256sum --quiet -c "../$E/physical-files.sha256")
+(cd "$R" && sha256sum --quiet -c SHA256SUMS)
+python3 -B "$F/audit.py" "$D" "$R" "$C/final-audit" --returned-rows "$D/rows"
+# Expected exit 1. Only strip/beta on strip 15 fails at each of the four physical endpoints.
+python3 -B "$E/turn.py" "$C/selector-final" --capture "$D"
+cmp "$E/moments.csv" "$C/selector-final/moments.csv"
+python3 -B "$E/turn.py" "$C/common-input" --capture "$D" --cross-inputs "$C/selector-final"
+cmp "$E/selector-choices.csv" "$C/common-input/choices.csv"
+python3 -B "$F/check_closeout.py" "$D" "$R" "$D/rows" "$C/selector-final" "$C/final-audit" "$C/review-controls"
+cmp "$E/review-checks.csv" "$C/review-controls/review-checks.csv"
+python3 -B benchmarks/growing_fault/compare.py build-5a-repair/donor-two/output "$D/nine/principal/output"
+~~~
+
+The measured cross-input replay used the identical buffers in the preceding capture at `build-5b/closeout/selector-live`. The retained two-rank nine-strip control also passed at all three clocks, with final signed slip 1.69302306477e−4 m². The coarse and fine continuations were reanalyzed from their retained accepted outputs.
+
+Regenerate Figure 1 from accepted fields and Figure 2 from the saved moments and common-input selections. Each command writes a PNG and a vector PDF. The second also writes the signed force, arclength, score, bracket endpoint and rate residual for the angle probes.
+
+~~~bash
+export OPENBLAS_NUM_THREADS=1 MPLCONFIGDIR=/tmp/5b-mpl
+python3 -B benchmarks/growing_fault/timestep/plot_phase.py build-5b build-5b/closeout/final-figures
+E=refactoring/phase-field-fault/results/strip18
+python3 -B "$E/peak.py" "$E/moments.csv" build-5b/closeout/final-figures --common-choices "$E/selector-choices.csv"
+~~~
+
+~~~text
+refactoring/phase-field-fault/results/strip18/phase-increments.png
+refactoring/phase-field-fault/results/strip18/phase-increments.pdf
+refactoring/phase-field-fault/results/strip18/strip15-direction.png
+refactoring/phase-field-fault/results/strip18/strip15-direction.pdf
+refactoring/phase-field-fault/results/strip18/review-checks.csv
+refactoring/phase-field-fault/results/strip18/peak.json
+benchmarks/growing_fault/timestep/audit.py
+benchmarks/growing_fault/timestep/frames.py
+refactoring/phase-field-fault/results/strip18/turn.py
+~~~
+
 ## Increment 5B · Two 18-strip timestep schedules
 
-**The timestep separation reproduced. Full frame qualification remains open on one material angle.** The first over-budget operation was prospective plane selection for strip 15 during the common 0–5 ms step. It differed by −2.36894e−7 rad at acceptance. Both continuations preserved the formed plane. All other tested field columns, classifications, admissions and physical reductions passed the original budgets.
+**Original strict comparison.** The timestep separation reproduced. The first over-budget operation was prospective plane selection for strip 15 during the common 0–5 ms step. It differed by −2.36894e−7 rad at acceptance. Both continuations preserved the formed plane. All other tested field columns, classifications, admissions and physical reductions passed the original budgets.
 
 Starting HEAD was `2bbeaec54449f7270a91ce4868aad0e4cfb66941`. The [assignment](INCREMENT_5B_TASK.md) used the existing two-rank Release implementation. The benchmark runner, FE observer and independent reducers are in `f7f114a84`. The SHA-256 of the indexed archive was `a82d362c3504be188e9602cf10c93cf51a26544be5e6d4a7677016cc52981c57`. All 144 internal entries passed verification. With Python assertions enabled the timestep, point-audit and closeout reducers reproduced all three expected JSON files byte for byte. The donor core and checker were `e640fa627141ea98343fee14526c532f005281d336da32aa2d2f3467c5589b10` and `977328e5d1a4b80c06e8ac8734caa8bf0b77a98232bf095463b154b64f6f44e8`. The qualified target executable was `8769c98b64923906964379ef78917567eb93edc40da93b9d38765b187184022d` (its configure-time banner still reports `415131be1`), its growing-fault observer `a65c5ebe8438af157225a2c875e792b850a752aa190339ad4e2d3a271e56810f`, and the common mesh-field observer `5d3722031f34b833d96244bd867cce5975913375ddc2045378ef6b5c9753adf9`. Only the benchmark and verification record changed.
 
@@ -117,7 +247,7 @@ python3 "$F/audit.py" "$N" "$R" "$D/final-negative"
 
 A second negative control added 0.001 to just the fine 7.5 ms phase coefficient at (CellId `0_0:`, component 7, local index 0) in a copied mesh table. Every donor frame, target native sample and 10 ms endpoint stayed intact. Independent evaluation of the modified intermediate FE field disagreed at all 144 native samples of that cell, with maximum phase error 9.6049e−4.
 
-The next action is author review of the measured timestep sensitivity and the open angle comparison. No conclusion about the physical time of propagation follows from these schedules.
+The author accepted this timestep comparison with the strip-15 exception recorded in the Increment 5 closeout. The physical time of propagation remains open for Example 2.
 
 ## Ownership cleanup before 5B
 

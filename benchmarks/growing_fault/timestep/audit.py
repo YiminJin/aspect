@@ -160,7 +160,29 @@ class Frame:
         self.time=self.book.get('time',0.)
 
 
-def interval(old,new,geom,donor,step,clock,audit_rows,reference_mesh,previous_mesh,cmp,returned_rows=None):
+def donor_endpoint_drive(points,planes,rates):
+    """Conditional endpoint drive in Pa, on the archived native point keys."""
+    np.testing.assert_array_equal(planes['xi'],rates['xi'])
+    intact=points['phi']<=0
+    drive=points['Y_endpoint'].copy()
+    strip=points['section'][intact].astype(int)
+    a=np.pi/6+planes['beta'][strip]
+    traction=(.5*(points['tauyy'][intact]-points['tauxx'][intact])*np.sin(2*a)
+              + points['tauxy'][intact]*np.cos(2*a))
+    reaction=resistance(rates['resolved_V'],planes['age'])
+    drive[intact]=M/(2*G)*(traction-reaction[strip])**2
+    return drive
+
+
+def endpoint_rows(geom,coeff,gradient,drive):
+    load=geom.load(drive)
+    residual=gradient-load
+    downhill=(coeff<1)&(residual<0)
+    projected=np.clip(coeff-residual/(KF*geom.mass),coeff,1)-coeff
+    return load,residual,downhill,projected>1e-7
+
+
+def interval(old,new,geom,donor_geom,donor,step,clock,audit_rows,reference_mesh,previous_mesh,cmp,returned_rows=None):
     p0,p1=old.point,new.point
     aligned(p0,p1,['cell','q','section','x','y','weight'])
     aligned(old.mesh,new.mesh,['cell','component','local','x0','x1','y0','y1'])
@@ -227,8 +249,7 @@ def interval(old,new,geom,donor,step,clock,audit_rows,reference_mesh,previous_me
     positive=phi1>0
     p=phi1[positive]
     drive1[positive]=G*dot(A1,A1)[positive]*(1+3*p)*(1-p)/(M*(p*(1+p))**2)
-    endres=endfg-geom.load(drive1)
-    downhill=(new.coeff<1)&(endres<0)
+    endload,endres,downhill,resolved=endpoint_rows(geom,new.coeff,endfg,drive1)
     check(new.book['phase_KKT'],KKT,2e-12)
     for name,value in [('Wext',wall),('Db',Db),('Dc',Dc),('Df',Df),('fracture',geom.fracture(new.coeff)),
                        ('phase_remainder',rem),('phase_work',phase_work),('bulk',J@dot(tau1,tau1)/(4*G)),('cohesive',J@energy(phi1,A1))]:
@@ -256,6 +277,9 @@ def interval(old,new,geom,donor,step,clock,audit_rows,reference_mesh,previous_me
     d_pred=dsb-donor_res/(KF*geom.mass)
     d_status=np.where(d_pred<=dob,-1,np.where(d_pred>=(1+dob)/2,1,0))
     row_ids=[new.mesh[k][new.mesh['component']==new.phase_component] for k in ('cell','local')]
+    rates=read([donor/f'tip-sections-{step:04}.csv'],['xi'])
+    donor_load=donor_geom.load(donor_endpoint_drive(native,planes,rates))
+    donor_gradient=donor_geom.H@deb+KF*donor_geom.mass
     cmp.check('reconstructed_row/residual',donor_res,residual,1e-8,1e-7,row_ids)
     cmp.check('reconstructed_row/classification',d_status,active,0,ids=row_ids)
     if returned_rows:
@@ -279,6 +303,7 @@ def interval(old,new,geom,donor,step,clock,audit_rows,reference_mesh,previous_me
         ids=[new.mesh['cell'][selected],new.mesh['local'][selected]]
         for x,y in zip(ids,[donor_rows['cell'],donor_rows['i']]): np.testing.assert_array_equal(x,y)
         da=donor_rows
+        donor_gradient=da['fracture_gradient']
         d_pred=da['stage_B']-da['residual']/(KF*da['mass'])
         classification=np.where(d_pred<=da['lower'],-1,np.where(d_pred>=(1+da['lower'])/2,1,0))
         for key,out,tol in [('lower',lower,1e-9),('stage_B',stage,1e-9),('B',new.coeff,1e-9),
@@ -286,9 +311,21 @@ def interval(old,new,geom,donor,step,clock,audit_rows,reference_mesh,previous_me
                             ('stage_fracture_gradient',fg,1e-8),('fracture_gradient',endfg,1e-8)]:
             cmp.check('row/'+key,da[key],out,tol,1e-7,ids)
         cmp.check('row/classification',classification,active,0,ids=ids)
-    return dict(time_s=new.time,duration_s=dt,stage_s=new.time-h,iterations=new.book['iterations'],
+    donor_endres=donor_gradient-donor_load
+    donor_downhill=(deb<1)&(donor_endres<0)
+    # Feasible additional rise at the *accepted* donor endpoint; its
+    # obstacle has already advanced. The stage has its own box and residual.
+    donor_resolved=np.minimum(1-deb,-donor_endres/(KF*donor_geom.mass))>1e-7
+    for name,reference,measured in [('load',donor_load,endload),('residual',donor_endres,endres)]:
+        cmp.check('endpoint/'+name,reference,measured,1e-8,1e-7,row_ids)
+    for name,reference,measured in [('strict_downhill',donor_downhill,downhill),
+                                    ('projected_above_tolerance',donor_resolved,resolved)]:
+        cmp.check('endpoint/'+name,reference.astype(int),measured.astype(int),0,ids=row_ids)
+    return dict(time_s=new.time,duration_s=dt,stage_s=new.time-h,
                 lower=int(sum(active==-1)),free=int(sum(active==0)),upper=int(sum(active==1)),
-                downhill=int(sum(downhill)),kkt=KKT,mechanics=new.book['mechanical_residual'],
+                downhill=int(sum(downhill)),resolved_downhill=int(sum(resolved)),
+                min_abs_endpoint_residual_J_m=float(min(abs(endres))),max_endpoint_load_J_m=float(max(endload)),
+                kkt=KKT,mechanics=new.book['mechanical_residual'],
                 registrations=int(sum(sec['formed']-old.strip['formed'])),
                 signed_slip_m2=ds@(sec['slip']-old.strip['slip']),phase_increment_L2_m=np.sqrt(J@inc**2),
                 phase_increment_sample_max=np.max(inc),fracture_change_J_m=deltafract,
@@ -296,22 +333,29 @@ def interval(old,new,geom,donor,step,clock,audit_rows,reference_mesh,previous_me
                 external=wall,elastic_change=elastic,cohesive_change=dcoh,Db=Db,Dc=Dc,Df=Df)
 
 
-def main():
+def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('runs',type=Path)
     p.add_argument('reference',type=Path)
     p.add_argument('destination',type=Path)
     p.add_argument('--returned-rows',type=Path,help='Separate matching trajectories from the scratch returned-row recorder')
-    args=p.parse_args()
+    args=p.parse_args(argv)
     dest=args.destination
     dest.mkdir(exist_ok=False)
     r=args.reference/'runs'
     d=args.runs
     expected=json.loads((args.reference/'expected/timestep.json').read_text())
+    diagnosis=json.loads((args.reference/'expected/diagnosis.json').read_text())
+    endpoint_reference=[diagnosis['endpoint_balance'][key] for key in ('parent','coarse','first_half')]
+    endpoint_reference.append(diagnosis['frozen']['refined_final_balance'])
     cases=[('parent',1,'localized-oneo1',None),('coarse',2,'localized-oneo2','strip18-audit-full'),
            ('half',2,'strip18-midpoint-half','strip18-audit-half1'),('half',3,'strip18-midpoint-half',None)]
     initial=Frame(d/'parent/output',0)
     geom=Geometry(initial.mesh,initial.point)
+    replay=d/'donor-parent/output'
+    donor_geom=Geometry(shards(replay,'mesh-0000',['cell','component','local']),
+                        shards(replay,'tip-points-0000',['cell','q']))
+    np.testing.assert_array_equal(geom.cells,donor_geom.cells)
     parent=Frame(d/'parent/output',1)
     first=Frame(d/'half/output',2)
     # Both schedules must branch from exactly the same published state.
@@ -332,7 +376,7 @@ def main():
     seed=Comparison()
     compare(0,d/'parent/output',r/'localized-oneo1/output',d/'donor-parent/output',seed)
     failed+=seed.write(dest/'seed.csv')
-    for case,step,ref,obs in cases:
+    for (case,step,ref,obs),conditional in zip(cases,endpoint_reference,strict=True):
         ids=Comparison()
         donor=r/ref/'output'
         compare(step,d/case/'output',donor,d/('donor-'+case)/'output',ids)
@@ -351,8 +395,17 @@ def main():
         match=re.search(rf'\*\*\* Timestep {step}:\s+t=([\d.eE+-]+) seconds, dt=([\d.eE+-]+) seconds',log)
         if not match: raise ValueError('Missing attempt clock')
         np.testing.assert_allclose(float(match[1]),clocks[2],atol=1e-15,rtol=0)
-        actual=interval(old,new,geom,donor,step,clocks+[float(match[2])],r/obs/'output' if obs else None,
+        actual=interval(old,new,geom,donor_geom,donor,step,clocks+[float(match[2])],r/obs/'output' if obs else None,
                         d/('donor-'+case)/'output',d/('donor-half' if step==3 else 'donor-parent')/'output',ids,captured)
+        for key,observed,tol in [('max_load','max_endpoint_load_J_m',1e-8),('downhill','downhill',0),
+                                 ('above_stage_tolerance','resolved_downhill',0)]:
+            ids.check('archived_endpoint/'+key,conditional[key],actual[observed],tol,1e-7 if tol else 0.)
+        completion=np.loadtxt(d/case/'output/completions',ndmin=2)
+        completed=completion[completion[:,0]==step,2].item()
+        solver=read([d/('donor-'+case)/'output/tip-solver.csv'],['step'])
+        actual['donor_iterations']=solver['nonlinear_iterations'][solver['step']==step].item()
+        actual['target_iterations']=completed
+        ids.check('solver/target_balance_vs_completion',completed,new.book['iterations'],0)
         if step==1:
             donor_points=shards(donor,'tip-points-0001',['cell','q'])
             seed_points=shards(d/'donor-parent/output','tip-points-0000',['cell','q'])

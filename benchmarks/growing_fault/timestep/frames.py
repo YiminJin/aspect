@@ -112,6 +112,16 @@ def compare(step, target, donor, replay, cmp):
         atol = 0 if k=='section' else 1e-14 if k in ('x','y','weight') else 1e-6 if k.startswith('tau') else 1e-9 if k=='phi' else 1e-10
         cmp.check('point/'+k,a[k],b[k],atol,1e-7 if atol>=1e-10 else 0.,ids)
     if not step:
+        # The donor writes the virgin incoming history on its first physical
+        # plane table. The unturned seed spans exactly the reference width.
+        a=read([donor/'tip-planes-0001.csv'],['section'])
+        b=read([target/'sections-0000.csv'],['section'])
+        ids=aligned(a,b,['section'])
+        for key,expected,atol in [('xi',a['xi'],1e-11),('ds',a['reference_dxi'],1e-11),
+                                  ('beta',0.,1e-7),('formed',a['parent_formed'],0.),
+                                  ('age',a['parent_age'],1e-11),('slip',a['parent_slip'],1e-11),
+                                  ('V',0.,1e-11),('force',0.,1e-6)]:
+            cmp.check('seed_strip/'+key,expected,b[key],atol,1e-7 if atol else 0.,ids)
         return
     a = read([donor/f'tip-planes-{tag}.csv'],['section'])
     b = read([target/f'sections-{tag}.csv'],['section'])

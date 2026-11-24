@@ -67,6 +67,8 @@ The midpoint audit is closed and its discrete update is frozen. Read the active 
 
 At handoff, update the working record with the exact commands, results and next action. Show the normal call path, the equation and state owner, and the smallest representative public header and implementation a human should read. Keep the active design in one guide as code lands. Use the project's scoped tests and the checkout’s formatter. Default to four or fewer total local workers on the author's laptop and record the rank/thread layout for comparisons. Publishing changes or submitting cluster jobs requires a separate request.
 
+Include a reproducible figure from the computed fields that answers the experiment’s main question, with units, a caption, and copyable paths to the figure and plotting command.
+
 When referring me to a local file, print its full path relative to the worktree root in a fenced text code block, one path per line. Use the actual path in the relevant worktree so I can distinguish the refactor from the donor. Put line numbers and explanations outside the block so I can copy the path directly into my editor. Omit clickable Markdown links for local files. Apply this rule to both progress updates and final replies.
 
 ### Architecture guidance
