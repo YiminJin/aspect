@@ -42,6 +42,9 @@ namespace aspect::GrowingFault
   SectionRoot solve_section(const Friction &, double free_rate, double mobility,
                             double age, double h, double compression);
 
+  /** Evaluate the analytic endpoint for FE phase samples within roundoff of [0,1]. */
+  double physical_phase(double value);
+
   struct PointResponse
   {
     Stress stress, cohesive_strain;
@@ -53,8 +56,11 @@ namespace aspect::GrowingFault
   {
     double G, eta, m;
     double relaxation(double h) const;
+    /** Evaluate a native point at the fixed midpoint iterate. At publication
+     * traction_remainder (Pa) recovers the low part of the driving traction
+     * lost when subtracting the strip resistance. */
     PointResponse response(const PointHistory &, const Stress &increment, double phase,
-                           double h, const Stress &plane, double resistance) const;
+                           double h, const Stress &plane, double resistance, double traction_remainder=0.) const;
     struct Variation
     {
       Stress stress;

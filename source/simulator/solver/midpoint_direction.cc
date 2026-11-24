@@ -111,6 +111,7 @@ namespace aspect::GrowingFault
           const Stress predictor=B*(old.stress+2.*G*increment);
           const double u0=.5*(predictor[1][1]-predictor[0][0]),v0=predictor[0][1];
           const double u=cos2*u0-sin2*v0,v=sin2*u0+cos2*v0;
+          phi=physical_phase(phi);
           const double c=material.maxwell().m*phi*(1.+phi),d=(1.-phi)*(1.-phi),F=c/(c+d);
           const double w=p.area*(1.-F)*(1.-F)*p.kernel;
           const auto local=onset_moments(p.area,p.kernel,F,u,v);

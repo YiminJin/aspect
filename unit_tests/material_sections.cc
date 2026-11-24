@@ -87,6 +87,11 @@ TEST_CASE("Intact cohesive Maxwell response has the analytic locked and phase de
   const auto predictor=(old.stress+2.*law.G*increment)/(1.+h*law.G/law.eta);
   const double traction=predictor*plane-30.;
   REQUIRE((response.stress-predictor).norm()<1.e-13);
+  const double above=std::nextafter(1.,2.);
+  const auto damaged=law.response(old,increment,1.,h,plane,30.);
+  REQUIRE(law.response(old,increment,above,h,plane,30.).rate==damaged.rate);
+  REQUIRE(law.cohesive_energy(damaged.cohesive_strain,above)==0.);
+  REQUIRE_THROWS(law.response(old,increment,1.+1.e-8,h,plane,30.));
   REQUIRE(response.rate==0.);
   REQUIRE(response.cohesive_strain.norm()==0.);
   REQUIRE(law.cohesive_energy(response.cohesive_strain,0.)==0.);
@@ -112,4 +117,30 @@ TEST_CASE("Remote shear controls the resistance inside an onset disk")
   REQUIRE(loaded.resistance>100.);
   REQUIRE(loaded.score==Approx(.13*.64*.88*.88*loaded.resistance*loaded.resistance));
   REQUIRE(loaded.score>100.);
+}
+
+TEST_CASE("Cold creep has a finite condensed section tangent")
+{
+  using namespace aspect::GrowingFault;
+  const Friction law= {.72,.001,0.,.001,.01,1000.};
+  const double mobility=.0003;
+  for (const double free :
+  {
+    0.,.0008,-.0008
+  })
+  {
+    const auto root=solve_section(law,free,mobility,10.,.0025,200.);
+    // At this stiffness f = Vfree/M within 1e-306 Pa. Independently
+    // invert the constant-state asinh law in extended precision.
+    const long double f=free/mobility;
+    const long double v=2.L*law.reference_speed*std::exp(-static_cast<long double>(law.reference_coefficient)/law.direct_effect)
+                        *std::sinh(f/(200.L*law.direct_effect));
+    REQUIRE(root.resistance==Approx(static_cast<double>(f)).margin(1.e-13));
+    REQUIRE(std::abs(root.rate-v)<=1.e-12L*std::abs(v));
+    REQUIRE(root.slope==Approx(1./mobility).epsilon(1.e-13));
+  }
+  const auto free=solve_section(law,.0008,0.,10.,.0025,200.);
+  REQUIRE(free.rate==.0008);
+  REQUIRE(std::isfinite(free.slope));
+  REQUIRE_THROWS(solve_section(law,0.,0.,10.,.0025,200.));
 }

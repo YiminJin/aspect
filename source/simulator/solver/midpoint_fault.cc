@@ -130,7 +130,7 @@ namespace aspect::GrowingFault
       }
     Evaluation e;
     e.residual.assign(n,0.);
-    SectionTransfer transfer(ns), returned(ns);
+    SectionTransfer transfer(ns);
     struct Trial
     {
       Stress strain;
@@ -162,6 +162,43 @@ namespace aspect::GrowingFault
     for (unsigned int k=0; k<ns; ++k)
       e.roots.push_back(solve_section(material.friction(),transfer.free_rate[k],transfer.mobility[k],parent.sections[k].age,
                                       h,material.get_parameters().surface_pressure));
+    // In exact arithmetic the weighted sum of the returned point rates is V.
+    // In cold creep even the rounding error of the scalar resistance can be
+    // much larger than V/M. Recover that low part of the traction before
+    // forming the native endpoint tensors and shear inventories.
+    Values traction_remainder(ns);
+    if (publish)
+      {
+        std::vector<long double> native_rate(ns), magnitude(ns);
+        std::vector<unsigned int> count(ns);
+        for (const auto &[id,cell]:cells)
+          for (unsigned int q=0; q<cell.points.size(); ++q)
+            {
+              const auto &p=cell.points[q];
+              const auto k=p.strip;
+              const auto &t=trials.at(id)[q];
+              const auto &old=parent.cells.at(id)[q];
+              const auto &root=e.roots[k];
+              const auto r=mat.response(old,t.strain,t.phase,h,planes[k],root.resistance);
+              const long double weight=p.area/lengths[k];
+              native_rate[k]+=weight*r.rate;
+              magnitude[k]+=weight*(std::abs(r.rate)+2.*std::abs(root.resistance)*r.fraction/(G*B*h)
+                                    +4.*std::abs(old.cohesive_strain*planes[k])/h);
+              ++count[k];
+            }
+        Utilities::MPI::sum(native_rate,comm,native_rate);
+        Utilities::MPI::sum(magnitude,comm,magnitude);
+        Utilities::MPI::sum(count,comm,count);
+        for (unsigned int k=0; k<ns; ++k)
+          {
+            const long double defect=e.roots[k].rate-native_rate[k];
+            // n positive-weight additions, plus the 32-epsilon root certificate.
+            const long double budget=(64.+4.*count[k])*std::numeric_limits<double>::epsilon()
+                                     *(magnitude[k]+std::abs(e.roots[k].rate));
+            AssertThrow(std::abs(defect)<=budget,ExcMessage("Native transfer disagrees with the signed section root."));
+            if (transfer.mobility[k]>0.) traction_remainder[k]=defect/transfer.mobility[k];
+          }
+      }
     std::vector<unsigned int> admitted(ns,0);
     unsigned int detached=0;
     if (publish) e.candidate.sections=parent.sections;
@@ -179,7 +216,7 @@ namespace aspect::GrowingFault
             const auto &t=states[q];
             const auto &old=history[q];
             const double f=e.roots[k].resistance;
-            const auto r=mat.response(old,t.strain,t.phase,h,S,f);
+            const auto r=mat.response(old,t.strain,t.phase,h,S,f,traction_remainder[k]);
             if (publish)
               {
                 PointHistory end {2.*r.stress-old.stress,2.*r.cohesive_strain-old.cohesive_strain,
@@ -188,7 +225,6 @@ namespace aspect::GrowingFault
                 e.candidate.cells[id].push_back(end);
                 admitted[k]|=(formed[k] || eligible[k]) && t.phase>0.;
                 detached|=!formed[k] && !eligible[k] && (end.absolute_shear!=0. || end.cohesive_strain.norm()!=0.);
-                returned.add(k,p.area/lengths[k],r.rate,0.);
                 const double phase1=2.*t.phase-p.old_phase;
                 const double cohesive=mat.cohesive_energy(end.cohesive_strain,phase1);
                 const double change=cohesive-mat.cohesive_energy(old.cohesive_strain,p.old_phase);
@@ -199,7 +235,7 @@ namespace aspect::GrowingFault
                 b.bulk_loss+=p.area*2.*h*(r.stress*r.stress)/(2.*mat.eta);
                 const auto reaction=2.*(1.-r.fraction)*r.force*S;
                 b.cohesive_loss+=p.area*2.*h*G/mat.eta*(reaction*r.cohesive_strain);
-                b.friction_work+=p.area*2.*h*f*r.rate;
+                b.adjoint_defect+=p.area*2.*h*f*r.rate;
                 b.compliance_remainder+=p.area*(reaction*(end.cohesive_strain-old.cohesive_strain)-change-r.driving*(phase1-p.old_phase));
               }
             const auto df=mat.derivative(r, {},0.,h,S,1.);
@@ -262,25 +298,24 @@ namespace aspect::GrowingFault
       {
         AssertThrow(!Utilities::MPI::max(detached,comm),ExcMessage("Detached exterior cohesive history requires a formation law."));
         Utilities::MPI::max(admitted,comm,admitted);
-        returned.sum(comm);
         auto &b=e.ledger;
         for (auto *v:
              {
-               &b.bulk,&b.cohesive,&b.storage_change,&b.bulk_loss,&b.cohesive_loss,&b.friction_work,&b.compliance_remainder,&b.fracture
+               &b.bulk,&b.cohesive,&b.storage_change,&b.bulk_loss,&b.cohesive_loss,&b.adjoint_defect,&b.compliance_remainder,&b.fracture
              })
           *v=Utilities::MPI::sum(*v,comm);
-        b.adjoint_defect=b.friction_work;
         for (unsigned int k=0; k<ns; ++k)
           {
             auto &s=e.candidate.sections[k];
             s.angle=angles[k];
             s.formed=formed[k] || admitted[k];
-            s.rate=returned.free_rate[k];
+            s.rate=e.roots[k].rate;
             s.resistance=e.roots[k].resistance;
             s.slip+=2.*h*s.rate;
             s.age=material.friction().advance_age(std::abs(s.rate),s.age,2.*h);
-            b.adjoint_defect-=2.*h*lengths[k]*s.rate*s.resistance;
+            b.friction_work+=2.*h*lengths[k]*s.rate*s.resistance;
           }
+        b.adjoint_defect-=b.friction_work;
         for (const auto &[i,v]:fixed) if (i<nv) b.wall+=2.*G*v*e.residual[i];
         for (Index i=phase_begin; i<n; ++i) b.phase_work+=Kf*(endpoint(i)-lower[i])*e.residual[i];
         e.candidate.step=parent.step+1;
@@ -483,6 +518,43 @@ namespace aspect::GrowingFault
     }
   }
 
+  namespace
+  {
+    // Confirm the observable a consumer can reconstruct from stored native
+    // increments, including roundoff in adding an increment to old shear.
+    void check_published_section_rates(const MidpointSystem &system,const History &candidate)
+    {
+      const unsigned int n=candidate.sections.size();
+      std::vector<long double> rates(n),inventory(n);
+      for (const auto &[id,cell]:system.cells)
+        for (unsigned int q=0; q<cell.points.size(); ++q)
+          {
+            const auto &p=cell.points[q];
+            const unsigned int k=p.strip;
+            const long double old=system.material.history().cells.at(id)[q].signed_shear;
+            const long double next=candidate.cells.at(id)[q].signed_shear;
+            const long double weight=p.area/(2.*system.h*system.material.sections().length(k,candidate.sections[k].angle));
+            rates[k]+=weight*(next-old);
+            inventory[k]+=weight*(std::abs(next)+std::abs(old));
+          }
+      Utilities::MPI::sum(rates,system.comm,rates);
+      Utilities::MPI::sum(inventory,system.comm,inventory);
+      for (unsigned int k=0; k<n; ++k)
+        {
+          const double rate=candidate.sections[k].rate;
+          const long double error=std::abs(rates[k]-rate);
+          const long double budget=32.*std::numeric_limits<double>::epsilon()*inventory[k];
+          if (error>budget || (rate!=0. && error>=std::abs(rate)))
+            {
+              std::ostringstream message;
+              message<<"Unresolved native slip rate on strip "<<k<<": stored increments give "<<rates[k]
+                     <<" m/s, signed root "<<rate<<" m/s, transfer roundoff budget "<<budget<<" m/s.";
+              AssertThrow(false,ExcMessage(message.str()));
+            }
+        }
+    }
+  }
+
   void solve_midpoint(const Material<2> &material, LinearAlgebra::BlockVector &solution, History &next, Balance &balance)
   {
     TimerOutput::Scope timer(material.get_computing_timer(),"Coupled midpoint fault");
@@ -510,6 +582,7 @@ namespace aspect::GrowingFault
             auto returned=system.assemble_stage(x,true,true);
             if (returned.ledger.mechanical>settings.nonlinear_tolerance || returned.ledger.kkt>1.e-7)
               throw ExcNonlinearSolverNoConvergence();
+            check_published_section_rates(system,returned.candidate);
             system.write_candidate_fields(x,solution);
             next=std::move(returned.candidate);
             balance=returned.ledger;
