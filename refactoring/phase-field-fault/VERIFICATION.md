@@ -2,6 +2,10 @@
 
 The completed `MIDPOINT_UPDATE_CLOSEOUT.md` freezes the implemented midpoint update. The audit found that the irreversible phase equation equilibrates at the stage. Extrapolating that solution to the endpoint leaves further admissible downhill directions for the next solve. A fracture-only calculation reproduced the native second phase increment within 0.014% in spatial L². Preserve this update and its known timestep sensitivity. The proposed endpoint-equilibrated alternative belongs to a separate numerical-method study.
 
+## Growing fault review repairs
+
+Use the [repair matrix and reproduction commands](STATUS.md#increment-5a-review-repairs) to check the published RSF pair at the stage age, integrate stored point increments with a cancellation-aware bound, and exercise the Stokes constraints, automatic cutbacks and restore-before-observation lifecycle. For signed friction work, compare both the native work integral and the section root product. Evaluate prescribed-velocity work over every constrained velocity reaction, including an interior actuator when present.
+
 ## Growing fault midpoint control (5A)
 
 Start with the [5A working record](STATUS.md#increment-5a--single-forward-front) for the input identities, reproduced clocks, exact commands and first failing points. The canonical layout is two MPI processes, one thread each. The nine-strip test qualifies one fixed 2-D mesh, constitutive law and short trajectory. The visible arclength change of strip 8 across builds and MPI layouts is retained there.

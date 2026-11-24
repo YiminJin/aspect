@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**The [5A review repairs](INCREMENT_5A_REVIEW_REPAIRS.md) are ready for focused re-review.** The [working record](STATUS.md#increment-5a-review-repairs) covers the signed cold-creep publication, Stokes admission and work, checkpoint lifecycle, translated strips and the measured native-history resolution limit.
+
 **[Increment 5A](INCREMENT_5A_TASK.md) is ready for review.** The [working record](STATUS.md#increment-5a--single-forward-front) gives the frozen two-rank nine-strip comparison, the returned-state checks and the open sensitivity of the first prospective angle to build and rank layout. Increment 5B awaits review.
 
 **[Increment 4C](INCREMENT_4C_TASK.md) is closed for review.** The [six review repairs and verification commands](STATUS.md#increment-4c-review-closeout) cover the post-solve projection, material connectivity, full and finite normal support, explicit choice of seed mechanics, the projected section tangent and named physical output. The [original two-step comparison](STATUS.md#increment-4c--coupled-layered-moving-fault) retains its donor observations and budgets.

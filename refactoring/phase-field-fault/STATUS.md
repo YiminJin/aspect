@@ -1,5 +1,140 @@
 # Phase-field fault working record
 
+## Increment 5A review repairs
+
+The [repair assignment](INCREMENT_5A_REVIEW_REPAIRS.md) was applied to reviewed production commit `3c58b5d26`. Review the signed section response and native publication in `8e7440f57`, Stokes constraints and translated strips in `70520561f`, and checkpoint, solver lifecycle and parameter-file regressions in `f9d8b7a85`. The retained strip-8 archive SHA-256 is `0c7875ccd2451e2864acacb22ef7f9fd7c60cf181158528a69a2a575b0e8d757`. The two-rank Release control qualifies through 5, 10 and 15 ms with the original budgets. Review the binary64 native-history limit in finding 13 before broadening the supported regime.
+
+### Findings and discriminating results
+
+Groups below are arguments to the ordinary parameter-file repair runner. Unless identified as a review observation, numbers in the results column were measured during this repair.
+
+| Finding | Reproducer and regression | Result |
+| --- | --- | --- |
+| 1. Signed rate, native history and work | `friction`. Change only μ₀ to 0.9 in the physical case. Independently integrate every stored point increment on all nine strips, solve the exact stage-aging formula at the published signed rate, check full-duration slip and age, and sum signed work. | Original executable, strip 0 at 5 ms: −4.15459343e−18 m/s with +49.99875005 Pa. Its independent RSF value was −80.65731441 Pa and total Df was −2.71180e−18 J/m. Repaired Release: +1.51442146e−22 m/s with +49.99875005 Pa on strip 0. Maximum force defect 1.42e−14 Pa at the published rate, 4.28e−5 Pa at the independently reconstructed native rate. Maximum native rate defect 2.16e−27 m/s, largest per-strip roundoff budget 1.35e−24 m/s. Every section dissipated positive work, totaling 8.45045273e−23 J/m. The independently accumulated point/section work defect was −1.65e−27 J/m. Debug also passed, with maximum native force defect 1.24e−4 Pa. The same checker rejects the original publication. |
+| 2. Net wall flux | `constraints`, velocity (1e−5 x, 0) and the affine divergence-free control (1e−5 x, −1e−5 y). | The Q1 constant test measured +2.0000000000000086e−5 m²/s in the first case and rejected it before physical publication. The affine control accepted the 5 ms step. |
+| 3. Continuity model | `constraints`, stock dilation function 1e−3(x−1) and, separately, reference-density-profile mass conservation. | Both fail with the incompressible/no-dilation diagnostic. The zero-mean function distinguishes omission of a local source from net boundary flux. |
+| 4. Gravity | `constraints` uses a layer below y=0.1. `mpi` restricts it to x<0.2 as well. | Native quadrature detected both loads missed by a center-only test. Actual Open MPI run, two ranks × one thread, 150 s timeout: both ranks reported nonzero gravity on **1 of 2** owners. Launcher exited 1 without timing out. Neither run published a physical endpoint. |
+| 5. Restart before observation | Canonical `run.py` restarts from generations 01 and 03, with the existing step-1 pre-solve FE operator observer enabled. | Generation 01 executed the observer on the restored mesh and reproduced all three endpoints. Generation 03 reproduced 15 ms. Both used only the selected checkpoint generation in a fresh destination. |
+| 5 supplement. Balance availability | `lifecycle` compares the native and balance archives read before step 3 with those saved at uninterrupted publication at 10 ms. Include the original executable's generation 03. | The new native archive (point and strip histories) and the entire balance (prescribed work, energies, dissipations and residuals) were byte-identical for both restored trajectories. The old v1 native archive resumes to 15 ms with its physical history and explicitly unavailable prior balance. Its next accepted balance is available. |
+| 6. Fully damaged phase | `friction`, original velocity loading with initial Bernstein phase 1, and an invalid initial mean 1.001. Unit test of the point response and stored energy one spacing above 1 and at 1+1e−8. | Release and Debug accepted the fully damaged step with identical incoming and outgoing phase coefficients. Native evaluation within 128 binary64 epsilons uses the analytic limit. The 1.001 input and the 1+1e−8 point evaluation received diagnostics. |
+| 7. Block layout and companion | `constraints` selects the stock direct Stokes solver. `companion` puts phase first and advances an ordinary implicit tracer alongside it. | Combined velocity–pressure layout rejected during material parameter validation. In Release and Debug the phase coefficients matched at initialization, 5 and 10 ms under permutation. The implicit companion's maximum coefficient change was 1.06396e−4. |
+| 8. Pressure datum | `constraints` loads the stock pressure-constraint connector. | The solver read 100 Pa at DoF 306, pinned its p/G coordinate and published exactly **100 Pa** there at 5 ms. A single pure pressure datum is supported. More than one pressure constraint or a constraint involving other DoFs is diagnosed. |
+| 9. Duration-dependent cutback | `lifecycle`, damping 0.75 Pa s/m, then separately viscosity 1800 Pa s. Compare automatic 5→2.5 ms cutback against a clean half-step. | In each case the solver triggered one cut and published exactly one physical step at 2.5 ms. The FE coefficients, point histories, sections and entire ledger were byte-identical to clean. The distinct solved-step test still rejected two completed trials and matched the uninterrupted endpoints. |
+| 10. Iteration output | `constraints` selects velocity statistics and iteration postprocessing. `lifecycle` runs normal accepted output. | The unsupported option is diagnosed at initialization. With normal output, four velocity-statistics records were produced including initialization. |
+| 11. Completion notification | `lifecycle`, subscribe to the normal post-nonlinear-solver signal and read the accepted history inside the callback. | Exactly one successful notification per physical solve. Counts 4, 3 and 3 matched the respective ledgers. The subscriber saw accepted steps 0, 1 and 2 respectively, ahead of publication of steps 1, 2 and 3. |
+| 12. Locked tangent | Unit case `Cold creep has a finite condensed section tangent`, μ₀=.72, a=.001, b=0, M=.0003. | At zero free rate the regularized root returns zero resistance and the finite strip Jacobian coefficient 3333.33333333 Pa s/m. At zero mobility the unrepresentable uncondensed locked slope is diagnosed. Ordinary creep and the positive-speed zero-mobility case pass. |
+| 12 supplement. Nonzero subnormal roots | Same unit case at free rates ±.0008 m/s. Independently invert the asinh law in extended precision. | Rates ±1.25478e−310 m/s, absolute error 6.67e−324 m/s; resistances ±2.6666666667 Pa and condensed slopes 3333.33333333 Pa s/m. These are production scalar coefficients used by the matrix border. The independent assembled-tangent test below exercises the ordinary nine-strip parameters. |
+| 13. Prescribed-velocity work | `constraints`, walls at rest, an interior x-velocity of 1e−5 m/s at (1,0.5). Also run with μ₀=.3 to resolve the signed creep mean. | The reviewed μ₀=.6 input now stops before publication: strip 1 stores +2.13e−23 m/s against the −1.19e−24 m/s root, within a 4.69e−21 m/s storage roundoff budget but with the wrong sign. With the same drive and μ₀=.3, measured maximum wall speed and wall work are zero, total prescribed-velocity work is +1.27156928602e−9 J/m, and the work-balance defect is −3.25e−15 J/m. The ledger reports total prescribed-velocity work, including interior reactions. |
+| Translation supplement | Production strip constructor on the 30° 8 × 4 mesh with x origin shifted by +10,000 m; `geometry` also translates the seed and loading and runs to 15 ms. | Original executable rejected the translated cell coverage. With the box corner as projection origin, 4,968 point identities and memberships, all nine widths and fixed-angle lengths, and reference weights agree. Maximum normalized cell-area error 1.44e−15 under the original 1e−12 threshold. Maximum physical position error after undoing the translation 9.09e−13 m. Relative stations and formed flags agree through 15 ms. |
+
+### One returned step
+
+The ordinary single-advection iterated-Newton scheme advances temperature and companions and calls the material's midpoint attempt. Its accepted ASPECT fields and native history are held fixed. A volume integral of div(u) checks the constant pressure test before its gauge row is removed. At each native point the trial strain and phase give a free shear rate and a mobility. Integrating with physical area divided by strip arclength produces the collective signed RSF equation V + M f(V,θ(h)) = Vfree, with half-duration h. The implicit coefficient f′/(1+M f′) couples the velocity and phase degrees of freedom on each strip at the same age. At subnormal speed the calculation uses V f′ for the derivative and Newton step.
+
+A cold root can satisfy that equation to floating-point accuracy while rounding its O(50 Pa) resistance loses the much smaller V/M. At final assembly the solver integrates the point rates at the returned force and recovers the lost traction as (Vroot−Vnative)/M on mobile strips. It checks this correction against the forward error of the quadrature sum and scalar root before using it in the point response. Endpoint tensors, signed/absolute native shear increments and the ledger all use that response. Strip slip and full-duration age use the signed scalar root. The native work integral and section work remain independently accumulated.
+
+Before writing the returned FE fields, the solver checks the rate a consumer can recover from the stored native shear increments. Its binary64 storage budget is 32 ε Σ J (|γₙ₊₁|+|γₙ|)/(Δt ds); the sum itself uses extended precision. A discrepancy outside the budget or an error as large as the nonzero root is diagnosed. This is the limit exercised by the interior-drive case. Only after the final mechanical and phase gates and this check pass does the simulator emit solver completion. The existing post-repeat acceptance callback installs the candidate. On restart the material reconstructs native geometry after mesh and DoF restoration, ahead of pre-solve observation.
+
+The only established ASPECT core edit is in the existing midpoint branch of the nonlinear solver scheme. The simulator owns its iteration counter and completion signal. A local constitutive evaluation cannot emit the scheme's completion after the linearization point is updated. The stock solver paths are covered below. All constitutive, geometric, checkpoint and constraint changes are branch code. The two extra native traversals and strip reductions run at returned candidate recovery/verification. Native state remains 112 bytes per point and the correction stores only O(number of strips) extra scalars per rank. The canonical observer measured peak RSS of 247,692 and 219,820 KiB on the two owners, and 5.97 s for the full principal run.
+
+~~~text
+source/material_model/growing_fault/section_response.cc
+source/simulator/solver/midpoint_fault.cc
+include/aspect/material_model/growing_fault.h
+source/material_model/growing_fault.cc
+source/simulator/solver_schemes.cc
+source/reconstructed_fault/material_sections.cc
+benchmarks/growing_fault/check_section_publication.py
+benchmarks/growing_fault/check_repairs.py
+~~~
+
+### Verification commands and scope
+
+The direct frozen archive and all-frame comparisons passed with two Release ranks and one numerical thread each. Signed integrated slip was 9.20718145918e−16, 3.94713921110e−5 and 1.69302306477e−4 m². The first value was previously 9.20703396413e−16 m² because publication used the cancellation-prone point sum. Maximum native stress difference against the donor was 8.18e−8 Pa. The independent Maxwell/cohesive history defects were at most 8.76e−17 / 1.05e−17 s⁻¹. Physical stress work was −72.8466597874761 versus −72.8466597874759 Pa m². The returned 15 ms tangent defect was 4.62e−10 relative. Strip 8 retains −0.147868802764826 rad on two-rank Release. An all-column audit at every clock retains only the known strip-8 angle/arclength failures on Release 1 and Debug 2 and angle alone on Debug 1. All three secondary layouts reproduce their own earlier angles exactly.
+
+The full Release suite passed 2,566 assertions in 59 cases. The five scoped Debug cases passed 184 assertions, and the active two-rank Release unit run passed 120 per rank. The mature 4C runs covered the principal case, changed owner, zero and reversed motion, retry, restart and homogeneous controls. The principal rate differences at its two donor endpoints were 1.373e−9 and 1.185e−9 m/s. Eight of ten scoped Release CTests passed. The two historical stock **screen** differences persist. All 76 and six respective nonlinear residual lines match the retained 5A baseline byte for byte; both statistics comparisons pass. The initial sandboxed stock run also picked up MPI socket warnings in matrix_nonzeros_1. A fresh run with local sockets passed it. The checked-in references and strip-8 evidence retain their original contents.
+
+Run from the worktree root. Each new case uses a fresh destination. These commands show the existing build directories and recorded destinations. The original executable was copied before rebuilding. The generation 03 legacy input used the original nine-strip parameter file with the stated checkpoint settings.
+
+~~~bash
+D=build-5a-repair
+F=benchmarks/growing_fault
+P=build-5a/plugin/libgrowing_fault_checks.release.so
+PD=build-5a/debug-plugin/libgrowing_fault_checks.debug.so
+B=build-slice/aspect-release
+BD=build-slice-debug/aspect-debug
+T=build-4c/tests
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+mkdir -p "$D"
+# On the reviewed build, before rebuilding
+cp --reflink=auto "$B" "$D/aspect-before"
+cp "$P" "$D/libbefore.release.so"
+{ sed -e 's/^set End time = 0.015$/set End time = .005/' \
+      -e 's/Reference friction coefficient = .6$/Reference friction coefficient = .9/' "$F/onecut.prm"
+  echo "set Output directory = $PWD/$D/before"
+  echo "set Additional shared libraries = $PWD/$P"
+  cat <<'PRM'
+subsection Postprocess
+ set List of postprocessors = growing fault samples
+end
+PRM
+} > "$D/before.prm"
+"$D/aspect-before" "$D/before.prm"
+python3 -O "$F/check_section_publication.py" "$D/before"    # expected wrong-sign failure
+{ cat "$F/onecut.prm"; echo "set Output directory = $PWD/$D/before-checkpoint"; cat <<'PRM'
+subsection Checkpointing
+ set Steps between checkpoint = 1
+ set Number of checkpoints to keep = 4
+end
+PRM
+} > "$D/before-checkpoint.prm"
+"$D/aspect-before" "$D/before-checkpoint.prm"
+
+cmake --build build-slice --target aspect -j2
+cmake --build build-slice-debug --target aspect -j2
+cmake --build build-5a/plugin -j1
+cmake --build build-5a/debug-plugin -j1
+cmake --build "$T" --target pressure_constraint -j1
+tar -xzf ../aspect-pf-rsf-reference-20261121/reference.tar.gz -C "$D"
+(cd "$D/reference" && sha256sum --quiet -c SHA256SUMS)
+python3 "$D/reference/analysis/replay_midpoint_reference.py" "$PWD/$D/reference" localized-onecut "$PWD/$D/donor-two" --launcher "$MPI"
+python3 "$D/reference/analysis/check_midpoint_reference.py" "$D/reference" localized-onecut "$D/donor-two/output"
+python3 -O "$F/run.py" "$B" "$P" "$D/final-canonical" --mpiexec "$MPI"
+Q="$D/final-canonical/principal/output"
+python3 -O "$F/compare.py" "$D/reference/runs/localized-onecut/output" "$Q" --archive
+python3 -O "$F/compare.py" "$D/donor-two/output" "$Q"
+python3 -O "$F/compare.py" "$D/donor-two/output" "$Q" --check-corruption
+python3 -O "$F/check_history.py" "$Q"
+python3 -O "$F/check_admission.py" "$B" "$P" "$D/final-admission"
+for group in friction geometry companion; do
+  python3 -O "$F/check_repairs.py" "$B" "$P" "$D/final-release-$group" "$group"
+done
+python3 -O "$F/check_repairs.py" "$B" "$P" "$D/constraints-qualified" constraints --pressure-plugin "$T/libpressure_constraint.release.so"
+python3 -O "$F/check_repairs.py" "$B" "$P" "$D/qualified-lifecycle" lifecycle --legacy-snapshot "$D/before-checkpoint/restart/03"
+python3 -O "$F/check_repairs.py" "$B" "$P" "$D/final-owner" mpi --mpiexec "$MPI"
+for group in friction companion; do
+  python3 -O "$F/check_repairs.py" "$BD" "$PD" "$D/final-debug-$group" "$group"
+done
+for n in 1 2; do
+  python3 -O "$F/run.py" "$BD" "$PD" "$D/final-debug$n" --ranks "$n" --mpiexec "$MPI" --principal-only
+done
+(cd build-slice/unit_tests && ../aspect --test)
+(cd build-slice-debug/unit_tests && ../aspect --test 'Cold creep*,Translated material*,Material sections preserve*,Remote shear*,Intact cohesive*')
+"$MPI" --bind-to core --map-by core -np 2 "$B" --test 'Material sections preserve*,Cold creep*,Translated material*,Remote shear*,Intact cohesive*'
+L=benchmarks/layered_moving_fault
+python3 "$L/run.py" "$B" build-4c-closeout/plugin/liblayered_moving_fault.release.so "$T/libfixed_fault.release.so" "$D/layered" --mpiexec "$MPI"
+python3 -O "$L/check.py" "$D/layered" build-4c/donor/output "$D/layered.png" --zero build-4c/donor-zero/output --reverse build-4c/donor-reverse/output
+ctest --test-dir "$T" -R '^(growing_fault|fixed_fault|stationary_fault|layered_moving_fault|layered_fault_traction_step|postprocess/phase_field_surface_energy_at2|explicit_dg_compositions|matrix_nonzeros_1|iterated_advection_and_stokes_DG|prescribed_dilation_newton_singleadvection)$' --output-on-failure
+for t in iterated_advection_and_stokes_DG prescribed_dilation_newton_singleadvection; do
+  rg -a 'nonlinear residual|Nonlinear residual reduction' "$T/output-$t/log.txt" > "$D/$t-residuals"
+done
+cmp build-5a/stock-5a-residuals "$D/iterated_advection_and_stokes_DG-residuals"
+cmp build-5a/stock-newton-5a-residuals "$D/prescribed_dilation_newton_singleadvection-residuals"
+~~~
+
+The next action is focused re-review of 5A. General resistance-law ownership and 5B remain subsequent assignments.
+
 ## Increment 5A · single forward front
 
 Entry was `01575dd15` on pf-rsf. The assignment and local verification skill were the only untracked inputs. The frozen archive and all members passed their SHA-256 checks. The numerical source was reconstructed at c407e612b with the qualified patch followed by the additions. The native two-rank replay passed the original checker with assertions enabled. The closeout text supplied by the archive is `reference/closeout.md`. The seed enters at zero clock without fracture equilibration.
