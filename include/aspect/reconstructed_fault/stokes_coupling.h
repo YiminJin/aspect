@@ -26,7 +26,7 @@ namespace aspect
       explicit FaultStokesCoupling(MaterialModel::PhaseFieldFault<dim> &material);
       /** Register plane-strain Stokes assembly and accepted-state publication. */
       void initialize();
-      /** Couple trial rates and convergence to the fixed-age RSF section solve. */
+      /** Couple trial rates and convergence to the section solve with fixed incoming material state. */
       void connect_section_balance();
       /** Transport (when selected), rotate and project the accepted physical stress on owned cells. */
       void prepare_parent();
@@ -35,7 +35,7 @@ namespace aspect
                                            const Point<dim> &position, double phase) const;
 
       /** One bulk quadrature contribution to section balance. The tangent
-       * is minus the fixed-age derivative with respect to label rates. */
+       * is minus the fixed-state derivative with respect to label rates. */
       struct BulkPoint
       {
         typename FaultPhaseProfile<dim>::Sample transfer;

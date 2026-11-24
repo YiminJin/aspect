@@ -641,6 +641,10 @@ namespace aspect::GrowingFault
     const auto *provider=dynamic_cast<const MidpointMaterial *>(&model);
     AssertThrow(provider,ExcMessage("Midpoint fault phase requires a material providing the Maxwell/AT1 midpoint response."));
     const auto field=provider->phase_field();
+    p.surface_energy_model.validate();
+    AssertThrow(&p.surface_energy_model.geometry==&PhaseField::CrackGeometry::select("AT1") &&
+                p.names_of_compositional_fields[selected-methods.begin()]==p.surface_energy_model.composition,
+                ExcMessage("Midpoint fault phase requires the configured AT1 surface energy on the selected phase field."));
     AssertThrow(dim==2 && !p.enable_elasticity &&
                 p.nonlinear_solver==Parameters<dim>::NonlinearSolver::single_Advection_iterated_Newton_Stokes &&
                 field==static_cast<unsigned int>(selected-methods.begin()) &&

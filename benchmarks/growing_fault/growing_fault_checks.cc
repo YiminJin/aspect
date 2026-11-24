@@ -298,6 +298,12 @@ namespace aspect::TimeStepping
               Utilities::MPI::sum(x,op.comm,x);
               AssertThrow(!op.select_prospective_planes(x),ExcMessage("Returned endpoint would change the plane map."));
               const auto e=op.assemble_stage(x,true,false);
+              if (m.friction().name()=="linear dashpot" && Utilities::MPI::this_mpi_process(op.comm)==0)
+                {
+                  std::ofstream slopes(this->get_output_directory()+"returned-linear-slopes");
+                  slopes<<std::setprecision(17);
+                  for (const auto &root:e.roots) slopes<<root.slope<<'\n';
+                }
               AssertThrow(e.ledger.mechanical<=m.get_parameters().nonlinear_tolerance && e.ledger.kkt<=1.e-7,
                           ExcMessage("Returned fields fail the physical convergence gate."));
               std::vector<double> d(op.n,0.),action(op.n,0.),force(op.angles.size(),0.);

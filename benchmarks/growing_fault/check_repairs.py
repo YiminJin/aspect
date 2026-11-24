@@ -22,6 +22,7 @@ def main():
     for arg in ('aspect','plugin','destination'):
         ap.add_argument(arg,type=lambda p:Path(p).resolve())
     ap.add_argument('group',choices=['friction','constraints','mpi','lifecycle','companion','geometry'])
+    ap.add_argument('--repaired-checkpoints',type=Path,help='checkpoint directory written by repaired 5A before ownership cleanup')
     ap.add_argument('--legacy-snapshot',type=Path,help='generation 03 of a physical v1 checkpoint without a balance')
     ap.add_argument('--pressure-plugin',type=lambda p:Path(p).resolve())
     ap.add_argument('--mpiexec',default='mpirun')
@@ -108,12 +109,16 @@ def main():
     if args.group=='lifecycle':
         snapshots=subsection('Checkpointing','set Steps between checkpoint = 1\nset Number of checkpoints to keep = 4')
         clean=run('clean',snapshots,end='.015')
-        for generation,steps in [(1,[1,2,3]),(3,[3])]:
-            other=run(f'restart-{generation}',snapshot=clean/'restart'/f'{generation:02}',end='.015')
-            continuation(clean,other,steps)
-            for item in ['Native growing fault v2','Growing fault accepted balance v1']:
-                if (clean/('published-'+item)).read_bytes()!=(other/('pre-solve-'+item)).read_bytes():
-                    raise ValueError(f'Generation {generation}: restored 10 ms {item} differs')
+        parents = [('restart',clean/'restart')]
+        if args.repaired_checkpoints:
+            parents.append(('repaired',args.repaired_checkpoints))
+        for label,checkpoints in parents:
+            for generation,steps in [(1,[1,2,3]),(3,[3])]:
+                other=run(f'{label}-{generation}',snapshot=checkpoints/f'{generation:02}',end='.015')
+                continuation(clean,other,steps)
+                for item in ['Native growing fault v2','Growing fault accepted balance v1']:
+                    if (clean/('published-'+item)).read_bytes()!=(other/('pre-solve-'+item)).read_bytes():
+                        raise ValueError(f'Generation {generation}: restored 10 ms {item} differs')
         if args.legacy_snapshot:
             legacy=run('legacy',snapshot=args.legacy_snapshot,end='.015')
             if (not (legacy/'pre-solve-Native growing fault v2').is_file() or

@@ -16,7 +16,8 @@ namespace aspect
   {
     /** Single-lithology Maxwell material in plane strain with mature-fault
      * friction. The native static DG fields carry the accepted spatial stress
-     * in Pa. Independent Q1 material vertices carry age, slip and rate. */
+     * in Pa. Independent Q1 material vertices carry slip and rate. The
+     * selected resistance law owns any constitutive history at their IDs. */
     template <int dim>
     class PhaseFieldFault : public Interface<dim>, public SimulatorAccess<dim>
     {
