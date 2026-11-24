@@ -1,5 +1,103 @@
 # Phase-field fault working record
 
+## Increment 6A
+
+**Ready for review on pf-rsf.** The baseline is `0d605a75a`. Commit `044470d21` makes `explicit DG SSPRK3` an ordinary compositional field method. The following commit extracts the shared Stokes Picard iteration. For the parsing rule, read the method-list expansion in the first file. For both dispatch decisions, read `assemble_and_solve_composition()`, `solve_stokes_by_picard_iteration()` and its two callers in the second.
+
+~~~text
+source/simulator/parameters.cc
+source/simulator/solver_schemes.cc
+~~~
+
+### Configuration, ownership and upstream edits
+
+| Location | Responsibility and coverage |
+| --- | --- |
+| ASPECT `Parameters::AdvectionFieldMethod`, declaration and parser | An empty list defaults to `field` and one method broadcasts. After expansion, each legacy `SSPRK3 fields` name promotes `field` or confirms `explicit DG SSPRK3`. Unknown or repeated names and conflicts with `static` or `midpoint fault phase` fail during parsing. Only the resolved enum persists. Method-specific validation uses it even with an empty legacy list. The explicit transport helper retains the separate Cartesian inflow evaluator needed for the RK stage clocks. |
+| ASPECT FE declaration, sparsity and checkpoint readers | Introspection selects Bernstein for the phase role with the explicit or midpoint method. Signed tracers retain their nodal basis. The matrix-needs predicate skips explicit rows for both volume and face sparsity. The existing base-element group scan still allocates a pattern in the first member's block if any companion needs it. Stock ordinary assembler registration already selects the implicit method. The legacy basis guard reads the new method. Serialized FE names and checkpoint format are unchanged. Mixed orders, all-explicit, basis swaps, pre-basis and pre-6A restarts exercise these decisions. |
+| ASPECT composition switch | `AdvectionField::advection_method(introspection)` drives the same switch for all fields. The explicit case calls `Transport::advance_composition` with accepted field and velocity, writes the candidate, then emits one field completion. After the field loop the ordinary linearization update sees all candidates. The midpoint case defers its phase. The fixture observes setup and completion through existing signals. |
+| Mature material and growing provider on pf-rsf | Mature admission reads the resolved phase method and still requires three static physical stress fields. Batched stress uses the material's accepted DG history. A growing phase has exactly one midpoint method, so its old separate boolean exclusion is redundant. The growing caller obtains the material provider and calls `GrowingFault::advance_midpoint` from single advection / iterated Newton Stokes. The two-rank nine-strip control exercises this separate route. |
+| ASPECT private Simulator scheme operations and branch signal documentation | The no-advection / iterated Stokes entry calls the shared Picard operation directly. Single advection / iterated Stokes solves temperature and compositions once per attempt first. This extraction keeps the existing loop body, including pre-refinement limits and counters. Each assembly prepares the current coupled response, optionally rebuilds matrix and preconditioner, solves Stokes, and runs configured iteration postprocessing. At bulk convergence the fault tests the returned solution and may require another assembly. The successful loop signals nonlinear completion. The Simulator's post-repeat acceptance hook publishes the staged physical history. Stock postprocessing, the traction-step veto, retry and checkpoint continuation exercise the ordering. |
+
+The SSPRK3 operator, Maxwell response, section residual and accepted-state equations carry over from their qualified increments. All substantive core edits above serve ordinary per-field selection, sparsity or scheme dispatch. The diagnostic reads the public assembler sets and solver signals from a test plugin.
+
+### Measured controls
+
+| Ordinary run | Result |
+| --- | --- |
+| Mixed 2-D, Release and Debug | At 0, 12.5 and 25 ms the two spellings gave **zero** difference in every keyed coefficient of both fields, with either field first. The maximum implicit/explicit differences at the two physical endpoints were 0.0001600393 and 0.0002158711. Release signed-tracer error against the strong-form oracle was 3.05e−16. The one-/two-rank differences were 1.39e−16 in Release and 1.67e−16 in Debug. Both ranks owned cells and the checker rejected an empty second owner. |
+| Setup, matrix and completion | In both orders the implicit field registered one volume, one boundary-face and one interior-face assembler and ran its implicit solve. The explicit field registered zero of each and made zero implicit solves. Six completion signals covered the two fields and three clocks, in order. Mixed diagonal nonzero counts were (324, 0), including explicit-first. Broadcast with a redundant legacy name agreed exactly with naming both tracers. Its group used (0, 0), compared with (324, 0) on the saved pre-6A executable. This measures allocated entries. |
+| Rejections | Both incompatible legacy methods, a duplicate and an unknown name failed with the requested diagnostics. Canonical explicit selection rejected a nonzero reaction on the tracer before any physical publication. A reacting implicit companion still advanced. The compatibility suite retained its prescribed-DoF rejection, temperature-only prescription, Q2 velocity restriction and implicit Q7 control. |
+| Bounded phase and 3-D signed/phase slab | The bounded ridge, divergent/limited phase, stage inflow and retry controls passed. The 3-D upper-slab integrals were 0.18748774999999998 and −0.062512249999999991, absolute errors 2.78e−17 and 1.39e−17. Stage-weighted z-partition transfers were +0.0037375 and −0.0012625. All 162 coefficients per clock agreed between one and two ranks within 1.94e−16. Asymmetric-face and time-dependent inflow controls also passed. |
+| Checkpoints | A three-field checkpoint written with the old spelling resumed with the canonical methods and matched the uninterrupted 3-D run exactly. Repeating with the saved **pre-6A executable** as writer gave zero difference. Two-rank resumed vs serial uninterrupted differed by 1.05e−15. The genuine pre-basis 3-D writer's nodal continuation matched exactly, and the legacy-to-Bernstein reader rejected it. In 2-D the driver exercised known and ambiguous legacy metadata, both mismatch directions and a mixed-field basis swap. |
+| Fixed fault and transported physical stress | The direct Picard caller matched all homogeneous reference checks. Clean/retried physical history was identical at all three clocks, including all 36 displayed stress samples at the first endpoint. With transported stress the measured Stokes load was −0.29364437004440336 Pa m², analytic −0.29364437004440386, stale receiving-cell prediction −0.3084580370518121. Retried labels and stress matched exactly. |
+| Moving layered fault | At tolerance 0.001 the first returned bulk residual was 0.000751667 and the projection changed by 0.521772. The veto forced a second assembly. Published cell work error was 4.23e−15. The two physical endpoints passed the existing donor budgets, with zero clean/retry and clean/restart differences and 2.46e−14 maximum one-/two-rank difference. Using the canonical method and a completion subscriber on the retry, phase signalled once on attempt numbers 0, 1, 1, 2. Nonlinear completion counts were 13, 9, 7, 7. The 25 ms attempt was rejected. All nine accepted bulk, surface and load files matched the clean run byte for byte. |
+| Growing fault | On two ranks all three accepted nine-strip frames passed the donor comparison. Final integrated slip was 1.69302306477e−4 m². Independent final native Maxwell and cohesive rate defects were 8.76e−17 and 1.041e−17 per second. |
+| Stock feature-off Picard and matrix layout | Five of six scoped Release CTests passed. The stock per-iteration screen comparison still differs from its checked-in reference in the Debug/Release library suffix and near-zero top pressure (final −2.984e−16 Pa here, +1.318e−16 Pa in the reference). Running the same input and solver-history subscriber on the saved and rebuilt executables with identical relative output paths gave byte-identical statistics, nine residuals, nine linear-solver reports and five successful nonlinear notifications with iteration counts 5, 1, 1, 1, 1. The stock matrix-layout CTest passed, and its before/after block counts and statistics agreed exactly. |
+
+The retained 5B strict audit again exited 1 with precisely the four strip-15 angle failures. Its output directory matched the Increment 5 closeout tables byte for byte. This was a replay on the frozen outputs. Example 2 still requires timestep-converged physical front advance. The installed reproduction, resource measurements, final guide and per-example qualification survey belong to 6B after author review. Regional gravity remains a separate qualification.
+
+### Reproduction
+
+From the worktree root, with one numerical thread per MPI rank. The 6A runs used up to two ranks, Release for the full fixture set, and Debug for both mixed field orders, the broadcast, rejection and partition controls. The numerical drivers require fresh destination directories. The following names identify the retained runs.
+
+~~~bash
+W=$PWD
+D=$W/build-6a
+T=$D/tests
+B=$W/build-slice/aspect-release
+BD=$W/build-slice-debug/aspect-debug
+TD=$W/build-4b-repair/tests-debug
+S=benchmarks/explicit_dg_transport
+F=benchmarks/fixed_fault
+M=benchmarks/layered_moving_fault
+N=benchmarks/growing_fault
+L=$W/build-4c-closeout/plugin/liblayered_moving_fault.release.so
+G=$W/build-5a/plugin/libgrowing_fault_checks.release.so
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+export ASPECT_SOURCE_DIR="$W" DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MPLCONFIGDIR="$D/mpl"
+# Save the existing Release executable and its observer libraries before rebuilding.
+mkdir -p "$D/baseline"
+cp "$B" "$D/baseline/"
+cp build-4c/tests/lib{explicit_dg_compositions,postprocess_iterations_iterated_Stokes}.release.so "$D/baseline/"
+cmake --build build-slice --target aspect -j4
+cmake --build build-slice-debug --target aspect -j2
+cmake -S tests -B "$T" -DAspect_DIR="$W/build-slice" -DASPECT_BINARY="$B" -DCMAKE_BUILD_TYPE=Release -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+cmake --build "$T" --target explicit_dg_compositions fixed_fault dg_stress_transport dg_stress_spin_order growing_fault postprocess_iterations_iterated_Stokes nonlinear_solver_history -j1
+cmake --build "$TD" --target explicit_dg_compositions -j1
+cmake --build build-4c-closeout/plugin -j1
+cmake --build build-5a/plugin -j1
+python3 -B "$S/check.py" "$B" "$T" "$D/mixed" --only mixed --mpiexec "$MPI"
+python3 -B "$S/check.py" "$BD" "$TD" "$D/debug-mixed" --only mixed --mpiexec "$MPI"
+python3 -B "$S/check.py" "$B" "$T" "$D/phase" --only phase --mpiexec "$MPI"
+python3 -B "$S/check_3d.py" "$B" "$T" "$D/slab" build-4b/final-capture/aspect-review build-4b-repair/tests-release --mpiexec "$MPI"
+python3 -B "$S/check_compatibility.py" "$B" "$T" "$D/compatibility"
+python3 -B "$F/check_lifecycle.py" "$B" "$T/libfixed_fault.release.so" "$D/fixed"
+python3 -B "$F/check_transport.py" "$B" "$T" "$D/stress" --mpiexec "$MPI"
+python3 -B "$M/run.py" "$B" "$L" "$T/libfixed_fault.release.so" "$D/layered" --mpiexec "$MPI"
+python3 -B "$M/check.py" "$D/layered" build-4c/donor/output "$D/layered.png" --zero build-4c/donor-zero/output --reverse build-4c/donor-reverse/output
+python3 -B "$M/check_review.py" "$B" "$L" "$D/projection"
+python3 -B "$N/run.py" "$B" "$G" "$D/growing" --mpiexec "$MPI" --principal-only
+python3 -B "$N/compare.py" build-5a-repair/donor-two/output "$D/growing/principal/output"
+python3 -B "$N/check_history.py" "$D/growing/principal/output"
+ctest --test-dir "$T" --output-on-failure -R '^(fixed_fault|dg_stress_transport|explicit_dg_compositions|growing_fault|matrix_nonzeros_1|postprocess_iterations_iterated_Stokes)$'
+python3 -B "$N/timestep/audit.py" build-5b build-5a-repair/reference "$D/strict5b" --returned-rows build-5b/rows
+# Expected exit 1. Compare the entire strict report.
+diff -qr "$D/strict5b" build-5b/closeout/final-audit
+~~~
+
+The matched baseline executable's SHA-256 was `8769c98b64923906964379ef78917567eb93edc40da93b9d38765b187184022d`. For the additional binary-to-binary restart, use the same 3-D slab driver settings as `seed-bernstein` with the saved executable and matching probe, copy that output as the resume parent, and run `continued-bernstein` with the current executable. Compare all clocks and coefficients with `direct-bernstein`. For the moving retry count, append the canonical methods `static, static, static, explicit DG SSPRK3` and an empty legacy list to the retry input, load the coefficient and nonlinear-history plugins in addition to its existing libraries, and add `DG method setup` to its postprocessors. The extra local commands and their actual input files are retained under the run directory.
+
+~~~bash
+python3 -B "$D/resume-baseline.py"
+bash "$D/observe-retry.sh"
+bash "$D/matched-picard.sh"
+cmp "$D/matched-baseline/output/statistics" "$D/matched-current/output/statistics"
+cmp "$D/matched-baseline/iterations" "$D/matched-current/iterations"
+~~~
+
+The standalone CTest configuration initially omitted `ASPECT_BINARY` and its launcher failed before invoking ASPECT. The commands above use the corrected configuration. A first matched statistics comparison also counted the two different absolute visualization paths as a difference. Running both binaries in separate directories with the same relative output setting gave a direct file comparison. The original CTest reference and all physical tolerances are preserved.
+
 ## Increment 5 closeout
 
 **Closed with the author's fixture-specific exception for strip 15. Increment 6 consolidation is next.** The original angle tolerance is 1e−7 rad absolute plus 1e−7 relative to the donor angle. The first-turn difference at 5 ms is 2.36894413e−7 rad against a budget of 1.14786132e−7 rad. That formed plane persists through the coarse 10 ms and fine 7.5 and 10 ms endpoints. The strict audit exits **1** and records exactly those four failures under `strip/beta`.

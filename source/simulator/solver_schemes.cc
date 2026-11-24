@@ -837,6 +837,14 @@ namespace aspect
   template <int dim>
   void Simulator<dim>::solve_no_advection_iterated_stokes ()
   {
+    solve_stokes_by_picard_iteration();
+  }
+
+
+
+  template <int dim>
+  void Simulator<dim>::solve_stokes_by_picard_iteration ()
+  {
     double initial_stokes_residual = 0.0;
 
     const unsigned int max_nonlinear_iterations =
@@ -1032,7 +1040,7 @@ namespace aspect
     assemble_and_solve_composition();
 
     // The coupled Picard solve sees the candidate compositions from this attempt.
-    solve_no_advection_iterated_stokes();
+    solve_stokes_by_picard_iteration();
   }
 
 
@@ -1487,6 +1495,7 @@ namespace aspect
   template void Simulator<dim>::solve_no_advection_single_stokes(); \
   template void Simulator<dim>::solve_no_advection_single_stokes_first_timestep_only(); \
   template void Simulator<dim>::solve_no_advection_iterated_stokes(); \
+  template void Simulator<dim>::solve_stokes_by_picard_iteration(); \
   template void Simulator<dim>::solve_no_advection_iterated_defect_correction_stokes(); \
   template void Simulator<dim>::solve_single_advection_no_stokes(); \
   template void Simulator<dim>::solve_single_advection_single_stokes(); \

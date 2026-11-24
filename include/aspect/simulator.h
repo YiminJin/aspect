@@ -499,6 +499,12 @@ namespace aspect
       void solve_no_advection_iterated_stokes ();
 
       /**
+       * Iterate the Stokes system to Picard convergence with temperature and
+       * compositions fixed at the values supplied by the calling scheme.
+       */
+      void solve_stokes_by_picard_iteration ();
+
+      /**
        * This function implements one scheme for the various
        * steps necessary to assemble and solve the nonlinear problem.
        *
