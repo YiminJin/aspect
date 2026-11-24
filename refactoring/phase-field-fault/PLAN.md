@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**Active assignment: [Increment 5A](INCREMENT_5A_TASK.md), the oblique nine-strip midpoint control.**
+
 **[Increment 4C](INCREMENT_4C_TASK.md) is closed for review.** The [six review repairs and verification commands](STATUS.md#increment-4c-review-closeout) cover the post-solve projection, material connectivity, full and finite normal support, explicit choice of seed mechanics, the projected section tangent and named physical output. The [original two-step comparison](STATUS.md#increment-4c--coupled-layered-moving-fault) retains its donor observations and budgets.
 
 The material owns the accepted `MaterialFaultTrace` and phase profile. A label's index follows the material through cell and rank crossings. For a boundary-spanning seed, `fit_boundary_spanning_seed_to_phase_ridge()` uses the initialized FE phase once. Both interior modes instead use the prescribed material vertices and Q8 projected Maxwell response. In the advected mode, `advect_with_accepted_velocity()` moves the trial vertices before binding their profile to the candidate phase. Stokes assembly and the section solve use that same geometry. Once the returned projection and rates pass the convergence veto, the post-accept hook installs the pair and advances label history.

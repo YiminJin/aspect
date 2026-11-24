@@ -1,5 +1,19 @@
 # Phase-field fault working record
 
+## Increment 5A · single forward front
+
+Entry was `01575dd15` on pf-rsf. The assignment and local verification skill were the only untracked inputs. The frozen archive and all members passed their SHA-256 checks. The numerical source was reconstructed at c407e612b with the qualified patch followed by the additions. The native two-rank replay passed the original checker with assertions enabled. The closeout text supplied by the archive is `reference/closeout.md`. The seed enters at zero clock without fracture equilibration.
+
+### Ownership at entry
+
+| Operation | Normal caller, inputs and outgoing state |
+| --- | --- |
+| Material sections | Initialization on a fixed mesh constructs cell-local chord rules and immutable strip IDs from the projected mesh bounds. Every owner stores its own native stress, recoverable strain and shear inventory. Strip age, slip and structural plane are replicated. |
+| Constitutive elimination | The coupled residual supplies accepted tensors, stage strain and phase. An MPI sum returns the complete strip mobility and free rate. Its scalar signed RSF solve supplies resistance and its derivative to every contributing point. Neither operation publishes history. |
+| Fracture and bounds | The phase module uses the configured surface-energy model and native Bernstein field to assemble the volume gradient, interior jump terms and midpoint obstacle. |
+| Coupled solve | The ordinary single-advection Stokes scheme needs an opt-in dispatch because a local material evaluation cannot assemble the phase rows, the pressure constraint or cross-rank force derivatives. Temperature and auxiliary compositions retain their normal dispatch. The configured tip phase requires Bernstein coordinates even though SSPRK3 is off. |
+| Acceptance | A returned solution is checked with the final plane map. The material retains the candidate until the simulator's existing post-accept signal. The simulator checkpoints the phase block and the material save/load interface carries native history. |
+
 ## Increment 4C review closeout
 
 The starting commit was `55cf57ece`. The incoming project instructions and the local verification skill were present before the repair. The six findings concern the projected interior section in plane strain, its geometry, and its observer. The earlier two-step results below are retained as measured at that commit.
