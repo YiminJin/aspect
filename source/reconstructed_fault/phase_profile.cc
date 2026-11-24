@@ -130,7 +130,7 @@ namespace aspect
                     }
                   return self(self,left,mid,l,depth+1)+self(self,mid,right,r,depth+1);
                 };
-                const double width=labels[j].half_width+stations.point(k)[0]*(labels[j+1].half_width-labels[j].half_width);
+                const double width=geometry.normal_support(j,stations.point(k)[0]);
                 const double cuts[4]= {a,std::clamp(-width,a,b),std::clamp(width,a,b),b};
                 const unsigned int index=j*stations.size()+k;
                 for (unsigned int side=0; side<3; ++side)

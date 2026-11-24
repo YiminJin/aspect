@@ -1,0 +1,49 @@
+# Overrides for the 4C review reproduction.
+include $ASPECT_SOURCE_DIR/benchmarks/layered_moving_fault/layered.prm
+
+set End time = .0125
+set Nonlinear solver tolerance = .01
+
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right:function, bottom:function
+  subsection Function
+    set Function expression = 0;1
+  end
+end
+
+subsection Boundary traction model
+  set Prescribed traction boundary indicators = top:function
+  subsection Function
+    set Function expression = 0;0
+  end
+end
+
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0;0;0;.35
+  end
+end
+
+subsection Material model
+  subsection Phase field fault
+    set Fault vertices = -0.8,0; 0.8,0
+    set Background compression = 1e8
+    set Background shear traction = 1e8
+    set Radiation damping = 1e16
+    set Initial label shear tractions =
+    set Initial label ages =
+    set Profile half width = 0
+  end
+end
+
+subsection Boundary composition model
+  subsection Function
+    set Function expression = 0;0;0;.35
+  end
+end
+
+subsection Postprocess
+  subsection Layered background
+    set Translation = 100
+  end
+end

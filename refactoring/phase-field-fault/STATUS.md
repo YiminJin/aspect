@@ -1,5 +1,64 @@
 # Phase-field fault working record
 
+## Increment 4C review closeout
+
+The starting commit was `55cf57ece`. The incoming project instructions and the local verification skill were present before the repair. The six findings concern the projected interior section in plane strain, its geometry, and its observer. The earlier two-step results below are retained as measured at that commit.
+
+| Finding | Discriminating result on the repaired Release path |
+| --- | --- |
+| Returned projection and rates | The nonzero-parent 0.1 Pa traction step passes the first Stokes test at 0.000751667 (tolerance 0.001). The returned projection changes by 0.521772 on the same scale as the former pre-solve test, which measured only 0.000405. The coupled veto forces a second Stokes assembly. The assembled complete cell work then agrees with the published stress contraction to 4.23e−15 Pa m². |
+| Material connectivity | Three successive 35° rigid maps retain both vertex identities and their oriented unit segment through 105°. A collapsed edge and a folded trace with nonadjacent intersecting segments raise diagnostics. The boundary-spanning fit retains its seed-tangent ordering check. All 38 fitted reference labels agree at three clocks, with maximum speed difference 5.135e−16 m/s. |
+| Full and finite normal support | At y = +0.0125 m, the constant-phase horizontal normal integral divided by the degradation weight is 4 m for both full admission and a 2.1 m radius. A 2 m material radius correctly diagnoses a missing fraction of 0.003125. Adding deformation to the translation changes the 2.1 m radii to 2.10264605 m, agreeing within 2e−12 m with the inverse-transpose map computed independently from the two one-sided FE gradients. The principal input explicitly gives the archived donor's initial material radius, 4.8019603839902745 m. |
+| Selection of interior mechanics | With identical nonuniform phase, seed and bulk solution, fixed and advected interior vertices give the identical initial assembled offset work, +0.02305764357870983 Pa m². The fixed vertices stay at their seed through both intervals. With constant phase, static DGQ2 and selected Bernstein transport give the same initial work, +6.713859978375032e−10 Pa m². An advected interior seed with phase transport disabled is diagnosed. |
+| Projected section tangent | The third Picard preparation at 25 ms has 2,120 active Q8 points and a 0.013652606 Pa maximum frozen stress defect. At fixed incoming age, geometry, phase, bulk iterate, normal compression and projection defect, the negative centered rate derivative agrees with the reduced Newton bands to 1.46e−10 relative at h = 5e−5 (budget 2e−8). Halving h from 1e−4 gives a Richardson error estimate of 1.46e−10. Substituting label-interpolated stiffness gives 1.057e−4. This is a differential of the section solve inside Picard, with no re-solve of Stokes. |
+| Named fields | Exchanging phase and xx, including their types, methods and initial data, reproduces every named Q3 bulk and surface column exactly at 0, 12.5 and 25 ms. |
+
+**Publication.** Once the ordinary Stokes stopping test succeeds, `FaultStokesCoupling::check_convergence` solves rates on the returned velocity/pressure using the assembled projection defect. It compares those rates to the ones used for assembly, then projects the returned solution and its rates. The numerator is the maximum owned DG coefficient tensor-norm change in Pa, globally reduced. The denominator is the larger of 1 Pa and the maximum returned norm. At physical endpoints it also checks the rates with the new defect. A veto leaves another Picard assembly possible. `accept_step` copies the retained DG moments and commits the rates that generated them. It allocates no second bulk candidate for the gate. The old stress coefficients of one cell stay live during comparison. Checking an open trace for self-intersections uses O(n²) pair comparisons per frame rebuild and O(n) replicated vertex/frame storage.
+
+**Selection.** Under Material model / Phase field fault, `Fault geometry = boundary spanning` uses the established stationary section. Both `fixed interior` and `advected interior` use a prescribed interior seed, an eight-panel normal integration and the Q8 projected response. Fixed interior holds vertex positions constant and allows either a static or a transported phase. Advected interior requires bounded phase transport and physical stress transport. The default `automatic` preserves legacy inputs by their existing phase composition role (generic for the boundary-spanning section, phase field for the advected interior seed). Changing the SSPRK3 selection alone cannot change the mechanics. A zero profile width admits the full in-box ray at the current geometry and is reported as zero. A positive width is a material length and follows deformation.
+
+**Regression runs.** The principal donor rate differences were 1.373e−9 and 1.186e−9 m/s at 12.5 and 25 ms. Maximum bulk stress differences were 1.890e−9 and 2.396e−9 Pa. Clean/retry and checkpoint continuation gave zero difference across exported histories. The one/two-rank maximum difference was 2.46e−14 and the separate crossing control retained material history across MPI owners. Zero/reversed translation, the interior strip and homogeneous comparisons all passed their original checks. The unit suite passed 2,376 assertions in 53 cases. No upstream Simulator, solver or assembler edit was needed. Test registration declares the new quick CTest's dependency on the layered plugin and its two included inputs.
+
+**Commands.** From the worktree root, with a Release build, 1 thread per rank and 1 rank except for the explicit MPI comparisons:
+
+```sh
+W=$PWD
+D=$W/build-4c-closeout
+T=$W/build-4c/tests
+B=$W/build-slice
+A=$B/aspect
+F=benchmarks/layered_moving_fault
+P=$D/plugin/liblayered_moving_fault.release.so
+V=$W/refactoring/phase-field-fault/rate_tangent
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+export ASPECT_SOURCE_DIR=$W DEAL_II_NUM_THREADS=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+cmake --build "$B" --target aspect -j2
+cmake -S "$F" -B "$D/plugin" -DAspect_DIR="$B" -DCMAKE_BUILD_TYPE=Release
+cmake --build "$D/plugin" -j1
+cmake -S tests -B "$T"
+cmake --build "$T" --target fixed_fault stationary_fault layered_moving_fault -j2
+ctest --test-dir "$T" -R '^(layered_fault_traction_step|layered_moving_fault|stationary_fault|fixed_fault)$' --output-on-failure
+(cd "$B/unit_tests" && ../aspect --test)
+python3 -O "$F/check_review.py" "$A" "$P" "$D/r2"
+python3 "$F/run.py" "$A" "$P" "$T/libfixed_fault.release.so" "$D/m1" --mpiexec "$MPI"
+python3 -O "$F/check.py" "$D/m1" build-4c/donor/output "$D/m1.png" --zero build-4c/donor-zero/output --reverse build-4c/donor-reverse/output
+R=$D/tangent1
+mkdir -p "$R/bands" "$R/run"
+(cd "$R/bands" && python3 "$V/capture.py" "$W" --moving)
+cp "$F/layered.prm" "$R/run/input.prm"
+printf '\nset Additional shared libraries = %s\nset Output directory = %s\n' "$P" "$R/run/output" >> "$R/run/input.prm"
+"$R/bands/aspect-review" "$R/run/input.prm"
+python3 -O "$V/check_moving.py" "$R/run/output"
+S=$D/fit1
+mkdir -p "$S/free-32"
+cmake -S benchmarks/fixed_fault/phase_ridge -B "$S/plugin" -DAspect_DIR="$B" -DCMAKE_BUILD_TYPE=Release
+cmake --build "$S/plugin" -j1
+sed "s|$W/build-4c/final-tangent/free-32/output|$S/free-32/output|;s|$W/build-4c/final-tangent/ridge/|$S/plugin/|" build-4c/final-tangent/free-32/input.prm > "$S/free-32/input.prm"
+"$A" "$S/free-32/input.prm"
+cp build-4a/free-32/profile.txt "$S/free-32/profile.txt"
+PYTHONPATH=benchmarks/fixed_fault/phase_ridge python3 -c 'from check import check_case; import sys; from pathlib import Path; check_case(Path(sys.argv[1]),"free",32)' "$S"
+```
+
 ## Increment 4C · coupled layered moving fault
 
 Entry was clean at `8712d8fc2` on `pf-rsf`, apart from the incoming assignment and local skills. The reviewed 3-D baseline comprises `610d6eecc` and `63db4899a`; its six scoped CTests in each configuration, 2359 assertions in 51 unit cases, slab moments and 162-coefficient MPI comparison are recorded below. The seven 4B repair gates remain part of that baseline.

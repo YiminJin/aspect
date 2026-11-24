@@ -93,6 +93,8 @@ class Frame:
             u = (offset@edge)/(edge@edge)
             d = abs(offset@perp)
             radius = (1-u)*self.surface["width_m"][j]+u*self.surface["width_m"][j+1]
+            if self.surface["width_m"][j] == self.surface["width_m"][j+1] == 0.:
+                radius = np.inf
             take = (u >= -1e-14) & (u <= 1+1e-14) & (d <= radius) & (d < dist)
             ids[take], xi[take], normal[take], dist[take] = j, u[take], perp, d[take]
         def interpolate(values):

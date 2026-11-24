@@ -68,3 +68,43 @@ TEST_CASE("Fault strip cuts a cell whose four corners name the same segment")
   CHECK(admitted == Approx(.2));
   CHECK(fault.cut_quadrature(Point<2>(.45,.2),Point<2>(.55,.3)).size() == 0);
 }
+
+TEST_CASE("Interior material connectivity through rigid rotation")
+{
+  using dealii::Point;
+  aspect::StationaryFault<2> fault;
+  const Point<2> center;
+  fault.initialize(Point<2>(-2,-2),Point<2>(4,4), {{-.5,0.},{.5,0.}},1.,1.,.2,true);
+  auto labels=fault.labels();
+  labels[1].age=2.;
+  const double angle=35.*dealii::numbers::PI/180.;
+  for (unsigned int turn=1; turn<=3; ++turn)
+    {
+      for (auto &label:labels)
+        {
+          const auto prior=label.position;
+          label.position=Point<2>(std::cos(angle)*prior[0]-std::sin(angle)*prior[1],
+                                  std::sin(angle)*prior[0]+std::cos(angle)*prior[1]);
+        }
+      fault.set_labels(labels);
+      const auto &segment=fault.segment(0);
+      CHECK(segment.length==Approx(1.));
+      CHECK(segment.tangent[0]==Approx(std::cos(turn*angle)));
+      CHECK(segment.normal[0]==Approx(-std::sin(turn*angle)));
+      CHECK(fault.project(center).xi==Approx(.5));
+      CHECK(fault.labels()[1].age==2.);
+    }
+  labels[1].position=labels[0].position;
+  REQUIRE_THROWS(fault.set_labels(labels));
+}
+
+TEST_CASE("A material fault retains simple open connectivity")
+{
+  using dealii::Point;
+  aspect::StationaryFault<2> fault;
+  fault.initialize(Point<2>(-2,-2),Point<2>(4,4), {{-1.,0.},{-.5,0.},{.5,0.},{1.,0.}},1.,1.,.2,true);
+  auto vertices=fault.labels();
+  vertices[1].position=Point<2>(1.,1.);
+  vertices[2].position=Point<2>(-1.,1.);
+  REQUIRE_THROWS(fault.set_labels(vertices));
+}

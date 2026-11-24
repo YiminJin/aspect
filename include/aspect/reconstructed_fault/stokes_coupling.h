@@ -68,8 +68,8 @@ namespace aspect
       };
       std::map<CellId,Reaction> reaction;
       std::vector<double> reaction_rates;
-      double reaction_change=0.;
-      void project_reaction(const LinearAlgebra::BlockVector &iterate);
+      /** Replace trial moments and optionally measure the change from the last Stokes assembly. */
+      double project_reaction(const LinearAlgebra::BlockVector &iterate, bool compare_with_assembly);
       /** Owned DGQ2 rotated spatial parent in Pa. Apply the local Maxwell beta
        * after interpolation to each physical constitutive point. */
       std::map<CellId,std::vector<Stress>> objective_parent;

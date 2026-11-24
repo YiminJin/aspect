@@ -46,18 +46,6 @@ namespace aspect
     normal[0] = -tangent[1];
     normal[1] = tangent[0];
     half_width = support;
-    if (interior && support==std::numeric_limits<double>::max())
-      {
-        half_width=0.;
-        for (unsigned int v=0; v<GeometryInfo<dim>::vertices_per_cell; ++v)
-          {
-            Point<dim> corner=origin;
-            for (unsigned int d=0; d<dim; ++d)
-              if (v & (1u<<d)) corner[d]+=extent[d];
-            half_width=std::max(half_width,std::abs((corner-vertices.front())*normal));
-          }
-        half_width+=64.*std::numeric_limits<double>::epsilon()*std::max({1.,length,vertices.front().norm(),vertices.back().norm()});
-      }
     accepted.clear();
     for (const auto &vertex : vertices)
       {
@@ -68,7 +56,7 @@ namespace aspect
         AssertThrow(std::abs((vertex-vertices.front())*normal) <= face_tolerance(axis) &&
                     (accepted.empty() || (vertex-accepted.back().position)*tangent > 0.),
                     ExcMessage("Stationary seed labels must be straight and strictly ordered."));
-        accepted.push_back({vertex,age,0.,rate,half_width,0.,0.});
+        accepted.push_back({vertex,age,0.,rate,support==std::numeric_limits<double>::max() ? 0. : support,0.,0.});
       }
     rebuild_segments();
   }
@@ -77,6 +65,9 @@ namespace aspect
   void StationaryFault<dim>::set_labels(std::vector<Label> labels)
   {
     AssertThrow(labels.size()==accepted.size(),ExcMessage("Material fault topology changed."));
+    if (half_width==std::numeric_limits<double>::max())
+      for (auto &label:labels)
+        label.half_width=0.;
     accepted=std::move(labels);
     rebuild_segments();
   }
@@ -103,7 +94,8 @@ namespace aspect
         Tensor<2,dim> F=unit_symmetric_tensor<dim>();
         F+=dt*grad[i];
         AssertThrow(determinant(F)>0.,ExcMessage("Material support reversed orientation."));
-        accepted[i].half_width/=(transpose(invert(F))*n).norm();
+        if (half_width!=std::numeric_limits<double>::max())
+          accepted[i].half_width/=(transpose(invert(F))*n).norm();
         accepted[i].position+=dt*u[i];
         for (unsigned int d=0; d<dim; ++d)
           AssertThrow(accepted[i].position[d]>box.get_origin()[d] &&
@@ -116,12 +108,44 @@ namespace aspect
   template <int dim>
   void StationaryFault<dim>::rebuild_segments()
   {
+    // A trace may turn through any angle, but cannot fold back onto
+    // itself or acquire a crossing without a change of fault topology.
+    const auto cross=[](const Tensor<1,dim> &a,const Tensor<1,dim> &b)
+    {
+      return a[0]*b[1]-a[1]*b[0];
+    };
     segments.clear();
     arclength = {0.};
     for (unsigned int j=0; j+1<accepted.size(); ++j)
       {
         const auto edge = accepted[j+1].position-accepted[j].position;
-        AssertThrow(edge*tangent > 0.,ExcMessage("Ridge fit reversed the order of the material labels."));
+        AssertThrow(std::isfinite(edge.norm()) && edge.norm()>0.,ExcMessage("Degenerate material fault edge."));
+        const auto &start=accepted[j].position;
+        const auto &end=accepted[j+1].position;
+        if (j>0)
+          {
+            const auto previous=start-accepted[j-1].position;
+            AssertThrow(cross(previous,edge)!=0. || previous*edge>0.,
+                        ExcMessage("Adjacent material fault edges overlap."));
+          }
+        for (unsigned int k=0; k+1<j; ++k)
+          {
+            const auto &a=accepted[k].position;
+            const auto &b=accepted[k+1].position;
+            const auto separate=[](const double u,const double v,const double x,const double y)
+            {
+              return std::max(u,v)<std::min(x,y) || std::max(x,y)<std::min(u,v);
+            };
+            if (separate(a[0],b[0],start[0],end[0]) || separate(a[1],b[1],start[1],end[1]))
+              continue;
+            const auto same_side=[](const double x,const double y)
+            {
+              return (x>0. && y>0.) || (x<0. && y<0.);
+            };
+            AssertThrow(same_side(cross(edge,a-start),cross(edge,b-start)) ||
+                        same_side(cross(b-a,start-a),cross(b-a,end-a)),
+                        ExcMessage("Nonadjacent material fault edges intersect."));
+          }
         const auto t = edge/edge.norm();
         Tensor<1,dim> n;
         n[0] = -t[1];
@@ -129,6 +153,15 @@ namespace aspect
         segments.push_back({arclength.back(),edge.norm(),t,n,outer_product(t,n)});
         arclength.push_back(arclength.back()+edge.norm());
       }
+  }
+
+  template <int dim>
+  double StationaryFault<dim>::normal_support(const unsigned int segment_index, const double xi) const
+  {
+    if (half_width==std::numeric_limits<double>::max())
+      return std::numeric_limits<double>::infinity();
+    const double left=accepted[segment_index].half_width;
+    return left+xi*(accepted[segment_index+1].half_width-left);
   }
 
   template <int dim>
@@ -306,6 +339,9 @@ namespace aspect
       }
     accepted.front().position=bottom;
     accepted.back().position=top;
+    for (unsigned int j=1; j<n; ++j)
+      AssertThrow((accepted[j].position-accepted[j-1].position)*tangent > 0.,
+                  ExcMessage("Ridge fit reversed the order of the material labels."));
     for (const auto &label : accepted)
       AssertThrow(sim.get_geometry_model().point_is_in_domain(label.position),ExcMessage("Fitted fault left the physical box."));
     rebuild_segments();
@@ -330,7 +366,7 @@ namespace aspect
                                     accepted[j].position + s*seg.tangent);
         const double distance = point.distance_square(closest_point);
         const double tol = 32.*std::numeric_limits<double>::epsilon()*arclength.back();
-        const bool active = s >= -tol && s <= seg.length+tol && std::abs(offset*seg.normal) <= accepted[j].half_width+(bounded/seg.length)*(accepted[j+1].half_width-accepted[j].half_width);
+        const bool active = s >= -tol && s <= seg.length+tol && std::abs(offset*seg.normal) <= normal_support(j,bounded/seg.length);
         if ((active && !closest.active) || (active == closest.active && distance < best))
           {
             closest = {j,bounded/seg.length,active};
@@ -372,7 +408,7 @@ namespace aspect
                                 line.c+std::max(0.,line.a)+std::max(0.,line.b));
         };
         const auto s=range(station), d=range(normal_distance);
-        const double radius=std::max(accepted[j].half_width,accepted[j+1].half_width);
+        const double radius=std::max(normal_support(j,0.),normal_support(j,1.));
         if (s.second<=0. || s.first>=segments[j].length || d.second<=-radius || d.first>=radius)
           continue;
         for (const double face :
@@ -392,7 +428,7 @@ namespace aspect
                               normal_distance.c-side*(accepted[j].half_width+slope*station.c)
           };
           const auto limits=range(edge);
-          if (limits.first<0. && limits.second>0.) cuts.push_back(edge);
+          if (std::isfinite(radius) && limits.first<0. && limits.second>0.) cuts.push_back(edge);
         }
         for (const auto &other:normals)
           for (const double sign :

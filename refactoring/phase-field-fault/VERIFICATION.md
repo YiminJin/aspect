@@ -4,6 +4,8 @@ The completed `MIDPOINT_UPDATE_CLOSEOUT.md` freezes the implemented midpoint upd
 
 ## Layered moving mature fault
 
+The [4C closeout regressions](STATUS.md#increment-4c-review-closeout) check the returned DG projection with a nonzero parent, full and finite moving normal supports, the fixed/advected interior weak action, and the later Picard section tangent. Keep the prescribed donor radius explicit in the frozen case. The zero-width translation exercises full in-box admission separately.
+
 Use the [4C fixture, immutable donor identity, commands and measured comparisons](STATUS.md#review-of-the-bounded-4c-calculation). The canonical run compares both accepted physical endpoints and twenty material IDs. Reconstruct the Cartesian DG polynomials independently, check both signed transfer contractions, and compare the actual Q3 Stokes vector action with Q8 physical stress work. Initialization tests the direct section law. Physical steps test the projected response shared by mechanics and publication.
 
 The target-only matrix covers fresh starts, rejection of a long first attempt, checkpoint continuation, an actual change of supporting MPI rank, pointwise layer sampling, zero and reversed translations, a compact support disjoint from the walls, and the homogeneous limit. Keep sampled physical extrema and exact geometric clearance distinct. The plot, parameter-file CTest and comparison script belong with their respective record, tests and benchmark. The frozen donor archive is needed only for the external scientific comparison.

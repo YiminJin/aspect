@@ -46,11 +46,8 @@ namespace aspect
         Tensor<1,dim> tangent, normal;
         Tensor<2,dim> dyad;
       };
-      /** Seed normal radius in metres. The moving strip interpolates current label widths. */
-      double support_radius() const
-      {
-        return half_width;
-      }
+      /** Current normal admission radius at a Q1 station, or infinity for full in-box support. */
+      double normal_support(unsigned int segment_index, double xi) const;
       const Segment &segment(unsigned int j) const;
       /** Collectively fit normal offsets to two-sided observations of the
        * initialized FE ridge. Constrain both crossings to the one-sided

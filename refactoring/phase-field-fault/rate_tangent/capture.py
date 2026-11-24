@@ -7,6 +7,9 @@ scratch=Path.cwd()
 repo=Path(sys.argv[1]).resolve(); build=repo/'build-slice'
 source=repo/'source/reconstructed_fault/stokes_coupling.cc'
 original=source.read_text()
+moving = sys.argv[2:] == ["--moving"]
+if sys.argv[2:] and not moving:
+    raise SystemExit("usage: capture.py WORKTREE [--moving]")
 def inject(text, anchor, addition):
     if text.count(anchor)!=1: raise ValueError(anchor)
     return text.replace(anchor,addition+anchor)
@@ -37,6 +40,17 @@ s=inject(s,'        if (residual <= 64.*std::numeric_limits<double>::epsilon())'
                 << ' ' << rhs[j] << ' ' << scale[j] << ' ' << material.stiffness(accepted[j].position) << '\n';
           }
 ''')
+if moving:
+    # The third Picard preparation at the second endpoint has a frozen Q8
+    # reaction. Record its stress defect relative to the unprojected point law.
+    s = s.replace("this->get_timestep_number()==2 && this->get_nonlinear_iteration()==0",
+                  "this->get_timestep_number()==2 && this->get_nonlinear_iteration()==2 && !reaction.empty()")
+    s = inject(s, "              if (review_points.is_open())", r"""
+              Stress direct = material.viscous_stress(strain[q],x);
+              for (unsigned int i=0; i<parent.size(); ++i)
+                direct += basis(q,i)*parent[i]*material.relaxation(x);
+""")
+    s = s.replace("<< compression << '\\n'", "<< compression << ' ' << (stress-direct).norm() << '\\n'")
 (scratch/source.name).write_text('#include <fstream>\n#include <iomanip>\n'+s)
 unity=next(p for p in (build/'CMakeFiles/aspect.exe.release.dir/Unity').glob('*.cxx') if str(source) in p.read_text())
 replacement=scratch/unity.name

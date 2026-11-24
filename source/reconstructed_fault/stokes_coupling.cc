@@ -88,25 +88,35 @@ namespace aspect
   {
     material.bind_candidate(iterate);
     trial_rates = solve_rates(iterate);
-    if (material.moving) project_reaction(iterate);
+    if (material.interior_seed) project_reaction(iterate,false);
   }
 
   template <int dim>
   void FaultStokesCoupling<dim>::check_convergence(const LinearAlgebra::BlockVector &solution, bool &converged)
   {
-    if (material.moving && reaction_change>this->get_parameters().nonlinear_tolerance)
+    const auto rates_agree = [](const std::vector<double> &a, const std::vector<double> &b)
+    {
+      for (unsigned int j=0; j<a.size(); ++j)
+        if (std::abs(a[j]-b[j]) > 1.e-8*std::max(a[j],b[j]))
+          return false;
+      return true;
+    };
+    auto returned_rates = solve_rates(solution);
+    converged &= rates_agree(returned_rates,trial_rates);
+    trial_rates.swap(returned_rates);
+    if (material.interior_seed)
       {
-        converged=false;
-        return;
+        // Compare the returned Q8 moments to those used in the last assembly.
+        // Keep this stress/rate pair for publication if all vetoes pass.
+        const double change = project_reaction(solution,true);
+        if (change > this->get_parameters().nonlinear_tolerance)
+          {
+            this->get_pcout() << "      Relative change in returned fault stress projection: " << change << std::endl;
+            converged = false;
+          }
+        if (converged && this->get_timestep()>0.)
+          converged &= rates_agree(solve_rates(solution),trial_rates);
       }
-    auto rates = solve_rates(solution);
-    for (unsigned int j=0; j<rates.size(); ++j)
-      if (std::abs(rates[j]-trial_rates[j]) > 1.e-8*std::max(rates[j],trial_rates[j]))
-        {
-          converged = false;
-          return;
-        }
-    trial_rates.swap(rates);
   }
 
   template <int dim>
@@ -217,7 +227,7 @@ namespace aspect
               if (transfer.chi==0.) continue;
               const auto &frame = material.section().fault.segment(transfer.foot.left);
               Stress stress = material.viscous_stress(strain[q],x);
-              if (material.moving && this->get_timestep()>0. && !reaction.empty())
+              if (material.interior_seed && this->get_timestep()>0. && !reaction.empty())
                 {
                   const auto &frozen=reaction.at(cell->id());
                   const double k=material.stiffness(x);
@@ -272,7 +282,8 @@ namespace aspect
   }
 
   template <int dim>
-  void FaultStokesCoupling<dim>::project_reaction(const LinearAlgebra::BlockVector &iterate)
+  double FaultStokesCoupling<dim>::project_reaction(const LinearAlgebra::BlockVector &iterate,
+                                                    const bool compare_with_assembly)
   {
     const QGauss<dim> rule(8);
     const auto &dg=stress_element();
@@ -301,20 +312,23 @@ namespace aspect
               physical[q]=material.relaxation(x)*anchor+material.viscous_stress(strain[q],x)-2.*material.stiffness(x)*symmetrize(slip);
             }
           auto &frozen=reaction[cell->id()];
-          const auto old=frozen.stress;
+          std::vector<Stress> assembled;
+          if (compare_with_assembly)
+            assembled.swap(frozen.stress);
           frozen.strain.resize(parent.size());
           frozen.stress.resize(parent.size());
           FETools::compute_projection_from_quadrature_points(projection,strain,frozen.strain);
           FETools::compute_projection_from_quadrature_points(projection,physical,frozen.stress);
-          for (unsigned int i=0; i<parent.size(); ++i)
-            {
-              scale=std::max(scale,frozen.stress[i].norm());
-              difference=std::max(difference,old.empty() ? frozen.stress[i].norm() : (old[i]-frozen.stress[i]).norm());
-            }
+          if (compare_with_assembly)
+            for (unsigned int i=0; i<parent.size(); ++i)
+              {
+                scale=std::max(scale,frozen.stress[i].norm());
+                difference=std::max(difference,(assembled[i]-frozen.stress[i]).norm());
+              }
         }
     const auto comm=this->get_mpi_communicator();
-    reaction_change=Utilities::MPI::max(difference,comm)/Utilities::MPI::max(scale,comm);
     reaction_rates=trial_rates;
+    return compare_with_assembly ? Utilities::MPI::max(difference,comm)/Utilities::MPI::max(scale,comm) : 0.;
   }
 
   template <int dim>
@@ -325,7 +339,6 @@ namespace aspect
       {
         // Project the complete physical response: localized slip and cut Q1
         // knots generally lie outside DGQ2. The Cartesian cell Jacobian is constant.
-        if (material.moving) project_reaction(solution);
         const auto &system = this->get_fe();
         const auto &intro = this->introspection();
         const QGauss<dim> rule(8);
@@ -341,7 +354,7 @@ namespace aspect
         for (const auto &cell : this->get_dof_handler().active_cell_iterators())
           if (cell->is_locally_owned())
             {
-              const auto cut=material.moving ? Quadrature<dim>() : material.section().fault.cut_quadrature(cell->vertex(0),cell->vertex(GeometryInfo<dim>::vertices_per_cell-1));
+              const auto cut=material.interior_seed ? Quadrature<dim>() : material.section().fault.cut_quadrature(cell->vertex(0),cell->vertex(GeometryInfo<dim>::vertices_per_cell-1));
               const auto project=[&](FEValues<dim> &values, const FullMatrix<double> &projection)
               {
                 values.reinit(cell);
@@ -354,7 +367,7 @@ namespace aspect
                   physical[q]=material.endpoint_stress(cell,values.quadrature_point(q),phase[q],strain[q]);
                 FETools::compute_projection_from_quadrature_points(projection,physical,coefficients);
               };
-              if (material.moving)
+              if (material.interior_seed)
                 coefficients=reaction.at(cell->id()).stress;
               else if (cut.size())
                 {

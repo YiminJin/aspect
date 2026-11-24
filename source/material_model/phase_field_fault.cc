@@ -52,8 +52,8 @@ namespace aspect
         {
           if (fit_trace)
             accepted->fault.fit(*this,phase_field,this->get_old_solution());
-          if (!moving || this->get_timestep_number()>0)
-            accepted->profile.initialize(*this,phase_field,this->get_old_solution(),degradation_magnitude,moving ? 8 : 1);
+          if (!interior_seed || this->get_timestep_number()>0)
+            accepted->profile.initialize(*this,phase_field,this->get_old_solution(),degradation_magnitude,interior_seed ? 8 : 1);
           trace_initialized = true;
         }
       coupling.prepare_parent();
@@ -62,10 +62,10 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::bind_candidate(const LinearAlgebra::BlockVector &fields)
     {
-      if (!moving || candidate) return;
+      if (!interior_seed || candidate) return;
       candidate=std::make_unique<Section>();
       candidate->fault=accepted->fault;
-      if (this->get_timestep()>0.)
+      if (advect_vertices && this->get_timestep()>0.)
         candidate->fault.advect(*this,this->get_timestep());
       candidate->profile.initialize(*this,phase_field,fields,degradation_magnitude,8);
     }
@@ -162,6 +162,13 @@ namespace aspect
       prm.enter_subsection("Exterior parent stress");
       Functions::ParsedFunction<dim>::declare_parameters(prm,3);
       prm.leave_subsection();
+      prm.declare_entry("Fault geometry","automatic",
+                        Patterns::Selection("automatic|boundary spanning|fixed interior|advected interior"),
+                        "Boundary spanning uses the stationary section law. Both interior modes use the prescribed "
+                        "material seed and the same Q8 projected Maxwell response. Advected interior moves vertices "
+                        "with accepted velocity and requires bounded phase and physical stress transport. Fixed "
+                        "interior holds the vertices fixed. Automatic preserves earlier inputs by selecting advected "
+                        "interior for the phase field composition role and boundary spanning for the generic role.");
       prm.declare_entry("Fault vertices","",Patterns::List(Patterns::List(Patterns::Double(),2,2),0,
                                                            Patterns::List::max_int_value,";"),"Ordered x,y label positions in metres separated by semicolons. "
                         "The default joins the ends of the left box boundary.");
@@ -204,11 +211,10 @@ namespace aspect
       prm.leave_subsection();
       const auto &p = this->get_parameters();
       phase_field = this->introspection().compositional_index_for_name("phase_field");
-      moving=p.explicit_compositions.selected[phase_field];
-      AssertThrow(moving || (prm.get("Resume computation") == "false" && p.resume_checkpoint_id == 0 && p.resume_time < 0. &&
+      const bool transport_phase = p.explicit_compositions.selected[phase_field];
+      const bool fresh_run = prm.get("Resume computation") == "false" && p.resume_checkpoint_id == 0 && p.resume_time < 0. &&
                              p.checkpoint_steps == 0 && p.checkpoint_time_secs == 0 &&
-                             p.additional_checkpoint_times.empty() && !checkpoint_on_termination),
-                  ExcMessage("Phase field fault requires a fresh run with checkpointing disabled: label history is in memory."));
+                             p.additional_checkpoint_times.empty() && !checkpoint_on_termination;
       prm.enter_subsection("Material model");
       prm.enter_subsection("Simple model");
       // The Simple model subsection supplies the single-lithology background
@@ -220,6 +226,18 @@ namespace aspect
                   ExcMessage("The base Maxwell viscosity requires zero thermal exponent and unit compositional prefactor."));
       prm.leave_subsection();
       prm.enter_subsection("Phase field fault");
+      const std::string geometry = prm.get("Fault geometry");
+      // Before the geometry parameter existed, interior inputs required the
+      // phase-field role and boundary-spanning inputs required a generic field.
+      const bool phase_role = p.composition_descriptions[phase_field].type == CompositionalFieldDescription::phase_field;
+      advect_vertices = geometry == "advected interior" || (geometry == "automatic" && phase_role);
+      interior_seed = advect_vertices || geometry == "fixed interior";
+      AssertThrow(!advect_vertices || transport_phase,
+                  ExcMessage("An advected interior seed requires bounded SSPRK3 transport of phase_field."));
+      AssertThrow(!transport_phase || interior_seed,
+                  ExcMessage("Transported phase requires an interior fault seed."));
+      AssertThrow(interior_seed || fresh_run,
+                  ExcMessage("Phase field fault requires a fresh run with checkpointing disabled: label history is in memory."));
       if (prm.get_bool("Advect physical stress"))
         {
           AssertThrow(this->get_geometry_model().get_periodic_boundary_pairs().empty(),
@@ -261,10 +279,10 @@ namespace aspect
       AssertThrow(degradation_magnitude>0.,ExcMessage("Degradation magnitude must be positive."));
       fit_trace = prm.get_bool("Fit trace to phase");
       const double support = prm.get_double("Profile half width");
-      AssertThrow(!moving || (!fit_trace && inflow_stress && vertices.size()>=2),
-                  ExcMessage("Moving mature fault requires a prescribed material seed, transported stress and bounded phase."));
+      AssertThrow(!interior_seed || (!fit_trace && (!advect_vertices || inflow_stress)),
+                  ExcMessage("Interior mechanics requires a prescribed seed with fitting disabled. Moving its vertices also requires physical stress transport."));
       accepted->fault.initialize(box.get_origin(),box.get_extents(),vertices,age,friction.reference_speed,
-                                 support > 0. ? support : std::numeric_limits<double>::max(),moving);
+                                 support > 0. ? support : std::numeric_limits<double>::max(),interior_seed);
       auto labels=accepted->fault.labels();
       const auto ages=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label ages")));
       const auto shear=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label shear tractions")));
@@ -285,12 +303,12 @@ namespace aspect
                   ExcMessage("The fixed fault requires positive material, time and speed scales."));
       AssertThrow(friction.reference_speed >= minimum_speed,
                   ExcMessage("The reference speed must be at least the minimum admissible speed."));
-      AssertThrow(dim == 2 && !p.enable_elasticity && p.nonlinear_solver == (moving ? Parameters<dim>::NonlinearSolver::single_Advection_iterated_Stokes : Parameters<dim>::NonlinearSolver::no_Advection_iterated_Stokes)
+      AssertThrow(dim == 2 && !p.enable_elasticity && p.nonlinear_solver == (transport_phase ? Parameters<dim>::NonlinearSolver::single_Advection_iterated_Stokes : Parameters<dim>::NonlinearSolver::no_Advection_iterated_Stokes)
                   && p.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg && p.stokes_velocity_degree == 2
                   && !p.run_postprocessors_on_nonlinear_iterations && !p.mesh_deformation_enabled && !p.include_melt_transport && p.pressure_normalization == "no"
                   && p.nonlinear_solver_failure_strategy != Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep,
                   ExcMessage("The fixed fault requires a fixed 2-D Q2 box with ASPECT elasticity disabled, block AMG, no pressure normalization, "
-                             "one phase advance for moving geometry, iterated Stokes, and convergence or retry."));
+                             "a composition solve for selected phase transport, iterated Stokes, and convergence or retry."));
       AssertThrow(!p.enable_prescribed_dilation && (p.formulation_mass_conservation ==
                                                     Parameters<dim>::Formulation::MassConservation::incompressible || p.formulation_mass_conservation ==
                                                     Parameters<dim>::Formulation::MassConservation::ask_material_model),
@@ -307,11 +325,11 @@ namespace aspect
           AssertThrow(p.composition_descriptions[stress_fields[c]].type == CompositionalFieldDescription::stress,
                       ExcMessage(names[c]+" must have compositional type stress."));
         }
-      AssertThrow(p.composition_descriptions[phase_field].type == (moving ? CompositionalFieldDescription::phase_field : CompositionalFieldDescription::generic),
-                  ExcMessage("Static phase must have type generic, transported phase must have type phase field."));
+      AssertThrow((interior_seed ? phase_role : p.composition_descriptions[phase_field].type == CompositionalFieldDescription::generic),
+                  ExcMessage("Interior mechanics requires the phase field role. Boundary-spanning mechanics requires generic phase."));
       for (unsigned int c=0; c<intro.n_compositional_fields; ++c)
         AssertThrow(p.composition_degrees[c] == 2 && p.use_discontinuous_composition_discretization[c] &&
-                    p.compositional_field_methods[c] == (moving && c==phase_field ? Parameters<dim>::AdvectionFieldMethod::fem_field : Parameters<dim>::AdvectionFieldMethod::static_field),
+                    p.compositional_field_methods[c] == (transport_phase && c==phase_field ? Parameters<dim>::AdvectionFieldMethod::fem_field : Parameters<dim>::AdvectionFieldMethod::static_field),
                     ExcMessage("Fault stress requires static DGQ2. Phase requires static DGQ2 or bounded SSPRK3."));
 
       interval = initial_interval;
@@ -321,7 +339,7 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::save(std::map<std::string,std::string> &status) const
     {
-      if (!moving) return;
+      if (!interior_seed) return;
       std::ostringstream out;
       out<<std::setprecision(17)<<labels().size()<<'\n';
       for (const auto &p:labels())
@@ -332,17 +350,17 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::load(const std::map<std::string,std::string> &status)
     {
-      if (!moving) return;
+      if (!interior_seed) return;
       const auto entry=status.find("Material fault labels v1");
-      AssertThrow(entry!=status.end(),ExcMessage("Missing moving fault labels in checkpoint."));
+      AssertThrow(entry!=status.end(),ExcMessage("Missing interior fault labels in checkpoint."));
       std::istringstream in(entry->second);
       auto restored=labels();
       unsigned int n=0;
       in>>n;
-      AssertThrow(n==restored.size(),ExcMessage("Incompatible moving fault topology in checkpoint."));
+      AssertThrow(n==restored.size(),ExcMessage("Incompatible interior fault topology in checkpoint."));
       for (auto &p:restored)
         in>>p.position>>p.half_width>>p.initial_shear>>p.age>>p.rate>>p.slip>>p.memory;
-      AssertThrow(in,ExcMessage("Incomplete moving fault checkpoint."));
+      AssertThrow(in,ExcMessage("Incomplete interior fault checkpoint."));
       accepted->fault.set_labels(std::move(restored));
       trace_initialized=false;
     }

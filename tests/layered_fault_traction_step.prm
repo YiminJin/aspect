@@ -1,0 +1,3 @@
+# Enable if: QUICK_TEST
+include $ASPECT_SOURCE_DIR/benchmarks/layered_moving_fault/traction_step.prm
+set Additional shared libraries = ./liblayered_moving_fault.so

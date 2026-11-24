@@ -78,8 +78,9 @@ namespace aspect
         {
           return candidate ? *candidate : *accepted;
         }
-        /** A selected bounded phase transports the interior material curve. */
-        bool moving = false;
+        /** Both interior seed modes use the projected Maxwell response. */
+        bool interior_seed = false;
+        bool advect_vertices = false;
         double interval;
         double degradation_magnitude;
         std::array<unsigned int,3> stress_fields; // xx, yy, xy by role

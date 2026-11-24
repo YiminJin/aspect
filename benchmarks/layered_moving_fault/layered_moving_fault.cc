@@ -328,6 +328,12 @@ namespace aspect
           std::vector<Tensor<1,dim>> velocity(rule.size());
           std::vector<Tensor<2,dim>> grad(rule.size());
           std::vector<double> pressure(rule.size());
+          const auto &intro=this->introspection();
+          const std::array<unsigned int,4> fields_by_role= {{
+              intro.compositional_index_for_name("fault_stress_xx"),intro.compositional_index_for_name("fault_stress_yy"),
+              intro.compositional_index_for_name("fault_stress_xy"),intro.compositional_index_for_name("phase_field")
+            }
+          };
           std::array<std::vector<double>,4> composition;
           const auto &ex=this->introspection().extractors;
           for (const auto &cell:this->get_dof_handler().active_cell_iterators())
@@ -341,7 +347,7 @@ namespace aspect
                 for (unsigned int c=0; c<4; ++c)
                   {
                     composition[c].resize(rule.size());
-                    fe[ex.compositional_fields[c]].get_function_values(sol,composition[c]);
+                    fe[ex.compositional_fields[fields_by_role[c]]].get_function_values(sol,composition[c]);
                   }
                 for (unsigned int q=0; q<rule.size(); ++q)
                   {
