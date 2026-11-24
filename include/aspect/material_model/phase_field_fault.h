@@ -34,25 +34,53 @@ namespace aspect
 
         const FaultPhaseProfile<dim> &phase_profile() const
         {
-          return profile;
+          return accepted->profile;
         }
-        /** Instantaneous physical endpoint before projection into DG history. */
+        /** Stress used by Stokes at the current endpoint, in Pa. */
         SymmetricTensor<2,dim> endpoint_stress(const typename DoFHandler<dim>::active_cell_iterator &cell,
                                                const Point<dim> &x, double phase, const SymmetricTensor<2,dim> &strain) const;
+        void save(std::map<std::string,std::string> &status) const override;
+        void load(const std::map<std::string,std::string> &status) override;
       protected:
+        /** Eulerian Maxwell viscosity (Pa s) at the constitutive point. */
+        virtual double bulk_viscosity(const Point<dim> &) const
+        {
+          return viscosity;
+        }
+        /** Exterior physical parent stress, with a private RK clock in seconds. */
+        virtual Function<dim> &exterior_stress()
+        {
+          return *inflow_stress;
+        }
         /** FE operations shared by materials with the same Maxwell response. */
         FaultStokesCoupling<dim> coupling;
       private:
         friend class aspect::FaultStokesCoupling<dim>;
         using Stress = SymmetricTensor<2,dim>;
-        Stress viscous_stress(const Stress &strain_rate) const;
+        Stress viscous_stress(const Stress &strain_rate, const Point<dim> &x) const;
+        double stiffness(const Point<dim> &x) const;
+        double relaxation(const Point<dim> &x) const;
+        void bind_candidate(const LinearAlgebra::BlockVector &fields);
 
-        Stress relaxed_parent(const Stress &parent, const Tensor<2,dim> &accepted_gradient,
-                              const Tensor<2,dim> &slip_gradient, double physical_dt, double relaxation) const;
+        Stress rotate_parent(const Stress &parent, const Tensor<2,dim> &accepted_gradient,
+                             const Tensor<2,dim> &slip_gradient, double physical_dt) const;
         EquationOfState::LinearizedIncompressible<dim> eos;
         Rheology::RateAndStateFriction friction;
-        StationaryFault<dim> fault;
-        FaultPhaseProfile<dim> profile;
+        // A profile borrows its own curve. Swapping owners publishes both together.
+        struct Section
+        {
+          StationaryFault<dim> fault;
+          FaultPhaseProfile<dim> profile {fault};
+        };
+        std::unique_ptr<Section> accepted, candidate;
+        /** Active geometry and transfer for the current Stokes evaluation. */
+        Section &section()
+        {
+          return candidate ? *candidate : *accepted;
+        }
+        /** A selected bounded phase transports the interior material curve. */
+        bool moving = false;
+        double interval;
         double degradation_magnitude;
         std::array<unsigned int,3> stress_fields; // xx, yy, xy by role
         unsigned int phase_field;
@@ -61,7 +89,7 @@ namespace aspect
         std::unique_ptr<Functions::ParsedFunction<dim>> inflow_stress;
         bool fit_trace, trace_initialized = false;
         double conductivity, viscosity, modulus, background_shear, background_compression;
-        double initial_interval, minimum_speed, kappa;
+        double initial_interval, minimum_speed;
     };
   }
 }

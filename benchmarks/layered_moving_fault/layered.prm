@@ -1,0 +1,122 @@
+# Finite material trace in the frozen layered Maxwell column.
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = 0.025
+set Nonlinear solver scheme = single Advection, iterated Stokes
+set Nonlinear solver tolerance = 1e-8
+set Nonlinear solver failure strategy = abort program
+set Max nonlinear iterations = 30
+set Pressure normalization = no
+set Output directory = output-layered-moving-fault
+subsection Formulation
+  set Enable elasticity = false
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set X extent = 12
+    set Y extent = 4
+    set X repetitions = 3
+    set Box origin X coordinate = -6
+    set Box origin Y coordinate = -2
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 3
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:layered background, right:layered background, bottom:layered background
+  subsection Function
+    set Function expression = 0;0
+  end
+end
+subsection Boundary traction model
+  set Prescribed traction boundary indicators = top:layered background
+  subsection Function
+    set Function expression = 0;0.02+t
+  end
+end
+subsection Time stepping
+  set List of model names = function
+  subsection Function
+    set Function expression = 0.0125
+  end
+end
+subsection Discretization
+  set Composition polynomial degree = 2
+  set Use discontinuous composition discretization = true
+end
+subsection Compositional fields
+  set Number of fields = 4
+  set Names of fields = fault_stress_xx, fault_stress_yy, fault_stress_xy, phase_field
+  set Types of fields = stress, stress, stress, phase field
+  set Compositional field methods = static, static, static, field
+  set SSPRK3 fields = phase_field
+end
+subsection Initial composition model
+  set List of model names = function
+  subsection Function
+    set Function expression = 0;0;0;.35*max(0,1-(x/1.4)^2)^4*max(0,1-((y-.6*x)/.6)^2)^4
+  end
+end
+subsection Initial temperature model
+  set List of model names = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Material model
+  set Model name = layered mature fault
+  subsection Simple model
+    set Viscosity = 10
+  end
+  subsection Phase field fault
+    set Fault vertices = -0.80000000000000004,-0.47999999999999998; -0.71578947368421053,-0.42947368421052629; -0.63157894736842113,-0.37894736842105264; -0.5473684210526315,-0.32842105263157889; -0.46315789473684216,-0.27789473684210531; -0.3789473684210527,-0.22736842105263161; -0.29473684210526307,-0.17684210526315783; -0.21052631578947367,-0.12631578947368419; -0.12631578947368427,-0.075789473684210559; -0.042105263157894757,-0.025263157894736852; 0.042105263157894646,0.025263157894736786; 0.12631578947368427,0.075789473684210559; 0.21052631578947389,0.12631578947368433; 0.29473684210526319,0.17684210526315791; 0.3789473684210527,0.22736842105263161; 0.46315789473684199,0.27789473684210519; 0.5473684210526315,0.32842105263157889; 0.63157894736842124,0.37894736842105275; 0.71578947368421053,0.42947368421052629; 0.80000000000000004,0.47999999999999998
+    set Initial label ages = 8.0008527939169891, 8.0193501954744715, 8.093897339340197, 8.2223846409758252, 8.4011760814697354, 8.6252121020126378, 8.8881527826497262, 9.1825572535420275, 9.5000942616380399, 9.831777934000284, 10.168222065999714, 10.49990573836196, 10.817442746457973, 11.111847217350274, 11.374787897987362, 11.598823918530265, 11.777615359024175, 11.906102660659803, 11.980649804525529, 11.999147206083011
+    set Initial label shear tractions = 3.5893909426688131, 3.6182269888747576, 3.6522543121906308, 3.6893127223261271, 3.7270496035022811, 3.7630692678906246, 3.7950850434379531, 3.8210644409345806, 3.8393581845412292, 3.8488049144017142, 3.8488049144017142, 3.8393581845412292, 3.8210644409345806, 3.7950850434379531, 3.7630692678906246, 3.7270496035022811, 3.6893127223261271, 3.6522543121906308, 3.6182269888747576, 3.5893909426688131
+    set Advect physical stress = true
+    set Fit trace to phase = false
+    set Degradation magnitude = 50
+    set Shear modulus = 10
+    set Initialization interval = 0.1
+    set Background compression = 5
+    set Background shear traction = 3.85
+    set Reference friction coefficient = 0.6
+    set Direct effect = 0.025
+    set Evolution effect = 0.015
+    set Slip distance = 0.008
+    set Reference speed = 0.001
+    set Radiation damping = 1
+    set Initial age = 10
+  end
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-9
+  end
+end
+subsection Boundary composition model
+  set Fixed composition boundary indicators = left,right,bottom,top
+  set List of model names = function
+  subsection Function
+    set Function expression = 0;0;0;0
+  end
+end
+subsection Postprocess
+  set List of postprocessors = layered background, moving fault samples, composition statistics
+  subsection Layered background
+    set Translation = 2
+  end
+end

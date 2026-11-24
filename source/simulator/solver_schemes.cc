@@ -1025,42 +1025,8 @@ namespace aspect
     assemble_and_solve_temperature();
     assemble_and_solve_composition();
 
-    // ...and then iterate the solution of the Stokes system
-    double initial_stokes_residual = 0;
-
-    const unsigned int max_nonlinear_iterations =
-      (pre_refinement_step < parameters.initial_adaptive_refinement)
-      ?
-      std::min(parameters.max_nonlinear_iterations,
-               parameters.max_nonlinear_iterations_in_prerefinement)
-      :
-      parameters.max_nonlinear_iterations;
-
-    SolverControl nonlinear_solver_control(max_nonlinear_iterations,
-                                           parameters.nonlinear_tolerance);
-
-    double relative_residual = std::numeric_limits<double>::max();
-    nonlinear_iteration = 0;
-    do
-      {
-        relative_residual =
-          assemble_and_solve_stokes(initial_stokes_residual,
-                                    nonlinear_iteration == 0 ? &initial_stokes_residual : nullptr);
-
-        pcout << "      Relative nonlinear residual (Stokes system) after nonlinear iteration " << nonlinear_iteration+1
-              << ": " << relative_residual
-              << std::endl
-              << std::endl;
-
-        if (parameters.run_postprocessors_on_nonlinear_iterations)
-          postprocess ();
-
-        ++nonlinear_iteration;
-      }
-    while (nonlinear_solver_control.check(nonlinear_iteration, relative_residual) == SolverControl::iterate);
-
-    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
-    signals.post_nonlinear_solver(nonlinear_solver_control);
+    // The coupled Picard solve sees the candidate compositions from this attempt.
+    solve_no_advection_iterated_stokes();
   }
 
 

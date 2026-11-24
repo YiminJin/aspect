@@ -22,7 +22,7 @@ s=inject(s,'              samples.push_back({transfer,fe.JxW(q)',r'''
               if (review_points.is_open())
                 review_points << cell->id() << ' ' << q << ' ' << fe.quadrature_point(q) << ' ' << phase[q] << ' '
                               << transfer.foot.left << ' ' << transfer.foot.xi << ' ' << transfer.chi << ' '
-                              << fe.JxW(q) << ' ' << material.background_shear + stress*symmetrize(frame.dyad)
+                              << fe.JxW(q) << ' ' << shear + stress*symmetrize(frame.dyad)
                               << ' ' << compression << '\n';
 ''')
 s=inject(s,'        if (residual <= 64.*std::numeric_limits<double>::epsilon())',r'''
@@ -32,9 +32,9 @@ s=inject(s,'        if (residual <= 64.*std::numeric_limits<double>::epsilon())'
             std::ofstream o(this->get_output_directory()+"review-bands-"+std::to_string(iteration)+"-"+std::to_string(rank));
             o << std::setprecision(17);
             for (unsigned int j=0;j<n;++j)
-              o << j << ' ' << accepted[j].position << ' ' << material.profile.normal_integrals()[j] << ' '
+              o << j << ' ' << accepted[j].position << ' ' << material.section().profile.normal_integrals()[j] << ' '
                 << accepted[j].age << ' ' << rates[j] << ' ' << diagonal[j] << ' ' << (j+1<n?upper[j]:0.)
-                << ' ' << rhs[j] << ' ' << scale[j] << ' ' << material.kappa << '\n';
+                << ' ' << rhs[j] << ' ' << scale[j] << ' ' << material.stiffness(accepted[j].position) << '\n';
           }
 ''')
 (scratch/source.name).write_text('#include <fstream>\n#include <iomanip>\n'+s)

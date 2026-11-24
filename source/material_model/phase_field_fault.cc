@@ -33,7 +33,7 @@ namespace aspect
     }
 
     template <int dim>
-    PhaseFieldFault<dim>::PhaseFieldFault() : coupling(*this), profile(fault) {}
+    PhaseFieldFault<dim>::PhaseFieldFault() : coupling(*this), accepted(std::make_unique<Section>()) {}
 
     template <int dim>
     void PhaseFieldFault<dim>::initialize()
@@ -46,35 +46,60 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::update()
     {
-      const double dt = this->get_timestep_number() == 0 ? initial_interval : this->get_timestep();
-      kappa = -viscosity*std::expm1(-modulus*dt/viscosity);
+      interval = this->get_timestep_number() == 0 ? initial_interval : this->get_timestep();
+      candidate.reset();
       if (!trace_initialized)
         {
           if (fit_trace)
-            fault.fit(*this,phase_field,this->get_old_solution());
-          profile.initialize(*this,phase_field,this->get_old_solution(),degradation_magnitude);
+            accepted->fault.fit(*this,phase_field,this->get_old_solution());
+          if (!moving || this->get_timestep_number()>0)
+            accepted->profile.initialize(*this,phase_field,this->get_old_solution(),degradation_magnitude,moving ? 8 : 1);
           trace_initialized = true;
         }
-      coupling.prepare_parent(std::exp(-modulus*dt/viscosity));
+      coupling.prepare_parent();
     }
 
     template <int dim>
-    typename PhaseFieldFault<dim>::Stress PhaseFieldFault<dim>::viscous_stress(const Stress &strain_rate) const
+    void PhaseFieldFault<dim>::bind_candidate(const LinearAlgebra::BlockVector &fields)
     {
-      return 2.*kappa*Utilities::Tensors::consistent_deviator(strain_rate);
+      if (!moving || candidate) return;
+      candidate=std::make_unique<Section>();
+      candidate->fault=accepted->fault;
+      if (this->get_timestep()>0.)
+        candidate->fault.advect(*this,this->get_timestep());
+      candidate->profile.initialize(*this,phase_field,fields,degradation_magnitude,8);
+    }
+
+    template <int dim>
+    double PhaseFieldFault<dim>::stiffness(const Point<dim> &x) const
+    {
+      const double eta=bulk_viscosity(x);
+      return -eta*std::expm1(-modulus*interval/eta);
+    }
+
+    template <int dim>
+    double PhaseFieldFault<dim>::relaxation(const Point<dim> &x) const
+    {
+      return std::exp(-modulus*interval/bulk_viscosity(x));
+    }
+
+    template <int dim>
+    typename PhaseFieldFault<dim>::Stress PhaseFieldFault<dim>::viscous_stress(const Stress &strain_rate,const Point<dim> &x) const
+    {
+      return 2.*stiffness(x)*Utilities::Tensors::consistent_deviator(strain_rate);
     }
 
     template <int dim>
     SymmetricTensor<2,dim> PhaseFieldFault<dim>::endpoint_stress(const typename DoFHandler<dim>::active_cell_iterator &cell,
                                                                  const Point<dim> &x, const double phase, const Stress &strain) const
     {
-      return viscous_stress(strain)+coupling.stress_offset(cell,x,phase);
+      return viscous_stress(strain,x)+coupling.stress_offset(cell,x,phase);
     }
 
     template <int dim>
     typename PhaseFieldFault<dim>::Stress
-    PhaseFieldFault<dim>::relaxed_parent(const Stress &parent, const Tensor<2,dim> &accepted_gradient,
-                                         const Tensor<2,dim> &slip_gradient, const double physical_dt, const double relaxation) const
+    PhaseFieldFault<dim>::rotate_parent(const Stress &parent, const Tensor<2,dim> &accepted_gradient,
+                                        const Tensor<2,dim> &slip_gradient, const double physical_dt) const
     {
       if constexpr (dim == 2)
         {
@@ -83,7 +108,7 @@ namespace aspect
           const auto gradient = accepted_gradient - slip_gradient;
           const double angle = .5*physical_dt*(gradient[1][0]-gradient[0][1]);
           const auto rotation = Physics::Transformations::Rotations::rotation_matrix_2d(angle);
-          return relaxation*symmetrize(rotation*static_cast<Tensor<2,dim>>(parent)*transpose(rotation));
+          return symmetrize(rotation*static_cast<Tensor<2,dim>>(parent)*transpose(rotation));
         }
       AssertThrow(false,ExcNotImplemented());
       return {};
@@ -111,7 +136,7 @@ namespace aspect
           out.entropy_derivative_pressure[q] = background.entropy_derivative_pressure[0];
           out.entropy_derivative_temperature[q] = background.entropy_derivative_temperature[0];
           out.thermal_conductivities[q] = conductivity;
-          out.viscosities[q] = kappa;
+          out.viscosities[q] = stiffness(in.position[q]);
           std::fill(out.reaction_terms[q].begin(),out.reaction_terms[q].end(),0.);
           if (physical)
             for (unsigned int c=0; c<stress_fields.size(); ++c)
@@ -124,7 +149,7 @@ namespace aspect
     template <int dim>
     const std::vector<typename StationaryFault<dim>::Label> &PhaseFieldFault<dim>::labels() const
     {
-      return fault.labels();
+      return accepted->fault.labels();
     }
 
     template <int dim>
@@ -154,6 +179,8 @@ namespace aspect
       prm.declare_entry("Minimum speed","1e-20",Patterns::Double(0.),"Minimum admissible sliding speed in m/s.");
       prm.declare_entry("Slip distance","0.01",Patterns::Double(0.),"Characteristic slip distance in m.");
       prm.declare_entry("Radiation damping","0",Patterns::Double(0.),"Radiation damping coefficient in Pa s/m.");
+      prm.declare_entry("Initial label ages","",Patterns::List(Patterns::Double(0.)),"Optional ordered initial material ages in seconds.");
+      prm.declare_entry("Initial label shear tractions","",Patterns::List(Patterns::Double()),"Optional ordered initial material shear tractions in Pa.");
       prm.declare_entry("Initial age","1",Patterns::Double(0.),"Initial section age in seconds.");
       prm.leave_subsection();
       prm.leave_subsection();
@@ -162,6 +189,7 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::parse_parameters(ParameterHandler &prm)
     {
+      AssertThrow(dim==2,ExcMessage("Reconstructed fault mechanics requires 2-D plane strain."));
       // Some wrappers parse their base material without forwarding initialize().
       AssertThrow(&this->get_material_model() == this,
                   ExcMessage("Phase field fault must be the top-level material model so Stokes and "
@@ -175,9 +203,11 @@ namespace aspect
       const bool checkpoint_on_termination = prm.get_bool("Checkpoint on termination");
       prm.leave_subsection();
       const auto &p = this->get_parameters();
-      AssertThrow(prm.get("Resume computation") == "false" && p.resume_checkpoint_id == 0 && p.resume_time < 0. &&
-                  p.checkpoint_steps == 0 && p.checkpoint_time_secs == 0 &&
-                  p.additional_checkpoint_times.empty() && !checkpoint_on_termination,
+      phase_field = this->introspection().compositional_index_for_name("phase_field");
+      moving=p.explicit_compositions.selected[phase_field];
+      AssertThrow(moving || (prm.get("Resume computation") == "false" && p.resume_checkpoint_id == 0 && p.resume_time < 0. &&
+                             p.checkpoint_steps == 0 && p.checkpoint_time_secs == 0 &&
+                             p.additional_checkpoint_times.empty() && !checkpoint_on_termination),
                   ExcMessage("Phase field fault requires a fresh run with checkpointing disabled: label history is in memory."));
       prm.enter_subsection("Material model");
       prm.enter_subsection("Simple model");
@@ -187,7 +217,7 @@ namespace aspect
       conductivity = prm.get_double("Thermal conductivity");
       viscosity = prm.get_double("Viscosity");
       AssertThrow(prm.get_double("Thermal viscosity exponent") == 0 && prm.get_double("Composition viscosity prefactor") == 1.,
-                  ExcMessage("The stationary fault requires a constant bulk viscosity."));
+                  ExcMessage("The base Maxwell viscosity requires zero thermal exponent and unit compositional prefactor."));
       prm.leave_subsection();
       prm.enter_subsection("Phase field fault");
       if (prm.get_bool("Advect physical stress"))
@@ -231,8 +261,22 @@ namespace aspect
       AssertThrow(degradation_magnitude>0.,ExcMessage("Degradation magnitude must be positive."));
       fit_trace = prm.get_bool("Fit trace to phase");
       const double support = prm.get_double("Profile half width");
-      fault.initialize(box.get_origin(),box.get_extents(),vertices,age,friction.reference_speed,
-                       support > 0. ? support : std::numeric_limits<double>::max());
+      AssertThrow(!moving || (!fit_trace && inflow_stress && vertices.size()>=2),
+                  ExcMessage("Moving mature fault requires a prescribed material seed, transported stress and bounded phase."));
+      accepted->fault.initialize(box.get_origin(),box.get_extents(),vertices,age,friction.reference_speed,
+                                 support > 0. ? support : std::numeric_limits<double>::max(),moving);
+      auto labels=accepted->fault.labels();
+      const auto ages=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label ages")));
+      const auto shear=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label shear tractions")));
+      AssertThrow((ages.empty() || ages.size()==labels.size()) && (shear.empty() || shear.size()==labels.size()),
+                  ExcMessage("Material initial data must match the number of fault vertices."));
+      for (unsigned int i=0; i<labels.size(); ++i)
+        {
+          labels[i].initial_shear=shear.empty() ? background_shear : shear[i];
+          labels[i].age=ages.empty() ? age : ages[i];
+          AssertThrow(labels[i].age>0.,ExcMessage("Material label age must be positive."));
+        }
+      accepted->fault.set_labels(std::move(labels));
       prm.leave_subsection();
       prm.leave_subsection();
       AssertThrow(std::min({viscosity,modulus,initial_interval,friction.direct_effect,minimum_speed,
@@ -241,12 +285,12 @@ namespace aspect
                   ExcMessage("The fixed fault requires positive material, time and speed scales."));
       AssertThrow(friction.reference_speed >= minimum_speed,
                   ExcMessage("The reference speed must be at least the minimum admissible speed."));
-      AssertThrow(dim == 2 && !p.enable_elasticity && p.nonlinear_solver == Parameters<dim>::NonlinearSolver::no_Advection_iterated_Stokes
+      AssertThrow(dim == 2 && !p.enable_elasticity && p.nonlinear_solver == (moving ? Parameters<dim>::NonlinearSolver::single_Advection_iterated_Stokes : Parameters<dim>::NonlinearSolver::no_Advection_iterated_Stokes)
                   && p.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg && p.stokes_velocity_degree == 2
                   && !p.run_postprocessors_on_nonlinear_iterations && !p.mesh_deformation_enabled && !p.include_melt_transport && p.pressure_normalization == "no"
                   && p.nonlinear_solver_failure_strategy != Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep,
                   ExcMessage("The fixed fault requires a fixed 2-D Q2 box with ASPECT elasticity disabled, block AMG, no pressure normalization, "
-                             "no Advection, iterated Stokes, and convergence or retry."));
+                             "one phase advance for moving geometry, iterated Stokes, and convergence or retry."));
       AssertThrow(!p.enable_prescribed_dilation && (p.formulation_mass_conservation ==
                                                     Parameters<dim>::Formulation::MassConservation::incompressible || p.formulation_mass_conservation ==
                                                     Parameters<dim>::Formulation::MassConservation::ask_material_model),
@@ -263,21 +307,49 @@ namespace aspect
           AssertThrow(p.composition_descriptions[stress_fields[c]].type == CompositionalFieldDescription::stress,
                       ExcMessage(names[c]+" must have compositional type stress."));
         }
-      phase_field = intro.compositional_index_for_name("phase_field");
-      AssertThrow(p.composition_descriptions[phase_field].type == CompositionalFieldDescription::generic,
-                  ExcMessage("phase_field must have compositional type generic."));
+      AssertThrow(p.composition_descriptions[phase_field].type == (moving ? CompositionalFieldDescription::phase_field : CompositionalFieldDescription::generic),
+                  ExcMessage("Static phase must have type generic, transported phase must have type phase field."));
       for (unsigned int c=0; c<intro.n_compositional_fields; ++c)
         AssertThrow(p.composition_degrees[c] == 2 && p.use_discontinuous_composition_discretization[c] &&
-                    p.compositional_field_methods[c] == Parameters<dim>::AdvectionFieldMethod::static_field,
-                    ExcMessage("Fault stress and phase require static DGQ2 fields."));
+                    p.compositional_field_methods[c] == (moving && c==phase_field ? Parameters<dim>::AdvectionFieldMethod::fem_field : Parameters<dim>::AdvectionFieldMethod::static_field),
+                    ExcMessage("Fault stress requires static DGQ2. Phase requires static DGQ2 or bounded SSPRK3."));
 
-      kappa = -viscosity*std::expm1(-modulus*initial_interval/viscosity);
+      interval = initial_interval;
 
     }
 
+    template <int dim>
+    void PhaseFieldFault<dim>::save(std::map<std::string,std::string> &status) const
+    {
+      if (!moving) return;
+      std::ostringstream out;
+      out<<std::setprecision(17)<<labels().size()<<'\n';
+      for (const auto &p:labels())
+        out<<p.position<<' '<<p.half_width<<' '<<p.initial_shear<<' '<<p.age<<' '<<p.rate<<' '<<p.slip<<' '<<p.memory<<'\n';
+      status["Material fault labels v1"]=out.str();
+    }
+
+    template <int dim>
+    void PhaseFieldFault<dim>::load(const std::map<std::string,std::string> &status)
+    {
+      if (!moving) return;
+      const auto entry=status.find("Material fault labels v1");
+      AssertThrow(entry!=status.end(),ExcMessage("Missing moving fault labels in checkpoint."));
+      std::istringstream in(entry->second);
+      auto restored=labels();
+      unsigned int n=0;
+      in>>n;
+      AssertThrow(n==restored.size(),ExcMessage("Incompatible moving fault topology in checkpoint."));
+      for (auto &p:restored)
+        in>>p.position>>p.half_width>>p.initial_shear>>p.age>>p.rate>>p.slip>>p.memory;
+      AssertThrow(in,ExcMessage("Incomplete moving fault checkpoint."));
+      accepted->fault.set_labels(std::move(restored));
+      trace_initialized=false;
+    }
+
     ASPECT_REGISTER_MATERIAL_MODEL(PhaseFieldFault,"phase field fault",
-                                   "Stationary mature fault with independent Q1 labels spanning a Cartesian box. "
-                                   "The static DG phase supplies the fitted ridge and its normalized slip distribution. "
+                                   "Plane-strain mature fault with independent Q1 material labels. "
+                                   "Static or transported DG phase supplies the normalized slip distribution. "
                                    "The named additional outputs fault_tau_xx, fault_tau_yy and fault_tau_xy read accepted physical stress in Pa.")
   }
 }

@@ -9,8 +9,8 @@
 
 namespace aspect
 {
-  /** Finite-strip bulk/section transfer on a stationary trace. ASPECT owns
-   * the static DG phase. This operator owns its replicated Q1 normal
+  /** Finite-strip bulk/section transfer on one oriented trace. ASPECT owns
+   * the native DG phase. This operator owns its replicated Q1 normal
    * integrals in metres and uses the same inverse-length weight both ways. */
   template <int dim>
   class FaultPhaseProfile
@@ -28,10 +28,10 @@ namespace aspect
       };
 
       /** Integrate h along both physical normal rays at three Gauss stations
-       * per segment. Collectively check phase, quadrature convergence and the
+       * per surface panel. Collectively check phase, quadrature convergence and the
        * discarded fraction before projecting with the consistent Q1 mass. */
       void initialize(const SimulatorAccess<dim> &sim, unsigned int phase_field,
-                      const LinearAlgebra::BlockVector &fields, double magnitude);
+                      const LinearAlgebra::BlockVector &fields, double magnitude, unsigned int station_subdivisions = 1);
       double weight(double phase) const;
       Sample sample(const Point<dim> &x, double phase) const;
       Tensor<2,dim> slip_gradient(const Sample &sample, double rate) const;

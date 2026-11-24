@@ -12,7 +12,8 @@
 namespace aspect
 {
 
-  /** A stationary, oriented Q1 trace joining two contacts of a Cartesian box.
+  /** An oriented Q1 material trace in a Cartesian box, fixed at two contacts
+   * or advected between two interior material endpoints.
    * Segment frames and arclengths are reconstructed from its vertices. Material
    * label identity is its index in the ordered list of vertices.
    * Geometry and accepted history are replicated on the simulator communicator.
@@ -26,6 +27,7 @@ namespace aspect
       {
         Point<dim> position;
         double age, slip, rate; // s, m, m/s
+        double half_width, initial_shear, memory; // material normal radius (m), prestress (Pa), Maxwell slip memory (Pa m)
       };
 
       /** Normal projection onto the segment joining labels left and left+1. */
@@ -44,7 +46,7 @@ namespace aspect
         Tensor<1,dim> tangent, normal;
         Tensor<2,dim> dyad;
       };
-      /** Normal radius of the finite association strip, in metres. */
+      /** Seed normal radius in metres. The moving strip interpolates current label widths. */
       double support_radius() const
       {
         return half_width;
@@ -57,7 +59,13 @@ namespace aspect
                const LinearAlgebra::BlockVector &fields);
       /** Set the prescribed geometry and uniform initial state in physical units. */
       void initialize(const Point<dim> &origin, const Point<dim> &extent,
-                      const std::vector<Point<dim>> &vertices, double age, double rate, double half_width = std::numeric_limits<double>::max());
+                      const std::vector<Point<dim>> &vertices, double age, double rate, double half_width = std::numeric_limits<double>::max(),
+                      bool interior = false);
+      /** Carry each finite material vertex and its normal support with the
+       * accepted FE velocity and deformation gradient. Collective on all ranks. */
+      void advect(const SimulatorAccess<dim> &sim, double dt);
+      /** Install ordered material histories and reconstruct the segment frames. */
+      void set_labels(std::vector<Label> labels);
       /** Find the two neighboring material labels and the local Q1 coordinate. */
       Projection project(const Point<dim> &point) const;
 

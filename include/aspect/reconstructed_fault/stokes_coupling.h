@@ -27,8 +27,8 @@ namespace aspect
       void initialize();
       /** Couple trial rates and convergence to the fixed-age RSF section solve. */
       void connect_section_balance();
-      /** Transport (when selected), rotate, relax and project the accepted physical stress on owned cells. */
-      void prepare_parent(double relaxation);
+      /** Transport (when selected), rotate and project the accepted physical stress on owned cells. */
+      void prepare_parent();
       /** Spatial stress (Pa) added to the implicit plane-strain viscous stress. */
       SymmetricTensor<2,dim> stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
                                            const Point<dim> &position, double phase) const;
@@ -38,8 +38,8 @@ namespace aspect
       struct BulkPoint
       {
         typename FaultPhaseProfile<dim>::Sample transfer;
-        double volume, driving_shear, compression;
-        void add_balance(const std::vector<double> &rates, double age, double kappa,
+        double volume, driving_shear, compression, stiffness;
+        void add_balance(const std::vector<double> &rates, double age,
                          const MaterialModel::Rheology::RateAndStateFriction &law,
                          std::vector<double> &rhs, std::vector<double> &diagonal,
                          std::vector<double> &upper, std::vector<double> &scale) const;
@@ -60,8 +60,19 @@ namespace aspect
       // The material owns both the physical parameters and the accepted curve.
       MaterialModel::PhaseFieldFault<dim> &material;
       std::vector<double> trial_rates;
-      /** DGQ2 coefficients of the attempted rotated/relaxed parent, in Pa. */
-      std::map<CellId,std::vector<Stress>> relaxed_parent;
+      // Moving mechanics uses Q8 cell moments of the complete physical response.
+      // Freeze its projection defect while Stokes and the Q1 section are linearized.
+      struct Reaction
+      {
+        std::vector<Stress> stress, strain;
+      };
+      std::map<CellId,Reaction> reaction;
+      std::vector<double> reaction_rates;
+      double reaction_change=0.;
+      void project_reaction(const LinearAlgebra::BlockVector &iterate);
+      /** Owned DGQ2 rotated spatial parent in Pa. Apply the local Maxwell beta
+       * after interpolation to each physical constitutive point. */
+      std::map<CellId,std::vector<Stress>> objective_parent;
   };
 }
 #endif

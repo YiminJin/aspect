@@ -1,0 +1,2 @@
+# Enable if: QUICK_TEST
+include $ASPECT_SOURCE_DIR/benchmarks/layered_moving_fault/layered.prm

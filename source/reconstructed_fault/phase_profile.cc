@@ -30,14 +30,15 @@ namespace aspect
 
   template <int dim>
   void FaultPhaseProfile<dim>::initialize(const SimulatorAccess<dim> &sim, const unsigned int field,
-                                          const LinearAlgebra::BlockVector &fields, const double m)
+                                          const LinearAlgebra::BlockVector &fields, const double m, const unsigned int station_subdivisions)
   {
     magnitude = m;
     const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(sim.get_geometry_model());
     const auto upper = box.get_origin()+box.get_extents();
     const auto &labels = geometry.labels();
     const unsigned int n = labels.size();
-    const QGauss<1> stations(3), ray(12);
+    const QIterated<1> stations(QGauss<1>(3),station_subdivisions);
+    const QGauss<1> ray(12);
     std::vector<double> rays((n-1)*stations.size());
     std::vector<double> omitted(rays.size());
     bool resolved = true;
@@ -129,7 +130,7 @@ namespace aspect
                     }
                   return self(self,left,mid,l,depth+1)+self(self,mid,right,r,depth+1);
                 };
-                const double width=geometry.support_radius();
+                const double width=labels[j].half_width+stations.point(k)[0]*(labels[j+1].half_width-labels[j].half_width);
                 const double cuts[4]= {a,std::clamp(-width,a,b),std::clamp(width,a,b),b};
                 const unsigned int index=j*stations.size()+k;
                 for (unsigned int side=0; side<3; ++side)

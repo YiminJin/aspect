@@ -343,10 +343,10 @@ namespace aspect
               const auto grad=profile.slip_gradient(p.transfer,p.transfer.rate(test));
               work+=p.volume*virtual_traction*(frame.tangent*(grad*frame.normal));
               const double age=foot.interpolate(parent_age[foot.left],parent_age[foot.left+1]);
-              p.add_balance(test,age,kappa,law,b,d,u,scratch);
-              p.add_balance(plus,age,kappa,law,bp,scratch_d,scratch_u,scratch);
-              p.add_balance(minus,age,kappa,law,bm,scratch_d,scratch_u,scratch);
-              p.add_balance(rates,age,kappa,law,residual,scratch_d,scratch_u,scale);
+              p.add_balance(test,age,law,b,d,u,scratch);
+              p.add_balance(plus,age,law,bp,scratch_d,scratch_u,scratch);
+              p.add_balance(minus,age,law,bm,scratch_d,scratch_u,scratch);
+              p.add_balance(rates,age,law,residual,scratch_d,scratch_u,scale);
             }
           const auto comm=this->get_mpi_communicator();
           for (auto *v:

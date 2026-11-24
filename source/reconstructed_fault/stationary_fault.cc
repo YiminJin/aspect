@@ -4,13 +4,14 @@
 */
 #include <aspect/reconstructed_fault/stationary_fault.h>
 #include <aspect/geometry_model/box.h>
+#include <deal.II/numerics/vector_tools_evaluate.h>
 
 namespace aspect
 {
   template <int dim>
   void StationaryFault<dim>::initialize(const Point<dim> &origin, const Point<dim> &extent,
                                         const std::vector<Point<dim>> &vertices,
-                                        const double age, const double rate, const double support)
+                                        const double age, const double rate, const double support, const bool interior)
   {
     AssertThrow(dim == 2 && vertices.size() >= 2, ExcMessage("A stationary fault requires at least two ordered vertices in 2-D."));
     const auto direction = vertices.back()-vertices.front();
@@ -23,37 +24,91 @@ namespace aspect
              std::max({std::abs(origin[d]), std::abs(origin[d]+extent[d]), extent[d]});
     };
     AssertThrow(length > 0. && support > 0., ExcMessage("Degenerate stationary seed or support."));
-    for (unsigned int end=0; end<2; ++end)
-      {
-        const auto &vertex = end ? vertices.back() : vertices.front();
-        contact_axes[end] = dim;
-        double best = 0.;
-        for (unsigned int d=0; d<dim; ++d)
-          {
-            const double outward = end ? direction[d] : -direction[d];
-            const double face = origin[d] + (outward > 0. ? extent[d] : 0.);
-            if (std::abs(vertex[d]-face) <= face_tolerance(d) && std::abs(outward) > best)
-              {
-                contact_axes[end] = d;
-                best = std::abs(outward);
-              }
-          }
-        AssertThrow(contact_axes[end] < dim,ExcMessage("The stationary fault must span the Box between boundary contacts."));
-      }
+    if (!interior)
+      for (unsigned int end=0; end<2; ++end)
+        {
+          const auto &vertex = end ? vertices.back() : vertices.front();
+          contact_axes[end] = dim;
+          double best = 0.;
+          for (unsigned int d=0; d<dim; ++d)
+            {
+              const double outward = end ? direction[d] : -direction[d];
+              const double face = origin[d] + (outward > 0. ? extent[d] : 0.);
+              if (std::abs(vertex[d]-face) <= face_tolerance(d) && std::abs(outward) > best)
+                {
+                  contact_axes[end] = d;
+                  best = std::abs(outward);
+                }
+            }
+          AssertThrow(contact_axes[end] < dim,ExcMessage("The stationary fault must span the Box between boundary contacts."));
+        }
     tangent = direction/length;
     normal[0] = -tangent[1];
     normal[1] = tangent[0];
     half_width = support;
+    if (interior && support==std::numeric_limits<double>::max())
+      {
+        half_width=0.;
+        for (unsigned int v=0; v<GeometryInfo<dim>::vertices_per_cell; ++v)
+          {
+            Point<dim> corner=origin;
+            for (unsigned int d=0; d<dim; ++d)
+              if (v & (1u<<d)) corner[d]+=extent[d];
+            half_width=std::max(half_width,std::abs((corner-vertices.front())*normal));
+          }
+        half_width+=64.*std::numeric_limits<double>::epsilon()*std::max({1.,length,vertices.front().norm(),vertices.back().norm()});
+      }
     accepted.clear();
     for (const auto &vertex : vertices)
       {
         for (unsigned int d=0; d<dim; ++d)
-          AssertThrow(vertex[d] >= origin[d]-face_tolerance(d) && vertex[d] <= origin[d]+extent[d]+face_tolerance(d),
-                      ExcMessage("A seed vertex is outside the box."));
+          AssertThrow(interior ? (vertex[d]>origin[d] && vertex[d]<origin[d]+extent[d]) :
+                      (vertex[d] >= origin[d]-face_tolerance(d) && vertex[d] <= origin[d]+extent[d]+face_tolerance(d)),
+                      ExcMessage("A seed vertex is outside its supported box region."));
         AssertThrow(std::abs((vertex-vertices.front())*normal) <= face_tolerance(axis) &&
                     (accepted.empty() || (vertex-accepted.back().position)*tangent > 0.),
                     ExcMessage("Stationary seed labels must be straight and strictly ordered."));
-        accepted.push_back({vertex,age,0.,rate});
+        accepted.push_back({vertex,age,0.,rate,half_width,0.,0.});
+      }
+    rebuild_segments();
+  }
+
+  template <int dim>
+  void StationaryFault<dim>::set_labels(std::vector<Label> labels)
+  {
+    AssertThrow(labels.size()==accepted.size(),ExcMessage("Material fault topology changed."));
+    accepted=std::move(labels);
+    rebuild_segments();
+  }
+
+  template <int dim>
+  void StationaryFault<dim>::advect(const SimulatorAccess<dim> &sim, const double dt)
+  {
+    const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(sim.get_geometry_model());
+    std::vector<Point<dim>> vertices;
+    for (const auto &label:accepted) vertices.push_back(label.position);
+    GridTools::Cache<dim> cache(sim.get_triangulation(),sim.get_mapping());
+    Utilities::MPI::RemotePointEvaluation<dim> lookup;
+    lookup.reinit(cache,vertices);
+    AssertThrow(lookup.all_points_found(),ExcMessage("A material fault vertex left the mesh."));
+    const unsigned int first=sim.introspection().component_indices.velocities[0];
+    const auto u=VectorTools::point_values<dim>(lookup,sim.get_dof_handler(),sim.get_old_solution(),VectorTools::EvaluationFlags::avg,first);
+    const auto grad=VectorTools::point_gradients<dim>(lookup,sim.get_dof_handler(),sim.get_old_solution(),VectorTools::EvaluationFlags::avg,first);
+    for (unsigned int i=0; i<vertices.size(); ++i)
+      {
+        const auto edge=vertices[std::min<unsigned int>(i+1,vertices.size()-1)]-vertices[i==0 ? 0 : i-1];
+        Tensor<1,dim> n;
+        n[0]=-edge[1]/edge.norm();
+        n[1]=edge[0]/edge.norm();
+        Tensor<2,dim> F=unit_symmetric_tensor<dim>();
+        F+=dt*grad[i];
+        AssertThrow(determinant(F)>0.,ExcMessage("Material support reversed orientation."));
+        accepted[i].half_width/=(transpose(invert(F))*n).norm();
+        accepted[i].position+=dt*u[i];
+        for (unsigned int d=0; d<dim; ++d)
+          AssertThrow(accepted[i].position[d]>box.get_origin()[d] &&
+                      accepted[i].position[d]<box.get_origin()[d]+box.get_extents()[d],
+                      ExcMessage("A finite material fault reached the box boundary."));
       }
     rebuild_segments();
   }
@@ -275,7 +330,7 @@ namespace aspect
                                     accepted[j].position + s*seg.tangent);
         const double distance = point.distance_square(closest_point);
         const double tol = 32.*std::numeric_limits<double>::epsilon()*arclength.back();
-        const bool active = s >= -tol && s <= seg.length+tol && std::abs(offset*seg.normal) <= half_width;
+        const bool active = s >= -tol && s <= seg.length+tol && std::abs(offset*seg.normal) <= accepted[j].half_width+(bounded/seg.length)*(accepted[j+1].half_width-accepted[j].half_width);
         if ((active && !closest.active) || (active == closest.active && distance < best))
           {
             closest = {j,bounded/seg.length,active};
@@ -317,18 +372,28 @@ namespace aspect
                                 line.c+std::max(0.,line.a)+std::max(0.,line.b));
         };
         const auto s=range(station), d=range(normal_distance);
-        if (s.second<=0. || s.first>=segments[j].length || d.second<=-half_width || d.first>=half_width)
+        const double radius=std::max(accepted[j].half_width,accepted[j+1].half_width);
+        if (s.second<=0. || s.first>=segments[j].length || d.second<=-radius || d.first>=radius)
           continue;
         for (const double face :
         {
           0.,segments[j].length
           })
         if (s.first<face && s.second>face) cuts.push_back({station.a,station.b,station.c-face});
-        for (const double face :
+        const double slope=(accepted[j+1].half_width-accepted[j].half_width)/segments[j].length;
+        for (const double side :
         {
-          -half_width,half_width
+          -1.,1.
         })
-        if (d.first<face && d.second>face) cuts.push_back({normal_distance.a,normal_distance.b,normal_distance.c-face});
+        {
+          const Line edge
+          {
+            normal_distance.a-side *slope *station.a, normal_distance.b-side *slope *station.b,
+                              normal_distance.c-side*(accepted[j].half_width+slope*station.c)
+          };
+          const auto limits=range(edge);
+          if (limits.first<0. && limits.second>0.) cuts.push_back(edge);
+        }
         for (const auto &other:normals)
           for (const double sign :
           {

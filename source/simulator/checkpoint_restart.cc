@@ -827,8 +827,10 @@ namespace aspect
 //why do we need this?!
 BOOST_CLASS_TRACKING (aspect::Simulator<2>, boost::serialization::track_never)
 BOOST_CLASS_TRACKING (aspect::Simulator<3>, boost::serialization::track_never)
-// Distinguish pre-Bernstein 3-D DGQ2 archives from slots missing their basis record.
-BOOST_CLASS_VERSION (aspect::Simulator<3>, 1)
+// Version 1 distinguished the 3-D Bernstein basis. Version 2 adds the
+// existing material plugin save/load contract in both dimensions.
+BOOST_CLASS_VERSION (aspect::Simulator<2>, 2)
+BOOST_CLASS_VERSION (aspect::Simulator<3>, 2)
 
 
 namespace aspect
@@ -867,6 +869,15 @@ namespace aspect
                  ExcMessage ("The number of particle managers stored in the checkpoint "
                              "does not match the particle managers initialized from "
                              "the current input file."));
+    // Material point histories outside the FE vector use the ordinary plugin
+    // checkpoint contract. Legacy archives have no auxiliary material data.
+    std::map<std::string,std::string> material_state;
+    if (version>=2)
+      {
+        if constexpr (Archive::is_saving::value) material_model->save(material_state);
+        ar &material_state;
+      }
+    if constexpr (Archive::is_loading::value) material_model->load(material_state);
     ar &postprocess_manager;
     ar &boundary_temperature_manager;
     ar &boundary_convective_heating_manager;
