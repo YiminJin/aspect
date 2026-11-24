@@ -33,6 +33,7 @@ These project instructions apply to the research transplant. Read the [migration
 2. Make the change readable to an ASPECT maintainer. Ownership, public interfaces, comments and consistency with neighboring code are acceptance criteria on every increment.
 3. Measure resource use where the change affects it. Account for candidate copies and MPI replication.
 4. Carry an experimental option only when a paper example or a discriminating test needs it.
+5. Name public operations so a caller can tell what entity they change and what data they use. Define project-specific physical and geometric terms in the owning header before using them in method contracts.
 
 The implementation belongs in this worktree. The research donor is `../aspect-pf-rsf-particle-free/`, relative to this root. Treat its source, dirty changes, executables, build trees and checkpoints as evidence. Direct new builds, outputs, patches and replays to separate destinations. Linked worktrees can share Git refs. Preserve the donor and any incoming work. Installed code, regression tests and normal runs must work without that sibling.
 
