@@ -1,0 +1,99 @@
+# Oblique nine-strip single-front midpoint reference, SI units.
+set Dimension = 2
+set End time = 0.015
+set Use years instead of seconds = false
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Max nonlinear iterations = 80
+set Nonlinear solver failure strategy = abort program
+set Nonlinear solver tolerance = 1e-9
+set Maximum time step = 0.005
+set Maximum first time step = 0.005
+set Surface pressure = 200
+set Pressure normalization = no
+set Output directory = output-growing-fault
+subsection Geometry model
+ set Model name = box
+ subsection Box
+  set X extent = 2
+  set Y extent = 1
+  set X repetitions = 8
+  set Y repetitions = 4
+ end
+end
+subsection Gravity model
+ set Model name = vertical
+ subsection Vertical
+  set Magnitude = 0
+ end
+end
+subsection Temperature field
+ set Temperature method = static
+end
+subsection Initial temperature model
+ set List of model names = function
+ subsection Function
+  set Function expression = 293
+ end
+end
+subsection Compositional fields
+ set Number of fields = 4
+ set Names of fields = tau_xx, tau_yy, tau_xy, phase_field
+ set Types of fields = generic, generic, generic, phase field
+ set Compositional field methods = static, static, static, midpoint fault phase
+ set Mapped particle properties =
+end
+subsection Discretization
+ set Composition polynomial degree = 2
+ set Use discontinuous composition discretization = true
+end
+subsection Initial composition model
+ set List of model names = function
+ subsection Function
+  set Variable names = x,y
+  set Function expression = 0;0;0;.2*max(0,1-(max(0,((0.86602540378443871)*(x-(1))+(0.49999999999999994)*(y-(0.5))))/.5)^2)*max(0,1-(((-(0.49999999999999994))*(x-(1))+(0.86602540378443871)*(y-(0.5)))/.25)^2)
+ end
+end
+subsection Material model
+ set Model name = growing fault
+ subsection Growing fault
+  set Seed tangent angle = 30
+  set Forward seed tip = 1.4330127018922194,0.75
+  set Section quadrature order = 6
+  set Initial age = 10
+  set Shear modulus = 1e6
+  set Viscosity = 1e8
+  set Cohesion = 1000
+  set Reference friction coefficient = .6
+  set Direct effect = .015
+  set Evolution effect = .02
+  set Reference speed = .001
+  set Slip distance = .01
+  set Radiation damping = 1000
+ end
+end
+subsection Mesh refinement
+ set Initial global refinement = 0
+ set Initial adaptive refinement = 0
+ set Time steps between mesh refinement = 0
+end
+subsection Boundary velocity model
+ set Prescribed velocity boundary indicators = left:function, right:function, bottom:function, top:function
+ subsection Function
+  set Variable names = x,y,t
+  set Function expression = (0.86602540378443871)*(.02*((-(0.49999999999999994))*(x-(1))+(0.86602540378443871)*(y-(0.5)))+(0.0030000000000000001)*((0.86602540378443871)*(x-(1))+(0.49999999999999994)*(y-(0.5))))-(0.49999999999999994)*(-(0.0030000000000000001)*((-(0.49999999999999994))*(x-(1))+(0.86602540378443871)*(y-(0.5))));(0.49999999999999994)*(.02*((-(0.49999999999999994))*(x-(1))+(0.86602540378443871)*(y-(0.5)))+(0.0030000000000000001)*((0.86602540378443871)*(x-(1))+(0.49999999999999994)*(y-(0.5))))+(0.86602540378443871)*(-(0.0030000000000000001)*((-(0.49999999999999994))*(x-(1))+(0.86602540378443871)*(y-(0.5))))
+ end
+end
+subsection Solver parameters
+ subsection Stokes solver parameters
+  set Stokes solver type = block AMG
+ end
+end
+subsection Postprocess
+ set List of postprocessors =
+ subsection Phase field surface energy
+  set Crack geometry = AT1
+  set Phase composition = phase_field
+  set Fracture energy = 26.6666666667
+  set Length scale = .25
+ end
+end

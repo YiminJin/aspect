@@ -1444,7 +1444,7 @@ namespace aspect
                          "the user's responsibility to check that the chosen material model "
                          "and other plugins interpret the compositional fields as intended.");
       prm.declare_entry ("Compositional field methods", "",
-                         Patterns::List (Patterns::Selection("field|particles|volume of fluid|static|melt field|darcy field|prescribed field|prescribed field with diffusion")),
+                         Patterns::List (Patterns::Selection("field|particles|volume of fluid|static|midpoint fault phase|melt field|darcy field|prescribed field|prescribed field with diffusion")),
                          "A comma separated list denoting the solution method of each "
                          "compositional field. Each entry of the list must be "
                          "one of the currently implemented field methods."
@@ -1474,6 +1474,8 @@ namespace aspect
                          "from a volume of fluid interface tracking method, "
                          "which is used to compute the advection updates."
                          "\n"
+                         "* ``midpoint fault phase'': Use the growing fault material's coupled irreversible "
+                         "midpoint solve for this DGQ2 Bernstein phase field.\n\n"
                          "* ``static'': If a compositional field is marked "
                          "this way, then it does not evolve at all. Its values are "
                          "simply set to the initial conditions, and will then "
@@ -2307,6 +2309,13 @@ namespace aspect
                                        "computations."));
               compositional_field_methods[i] = AdvectionFieldMethod::volume_of_fluid;
             }
+          else if (x_compositional_field_methods[i] == "midpoint fault phase")
+            {
+              AssertThrow(dim == 2 && composition_descriptions[i].type == aspect::CompositionalFieldDescription::phase_field
+                          && composition_degrees[i] == 2 && use_discontinuous_composition_discretization[i],
+                          ExcMessage("Midpoint fault phase requires a 2-D DGQ2 phase field."));
+              compositional_field_methods[i] = AdvectionFieldMethod::midpoint_fault_phase;
+            }
           else if (x_compositional_field_methods[i] == "static")
             compositional_field_methods[i] = AdvectionFieldMethod::static_field;
           else if (x_compositional_field_methods[i] == "melt field")
@@ -2465,6 +2474,14 @@ namespace aspect
     prm.leave_subsection ();
 
     explicit_compositions.parse_parameters(prm, *this);
+    if (std::count(compositional_field_methods.begin(),compositional_field_methods.end(),
+                   AdvectionFieldMethod::midpoint_fault_phase))
+      {
+        prm.enter_subsection("Material model");
+        AssertThrow(prm.get("Model name") == "growing fault",
+                    ExcMessage("Midpoint fault phase requires the growing fault material."));
+        prm.leave_subsection();
+      }
 
     // then, finally, let user additions that do not go through the usual
     // plugin mechanism, declare their parameters if they have subscribed

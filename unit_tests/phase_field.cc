@@ -63,3 +63,17 @@ TEST_CASE("Crack geometry selection, variations and surface normalization")
       CHECK(std::abs(law.normalization()-integral) < 5.e-14);
     }
 }
+
+#include <aspect/phase_field/midpoint_fracture.h>
+
+TEST_CASE("Midpoint inequality rows respect the signed stage obstacle")
+{
+  using aspect::PhaseField::projected_gradient;
+  const double lo=-.008, hi=.5*(1.+lo), mass=.03;
+  REQUIRE(projected_gradient(lo,2.,mass,lo,hi)==0.);
+  REQUIRE(projected_gradient(hi,-2.,mass,lo,hi)==0.);
+  REQUIRE(projected_gradient(.2,0.,mass,lo,hi)==0.);
+  REQUIRE(projected_gradient(lo,-2.,mass,lo,hi)<0.);
+  REQUIRE(projected_gradient(hi,2.,mass,lo,hi)>0.);
+  REQUIRE(projected_gradient(.2,.001,mass,lo,hi)==Approx(.001/mass));
+}

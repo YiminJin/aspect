@@ -280,7 +280,8 @@ namespace aspect
     const auto bounded_phase = [&](const unsigned int field)
     {
       return parameters.composition_descriptions[field].type == CompositionalFieldDescription::phase_field
-             && parameters.explicit_compositions.selected[field];
+             && (parameters.explicit_compositions.selected[field]
+                 || parameters.compositional_field_methods[field] == Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase);
     };
     for (unsigned int c=0; c<parameters.n_compositional_fields; ++c)
       {

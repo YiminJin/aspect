@@ -20,6 +20,7 @@
 
 
 #include <aspect/simulator.h>
+#include <aspect/material_model/growing_fault.h>
 #include <aspect/global.h>
 #include <aspect/mesh_deformation/free_surface.h>
 #include <aspect/volume_of_fluid/handler.h>
@@ -366,6 +367,10 @@ namespace aspect
               volume_of_fluid_handler->do_volume_of_fluid_update(adv_field);
               break;
             }
+
+            case Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase:
+              // The coupled midpoint residual owns this phase row.
+              break;
 
             case Parameters<dim>::AdvectionFieldMethod::static_field:
             {
@@ -1046,6 +1051,13 @@ namespace aspect
     // First assemble and solve the temperature and compositional fields
     assemble_and_solve_temperature();
     assemble_and_solve_composition();
+
+    if (auto *front = dynamic_cast<GrowingFault::Material<dim> *>(material_model.get()))
+      {
+        front->solve_midpoint_fields(solution);
+        current_linearization_point = solution;
+        return;
+      }
 
     // Now store the linear_tolerance we started out with, because we might change
     // it within this timestep.

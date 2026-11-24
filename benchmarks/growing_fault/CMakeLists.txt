@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect 3.1 REQUIRED HINTS ${Aspect_DIR} $ENV{ASPECT_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(growing_fault_checks)
+add_library(growing_fault_checks SHARED growing_fault_checks.cc)
+ASPECT_SETUP_PLUGIN(growing_fault_checks)
