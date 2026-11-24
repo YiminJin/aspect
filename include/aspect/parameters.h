@@ -221,7 +221,8 @@ namespace aspect
         fem_darcy_field,
         prescribed_field,
         prescribed_field_with_diffusion,
-        midpoint_fault_phase
+        midpoint_fault_phase,
+        explicit_dg_ssprk3
       };
     };
 
@@ -842,7 +843,8 @@ namespace aspect
      * field. Consequently the vector has n_compositional_fields entries.
      */
     std::vector<typename AdvectionFieldMethod::Kind> compositional_field_methods;
-    Transport::ExplicitCompositions<dim> explicit_compositions;
+    /** Prescribed inflow used by explicit compositions at the SSPRK3 stage time. */
+    Transport::CompositionInflow<dim> explicit_composition_inflow;
 
     /**
      * Map from compositional index to a pair "particle property", "component",

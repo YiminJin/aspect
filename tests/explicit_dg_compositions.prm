@@ -1,5 +1,9 @@
 # Enable if: QUICK_TEST
 include $ASPECT_SOURCE_DIR/benchmarks/explicit_dg_transport/mixed.prm
+subsection Compositional fields
+  set SSPRK3 fields =
+  set Compositional field methods = field, explicit DG SSPRK3
+end
 subsection Postprocess
   set List of postprocessors = DG coefficient samples
 end

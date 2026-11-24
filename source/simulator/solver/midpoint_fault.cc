@@ -650,7 +650,6 @@ namespace aspect::GrowingFault
                 field==static_cast<unsigned int>(selected-methods.begin()) &&
                 std::count(p.compositional_field_methods.begin(),p.compositional_field_methods.end(),
                            Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase)==1 &&
-                !p.explicit_compositions.selected[field] &&
                 p.nonlinear_solver_failure_strategy!=Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep &&
                 p.surface_pressure>0. && p.pressure_normalization=="no",
                 ExcMessage("Growing fault requires a single midpoint fault phase, plane strain, native elasticity off, single Advection, iterated Newton Stokes, prescribed positive surface pressure and no pressure normalization. Nonconvergence must abort or request a retry."));

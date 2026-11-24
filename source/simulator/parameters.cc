@@ -52,7 +52,6 @@ namespace aspect
   declare_parameters (ParameterHandler &prm, const unsigned int mpi_rank)
   {
     PhaseField::SurfaceEnergyModel::declare_parameters(prm);
-    Transport::ExplicitCompositions<dim>::declare_parameters(prm);
 
     prm.declare_entry ("Dimension", "2",
                        Patterns::Integer (2,3),
@@ -1443,8 +1442,11 @@ namespace aspect
                          "the field types, not all of the code will make use of it. It is "
                          "the user's responsibility to check that the chosen material model "
                          "and other plugins interpret the compositional fields as intended.");
+      prm.declare_entry ("SSPRK3 fields", "", Patterns::List(Patterns::Anything()),
+                         "Compatibility spelling for selecting explicit DG SSPRK3 by composition name. "
+                         "Each listed field must have method field or explicit DG SSPRK3.");
       prm.declare_entry ("Compositional field methods", "",
-                         Patterns::List (Patterns::Selection("field|particles|volume of fluid|static|midpoint fault phase|melt field|darcy field|prescribed field|prescribed field with diffusion")),
+                         Patterns::List (Patterns::Selection("field|explicit DG SSPRK3|particles|volume of fluid|static|midpoint fault phase|melt field|darcy field|prescribed field|prescribed field with diffusion")),
                          "A comma separated list denoting the solution method of each "
                          "compositional field. Each entry of the list must be "
                          "one of the currently implemented field methods."
@@ -1458,6 +1460,10 @@ namespace aspect
                          "this corresponds to the usual notion of a composition field as "
                          "mentioned in Section~\\ref{sec:methods:compositional-fields}. "
                          "\n"
+                         "* ``explicit DG SSPRK3'': Advance a DGQ2 composition by pure material advection "
+                         "with the accepted Q2 velocity on a fixed conforming nonperiodic Cartesian box. "
+                         "Phase fields use bounded Bernstein transport. Generic and chemical tracers are signed. "
+                         "Use single Advection with prescribed, single or iterated Stokes velocity.\n"
                          "* ``particles'': If a compositional field is marked with "
                          "this method, then its values are obtained in each time step "
                          "by interpolating the corresponding properties from the "
@@ -2290,6 +2296,19 @@ namespace aspect
         x_compositional_field_methods = std::vector<std::string> (n_compositional_fields,x_compositional_field_methods[0]);
 
 
+      // Resolve the older name-based selection after expanding defaults and single entries.
+      const auto explicit_fields = Utilities::split_string_list(prm.get("SSPRK3 fields"));
+      AssertThrow(Utilities::has_unique_entries(explicit_fields), ExcMessage("Duplicate names in SSPRK3 fields."));
+      for (const auto &name : explicit_fields)
+        {
+          const auto field = std::find(names_of_compositional_fields.begin(), names_of_compositional_fields.end(), name);
+          AssertThrow(field != names_of_compositional_fields.end(), ExcMessage("Unknown SSPRK3 field " + name));
+          auto &method = x_compositional_field_methods[field - names_of_compositional_fields.begin()];
+          AssertThrow(method == "field" || method == "explicit DG SSPRK3",
+                      ExcMessage("SSPRK3 fields conflicts with compositional field method " + method + " for " + name));
+          method = "explicit DG SSPRK3";
+        }
+
       // Parse all field methods and store them, the vector should be empty
       // since nobody should have written into it yet.
       Assert(compositional_field_methods.size() == 0,
@@ -2299,6 +2318,8 @@ namespace aspect
         {
           if (x_compositional_field_methods[i] == "field")
             compositional_field_methods[i] = AdvectionFieldMethod::fem_field;
+          else if (x_compositional_field_methods[i] == "explicit DG SSPRK3")
+            compositional_field_methods[i] = AdvectionFieldMethod::explicit_dg_ssprk3;
           else if (x_compositional_field_methods[i] == "particles")
             compositional_field_methods[i] = AdvectionFieldMethod::particles;
           else if (x_compositional_field_methods[i] == "volume of fluid")
@@ -2473,7 +2494,7 @@ namespace aspect
     }
     prm.leave_subsection ();
 
-    explicit_compositions.parse_parameters(prm, *this);
+    explicit_composition_inflow = Transport::parse_explicit_composition_parameters(prm, *this);
 
     // then, finally, let user additions that do not go through the usual
     // plugin mechanism, declare their parameters if they have subscribed

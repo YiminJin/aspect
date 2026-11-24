@@ -66,3 +66,31 @@ Play with them!
 :::{note}
 As has hopefully become clear from the discussion above, the term "compositional field" as used in ASPECT is by now mostly historic: These fields were meant to track chemical compositions, but are now used to track all sorts of other things as well, or in some cases track nothing at all and just be static fields that simply indicate where some features of the model are located. It is therefore useful to think of the term "compositional field" as a *technical term* in which the two words appear together, separate from the original meaning of the word "compositional".
 :::
+
+## Selecting an explicit advection method
+
+Each entry in `Compositional field methods` applies to the corresponding field name.
+For example, this input advances the companion with the ordinary implicit method
+and the tracer with third-order strong-stability-preserving Runge–Kutta (SSPRK3).
+
+```text
+subsection Compositional fields
+  set Number of fields = 2
+  set Names of fields = companion, tracer
+  set Compositional field methods = field, explicit DG SSPRK3
+end
+```
+
+The explicit method transports a DGQ2 scalar with the accepted Q2 velocity on a fixed,
+conforming, nonperiodic Cartesian box in 2-D or 3-D. Generic and chemical tracers
+use signed transport. A field of type `phase field` uses bounded quadratic Bernstein
+transport. Prescribed inflow uses the Cartesian boundary composition function at
+each stage time. Use a single-advection scheme with prescribed, single or iterated
+Stokes velocity. Explicit fields require pure advection with zero reaction increments,
+no prescribed DoFs and the ordinary composition limiter disabled. Operator splitting,
+melt transport and ASPECT elasticity are unsupported in this configuration.
+
+An empty method list defaults to `field`. A single entry applies to every composition.
+Existing inputs using `SSPRK3 fields = tracer` select the same explicit method
+after this expansion. A name may occur once in that list and its method must be
+either `field` or `explicit DG SSPRK3`.

@@ -221,7 +221,7 @@ namespace aspect
       prm.leave_subsection();
       const auto &p = this->get_parameters();
       phase_field = this->introspection().compositional_index_for_name("phase_field");
-      const bool transport_phase = p.explicit_compositions.selected[phase_field];
+      const bool transport_phase = p.compositional_field_methods[phase_field] == Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3;
       const bool fresh_run = prm.get("Resume computation") == "false" && p.resume_checkpoint_id == 0 && p.resume_time < 0. &&
                              p.checkpoint_steps == 0 && p.checkpoint_time_secs == 0 &&
                              p.additional_checkpoint_times.empty() && !checkpoint_on_termination;
@@ -328,7 +328,7 @@ namespace aspect
                   ExcMessage("Interior mechanics requires the phase field role. Boundary-spanning mechanics requires generic phase."));
       for (unsigned int c=0; c<intro.n_compositional_fields; ++c)
         AssertThrow(p.composition_degrees[c] == 2 && p.use_discontinuous_composition_discretization[c] &&
-                    p.compositional_field_methods[c] == (transport_phase && c==phase_field ? Parameters<dim>::AdvectionFieldMethod::fem_field : Parameters<dim>::AdvectionFieldMethod::static_field),
+                    p.compositional_field_methods[c] == (transport_phase && c==phase_field ? Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3 : Parameters<dim>::AdvectionFieldMethod::static_field),
                     ExcMessage("Fault stress requires static DGQ2. Phase requires static DGQ2 or bounded SSPRK3."));
 
       interval = initial_interval;

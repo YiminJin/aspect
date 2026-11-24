@@ -12,29 +12,13 @@ namespace aspect
   namespace Transport
   {
     template <int dim>
-    void ExplicitCompositions<dim>::declare_parameters(ParameterHandler &prm)
+    CompositionInflow<dim>
+    parse_explicit_composition_parameters(ParameterHandler &prm, const Parameters<dim> &p)
     {
-      prm.enter_subsection("Compositional fields");
-      prm.declare_entry("SSPRK3 fields","",Patterns::List(Patterns::Anything()),
-                        "Names of DGQ2 field-method compositions advanced by pure material advection with "
-                        "accepted velocity. Other fields keep their ordinary method. Supports single Advection "
-                        "with Q2 prescribed, single or iterated Stokes velocity, on a fixed conforming nonperiodic Cartesian box in 2-D or 3-D. "
-                        "Prescribe Cartesian boundary composition function data on incoming faces. A selected "
-                        "field of type 'phase field' uses bounded quadratic Bernstein transport. Generic and "
-                        "chemical tracers are signed. Reactions, operator splitting, ASPECT elasticity and the "
-                        "release composition limiter on the selected field are unsupported. Selected fields must have no prescribed DoFs.");
-      prm.leave_subsection();
-    }
-
-    template <int dim>
-    void ExplicitCompositions<dim>::parse_parameters(ParameterHandler &prm, const Parameters<dim> &p)
-    {
-      prm.enter_subsection("Compositional fields");
-      const auto names=Utilities::split_string_list(prm.get("SSPRK3 fields"));
-      prm.leave_subsection();
-      selected.assign(p.n_compositional_fields,false);
-      if (names.empty())
-        return;
+      using Method = typename Parameters<dim>::AdvectionFieldMethod;
+      if (std::find(p.compositional_field_methods.begin(), p.compositional_field_methods.end(),
+                    Method::explicit_dg_ssprk3) == p.compositional_field_methods.end())
+        return {};
 
       using Scheme=typename Parameters<dim>::NonlinearSolver;
       AssertThrow(!p.use_operator_splitting && !p.enable_elasticity && !p.include_melt_transport &&
@@ -46,20 +30,16 @@ namespace aspect
                   ExcMessage("SSPRK3 composition transport is qualified for Stokes velocity degree 2."));
       AssertThrow(p.initial_adaptive_refinement==0 && p.adaptive_refinement_interval==0 && p.additional_refinement_times.empty(),
                   ExcMessage("SSPRK3 fields require a fixed mesh."));
-      for (const auto &name : names)
-        {
-          const auto it=std::find(p.names_of_compositional_fields.begin(),p.names_of_compositional_fields.end(),name);
-          AssertThrow(it!=p.names_of_compositional_fields.end(),ExcMessage("Unknown SSPRK3 field "+name));
-          const unsigned int c=it-p.names_of_compositional_fields.begin();
-          const auto type=p.composition_descriptions[c].type;
-          AssertThrow(!selected[c] && p.compositional_field_methods[c]==Parameters<dim>::AdvectionFieldMethod::fem_field &&
-                      p.use_discontinuous_composition_discretization[c] && p.composition_degrees[c]==2 &&
-                      !p.use_limiter_for_discontinuous_composition_solution[c] &&
-                      (type==CompositionalFieldDescription::generic || type==CompositionalFieldDescription::chemical_composition ||
-                       type==CompositionalFieldDescription::phase_field),
-                      ExcMessage("SSPRK3 requires a unique scalar DGQ2 field-method tracer or phase without the release limiter: "+name));
-          selected[c]=true;
-        }
+      for (unsigned int c=0; c<p.n_compositional_fields; ++c)
+        if (p.compositional_field_methods[c] == Method::explicit_dg_ssprk3)
+          {
+            const auto type=p.composition_descriptions[c].type;
+            AssertThrow(p.use_discontinuous_composition_discretization[c] && p.composition_degrees[c]==2 &&
+                        !p.use_limiter_for_discontinuous_composition_solution[c] &&
+                        (type==CompositionalFieldDescription::generic || type==CompositionalFieldDescription::chemical_composition ||
+                         type==CompositionalFieldDescription::phase_field),
+                        ExcMessage("SSPRK3 requires a scalar DGQ2 tracer or phase without the release limiter: "+p.names_of_compositional_fields[c]));
+          }
 
       // The release boundary manager updates its plugins at the simulator clock.
       // Parse an independent evaluator of the selected function for the RK clocks.
@@ -69,7 +49,7 @@ namespace aspect
           // A closed box can have no incoming face. An actual inflow without a
           // prescribed value is diagnosed collectively during the stage.
           prm.leave_subsection();
-          return;
+          return {};
         }
       AssertThrow(prm.get("List of model names")=="function" && prm.get("List of model operators")=="add",
                   ExcMessage("SSPRK3 fields require the function boundary composition model with the add operator."));
@@ -80,15 +60,15 @@ namespace aspect
       auto function=std::make_shared<Functions::ParsedFunction<dim>>(p.n_compositional_fields);
       function->parse_parameters(prm);
       const double unit=p.convert_to_years ? year_in_seconds : 1.;
-      inflow=[function,unit](const Point<dim> &point,unsigned int field,double seconds)
+      prm.leave_subsection();
+      prm.leave_subsection();
+      return [function,unit](const Point<dim> &point,unsigned int field,double seconds)
       {
         const double time=seconds/unit;
         if (function->get_time()!=time)
           function->set_time(time);
         return function->value(point,field);
       };
-      prm.leave_subsection();
-      prm.leave_subsection();
     }
 
     template <int dim>
@@ -141,7 +121,7 @@ namespace aspect
       {
         if (!fixed.count(id))
           return std::numeric_limits<double>::quiet_NaN();
-        return p.explicit_compositions.inflow(point,field,t);
+        return p.explicit_composition_inflow(point,field,t);
       };
 
       const auto candidate=advect_scalar(sim,field,exterior,p.composition_descriptions[field].type==CompositionalFieldDescription::phase_field);
@@ -163,8 +143,8 @@ namespace aspect
       solution.block(block)=owned;
     }
 
-    template struct ExplicitCompositions<2>;
-    template struct ExplicitCompositions<3>;
+    template CompositionInflow<2> parse_explicit_composition_parameters(ParameterHandler &, const Parameters<2> &);
+    template CompositionInflow<3> parse_explicit_composition_parameters(ParameterHandler &, const Parameters<3> &);
     template void advance_composition(const SimulatorAccess<2> &, unsigned int, LinearAlgebra::BlockVector &);
     template void advance_composition(const SimulatorAccess<3> &, unsigned int, LinearAlgebra::BlockVector &);
   }

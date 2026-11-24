@@ -294,7 +294,11 @@ def lifecycle(args):
     for name, select, other in [('bernstein','',implicit), ('nodal',implicit,'')]:
         simulate(args, 'seed-'+name, select+setting('End time',.02)+write)
         seed = args.directory/('seed-'+name)/'output'
-        continued = simulate(args, 'continued-'+name, select+finish+resume, checkpoint=seed)
+        # Read the mixed-basis checkpoint written with the legacy name list
+        # using only the ordinary per-field methods.
+        continuation_methods = (fields(SSPRK3_fields='', Compositional_field_methods='field, explicit DG SSPRK3, explicit DG SSPRK3')
+                                if name == 'bernstein' else select)
+        continued = simulate(args, 'continued-'+name, continuation_methods+finish+resume, checkpoint=seed)
         direct = simulate(args, 'direct-'+name, select+finish)
         err = compare(direct, continued, 1e-12)
         simulate(args, 'mismatch-'+name, other+finish+resume, checkpoint=seed,

@@ -267,15 +267,16 @@ namespace aspect
       {
         const AdvectionField adv_field (AdvectionField::composition(c));
         const typename Parameters<dim>::AdvectionFieldMethod::Kind method = adv_field.advection_method(introspection);
-        if (parameters.explicit_compositions.selected[c])
-          {
-            Transport::advance_composition(SimulatorAccess<dim>(*this), c, solution);
-            SolverControl control;
-            signals.post_advection_solver(*this, false, c, control);
-            continue;
-          }
         switch (method)
           {
+            case Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3:
+            {
+              Transport::advance_composition(SimulatorAccess<dim>(*this), c, solution);
+              SolverControl control;
+              signals.post_advection_solver(*this, false, c, control);
+              break;
+            }
+
             case Parameters<dim>::AdvectionFieldMethod::fem_field:
             case Parameters<dim>::AdvectionFieldMethod::fem_melt_field:
             case Parameters<dim>::AdvectionFieldMethod::prescribed_field_with_diffusion:

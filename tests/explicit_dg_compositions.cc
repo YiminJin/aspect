@@ -2,7 +2,10 @@
 #include <aspect/postprocess/interface.h>
 #include <aspect/prescribed_solution/interface.h>
 #include <aspect/material_model/simple.h>
+#include <aspect/advection_field.h>
+#include <aspect/simulator/assemblers/interface.h>
 #include <aspect/simulator_access.h>
+#include <aspect/simulator_signals.h>
 #include <fstream>
 #include <iomanip>
 
@@ -43,6 +46,43 @@ namespace aspect
         }
     };
     ASPECT_REGISTER_POSTPROCESSOR(DGCoefficients,"DG coefficient samples","Export owned DG coefficients by field and cell.")
+
+    template <int dim>
+    class DGMethodSetup : public Interface<dim>, public SimulatorAccess<dim>
+    {
+      public:
+        void initialize() override
+        {
+          this->get_signals().set_assemblers.connect(
+            [this](const SimulatorAccess<dim> &, Assemblers::Manager<dim> &assemblers)
+          {
+            const auto &intro = this->introspection();
+            for (unsigned int c=0; c<intro.n_compositional_fields; ++c)
+              {
+                const auto field = AdvectionField::composition(c);
+                const auto i = field.field_index();
+                const bool explicit_dg = field.advection_method(intro) == Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3;
+                this->get_pcout() << "DG setup " << intro.name_for_compositional_index(c) << ' ' << explicit_dg
+                                  << ' ' << assemblers.advection_system[i].size()
+                                  << ' ' << assemblers.advection_system_on_boundary_face[i].size()
+                                  << ' ' << assemblers.advection_system_on_interior_face[i].size() << std::endl;
+              }
+          });
+          this->get_signals().post_advection_solver.connect(
+            [this](const SimulatorAccess<dim> &, const bool temperature, const unsigned int c, const SolverControl &)
+          {
+            if (!temperature)
+              this->get_pcout() << "DG completion " << this->get_timestep_number() << ' '
+                                << this->introspection().name_for_compositional_index(c) << std::endl;
+          });
+        }
+
+        std::pair<std::string,std::string> execute(TableHandler &) override
+        {
+          return {};
+        }
+    };
+    ASPECT_REGISTER_POSTPROCESSOR(DGMethodSetup,"DG method setup","Observe composition assembly setup and per-field solver signals.")
   }
 
   namespace PrescribedSolution

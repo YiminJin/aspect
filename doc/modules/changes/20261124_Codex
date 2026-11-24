@@ -1,0 +1,5 @@
+New: Compositional fields can select explicit DG SSPRK3 advection individually
+through the existing field-method list. The SSPRK3 fields name list continues
+to select the same method in existing inputs.
+<br>
+(Codex, 2026/11/24)

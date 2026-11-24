@@ -953,6 +953,7 @@ namespace aspect
             return true;
           case Parameters<dim>::AdvectionFieldMethod::particles:
           case Parameters<dim>::AdvectionFieldMethod::volume_of_fluid:
+          case Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3:
           case Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase:
           case Parameters<dim>::AdvectionFieldMethod::static_field:
           case Parameters<dim>::AdvectionFieldMethod::prescribed_field:

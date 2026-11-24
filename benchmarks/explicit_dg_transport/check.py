@@ -3,6 +3,7 @@ import argparse
 import math
 import os
 from pathlib import Path
+import re
 import subprocess
 import shutil
 
@@ -150,6 +151,30 @@ def oracle(data,field,initial,velocity,divergence,exterior,bounded,*,expected_ra
     return ref.limited-entry_scales
 
 
+def check_method_setup(args, name, expected, frames):
+    log = (args.directory/name/'run.log').read_text()
+    setup = re.findall(r'^DG setup (\w+) (\d) (\d+) (\d+) (\d+)$', log, re.M)
+    completions = re.findall(r'DG completion (\d+) (\w+)$', log, re.M)
+    require(completions == [(str(step), field) for step in sorted(frames) for field in expected],
+            f'{name}: missing or repeated field completion')
+    require(len(setup) == len(expected), f'{name}: missing or repeated setup record')
+    for (field, explicit), row in zip(expected.items(), setup):
+        count = int(not explicit)
+        require(row == (field, str(int(explicit)), str(count), str(count), str(count)),
+                f'{name}: wrong assembler setup {row}')
+        require(log.count(f'Solving {field} system') == count*len(frames), f'{name}: wrong implicit solve count')
+    # Both nodal tracers share the first composition's matrix storage.
+    matrices = log.split('system matrix nnz by block:')[1:]
+    require(len(matrices) == len(frames), f'{name}: missing matrix statistics')
+    for matrix in matrices:
+        rows = [line.split() for line in matrix.strip().splitlines()[:5]]
+        diagonal = [int(rows[i][i].replace(',', '')) for i in (3, 4)]
+        require((diagonal[0] > 0) == (False in expected.values()) and diagonal[1] == 0,
+                f'{name}: wrong shared composition blocks {diagonal}')
+    print(f'{name}: {setup}, composition diagonal nnz {diagonal}, '
+          f'{len(completions)} field completions', flush=True)
+
+
 def mixed(args):
     profile=lambda x,y,t:(x-t-.4)**2-.2
     u=constant_velocity(1,0)
@@ -157,6 +182,25 @@ def mixed(args):
     a=run(args,'mixed')
     b=run(args,'default',fields(SSPRK3_fields=''))
     swap=run(args,'swapped',fields(Names_of_fields='tracer, companion'))
+    statistics = section('Postprocess', setting('List of postprocessors',
+                         'DG coefficient samples, DG method setup, matrix statistics'))
+    for name, names, methods, legacy in [
+            ('method-last', 'companion, tracer', 'field, explicit DG SSPRK3', a),
+            ('method-first', 'tracer, companion', 'explicit DG SSPRK3, field', swap)]:
+        case = run(args, name, fields(Names_of_fields=names, Compositional_field_methods=methods,
+                                     SSPRK3_fields='') + statistics)
+        print(name, 'old/new coefficient defect', compare(case, legacy, 0.), flush=True)
+        check_method_setup(args, name, {field: field=='tracer' for field in names.split(', ')}, case)
+    both = run(args, 'both-by-name', fields(SSPRK3_fields='companion, tracer'))
+    broadcast = run(args, 'broadcast', fields(Compositional_field_methods='explicit DG SSPRK3') + statistics)
+    # The old input still names tracer, redundantly, while broadcast also selects companion.
+    print('broadcast/redundant coefficient defect', compare(broadcast, both, 0.), flush=True)
+    check_method_setup(args, 'broadcast', {'companion': True, 'tracer': True}, broadcast)
+    for invalid in ('static', 'midpoint fault phase'):
+        run(args, 'conflict-'+invalid.replace(' ', '-'), fields(Compositional_field_methods='field, '+invalid),
+            fail='conflicts with compositional field method '+invalid+' for tracer')
+    run(args, 'duplicate', fields(SSPRK3_fields='tracer, tracer'), fail='Duplicate names in SSPRK3 fields')
+    run(args, 'unknown', fields(SSPRK3_fields='absent'), fail='Unknown SSPRK3 field absent')
     oracle(a,'tracer',profile,u,zero,profile,False,expected_ranks=1)
     oracle(swap,'tracer',profile,u,zero,profile,False,expected_ranks=1)
     separation=[]
@@ -192,7 +236,8 @@ def mixed(args):
     spatial=run(args,'static-inflow',static_boundary)
     oracle(spatial,'tracer',profile,u,zero,lambda x,y,t:np.full_like(x,.3),False,expected_ranks=1)
     reaction=section('Material model',setting('Model name','tracer reaction'))
-    run(args,'explicit-reaction',reaction,fail='cannot omit a reaction increment for tracer')
+    run(args,'explicit-reaction',reaction+fields(SSPRK3_fields='', Compositional_field_methods='field, explicit DG SSPRK3'),
+        fail='cannot omit a reaction increment for tracer')
     require((args.directory/'explicit-reaction/output/publication-0').read_text().split()==['0','0'],
             'reacting trial reached publication')
     unrelated=run(args,'implicit-reaction',reaction+fields(SSPRK3_fields='companion'))

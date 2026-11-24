@@ -172,7 +172,7 @@ namespace aspect
                 {
                   // Only nodal DGQ2 existed in a legacy, unmarked 3-D slot.
                   AssertThrow(archive_version == 0, ExcMessage("Missing 3-D checkpoint composition basis record."));
-                  AssertThrow(!(parameters.explicit_compositions.selected[c] &&
+                  AssertThrow(!(parameters.compositional_field_methods[c] == Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3 &&
                                 parameters.composition_descriptions[c].type == CompositionalFieldDescription::phase_field),
                               ExcMessage("Legacy 3-D checkpoint has nodal basis for field " + introspection.name_for_compositional_index(c)
                                          + ", current basis is " + bases[c] + "."));

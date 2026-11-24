@@ -13,17 +13,15 @@ namespace aspect
 
   namespace Transport
   {
-    /** Per-composition opt-in. The stage evaluator reads the same prescribed
-     * Cartesian boundary function as implicit advection, with time in seconds
-     * supplied explicitly by the stage. */
+    /** Prescribed Cartesian composition at a point, field index and stage time in seconds. */
     template <int dim>
-    struct ExplicitCompositions
-    {
-      static void declare_parameters(ParameterHandler &prm);
-      void parse_parameters(ParameterHandler &prm, const Parameters<dim> &parameters);
-      std::vector<bool> selected;
-      std::function<double(const Point<dim> &, unsigned int, double)> inflow;
-    };
+    using CompositionInflow = std::function<double(const Point<dim> &, unsigned int, double)>;
+
+    /** Validate fields with the explicit DG SSPRK3 method and parse their stage-time
+     * inflow function. Return an empty evaluator when no inflow is prescribed. */
+    template <int dim>
+    CompositionInflow<dim>
+    parse_explicit_composition_parameters(ParameterHandler &prm, const Parameters<dim> &parameters);
 
     /** Advance one selected DG field from its accepted coefficients
      * and accepted velocity. Write only its candidate solution block. */
