@@ -47,7 +47,8 @@ namespace aspect::MaterialModel::Rheology
       virtual void initialize(unsigned int) {}
       /** Publish one material identity at the accepted signed rate in m/s. */
       virtual void accept_rate(unsigned int, double, double) {}
-      /** Optional state, in material identity order, for checkpoints. */
+      /** Optional scalar history for checkpoints. A stateful law supplies one
+       * value per material identity; a state-free law supplies none. */
       virtual const std::vector<double> &state() const
       {
         static const std::vector<double> empty;

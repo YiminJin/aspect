@@ -33,10 +33,7 @@ namespace aspect
         const std::vector<typename MaterialFaultTrace<dim>::Label> &labels() const;
 
         /** Accepted RSF ages (s), or an empty vector for a state-free material. */
-        const std::vector<double> &label_ages() const
-        {
-          return friction->state();
-        }
+        const std::vector<double> &label_ages() const;
         /** Accepted surface Maxwell memory (Pa m) in material vertex order. */
         const std::vector<double> &label_memory() const
         {
@@ -80,6 +77,7 @@ namespace aspect
         EquationOfState::LinearizedIncompressible<dim> eos;
         std::unique_ptr<Rheology::FaultResistance> friction;
         std::vector<double> initial_shear, maxwell_memory;
+        std::string label_checkpoint_key() const;
         void accept_section(const std::vector<double> &rates, double dt);
         // A profile borrows its own curve. Swapping owners publishes both together.
         struct Section

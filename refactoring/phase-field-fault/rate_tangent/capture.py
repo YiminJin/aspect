@@ -36,7 +36,7 @@ s=inject(s,'        if (residual <= 64.*std::numeric_limits<double>::epsilon())'
             o << std::setprecision(17);
             for (unsigned int j=0;j<n;++j)
               o << j << ' ' << accepted[j].position << ' ' << material.section().profile.normal_integrals()[j] << ' '
-                << accepted[j].age << ' ' << rates[j] << ' ' << diagonal[j] << ' ' << (j+1<n?upper[j]:0.)
+                << material.label_ages().at(j) << ' ' << rates[j] << ' ' << diagonal[j] << ' ' << (j+1<n?upper[j]:0.)
                 << ' ' << rhs[j] << ' ' << scale[j] << ' ' << material.stiffness(accepted[j].position) << '\n';
           }
 ''')

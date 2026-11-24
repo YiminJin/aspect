@@ -154,6 +154,15 @@ namespace aspect
     }
 
     template <int dim>
+    const std::vector<double> &PhaseFieldFault<dim>::label_ages() const
+    {
+      // Only RSF interprets its saved scalar as an age in seconds.
+      static const std::vector<double> empty;
+      const auto *rsf=dynamic_cast<const Rheology::RateStateHistory *>(friction.get());
+      return rsf ? rsf->state() : empty;
+    }
+
+    template <int dim>
     void PhaseFieldFault<dim>::declare_parameters(ParameterHandler &prm)
     {
       prm.enter_subsection("Material model");
@@ -353,6 +362,14 @@ namespace aspect
     }
 
     template <int dim>
+    std::string PhaseFieldFault<dim>::label_checkpoint_key() const
+    {
+      if (dynamic_cast<const Rheology::RateStateHistory *>(friction.get()))
+        return "Material fault labels v1";
+      return "Material fault labels "+friction->name();
+    }
+
+    template <int dim>
     void PhaseFieldFault<dim>::save(std::map<std::string,std::string> &status) const
     {
       if (!interior_seed) return;
@@ -367,7 +384,7 @@ namespace aspect
           out<<p.rate<<' '<<p.slip<<' '<<maxwell_memory[i]<<'\n';
         }
       // Retain the repaired RSF wire format, including its per-label age.
-      status[friction->name()=="rate and state" ? "Material fault labels v1" : "Material fault labels "+friction->name()]=out.str();
+      status[label_checkpoint_key()]=out.str();
 
     }
 
@@ -375,7 +392,7 @@ namespace aspect
     void PhaseFieldFault<dim>::load(const std::map<std::string,std::string> &status)
     {
       if (!interior_seed) return;
-      const auto entry=status.find(friction->name()=="rate and state" ? "Material fault labels v1" : "Material fault labels "+friction->name());
+      const auto entry=status.find(label_checkpoint_key());
       AssertThrow(entry!=status.end(),ExcMessage("Missing interior fault labels in checkpoint."));
       std::istringstream in(entry->second);
       auto restored=labels();
