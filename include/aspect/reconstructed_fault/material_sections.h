@@ -39,6 +39,8 @@ namespace aspect
       double length(unsigned int section, double beta) const;
       SymmetricTensor<2,3> shear(double beta) const;
 
+      /** Lower box corner. Stations are tangent projections relative to this origin. */
+      Point<2> origin;
       Tensor<1,2> tangent;
       std::vector<double> edges;
       std::map<CellId,CellRule> cells;

@@ -34,7 +34,7 @@ namespace aspect::GrowingFault
       {
         const auto &t=geometry.tangent;
         const Tensor<1,2> normal({-t[1],t[0]});
-        double z=normal[0]*seed[0]+normal[1]*seed[1],last_xi=tip_xi;
+        double z=normal*(seed-geometry.origin),last_xi=tip_xi;
         const auto &fe=material.get_fe();
         const auto c=material.introspection().component_indices.compositional_fields[field];
         const auto &element=fe.base_element(fe.component_to_base_index(c).first);
@@ -46,7 +46,7 @@ namespace aspect::GrowingFault
                 z+=(stations[k]-last_xi)*std::tan(angles[k]);
                 last_xi=stations[k];
               }
-            const Point<2> p(stations[k]*t+z*normal);
+            const Point<2> p=geometry.origin+(stations[k]*t+z*normal);
             double trace=0.;
             for (const auto &cell:material.get_dof_handler().active_cell_iterators())
               if (cell->is_locally_owned() && cell->bounding_box().point_inside(p,1.e-12))

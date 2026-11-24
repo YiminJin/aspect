@@ -50,6 +50,11 @@ namespace aspect::GrowingFault
                 p.additional_refinement_times.empty() && p.stokes_velocity_degree==2 && !p.use_equal_order_interpolation_for_stokes &&
                 !p.use_locally_conservative_discretization && !p.include_melt_transport,
                 ExcMessage("Growing fault requires a fixed conforming Q2/Q1 mesh."));
+    AssertThrow(!p.use_direct_stokes_solver,ExcMessage("Midpoint fault mechanics requires separate velocity and pressure blocks."));
+    AssertThrow(!p.enable_prescribed_dilation &&
+                (p.formulation_mass_conservation==Parameters<dim>::Formulation::MassConservation::incompressible ||
+                 p.formulation_mass_conservation==Parameters<dim>::Formulation::MassConservation::ask_material_model),
+                ExcMessage("Midpoint fault mechanics requires incompressible continuity without prescribed dilation."));
     prm.enter_subsection("Material model");
     prm.enter_subsection("Growing fault");
     degrees=prm.get_double("Seed tangent angle");

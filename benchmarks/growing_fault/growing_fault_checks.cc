@@ -191,7 +191,7 @@ namespace aspect::Postprocess
                     std::ofstream book(path+"balance-"+tag+".csv");
                     const auto &b=m.balance();
                     book<<std::setprecision(17)<<"step,time,bulk,cohesive,fracture,Wext,Db,Dc,Df,phase_remainder,phase_work,energy_change,mechanical_residual,phase_KKT,adjoint_error,iterations\n"
-                        <<history.step<<','<<history.time<<','<<b.bulk<<','<<b.cohesive<<','<<b.fracture<<','<<b.wall<<','<<b.bulk_loss<<','<<b.cohesive_loss
+                        <<history.step<<','<<history.time<<','<<b.bulk<<','<<b.cohesive<<','<<b.fracture<<','<<b.prescribed_velocity_work<<','<<b.bulk_loss<<','<<b.cohesive_loss
                         <<','<<b.friction_work<<','<<b.compliance_remainder<<','<<b.phase_work<<','<<b.storage_change<<','<<b.mechanical<<','<<b.kkt<<','<<b.adjoint_defect<<','<<b.iterations<<'\n';
                   }
               }

@@ -5,6 +5,8 @@
 #include <aspect/reconstructed_fault/onset_score.h>
 #include <deal.II/distributed/tria.h>
 #include <deal.II/grid/grid_generator.h>
+#include <deal.II/grid/grid_tools.h>
+#include <numeric>
 
 TEST_CASE("Material sections preserve the signed work of an oblique distributed strip")
 {
@@ -143,4 +145,47 @@ TEST_CASE("Cold creep has a finite condensed section tangent")
   REQUIRE(free.rate==.0008);
   REQUIRE(std::isfinite(free.slope));
   REQUIRE_THROWS(solve_section(law,0.,0.,10.,.0025,200.));
+}
+
+TEST_CASE("Translated material strips preserve membership and cell measures")
+{
+  using namespace aspect;
+  using namespace GrowingFault;
+  const MPI_Comm comm=MPI_COMM_WORLD;
+  parallel::distributed::Triangulation<2> mesh(comm);
+  GridGenerator::subdivided_hyper_rectangle(mesh, {8,4},Point<2>(),Point<2>(2.,1.));
+  const MaterialSections original(mesh,comm,30.,6);
+  Tensor<1,2> shift;
+  shift[0]=10000.;
+  GridTools::shift(shift,mesh);
+  const MaterialSections moved(mesh,comm,30.,6);
+  REQUIRE(original.edges==moved.edges);
+  const Point<2> seed(1.4330127018922194,.75);
+  REQUIRE(std::abs(original.coordinate(seed)-moved.coordinate(seed+shift))<1.e-12);
+  double area_error=0., position_error=0.;
+  unsigned int count=0;
+  for (const auto &cell:mesh.active_cell_iterators())
+    if (cell->is_locally_owned())
+      {
+        const auto &a=original.cells.at(cell->id()), &b=moved.cells.at(cell->id());
+        REQUIRE(a.section==b.section);
+        REQUIRE(a.quadrature.get_weights()==b.quadrature.get_weights());
+        area_error=std::max(area_error,std::abs(std::accumulate(b.quadrature.get_weights().begin(),b.quadrature.get_weights().end(),0.)-1.));
+        for (unsigned int q=0; q<b.quadrature.size(); ++q)
+          {
+            const auto physical=cell->vertex(0)+.25*b.quadrature.point(q);
+            const auto reference=(cell->vertex(0)-shift)+.25*a.quadrature.point(q);
+            position_error=std::max(position_error,reference.distance(physical-shift));
+            ++count;
+          }
+      }
+  for (unsigned int k=0; k+1<original.edges.size(); ++k)
+    REQUIRE(original.length(k,-.147)==moved.length(k,-.147));
+  area_error=dealii::Utilities::MPI::max(area_error,comm);
+  position_error=dealii::Utilities::MPI::max(position_error,comm);
+  REQUIRE(dealii::Utilities::MPI::sum(count,comm)==4968);
+  REQUIRE(area_error<1.e-12);
+  REQUIRE(position_error<1.e-12);
+  if (dealii::Utilities::MPI::this_mpi_process(comm)==0)
+    std::cout<<"Translated strip maximum normalized area error "<<area_error<<", physical position error "<<position_error<<" m\n";
 }

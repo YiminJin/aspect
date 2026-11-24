@@ -7,7 +7,7 @@ namespace aspect::GrowingFault
 {
   double MaterialSections::coordinate(const Point<2> &p) const
   {
-    return tangent[0]*p[0]+tangent[1]*p[1];
+    return tangent*(p-origin);
   }
 
   double MaterialSections::width(const unsigned int k) const
@@ -38,6 +38,14 @@ namespace aspect::GrowingFault
     tangent[1]=std::sin(degrees*numbers::PI/180.);
     if (std::remainder(degrees,180.)==0.) tangent[1]=0.;
     if (std::remainder(degrees-90.,180.)==0.) tangent[0]=0.;
+    for (unsigned int d=0; d<2; ++d)
+      {
+        double minimum=std::numeric_limits<double>::max();
+        for (const auto &cell:mesh.active_cell_iterators())
+          if (cell->is_locally_owned())
+            minimum=std::min(minimum,cell->vertex(0)[d]);
+        origin[d]=Utilities::MPI::min(minimum,comm);
+      }
     double lo=std::numeric_limits<double>::max(), hi=-lo, altitude=lo;
     unsigned int invalid=0;
     for (const auto &cell:mesh.active_cell_iterators())

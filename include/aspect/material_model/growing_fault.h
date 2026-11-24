@@ -17,10 +17,11 @@ namespace aspect::GrowingFault
     std::map<CellId,std::vector<PointHistory>> cells;
   };
 
-  /** Full-step energies and work per unit out-of-plane thickness (J/m). */
+  /** Full-step energies and work per unit out-of-plane thickness (J/m).
+   * Prescribed-velocity work includes both wall and interior reactions. */
   struct Balance
   {
-    double bulk=0.,cohesive=0.,fracture=0.,wall=0.,bulk_loss=0.,cohesive_loss=0.,friction_work=0.;
+    double bulk=0.,cohesive=0.,fracture=0.,prescribed_velocity_work=0.,bulk_loss=0.,cohesive_loss=0.,friction_work=0.;
     double compliance_remainder=0.,phase_work=0.,storage_change=0.,adjoint_defect=0.,mechanical=0.,kkt=0.;
     unsigned int iterations=0;
   };

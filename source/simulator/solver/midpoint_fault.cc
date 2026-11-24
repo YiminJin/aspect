@@ -65,15 +65,24 @@ namespace aspect::GrowingFault
             invalid|=!line.entries.empty();
             owned_constraints[line.index]=h*line.inhomogeneity;
           }
+        if (line.index>=nv && line.index<phase_begin && intro.index_sets.system_partitioning[1].is_element(line.index-nv))
+          {
+            invalid|=!line.entries.empty();
+            owned_constraints[line.index]=line.inhomogeneity/G;
+          }
         if (line.index>=offset && line.index<offset+n-phase_begin) invalid=1;
       }
-    AssertThrow(!Utilities::MPI::max(invalid,comm),ExcMessage("Midpoint mechanics requires fully prescribed wall velocity and unconstrained DG phase."));
+    AssertThrow(!Utilities::MPI::max(invalid,comm),ExcMessage("Midpoint mechanics requires fully prescribed wall velocity with simple prescribed values, at most one pressure datum and unconstrained DG phase."));
     for (auto part:Utilities::MPI::all_gather(comm,owned_constraints)) fixed.merge(part);
-    const double gauge=initial[nv];
+    auto datum=fixed.lower_bound(nv);
+    if (datum==fixed.end()) datum=fixed.emplace(nv,0.).first;
+    AssertThrow(std::next(datum)==fixed.end(),ExcMessage("Midpoint fault supports one prescribed physical pressure datum."));
+    const double gauge=initial[datum->first]-datum->second;
     for (Index i=nv; i<phase_begin; ++i) initial[i]-=gauge;
-    fixed[nv]=0.;
     for (const auto &[i,v]:fixed) initial[i]=v;
 
+    unsigned int nonzero_gravity=0;
+    double flux=0.,flux_scale=0.;
     const auto &sections=m.sections();
     for (const auto &s:m.history().sections)
       {
@@ -89,8 +98,6 @@ namespace aspect::GrowingFault
           FEValues<2> values(m.get_mapping(),fe,rule.quadrature,update_values|update_gradients|update_JxW_values|update_quadrature_points);
           values.reinit(cell);
           cell->get_dof_indices(ids);
-          AssertThrow(material.get_gravity_model().gravity_vector(cell->center()).norm()==0.,
-                      ExcMessage("Growing fault mechanics currently supports zero gravity."));
           auto &data=cells[cell->id()];
           std::vector<unsigned int> local;
           for (unsigned int j=0; j<ids.size(); ++j)
@@ -102,17 +109,32 @@ namespace aspect::GrowingFault
           for (unsigned int q=0; q<rule.quadrature.size(); ++q)
             {
               Sample p {rule.section[q],values.quadrature_point(q),values.JxW(q),0.,0.,{}};
+              nonzero_gravity|=material.get_gravity_model().gravity_vector(p.position)!=Tensor<1,2>();
               for (const auto j:local)
                 {
                   p.shapes.push_back({plane_strain(values[intro.extractors.velocities].symmetric_gradient(j,q)),
                                       values[intro.extractors.velocities].divergence(j,q),values[intro.extractors.pressure].value(j,q),
                                       values.shape_value_component(j,q,c)
                                      });
+                  if (ids[j]<nv)
+                    {
+                      const double term=p.area*p.shapes.back().div*(initial[ids[j]]/h);
+                      flux+=term;
+                      flux_scale+=std::abs(term);
+                    }
                   if (ids[j]>=phase_begin) p.old_phase+=p.shapes.back().phase*old[ids[j]];
                 }
               data.points.push_back(std::move(p));
             }
         }
+    const unsigned int gravity_owners=Utilities::MPI::sum(nonzero_gravity,comm);
+    AssertThrow(gravity_owners==0,ExcMessage("Growing fault mechanics requires zero gravity at every native integration point; nonzero on "+
+                                             std::to_string(gravity_owners)+" of "+std::to_string(Utilities::MPI::n_mpi_processes(comm))+" ranks."));
+    flux=Utilities::MPI::sum(flux,comm);
+    flux_scale=Utilities::MPI::sum(flux_scale,comm);
+    // Sum of all Q1 continuity tests is the constant test. Its integral
+    // equals the prescribed net wall flux regardless of the interior values.
+    AssertThrow(std::abs(flux)<=1.e-12*flux_scale,ExcMessage("Incompatible prescribed net velocity flux: "+Utilities::to_string(flux)+" m^2/s."));
   }
 
   MidpointSystem::Evaluation MidpointSystem::assemble_stage(const Values &x,const bool tangent,const bool publish) const
@@ -316,7 +338,7 @@ namespace aspect::GrowingFault
             b.friction_work+=2.*h*lengths[k]*s.rate*s.resistance;
           }
         b.adjoint_defect-=b.friction_work;
-        for (const auto &[i,v]:fixed) if (i<nv) b.wall+=2.*G*v*e.residual[i];
+        for (const auto &[i,v]:fixed) if (i<nv) b.prescribed_velocity_work+=2.*G*v*e.residual[i];
         for (Index i=phase_begin; i<n; ++i) b.phase_work+=Kf*(endpoint(i)-lower[i])*e.residual[i];
         e.candidate.step=parent.step+1;
         e.candidate.time=material.get_time();
