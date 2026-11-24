@@ -26,6 +26,9 @@ namespace aspect
         /** Evaluate the traction and tangent at fixed age and compression. */
         FaultTraction resistance(double speed, double age, double compression) const;
 
+        /** Eliminate the signed, stage-aged RSF relation on a material strip. */
+        SectionRoot solve_strip(double free_rate,double mobility,double age,double h,double compression) const;
+
         /** Age in seconds after sliding at constant speed for dt seconds. */
         double advance_age(double speed, double age, double dt) const;
       };
@@ -42,6 +45,10 @@ namespace aspect
             return "rate and state";
           }
           FaultTraction at_speed(unsigned int i,double xi,double speed,double pressure) const override;
+          SectionRoot solve_strip(unsigned int i,double free_rate,double mobility,double h,double compression) const override;
+          void validate_midpoint() const override;
+          bool admits_duration(double h,double pressure) const override;
+          std::vector<double> parameters() const override;
           void initialize(unsigned int count) override;
           void accept_rate(unsigned int i,double rate,double dt) override;
           const std::vector<double> &state() const override

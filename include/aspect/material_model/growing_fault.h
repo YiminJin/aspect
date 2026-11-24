@@ -80,20 +80,23 @@ namespace aspect::GrowingFault
       {
         return point_law;
       }
-      const Friction &friction() const
+      const MaterialModel::Rheology::FaultResistance &friction() const
       {
-        return law;
+        return *law;
       }
       const Point<2> &seed_tip() const
       {
         return anchor;
       }
+    protected:
+      /** Select a constitutive law in the Growing fault parameter subsection. */
+      virtual std::unique_ptr<MaterialModel::Rheology::FaultResistance> make_resistance(ParameterHandler &) const;
     private:
       unsigned int order,field;
-      double degrees,initial_age;
+      double degrees;
       Point<2> anchor;
       CohesiveMaxwell point_law;
-      Friction law;
+      std::unique_ptr<MaterialModel::Rheology::FaultResistance> law;
       std::unique_ptr<MaterialSections> geometry;
       History accepted;
       std::unique_ptr<History> trial;
@@ -102,6 +105,7 @@ namespace aspect::GrowingFault
       void initialize_native_history();
       /** Deferred until ASPECT restores the mesh and reconstructs native rules. */
       std::string restored;
+      bool legacy_checkpoint=false;
       std::vector<double> checkpoint_parameters() const;
   };
 }

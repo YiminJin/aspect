@@ -1,5 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include "common.h"
+#include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <aspect/material_model/growing_fault/section_response.h>
 #include <aspect/reconstructed_fault/material_sections.h>
 #include <aspect/reconstructed_fault/onset_score.h>
@@ -54,19 +55,19 @@ TEST_CASE("Material sections preserve the signed work of an oblique distributed 
   double strip_work=0.;
   for (unsigned int k=0; k<3; ++k) strip_work+=geometry.length(k,.1*k)*forces[k]*rates.free_rate[k];
   REQUIRE(std::abs(strip_work-dealii::Utilities::MPI::sum(point_work,comm))<1.e-13);
-  const Friction law= {.6,.015,.02,.001,.01,1000.};
+  const aspect::MaterialModel::Rheology::RateAndStateFriction law= {.6,.015,.02,.001,.01,1000.};
   const auto force=[&](const SectionTransfer &t)
   {
-    return solve_section(law,t.free_rate[1],t.mobility[1],10.,.0025,200.).resistance;
+    return law.solve_strip(t.free_rate[1],t.mobility[1],10.,.0025,200.).resistance;
   };
   REQUIRE(std::abs(force(perturbed)-force(rates))>1.e-6);
-  const auto positive=solve_section(law,.1,.0003,10.,.0025,200.);
+  const auto positive=law.solve_strip(.1,.0003,10.,.0025,200.);
   REQUIRE(positive.rate+positive.resistance*.0003==Approx(.1));
-  REQUIRE(solve_section(law,-.1,.0003,10.,.0025,200.).rate==Approx(-positive.rate));
-  REQUIRE(solve_section(law,0.,.0003,10.,.0025,200.).resistance==0.);
+  REQUIRE(law.solve_strip(-.1,.0003,10.,.0025,200.).rate==Approx(-positive.rate));
+  REQUIRE(law.solve_strip(0.,.0003,10.,.0025,200.).resistance==0.);
   const double d=1.e-6;
-  const auto plus=solve_section(law,.1+d,.0003+d*.001,10.,.0025,200.);
-  const auto minus=solve_section(law,.1-d,.0003-d*.001,10.,.0025,200.);
+  const auto plus=law.solve_strip(.1+d,.0003+d*.001,10.,.0025,200.);
+  const auto minus=law.solve_strip(.1-d,.0003-d*.001,10.,.0025,200.);
   REQUIRE((plus.resistance-minus.resistance)/(2.*d)==Approx(positive.slope*(1.-.001*positive.resistance)).epsilon(1.e-8));
 }
 
@@ -105,7 +106,7 @@ TEST_CASE("Intact cohesive Maxwell response has the analytic locked and phase de
 TEST_CASE("Remote shear controls the resistance inside an onset disk")
 {
   using namespace aspect::GrowingFault;
-  const Friction law= {.6,.015,.02,.001,.01,1000.};
+  const aspect::MaterialModel::Rheology::RateAndStateFriction law= {.6,.015,.02,.001,.01,1000.};
   const auto local=onset_moments(.13,.64,.12,0.,0.);
   const auto remote=onset_moments(.78,0.,.42,30.,220.);
   for (unsigned int j=3; j<remote.size(); ++j) REQUIRE(remote[j]==0.);
@@ -113,8 +114,12 @@ TEST_CASE("Remote shear controls the resistance inside an onset disk")
   for (unsigned int j=0; j<total.size(); ++j) total[j]+=remote[j];
   const double variance[3]= {};
   const double angle=.17, h=.0025, length=.21/std::cos(angle), GBh=1.e6*h/(1.+h*.01);
-  const auto cold=candidate_onset(local.data(),variance,law,10.,h,200.,GBh*length,angle);
-  const auto loaded=candidate_onset(total.data(),variance,law,10.,h,200.,GBh*length,angle);
+  const auto resistance=[&](double free,double mobility)
+  {
+    return law.solve_strip(free,mobility,10.,h,200.).resistance;
+  };
+  const auto cold=candidate_onset(local.data(),variance,resistance,GBh*length,angle);
+  const auto loaded=candidate_onset(total.data(),variance,resistance,GBh*length,angle);
   REQUIRE(cold.resistance==0.);
   REQUIRE(loaded.resistance>100.);
   REQUIRE(loaded.score==Approx(.13*.64*.88*.88*loaded.resistance*loaded.resistance));
@@ -124,14 +129,14 @@ TEST_CASE("Remote shear controls the resistance inside an onset disk")
 TEST_CASE("Cold creep has a finite condensed section tangent")
 {
   using namespace aspect::GrowingFault;
-  const Friction law= {.72,.001,0.,.001,.01,1000.};
+  const aspect::MaterialModel::Rheology::RateAndStateFriction law= {.72,.001,0.,.001,.01,1000.};
   const double mobility=.0003;
   for (const double free :
   {
     0.,.0008,-.0008
   })
   {
-    const auto root=solve_section(law,free,mobility,10.,.0025,200.);
+    const auto root=law.solve_strip(free,mobility,10.,.0025,200.);
     // At this stiffness f = Vfree/M within 1e-306 Pa. Independently
     // invert the constant-state asinh law in extended precision.
     const long double f=free/mobility;
@@ -141,10 +146,10 @@ TEST_CASE("Cold creep has a finite condensed section tangent")
     REQUIRE(std::abs(root.rate-v)<=1.e-12L*std::abs(v));
     REQUIRE(root.slope==Approx(1./mobility).epsilon(1.e-13));
   }
-  const auto free=solve_section(law,.0008,0.,10.,.0025,200.);
+  const auto free=law.solve_strip(.0008,0.,10.,.0025,200.);
   REQUIRE(free.rate==.0008);
   REQUIRE(std::isfinite(free.slope));
-  REQUIRE_THROWS(solve_section(law,0.,0.,10.,.0025,200.));
+  REQUIRE_THROWS(law.solve_strip(0.,0.,10.,.0025,200.));
 }
 
 TEST_CASE("Translated material strips preserve membership and cell measures")

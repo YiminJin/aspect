@@ -31,7 +31,7 @@ namespace aspect::GrowingFault
     // Both admissibility bounds depend on this attempt's half-duration and
     // hold on every rank. Let the time-step manager retry from the same parent.
     if (h*G>m.maxwell().eta ||
-        m.friction().damping<m.get_parameters().surface_pressure*h*m.friction().evolution_effect/m.friction().slip_distance)
+        !m.friction().admits_duration(h,m.get_parameters().surface_pressure))
       throw ExcNonlinearSolverNoConvergence();
     const auto &old=m.get_old_solution();
     const auto &fe=m.get_fe();
@@ -187,8 +187,8 @@ namespace aspect::GrowingFault
       }
     transfer.sum(comm);
     for (unsigned int k=0; k<ns; ++k)
-      e.roots.push_back(solve_section(material.friction(),transfer.free_rate[k],transfer.mobility[k],parent.sections[k].age,
-                                      h,material.get_parameters().surface_pressure));
+      e.roots.push_back(material.friction().solve_strip(k,transfer.free_rate[k],transfer.mobility[k],
+                                                        h,material.get_parameters().surface_pressure));
     // In exact arithmetic the weighted sum of the returned point rates is V.
     // In cold creep even the rounding error of the scalar resistance can be
     // much larger than V/M. Recover that low part of the traction before
@@ -339,7 +339,6 @@ namespace aspect::GrowingFault
             s.rate=e.roots[k].rate;
             s.resistance=e.roots[k].resistance;
             s.slip+=2.*h*s.rate;
-            s.age=material.friction().advance_age(std::abs(s.rate),s.age,2.*h);
             b.friction_work+=2.*h*lengths[k]*s.rate*s.resistance;
           }
         b.adjoint_defect-=b.friction_work;

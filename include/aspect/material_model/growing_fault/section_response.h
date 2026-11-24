@@ -2,12 +2,12 @@
 #ifndef _aspect_growing_fault_section_response_h
 #define _aspect_growing_fault_section_response_h
 #include <aspect/global.h>
-#include <aspect/material_model/rheology/rate_and_state_friction.h>
+#include <aspect/material_model/rheology/fault_resistance.h>
 
 namespace aspect::GrowingFault
 {
   using Stress = SymmetricTensor<2,3>;
-  using Friction = MaterialModel::Rheology::RateAndStateFriction;
+  using MaterialModel::Rheology::SectionRoot;
 
   /** A stage is the midpoint of a physical step. Tensors retain zz in plane
    * strain. This state belongs to one native point on the fixed material mesh. */
@@ -24,23 +24,13 @@ namespace aspect::GrowingFault
   /** Replicated, ordered material-strip history. Slip is signed and in metres. */
   struct SectionHistory
   {
-    double age=0., slip=0., angle=0., rate=0., resistance=0.;
+    double slip=0., angle=0., rate=0., resistance=0.;
     bool formed=false;
     template <class Archive> void serialize(Archive &ar, const unsigned int)
     {
-      ar &age &slip &angle &rate &resistance &formed;
+      ar &slip &angle &rate &resistance &formed;
     }
   };
-
-  struct SectionRoot
-  {
-    double rate, resistance, slope; ///< slope = f'/(1+M f'), in Pa s/m.
-  };
-
-  /** Eliminate the signed strip rate at prescribed compression. Age and its
-   * derivative are evaluated at the same stage duration h as the Maxwell law. */
-  SectionRoot solve_section(const Friction &, double free_rate, double mobility,
-                            double age, double h, double compression);
 
   /** Evaluate the analytic endpoint for FE phase samples within roundoff of [0,1]. */
   double physical_phase(double value);

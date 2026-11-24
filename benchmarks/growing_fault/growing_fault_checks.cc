@@ -179,12 +179,15 @@ namespace aspect::Postprocess
             if (rank==0)
               {
                 std::ofstream strips(path+"sections-"+tag+".csv");
-                strips<<std::setprecision(17)<<"section,xi,ds,beta,formed,age,slip,V,force\n";
+                const auto &ages=m.friction().state();
+                strips<<std::setprecision(17)<<"section,xi,ds,beta,formed,"<<(ages.empty()?"":"age,")<<"slip,V,force\n";
                 for (unsigned int k=0; k<history.sections.size(); ++k)
                   {
                     const auto &s=history.sections[k];
                     strips<<k<<','<<.5*(m.sections().edges[k]+m.sections().edges[k+1])<<','<<m.sections().length(k,s.angle)<<','<<s.angle
-                          <<','<<s.formed<<','<<s.age<<','<<s.slip<<','<<s.rate<<','<<s.resistance<<'\n';
+                          <<','<<s.formed<<',';
+                    if (!ages.empty()) strips<<ages[k]<<',';
+                    strips<<s.slip<<','<<s.rate<<','<<s.resistance<<'\n';
                   }
                 // The initial seed has no completed step-work ledger.
                 if (history.step>0)

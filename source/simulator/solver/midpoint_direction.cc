@@ -136,10 +136,13 @@ namespace aspect::GrowingFault
         {
           const auto *m=&moments[9*k];
           if (m[8]==0. || (m[3]+m[4]==0. && m[0]==0. && m[1]==0.)) continue;
+          const auto resistance=[&](double free,double mobility)
+          {
+            return material.friction().solve_strip(k,free,mobility,h,material.get_parameters().surface_pressure).resistance;
+          };
           const auto score=[&](const double angle)
           {
-            return candidate_onset(m,&centered[3*k],material.friction(),material.history().sections[k].age,h,
-                                   material.get_parameters().surface_pressure,G*B*h*geometry.length(k,angle),angle).score;
+            return candidate_onset(m,&centered[3*k],resistance,G*B*h*geometry.length(k,angle),angle).score;
           };
           const double limit=numbers::PI/4.,spacing=2.*limit/128.;
           unsigned int best=0;

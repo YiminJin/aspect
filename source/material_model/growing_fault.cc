@@ -1,5 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/material_model/growing_fault.h>
+#include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <aspect/simulator/solver/midpoint_fault.h>
 #include <aspect/phase_field/bernstein_bounds.h>
 #include <aspect/geometry_model/box.h>
@@ -8,6 +9,20 @@
 
 namespace aspect::GrowingFault
 {
+  namespace
+  {
+    // The repaired v1 archive interleaved RSF age with each physical strip.
+    // Decode this representation only when restoring that format.
+    struct ArchivedRsfStrip : SectionHistory
+    {
+      double age;
+      template <class Archive> void serialize(Archive &ar,const unsigned int)
+      {
+        ar &age &slip &angle &rate &resistance &formed;
+      }
+    };
+  }
+
   template <int dim>
   void Material<dim>::declare_parameters(ParameterHandler &prm)
   {
@@ -62,18 +77,13 @@ namespace aspect::GrowingFault
     const auto coordinates=Utilities::string_to_double(Utilities::split_string_list(prm.get("Forward seed tip")));
     anchor=Point<2>(coordinates[0],coordinates[1]);
     order=prm.get_integer("Section quadrature order");
-    initial_age=prm.get_double("Initial age");
     const double G=prm.get_double("Shear modulus"), strength=prm.get_double("Cohesion");
     const double Kf=energy.fracture_energy/(energy.geometry.normalization()*energy.length_scale);
     AssertThrow(strength>0.,ExcMessage("Growing fault requires positive cohesion."));
     point_law= {G,prm.get_double("Viscosity"),Kf*2.*G/(strength*strength)};
-    law= {prm.get_double("Reference friction coefficient"),prm.get_double("Direct effect"),prm.get_double("Evolution effect"),
-          prm.get_double("Reference speed"),prm.get_double("Slip distance"),prm.get_double("Radiation damping")
-         };
-    AssertThrow(G>0. && point_law.eta>0. && initial_age>0. && law.direct_effect>0. && law.reference_speed>0. && law.slip_distance>0.,
-                ExcMessage("Growing fault requires positive Maxwell and RSF scales."));
-    AssertThrow(law.damping>0. || law.evolution_effect==0.,
-                ExcMessage("The growing fault monotonicity bound requires positive damping for nonzero state evolution."));
+    AssertThrow(G>0. && point_law.eta>0.,ExcMessage("Growing fault requires positive Maxwell scales."));
+    law=make_resistance(prm);
+    law->validate_midpoint();
     prm.leave_subsection();
     prm.leave_subsection();
     this->model_dependence.viscosity=MaterialModel::NonlinearDependence::none;
@@ -81,6 +91,15 @@ namespace aspect::GrowingFault
     this->model_dependence.compressibility=MaterialModel::NonlinearDependence::none;
     this->model_dependence.specific_heat=MaterialModel::NonlinearDependence::none;
     this->model_dependence.thermal_conductivity=MaterialModel::NonlinearDependence::none;
+  }
+
+  template <int dim>
+  std::unique_ptr<MaterialModel::Rheology::FaultResistance> Material<dim>::make_resistance(ParameterHandler &prm) const
+  {
+    const MaterialModel::Rheology::RateAndStateFriction parameters= {prm.get_double("Reference friction coefficient"),prm.get_double("Direct effect"),prm.get_double("Evolution effect"),
+                                                                     prm.get_double("Reference speed"),prm.get_double("Slip distance"),prm.get_double("Radiation damping")
+                                                                    };
+    return std::make_unique<MaterialModel::Rheology::RateStateHistory>(parameters,prm.get_double("Initial age"));
   }
 
   template <int dim>
@@ -94,6 +113,8 @@ namespace aspect::GrowingFault
     {
       if (trial)
         {
+          for (unsigned int k=0; k<trial->sections.size(); ++k)
+            law->accept_rate(k,trial->sections[k].rate,this->get_timestep());
           accepted=std::move(*trial);
           trial.reset();
           last_balance=trial_balance;
@@ -127,7 +148,7 @@ namespace aspect::GrowingFault
                     ExcMessage("Growing fault requires a fixed nonperiodic box."));
         geometry=std::make_unique<MaterialSections>(this->get_triangulation(),this->get_mpi_communicator(),degrees,order);
         accepted.sections.resize(geometry->edges.size()-1);
-        for (auto &s:accepted.sections) s.age=initial_age;
+        law->initialize(accepted.sections.size());
         for (const auto &cell:geometry->cells) accepted.cells[cell.first].resize(cell.second.quadrature.size());
         if (!restored.empty())
           {
@@ -139,7 +160,25 @@ namespace aspect::GrowingFault
             std::vector<double> signature;
             ar >> signature;
             AssertThrow(signature==checkpoint_parameters(),ExcMessage("Growing fault physical parameters differ from the checkpoint."));
-            ar >> n >> angle >> edges >> accepted.step >> accepted.time >> accepted.sections;
+            ar >> n >> angle >> edges >> accepted.step >> accepted.time;
+            if (legacy_checkpoint)
+              {
+                AssertThrow(law->name()=="rate and state",ExcMessage("The v1 growing fault checkpoint requires RSF."));
+                std::vector<ArchivedRsfStrip> records;
+                ar >> records;
+                std::vector<double> ages;
+                accepted.sections.assign(records.begin(),records.end());
+                for (const auto &record:records) ages.push_back(record.age);
+                law->restore_state(std::move(ages));
+              }
+            else
+              {
+                std::string name;
+                std::vector<double> state;
+                ar >> name >> accepted.sections >> state;
+                AssertThrow(name==law->name(),ExcMessage("Growing fault checkpoint resistance law changed."));
+                law->restore_state(std::move(state));
+              }
             AssertThrow(n==order && angle==degrees && edges==geometry->edges && accepted.sections.size()+1==edges.size(),
                         ExcMessage("Incompatible native material strip checkpoint."));
             std::map<std::string,std::pair<std::array<Point<2>,4>,std::vector<PointHistory>>> points;
@@ -208,10 +247,12 @@ namespace aspect::GrowingFault
   std::vector<double> Material<dim>::checkpoint_parameters() const
   {
     const auto &energy=this->get_parameters().surface_energy_model;
-    return {energy.fracture_energy,energy.length_scale,this->get_parameters().discontinuous_penalty,
-            this->get_parameters().surface_pressure,anchor[0],anchor[1],point_law.G,point_law.eta,point_law.m,
-            law.reference_coefficient,law.direct_effect,law.evolution_effect,law.reference_speed,law.slip_distance,law.damping
-           };
+    std::vector<double> signature= {energy.fracture_energy,energy.length_scale,this->get_parameters().discontinuous_penalty,
+                                    this->get_parameters().surface_pressure,anchor[0],anchor[1],point_law.G,point_law.eta,point_law.m
+                                   };
+    const auto parameters=law->parameters();
+    signature.insert(signature.end(),parameters.begin(),parameters.end());
+    return signature;
   }
 
   template <int dim>
@@ -236,9 +277,9 @@ namespace aspect::GrowingFault
         std::ostringstream out;
         {
           aspect::oarchive ar(out);
-          ar << checkpoint_parameters() << order << degrees << geometry->edges << accepted.step << accepted.time << accepted.sections << all;
+          ar << checkpoint_parameters() << order << degrees << geometry->edges << accepted.step << accepted.time << law->name() << accepted.sections << law->state() << all;
         }
-        status["Native growing fault v1"]=out.str();
+        status["Native growing fault v2"]=out.str();
         if (balance_available)
           {
             std::ostringstream bytes;
@@ -254,7 +295,8 @@ namespace aspect::GrowingFault
   template <int dim>
   void Material<dim>::load(const std::map<std::string,std::string> &status)
   {
-    restored=status.at("Native growing fault v1");
+    legacy_checkpoint=status.find("Native growing fault v2")==status.end();
+    restored=status.at(legacy_checkpoint ? "Native growing fault v1" : "Native growing fault v2");
     const auto entry=status.find("Growing fault accepted balance v1");
     balance_available=entry!=status.end();
     if (balance_available)

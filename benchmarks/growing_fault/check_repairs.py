@@ -111,12 +111,12 @@ def main():
         for generation,steps in [(1,[1,2,3]),(3,[3])]:
             other=run(f'restart-{generation}',snapshot=clean/'restart'/f'{generation:02}',end='.015')
             continuation(clean,other,steps)
-            for item in ['Native growing fault v1','Growing fault accepted balance v1']:
+            for item in ['Native growing fault v2','Growing fault accepted balance v1']:
                 if (clean/('published-'+item)).read_bytes()!=(other/('pre-solve-'+item)).read_bytes():
                     raise ValueError(f'Generation {generation}: restored 10 ms {item} differs')
         if args.legacy_snapshot:
             legacy=run('legacy',snapshot=args.legacy_snapshot,end='.015')
-            if (not (legacy/'pre-solve-Native growing fault v1').is_file() or
+            if (not (legacy/'pre-solve-Native growing fault v2').is_file() or
                 (legacy/'pre-solve-Growing fault accepted balance v1').exists() or not (legacy/'balance-0003.csv').is_file()):
                 raise ValueError('Legacy restore failed to distinguish missing work from physical state')
             print('Legacy generation 03: native history restored, prior balance unavailable, new 15 ms balance published.')
