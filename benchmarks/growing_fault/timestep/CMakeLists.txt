@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect 3.1 REQUIRED HINTS ${Aspect_DIR} $ENV{ASPECT_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(midpoint_fields)
+add_library(midpoint_fields SHARED midpoint_fields.cc)
+ASPECT_SETUP_PLUGIN(midpoint_fields)
