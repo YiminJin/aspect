@@ -1,6 +1,8 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**The [5A review repairs](INCREMENT_5A_REVIEW_REPAIRS.md) are ready for focused re-review.** The [working record](STATUS.md#increment-5a-review-repairs) covers the signed cold-creep publication, Stokes admission and work, checkpoint lifecycle, translated strips and the measured native-history resolution limit.
+**The [ownership cleanup](PF_RSF_OWNERSHIP_CLEANUP.md) is the current architecture review.** The simulator selects the Maxwell–AT1 midpoint provider from the configured phase method. The material selects friction and owns its optional history. Ordered mature vertices and fixed growing strips retain their separate transfers and slip kinematics. The [working record](STATUS.md#ownership-cleanup-before-5b) gives the substitution, baseline, restart and MPI checks.
+
+**The [5A review repairs](INCREMENT_5A_REVIEW_REPAIRS.md) passed focused re-review.** The [working record](STATUS.md#increment-5a-review-repairs) covers the signed cold-creep publication, Stokes admission and work, checkpoint lifecycle, translated strips and the measured native-history resolution limit.
 
 **[Increment 5A](INCREMENT_5A_TASK.md) is ready for review.** The [working record](STATUS.md#increment-5a--single-forward-front) gives the frozen two-rank nine-strip comparison, the returned-state checks and the [strip 8 diagnosis](strip8/README.md). The turn at 5 ms is resolved. The score gap between the two reported maxima is below the measured fixed-input variation. Two-rank Release retains full qualification. Increment 5B awaits review.
 

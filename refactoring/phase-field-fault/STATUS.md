@@ -1,5 +1,161 @@
 # Phase-field fault working record
 
+## Ownership cleanup before 5B
+
+**Target trace at `d12c188fd`, recorded before consulting the donor.** On the mature path the material constructs the Q1 trace and binds its borrowed phase profile. The label index identifies geometry, slip/rate, background traction, Maxwell memory and RSF age. The section solver interpolates accepted age before evaluating resistance at the sampled pressure and trial speed. The returned Stokes fields and rates remain a trial until the post-repeat callback updates slip, age and memory and installs the moving trace. Interior checkpoints presently store these quantities in one row per label. A speed-only law currently requires editing geometry initialization and acceptance, sampled balance, material parsing, observers and the checkpoint reader.
+
+On the growing path the material initializes fixed strip quadrature, per-point tensors and shear inventories, and replicated strip records including prospective angles, formed flags, slip/rate and RSF age. The simulator defers the phase, then calls a solver on the concrete material. The stage integrates free rate and mobility over the complete strip. Both the condensed stress tangent and every proposed angle solve against the stage-aged law. Candidate recovery updates strip age over the full step. The post-repeat material callback installs the converged history and ledger. Post-resume reconstruction reads the native checkpoint before pre-solve observers. A speed-only law currently touches the strip record, border assembly, direction scoring, duration guard, serialization and the material-specific dispatch.
+
+### Focused re-review and ownership decision
+
+The focused read-only re-review of `3c58b5d26..8f6f6d038` preceded the code movement. At the final stage the scalar root supplies both signed rate and force. The traction remainder recovers native increments; the separately reduced storage check runs before the candidate FE fields are written. The material reloads its fixed rules and accepted history on `post_resume_load_user_data`. Both duration guards throw the recoverable nonlinear exception. Only a successful non-repeated step signals `post_accept_timestep`. An independent audit on the retained repaired cold output gave a maximum native-rate defect of 2.15825e−27 m/s and signed RSF defect of 1.42109e−14 Pa. The retained clean/cut and early-resume outputs support that reading. No numerical repair was needed. Before rebuilding, the repaired Release/Debug executables and compatible Release observers were copied into `build-ownership/baseline`; the original 5A and 4C outputs and checkpoints remain in their original destinations.
+
+The donor checkout currently points to the ASPECT release. Reading Git objects at the assigned donor commit `abbc9b0c` showed independent committed slip-rate accessors and a material that requests age only when `has_state_variable()` is true. We kept material identity and that optionality. The target uses typed material laws and native DG/strip state; this change adds no runtime property registry, markers, particles, or second timestep driver.
+
+| Owner | Public contract and normal caller |
+| --- | --- |
+| Mature material vertices | `MaterialFaultTrace` stores position, ordered connectivity, frame, normal support and slip/speed. `PhaseFieldFault` owns the bound section/profile, initial shear and surface Maxwell memory, indexed by stable vertex ID. RSF alone allocates ages. `FaultStokesCoupling::solve_rates` asks the material law for the traction and slope at Q1 coordinate ξ, sampled compression and interpolated trial speed. The weak row uses that result and its own physical area, χ and stiffness. The material publishes at the existing post-accept callback. |
+| Fixed growing strips | `MaterialSections` constructs the native rules; `SectionTransfer` integrates rate and mobility using area/current arclength on the cell owner and sums across ranks. Replicated strip records hold formed status, angle, signed slip/rate and returned resistance. Native point tensors and both shear inventories remain keyed by (CellId,q). Prospective strips retain stable indices. `MidpointSystem` asks the selected law to solve once per strip for assembly and again for every proposed angle at its own arclength. |
+| Constitutive law | To add a law, implement `FaultResistance` and select it in the material's `make_resistance`. The state-free test uses the empty default history and has no age parameter. `RateStateHistory` owns the RSF ages. The mature sampled response uses interpolated accepted age; the growing signed solve uses age advanced by the half-duration. The full-step commit uses the accepted speed magnitude on every strip, including unformed strips. The Maxwell guard remains in the midpoint solve. The monotonicity and creep-scale guards belong to RSF. |
+| Simulator and persistence | After top-level material parsing, the simulator checks that the selected phase field has a compatible Maxwell–AT1 provider. After temperature and companion dispatch, `advance_midpoint` receives simulator services separately from `MidpointMaterial`. The solver returns the FE solution and stages one native candidate. The normal completion signal precedes the repeat decision. To change the acceptance clock, inspect the repeat test in `Simulator::run` and the two owners' `post_accept_timestep` subscriptions. No material starts a global solve. Mature RSF keeps its v1 row format. Growing v2 separates the law identity/state from strip kinematics and keeps the balance record. Its v1 reader unpacks the old interleaved ages and preserves the distinction between an unavailable ledger and zero work. |
+
+The established ASPECT core changes are confined to three call sites. The method parser keeps its dimension, phase-role and FE checks and drops a literal material name; parameter strings alone cannot establish the provider capability. The simulator constructor checks the actual plugin after parsing, before initialization can skip a field. The Newton scheme retains temperature, ordinary compositions, linearization update and completion signaling, and dispatches the selected midpoint field to the simulator-side solver. The ordinary material base and generic assembly interfaces are unchanged. The implicit companion and ordinary explicit DG, Stokes and dilation controls exercise the pre-existing callers. Both linear materials and their archive probes live solely in the benchmark plugin.
+
+The law and typed provider headers give the constitutive contracts. The solver scheme calls the midpoint advance. The simulator run loop signals post-accept through the public simulator signals interface, and the two material subscribers install their returned states. Changing strip quadrature or arclength starts at the last two files. The source-linked verification guide describes both weak forms.
+
+~~~text
+include/aspect/material_model/rheology/fault_resistance.h
+source/material_model/rheology/rate_and_state_friction.cc
+include/aspect/material_model/growing_fault/midpoint_material.h
+source/simulator/solver_schemes.cc
+source/simulator/solver/midpoint_fault.cc
+include/aspect/simulator_signals.h
+source/simulator/core.cc
+source/material_model/growing_fault.cc
+source/reconstructed_fault/stokes_coupling.cc
+source/material_model/phase_field_fault.cc
+include/aspect/reconstructed_fault/material_sections.h
+source/reconstructed_fault/material_sections.cc
+~~~
+
+### Operator, identity and lifecycle evidence
+
+| Discriminator | Measured result |
+| --- | --- |
+| State-free signed strip, one and two ranks | Ordinary parameters select the separately registered linear material with κ=1000 Pa s/m. Setting RSF age, direct effect and damping to zero exercises the law boundary. Reverse loading reverses all nine first-step rates. Independent Q2 gradients, native tensors and whole-strip measures recover Vfree/(1+Mκ) within 2.78e−17 m/s, κV within 2.85e−14 Pa and the rate from stored shear within 4.52e−17 m/s across both ranks/layouts. At 15 ms the returned condensed derivative agrees within 2.28e−13 Pa s/m. Centered differences of the returned assembled tangent give relative errors 3.76e−10 and 4.21e−10 forward/reverse on one rank, 4.76e−10 and 4.82e−10 on two. |
+| State-free direction and actual return | Independently differentiating the direct pointwise squared-traction integral at 5 ms gives maxima −0.143407431527 and −0.111426615471 rad on strips 7 and 8. The largest returned angle difference is 6.48e−9 rad. Using only the disk to compute resistance changes those scores by 0.404 and 6.25e−6 Pa² m². The full Maxwell/cohesive residuals, native signed slip, Newton matrix, virtual work, formation decision and accepted FE/strip outputs traverse production code. |
+| State-free mature speed and IO | With κ=20 Pa s/m the imposed homogeneous traction gives 0.190875 and 0.19025 m/s at 12.5 and 25 ms. Accumulated slip is 0.0023859375 and 0.0047640625 m, within 2e−12 absolute. Serial and two-rank controls pass. A separate fixed interior seed writes an actual checkpoint. Its decoder finds exactly x, y, width, background traction, speed, slip and Maxwell memory per vertex. The growing decoder finds zero constitutive entries after nine physical strip records. Both still publish kinematic data. |
+| Repaired signed RSF | The 5 ms cold strip-0 root is +1.51442146194e−22 m/s with +49.9987500525 Pa. Independent signed RSF defect 1.42109e−14 Pa; maximum native rate defect 2.15825e−27 m/s. All nine dissipate positively, 8.45045e−23 J/m total. Subnormal ±1.25478e−310 m/s and the zero root retain the finite condensed slope 3333.33333 Pa s/m. The unresolved actuator still fails on strip 1: stored +2.12932e−23 against root −1.19035e−24 m/s, budget 4.68671e−21 m/s, before publication. |
+| Retry, restart, dispatch | Both automatic 5→2.5 ms cutbacks reproduced clean FE fields, points, strips and balance byte for byte. The nine-strip retry rejected two already solved attempts before publication. Generations 01 and 03 from the repaired executable and from the new writer reached 15 ms; the 10 ms native state and balance seen by the pre-solve observer matched clean. The old checkpoint without a balance retained that distinction until a new acceptance. Completion counts 4/3/3 preceded commits 1/2/3. Top-level simple material with a midpoint phase is rejected at configuration. The ordinary implicit tracer advanced while permuted phase coefficients remained equal. |
+| Mature kinetic and Maxwell identity | The moving, reverse, zero translation, fixed/finite support, loading, homogeneous, permutation, MPI, retry and restart controls passed. Material ID 9 crossed from owner 0 to owner 1 during the first 12.5 ms. Its accepted age was 7.76828258436 s, slip 0.00203163227401 m, rate 0.162530581921 m/s and Maxwell memory 0.0200872338756 Pa m. The two replicated label records matched exactly. The ordinary MPI bulk/label comparison had at most 2.46e−14 difference, clean/retried and restart had zero. Resuming the repaired interior checkpoint by itself gave byte-identical 25 ms physical bulk, label and background output. The 38-label fitted control passed all three frozen clocks. At a later projected moving Picard assembly the tangent defect was 1.46e−10 relative on 2,120 Q8 points; replacing point stiffness with interpolated vertex stiffness gave 1.057e−4. |
+| Geometry and failure collectives | Translating the nine-strip box by 10,000 m preserved all 4,968 point identities with 9.09e−13 m maximum position defect. The 150 s bounded two-rank Open MPI run rejected gravity present on one owner. Both ranks reached the diagnostic; the launcher exited 1. |
+| Frozen nine-strip RSF and matched layouts | The two-rank Release solve passed the frozen archive and all donor frames. Integrated slip at 15 ms was 1.69302306477e−4 m². The returned tangent defect was 4.61979e−10 relative. Deliberately adding 0.001 Pa to the first cell's zz stress failed the comparator. Both Release and Debug reproduced every same-layout field, point, strip and balance CSV from the repaired build byte for byte (23 files per two-rank run and 15 per serial run). All four recomputed donor audits match the repaired audit. Against the frozen donor, Release serial and Debug two-rank still miss the angle and arclength budgets on strip 8; Debug serial still misses its angle budget. The 5 ms angle differences are 1.29327e−6, 1.53118e−6 and 5.76599e−7 rad respectively and persist to 15 ms. |
+| Configuration, units and feature-off controls | The provider test rejected the simple material and rejected an otherwise compatible provider configured with AT2 before any midpoint solve. Release passed 2,566 assertions in 59 cases. Debug passed 205 assertions in seven scoped cases; each MPI owner passed 120 in five cases. Eight of ten scoped Release CTests passed. The screen differences for `iterated_advection_and_stokes_DG` and `prescribed_dilation_newton_singleadvection` reproduce the retained 76 and six raw residual lines byte for byte. The statistics diffs for both are empty. Reference screens and tolerances were preserved. |
+
+The matched two-rank Release principal runs took 6.088 s at repaired baseline and 4.181 s after cleanup, with the observer, one numerical thread per rank and the same 8 × 4 mesh. Peak RSS on rank 0/rank 1 was 247,996/219,880 KiB before and 229,972/240,216 KiB after. These are single wall-clock observations. Both report 112 bytes per native history point. Moving a mature trial copies three fewer doubles per vertex (24 bytes), and the growing candidate no longer copies the age double per strip. Only a stateful law allocates the replicated O(number of identities) constitutive vector. Native point history and MPI reductions retain the repaired baseline's copy and reduction counts. Restart serializes the small law vector in addition to the physical strip records.
+
+### Reproduction from the worktree root
+
+The paths below describe the retained build trees and fresh destinations used here. Run from the refactor worktree with the matching plugin ABI and one numerical thread per rank. The before pair was saved at `d12c188fd` ahead of rebuilding. The exact donor and baseline comparison inputs are the retained repair outputs.
+
+~~~bash
+W=$PWD
+D=$W/build-ownership/final
+R=$W/build-5a-repair
+F=benchmarks/growing_fault
+B=$W/build-slice/aspect-release
+BD=$W/build-slice-debug/aspect-debug
+P=$W/build-5a/plugin/libgrowing_fault_checks.release.so
+PD=$W/build-5a/debug-plugin/libgrowing_fault_checks.debug.so
+T=$W/build-4c/tests
+M=/opt/openmpi/5.0.6/bin/mpirun
+export ASPECT_SOURCE_DIR=$W OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+cmake --build build-slice --target aspect -j2
+cmake --build build-slice-debug --target aspect -j1
+cmake --build build-5a/plugin -j2
+cmake --build build-5a/debug-plugin -j2
+cmake --build build-4c-closeout/plugin -j2
+cmake --build build-4c-closeout/fit2/plugin -j1
+cmake --build "$T" --target fixed_fault stationary_fault growing_fault -j2
+python3 -BO "$F/run.py" build-ownership/baseline/aspect-release build-ownership/baseline/libgrowing_fault_checks.release.so "$D/cost-before" --mpiexec "$M" --principal-only
+python3 -BO "$F/run.py" "$B" "$P" "$D/cost-after" --mpiexec "$M" --principal-only
+python3 -BO "$F/run.py" "$B" "$P" "$D/canonical" --mpiexec "$M"
+Q=$D/canonical/principal/output
+python3 -BO "$F/compare.py" "$R/reference/runs/localized-onecut/output" "$Q" --archive
+python3 -BO "$F/compare.py" "$R/donor-two/output" "$Q"
+python3 -BO "$F/compare.py" "$R/donor-two/output" "$Q" --check-corruption
+python3 -BO "$F/check_history.py" "$Q"
+python3 -BO "$F/check_state_free.py" "$B" "$P" "$D/provider"
+python3 -BO "$F/check_state_free.py" "$B" "$P" "$D/provider-two" --ranks 2 --mpiexec "$M"
+for g in friction geometry companion; do python3 -BO "$F/check_repairs.py" "$B" "$P" "$D/$g" "$g"; done
+python3 -BO "$F/check_repairs.py" "$B" "$P" "$D/constraints" constraints --pressure-plugin "$T/libpressure_constraint.release.so"
+python3 -BO "$F/check_repairs.py" "$B" "$P" "$D/lifecycle" lifecycle --legacy-snapshot "$R/before-checkpoint/restart/03" --repaired-checkpoints "$R/qualified-lifecycle/clean/output/restart"
+python3 -BO "$F/check_repairs.py" "$B" "$P" "$D/mpi" mpi --mpiexec "$M"
+for g in friction companion; do python3 -BO "$F/check_repairs.py" "$BD" "$PD" "$D/debug-$g" "$g"; done
+for n in 1 2; do python3 -BO "$F/run.py" "$BD" "$PD" "$D/debug$n" --ranks "$n" --mpiexec "$M" --principal-only; done
+(cd build-slice/unit_tests && ../aspect --test)
+(cd build-slice-debug/unit_tests && ../aspect --test 'Cold creep*,Remote shear*,Material sections preserve*,Translated material*,Intact cohesive*,Interior material connectivity*,Mature fault resistance*')
+"$M" --map-by core --bind-to core -np 2 "$B" --test 'Cold creep*,Remote shear*,Material sections preserve*,Translated material*,Intact cohesive*'
+ctest --test-dir "$T" -R '^(growing_fault|fixed_fault|stationary_fault|layered_moving_fault|layered_fault_traction_step|postprocess/phase_field_surface_energy_at2|explicit_dg_compositions|matrix_nonzeros_1|iterated_advection_and_stokes_DG|prescribed_dilation_newton_singleadvection)$' --output-on-failure
+for t in iterated_advection_and_stokes_DG prescribed_dilation_newton_singleadvection; do
+  rg -a 'nonlinear residual|Nonlinear residual reduction' "$T/output-$t/log.txt" > "$D/$t-residuals"
+done
+cmp build-5a/stock-5a-residuals "$D/iterated_advection_and_stokes_DG-residuals"
+cmp build-5a/stock-newton-5a-residuals "$D/prescribed_dilation_newton_singleadvection-residuals"
+~~~
+
+The matched repaired snapshots for Release two/one and Debug one/two were respectively `final-canonical/principal`, `qualified-lifecycle/clean`, `final-debug1/principal` and `final-debug2/principal` below the repair output root. Reproduce the per-frame byte comparisons and all-column audit with the same cases and keys:
+
+~~~bash
+python3 -BO - <<'PY'
+import csv, sys
+from filecmp import cmp
+from pathlib import Path
+sys.path.insert(0,'refactoring/phase-field-fault/strip8')
+from endpoints import audit
+r, d = Path('build-5a-repair'), Path('build-ownership/final')
+cases = [('R2','final-canonical/principal','canonical/principal'),('R1','qualified-lifecycle/clean','lifecycle/clean'),('B1','final-debug1/principal','debug1/principal'),('B2','final-debug2/principal','debug2/principal')]
+with (d/'layout.csv').open('w') as stream:
+    writer = csv.writer(stream)
+    writer.writerow('layout step column entries failed max_abs max_tolerance_ratio worst_id ref target'.split())
+    for label, before, after in cases:
+        output = d/after/'output'
+        for p in (r/before/'output').glob('*.csv'):
+            if p.name.split('-')[0] in {'fields','points','sections','balance'} and not cmp(p,output/p.name,shallow=False):
+                raise ValueError((label,p.name))
+        audit(r/'donor-two/output',output,label,writer)
+if not cmp(r/'layout-audit.csv',d/'layout.csv',shallow=False): raise ValueError('Changed donor comparison')
+PY
+~~~
+
+The mature restart copied only the original checkpoint generations into the new run. The fitted and moving tangent checks use the same parameter files and tolerances as the 4C closeout.
+
+~~~bash
+L=benchmarks/layered_moving_fault
+LP=$W/build-4c-closeout/plugin/liblayered_moving_fault.release.so
+V=$W/refactoring/phase-field-fault/rate_tangent
+python3 -BO "$L/run.py" "$B" "$LP" "$T/libfixed_fault.release.so" "$D/layered" --mpiexec "$M"
+python3 -BO "$L/check.py" "$D/layered" build-4c/donor/output "$D/layered.png" --zero build-4c/donor-zero/output --reverse build-4c/donor-reverse/output
+python3 -BO "$L/check_review.py" "$B" "$LP" "$D/mature-review"
+mkdir -p "$D/old-mature/output" "$D/bands" "$D/fitted/free-32"
+cp -a "$R/layered/seed/output/restart" "$D/old-mature/output/restart"
+sed "s|$R/layered/restart/output|$D/old-mature/output|" "$R/layered/restart/input.prm" > "$D/old-mature/input.prm"
+"$B" "$D/old-mature/input.prm"
+for f in "$D"/old-mature/output/material-2-*.csv "$D"/old-mature/output/background-2.csv; do cmp "$f" "$R/layered/principal/output/${f##*/}"; done
+(cd "$D/bands" && python3 "$V/capture.py" "$W" --moving)
+cp "$L/layered.prm" "$D/bands/input.prm"
+printf '\nset Additional shared libraries = %s\nset Output directory = %s\n' "$LP" "$D/bands/output" >> "$D/bands/input.prm"
+"$D/bands/aspect-review" "$D/bands/input.prm"
+python3 -BO "$V/check_moving.py" "$D/bands/output"
+S=$W/build-4c-closeout/fit2
+sed "s|$S/free-32/output|$D/fitted/free-32/output|" "$S/free-32/input.prm" > "$D/fitted/free-32/input.prm"
+"$B" "$D/fitted/free-32/input.prm"
+cp "$S/free-32/profile.txt" "$D/fitted/free-32/profile.txt"
+PYTHONPATH=benchmarks/fixed_fault/phase_ridge python3 -B -c 'from pathlib import Path; import sys; from check import check_case; check_case(Path(sys.argv[1]),"free",32)' "$D/fitted"
+~~~
+
+Review the mature change in `11c2ac2fc` and its diagnostic follow-up `f7181ef26`, the growing response in `415131be1` and its transfer placement in `7d44bd2e1`, the simulator dispatch in `6fa3e182e`, and the substitution and admission checks in `160b0eaa5`. The next decision is architecture review of the typed law and midpoint material contracts. The two 18-strip trajectories in 5B remain pending.
+
 ## Increment 5A review repairs
 
 The [repair assignment](INCREMENT_5A_REVIEW_REPAIRS.md) was applied to reviewed production commit `3c58b5d26`. Review the signed section response and native publication in `8e7440f57`, Stokes constraints and translated strips in `70520561f`, and checkpoint, solver lifecycle and parameter-file regressions in `f9d8b7a85`. The retained strip-8 archive SHA-256 is `0c7875ccd2451e2864acacb22ef7f9fd7c60cf181158528a69a2a575b0e8d757`. The two-rank Release control qualifies through 5, 10 and 15 ms with the original budgets. Review the binary64 native-history limit in finding 13 before broadening the supported regime.
