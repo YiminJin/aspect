@@ -1,5 +1,124 @@
 # Phase-field fault working record
 
+## Increment 5B · Two 18-strip timestep schedules
+
+**The timestep separation reproduced. Full frame qualification remains open on one material angle.** The first over-budget operation was prospective plane selection for strip 15 during the common 0–5 ms step. It differed by −2.36894e−7 rad at acceptance. Both continuations preserved the formed plane. All other tested field columns, classifications, admissions and physical reductions passed the original budgets.
+
+Starting HEAD was `2bbeaec54449f7270a91ce4868aad0e4cfb66941`. The [assignment](INCREMENT_5B_TASK.md) used the existing two-rank Release implementation. The benchmark runner, FE observer and independent reducers are in `f7f114a84`. The SHA-256 of the indexed archive was `a82d362c3504be188e9602cf10c93cf51a26544be5e6d4a7677016cc52981c57`. All 144 internal entries passed verification. With Python assertions enabled the timestep, point-audit and closeout reducers reproduced all three expected JSON files byte for byte. The donor core and checker were `e640fa627141ea98343fee14526c532f005281d336da32aa2d2f3467c5589b10` and `977328e5d1a4b80c06e8ac8734caa8bf0b77a98232bf095463b154b64f6f44e8`. The qualified target executable was `8769c98b64923906964379ef78917567eb93edc40da93b9d38765b187184022d` (its configure-time banner still reports `415131be1`), its growing-fault observer `a65c5ebe8438af157225a2c875e792b850a752aa190339ad4e2d3a271e56810f`, and the common mesh-field observer `5d3722031f34b833d96244bd867cce5975913375ddc2045378ef6b5c9753adf9`. Only the benchmark and verification record changed.
+
+### Common parent and branch clocks
+
+The 16 × 8 mesh occupies [0,2] × [0,1] m, with 18 oblique strips and 19,944 native points (9,972 on each owner). Comparing the archived inputs to nine-strip onecut isolates the mesh repetitions and run controls. Both use the same 30° material frame, seed, order-six native rule, steady affine wall velocity, RSF and Maxwell–AT1 material. The supplemental donor replays added a generic FE postprocessor to the indexed cases. Every archived physical CSV matched the replay byte for byte after decompressing native points. This provides the donor's zero-clock seed, FE coefficients by component and local index, native history including zz, and both phase and mechanical stages at their proper clocks.
+
+At zero time, the largest phase-coefficient difference was 1.39e−17 and the largest native-area difference 1.08e−19 m². At 5 ms, target and donor enclose the same damaged band and retain a minimum Bernstein coefficient of −0.00866863. All 18 strips agreed on incoming and accepted formation status, including 16 newly formed planes. The phase check compared all 1,152 obstacle values by CellId and local Bernstein index. Target velocity, pressure and phase coefficients matched donor within 4.80e−12 m/s, 1.38e−7 Pa and 1.41e−12. The parent KKT and mechanical gates passed. Strip 15's angle was the sole failed parent comparison.
+
+The coarse calculation resumed target generation 02. Its checkpoint had already advanced the pending duration to 5 ms. The fine calculation used the stock function timestep model from time zero and requested 2.5 ms after the first physical acceptance. All seven zero-clock and eight 5 ms physical tables (including both ranks' mesh, field and native data) matched the coarse preparation byte for byte. No donor checkpoint was read by the target. The donor continuations both resumed the indexed donor generation 02. Every production attempt completed and published once, with zero repeats. Target completion-ledger pairs were (0,0), (1,0) for preparation, (2,1) for the coarse restart, and (0,0), (1,0), (2,1), (3,2) for the fine run; each pair is (solve step, accepted parent observed before publication).
+
+| Parent → stage → endpoint (ms) | Lower / free / upper, donor and target | Target stage KKT | Target mechanics | New planes | Conditional endpoint downhill rows | Nonlinear iterations, donor / target |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| 0 → 2.5 → 5 | 913 / 239 / 0 | 6.1951e-09 | 1.4987e-11 | 16 | 183 | 4 / 4 |
+| 5 → 7.5 → 10, coarse | 947 / 205 / 0 | 1.4539e-12 | 1.4003e-17 | 0 | 169 | 4 / 4 |
+| 5 → 6.25 → 7.5, first half | 947 / 205 / 0 | 6.9682e-09 | 6.5927e-11 | 0 | 169 | 3 / 3 |
+| 7.5 → 8.75 → 10, second half | 966 / 186 / 0 | 2.0596e-12 | 3.9052e-17 | 0 | 169 | 4 / 4 |
+
+The coarse 7.5 ms state is an equilibrium **stage** bounded against the 5 ms obstacle. The fine 7.5 ms state is an extrapolated, **accepted endpoint** that supplies the next obstacle. Each of the 947/205/0 classifications matched the corresponding observed donor row. Maximum stage-residual differences were 1.97e−11 J/m (coarse) and 4.56e−12 J/m (first half). The fine 7.5 ms endpoint still has 169 downhill rows. A second equilibrium solve under the same loading can release more phase. The two endpoint increment peaks are 0.07980657222 and 0.07980755852. Their spatial distance is 0.00742665266796313 m versus 0.00742665266795857 m in the donor. Neither schedule formed another plane from 5 to 10 ms.
+
+A scratch Release binary recorded the actual phase rows after both coupled gates and the native-rate guard, immediately before `write_candidate_fields`. Its accepted FE, native, strip and energy tables matched the uninstrumented runs byte for byte. The 4,608 returned rows agreed with independent assembly within 2.87e−14 J/m, including the physical mass, obstacle, stage and classification checks. Captured half-durations were 0.0025 and 0.00125 s, and the Maxwell factors were 0.99997500062498446 and 0.99998750015624804. The largest difference against the reconstructed donor row was 4.18e−11 J/m on the last fine interval.
+
+### Physical reductions
+
+Each entry below is **donor / target / signed target-minus-donor**. Energy and work use μJ per metre out of plane. Full-precision values and budgets are preserved in the [frame audit](results/strip18/frame-comparisons.csv) and [independent reductions](results/strip18/intervals.json). The coarse interval and coarse window are listed separately to expose the common-parent convention.
+
+| Accepted interval or window | Signed section slip (m²) | Spatial L² phase increment (m) | Added fracture energy (μJ/m) |
+| --- | --- | --- | --- |
+| Preparation 0–5 ms | 7.7924367925e-16 / 7.7923515609e-16 / -8.52e-21 | 0.017941450091 / 0.017941450091 / -2.76e-14 | -0.00021797585958 / -0.00021836932262 / -3.93e-07 |
+| Coarse 5–10 ms | 3.7489010408e-05 / 3.7489010408e-05 / -6.61e-18 | 0.01148909425 / 0.01148909425 / -1.53e-16 | 5.5504746648 / 5.5504746452 / -1.95e-08 |
+| First half 5–7.5 ms | 5.3077937671e-06 / 5.3077937671e-06 / -8.35e-17 | 0.011488997397 / 0.011488997397 / -1.21e-16 | 0.13478172356 / 0.13478170935 / -1.42e-08 |
+| Second half 7.5–10 ms | 5.2699751473e-05 / 5.2699751473e-05 / +9.4e-17 | 0.0074267818907 / 0.0074267818907 / +4.44e-15 | 14.906593731 / 14.90659372 / -1.07e-08 |
+| Coarse window 5–10 ms | 3.7489010408e-05 / 3.7489010408e-05 / -6.61e-18 | 0.01148909425 / 0.01148909425 / -1.53e-16 | 5.5504746648 / 5.5504746452 / -1.95e-08 |
+| Fine window 5–10 ms | 5.800754524e-05 / 5.800754524e-05 / +1.06e-17 | 0.015185496702 / 0.015185496702 / +4.19e-15 | 15.041375454 / 15.04137543 / -2.49e-08 |
+
+| Accepted interval or window | Physical-work defect (μJ/m) | Cohesive compliance remainder (μJ/m) | Phase residual work (μJ/m) | Mechanical residual work (μJ/m) |
+| --- | --- | --- | --- | --- |
+| Preparation 0–5 ms | 0.0003885571056 / 0.00038899417922 / +4.37e-07 | 1.8142833748e-12 / 1.8175165091e-12 / +3.23e-15 | -0.00021797017886 / -0.00021837092695 / -4.01e-07 | -0.00017058834033 / -0.00017062483371 / -3.65e-08 |
+| Coarse 5–10 ms | 3.9600873008 / 3.9600873203 / +1.95e-08 | 3.9600872988 / 3.9600873018 / +2.94e-09 | -6.0361440423e-09 / -7.1819906362e-09 / -1.15e-09 | -3.1225022568e-10 / -4.8572257327e-11 / +2.64e-10 |
+| First half 5–7.5 ms | 0.093895357001 / 0.093895397441 / +4.04e-08 | 0.093253169141 / 0.093253169615 / +4.74e-10 | -8.3072802597e-05 / -8.3079081191e-05 / -6.28e-09 | -0.00055911747281 / -0.00055914569502 / -2.82e-08 |
+| Second half 7.5–10 ms | 6.6890619565 / 6.6890619645 / +7.99e-09 | 6.6890619562 / 6.6890619479 / -8.33e-09 | -1.001122968e-08 / -1.273785628e-08 / -2.73e-09 | -1.9775847626e-10 / -3.6776137691e-10 / -1.7e-10 |
+| Coarse window 5–10 ms | 3.9600873008 / 3.9600873203 / +1.95e-08 | 3.9600872988 / 3.9600873018 / +2.94e-09 | -6.0361440423e-09 / -7.1819906362e-09 / -1.15e-09 | -3.1225022568e-10 / -4.8572257327e-11 / +2.64e-10 |
+| Fine window 5–10 ms | 6.7829573136 / 6.782957362 / +4.84e-08 | 6.7823151253 / 6.7823151175 / -7.85e-09 | -8.3082813826e-05 / -8.3091819047e-05 / -9.01e-09 | -0.00055911767056 / -0.00055914606278 / -2.84e-08 |
+
+Each 5–10 ms interval's physical defect was positive. The sums of absolute defects therefore equal the signed sums: donor/target 3.96008730/3.96008732 μJ/m coarse, 6.78295731/6.78295736 μJ/m fine. The absolute interval compliance remainders likewise sum to 3.96008730/3.96008730 and 6.78231513/6.78231512 μJ/m. The work audit integrates a boundary-only Q2 velocity test against midpoint stress and Q1 pressure, independently differences elastic, cohesive and SIPG fracture storage, and subtracts bulk viscous, cohesive viscous and point friction work. It also checks the point friction term against the signed full-strip transfer and the defect against compliance remainder less phase and mechanical residual work. The [verification guide](VERIFICATION.md#18-strip-midpoint-timestep-comparison) gives the identity mapping, frozen thresholds, weak forms and stage clocks.
+
+### First divergent operation
+
+At the first prospective decision, strip 15 entered with zero angle, zero slip and no formed plane on both sides. The donor selected −0.14786132315540235 rad and the target −0.14786156004981515 rad. The 2.36894413e−7 rad difference exceeds the 1.14786132e−7 rad budget by a factor of 2.064. The arclength difference is +4.42372e−9 m and the signed resistance difference is −1.05405e−7 Pa, both within budget. Both marked this strip formed, then kept their respective angle across every subsequent acceptance. The native rate guard passed on every attempt.
+
+A read-only debugger observation at entry to each original selector captured the two completed MPI reductions for strip 15 before the angle search. The full-strip fraction moment was 8.737953428211681e−8 m² on the donor and 8.737953428211664e−8 m² on the target. Their fraction-weighted predictor sine and cosine terms differed by +1.09e−18 and +9.74e−18 Pa m² (target minus donor). At zero the high-precision centered scores on the two captured inputs were 1.07201650025e−9 and 1.07201560700e−9 Pa² m². At the donor angle they were 4.75328110871e−9 and 4.75327957476e−9. On the same input, changing from the donor to the target angle changes the high-precision score by only +2.26e−20 (donor moments) or +2.33e−20 Pa² m² (target moments). The corresponding-input score shift at the donor angle is 1.53e−15 Pa² m². This localizes the first out-of-budget output to the flat maximum of the prospective direction score. The capture establishes that its operands already differ slightly; it does not isolate a single causal floating-point instruction within the nonlinear solve or angular search.
+
+The debugger replay preserved all 15 target and 11 donor physical tables at initialization and 5 ms byte for byte. The [original moments](results/strip18/moments.csv), [strip 15 histories](results/strip18/strip15.csv), [per-column maxima and worst keys](results/strip18/frame-comparisons.csv) and [96 raw physical file hashes](results/strip18/physical-files.sha256) retain the evidence. The donor replay archive, actual raw fields, both checkpoints and attempt logs remain in their recorded local locations. No scientific tolerance, seed, angle, production operator or reference output was changed.
+
+### Runs and reproduction
+
+Two bound Open MPI 5.0.6 ranks, one numerical thread per rank, sequential target and donor runs. Launch-to-exit time including output was 18.301 s for parent preparation, 18.455 s for the coarse restart and 45.865 s for the fine schedule from zero. Supplemental donor replays took 4.172, 5.575 and 8.633 s. Target peak RSS on rank 0/rank 1 was 299372/241668 KiB at the parent, 325896/249516 KiB coarse, 307964/247984 KiB first half and 307964/248332 KiB second half. Native history used 112 bytes per point. The original two-rank nine-strip control was rerun in 4.007 s and passed the all-frame comparison through 15 ms (integrated slip 1.69302306477e−4 m²).
+
+Run these commands from the worktree root, using a fresh destination. The reference is the verified extraction retained by the 5A repair. The frame command intentionally exits 1 for the failed strip-15 angle. The full audit records every comparison before returning that status.
+
+~~~bash
+W=$PWD
+D=$W/build-5b
+R=$W/build-5a-repair/reference
+F=benchmarks/growing_fault/timestep
+B=$W/build-slice/aspect-release
+P=$W/build-5a/plugin/libgrowing_fault_checks.release.so
+M=/opt/openmpi/5.0.6/bin/mpirun
+E=$W/refactoring/phase-field-fault/results/strip18
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1
+mkdir -p "$D"
+sha256sum ../aspect-pf-rsf-reference-20261121/reference.tar.gz
+(cd "$R" && sha256sum --quiet -c SHA256SUMS &&
+ python3 analysis/midpoint_timestep.py runs/localized-oneo1/output runs/localized-oneo2/output runs/strip18-midpoint-half/output > "$D/timestep.json" &&
+ python3 analysis/midpoint_audit.py runs > "$D/point-audit.json" &&
+ python3 analysis/midpoint_closeout.py runs > "$D/diagnosis.json")
+for name in timestep point-audit diagnosis; do cmp "$R/expected/$name.json" "$D/$name.json"; done
+cmake -S "$F" -B "$D/plugin" -DAspect_DIR="$W/build-slice" -DCMAKE_BUILD_TYPE=Release
+cmake --build "$D/plugin" -j1
+O=$D/plugin/libmidpoint_fields.release.so
+python3 "$F/run.py" parent "$D/parent" "$O" --aspect "$B" --plugin "$P"
+python3 "$F/run.py" parent "$D/donor-parent" "$O" --reference "$R"
+for n in 0 1; do python3 "$F/frames.py" "$n" "$D/parent/output" "$R/runs/localized-oneo1/output" "$D/donor-parent/output" "$D/parent-$n.csv"; done
+for case in coarse half; do
+  python3 "$F/run.py" "$case" "$D/$case" "$O" --aspect "$B" --plugin "$P" --parent "$D/parent/output"
+  python3 "$F/run.py" "$case" "$D/donor-$case" "$O" --reference "$R"
+done
+(cd "$D" && sha256sum --quiet -c "$E/physical-files.sha256")
+python3 "$F/audit.py" "$D" "$R" "$D/final"
+python3 "$E/capture_rows.py" "$W/build-slice" "$D/row-build"
+for case in parent coarse half; do
+  python3 "$F/run.py" "$case" "$D/rows/$case" "$O" --aspect "$D/row-build/aspect-rows" --plugin "$P" --parent "$D/rows/parent/output"
+done
+python3 "$F/audit.py" "$D" "$R" "$D/returned-audit" --returned-rows "$D/rows"
+python3 "$E/turn.py" "$D/selector" --capture "$D"
+cmp "$E/moments.csv" "$D/selector/moments.csv"
+python3 "$E/turn.py" "$E/moments.csv"
+python3 benchmarks/growing_fault/run.py "$B" "$P" "$D/nine" --mpiexec "$M" --principal-only
+python3 benchmarks/growing_fault/compare.py "$W/build-5a-repair/donor-two/output" "$D/nine/principal/output"
+~~~
+
+For the negative control the only edit to a temporary run copy was the first half-step's logged pending duration, changed from 2.5 to 5 ms. The audit failed on interval 5→7.5 ms with a 0.0025 s error, before evaluating the wall or material equations for that interval:
+
+~~~bash
+N=$D/wrong-clock
+mkdir -p "$N/half"
+for n in parent coarse donor-parent donor-coarse donor-half; do ln -s "$D/$n" "$N/$n"; done
+ln -s "$D/half/output" "$N/half/output"
+sed 's/t=0.0075 seconds, dt=0.0025 seconds/t=0.0075 seconds, dt=0.005 seconds/' "$D/half/log" > "$N/half/log"
+python3 "$F/audit.py" "$N" "$R" "$D/final-negative"
+~~~
+
+A second negative control added 0.001 to just the fine 7.5 ms phase coefficient at (CellId `0_0:`, component 7, local index 0) in a copied mesh table. Every donor frame, target native sample and 10 ms endpoint stayed intact. Independent evaluation of the modified intermediate FE field disagreed at all 144 native samples of that cell, with maximum phase error 9.6049e−4.
+
+The next action is author review of the measured timestep sensitivity and the open angle comparison. No conclusion about the physical time of propagation follows from these schedules.
+
 ## Ownership cleanup before 5B
 
 **Target trace at `d12c188fd`, recorded before consulting the donor.** On the mature path the material constructs the Q1 trace and binds its borrowed phase profile. The label index identifies geometry, slip/rate, background traction, Maxwell memory and RSF age. The section solver interpolates accepted age before evaluating resistance at the sampled pressure and trial speed. The returned Stokes fields and rates remain a trial until the post-repeat callback updates slip, age and memory and installs the moving trace. Interior checkpoints presently store these quantities in one row per label. A speed-only law currently requires editing geometry initialization and acceptance, sampled balance, material parsing, observers and the checkpoint reader.
