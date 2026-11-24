@@ -24,6 +24,11 @@ namespace aspect::GrowingFault
     double bulk=0.,cohesive=0.,fracture=0.,prescribed_velocity_work=0.,bulk_loss=0.,cohesive_loss=0.,friction_work=0.;
     double compliance_remainder=0.,phase_work=0.,storage_change=0.,adjoint_defect=0.,mechanical=0.,kkt=0.;
     unsigned int iterations=0;
+    template <class Archive> void serialize(Archive &ar, const unsigned int)
+    {
+      ar &bulk &cohesive &fracture &prescribed_velocity_work &bulk_loss &cohesive_loss &friction_work
+      &compliance_remainder &phase_work &storage_change &adjoint_defect &mechanical &kkt &iterations;
+    }
   };
 
   /** Material owner for a fixed-reference, single-forward-front midpoint
@@ -46,8 +51,9 @@ namespace aspect::GrowingFault
       void load(const std::map<std::string,std::string> &) override;
 
       /** Collective single attempt. Returns the stage velocity and pressure
-       * and candidate endpoint phase in the ordinary solution vector. */
-      void solve_midpoint_fields(LinearAlgebra::BlockVector &solution);
+       * and candidate endpoint phase in the ordinary solution vector. The
+       * simulator uses the returned status for its pre-acceptance completion signal. */
+      SolverControl solve_midpoint_fields(LinearAlgebra::BlockVector &solution);
       const History &history() const
       {
         return accepted;
@@ -56,8 +62,14 @@ namespace aspect::GrowingFault
       {
         return *geometry;
       }
+      /** False at initialization and for legacy checkpoints without work data. */
+      bool has_accepted_balance() const
+      {
+        return balance_available;
+      }
       const Balance &balance() const
       {
+        AssertThrow(balance_available,ExcMessage("No accepted balance is available for this growing fault checkpoint or initial state."));
         return last_balance;
       }
       unsigned int phase_field() const
@@ -86,6 +98,8 @@ namespace aspect::GrowingFault
       History accepted;
       std::unique_ptr<History> trial;
       Balance last_balance,trial_balance;
+      bool balance_available=false;
+      void initialize_native_history();
       /** Deferred until ASPECT restores the mesh and reconstructs native rules. */
       std::string restored;
       std::vector<double> checkpoint_parameters() const;

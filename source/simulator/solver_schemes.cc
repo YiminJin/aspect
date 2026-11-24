@@ -1054,8 +1054,10 @@ namespace aspect
 
     if (auto *front = dynamic_cast<GrowingFault::Material<dim> *>(material_model.get()))
       {
-        front->solve_midpoint_fields(solution);
+        const SolverControl control = front->solve_midpoint_fields(solution);
         current_linearization_point = solution;
+        nonlinear_iteration = control.last_step();
+        signals.post_nonlinear_solver(control);
         return;
       }
 

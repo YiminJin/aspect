@@ -51,6 +51,7 @@ namespace aspect::GrowingFault
                 !p.use_locally_conservative_discretization && !p.include_melt_transport,
                 ExcMessage("Growing fault requires a fixed conforming Q2/Q1 mesh."));
     AssertThrow(!p.use_direct_stokes_solver,ExcMessage("Midpoint fault mechanics requires separate velocity and pressure blocks."));
+    AssertThrow(!p.run_postprocessors_on_nonlinear_iterations,ExcMessage("Midpoint fault output requires an accepted step; iteration postprocessing is unsupported."));
     AssertThrow(!p.enable_prescribed_dilation &&
                 (p.formulation_mass_conservation==Parameters<dim>::Formulation::MassConservation::incompressible ||
                  p.formulation_mass_conservation==Parameters<dim>::Formulation::MassConservation::ask_material_model),
@@ -71,6 +72,8 @@ namespace aspect::GrowingFault
          };
     AssertThrow(G>0. && point_law.eta>0. && initial_age>0. && law.direct_effect>0. && law.reference_speed>0. && law.slip_distance>0.,
                 ExcMessage("Growing fault requires positive Maxwell and RSF scales."));
+    AssertThrow(law.damping>0. || law.evolution_effect==0.,
+                ExcMessage("The growing fault monotonicity bound requires positive damping for nonzero state evolution."));
     prm.leave_subsection();
     prm.leave_subsection();
     this->model_dependence.viscosity=MaterialModel::NonlinearDependence::none;
@@ -83,6 +86,10 @@ namespace aspect::GrowingFault
   template <int dim>
   void Material<dim>::initialize()
   {
+    this->get_signals().post_resume_load_user_data.connect([this](parallel::distributed::Triangulation<dim> &)
+    {
+      initialize_native_history();
+    });
     this->get_signals().post_accept_timestep.connect([this](LinearAlgebra::BlockVector &)
     {
       if (trial)
@@ -90,6 +97,7 @@ namespace aspect::GrowingFault
           accepted=std::move(*trial);
           trial.reset();
           last_balance=trial_balance;
+          balance_available=true;
         }
     });
   }
@@ -110,48 +118,55 @@ namespace aspect::GrowingFault
   }
 
   template <int dim>
-  void Material<dim>::solve_midpoint_fields(LinearAlgebra::BlockVector &solution)
+  void Material<dim>::initialize_native_history()
   {
+    if constexpr (dim==2)
+      {
+        AssertThrow(dynamic_cast<const GeometryModel::Box<dim>*>(&this->get_geometry_model()) &&
+                    this->get_geometry_model().get_periodic_boundary_pairs().empty(),
+                    ExcMessage("Growing fault requires a fixed nonperiodic box."));
+        geometry=std::make_unique<MaterialSections>(this->get_triangulation(),this->get_mpi_communicator(),degrees,order);
+        accepted.sections.resize(geometry->edges.size()-1);
+        for (auto &s:accepted.sections) s.age=initial_age;
+        for (const auto &cell:geometry->cells) accepted.cells[cell.first].resize(cell.second.quadrature.size());
+        if (!restored.empty())
+          {
+            std::istringstream input(restored);
+            aspect::iarchive ar(input);
+            unsigned int n;
+            double angle;
+            std::vector<double> edges;
+            std::vector<double> signature;
+            ar >> signature;
+            AssertThrow(signature==checkpoint_parameters(),ExcMessage("Growing fault physical parameters differ from the checkpoint."));
+            ar >> n >> angle >> edges >> accepted.step >> accepted.time >> accepted.sections;
+            AssertThrow(n==order && angle==degrees && edges==geometry->edges && accepted.sections.size()+1==edges.size(),
+                        ExcMessage("Incompatible native material strip checkpoint."));
+            std::map<std::string,std::pair<std::array<Point<2>,4>,std::vector<PointHistory>>> points;
+            ar >> points;
+            for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+              if (cell->is_locally_owned())
+                {
+                  auto &history=accepted.cells.at(cell->id());
+                  const auto &saved_cell=points.at(cell->id().to_string());
+                  for (const auto v:cell->vertex_indices())
+                    AssertThrow(saved_cell.first[v]==cell->vertex(v),ExcMessage("Material point locations differ from the fixed checkpoint mesh."));
+                  const auto &saved=saved_cell.second;
+                  AssertThrow(saved.size()==history.size(),ExcMessage("Incompatible native quadrature checkpoint."));
+                  history=saved;
+                }
+            restored.clear();
+          }
+      }
+  }
+
+  template <int dim>
+  SolverControl Material<dim>::solve_midpoint_fields(LinearAlgebra::BlockVector &solution)
+  {
+    SolverControl control(this->get_parameters().max_nonlinear_iterations,this->get_parameters().nonlinear_tolerance);
     if constexpr(dim==2)
       {
-        if (!geometry)
-          {
-            AssertThrow(dynamic_cast<const GeometryModel::Box<dim>*>(&this->get_geometry_model()) &&
-                        this->get_geometry_model().get_periodic_boundary_pairs().empty(),
-                        ExcMessage("Growing fault requires a fixed nonperiodic box."));
-            geometry=std::make_unique<MaterialSections>(this->get_triangulation(),this->get_mpi_communicator(),degrees,order);
-            accepted.sections.resize(geometry->edges.size()-1);
-            for (auto &s:accepted.sections) s.age=initial_age;
-            for (const auto &cell:geometry->cells) accepted.cells[cell.first].resize(cell.second.quadrature.size());
-            if (!restored.empty())
-              {
-                std::istringstream input(restored);
-                aspect::iarchive ar(input);
-                unsigned int n;
-                double angle;
-                std::vector<double> edges;
-                std::vector<double> signature;
-                ar >> signature;
-                AssertThrow(signature==checkpoint_parameters(),ExcMessage("Growing fault physical parameters differ from the checkpoint."));
-                ar >> n >> angle >> edges >> accepted.step >> accepted.time >> accepted.sections;
-                AssertThrow(n==order && angle==degrees && edges==geometry->edges && accepted.sections.size()+1==edges.size(),
-                            ExcMessage("Incompatible native material strip checkpoint."));
-                std::map<std::string,std::pair<std::array<Point<2>,4>,std::vector<PointHistory>>> points;
-                ar >> points;
-                for (const auto &cell:this->get_dof_handler().active_cell_iterators())
-                  if (cell->is_locally_owned())
-                    {
-                      auto &history=accepted.cells.at(cell->id());
-                      const auto &saved_cell=points.at(cell->id().to_string());
-                      for (const auto v:cell->vertex_indices())
-                        AssertThrow(saved_cell.first[v]==cell->vertex(v),ExcMessage("Material point locations differ from the fixed checkpoint mesh."));
-                      const auto &saved=saved_cell.second;
-                      AssertThrow(saved.size()==history.size(),ExcMessage("Incompatible native quadrature checkpoint."));
-                      history=saved;
-                    }
-                restored.clear();
-              }
-          }
+        if (!geometry) initialize_native_history();
         if (this->get_timestep_number()==0)
           {
             // Initialize the physical Q2 field with the inherited whole-cell
@@ -174,7 +189,8 @@ namespace aspect::GrowingFault
             AssertThrow(!Utilities::MPI::max(invalid,this->get_mpi_communicator()),ExcMessage("Invalid initial phase mean."));
             owned.compress(VectorOperation::insert);
             solution.block(b)=owned;
-            return;
+            control.check(0,0.);
+            return control;
           }
         AssertThrow(accepted.step+1==this->get_timestep_number(),ExcMessage("Growing fault accepted parent clock mismatch."));
         trial.reset();
@@ -183,7 +199,9 @@ namespace aspect::GrowingFault
         solve_midpoint(*this,solution,*next,result);
         trial=std::move(next);
         trial_balance=result;
+        control.check(result.iterations,result.mechanical);
       }
+    return control;
   }
 
   template <int dim>
@@ -221,6 +239,15 @@ namespace aspect::GrowingFault
           ar << checkpoint_parameters() << order << degrees << geometry->edges << accepted.step << accepted.time << accepted.sections << all;
         }
         status["Native growing fault v1"]=out.str();
+        if (balance_available)
+          {
+            std::ostringstream bytes;
+            {
+              aspect::oarchive archive(bytes);
+              archive << last_balance;
+            }
+            status["Growing fault accepted balance v1"]=bytes.str();
+          }
       }
   }
 
@@ -228,6 +255,14 @@ namespace aspect::GrowingFault
   void Material<dim>::load(const std::map<std::string,std::string> &status)
   {
     restored=status.at("Native growing fault v1");
+    const auto entry=status.find("Growing fault accepted balance v1");
+    balance_available=entry!=status.end();
+    if (balance_available)
+      {
+        std::istringstream bytes(entry->second);
+        aspect::iarchive archive(bytes);
+        archive >> last_balance;
+      }
   }
 
   ASPECT_REGISTER_MATERIAL_MODEL(Material,"growing fault",

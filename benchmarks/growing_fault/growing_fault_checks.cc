@@ -4,6 +4,7 @@
 #include <aspect/simulator/solver/midpoint_system.h>
 #include <aspect/phase_field/bernstein_bounds.h>
 #include <deal.II/fe/fe_values.h>
+#include <deal.II/dofs/dof_tools.h>
 #include <fstream>
 
 namespace aspect::Postprocess
@@ -201,6 +202,59 @@ namespace aspect::Postprocess
       }
   };
   ASPECT_REGISTER_POSTPROCESSOR(GrowingFaultSamples,"growing fault samples","Observe the published midpoint bulk and strip histories.")
+
+  /** Observe the accepted checkpoint on both sides of a restart, and the
+   * ordinary solver-completion notification before the repeat decision. */
+  template <int dim>
+  class MidpointPublication : public GrowingFaultSamples<dim>
+  {
+    public:
+      void initialize() override
+      {
+        this->get_signals().pre_nonlinear_solver.connect([this](const SimulatorAccess<dim> &)
+        {
+          if (this->get_timestep_number()==3) record_parent("pre-solve");
+        });
+        this->get_signals().post_nonlinear_solver.connect([this](const SolverControl &control)
+        {
+          const auto &m=dynamic_cast<const GrowingFault::Material<dim>&>(this->get_material_model());
+          if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator())==0)
+            std::ofstream(this->get_output_directory()+"completions",std::ios::app)
+                <<this->get_timestep_number()<<' '<<m.history().step<<' '<<control.last_step()<<' '
+                <<(control.last_check()==SolverControl::success)<<'\n';
+        });
+      }
+
+      std::pair<std::string,std::string> execute(TableHandler &statistics) override
+      {
+        const auto &v=this->get_solution();
+        const auto &intro=this->introspection();
+        const auto comm=this->get_mpi_communicator();
+        const auto &pressure=v.block(intro.block_indices.pressure);
+        const double datum=Utilities::MPI::sum(pressure.locally_owned_elements().is_element(0)?pressure[0]:0.,comm);
+        double wall_speed=0.;
+        for (const auto i:DoFTools::extract_boundary_dofs(this->get_dof_handler(),intro.component_masks.velocities))
+          if (v.locally_owned_elements().is_element(i)) wall_speed=std::max(wall_speed,std::abs(v[i]));
+        wall_speed=Utilities::MPI::max(wall_speed,comm);
+        if (Utilities::MPI::this_mpi_process(comm)==0)
+          std::ofstream(this->get_output_directory()+"published-constraints",std::ios::app)
+              <<std::setprecision(17)<<this->get_timestep_number()<<' '<<datum<<' '<<wall_speed<<'\n';
+        if (this->get_timestep_number()==2) record_parent("published");
+        return GrowingFaultSamples<dim>::execute(statistics);
+      }
+    private:
+      void record_parent(const std::string &when) const
+      {
+        const auto &m=dynamic_cast<const GrowingFault::Material<dim>&>(this->get_material_model());
+        std::map<std::string,std::string> record;
+        m.save(record);
+        if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator())==0)
+          for (const auto &[name,data]:record)
+            std::ofstream(this->get_output_directory()+when+"-"+name,std::ios::binary).write(data.data(),data.size());
+      }
+  };
+  ASPECT_REGISTER_POSTPROCESSOR(MidpointPublication,"midpoint publication","Observe accepted history and solver completion.")
+
 }
 
 #include <aspect/time_stepping/interface.h>

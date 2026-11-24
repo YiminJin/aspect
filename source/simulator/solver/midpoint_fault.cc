@@ -27,7 +27,12 @@ namespace aspect::GrowingFault
                                                                   *m.get_parameters().surface_energy_model.length_scale)),field(m.phase_field()),phase_block(m.introspection().block_indices.compositional_fields[field]),
       nv(solution.block(0).size()),phase_begin(nv+solution.block(1).size()),n(phase_begin+solution.block(phase_block).size()),fracture(m,field)
   {
-    AssertThrow(h>0. && h*G<=m.maxwell().eta,ExcMessage("Stage duration exceeds the positive Maxwell relaxation regime."));
+    AssertThrow(h>0.,ExcMessage("Midpoint mechanics needs a positive stage duration."));
+    // Both admissibility bounds depend on this attempt's half-duration and
+    // hold on every rank. Let the time-step manager retry from the same parent.
+    if (h*G>m.maxwell().eta ||
+        m.friction().damping<m.get_parameters().surface_pressure*h*m.friction().evolution_effect/m.friction().slip_distance)
+      throw ExcNonlinearSolverNoConvergence();
     const auto &old=m.get_old_solution();
     const auto &fe=m.get_fe();
     const auto &intro=m.introspection();

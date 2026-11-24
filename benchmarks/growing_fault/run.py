@@ -21,7 +21,7 @@ def main():
     root.mkdir(parents=True,exist_ok=False)
     env=dict(os.environ,DEAL_II_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1')
     base=Path(__file__).with_name('onecut.prm').read_text()
-    for name in (['principal'] if args.principal_only else ['principal','retry','restart']):
+    for name in (['principal'] if args.principal_only else ['principal','retry','restart-first','restart']):
         run=root/name
         run.mkdir()
         output=run/'output'
@@ -49,12 +49,13 @@ subsection Time stepping
  set List of model names = retry growing fault, check returned midpoint
 end
 '''
-        if name=='restart':
-            # The only data carried to the fresh destination are native checkpoint files.
-            snapshots=root/'principal/output/restart'
-            snapshot=snapshots/'03'
-            shutil.copytree(snapshot, output/'restart/03')
-            prm+='\nset Resume computation = true\nsubsection Checkpointing\n set Resume checkpoint = 3\n set Number of checkpoints to keep = 4\nend\n'
+        restart=name.startswith('restart')
+        if restart:
+            # Generation 01 resumes before the step-1 operator observer runs.
+            generation=1 if name=='restart-first' else 3
+            slot=f'{generation:02}'
+            shutil.copytree(root/'principal/output/restart'/slot,output/'restart'/slot)
+            prm+=f'\nset Resume computation = true\nsubsection Checkpointing\n set Resume checkpoint = {generation}\n set Number of checkpoints to keep = 4\nend\n'
         input_file=run/'input.prm'
         input_file.write_text(prm)
         cmd=[str(args.aspect),str(input_file)]
@@ -65,14 +66,14 @@ end
             subprocess.run(cmd,stdout=log,stderr=subprocess.STDOUT,env=env,check=True)
         print(f'{name}: {time.monotonic()-started:.3f} s',flush=True)
         log_text = (run/'log').read_text()
-        if log_text.count('Growing fault native section and point history') != (1 if name=='restart' else 4):
+        if log_text.count('Growing fault native section and point history') != (4-generation if restart else 4):
             raise ValueError('Publication count differs from the expected accepted clocks')
         if name=='retry':
             if log_text.count('Repeating the current time step')!=2:
                 raise ValueError('Expected two completed and rejected solves')
             continuation(root/'principal/output',output,[1,2,3])
-        if name=='restart':
-            continuation(root/'principal/output',output,[3])
+        if restart:
+            continuation(root/'principal/output',output,range(generation,4))
 
 
 if __name__=='__main__':
