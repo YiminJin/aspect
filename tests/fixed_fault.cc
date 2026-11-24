@@ -42,7 +42,8 @@ namespace aspect
 
         std::pair<std::string,std::string> execute(TableHandler &) override
         {
-          const auto &labels = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model()).labels();
+          const auto &model = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
+          const auto &labels=model.labels();
           const unsigned int step = this->get_timestep_number();
           if (homogeneous)
             {
@@ -57,8 +58,8 @@ namespace aspect
           const auto directory = this->get_output_directory();
           std::ofstream snapshot(directory+"fault-"+std::to_string(step)+"-"+std::to_string(rank)+".txt");
           snapshot << std::setprecision(17) << this->get_time() << ' ' << this->get_timestep();
-          for (const auto &label : labels)
-            snapshot << ' ' << label.position << ' ' << label.age << ' ' << label.slip << ' ' << label.rate;
+          for (unsigned int i=0; i<labels.size(); ++i)
+            snapshot << ' ' << labels[i].position << ' ' << model.label_ages().at(i) << ' ' << labels[i].slip << ' ' << labels[i].rate;
           snapshot << '\n';
 
           const double rate[] = {0.17074374817067778,0.16359216623205453,0.16724399270585846};
@@ -73,10 +74,11 @@ namespace aspect
                                    +", expected "+std::to_string(expected)));
           };
           if (homogeneous)
-            for (const auto &section : labels)
+            for (unsigned int i=0; i<labels.size(); ++i)
               {
+                const auto &section=labels[i];
                 check(section.rate,rate[step]);
-                check(section.age,age[step]);
+                check(model.label_ages().at(i),age[step]);
                 check(section.slip,.0125*((step>=1 ? rate[1] : 0.)+(step>=2 ? rate[2] : 0.)));
               }
 

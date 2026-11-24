@@ -32,6 +32,17 @@ namespace aspect
         /** Ordered geometry and last accepted physical state for diagnostics. */
         const std::vector<typename MaterialFaultTrace<dim>::Label> &labels() const;
 
+        /** Accepted RSF ages (s), or an empty vector for a state-free material. */
+        const std::vector<double> &label_ages() const
+        {
+          return friction->state();
+        }
+        /** Accepted surface Maxwell memory (Pa m) in material vertex order. */
+        const std::vector<double> &label_memory() const
+        {
+          return maxwell_memory;
+        }
+
         const FaultPhaseProfile<dim> &phase_profile() const
         {
           return accepted->profile;
@@ -42,6 +53,8 @@ namespace aspect
         void save(std::map<std::string,std::string> &status) const override;
         void load(const std::map<std::string,std::string> &status) override;
       protected:
+        /** Select the local resistance in the Phase field fault subsection. */
+        virtual std::unique_ptr<Rheology::FaultResistance> make_resistance(ParameterHandler &) const;
         /** Eulerian Maxwell viscosity (Pa s) at the constitutive point. */
         virtual double bulk_viscosity(const Point<dim> &) const
         {
@@ -65,7 +78,9 @@ namespace aspect
         Stress rotate_parent(const Stress &parent, const Tensor<2,dim> &accepted_gradient,
                              const Tensor<2,dim> &slip_gradient, double physical_dt) const;
         EquationOfState::LinearizedIncompressible<dim> eos;
-        Rheology::RateAndStateFriction friction;
+        std::unique_ptr<Rheology::FaultResistance> friction;
+        std::vector<double> initial_shear, maxwell_memory;
+        void accept_section(const std::vector<double> &rates, double dt);
         // A profile borrows its own curve. Swapping owners publishes both together.
         struct Section
         {

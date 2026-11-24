@@ -28,14 +28,14 @@ TEST_CASE("Stationary fault spans decimal box faces")
   const Point<2> origin(.1,.1), extent(.2,.2);
   std::vector<Point<2>> labels = {{.2,.1},{.2,.2},{.2,.3}};
   aspect::MaterialFaultTrace<2> fault;
-  fault.initialize(origin,extent,labels,10.,.001);
+  fault.initialize(origin,extent,labels,.001);
   CHECK(fault.labels().size() == 3);
   CHECK(fault.project(labels.back()).xi == Approx(1.));
   std::reverse(labels.begin(),labels.end());
-  fault.initialize(origin,extent,labels,10.,.001);
+  fault.initialize(origin,extent,labels,.001);
   CHECK(fault.project(labels.back()).xi == Approx(1.));
   labels.front()[1] = .299;
-  REQUIRE_THROWS(fault.initialize(origin,extent,labels,10.,.001));
+  REQUIRE_THROWS(fault.initialize(origin,extent,labels,.001));
 }
 
 TEST_CASE("Finite normal association on an inclined stationary trace")
@@ -43,7 +43,7 @@ TEST_CASE("Finite normal association on an inclined stationary trace")
   using dealii::Point;
   aspect::MaterialFaultTrace<2> fault;
   const double x = .5/std::sqrt(3.);
-  fault.initialize(Point<2>(-.5,-.5),Point<2>(1.,1.), {{-x,-.5},{0.,0.},{x,.5}},1.,1.,.2);
+  fault.initialize(Point<2>(-.5,-.5),Point<2>(1.,1.), {{-x,-.5},{0.,0.},{x,.5}},1.,.2);
   const auto &edge = fault.segment(1);
   CHECK(edge.length+edge.station == Approx(2./std::sqrt(3.)));
   CHECK(edge.normal[0] == Approx(-std::sqrt(3.)/2.));
@@ -56,7 +56,7 @@ TEST_CASE("Fault strip cuts a cell whose four corners name the same segment")
 {
   using dealii::Point;
   aspect::MaterialFaultTrace<2> fault;
-  fault.initialize(Point<2>(),Point<2>(1.,1.), {{.5,0.},{.5,1.}},1.,1.,.1);
+  fault.initialize(Point<2>(),Point<2>(1.,1.), {{.5,0.},{.5,1.}},1.,.1);
   const auto cut=fault.cut_quadrature(Point<2>(),Point<2>(1.,1.));
   double area=0., admitted=0.;
   for (unsigned int q=0; q<cut.size(); ++q)
@@ -74,9 +74,9 @@ TEST_CASE("Interior material connectivity through rigid rotation")
   using dealii::Point;
   aspect::MaterialFaultTrace<2> fault;
   const Point<2> center;
-  fault.initialize(Point<2>(-2,-2),Point<2>(4,4), {{-.5,0.},{.5,0.}},1.,1.,.2,true);
+  fault.initialize(Point<2>(-2,-2),Point<2>(4,4), {{-.5,0.},{.5,0.}},1.,.2,true);
   auto labels=fault.labels();
-  labels[1].age=2.;
+  labels[1].slip=2.;
   const double angle=35.*dealii::numbers::PI/180.;
   for (unsigned int turn=1; turn<=3; ++turn)
     {
@@ -92,7 +92,7 @@ TEST_CASE("Interior material connectivity through rigid rotation")
       CHECK(segment.tangent[0]==Approx(std::cos(turn*angle)));
       CHECK(segment.normal[0]==Approx(-std::sin(turn*angle)));
       CHECK(fault.project(center).xi==Approx(.5));
-      CHECK(fault.labels()[1].age==2.);
+      CHECK(fault.labels()[1].slip==2.);
     }
   labels[1].position=labels[0].position;
   REQUIRE_THROWS(fault.replace_material_labels(labels));
@@ -102,7 +102,7 @@ TEST_CASE("A material fault retains simple open connectivity")
 {
   using dealii::Point;
   aspect::MaterialFaultTrace<2> fault;
-  fault.initialize(Point<2>(-2,-2),Point<2>(4,4), {{-1.,0.},{-.5,0.},{.5,0.},{1.,0.}},1.,1.,.2,true);
+  fault.initialize(Point<2>(-2,-2),Point<2>(4,4), {{-1.,0.},{-.5,0.},{.5,0.},{1.,0.}},1.,.2,true);
   auto vertices=fault.labels();
   vertices[1].position=Point<2>(1.,1.);
   vertices[2].position=Point<2>(-1.,1.);

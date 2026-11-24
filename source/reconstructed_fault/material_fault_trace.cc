@@ -11,7 +11,7 @@ namespace aspect
   template <int dim>
   void MaterialFaultTrace<dim>::initialize(const Point<dim> &origin, const Point<dim> &extent,
                                            const std::vector<Point<dim>> &vertices,
-                                           const double age, const double rate, const double support, const bool interior)
+                                           const double rate, const double support, const bool interior)
   {
     AssertThrow(dim == 2 && vertices.size() >= 2, ExcMessage("A material fault trace requires at least two ordered vertices in 2-D."));
     const auto direction = vertices.back()-vertices.front();
@@ -56,7 +56,7 @@ namespace aspect
         AssertThrow(std::abs((vertex-vertices.front())*seed_normal) <= face_tolerance(axis) &&
                     (material_labels.empty() || (vertex-material_labels.back().position)*seed_tangent > 0.),
                     ExcMessage("Initial material vertices must be straight and strictly ordered."));
-        material_labels.push_back({vertex,age,0.,rate,support==std::numeric_limits<double>::max() ? 0. : support,0.,0.});
+        material_labels.push_back({vertex,0.,rate,support==std::numeric_limits<double>::max() ? 0. : support});
       }
     rebuild_segments();
   }
@@ -507,13 +507,11 @@ namespace aspect
   }
 
   template <int dim>
-  void MaterialFaultTrace<dim>::accept_section_rates(const std::vector<double> &rates, const double dt,
-                                                     const MaterialModel::Rheology::RateAndStateFriction &law)
+  void MaterialFaultTrace<dim>::accept_section_rates(const std::vector<double> &rates, const double dt)
   {
     for (unsigned int j=0; j<material_labels.size(); ++j)
       {
         auto &label = material_labels[j];
-        label.age = law.advance_age(rates[j],label.age,dt);
         label.slip += dt*rates[j];
         label.rate = rates[j];
       }

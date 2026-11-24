@@ -240,9 +240,8 @@ namespace aspect
                   stress+=basis(q,i)*parent[i]*material.relaxation(x);
               const double compression = material.background_compression + pressure[q] - frame.normal*(stress*frame.normal);
               locally_closed &= std::isfinite(compression) && compression > 0.;
-              const auto &labels=material.section().trace.labels();
               const auto &foot=transfer.foot;
-              const double shear=foot.interpolate(labels[foot.first_vertex].initial_shear,labels[foot.first_vertex+1].initial_shear);
+              const double shear=foot.interpolate(material.initial_shear[foot.first_vertex],material.initial_shear[foot.first_vertex+1]);
               samples.push_back({transfer,fe.JxW(q),shear + stress*symmetrize(frame.dyad),compression,material.stiffness(fe.quadrature_point(q))});
             }
         }
@@ -396,27 +395,15 @@ namespace aspect
             solution.block(intro.block_indices.compositional_fields[material.stress_fields[c]]) = owned[c];
           }
       }
-    material.section().trace.accept_section_rates(trial_rates,dt,material.friction);
-    if (material.candidate)
-      {
-        auto labels=material.candidate->trace.labels();
-        if (dt>0.)
-          for (auto &label:labels)
-            label.memory=material.relaxation(label.position)*label.memory+material.stiffness(label.position)*label.rate;
-        material.candidate->trace.replace_material_labels(std::move(labels));
-        material.accepted=std::move(material.candidate);
-      }
+    material.accept_section(trial_rates,dt);
   }
 
   template <int dim>
-  void FaultStokesCoupling<dim>::BulkPoint::add_balance(const std::vector<double> &rates, const double age,
-                                                        const MaterialModel::Rheology::RateAndStateFriction &law, std::vector<double> &rhs,
+  void FaultStokesCoupling<dim>::BulkPoint::add_balance(const double speed, const MaterialModel::Rheology::FaultTraction &resistance, std::vector<double> &rhs,
                                                         std::vector<double> &diagonal, std::vector<double> &upper, std::vector<double> &scale) const
   {
     const auto j=transfer.foot.first_vertex;
     const double N[2]= {1.-transfer.foot.xi,transfer.foot.xi};
-    const double speed=transfer.rate(rates);
-    const auto resistance=law.resistance(speed,age,compression);
     // One chi enters local slip stress, another enters the virtual-work measure.
     const double slip_stiffness=stiffness*transfer.chi;
     transfer.add_load(volume*(driving_shear-slip_stiffness*speed-resistance.traction),rhs);
@@ -443,8 +430,9 @@ namespace aspect
         for (const auto &point : points)
           {
             const auto &foot=point.transfer.foot;
-            const double age=foot.interpolate(accepted[foot.first_vertex].age,accepted[foot.first_vertex+1].age);
-            point.add_balance(rates,age,material.friction,rhs,diagonal,upper,scale);
+            const double speed=point.transfer.rate(rates);
+            const auto resistance=material.friction->at_speed(foot.first_vertex,foot.xi,speed,point.compression);
+            point.add_balance(speed,resistance,rhs,diagonal,upper,scale);
           }
 
         for (auto *row :

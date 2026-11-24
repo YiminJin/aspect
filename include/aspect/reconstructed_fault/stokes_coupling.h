@@ -7,6 +7,7 @@
 #define _aspect_reconstructed_fault_stokes_coupling_h
 
 #include <aspect/reconstructed_fault/phase_profile.h>
+#include <aspect/material_model/rheology/fault_resistance.h>
 #include <aspect/simulator_access.h>
 
 namespace aspect
@@ -39,8 +40,7 @@ namespace aspect
       {
         typename FaultPhaseProfile<dim>::Sample transfer;
         double volume, driving_shear, compression, stiffness;
-        void add_balance(const std::vector<double> &rates, double age,
-                         const MaterialModel::Rheology::RateAndStateFriction &law,
+        void add_balance(double speed, const MaterialModel::Rheology::FaultTraction &resistance,
                          std::vector<double> &rhs, std::vector<double> &diagonal,
                          std::vector<double> &upper, std::vector<double> &scale) const;
       };

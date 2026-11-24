@@ -221,8 +221,9 @@ namespace aspect
           const auto dir=this->get_output_directory();
           std::ofstream snapshot(dir+"accepted-"+std::to_string(step)+"-"+std::to_string(rank));
           snapshot << std::setprecision(17) << this->get_time() << ' ' << this->get_timestep() << '\n';
-          for (const auto &label : material.labels())
-            snapshot << label.position << ' ' << label.age << ' ' << label.slip << ' ' << label.rate << '\n';
+          const auto &labels=material.labels();
+          for (unsigned int i=0; i<labels.size(); ++i)
+            snapshot << labels[i].position << ' ' << material.label_ages().at(i) << ' ' << labels[i].slip << ' ' << labels[i].rate << '\n';
           const double dt=this->get_timestep();
           SymmetricTensor<2,2> endpoint_at_origin;
           if (step==1)
@@ -232,11 +233,12 @@ namespace aspect
               endpoint_at_origin = std::exp(-dt)*parent;
               endpoint_at_origin[0][1] += 10.*(1.-std::exp(-dt))*(shear_rate+rate);
               const double decay=std::exp(-rate*dt/.008);
-              for (const auto &label : material.labels())
+              for (unsigned int i=0; i<labels.size(); ++i)
                 {
+                  const auto &label=labels[i];
                   AssertThrow(std::abs(label.rate-rate)<1.e-10,ExcMessage("Incorrect solved section rate."));
                   AssertThrow(std::abs(label.slip-dt*rate)<1.e-11 &&
-                              std::abs(label.age-(10.*decay+.008/rate*(1.-decay)))<2.e-10,
+                              std::abs(material.label_ages().at(i)-(10.*decay+.008/rate*(1.-decay)))<2.e-10,
                               ExcMessage("Incorrect first accepted label history."));
                 }
             }

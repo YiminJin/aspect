@@ -21,6 +21,7 @@ namespace aspect
         {
           const auto &model = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
           const auto &labels = model.labels();
+          const auto &ages = model.label_ages();
           const auto &last = model.phase_profile().geometry.segment(labels.size()-2);
           const double length = last.station+last.length;
           double age = 0., slip = 0., rate = 0.;
@@ -29,7 +30,7 @@ namespace aspect
               const auto &a = labels[j-1];
               const auto &b = labels[j];
               const double weight = .5*a.position.distance(b.position)/length;
-              age += weight*(a.age+b.age);
+              if (!ages.empty()) age += weight*(ages[j-1]+ages[j]);
               slip += weight*(a.slip+b.slip);
               rate += weight*(a.rate+b.rate);
             }
@@ -37,15 +38,21 @@ namespace aspect
             {
               const std::string path = this->get_output_directory()+"fault-labels-"+Utilities::int_to_string(this->get_timestep_number(),5)+".txt";
               std::ofstream out(path);
-              out << "# label x(m) y(m) age(s) slip(m) rate(m/s)\n" << std::setprecision(17);
+              out << "# label x(m) y(m) " << (ages.empty() ? "" : "age(s) ") << "slip(m) rate(m/s)\n" << std::setprecision(17);
               for (unsigned int j=0; j<labels.size(); ++j)
-                out << j << ' ' << labels[j].position << ' ' << labels[j].age << ' ' << labels[j].slip << ' ' << labels[j].rate << '\n';
+                {
+                  out << j << ' ' << labels[j].position << ' ';
+                  if (!ages.empty()) out << ages[j] << ' ';
+                  out << labels[j].slip << ' ' << labels[j].rate << '\n';
+                }
               out.close();
               AssertThrow(out,ExcIO());
             }
-          const std::map<std::string,double> columns = {{"Fault age (s)",age},
+          std::map<std::string,double> columns =
+          {
             {"Cumulative fault slip (m)",slip},{"Fault slip rate (m/s)",rate}
           };
+          if (!ages.empty()) columns.emplace("Fault age (s)",age);
           for (const auto &column : columns)
             {
               statistics.add_value(column.first,column.second);

@@ -4,6 +4,7 @@
 */
 
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <aspect/simulator/assemblers/fault_stress.h>
 #include <aspect/geometry_model/box.h>
 #include <aspect/geometry_model/initial_topography_model/zero_topography.h>
@@ -251,12 +252,9 @@ namespace aspect
       initial_interval = prm.get_double("Initialization interval");
       background_shear = prm.get_double("Background shear traction");
       background_compression = prm.get_double("Background compression");
-      friction = {prm.get_double("Reference friction coefficient"),prm.get_double("Direct effect"),
-                  prm.get_double("Evolution effect"),prm.get_double("Reference speed"),
-                  prm.get_double("Slip distance"),prm.get_double("Radiation damping")
-                 };
-      minimum_speed = prm.get_double("Minimum speed");
-      const double age = prm.get_double("Initial age");
+      const double initial_speed=prm.get_double("Reference speed");
+      friction=make_resistance(prm);
+      minimum_speed=prm.get_double("Minimum speed");
       const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
       AssertThrow(Plugins::plugin_type_matches<InitialTopographyModel::ZeroTopography<dim>>(this->get_initial_topography_model()),
                   ExcMessage("The fault material requires the zero initial topography model "
@@ -281,27 +279,19 @@ namespace aspect
       const double support = prm.get_double("Profile half width");
       AssertThrow(!interior_seed || (!fit_trace && (!advect_vertices || inflow_stress)),
                   ExcMessage("Interior mechanics requires a prescribed seed with fitting disabled. Moving its vertices also requires physical stress transport."));
-      accepted->trace.initialize(box.get_origin(),box.get_extents(),vertices,age,friction.reference_speed,
+      accepted->trace.initialize(box.get_origin(),box.get_extents(),vertices,initial_speed,
                                  support > 0. ? support : std::numeric_limits<double>::max(),interior_seed);
-      auto labels=accepted->trace.labels();
-      const auto ages=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label ages")));
-      const auto shear=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label shear tractions")));
-      AssertThrow((ages.empty() || ages.size()==labels.size()) && (shear.empty() || shear.size()==labels.size()),
-                  ExcMessage("Material initial data must match the number of fault vertices."));
-      for (unsigned int i=0; i<labels.size(); ++i)
-        {
-          labels[i].initial_shear=shear.empty() ? background_shear : shear[i];
-          labels[i].age=ages.empty() ? age : ages[i];
-          AssertThrow(labels[i].age>0.,ExcMessage("Material label age must be positive."));
-        }
-      accepted->trace.replace_material_labels(std::move(labels));
+      const auto count=labels().size();
+      friction->initialize(count);
+      initial_shear=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label shear tractions")));
+      if (initial_shear.empty()) initial_shear.assign(count,background_shear);
+      AssertThrow(initial_shear.size()==count,ExcMessage("Material initial shear must match the number of fault vertices."));
+      maxwell_memory.assign(count,0.);
       prm.leave_subsection();
       prm.leave_subsection();
-      AssertThrow(std::min({viscosity,modulus,initial_interval,friction.direct_effect,minimum_speed,
-                            friction.reference_speed,friction.slip_distance,age
-                           }) > 0.,
+      AssertThrow(std::min({viscosity,modulus,initial_interval,minimum_speed,initial_speed}) > 0.,
                   ExcMessage("The fault material requires positive material, time and speed scales."));
-      AssertThrow(friction.reference_speed >= minimum_speed,
+      AssertThrow(initial_speed >= minimum_speed,
                   ExcMessage("The reference speed must be at least the minimum admissible speed."));
       AssertThrow(dim == 2 && !p.enable_elasticity && p.nonlinear_solver == (transport_phase ? Parameters<dim>::NonlinearSolver::single_Advection_iterated_Stokes : Parameters<dim>::NonlinearSolver::no_Advection_iterated_Stokes)
                   && p.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg && p.stokes_velocity_degree == 2
@@ -337,29 +327,70 @@ namespace aspect
     }
 
     template <int dim>
+    std::unique_ptr<Rheology::FaultResistance> PhaseFieldFault<dim>::make_resistance(ParameterHandler &prm) const
+    {
+      const Rheology::RateAndStateFriction law= {prm.get_double("Reference friction coefficient"),prm.get_double("Direct effect"),
+                                                 prm.get_double("Evolution effect"),prm.get_double("Reference speed"),prm.get_double("Slip distance"),prm.get_double("Radiation damping")
+                                                };
+      return std::make_unique<Rheology::RateStateHistory>(law,prm.get_double("Initial age"),
+                                                          Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label ages"))));
+    }
+
+    template <int dim>
+    void PhaseFieldFault<dim>::accept_section(const std::vector<double> &rates,const double dt)
+    {
+      section().trace.accept_section_rates(rates,dt);
+      for (unsigned int i=0; i<rates.size(); ++i)
+        {
+          friction->accept_rate(i,rates[i],dt);
+          if (candidate && dt>0.)
+            {
+              const auto &x=candidate->trace.labels()[i].position;
+              maxwell_memory[i]=relaxation(x)*maxwell_memory[i]+stiffness(x)*rates[i];
+            }
+        }
+      if (candidate) accepted=std::move(candidate);
+    }
+
+    template <int dim>
     void PhaseFieldFault<dim>::save(std::map<std::string,std::string> &status) const
     {
       if (!interior_seed) return;
       std::ostringstream out;
       out<<std::setprecision(17)<<labels().size()<<'\n';
-      for (const auto &p:labels())
-        out<<p.position<<' '<<p.half_width<<' '<<p.initial_shear<<' '<<p.age<<' '<<p.rate<<' '<<p.slip<<' '<<p.memory<<'\n';
-      status["Material fault labels v1"]=out.str();
+      const auto &state=friction->state();
+      for (unsigned int i=0; i<labels().size(); ++i)
+        {
+          const auto &p=labels()[i];
+          out<<p.position<<' '<<p.half_width<<' '<<initial_shear[i]<<' ';
+          if (!state.empty()) out<<state[i]<<' ';
+          out<<p.rate<<' '<<p.slip<<' '<<maxwell_memory[i]<<'\n';
+        }
+      // Retain the repaired RSF wire format, including its per-label age.
+      status[friction->name()=="rate and state" ? "Material fault labels v1" : "Material fault labels "+friction->name()]=out.str();
+
     }
 
     template <int dim>
     void PhaseFieldFault<dim>::load(const std::map<std::string,std::string> &status)
     {
       if (!interior_seed) return;
-      const auto entry=status.find("Material fault labels v1");
+      const auto entry=status.find(friction->name()=="rate and state" ? "Material fault labels v1" : "Material fault labels "+friction->name());
       AssertThrow(entry!=status.end(),ExcMessage("Missing interior fault labels in checkpoint."));
       std::istringstream in(entry->second);
       auto restored=labels();
       unsigned int n=0;
       in>>n;
       AssertThrow(n==restored.size(),ExcMessage("Incompatible interior fault topology in checkpoint."));
-      for (auto &p:restored)
-        in>>p.position>>p.half_width>>p.initial_shear>>p.age>>p.rate>>p.slip>>p.memory;
+      auto state=friction->state();
+      for (unsigned int i=0; i<n; ++i)
+        {
+          auto &p=restored[i];
+          in>>p.position>>p.half_width>>initial_shear[i];
+          if (!state.empty()) in>>state[i];
+          in>>p.rate>>p.slip>>maxwell_memory[i];
+        }
+      friction->restore_state(std::move(state));
       AssertThrow(in,ExcMessage("Incomplete interior fault checkpoint."));
       accepted->trace.replace_material_labels(std::move(restored));
       trace_initialized=false;

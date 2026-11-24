@@ -6,7 +6,6 @@
 #define _aspect_reconstructed_fault_material_fault_trace_h
 
 #include <aspect/simulator_access.h>
-#include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <deal.II/base/symmetric_tensor.h>
 
 namespace aspect
@@ -27,7 +26,7 @@ namespace aspect
    * material endpoints inside the box. It can remain fixed or move with the
    * accepted bulk velocity.
    *
-   * Every rank stores the complete ordered labels, their physical histories,
+   * Every rank stores the complete ordered labels, their slip and speed,
    * and the derived segment frames and arclengths. PhaseFieldFault owns the
    * accepted trace and profile. For an interior seed it also owns a trial
    * copy, bound once per timestep attempt. A retry discards that copy.
@@ -42,12 +41,9 @@ namespace aspect
       struct Label
       {
         Point<dim> position;  ///< Spatial position in metres.
-        double age;           ///< Rate-and-state age in seconds.
         double slip;          ///< Accumulated slip in metres.
         double rate;          ///< Section slip speed in m/s.
         double half_width;    ///< Material normal radius in metres, or zero for the full in-box ray.
-        double initial_shear; ///< Background shear traction carried from the seed, in Pa.
-        double memory;        ///< Maxwell slip memory in Pa m.
       };
 
       /** Normal projection onto the segment starting at first_vertex. */
@@ -70,7 +66,7 @@ namespace aspect
       };
 
       /**
-       * Initialize a straight, ordered seed with uniform age (s), rate (m/s)
+       * Initialize a straight, ordered seed with uniform rate (m/s)
        * and zero accumulated slip. A finite support is the initial normal
        * radius in metres. The default admits the full in-box cross-section.
        * Interior vertices must all lie strictly inside the box. Otherwise the
@@ -78,7 +74,7 @@ namespace aspect
        * all ranks supply the same inputs before the first solve.
        */
       void initialize(const Point<dim> &origin, const Point<dim> &extent,
-                      const std::vector<Point<dim>> &vertices, double age, double rate,
+                      const std::vector<Point<dim>> &vertices, double rate,
                       double support = std::numeric_limits<double>::max(), bool interior = false);
 
       /**
@@ -110,12 +106,11 @@ namespace aspect
       void replace_material_labels(std::vector<Label> labels);
 
       /**
-       * Apply the converged rates to this trace's incoming ages and cumulative
+       * Apply the converged rates to this trace's cumulative
        * slips at acceptance. At dt = 0 only the rates change. Local; the
        * section solver has already reduced the rates across ranks.
        */
-      void accept_section_rates(const std::vector<double> &rates, double dt,
-                                const MaterialModel::Rheology::RateAndStateFriction &law);
+      void accept_section_rates(const std::vector<double> &rates, double dt);
 
       /** Read this trace's ordered material records at its current time level. Local. */
       const std::vector<Label> &labels() const;

@@ -317,7 +317,7 @@ namespace aspect
           for (unsigned int i=0; i<labels.size(); ++i)
             {
               const auto &p=labels[i];
-              surface<<i<<','<<p.position[0]<<','<<p.position[1]<<','<<p.age<<','<<p.memory<<','
+              surface<<i<<','<<p.position[0]<<','<<p.position[1]<<','<<material.label_ages().at(i)<<','<<material.label_memory().at(i)<<','
                      <<material.phase_profile().normal_integrals()[i]<<','<<p.rate<<','<<p.half_width<<','
                      <<viscosity(p.position)<<','<<p.slip<<'\n';
             }

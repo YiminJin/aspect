@@ -1,3 +1,4 @@
+#include <aspect/material_model/rheology/rate_and_state_friction.h>
 /*
   This file is part of ASPECT, distributed under the GNU General Public
   License version 2 or later. See the file LICENSE for details.
@@ -270,7 +271,7 @@ namespace aspect
             {
               const auto &l=labels[j];
               rates[j]=l.rate;
-              geometry<<j<<' '<<l.position<<' '<<profile.normal_integrals()[j]<<' '<<l.age<<' '<<l.slip<<' '<<l.rate<<' '<<this->get_time()<<'\n';
+              geometry<<j<<' '<<l.position<<' '<<profile.normal_integrals()[j]<<' '<<m.label_ages().at(j)<<' '<<l.slip<<' '<<l.rate<<' '<<this->get_time()<<'\n';
             }
           if (parent_age.empty()) parent_age.assign(n,initial_age);
           const auto points=m.collect_attempt_samples(this->get_solution());
@@ -283,7 +284,7 @@ namespace aspect
           sample_fields(m,rates,kappa,points,metrics,prefix+"bulk-"+suffix);
           if (step==0)
             central_transect(m,rates,prefix+"transect-"+suffix);
-          for (unsigned int j=0; j<n; ++j) parent_age[j]=labels[j].age;
+          for (unsigned int j=0; j<n; ++j) parent_age[j]=m.label_ages().at(j);
           return {"Stationary ridge","exported accepted state and transfer checks"};
         }
       private:
@@ -343,10 +344,10 @@ namespace aspect
               const auto grad=profile.slip_gradient(p.transfer,p.transfer.rate(test));
               work+=p.volume*virtual_traction*(frame.tangent*(grad*frame.normal));
               const double age=foot.interpolate(parent_age[foot.first_vertex],parent_age[foot.first_vertex+1]);
-              p.add_balance(test,age,law,b,d,u,scratch);
-              p.add_balance(plus,age,law,bp,scratch_d,scratch_u,scratch);
-              p.add_balance(minus,age,law,bm,scratch_d,scratch_u,scratch);
-              p.add_balance(rates,age,law,residual,scratch_d,scratch_u,scale);
+              p.add_balance(p.transfer.rate(test),law.resistance(p.transfer.rate(test),age,p.compression),b,d,u,scratch);
+              p.add_balance(p.transfer.rate(plus),law.resistance(p.transfer.rate(plus),age,p.compression),bp,scratch_d,scratch_u,scratch);
+              p.add_balance(p.transfer.rate(minus),law.resistance(p.transfer.rate(minus),age,p.compression),bm,scratch_d,scratch_u,scratch);
+              p.add_balance(p.transfer.rate(rates),law.resistance(p.transfer.rate(rates),age,p.compression),residual,scratch_d,scratch_u,scale);
             }
           const auto comm=this->get_mpi_communicator();
           for (auto *v:
