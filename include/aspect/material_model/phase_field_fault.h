@@ -30,7 +30,7 @@ namespace aspect
         void evaluate(const MaterialModelInputs<dim> &in, MaterialModelOutputs<dim> &out) const override;
         void create_additional_named_outputs(MaterialModelOutputs<dim> &out) const override;
         /** Ordered geometry and last accepted physical state for diagnostics. */
-        const std::vector<typename StationaryFault<dim>::Label> &labels() const;
+        const std::vector<typename MaterialFaultTrace<dim>::Label> &labels() const;
 
         const FaultPhaseProfile<dim> &phase_profile() const
         {
@@ -69,8 +69,8 @@ namespace aspect
         // A profile borrows its own curve. Swapping owners publishes both together.
         struct Section
         {
-          StationaryFault<dim> fault;
-          FaultPhaseProfile<dim> profile {fault};
+          MaterialFaultTrace<dim> trace;
+          FaultPhaseProfile<dim> profile {trace};
         };
         std::unique_ptr<Section> accepted, candidate;
         /** Active geometry and transfer for the current Stokes evaluation. */

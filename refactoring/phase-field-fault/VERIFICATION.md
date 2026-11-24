@@ -4,7 +4,12 @@ The completed `MIDPOINT_UPDATE_CLOSEOUT.md` freezes the implemented midpoint upd
 
 ## Layered moving mature fault
 
+The trace unit tests rotate a unit segment through 105° and reject collapsed and self-crossing edges. The corrected 38-label fit exercises the initial boundary-spanning reconstruction independently of moving the donor curve.
+
 The [4C closeout regressions](STATUS.md#increment-4c-review-closeout) check the returned DG projection with a nonzero parent, full and finite moving normal supports, the fixed/advected interior weak action, and the later Picard section tangent. Keep the prescribed donor radius explicit in the frozen case. The zero-width translation exercises full in-box admission separately.
+
+For the projected section at a fixed Picard iterate, the assembled rate row is
+`r_i = Σ_q JxW χ N_i [τ_drive − κ χ V − R(V,θ,σ)]`, with Q1 trial speed `V = Σ_j N_j V_j`. Applying the negative rate derivative to a direction `d` gives `Σ_q JxW χ N_i [κ χ + ∂R/∂V] Σ_j N_j d_j`. Physical bulk area times χ gives a length, the bracket in the residual is a traction in Pa, and the residual and matrix action have units Pa m. The centered difference keeps age, the returned bulk iterate, candidate χ, pressure-inclusive compression and the current projected stress defect fixed. Sample κ where the Q8 residual is integrated. The closeout capture reads the globally reduced diagonal and upper band used by `solve_rates` before elimination.
 
 Use the [4C fixture, immutable donor identity, commands and measured comparisons](STATUS.md#review-of-the-bounded-4c-calculation). The canonical run compares both accepted physical endpoints and twenty material IDs. Reconstruct the Cartesian DG polynomials independently, check both signed transfer contractions, and compare the actual Q3 Stokes vector action with Q8 physical stress work. Initialization tests the direct section law. Physical steps test the projected response shared by mechanics and publication.
 

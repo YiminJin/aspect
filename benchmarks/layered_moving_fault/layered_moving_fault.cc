@@ -353,7 +353,7 @@ namespace aspect
                   {
                     const auto &x=fe.quadrature_point(q);
                     const auto transfer=material.phase_profile().sample(x,composition[3][q]);
-                    const auto &seg=material.phase_profile().geometry.segment(transfer.foot.left);
+                    const auto &seg=material.phase_profile().geometry.segment(transfer.foot.first_vertex);
                     const double eta=viscosity(x);
                     const double dt=this->get_timestep_number() ? this->get_timestep() : .1;
                     const double k=-eta*std::expm1(-10.*dt/eta);

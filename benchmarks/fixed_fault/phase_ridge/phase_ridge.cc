@@ -171,9 +171,9 @@ namespace aspect
               const auto x=fe.quadrature_point(q);
               const auto foot=profile.geometry.project(x);
               if (!foot.active) continue;
-              const auto &f=profile.geometry.segment(foot.left);
+              const auto &f=profile.geometry.segment(foot.first_vertex);
               const auto &I=profile.normal_integrals();
-              const double chi=profile.weight(phase[q])/foot.interpolate(I[foot.left],I[foot.left+1]);
+              const double chi=profile.weight(phase[q])/foot.interpolate(I[foot.first_vertex],I[foot.first_vertex+1]);
               SymmetricTensor<2,dim> strain;
               strain[0][0]=x[1];
               strain[0][1]=.5*(1.4+x[0]);
@@ -309,7 +309,7 @@ namespace aspect
                   {
                     const auto x=fe.quadrature_point(q);
                     const auto sample=profile.sample(x,phi[q]);
-                    const auto &frame=profile.geometry.segment(sample.foot.left);
+                    const auto &frame=profile.geometry.segment(sample.foot.first_vertex);
                     const auto grad=profile.slip_gradient(sample,sample.rate(rates));
                     out<<x<<' '<<line.weight(q)*(cell->vertex(1)[0]-cell->vertex(0)[0])<<' '<<phi[q]<<' '<<profile.weight(phi[q])<<' '<<frame.tangent*(grad*frame.normal)<<'\n';
                   }
@@ -337,12 +337,12 @@ namespace aspect
           for (const auto &p:points)
             {
               const auto foot=p.transfer.foot;
-              const auto &frame=profile.geometry.segment(foot.left);
+              const auto &frame=profile.geometry.segment(foot.first_vertex);
               const double virtual_traction=.7+std::sin(3.*(frame.station+frame.length*foot.xi));
               p.transfer.add_load(p.volume*virtual_traction,load);
               const auto grad=profile.slip_gradient(p.transfer,p.transfer.rate(test));
               work+=p.volume*virtual_traction*(frame.tangent*(grad*frame.normal));
-              const double age=foot.interpolate(parent_age[foot.left],parent_age[foot.left+1]);
+              const double age=foot.interpolate(parent_age[foot.first_vertex],parent_age[foot.first_vertex+1]);
               p.add_balance(test,age,law,b,d,u,scratch);
               p.add_balance(plus,age,law,bp,scratch_d,scratch_u,scratch);
               p.add_balance(minus,age,law,bm,scratch_d,scratch_u,scratch);
@@ -400,10 +400,10 @@ namespace aspect
                   if (order==16)
                     {
                       if (!this->get_timestep_number()) continue;
-                      const auto left=profile.geometry.project(cell->vertex(0)).left;
+                      const auto left=profile.geometry.project(cell->vertex(0)).first_vertex;
                       bool cut=false;
                       for (unsigned int corner=1; corner<GeometryInfo<dim>::vertices_per_cell; ++corner)
-                        cut |= profile.geometry.project(cell->vertex(corner)).left!=left;
+                        cut |= profile.geometry.project(cell->vertex(corner)).first_vertex!=left;
                       if (!cut) continue;
                     }
                   fe.reinit(cell);
@@ -423,13 +423,13 @@ namespace aspect
                       const auto x=fe.quadrature_point(q);
                       const auto s=profile.sample(x,phi[q]);
                       if (order==8 && s.chi==0.) continue;
-                      const auto &frame=profile.geometry.segment(s.foot.left);
+                      const auto &frame=profile.geometry.segment(s.foot.first_vertex);
                       const auto stress=m.endpoint_stress(cell,x,phi[q],symmetrize(grad[q]));
                       const double tau=shear+frame.tangent*(stress*frame.normal);
                       const double sigma=compression+p[q]-frame.normal*(stress*frame.normal);
                       if (order==3)
                         {
-                          bulk<<cell->id()<<' '<<q<<' '<<x<<' '<<phi[q]<<' '<<profile.weight(phi[q])<<' '<<s.chi<<' '<<s.foot.left<<' '<<s.foot.xi<<' '<<s.rate(rates)<<' '<<p[q];
+                          bulk<<cell->id()<<' '<<q<<' '<<x<<' '<<phi[q]<<' '<<profile.weight(phi[q])<<' '<<s.chi<<' '<<s.foot.first_vertex<<' '<<s.foot.xi<<' '<<s.rate(rates)<<' '<<p[q];
                           for (const auto &v:dg) bulk<<' '<<v[q];
                           for (unsigned int c=0; c<3; ++c) bulk<<' '<<stress.access_raw_entry(c);
                           bulk<<' '<<tau<<' '<<sigma<<' '<<grad[q][0][0]<<' '<<grad[q][0][1]<<' '<<grad[q][1][0]<<' '<<grad[q][1][1]<<' '<<s.foot.active;
@@ -450,7 +450,7 @@ namespace aspect
                           const auto &point=points.at(count++);
                           // Build the two hat-function residuals directly from the
                           // sampled tensor, mechanical pressure and incoming age.
-                          const unsigned int left=s.foot.left;
+                          const unsigned int left=s.foot.first_vertex;
                           const double xi=s.foot.xi;
                           const double age=(1.-xi)*parent_age[left]+xi*parent_age[left+1];
                           const double speed=(1.-xi)*rates[left]+xi*rates[left+1];

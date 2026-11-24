@@ -51,7 +51,7 @@ namespace aspect
       if (!trace_initialized)
         {
           if (fit_trace)
-            accepted->fault.fit(*this,phase_field,this->get_old_solution());
+            accepted->trace.fit_boundary_spanning_seed_to_phase_ridge(*this,phase_field,this->get_old_solution());
           if (!interior_seed || this->get_timestep_number()>0)
             accepted->profile.initialize(*this,phase_field,this->get_old_solution(),degradation_magnitude,interior_seed ? 8 : 1);
           trace_initialized = true;
@@ -64,9 +64,9 @@ namespace aspect
     {
       if (!interior_seed || candidate) return;
       candidate=std::make_unique<Section>();
-      candidate->fault=accepted->fault;
+      candidate->trace=accepted->trace;
       if (advect_vertices && this->get_timestep()>0.)
-        candidate->fault.advect(*this,this->get_timestep());
+        candidate->trace.advect_with_accepted_velocity(*this,this->get_timestep());
       candidate->profile.initialize(*this,phase_field,fields,degradation_magnitude,8);
     }
 
@@ -147,9 +147,9 @@ namespace aspect
     }
 
     template <int dim>
-    const std::vector<typename StationaryFault<dim>::Label> &PhaseFieldFault<dim>::labels() const
+    const std::vector<typename MaterialFaultTrace<dim>::Label> &PhaseFieldFault<dim>::labels() const
     {
-      return accepted->fault.labels();
+      return accepted->trace.labels();
     }
 
     template <int dim>
@@ -259,7 +259,7 @@ namespace aspect
       const double age = prm.get_double("Initial age");
       const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
       AssertThrow(Plugins::plugin_type_matches<InitialTopographyModel::ZeroTopography<dim>>(this->get_initial_topography_model()),
-                  ExcMessage("The stationary fault requires the zero initial topography model "
+                  ExcMessage("The fault material requires the zero initial topography model "
                              "because its normalization uses the rectangular box width."));
       std::vector<Point<dim>> vertices;
       for (const auto &entry : Utilities::split_string_list(prm.get("Fault vertices"),';'))
@@ -281,9 +281,9 @@ namespace aspect
       const double support = prm.get_double("Profile half width");
       AssertThrow(!interior_seed || (!fit_trace && (!advect_vertices || inflow_stress)),
                   ExcMessage("Interior mechanics requires a prescribed seed with fitting disabled. Moving its vertices also requires physical stress transport."));
-      accepted->fault.initialize(box.get_origin(),box.get_extents(),vertices,age,friction.reference_speed,
+      accepted->trace.initialize(box.get_origin(),box.get_extents(),vertices,age,friction.reference_speed,
                                  support > 0. ? support : std::numeric_limits<double>::max(),interior_seed);
-      auto labels=accepted->fault.labels();
+      auto labels=accepted->trace.labels();
       const auto ages=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label ages")));
       const auto shear=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label shear tractions")));
       AssertThrow((ages.empty() || ages.size()==labels.size()) && (shear.empty() || shear.size()==labels.size()),
@@ -294,25 +294,25 @@ namespace aspect
           labels[i].age=ages.empty() ? age : ages[i];
           AssertThrow(labels[i].age>0.,ExcMessage("Material label age must be positive."));
         }
-      accepted->fault.set_labels(std::move(labels));
+      accepted->trace.replace_material_labels(std::move(labels));
       prm.leave_subsection();
       prm.leave_subsection();
       AssertThrow(std::min({viscosity,modulus,initial_interval,friction.direct_effect,minimum_speed,
                             friction.reference_speed,friction.slip_distance,age
                            }) > 0.,
-                  ExcMessage("The fixed fault requires positive material, time and speed scales."));
+                  ExcMessage("The fault material requires positive material, time and speed scales."));
       AssertThrow(friction.reference_speed >= minimum_speed,
                   ExcMessage("The reference speed must be at least the minimum admissible speed."));
       AssertThrow(dim == 2 && !p.enable_elasticity && p.nonlinear_solver == (transport_phase ? Parameters<dim>::NonlinearSolver::single_Advection_iterated_Stokes : Parameters<dim>::NonlinearSolver::no_Advection_iterated_Stokes)
                   && p.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg && p.stokes_velocity_degree == 2
                   && !p.run_postprocessors_on_nonlinear_iterations && !p.mesh_deformation_enabled && !p.include_melt_transport && p.pressure_normalization == "no"
                   && p.nonlinear_solver_failure_strategy != Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep,
-                  ExcMessage("The fixed fault requires a fixed 2-D Q2 box with ASPECT elasticity disabled, block AMG, no pressure normalization, "
+                  ExcMessage("The fault material requires a fixed 2-D Q2 box with ASPECT elasticity disabled, block AMG, no pressure normalization, "
                              "a composition solve for selected phase transport, iterated Stokes, and convergence or retry."));
       AssertThrow(!p.enable_prescribed_dilation && (p.formulation_mass_conservation ==
                                                     Parameters<dim>::Formulation::MassConservation::incompressible || p.formulation_mass_conservation ==
                                                     Parameters<dim>::Formulation::MassConservation::ask_material_model),
-                  ExcMessage("Stationary fault mechanics requires incompressible continuity without prescribed dilation."));
+                  ExcMessage("Fault mechanics requires incompressible continuity without prescribed dilation."));
       AssertThrow(p.initial_adaptive_refinement == 0 && p.adaptive_refinement_interval == 0 &&
                   p.additional_refinement_times.empty(),
                   ExcMessage("The stationary FE phase profile requires a fixed Cartesian mesh."));
@@ -361,7 +361,7 @@ namespace aspect
       for (auto &p:restored)
         in>>p.position>>p.half_width>>p.initial_shear>>p.age>>p.rate>>p.slip>>p.memory;
       AssertThrow(in,ExcMessage("Incomplete interior fault checkpoint."));
-      accepted->fault.set_labels(std::move(restored));
+      accepted->trace.replace_material_labels(std::move(restored));
       trace_initialized=false;
     }
 

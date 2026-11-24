@@ -195,7 +195,7 @@ end
 """
     for pressure in (0, 0.1):
         run(f"closed_{pressure}", closed + f"set Surface pressure = {pressure}\n",
-            expected_error="Stationary fault friction requires a pressure datum")
+            expected_error="Fault friction requires a pressure datum")
 
     run("periodic_closed", """
 subsection Geometry model
@@ -211,7 +211,7 @@ end
 subsection Boundary traction model
   set Prescribed traction boundary indicators =
 end
-""", expected_error="Stationary fault friction requires a pressure datum")
+""", expected_error="Fault friction requires a pressure datum")
 
     run("topography", """
 subsection Geometry model
@@ -228,7 +228,7 @@ subsection Material model
     set Fault vertices = 0,0.5; 0.5,0.5; 1,0.5
   end
 end
-""", expected_error="The stationary fault requires the zero initial topography model")
+""", expected_error="The fault material requires the zero initial topography model")
 
     # Opposite tensile tractions on the horizontal faces shift the pressure
     # by -3 Pa at 12.5 ms. Extrapolating to 25 ms opens the trial fault.
@@ -241,12 +241,12 @@ subsection Boundary traction model
 end
 """
     opened, _ = run("open_initial_state", traction_boundaries.format(tension="6"),
-                    expected_error="Stationary fault trial requires finite, positive normal compression")
+                    expected_error="Fault trial requires finite, positive normal compression")
     if (opened / "fault-checks").exists():
         raise RuntimeError("Published an open initial fault")
     pulse = traction_boundaries.format(tension="3*max(0,1-abs(t/0.0125-1))")
     recovered, log = run("pulse_cutback", pulse + "set Nonlinear solver failure strategy = cut timestep size\n")
-    if (log.count("Stationary fault trial requires finite, positive normal compression") != 1 or
+    if (log.count("Fault trial requires finite, positive normal compression") != 1 or
             log.count("Repeating the current time step") != 1):
         raise RuntimeError("Expected one recoverable closed-fault violation")
     split, _ = run("pulse_clean", pulse + """

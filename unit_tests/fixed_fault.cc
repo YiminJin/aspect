@@ -4,7 +4,7 @@
 */
 #include "common.h"
 #include <aspect/material_model/rheology/rate_and_state_friction.h>
-#include <aspect/reconstructed_fault/stationary_fault.h>
+#include <aspect/reconstructed_fault/material_fault_trace.h>
 
 TEST_CASE("Mature fault resistance and aging")
 {
@@ -27,7 +27,7 @@ TEST_CASE("Stationary fault spans decimal box faces")
   using dealii::Point;
   const Point<2> origin(.1,.1), extent(.2,.2);
   std::vector<Point<2>> labels = {{.2,.1},{.2,.2},{.2,.3}};
-  aspect::StationaryFault<2> fault;
+  aspect::MaterialFaultTrace<2> fault;
   fault.initialize(origin,extent,labels,10.,.001);
   CHECK(fault.labels().size() == 3);
   CHECK(fault.project(labels.back()).xi == Approx(1.));
@@ -41,7 +41,7 @@ TEST_CASE("Stationary fault spans decimal box faces")
 TEST_CASE("Finite normal association on an inclined stationary trace")
 {
   using dealii::Point;
-  aspect::StationaryFault<2> fault;
+  aspect::MaterialFaultTrace<2> fault;
   const double x = .5/std::sqrt(3.);
   fault.initialize(Point<2>(-.5,-.5),Point<2>(1.,1.), {{-x,-.5},{0.,0.},{x,.5}},1.,1.,.2);
   const auto &edge = fault.segment(1);
@@ -55,7 +55,7 @@ TEST_CASE("Finite normal association on an inclined stationary trace")
 TEST_CASE("Fault strip cuts a cell whose four corners name the same segment")
 {
   using dealii::Point;
-  aspect::StationaryFault<2> fault;
+  aspect::MaterialFaultTrace<2> fault;
   fault.initialize(Point<2>(),Point<2>(1.,1.), {{.5,0.},{.5,1.}},1.,1.,.1);
   const auto cut=fault.cut_quadrature(Point<2>(),Point<2>(1.,1.));
   double area=0., admitted=0.;
@@ -72,7 +72,7 @@ TEST_CASE("Fault strip cuts a cell whose four corners name the same segment")
 TEST_CASE("Interior material connectivity through rigid rotation")
 {
   using dealii::Point;
-  aspect::StationaryFault<2> fault;
+  aspect::MaterialFaultTrace<2> fault;
   const Point<2> center;
   fault.initialize(Point<2>(-2,-2),Point<2>(4,4), {{-.5,0.},{.5,0.}},1.,1.,.2,true);
   auto labels=fault.labels();
@@ -86,7 +86,7 @@ TEST_CASE("Interior material connectivity through rigid rotation")
           label.position=Point<2>(std::cos(angle)*prior[0]-std::sin(angle)*prior[1],
                                   std::sin(angle)*prior[0]+std::cos(angle)*prior[1]);
         }
-      fault.set_labels(labels);
+      fault.replace_material_labels(labels);
       const auto &segment=fault.segment(0);
       CHECK(segment.length==Approx(1.));
       CHECK(segment.tangent[0]==Approx(std::cos(turn*angle)));
@@ -95,16 +95,16 @@ TEST_CASE("Interior material connectivity through rigid rotation")
       CHECK(fault.labels()[1].age==2.);
     }
   labels[1].position=labels[0].position;
-  REQUIRE_THROWS(fault.set_labels(labels));
+  REQUIRE_THROWS(fault.replace_material_labels(labels));
 }
 
 TEST_CASE("A material fault retains simple open connectivity")
 {
   using dealii::Point;
-  aspect::StationaryFault<2> fault;
+  aspect::MaterialFaultTrace<2> fault;
   fault.initialize(Point<2>(-2,-2),Point<2>(4,4), {{-1.,0.},{-.5,0.},{.5,0.},{1.,0.}},1.,1.,.2,true);
   auto vertices=fault.labels();
   vertices[1].position=Point<2>(1.,1.);
   vertices[2].position=Point<2>(-1.,1.);
-  REQUIRE_THROWS(fault.set_labels(vertices));
+  REQUIRE_THROWS(fault.replace_material_labels(vertices));
 }

@@ -56,7 +56,7 @@ namespace aspect
     signals.set_assemblers.connect([](const SimulatorAccess<dim> &sim, Assemblers::Manager<dim> &assemblers)
     {
       AssertThrow(has_normal_traction_boundary(sim),
-                  ExcMessage("Stationary fault friction requires a pressure datum from a nonperiodic box face "
+                  ExcMessage("Fault friction requires a pressure datum from a nonperiodic box face "
                              "with unconstrained normal velocity (prescribed or natural normal traction)."));
       // For the 3-D deviator in plane strain the velocity matrix needs
       // -2*kappa/3 div(u) div(v), even with incompressible continuity.
@@ -130,7 +130,7 @@ namespace aspect
   {
     const double physical_dt = this->get_timestep();
     trial_rates.clear();
-    for (const auto &label : material.section().fault.labels())
+    for (const auto &label : material.section().trace.labels())
       trial_rates.push_back(label.rate);
 
     const QGauss<dim> rule(8);
@@ -225,7 +225,7 @@ namespace aspect
               const auto &x=fe.quadrature_point(q);
               const auto transfer = material.section().profile.sample(x,phase[q]);
               if (transfer.chi==0.) continue;
-              const auto &frame = material.section().fault.segment(transfer.foot.left);
+              const auto &frame = material.section().trace.segment(transfer.foot.first_vertex);
               Stress stress = material.viscous_stress(strain[q],x);
               if (material.interior_seed && this->get_timestep()>0. && !reaction.empty())
                 {
@@ -240,9 +240,9 @@ namespace aspect
                   stress+=basis(q,i)*parent[i]*material.relaxation(x);
               const double compression = material.background_compression + pressure[q] - frame.normal*(stress*frame.normal);
               locally_closed &= std::isfinite(compression) && compression > 0.;
-              const auto &labels=material.section().fault.labels();
+              const auto &labels=material.section().trace.labels();
               const auto &foot=transfer.foot;
-              const double shear=foot.interpolate(labels[foot.left].initial_shear,labels[foot.left+1].initial_shear);
+              const double shear=foot.interpolate(labels[foot.first_vertex].initial_shear,labels[foot.first_vertex+1].initial_shear);
               samples.push_back({transfer,fe.JxW(q),shear + stress*symmetrize(frame.dyad),compression,material.stiffness(fe.quadrature_point(q))});
             }
         }
@@ -250,7 +250,7 @@ namespace aspect
     // All ranks reject this trial before evaluating friction or staging rates.
     if (!Utilities::MPI::min(static_cast<unsigned int>(locally_closed),this->get_mpi_communicator()))
       {
-        this->get_pcout() << "Stationary fault trial requires finite, positive normal compression." << std::endl;
+        this->get_pcout() << "Fault trial requires finite, positive normal compression." << std::endl;
         throw ExcNonlinearSolverNoConvergence();
       }
     return samples;
@@ -354,7 +354,7 @@ namespace aspect
         for (const auto &cell : this->get_dof_handler().active_cell_iterators())
           if (cell->is_locally_owned())
             {
-              const auto cut=material.interior_seed ? Quadrature<dim>() : material.section().fault.cut_quadrature(cell->vertex(0),cell->vertex(GeometryInfo<dim>::vertices_per_cell-1));
+              const auto cut=material.interior_seed ? Quadrature<dim>() : material.section().trace.cut_quadrature(cell->vertex(0),cell->vertex(GeometryInfo<dim>::vertices_per_cell-1));
               const auto project=[&](FEValues<dim> &values, const FullMatrix<double> &projection)
               {
                 values.reinit(cell);
@@ -396,14 +396,14 @@ namespace aspect
             solution.block(intro.block_indices.compositional_fields[material.stress_fields[c]]) = owned[c];
           }
       }
-    material.section().fault.accept(trial_rates,dt,material.friction);
+    material.section().trace.accept_section_rates(trial_rates,dt,material.friction);
     if (material.candidate)
       {
-        auto labels=material.candidate->fault.labels();
+        auto labels=material.candidate->trace.labels();
         if (dt>0.)
           for (auto &label:labels)
             label.memory=material.relaxation(label.position)*label.memory+material.stiffness(label.position)*label.rate;
-        material.candidate->fault.set_labels(std::move(labels));
+        material.candidate->trace.replace_material_labels(std::move(labels));
         material.accepted=std::move(material.candidate);
       }
   }
@@ -413,7 +413,7 @@ namespace aspect
                                                         const MaterialModel::Rheology::RateAndStateFriction &law, std::vector<double> &rhs,
                                                         std::vector<double> &diagonal, std::vector<double> &upper, std::vector<double> &scale) const
   {
-    const auto j=transfer.foot.left;
+    const auto j=transfer.foot.first_vertex;
     const double N[2]= {1.-transfer.foot.xi,transfer.foot.xi};
     const double speed=transfer.rate(rates);
     const auto resistance=law.resistance(speed,age,compression);
@@ -431,7 +431,7 @@ namespace aspect
   std::vector<double> FaultStokesCoupling<dim>::solve_rates(const LinearAlgebra::BlockVector &iterate) const
   {
     const auto points = sample_bulk(iterate);
-    const auto &accepted = material.section().fault.labels();
+    const auto &accepted = material.section().trace.labels();
     const unsigned int n = accepted.size();
     std::vector<double> rates(n);
     for (unsigned int j=0; j<n; ++j)
@@ -443,7 +443,7 @@ namespace aspect
         for (const auto &point : points)
           {
             const auto &foot=point.transfer.foot;
-            const double age=foot.interpolate(accepted[foot.left].age,accepted[foot.left+1].age);
+            const double age=foot.interpolate(accepted[foot.first_vertex].age,accepted[foot.first_vertex+1].age);
             point.add_balance(rates,age,material.friction,rhs,diagonal,upper,scale);
           }
 
@@ -455,7 +455,7 @@ namespace aspect
         double residual = 0.;
         for (unsigned int j=0; j<n; ++j)
           {
-            AssertThrow(scale[j] > 0.,ExcMessage("A stationary fault label has no resolved bulk support."));
+            AssertThrow(scale[j] > 0.,ExcMessage("A material fault label has no resolved bulk support."));
             residual = std::max(residual,std::abs(rhs[j])/scale[j]);
           }
         if (residual <= 64.*std::numeric_limits<double>::epsilon())
@@ -464,12 +464,12 @@ namespace aspect
         // Eliminate the symmetric positive tridiagonal Q1 tangent in place.
         for (unsigned int j=1; j<n; ++j)
           {
-            AssertThrow(diagonal[j-1] > 0.,ExcMessage("Singular stationary fault tangent."));
+            AssertThrow(diagonal[j-1] > 0.,ExcMessage("Singular fault section tangent."));
             const double multiplier = upper[j-1]/diagonal[j-1];
             diagonal[j] -= multiplier*upper[j-1];
             rhs[j] -= multiplier*rhs[j-1];
           }
-        AssertThrow(diagonal.back() > 0.,ExcMessage("Singular stationary fault tangent."));
+        AssertThrow(diagonal.back() > 0.,ExcMessage("Singular fault section tangent."));
         rhs.back() /= diagonal.back();
         for (unsigned int j=n-1; j>0; --j)
           rhs[j-1] = (rhs[j-1]-upper[j-1]*rhs[j])/diagonal[j-1];
@@ -480,13 +480,13 @@ namespace aspect
             fraction = std::min(fraction,.9*(rates[j]-material.minimum_speed)/(-rhs[j]));
         if (fraction <= 0.)
           {
-            this->get_pcout() << "Stationary fault Newton correction reached the minimum admissible speed." << std::endl;
+            this->get_pcout() << "Fault section Newton correction reached the minimum admissible speed." << std::endl;
             throw ExcNonlinearSolverNoConvergence();
           }
         for (unsigned int j=0; j<n; ++j)
           rates[j] += fraction*rhs[j];
       }
-    this->get_pcout() << "Stationary fault Q1 balance did not converge in 100 iterations." << std::endl;
+    this->get_pcout() << "Fault Q1 section balance did not converge in 100 iterations." << std::endl;
     throw ExcNonlinearSolverNoConvergence();
   }
 

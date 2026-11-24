@@ -130,7 +130,7 @@ namespace aspect
                     }
                   return self(self,left,mid,l,depth+1)+self(self,mid,right,r,depth+1);
                 };
-                const double width=geometry.normal_support(j,stations.point(k)[0]);
+                const double width=geometry.normal_support_radius(j,stations.point(k)[0]);
                 const double cuts[4]= {a,std::clamp(-width,a,b),std::clamp(width,a,b),b};
                 const unsigned int index=j*stations.size()+k;
                 for (unsigned int side=0; side<3; ++side)
@@ -198,7 +198,7 @@ namespace aspect
     const auto foot=geometry.project(x);
     const double h=weight(phase);
     if (!foot.active || h==0.) return {foot,0.};
-    const double I=foot.interpolate(integrals[foot.left],integrals[foot.left+1]);
+    const double I=foot.interpolate(integrals[foot.first_vertex],integrals[foot.first_vertex+1]);
     AssertThrow(I>0. && std::isfinite(I),ExcMessage("Active fault weight has invalid Q1 normal integral."));
     return {foot,h/I};
   }
@@ -206,21 +206,21 @@ namespace aspect
   template <int dim>
   double FaultPhaseProfile<dim>::Sample::rate(const std::vector<double> &rates) const
   {
-    return foot.interpolate(rates[foot.left],rates[foot.left+1]);
+    return foot.interpolate(rates[foot.first_vertex],rates[foot.first_vertex+1]);
   }
 
   template <int dim>
   void FaultPhaseProfile<dim>::Sample::add_load(const double integrated_traction,std::vector<double> &rows) const
   {
     const double load=chi*integrated_traction;
-    rows[foot.left]+=(1.-foot.xi)*load;
-    rows[foot.left+1]+=foot.xi*load;
+    rows[foot.first_vertex]+=(1.-foot.xi)*load;
+    rows[foot.first_vertex+1]+=foot.xi*load;
   }
 
   template <int dim>
   Tensor<2,dim> FaultPhaseProfile<dim>::slip_gradient(const Sample &sample,const double rate) const
   {
-    return (sample.chi*rate)*geometry.segment(sample.foot.left).dyad;
+    return (sample.chi*rate)*geometry.segment(sample.foot.first_vertex).dyad;
   }
 #define INSTANTIATE(dim) template class FaultPhaseProfile<dim>;
   ASPECT_INSTANTIATE(INSTANTIATE)

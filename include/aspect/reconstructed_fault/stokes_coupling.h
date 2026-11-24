@@ -16,7 +16,7 @@ namespace aspect
     template <int dim> class PhaseFieldFault;
   }
 
-  /** FE and MPI operations coupling a stationary section to Stokes. All
+  /** FE and MPI operations coupling a material fault section to Stokes. All
    * scratch is rebuilt from the accepted bulk fields and labels at attempt entry. */
   template <int dim>
   class FaultStokesCoupling : public SimulatorAccess<dim>

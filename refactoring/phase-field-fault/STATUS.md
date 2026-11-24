@@ -59,6 +59,33 @@ cp build-4a/free-32/profile.txt "$S/free-32/profile.txt"
 PYTHONPATH=benchmarks/fixed_fault/phase_ridge python3 -c 'from check import check_case; import sys; from pathlib import Path; check_case(Path(sys.argv[1]),"free",32)' "$S"
 ```
 
+### Trace interface and checks after the rename
+
+The correctness commit is `530c56a85`. Its direct child, **Name and document the ordered material fault trace**, contains the interface rename and its caller updates. The immutable starting point identifies both commits in order:
+
+```sh
+git log --reverse --ancestry-path --format='%H %s' 55cf57ece..pf-rsf | head -2
+```
+
+The public contract is in `include/aspect/reconstructed_fault/material_fault_trace.h`. The ASPECT particle manager is the nearest release analogue for identity, physical location and clear ownership. Here every rank keeps the same ordered Q1 material vertices. `PhaseFieldFault` owns the accepted trace and the candidate that borrows the simulator's accepted velocity for one collective advection call. Each trace's corresponding `FaultPhaseProfile` borrows that trace. Segment orientation always runs from the first material index to the next. The initial boundary-spanning fit borrows the FE field once and retains no Simulator lifetime dependency. Both `fit_boundary_spanning_seed_to_phase_ridge` and `advect_with_accepted_velocity` rebuild frames within the trace that the material supplied. `FaultStokesCoupling::check_convergence` retains the projected DG stress and section rates. After the repeat decision `accept_step` copies this stress, calls `accept_section_rates`, and publishes the interior trial. The geometry and transfer serve the normal material independently of the benchmark observer.
+
+Before and after renaming, the four scoped Release CTests passed, including the 0.1 Pa traction step. The rotation, collapsed-edge and crossing-edge tests ran in the unit suite. The stationary fit, projected tangent, frozen donor, retry, checkpoint restart and active two-rank case were rerun in fresh directories. Byte comparisons across the two commits matched for 161 moving-case output files (bulk, labels, assembled work and boundary history), 10 fitted-trace output files and all three moving tangent capture files. The stationary lifecycle included the tensile predictor and clean retry with a maximum difference of 1.39e−16. On one rank and one thread the final Release two-step principal case took 4.41 s and reached 249,964 KiB peak RSS including output.
+
+The initial nonuniform fixed/advected fields also matched exactly at every Q3 observation (phase, velocity, velocity gradient and pressure). The Debug review cases passed, with returned projection change 0.521772, final traction-step cell work defect 4.99e−15 Pa m² and zero named-column difference under permutation. The Debug principal case passed both frozen donor endpoints. Final Release executable and layered plugin SHA-256 digests are `6b27e4a9808cde55c20f64c0b2b889ed2e412b48e699aad684d7b0e1f9a6f773` and `81cd756dcd4b270378a190aedf610e4cc83dd4612086f75b592770c77632cb4c`. The corresponding Debug digests are `edf73ce9bdad852b1995f6aa82f11ce76b1f07de132acb9d942c626beabf4cd4` and `60d7fc2c8f7fcab758b1485755c13e65aa132df0db51a370e6695fcd3d0bebb8`.
+
+The Release commands above were repeated with fresh destinations `r3`, `m2`, `tangent2` and `fit2`. The additional lifecycle and Debug commands were:
+
+```sh
+python3 benchmarks/fixed_fault/check_lifecycle.py "$A" "$T/libfixed_fault.release.so" "$D/lifecycle2" --case stationary_fault
+cmake --build build-slice-debug --target aspect -j1
+cmake -S "$F" -B "$D/debug-plugin" -DAspect_DIR="$W/build-slice-debug" -DCMAKE_BUILD_TYPE=Debug
+cmake --build "$D/debug-plugin" -j1
+python3 -O "$F/check_review.py" build-slice-debug/aspect "$D/debug-plugin/liblayered_moving_fault.debug.so" "$D/debug"
+PYTHONPATH="$F" python3 -O -c 'from pathlib import Path; from check import endpoint; endpoint(Path("build-4c-closeout/debug/principal/output"),Path("build-4c/donor/output"))'
+```
+
+The supported comparison is a single open, non-self-intersecting plane-strain trace on the fixed box mesh. Three rotations exercise the material geometry update directly. The ordinary coupled trajectories exercise translation, finite deformation, cell/rank crossings, rollback and restart. The moving directional difference measures the fixed-Picard Q1 section row on one rank. The distributed run checks the two-step coupled solution. The original stock near-zero pressure difference and earlier Release reference discrepancies remain recorded with their baselines.
+
 ## Increment 4C · coupled layered moving fault
 
 Entry was clean at `8712d8fc2` on `pf-rsf`, apart from the incoming assignment and local skills. The reviewed 3-D baseline comprises `610d6eecc` and `63db4899a`; its six scoped CTests in each configuration, 2359 assertions in 51 unit cases, slab moments and 162-coefficient MPI comparison are recorded below. The seven 4B repair gates remain part of that baseline.

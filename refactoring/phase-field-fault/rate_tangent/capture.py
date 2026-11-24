@@ -24,7 +24,7 @@ s=inject(original,'    bool locally_closed = true;',r'''
 s=inject(s,'              samples.push_back({transfer,fe.JxW(q)',r'''
               if (review_points.is_open())
                 review_points << cell->id() << ' ' << q << ' ' << fe.quadrature_point(q) << ' ' << phase[q] << ' '
-                              << transfer.foot.left << ' ' << transfer.foot.xi << ' ' << transfer.chi << ' '
+                              << transfer.foot.first_vertex << ' ' << transfer.foot.xi << ' ' << transfer.chi << ' '
                               << fe.JxW(q) << ' ' << shear + stress*symmetrize(frame.dyad)
                               << ' ' << compression << '\n';
 ''')
