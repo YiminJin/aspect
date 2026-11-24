@@ -20,7 +20,7 @@
 
 
 #include <aspect/simulator.h>
-#include <aspect/material_model/growing_fault.h>
+#include <aspect/simulator/solver/midpoint_fault.h>
 #include <aspect/global.h>
 #include <aspect/mesh_deformation/free_surface.h>
 #include <aspect/volume_of_fluid/handler.h>
@@ -1052,14 +1052,17 @@ namespace aspect
     assemble_and_solve_temperature();
     assemble_and_solve_composition();
 
-    if (auto *front = dynamic_cast<GrowingFault::Material<dim> *>(material_model.get()))
-      {
-        const SolverControl control = front->solve_midpoint_fields(solution);
-        current_linearization_point = solution;
-        nonlinear_iteration = control.last_step();
-        signals.post_nonlinear_solver(control);
-        return;
-      }
+    if constexpr (dim == 2)
+      if (std::find(parameters.compositional_field_methods.begin(), parameters.compositional_field_methods.end(),
+                    Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase) != parameters.compositional_field_methods.end())
+        {
+          auto &provider = dynamic_cast<GrowingFault::MidpointMaterial &>(*material_model);
+          const SolverControl control = GrowingFault::advance_midpoint(SimulatorAccess<dim>(*this), provider, solution);
+          current_linearization_point = solution;
+          nonlinear_iteration = control.last_step();
+          signals.post_nonlinear_solver(control);
+          return;
+        }
 
     // Now store the linear_tolerance we started out with, because we might change
     // it within this timestep.

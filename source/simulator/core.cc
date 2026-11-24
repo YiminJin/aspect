@@ -20,6 +20,7 @@
 
 
 #include <aspect/simulator.h>
+#include <aspect/simulator/solver/midpoint_fault.h>
 #include <aspect/global.h>
 #include <aspect/linear_algebra_types.h>
 #include <aspect/utilities.h>
@@ -319,6 +320,7 @@ namespace aspect
     if (SimulatorAccess<dim> *sim = dynamic_cast<SimulatorAccess<dim>*>(material_model.get()))
       sim->initialize_simulator (*this);
     material_model->parse_parameters (prm);
+    GrowingFault::validate_midpoint_material(parameters,*material_model);
     material_model->initialize ();
 
     // Make sure that the material model supports elasticity when it is requested,

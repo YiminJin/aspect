@@ -1,8 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/material_model/growing_fault.h>
 #include <aspect/material_model/rheology/rate_and_state_friction.h>
-#include <aspect/simulator/solver/midpoint_fault.h>
-#include <aspect/phase_field/bernstein_bounds.h>
 #include <aspect/geometry_model/box.h>
 #include <deal.II/fe/fe_values.h>
 #include <numeric>
@@ -52,25 +50,8 @@ namespace aspect::GrowingFault
     const auto &energy=p.surface_energy_model;
     energy.validate();
     field=this->introspection().compositional_index_for_name(energy.composition);
-    AssertThrow(dim==2 && &this->get_material_model()==this && !p.enable_elasticity &&
-                p.nonlinear_solver==Parameters<dim>::NonlinearSolver::single_Advection_iterated_Newton_Stokes &&
-                p.compositional_field_methods[field]==Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase &&
-                std::count(p.compositional_field_methods.begin(),p.compositional_field_methods.end(),
-                           Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase)==1 &&
-                !p.explicit_compositions.selected[field] &&
-                p.nonlinear_solver_failure_strategy!=Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep &&
-                p.surface_pressure>0. && p.pressure_normalization=="no",
-                ExcMessage("Growing fault requires a single midpoint fault phase, plane strain, native elasticity off, single Advection, iterated Newton Stokes, prescribed positive surface pressure and no pressure normalization. Nonconvergence must abort or request a retry."));
-    AssertThrow(!p.mesh_deformation_enabled && !p.initial_adaptive_refinement && !p.adaptive_refinement_interval &&
-                p.additional_refinement_times.empty() && p.stokes_velocity_degree==2 && !p.use_equal_order_interpolation_for_stokes &&
-                !p.use_locally_conservative_discretization && !p.include_melt_transport,
-                ExcMessage("Growing fault requires a fixed conforming Q2/Q1 mesh."));
-    AssertThrow(!p.use_direct_stokes_solver,ExcMessage("Midpoint fault mechanics requires separate velocity and pressure blocks."));
-    AssertThrow(!p.run_postprocessors_on_nonlinear_iterations,ExcMessage("Midpoint fault output requires an accepted step; iteration postprocessing is unsupported."));
-    AssertThrow(!p.enable_prescribed_dilation &&
-                (p.formulation_mass_conservation==Parameters<dim>::Formulation::MassConservation::incompressible ||
-                 p.formulation_mass_conservation==Parameters<dim>::Formulation::MassConservation::ask_material_model),
-                ExcMessage("Midpoint fault mechanics requires incompressible continuity without prescribed dilation."));
+    AssertThrow(&this->get_material_model()==this && p.compositional_field_methods[field]==Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase,
+                ExcMessage("Growing fault requires a top-level midpoint material and a midpoint fault phase."));
     prm.enter_subsection("Material model");
     prm.enter_subsection("Growing fault");
     degrees=prm.get_double("Seed tangent angle");
@@ -200,47 +181,17 @@ namespace aspect::GrowingFault
   }
 
   template <int dim>
-  SolverControl Material<dim>::solve_midpoint_fields(LinearAlgebra::BlockVector &solution)
+  void Material<dim>::begin_attempt()
   {
-    SolverControl control(this->get_parameters().max_nonlinear_iterations,this->get_parameters().nonlinear_tolerance);
-    if constexpr(dim==2)
-      {
-        if (!geometry) initialize_native_history();
-        if (this->get_timestep_number()==0)
-          {
-            // Initialize the physical Q2 field with the inherited whole-cell
-            // scaling. An admissible polynomial keeps every input coefficient.
-            const auto &intro=this->introspection();
-            const auto c=intro.component_indices.compositional_fields[field], b=intro.block_indices.compositional_fields[field];
-            const auto offset=solution.get_block_indices().block_start(b);
-            LinearAlgebra::Vector owned(intro.index_sets.system_partitioning[b],this->get_mpi_communicator());
-            std::vector<types::global_dof_index> ids(this->get_fe().n_dofs_per_cell());
-            unsigned int invalid=0;
-            for (const auto &cell:this->get_dof_handler().active_cell_iterators())
-              if (cell->is_locally_owned())
-                {
-                  cell->get_dof_indices(ids);
-                  std::vector<double> patch(9);
-                  for (unsigned int j=0; j<9; ++j) patch[j]=solution[ids[this->get_fe().component_to_system_index(c,j)]];
-                  invalid|=!PhaseField::limit_bernstein<2>(patch,std::accumulate(patch.begin(),patch.end(),0.)/9.);
-                  for (unsigned int j=0; j<9; ++j) owned[ids[this->get_fe().component_to_system_index(c,j)]-offset]=patch[j];
-                }
-            AssertThrow(!Utilities::MPI::max(invalid,this->get_mpi_communicator()),ExcMessage("Invalid initial phase mean."));
-            owned.compress(VectorOperation::insert);
-            solution.block(b)=owned;
-            control.check(0,0.);
-            return control;
-          }
-        AssertThrow(accepted.step+1==this->get_timestep_number(),ExcMessage("Growing fault accepted parent clock mismatch."));
-        trial.reset();
-        auto next=std::make_unique<History>();
-        Balance result;
-        solve_midpoint(*this,solution,*next,result);
-        trial=std::move(next);
-        trial_balance=result;
-        control.check(result.iterations,result.mechanical);
-      }
-    return control;
+    trial.reset();
+    if (!geometry) initialize_native_history();
+  }
+
+  template <int dim>
+  void Material<dim>::stage_candidate(History &&candidate,const Balance &ledger)
+  {
+    trial=std::make_unique<History>(std::move(candidate));
+    trial_balance=ledger;
   }
 
   template <int dim>

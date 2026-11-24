@@ -1,8 +1,9 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/simulator/solver/midpoint_system.h>
+#include <aspect/phase_field/bernstein_bounds.h>
+#include <numeric>
 #include <aspect/simulator.h>
 #include <aspect/gravity_model/interface.h>
-#include <aspect/phase_field/bernstein_bounds.h>
 #include <deal.II/dofs/dof_tools.h>
 #include <deal.II/lac/sparse_direct.h>
 
@@ -21,21 +22,21 @@ namespace aspect::GrowingFault
 
   }
 
-  MidpointSystem::MidpointSystem(const Material<2> &m,const LinearAlgebra::BlockVector &solution)
-    : material(m),comm(m.get_mpi_communicator()),h(.5*m.get_timestep()),G(m.maxwell().G),B(m.maxwell().relaxation(h)),
-      Kf(m.get_parameters().surface_energy_model.fracture_energy/(m.get_parameters().surface_energy_model.geometry.normalization()
-                                                                  *m.get_parameters().surface_energy_model.length_scale)),field(m.phase_field()),phase_block(m.introspection().block_indices.compositional_fields[field]),
-      nv(solution.block(0).size()),phase_begin(nv+solution.block(1).size()),n(phase_begin+solution.block(phase_block).size()),fracture(m,field)
+  MidpointSystem::MidpointSystem(const SimulatorAccess<2> &simulator,const MidpointMaterial &m,const LinearAlgebra::BlockVector &solution)
+    : sim(simulator),material(m),comm(sim.get_mpi_communicator()),h(.5*sim.get_timestep()),G(m.maxwell().G),B(m.maxwell().relaxation(h)),
+      Kf(sim.get_parameters().surface_energy_model.fracture_energy/(sim.get_parameters().surface_energy_model.geometry.normalization()
+                                                                    *sim.get_parameters().surface_energy_model.length_scale)),field(m.phase_field()),phase_block(sim.introspection().block_indices.compositional_fields[field]),
+      nv(solution.block(0).size()),phase_begin(nv+solution.block(1).size()),n(phase_begin+solution.block(phase_block).size()),fracture(sim,field)
   {
     AssertThrow(h>0.,ExcMessage("Midpoint mechanics needs a positive stage duration."));
     // Both admissibility bounds depend on this attempt's half-duration and
     // hold on every rank. Let the time-step manager retry from the same parent.
     if (h*G>m.maxwell().eta ||
-        !m.friction().admits_duration(h,m.get_parameters().surface_pressure))
+        !m.friction().admits_duration(h,sim.get_parameters().surface_pressure))
       throw ExcNonlinearSolverNoConvergence();
-    const auto &old=m.get_old_solution();
-    const auto &fe=m.get_fe();
-    const auto &intro=m.introspection();
+    const auto &old=sim.get_old_solution();
+    const auto &fe=sim.get_fe();
+    const auto &intro=sim.introspection();
     const auto c=intro.component_indices.compositional_fields[field];
     const auto offset=solution.get_block_indices().block_start(phase_block);
     initial.assign(n,0.);
@@ -57,8 +58,8 @@ namespace aspect::GrowingFault
     for (const auto &[row,value]:fracture.mass) mass[phase_begin+row]=value;
     Utilities::MPI::sum(mass,comm,mass);
 
-    const auto &constraints=m.get_current_constraints();
-    const auto boundary=DoFTools::extract_boundary_dofs(m.get_dof_handler(),intro.component_masks.velocities);
+    const auto &constraints=sim.get_current_constraints();
+    const auto boundary=DoFTools::extract_boundary_dofs(sim.get_dof_handler(),intro.component_masks.velocities);
     unsigned int invalid=0;
     for (const auto i:boundary)
       if (intro.index_sets.system_partitioning[0].is_element(i)) invalid|=!constraints.is_constrained(i);
@@ -96,11 +97,11 @@ namespace aspect::GrowingFault
       }
     eligible.assign(angles.size(),0);
     std::vector<Index> ids(fe.n_dofs_per_cell());
-    for (const auto &cell:m.get_dof_handler().active_cell_iterators())
+    for (const auto &cell:sim.get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
         {
           const auto &rule=sections.cells.at(cell->id());
-          FEValues<2> values(m.get_mapping(),fe,rule.quadrature,update_values|update_gradients|update_JxW_values|update_quadrature_points);
+          FEValues<2> values(sim.get_mapping(),fe,rule.quadrature,update_values|update_gradients|update_JxW_values|update_quadrature_points);
           values.reinit(cell);
           cell->get_dof_indices(ids);
           auto &data=cells[cell->id()];
@@ -114,7 +115,7 @@ namespace aspect::GrowingFault
           for (unsigned int q=0; q<rule.quadrature.size(); ++q)
             {
               Sample p {rule.section[q],values.quadrature_point(q),values.JxW(q),0.,0.,{}};
-              nonzero_gravity|=material.get_gravity_model().gravity_vector(p.position)!=Tensor<1,2>();
+              nonzero_gravity|=sim.get_gravity_model().gravity_vector(p.position)!=Tensor<1,2>();
               for (const auto j:local)
                 {
                   p.shapes.push_back({plane_strain(values[intro.extractors.velocities].symmetric_gradient(j,q)),
@@ -188,7 +189,7 @@ namespace aspect::GrowingFault
     transfer.sum(comm);
     for (unsigned int k=0; k<ns; ++k)
       e.roots.push_back(material.friction().solve_strip(k,transfer.free_rate[k],transfer.mobility[k],
-                                                        h,material.get_parameters().surface_pressure));
+                                                        h,sim.get_parameters().surface_pressure));
     // In exact arithmetic the weighted sum of the returned point rates is V.
     // In cold creep even the rounding error of the scalar resistance can be
     // much larger than V/M. Recover that low part of the traction before
@@ -345,7 +346,7 @@ namespace aspect::GrowingFault
         for (const auto &[i,v]:fixed) if (i<nv) b.prescribed_velocity_work+=2.*G*v*e.residual[i];
         for (Index i=phase_begin; i<n; ++i) b.phase_work+=Kf*(endpoint(i)-lower[i])*e.residual[i];
         e.candidate.step=parent.step+1;
-        e.candidate.time=material.get_time();
+        e.candidate.time=sim.get_time();
       }
     return e;
   }
@@ -510,19 +511,19 @@ namespace aspect::GrowingFault
 
   void MidpointSystem::write_candidate_fields(const Values &x,LinearAlgebra::BlockVector &solution) const
   {
-    const auto &intro=material.introspection();
+    const auto &intro=sim.introspection();
     const auto c=intro.component_indices.compositional_fields[field];
     const auto offset=solution.get_block_indices().block_start(phase_block);
-    std::vector<Index> ids(material.get_fe().n_dofs_per_cell());
+    std::vector<Index> ids(sim.get_fe().n_dofs_per_cell());
     unsigned int invalid=0;
-    for (const auto &cell:material.get_dof_handler().active_cell_iterators())
+    for (const auto &cell:sim.get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
         {
           cell->get_dof_indices(ids);
           PhaseField::BernsteinPatch<2> patch;
           for (unsigned int j=0; j<patch.size(); ++j)
             {
-              const auto i=phase_begin+ids[material.get_fe().component_to_system_index(c,j)]-offset;
+              const auto i=phase_begin+ids[sim.get_fe().component_to_system_index(c,j)]-offset;
               patch[j]=2.*x[i]-lower[i];
               invalid|=x[i]<lower[i] || x[i]>upper[i];
             }
@@ -581,22 +582,22 @@ namespace aspect::GrowingFault
     }
   }
 
-  void solve_midpoint(const Material<2> &material, LinearAlgebra::BlockVector &solution, History &next, Balance &balance)
+  static void solve_midpoint(const SimulatorAccess<2> &sim,const MidpointMaterial &material, LinearAlgebra::BlockVector &solution, History &next, Balance &balance)
   {
-    TimerOutput::Scope timer(material.get_computing_timer(),"Coupled midpoint fault");
-    MidpointSystem system(material,solution);
+    TimerOutput::Scope timer(sim.get_computing_timer(),"Coupled midpoint fault");
+    MidpointSystem system(sim,material,solution);
     auto x=system.initial;
     system.freeze_direction_neighborhood();
     system.restore_continuity(x);
     double initial_merit=0.;
     bool use_positive_metric=true;
     unsigned int direction_updates=0;
-    const auto &settings=material.get_parameters();
+    const auto &settings=sim.get_parameters();
     for (unsigned int iteration=0; iteration<settings.max_nonlinear_iterations; ++iteration)
       {
         auto stage=system.assemble_stage(x,true,false);
-        material.get_pcout()<<"   Midpoint iteration "<<iteration<<", mechanics "<<stage.ledger.mechanical
-                            <<", projected phase "<<stage.ledger.kkt<<std::endl;
+        sim.get_pcout()<<"   Midpoint iteration "<<iteration<<", mechanics "<<stage.ledger.mechanical
+                       <<", projected phase "<<stage.ledger.kkt<<std::endl;
         if (stage.ledger.mechanical<=settings.nonlinear_tolerance && stage.ledger.kkt<=1.e-7)
           {
             if (system.select_prospective_planes(x))
@@ -631,4 +632,75 @@ namespace aspect::GrowingFault
       }
     throw ExcNonlinearSolverNoConvergence();
   }
+  template <int dim>
+  void validate_midpoint_material(const Parameters<dim> &p,const MaterialModel::Interface<dim> &model)
+  {
+    const auto &methods=p.compositional_field_methods;
+    const auto selected=std::find(methods.begin(),methods.end(),Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase);
+    if (selected==methods.end()) return;
+    const auto *provider=dynamic_cast<const MidpointMaterial *>(&model);
+    AssertThrow(provider,ExcMessage("Midpoint fault phase requires a material providing the Maxwell/AT1 midpoint response."));
+    const auto field=provider->phase_field();
+    AssertThrow(dim==2 && !p.enable_elasticity &&
+                p.nonlinear_solver==Parameters<dim>::NonlinearSolver::single_Advection_iterated_Newton_Stokes &&
+                field==static_cast<unsigned int>(selected-methods.begin()) &&
+                std::count(p.compositional_field_methods.begin(),p.compositional_field_methods.end(),
+                           Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase)==1 &&
+                !p.explicit_compositions.selected[field] &&
+                p.nonlinear_solver_failure_strategy!=Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep &&
+                p.surface_pressure>0. && p.pressure_normalization=="no",
+                ExcMessage("Growing fault requires a single midpoint fault phase, plane strain, native elasticity off, single Advection, iterated Newton Stokes, prescribed positive surface pressure and no pressure normalization. Nonconvergence must abort or request a retry."));
+    AssertThrow(!p.mesh_deformation_enabled && !p.initial_adaptive_refinement && !p.adaptive_refinement_interval &&
+                p.additional_refinement_times.empty() && p.stokes_velocity_degree==2 && !p.use_equal_order_interpolation_for_stokes &&
+                !p.use_locally_conservative_discretization && !p.include_melt_transport,
+                ExcMessage("Growing fault requires a fixed conforming Q2/Q1 mesh."));
+    AssertThrow(!p.use_direct_stokes_solver,ExcMessage("Midpoint fault mechanics requires separate velocity and pressure blocks."));
+    AssertThrow(!p.run_postprocessors_on_nonlinear_iterations,ExcMessage("Midpoint fault output requires an accepted step; iteration postprocessing is unsupported."));
+    AssertThrow(!p.enable_prescribed_dilation &&
+                (p.formulation_mass_conservation==Parameters<dim>::Formulation::MassConservation::incompressible ||
+                 p.formulation_mass_conservation==Parameters<dim>::Formulation::MassConservation::ask_material_model),
+                ExcMessage("Midpoint fault mechanics requires incompressible continuity without prescribed dilation."));
+  }
+  template void validate_midpoint_material(const Parameters<2> &,const MaterialModel::Interface<2> &);
+  template void validate_midpoint_material(const Parameters<3> &,const MaterialModel::Interface<3> &);
+
+  SolverControl advance_midpoint(const SimulatorAccess<2> &sim,MidpointMaterial &material,LinearAlgebra::BlockVector &solution)
+  {
+    SolverControl control(sim.get_parameters().max_nonlinear_iterations,sim.get_parameters().nonlinear_tolerance);
+    material.begin_attempt();
+    const auto field=material.phase_field();
+    if (sim.get_timestep_number()==0)
+      {
+        // Initialize the physical Q2 field with the inherited whole-cell
+        // scaling. An admissible polynomial keeps every input coefficient.
+        const auto &intro=sim.introspection();
+        const auto c=intro.component_indices.compositional_fields[field], b=intro.block_indices.compositional_fields[field];
+        const auto offset=solution.get_block_indices().block_start(b);
+        LinearAlgebra::Vector owned(intro.index_sets.system_partitioning[b],sim.get_mpi_communicator());
+        std::vector<types::global_dof_index> ids(sim.get_fe().n_dofs_per_cell());
+        unsigned int invalid=0;
+        for (const auto &cell:sim.get_dof_handler().active_cell_iterators())
+          if (cell->is_locally_owned())
+            {
+              cell->get_dof_indices(ids);
+              std::vector<double> patch(9);
+              for (unsigned int j=0; j<9; ++j) patch[j]=solution[ids[sim.get_fe().component_to_system_index(c,j)]];
+              invalid|=!PhaseField::limit_bernstein<2>(patch,std::accumulate(patch.begin(),patch.end(),0.)/9.);
+              for (unsigned int j=0; j<9; ++j) owned[ids[sim.get_fe().component_to_system_index(c,j)]-offset]=patch[j];
+            }
+        AssertThrow(!Utilities::MPI::max(invalid,sim.get_mpi_communicator()),ExcMessage("Invalid initial phase mean."));
+        owned.compress(VectorOperation::insert);
+        solution.block(b)=owned;
+        control.check(0,0.);
+        return control;
+      }
+    AssertThrow(material.history().step+1==sim.get_timestep_number(),ExcMessage("Growing fault accepted parent clock mismatch."));
+    History next;
+    Balance ledger;
+    solve_midpoint(sim,material,solution,next,ledger);
+    material.stage_candidate(std::move(next),ledger);
+    control.check(ledger.iterations,ledger.mechanical);
+    return control;
+  }
+
 }

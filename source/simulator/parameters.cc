@@ -1474,7 +1474,7 @@ namespace aspect
                          "from a volume of fluid interface tracking method, "
                          "which is used to compute the advection updates."
                          "\n"
-                         "* ``midpoint fault phase'': Use the growing fault material's coupled irreversible "
+                         "* ``midpoint fault phase'': Use the selected midpoint material's coupled irreversible "
                          "midpoint solve for this DGQ2 Bernstein phase field.\n\n"
                          "* ``static'': If a compositional field is marked "
                          "this way, then it does not evolve at all. Its values are "
@@ -2474,14 +2474,6 @@ namespace aspect
     prm.leave_subsection ();
 
     explicit_compositions.parse_parameters(prm, *this);
-    if (std::count(compositional_field_methods.begin(),compositional_field_methods.end(),
-                   AdvectionFieldMethod::midpoint_fault_phase))
-      {
-        prm.enter_subsection("Material model");
-        AssertThrow(prm.get("Model name") == "growing fault",
-                    ExcMessage("Midpoint fault phase requires the growing fault material."));
-        prm.leave_subsection();
-      }
 
     // then, finally, let user additions that do not go through the usual
     // plugin mechanism, declare their parameters if they have subscribed

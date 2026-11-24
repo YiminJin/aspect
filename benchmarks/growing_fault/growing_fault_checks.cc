@@ -1,5 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/postprocess/interface.h>
+#include <aspect/material_model/growing_fault.h>
 #include <aspect/simulator_signals.h>
 #include <aspect/simulator/solver/midpoint_system.h>
 #include <aspect/phase_field/bernstein_bounds.h>
@@ -12,9 +13,9 @@ namespace aspect::Postprocess
   namespace
   {
     using namespace GrowingFault;
-    void check_operator(const Material<2> &material, std::ostream &out)
+    void check_operator(const SimulatorAccess<2> &sim,const MidpointMaterial &material, std::ostream &out)
     {
-      MidpointSystem op(material,material.get_solution());
+      MidpointSystem op(sim,material,sim.get_solution());
       auto x=op.initial;
       std::fill(op.eligible.begin(),op.eligible.end(),1u);
       for (unsigned int i=0; i<op.nv; ++i) x[i]+=2.e-5*std::sin(1.+i);
@@ -67,14 +68,14 @@ namespace aspect::Postprocess
       // gradient is constant. Include the pressure multiplier on this test.
       std::map<types::global_dof_index,double> test;
       double reference=0.,pressure=0.;
-      const auto &system=material.get_fe();
-      const auto &intro=material.introspection();
-      const auto &solution=material.get_solution();
-      for (const auto &cell:material.get_dof_handler().active_cell_iterators())
+      const auto &system=sim.get_fe();
+      const auto &intro=sim.introspection();
+      const auto &solution=sim.get_solution();
+      for (const auto &cell:sim.get_dof_handler().active_cell_iterators())
         if (cell->is_locally_owned())
           {
             const auto &rule=material.sections().cells.at(cell->id());
-            FEValues<2> values(material.get_mapping(),system,rule.quadrature,update_values|update_JxW_values);
+            FEValues<2> values(sim.get_mapping(),system,rule.quadrature,update_values|update_JxW_values);
             values.reinit(cell);
             std::vector<types::global_dof_index> ids(system.n_dofs_per_cell());
             cell->get_dof_indices(ids);
@@ -84,7 +85,7 @@ namespace aspect::Postprocess
                 if (component==intro.component_indices.velocities[0] && solution.block(0).locally_owned_elements().is_element(ids[i]))
                   {
                     const auto &base=system.base_element(system.component_to_base_index(component).first);
-                    test[ids[i]]=material.get_mapping().transform_unit_to_real_cell(cell,base.unit_support_point(j))[0];
+                    test[ids[i]]=sim.get_mapping().transform_unit_to_real_cell(cell,base.unit_support_point(j))[0];
                   }
               }
             for (unsigned int q=0; q<rule.quadrature.size(); ++q)
@@ -120,7 +121,7 @@ namespace aspect::Postprocess
             const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
             std::ofstream out(this->get_output_directory()+"operator-r"+std::to_string(rank)+".txt");
             out<<std::setprecision(17);
-            check_operator(m,out);
+            check_operator(*this,m,out);
           });
       }
       std::pair<std::string,std::string> execute(TableHandler &) override
@@ -282,7 +283,7 @@ namespace aspect::TimeStepping
             {
               const auto &m=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
               const auto &v=this->get_solution();
-              GrowingFault::MidpointSystem op(m,v);
+              GrowingFault::MidpointSystem op(*this,m,v);
               op.freeze_direction_neighborhood();
               auto x=op.initial;
               std::fill(x.begin(),x.end(),0.);

@@ -39,7 +39,7 @@ namespace aspect::GrowingFault
       History candidate;
     };
 
-    MidpointSystem(const Material<2> &, const LinearAlgebra::BlockVector &);
+    MidpointSystem(const SimulatorAccess<2> &, const MidpointMaterial &, const LinearAlgebra::BlockVector &);
     /** Collectively assemble the physical residual and optional exact tangent
      * at (h v, p/G, b). With publish enabled, recover a candidate endpoint
      * from these same stages. The material keeps its accepted parent. */
@@ -54,7 +54,8 @@ namespace aspect::GrowingFault
      * mechanics response to the resulting phase correction. */
     void use_phase_search_metric(Evaluation &) const;
     void write_candidate_fields(const Values &,LinearAlgebra::BlockVector &) const;
-    const Material<2> &material;
+    const SimulatorAccess<2> &sim;
+    const MidpointMaterial &material;
     MPI_Comm comm;
     const double h,G,B,Kf;
     const unsigned int field,phase_block;

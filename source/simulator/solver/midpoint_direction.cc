@@ -7,7 +7,7 @@ namespace aspect::GrowingFault
   void MidpointSystem::freeze_direction_neighborhood()
   {
     const auto &geometry=material.sections();
-    const double ell=material.get_parameters().surface_energy_model.length_scale;
+    const double ell=sim.get_parameters().surface_energy_model.length_scale;
     const auto &seed=material.seed_tip();
     const double tip_xi=geometry.coordinate(seed);
     std::vector<double> stations;
@@ -35,8 +35,8 @@ namespace aspect::GrowingFault
         const auto &t=geometry.tangent;
         const Tensor<1,2> normal({-t[1],t[0]});
         double z=normal*(seed-geometry.origin),last_xi=tip_xi;
-        const auto &fe=material.get_fe();
-        const auto c=material.introspection().component_indices.compositional_fields[field];
+        const auto &fe=sim.get_fe();
+        const auto c=sim.introspection().component_indices.compositional_fields[field];
         const auto &element=fe.base_element(fe.component_to_base_index(c).first);
         std::vector<Index> ids(fe.n_dofs_per_cell());
         for (unsigned int k=anchor; k<formed.size() && (k<beyond || formed[k]); ++k)
@@ -48,15 +48,15 @@ namespace aspect::GrowingFault
               }
             const Point<2> p=geometry.origin+(stations[k]*t+z*normal);
             double trace=0.;
-            for (const auto &cell:material.get_dof_handler().active_cell_iterators())
+            for (const auto &cell:sim.get_dof_handler().active_cell_iterators())
               if (cell->is_locally_owned() && cell->bounding_box().point_inside(p,1.e-12))
                 {
-                  const auto unit=material.get_mapping().transform_real_to_unit_cell(cell,p);
+                  const auto unit=sim.get_mapping().transform_real_to_unit_cell(cell,p);
                   if (!GeometryInfo<2>::is_inside_unit_cell(unit,1.e-12)) continue;
                   cell->get_dof_indices(ids);
                   double value=0.;
                   for (unsigned int i=0; i<element.n_dofs_per_cell(); ++i)
-                    value+=element.shape_value(i,unit)*material.get_old_solution()[ids[fe.component_to_system_index(c,i)]];
+                    value+=element.shape_value(i,unit)*sim.get_old_solution()[ids[fe.component_to_system_index(c,i)]];
                   trace=std::max(trace,value);
                 }
             if (Utilities::MPI::max(trace,comm)<.05) break;
@@ -138,7 +138,7 @@ namespace aspect::GrowingFault
           if (m[8]==0. || (m[3]+m[4]==0. && m[0]==0. && m[1]==0.)) continue;
           const auto resistance=[&](double free,double mobility)
           {
-            return material.friction().solve_strip(k,free,mobility,h,material.get_parameters().surface_pressure).resistance;
+            return material.friction().solve_strip(k,free,mobility,h,sim.get_parameters().surface_pressure).resistance;
           };
           const auto score=[&](const double angle)
           {

@@ -3,40 +3,16 @@
 #define _aspect_material_model_growing_fault_h
 #include <aspect/material_model/interface.h>
 #include <aspect/simulator_access.h>
-#include <aspect/material_model/growing_fault/section_response.h>
-#include <aspect/reconstructed_fault/material_sections.h>
+#include <aspect/material_model/growing_fault/midpoint_material.h>
 
 namespace aspect::GrowingFault
 {
-  /** Accepted or trial strip and point state at one physical clock. */
-  struct History
-  {
-    unsigned int step=0;
-    double time=0.;
-    std::vector<SectionHistory> sections;
-    std::map<CellId,std::vector<PointHistory>> cells;
-  };
-
-  /** Full-step energies and work per unit out-of-plane thickness (J/m).
-   * Prescribed-velocity work includes both wall and interior reactions. */
-  struct Balance
-  {
-    double bulk=0.,cohesive=0.,fracture=0.,prescribed_velocity_work=0.,bulk_loss=0.,cohesive_loss=0.,friction_work=0.;
-    double compliance_remainder=0.,phase_work=0.,storage_change=0.,adjoint_defect=0.,mechanical=0.,kkt=0.;
-    unsigned int iterations=0;
-    template <class Archive> void serialize(Archive &ar, const unsigned int)
-    {
-      ar &bulk &cohesive &fracture &prescribed_velocity_work &bulk_loss &cohesive_loss &friction_work
-      &compliance_remainder &phase_work &storage_change &adjoint_defect &mechanical &kkt &iterations;
-    }
-  };
-
   /** Material owner for a fixed-reference, single-forward-front midpoint
    * solve. The simulator owns the velocity, pressure and Bernstein phase. The
    * material owns point tensors and strip history. A fresh attempt borrows
    * accepted state. Only the post-accept callback publishes its returned pair. */
   template <int dim>
-  class Material : public MaterialModel::Interface<dim>, public SimulatorAccess<dim>
+  class Material : public MaterialModel::Interface<dim>, public SimulatorAccess<dim>, public MidpointMaterial
   {
     public:
       static void declare_parameters(ParameterHandler &);
@@ -50,15 +26,13 @@ namespace aspect::GrowingFault
       void save(std::map<std::string,std::string> &) const override;
       void load(const std::map<std::string,std::string> &) override;
 
-      /** Collective single attempt. Returns the stage velocity and pressure
-       * and candidate endpoint phase in the ordinary solution vector. The
-       * simulator uses the returned status for its pre-acceptance completion signal. */
-      SolverControl solve_midpoint_fields(LinearAlgebra::BlockVector &solution);
-      const History &history() const
+      void begin_attempt() override;
+      void stage_candidate(History &&,const Balance &) override;
+      const History &history() const override
       {
         return accepted;
       }
-      const MaterialSections &sections() const
+      const MaterialSections &sections() const override
       {
         return *geometry;
       }
@@ -72,19 +46,19 @@ namespace aspect::GrowingFault
         AssertThrow(balance_available,ExcMessage("No accepted balance is available for this growing fault checkpoint or initial state."));
         return last_balance;
       }
-      unsigned int phase_field() const
+      unsigned int phase_field() const override
       {
         return field;
       }
-      const CohesiveMaxwell &maxwell() const
+      const CohesiveMaxwell &maxwell() const override
       {
         return point_law;
       }
-      const MaterialModel::Rheology::FaultResistance &friction() const
+      const MaterialModel::Rheology::FaultResistance &friction() const override
       {
         return *law;
       }
-      const Point<2> &seed_tip() const
+      const Point<2> &seed_tip() const override
       {
         return anchor;
       }
