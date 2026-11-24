@@ -3,18 +3,6 @@
 
 namespace aspect::GrowingFault
 {
-  void SectionTransfer::add(const unsigned int k, const double dn, const double rate, const double m)
-  {
-    free_rate[k]+=dn*rate;
-    mobility[k]+=dn*m;
-  }
-
-  void SectionTransfer::sum(const MPI_Comm comm)
-  {
-    Utilities::MPI::sum(free_rate,comm,free_rate);
-    Utilities::MPI::sum(mobility,comm,mobility);
-  }
-
   double physical_phase(const double value)
   {
     constexpr double tolerance=128.*std::numeric_limits<double>::epsilon();

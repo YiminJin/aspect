@@ -3,9 +3,21 @@
 #define _aspect_material_model_growing_fault_midpoint_material_h
 #include <aspect/material_model/growing_fault/section_response.h>
 #include <aspect/reconstructed_fault/material_sections.h>
+#include <aspect/material_model/rheology/fault_resistance.h>
 
 namespace aspect::GrowingFault
 {
+  /** Replicated, ordered material-strip history. Slip is signed and in metres. */
+  struct SectionHistory
+  {
+    double slip=0., angle=0., rate=0., resistance=0.;
+    bool formed=false;
+    template <class Archive> void serialize(Archive &ar, const unsigned int)
+    {
+      ar &slip &angle &rate &resistance &formed;
+    }
+  };
+
   /** Accepted or trial strip and point state at one physical clock. */
   struct History
   {

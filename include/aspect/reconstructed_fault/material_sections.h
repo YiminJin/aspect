@@ -45,6 +45,16 @@ namespace aspect
       std::vector<double> edges;
       std::map<CellId,CellRule> cells;
     };
+
+    /** Rank-local weighted strip integrals followed by a collective sum. The
+     * adjoint return at point q is the resistance of its unique material strip. */
+    struct SectionTransfer
+    {
+      explicit SectionTransfer(unsigned int n) : free_rate(n), mobility(n) {}
+      void add(unsigned int strip, double area_over_length, double rate, double point_mobility);
+      void sum(MPI_Comm);
+      std::vector<double> free_rate, mobility;
+    };
   }
 }
 #endif

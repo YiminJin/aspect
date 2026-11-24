@@ -2,12 +2,10 @@
 #ifndef _aspect_growing_fault_section_response_h
 #define _aspect_growing_fault_section_response_h
 #include <aspect/global.h>
-#include <aspect/material_model/rheology/fault_resistance.h>
 
 namespace aspect::GrowingFault
 {
   using Stress = SymmetricTensor<2,3>;
-  using MaterialModel::Rheology::SectionRoot;
 
   /** A stage is the midpoint of a physical step. Tensors retain zz in plane
    * strain. This state belongs to one native point on the fixed material mesh. */
@@ -18,17 +16,6 @@ namespace aspect::GrowingFault
     template <class Archive> void serialize(Archive &ar, const unsigned int)
     {
       ar &stress &cohesive_strain &signed_shear &absolute_shear;
-    }
-  };
-
-  /** Replicated, ordered material-strip history. Slip is signed and in metres. */
-  struct SectionHistory
-  {
-    double slip=0., angle=0., rate=0., resistance=0.;
-    bool formed=false;
-    template <class Archive> void serialize(Archive &ar, const unsigned int)
-    {
-      ar &slip &angle &rate &resistance &formed;
     }
   };
 
@@ -61,14 +48,6 @@ namespace aspect::GrowingFault
     double cohesive_energy(const Stress &strain, double phase) const;
   };
 
-  /** Rank-local weighted strip integrals followed by a collective sum. The
-   * adjoint return at point q is the resistance of its unique material strip. */
-  struct SectionTransfer
-  {
-    explicit SectionTransfer(unsigned int n) : free_rate(n), mobility(n) {}
-    void add(unsigned int strip, double area_over_length, double rate, double point_mobility);
-    void sum(MPI_Comm);
-    std::vector<double> free_rate, mobility;
-  };
+
 }
 #endif

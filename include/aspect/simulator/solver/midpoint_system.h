@@ -35,7 +35,7 @@ namespace aspect::GrowingFault
       Values residual;
       Matrix jacobian; // Local element blocks and borders for the exact strip derivative.
       Balance ledger;
-      std::vector<SectionRoot> roots;
+      std::vector<MaterialModel::Rheology::SectionRoot> roots;
       History candidate;
     };
 
