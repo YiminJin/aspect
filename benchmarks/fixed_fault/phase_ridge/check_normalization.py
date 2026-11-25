@@ -19,11 +19,13 @@ def main():
     for case, phase, width, failure in [
             ("discarded", ".35", .1, "discards significant normal weight"),
             ("constant", ".35", .5, None),
+            ("scaled", ".35", .5, None),
             ("pole", ".99*(1-4*(x-.5)^2)", .5, None),
             ("unequal", ".55*(1-4*(x-.5)^2)*(1-.4*y^2)", .5, None),
             ("unresolved", ".999999999999*(1-4*(x-.5)^2)", .5, "did not converge within 16 subdivisions"),
             ("singular", "1", .5, "outside the mature degradation domain"),
             ("ambiguous-contact", ".3+.1*y", .5, "ambiguous stationary phase maximum")]:
+        magnitude=4 if case=="scaled" else 1
         dest=root/case
         dest.mkdir()
         output=dest/"output"
@@ -39,7 +41,7 @@ subsection Material model
   set Model name = prescribed ridge diagnostic
   subsection Phase field fault
     set Reference speed = .005
-    set Degradation magnitude = 1
+    set Degradation magnitude = {magnitude}
     set Fault vertices = .5,0; .5,.3; .5,1
     set Fit trace to phase = {str(case=="ambiguous-contact").lower()}
     set Profile half width = {width}
@@ -78,10 +80,17 @@ end
                 elif case=="unequal": d=.55*(1-4*(x-.5)**2)*(1-.4*y*y)
                 else: d=np.full_like(x,.35)
                 shape=np.array([1-q,q])
-                rhs[j:j+2]+=(hi-lo)*v*shape*(w@(d*(1+d)/(1-d)**2))
+                rhs[j:j+2]+=(hi-lo)*v*shape*(w@(magnitude*d*(1+d)/(1-d)**2))
                 mass[j:j+2,j:j+2]+=(hi-lo)*v*np.outer(shape,shape)
         reference=np.linalg.solve(mass,rhs)
         near(values,reference,1.e-10,1.e-12)
+        if case=="scaled":
+            raw=np.loadtxt(root/"constant/output/labels-0-0.txt",skiprows=1)[:,3]
+            near(values,4*raw,1.e-12)
+            for directory in (output,root/"constant/output"):
+                chi=np.loadtxt(directory/"bulk-0-0.txt",skiprows=1,usecols=6)
+                near(chi,np.ones_like(chi),1.e-12)
+            print("Unit-width normal, m=1 and m=4:",raw[0],values[0],"m; normalized chi=1/m throughout")
         if case=="pole":
             q12,w12=gauss(12)
             d=.99*(1-4*(q12-.5)**2)

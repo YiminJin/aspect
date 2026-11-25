@@ -194,3 +194,21 @@ TEST_CASE("Translated material strips preserve membership and cell measures")
   if (dealii::Utilities::MPI::this_mpi_process(comm)==0)
     std::cout<<"Translated strip maximum normalized area error "<<area_error<<", physical position error "<<position_error<<" m\n";
 }
+
+TEST_CASE("Bent fault graph locates material stations before clipping pressure segments")
+{
+  using namespace aspect;
+  const MPI_Comm comm=MPI_COMM_WORLD;
+  parallel::distributed::Triangulation<2> mesh(comm);
+  GridGenerator::subdivided_hyper_rectangle(mesh, {4,2},Point<2>(),Point<2>(2.,1.));
+  const GrowingFault::MaterialSections strips(mesh,comm,0.,4);
+  const Point<2> tip(.9,.5);
+  const std::vector<double> angles= {0.,0.,std::atan(.5),std::atan(1.)};
+  const std::vector<unsigned int> formed= {1,1,1,1};
+  const auto graph=strips.accepted_graph(tip,angles,formed);
+  REQUIRE(graph.at(1.25).distance(Point<2>(1.25,.675))<1.e-14);
+  REQUIRE(graph.at(1.75).distance(Point<2>(1.75,1.175))<1.e-14);
+  // Last strip starts at (1.5,.925); the rising fault reaches the top at 1.575.
+  const auto pressures=strips.pressure_stations(tip,Point<2>(2.,1.),angles,formed);
+  REQUIRE(pressures.back().distance(Point<2>(1.5375,.9625))<1.e-14);
+}

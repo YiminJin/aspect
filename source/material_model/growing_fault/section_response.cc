@@ -1,5 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/material_model/growing_fault/section_response.h>
+#include <aspect/phase_field/degradation.h>
 
 namespace aspect::GrowingFault
 {
@@ -20,13 +21,12 @@ namespace aspect::GrowingFault
   {
     const double phi=physical_phase(phase);
     const double B=relaxation(h);
-    const double c=m*phi*(1.+phi), d=(1.-phi)*(1.-phi), den=c+d;
-    const double cp=m*(1.+2.*phi), dp=-2.*(1.-phi);
+    const PhaseField::CohesiveDegradation degradation(phi,m);
     PointResponse r;
-    r.fraction=c/den;
-    r.fraction_derivative=(cp*d-c*dp)/(den*den);
-    r.driving_factor=m*(1.+3.*phi)*(1.-phi)/(den*den);
-    r.driving_factor_derivative=m*(2.-6.*phi)/(den*den)-2.*r.driving_factor*(cp+dp)/den;
+    r.fraction=degradation.fraction();
+    r.fraction_derivative=degradation.fraction_derivative();
+    r.driving_factor=degradation.driving_factor();
+    r.driving_factor_derivative=degradation.driving_factor_derivative();
     const double old_e=2.*(old.cohesive_strain*S);
     const Stress predictor=B*(old.stress+2.*G*increment);
     r.force=(predictor*S+G*B*old_e-f)+traction_remainder;
@@ -56,6 +56,7 @@ namespace aspect::GrowingFault
         AssertThrow(A.norm()==0.,ExcMessage("Intact material point carries cohesive strain."));
         return 0.;
       }
-    return G*(A*A)*(1.-phi)*(1.-phi)/(m*phi*(1.+phi));
+    const PhaseField::CohesiveDegradation degradation(phi,m);
+    return degradation.cohesive_energy(G*(A*A));
   }
 }

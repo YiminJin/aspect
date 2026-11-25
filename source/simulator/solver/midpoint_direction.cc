@@ -1,6 +1,7 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/simulator/solver/midpoint_system.h>
 #include <aspect/reconstructed_fault/onset_score.h>
+#include <aspect/phase_field/degradation.h>
 
 namespace aspect::GrowingFault
 {
@@ -101,21 +102,14 @@ namespace aspect::GrowingFault
     const unsigned int beyond=std::upper_bound(stations.begin(),stations.end(),tip_xi)-stations.begin();
     if (material.history().step && beyond<formed.size() && formed[beyond])
       {
-        const auto &t=geometry.tangent;
-        const Tensor<1,2> normal({-t[1],t[0]});
-        double z=normal*(seed-geometry.origin),last_xi=tip_xi;
+        const auto graph=geometry.accepted_graph(seed,angles,formed);
         const auto &fe=sim.get_fe();
         const auto c=sim.introspection().component_indices.compositional_fields[field];
         const auto &element=fe.base_element(fe.component_to_base_index(c).first);
         std::vector<Index> ids(fe.n_dofs_per_cell());
         for (unsigned int k=anchor; k<formed.size() && (k<beyond || formed[k]); ++k)
           {
-            if (stations[k]>tip_xi)
-              {
-                z+=(stations[k]-last_xi)*std::tan(angles[k]);
-                last_xi=stations[k];
-              }
-            const Point<2> p=geometry.origin+(stations[k]*t+z*normal);
+            const Point<2> p=graph.at(stations[k]);
             double trace=0.;
             for (const auto &cell:sim.get_dof_handler().active_cell_iterators())
               if (cell->is_locally_owned() && cell->bounding_box().point_inside(p,1.e-12))
@@ -191,7 +185,7 @@ namespace aspect::GrowingFault
           const double u0=.5*(predictor[1][1]-predictor[0][0]),v0=predictor[0][1];
           const double u=cos2*u0-sin2*v0,v=sin2*u0+cos2*v0;
           phi=physical_phase(phi);
-          const double c=material.maxwell().m*phi*(1.+phi),d=(1.-phi)*(1.-phi),F=c/(c+d);
+          const double F=PhaseField::CohesiveDegradation(phi,material.maxwell().m).fraction();
           const double w=p.area*(1.-F)*(1.-F)*p.kernel;
           const auto local=onset_moments(p.area,p.kernel,F,u,v);
           for (unsigned int j=0; j<9; ++j) moments[9*k+j]+=local[j];

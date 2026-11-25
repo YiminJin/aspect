@@ -4,7 +4,7 @@
 */
 #include "common.h"
 #include <aspect/phase_field/crack_geometry.h>
-#include <aspect/phase_field/mature_degradation.h>
+#include <aspect/phase_field/degradation.h>
 #include <deal.II/base/quadrature_lib.h>
 
 TEST_CASE("Mature energetic degradation uses the physical phase limits")

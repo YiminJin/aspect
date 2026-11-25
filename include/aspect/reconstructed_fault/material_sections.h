@@ -34,6 +34,19 @@ namespace aspect
       MaterialSections(const Triangulation<2> &mesh, MPI_Comm comm,
                        double seed_angle_degrees, unsigned int gauss_order);
 
+      /** Seed, connected material stations and forward continuation, ordered by
+       * tangent projection in metres. A formed arriving station sets its slope. */
+      struct AcceptedGraph
+      {
+        std::vector<double> xi;
+        std::vector<Point<2>> knots;
+        Point<2> at(double coordinate) const;
+      };
+
+      /** Construct the replicated graph from the immutable step parent. Local. */
+      AcceptedGraph accepted_graph(const Point<2> &tip, const std::vector<double> &angles,
+                                   const std::vector<unsigned int> &formed) const;
+
       /** Arclength midpoints of the in-box fault portion of each strip.
        * Follow the straight seed to its tip and the connected accepted
        * station angles beyond it. Continue the last tangent through virgin

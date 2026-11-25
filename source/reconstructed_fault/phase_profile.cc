@@ -4,7 +4,7 @@
 */
 #include <aspect/reconstructed_fault/phase_profile.h>
 #include <aspect/geometry_model/box.h>
-#include <aspect/phase_field/mature_degradation.h>
+#include <aspect/phase_field/degradation.h>
 #include <deal.II/fe/fe_values.h>
 
 namespace aspect

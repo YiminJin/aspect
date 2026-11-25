@@ -17,8 +17,14 @@ namespace aspect::GrowingFault
     Utilities::MPI::sum(mobility,comm,mobility);
   }
 
-  std::vector<Point<2>> MaterialSections::pressure_stations(const Point<2> &tip, const Point<2> &upper,
-                                                             const std::vector<double> &angles, const std::vector<unsigned int> &formed) const
+  Point<2> MaterialSections::AcceptedGraph::at(const double position) const
+  {
+    const unsigned int i=std::clamp<std::ptrdiff_t>(std::upper_bound(xi.begin(),xi.end(),position)-xi.begin()-1,0,xi.size()-2);
+    return knots[i]+((position-xi[i])/(xi[i+1]-xi[i]))*(knots[i+1]-knots[i]);
+  }
+
+  MaterialSections::AcceptedGraph MaterialSections::accepted_graph(const Point<2> &tip,
+                                                                   const std::vector<double> &angles,const std::vector<unsigned int> &formed) const
   {
     const double tip_xi = coordinate(tip);
     const Tensor<1,2> normal({-tangent[1],tangent[0]});
@@ -26,9 +32,6 @@ namespace aspect::GrowingFault
     {
       return tangent + std::tan(beta)*normal;
     };
-    for (unsigned int d=0; d<2; ++d)
-      AssertThrow(tip[d]>=origin[d] && tip[d]<=upper[d],ExcMessage("Forward seed tip lies outside the mesh."));
-
     // Knots of the same station-to-station graph used to track the front.
     // The angle at the arriving formed station gives dz/dxi = tan(beta).
     std::vector<double> xi {edges.front()};
@@ -53,6 +56,17 @@ namespace aspect::GrowingFault
         knots.push_back(knots.back()+(edges.back()-xi.back())*direction(beta));
         xi.push_back(edges.back());
       }
+
+    return {std::move(xi),std::move(knots)};
+  }
+
+  std::vector<Point<2>> MaterialSections::pressure_stations(const Point<2> &tip, const Point<2> &upper,
+                                                             const std::vector<double> &angles, const std::vector<unsigned int> &formed) const
+  {
+    for (unsigned int d=0; d<2; ++d)
+      AssertThrow(tip[d]>=origin[d] && tip[d]<=upper[d],ExcMessage("Forward seed tip lies outside the mesh."));
+
+    const auto [xi,knots]=accepted_graph(tip,angles,formed);
 
     // Intersect each graph piece with both the strip and the physical box.
     // A strip can contain a bend, so locate its midpoint by arclength.
