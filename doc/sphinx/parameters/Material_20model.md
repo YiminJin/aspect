@@ -3964,6 +3964,15 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 **Documentation:** Optional persistent shear tractions in Pa, ordered by vertex.
 ::::
 
+::::{dropdown} __Parameter:__ {ref}`Initial slip rate<parameters:Material_20model/Phase_20field_20fault/Initial_20slip_20rate>`
+:name: parameters:Material_20model/Phase_20field_20fault/Initial_20slip_20rate
+**Default value:**
+
+**Pattern:** [List of <[Double 0...MAX_DOUBLE (inclusive)]> of length 0...1 (inclusive)]
+
+**Documentation:** Positive initial material vertex speed in m/s, used before the first section solve. An empty entry uses Reference speed for compatibility with earlier trace inputs.
+::::
+
 ::::{dropdown} __Parameter:__ {ref}`Initialization interval<parameters:Material_20model/Phase_20field_20fault/Initialization_20interval>`
 :name: parameters:Material_20model/Phase_20field_20fault/Initialization_20interval
 **Default value:** 1
@@ -4004,7 +4013,7 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 :name: parameters:Material_20model/Phase_20field_20fault/Reference_20friction_20coefficient
 **Default value:** 0.6
 
-**Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
+**Pattern:** [Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]
 
 **Documentation:** Dimensionless reference coefficient.
 ::::
@@ -4033,7 +4042,7 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 
 **Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
 
-**Documentation:** Elastic shear modulus in Pa.
+**Documentation:** Elastic shear modulus in Pa. With no explicit setting, mature traces use 1e10 and growing strips use 1e6.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Slip distance<parameters:Material_20model/Phase_20field_20fault/Slip_20distance>`
@@ -4043,6 +4052,15 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 **Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
 
 **Documentation:** Characteristic slip distance in m.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Viscosity<parameters:Material_20model/Phase_20field_20fault/Viscosity>`
+:name: parameters:Material_20model/Phase_20field_20fault/Viscosity
+**Default value:** 5e24
+
+**Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
+
+**Documentation:** Maxwell viscosity in Pa s. The default is 5e24 for a mature trace and 1e8 for growing strips.
 ::::
 
 (parameters:Material_20model/Phase_20field_20fault/Exterior_20parent_20stress)=

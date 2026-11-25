@@ -9,9 +9,25 @@ Both installed examples select `Material model / Model name = phase field fault`
 | Input | Physical choice | Accepted output |
 |---|---|---|
 | [Mature trace](../../benchmarks/fixed_fault/mature_trace.prm) | `Fault geometry = boundary spanning` and a static phase. A prescribed interior curve can instead use `fixed interior` with static or transported phase, or `advected interior` with transported phase and physical stress. | `mature fault statistics` writes `fault-labels-NNNNN.txt`. Read `fault_tau_xx`, `fault_tau_yy` and `fault_tau_xy` from the named additional visualization outputs. The older `fixed fault statistics` selector produces the same files. |
-| [Growing seed](../../benchmarks/growing_fault/growing_seed.prm) | `Compositional field methods = midpoint fault phase` on one `phase field` selects the irreversible AT1 strip solve. The seed tip, tangent and Maxwell parameters use the `Growing fault` subsection. This example takes friction pressure from the ASPECT adiabatic profile. | The built-in `growing fault history` postprocessor writes the accepted native tensors in `points-NNNN-rR.csv`, one strip table per clock, and the physical-step work ledger. |
+| [Growing seed](../../benchmarks/growing_fault/growing_seed.prm) | `Compositional field methods = midpoint fault phase` on one `phase field` selects the irreversible AT1 strip solve. The `Growing fault` subsection supplies the seed tip, tangent and cohesion. Set the Maxwell modulus and viscosity under `Phase field fault`. This example takes friction pressure from the ASPECT adiabatic profile. | The built-in `growing fault history` postprocessor writes the accepted native tensors in `points-NNNN-rR.csv`, one strip table per clock, and the physical-step work ledger. |
 
 The simulator uses the resolved field method when it constructs the top-level material. The existing `growing fault` name selects the same strip material and requires the midpoint method. A mature geometry declaration or vertex source conflicts with the midpoint selection. Growing seed and prescribed-compression controls require that selection. For older mature files, `automatic` retains the original inference from the phase role. Each concrete material installs its own acceptance and restart callbacks. A saved interior trace continues on the mature route, and a saved strip history continues on the growing route.
+
+### Change the material response
+
+Edit the shared settings in `Material model / Phase field fault` on either route. In the installed growing seed, changing this single line doubles the shear modulus. The accepted shear stress at the first native point increases from 75.9788626 to 151.9540527 Pa at 5 ms. The [measured field and replay](STATUS.md#assignment-a--public-fault-settings-and-accepted-output) use the same seed, velocity and adiabatic profile for both runs.
+
+```text
+subsection Material model
+  subsection Phase field fault
+    set Shear modulus = 2e6
+  end
+end
+```
+
+`Viscosity` is the Maxwell viscosity in Pa s. `Resistance law` and its coefficients are also shared. The historical `Growing fault` spellings and `Simple model / Viscosity` are accepted. One explicit value supplies the active calculation. Multiple values for the same quantity must agree after parsing, including values equal to a default. Leave a setting out to use the active route's default. The default modulus and viscosity are 1e10 Pa and 5e24 Pa s for a mature trace, and 1e6 Pa and 1e8 Pa s for growing strips. Trace initialization settings apply to mature mechanics, while the seed tip, fixed strips, cohesion and prescribed strip compression apply to growth. Supplying one of these controls to the other route gives an input error.
+
+`Phase field / Phase composition` names the physical phase read by both fault materials and the surface-energy reporter. Its default is `phase_field`. To call it `damage`, change the composition name in both places. The three mature stress fields remain distinct. Explicit fixed geometry supports the same static DGQ2 phase with either the generic or phase-field role. For moving phase the phase-field role with SSPRK3 selects bounded Bernstein transport.
 
 Set `Fault vertex file = mature_vertices.txt` inside `Material model / Phase field fault`. The [example table](../../benchmarks/fixed_fault/mature_vertices.txt) starts with `id x_m y_m`. IDs are consecutive integers beginning at zero. Positions in metres define an initially straight ordered curve. Increasing ID defines the positive slip direction. Optional named columns `initial_age_s` and `background_shear_Pa` can appear in either order. Comments start with `#`. ASPECT reads the file once on rank zero and distributes it. Relative filenames use the run directory.
 
@@ -25,7 +41,11 @@ set Initial label shear tractions = 3.85,3.80,3.75
 
 Supply each vertex quantity once. Without a per-ID value, `Initial age` in seconds and `Background shear traction` in Pa give uniform values. A per-ID shear replaces the scalar and participates in every subsequent balance. A stateless law rejects initial ages. At fixed mature phase the degradation magnitude scales the raw normal integral and local excess compliance together, so the normalized slip weight is invariant.
 
-Both active material subsections support `Resistance law = rate and state` with their historical defaults. To add a law, implement `FaultResistance` and register its parameter declaration and constructor once. It provides positive-speed traction at fixed incoming state for the mature trace and the signed stage root for the growing strip. Ages in seconds and opaque checkpoint state have separate accessors. The [dashpot plugin](../../benchmarks/growing_fault/linear_resistance.cc) exercises both contracts and has empty constitutive history.
+Set `Resistance law = rate and state` in the public material subsection to select RSF. The default law and its route-specific default coefficients reproduce historical inputs. To add a law, implement `FaultResistance`, declare its inputs with the ordinary ASPECT parameter handler and register its declaration and constructor once. It provides positive-speed traction at fixed incoming state for the mature trace and the signed stage root for the growing strip. Ages in seconds and opaque checkpoint state have separate accessors. The [dashpot plugin](../../benchmarks/growing_fault/linear_resistance.cc) exercises both contracts and has empty constitutive history.
+
+For a mature trace, `Initial slip rate` (m/s) seeds the vertices before the first Stokes solve. RSF uses `Reference speed` in its constitutive law. Omitting the initial rate uses the historical reference-speed input, or its mature default of 1e−6 m/s, including for historical stateless runs. An explicit initial rate makes the two choices independent.
+
+New mature interior checkpoints verify the active law's name and physical coefficients before restoring accepted history. Previous label archives can verify the law-specific key, pressure closure and fault support. Those archives require the original law settings to reproduce the trajectory because they did not record the coefficients.
 
 ## Use ASPECT's adiabatic pressure for friction
 
@@ -69,7 +89,7 @@ Use 200 Pa to reproduce the original experiment. Both spellings may appear if th
 
 ### Read stress at an accepted endpoint
 
-* **Growing fault.** Select `growing fault history` in `Postprocess / List of postprocessors`. In the output directory, `points-0001-r0.csv` contains the first accepted physical step on rank zero. Read all rank files for that step using `cell,q` as the key. The spatial deviatoric stresses are `tauxx,tauyy,tauzz,tauxy`, in Pa. The positive sign denotes tension for a normal component and traction along +x on a +y face for xy. The frame time in seconds is in `balance-0001.csv`. The static compositions named `tau_*` in the frozen fixture do not initialize these tensors.
+* **Growing fault.** Select `growing fault history` in `Postprocess / List of postprocessors`. In the output directory, `points-0001-r0.csv` contains the first accepted physical step on rank zero. Read all rank files for that step using `cell,q` as the key. The spatial deviatoric stresses are `tauxx,tauyy,tauzz,tauxy`, in Pa. The positive sign denotes tension for a normal component and traction along +x on a +y face for xy. The frame time in seconds is in `balance-0001.csv`. The static compositions named `tau_*` in the frozen fixture are independent of these tensors. A successful rewrite of a frame removes obsolete rank shards for that clock. File creation, final writes and closes are checked collectively; the error names the file and writer rank.
 * **Mature fault.** Select `visualization` and its `named additional outputs`. Read `fault_tau_xx`, `fault_tau_yy` and `fault_tau_xy` in the endpoint solution file. They are the three accepted in-plane deviatoric DG stresses with the same sign and units. For example, the [homogeneous input](../../benchmarks/fixed_fault/fixed_fault.prm) gives +0.0325 Pa shear at 12.5 ms.
 * Keep `Enable elasticity = false` on both routes. The ordinary visualization variable `stress` computes the compression-positive viscous estimate $pI-2\eta\epsilon(u)$ for these incompressible models. The fault outputs above include the material's Maxwell and slip history. Engineering total stress is $\sigma=\tau-pI$ using pressure and deviatoric stress at the same time. Growth solves pressure at the midpoint and publishes deviatoric stress at the endpoint.
 

@@ -1,5 +1,141 @@
 # Phase-field fault working record
 
+## Assignment A — Public fault settings and accepted output
+
+Ready for independent review on `pf-rsf`. Start `14358d2a56c2542aace26e91adafbc69e1ee71e2`. The separate exporter repair is `60115004e`, phase identity and mature restart are `f831e29d5`, material input resolution is `402cc4a71`, and the signed comparison, mutation and figure are `75b0e27a1e13aa9798fbccf8085acf1cd3aa6c9a`. The last of these is the tested implementation endpoint. The documentation commit immediately after it closes the review range. The [guide](IMPLEMENTATION.md#select-the-fault-calculation) gives the input and accepted output conventions.
+
+### What a change in the input does
+
+| Scientist's edit or negative control | Observed through installed Release ASPECT |
+|---|---|
+| Original installed growing seed, add public `Shear modulus = 2e6` while inheriting the old 1e6 Pa | Before repair, both runs used 1 MPa. At 5 ms, cell `0_0:`, quadrature point 0, the accepted native `tauxy` was **75.978862635792 Pa** in both. All 4,968 native records were byte-identical, SHA-256 `6105be63f1feb47de7edca35132e040bbbfe8dbf45ef1fd64560f364d9feaa59`. |
+| In the new growing seed change only `Material model / Phase field fault / Shear modulus` from 1e6 to 2e6 Pa | Accepted `tauxy` at the same material point rose to **151.95405267759796 Pa**. At each modulus, a clean historical-only input produced byte-identical native points, strips, friction pressures and balance. The two-MPa native file SHA-256 is `9f51f27f614e9cb23ca657011efbf9b2ff44b2074e72b7e30ee9d6c6f1101577`. |
+| Supply both public and historical settings | Equal `1e6` and `1000000.0` reproduced the original frame. Public 2e6 and historical 1e6 failed before physical publication. The diagnostic named both `Material model / Phase field fault / Shear modulus` and `Material model / Growing fault / Shear modulus`. Explicit historical defaults of 1e10 and 1e6 also conflicted. Omitting all shared settings reproduced the growing defaults. The same tests cover RSF and Simple viscosity conflicts, and route-specific controls even when explicitly equal to defaults. |
+| Select the SDK dashpot via the public law entry | Growing strip 8 at 5 ms, impedance 750 Pa s/m, had signed rate 3.3346184078722063e−8 m/s and resistance 2.5009638059041546e−5 Pa. All strips satisfied the force law. Both routes had empty age history. The independently compiled **pre-repair** law library produced the same files as the rebuilt library. On the mature trace, steady background shear gave 0.190875 and 0.19025 m/s at 12.5 and 25 ms. |
+| Rename mature `phase_field` to `damage` and set `Phase field / Phase composition = damage` | Three accepted label tables and all named physical stress arrays matched at 0, 12.5 and 25 ms with the reporter on and off. At 25 ms the local, gradient and total energies were 0.15, 0.00375 and 0.15375 J/m. Selecting a mature stress slot as phase failed. The fault-free affine AT2 control measured 7/3, 5/32 and 239/96 J/m. |
+| Give the mature trace an explicit initial rate of 0.01 m/s | The pre-solve observer saw 0.01. With this rate fixed, changing the RSF reference speed from 0.001 to 0.002 m/s changed the 25 ms solved rate from 0.167243992706 to 0.188984539709 m/s. The dashpot accepted the explicit rate with inactive RSF reference speed zero. Older inputs retained their supplied reference speed or the 1e−6 m/s initialization default. |
+| Change only the sign of the archived 5 ms strip-8 rate | The reviewed canonical/legacy checker accepted the sign reversal. The repaired **same checker entry point** rejected +1.3271218197676033e−13 to −1.3271218197676033e−13 m/s at ID 8, against 1.3271e−25 m/s. Exact zero compared successfully and changing zero to 1e−25 failed. The independent signed-root replay reproduced the unmodified archive (serial relative root error 7.11e−14) and rejected the reversal. IDs, flags and signed fields have distinct comparisons. |
+
+**Figure.** Accepted native shear stress in Pa at 5 ms for the two moduli, followed by the difference at matched material points. Positions are in metres. The largest paired increase was 76.0209886397 Pa at cell `30_0:`, quadrature point 35.
+
+```text
+refactoring/phase-field-fault/results/review-a/public-modulus.png
+refactoring/phase-field-fault/results/review-a/plot_modulus.py
+```
+
+### Ownership, restart and checked output
+
+* **Settings.** After the release material factory declares all plugins, the fault attaches ordinary deal.II parameter actions. This is the single shared-core hook. The mature and growing declarations identify shared entries, registered external-law coefficients and route-specific entries. The hook must run after the historical Simple viscosity exists. Each handler tracks explicit assignments including default-valued ones. Each active material resolves them before reading its Maxwell and law parameters. ASPECT's adiabatic conditions still supply the compression. Both historical material defaults and the external law declaration/constructor interface remain usable. Observations are small per-handler startup data and require no MPI exchange or per-cell storage.
+* **Mature history.** The phase-side model supplies the composition name to both materials and the energy observer. The mature material seeds vertex speed once and the law owns its parameters and optional state. A new independent archive entry stores law name and physical parameter vector alongside the historical label record. Generation 02 resumed exactly through 25 ms for RSF and dashpot. Changing the law, changing RSF slip distance from 0.008 to 0.009 m, or changing dashpot impedance was rejected before publication. A real C2 writer produced the old record. With original inputs its continuation matched exactly. That record has no coefficient signature: changing its unrecorded slip distance was accepted and changed the rate from 0.166779838133 to 0.171854976419 m/s. Such archives require the original physical settings.
+* **Other restarts and retries.** File and inline vertices matched exactly on each layout. ID 9 crossed from rank 0 to 1. Maximum difference across serial and two-rank outputs was 1.96e−14, and the one-to-two-rank continuation differed by 1.48e−14 at most. Historical finite/full support archives reproduced their original convention, including evolved radius 2.10264605 m. Changed support or pressure closure was rejected. Growing generations 01 and 03 resumed; the old generation without a stored ledger restored native state and wrote a fresh 15 ms ledger. Both RSF and Maxwell cutbacks recovered their clean 2.5 ms frames.
+* **Growing exporter.** Each writing rank checks every stream through close. A collective failure identifies the writer and filename. The reviewed executable returned success for a blocked rank-one points file and a rank-zero ledger directed to `/dev/full`. Both now exit 1 with the corresponding filename and rank. After a genuine two-to-one-rank overwrite, the old reader previously found a duplicate at `16_0:`, point 0. At 0 and 5 ms the shipped reader now matched all 4,968 native points and 1,280 FE records exactly to clean serial output; initial owners held 2,484 points each. Other frames and unrelated files survived. A write failure can leave an incomplete frame on disk.
+* **Other controls.** On the constant-pressure specimen, 200 versus 250 Pa changed strip 0 from 7.34744584329e−14 to 2.62134576916e−15 m/s. A +100 Pa Stokes datum change preserved the 200 Pa friction result to 8.4e−28 m/s. All three frozen two-rank nine-strip donor frames passed, final integrated slip 0.000169302306477 m². Cold creep had signed RSF residual 1.42e−14 Pa, a native-rate defect of 2.16e−27 m/s against 1.35e−24 m/s, and positive frictional work 8.45e−23 J/m. Release units passed 2,574 assertions in 61 cases. The scoped affine AT2 CTest passed. Verification used one or two MPI ranks with one numerical thread per rank. No Debug or unrestricted CTest run is claimed. The separate open C1 angle/arclength comparison and the four recorded 5B strip-15 differences retain their original references and tolerances.
+
+Start reading at these files, in input-to-output order.
+
+```text
+benchmarks/growing_fault/growing_seed.prm
+source/material_model/fault_parameters.cc
+source/material_model/phase_field_fault.cc
+source/postprocess/growing_fault_history.cc
+benchmarks/growing_fault/check_interface.py
+```
+
+### Reproduce from the worktree root
+
+The original runs used the retained C2 installation. These commands require an unused destination for each checker. Use an empty directory for `D` on replay. The standard SDK recipe below builds the installed executable and out-of-tree plugins. The measured run reused the configured Release build, installed the same four CMake components and rebuilt the required plugins in the separate prefix.
+
+```sh
+D=$PWD/build-c2-review-a
+B=$PWD/build-6b/release
+I=$D/install
+P=$D/plugins
+M=/opt/openmpi/5.0.6/bin/mpirun
+F=$PWD/refactoring/phase-field-fault/results/review-a
+C=$PWD/refactoring/phase-field-fault/results/interface-c2
+O=$PWD/build-interface-c2/qualified-sdk
+OLD=$O/bin/aspect-release
+export OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+printf '%s  %s\n' 13b77da9c2beda96f4c24441956919579c9d5eb3eb3e933c37c3d22846183901 "$OLD" | sha256sum -c -
+for variant in original ignored; do
+  mkdir -p "$D/before/$variant"
+  cp "$O"/benchmarks/growing_fault/{growing_seed,adiabatic_pressure,onecut}.prm "$D/before/$variant/"
+done
+cat >> "$D/before/ignored/growing_seed.prm" <<'PRM'
+subsection Material model
+ subsection Phase field fault
+  set Shear modulus = 2e6
+ end
+end
+PRM
+for variant in original ignored; do
+  (cd "$D/before/$variant" && "$OLD" growing_seed.prm >log)
+done
+sha256sum "$D"/before/{original,ignored}/output-growing-seed/points-0001-r0.csv
+
+bash "$C/sdk.sh" "$B" "$I" "$P"
+A=$I/bin/aspect-release
+G=$I/benchmarks/growing_fault
+T=$I/benchmarks/fixed_fault
+L=$I/benchmarks/layered_moving_fault
+growth=$P/growing_fault/libgrowing_fault_checks.release.so
+layered=$P/layered_moving_fault/liblayered_moving_fault.release.so
+ridge=$P/fixed_fault/phase_ridge/libphase_ridge.release.so
+python3 "$G/check_material_settings.py" "$A" "$D/physical-sdk"
+python3 "$G/check_interface.py" "$A" "$growth" "$D/sdk-interface"
+python3 "$T/check_mature_settings.py" "$A" "$P/tests/libfixed_fault.release.so" \
+  "$P/tests/libdashpot.release.so" "$D/mature-sdk" --legacy-writer "$OLD"
+python3 "$F/plot_modulus.py" "$D/physical-sdk/public-1/output" "$D/physical-sdk/public-2/output" "$D/public-modulus.png"
+cmp "$F/public-modulus.png" "$D/public-modulus.png"
+```
+
+The retained SDK law uses an ordinary parameter declaration. This additional run loads that binary unchanged and verifies its accepted response against the rebuilt one.
+
+```sh
+solo=$D/old-solo-impedance-qualified
+law=$PWD/build-interface-c2/sdk-plugins/tests/libdashpot.release.so
+mkdir "$solo"
+cp "$D/sdk-interface/public-impedance/input.prm" "$solo/input.prm"
+printf '\nset Additional shared libraries = %s\n' "$law" >> "$solo/input.prm"
+(cd "$solo" && "$A" input.prm > log)
+for file in points-0001-r0.csv sections-0001.csv; do
+  cmp "$solo/output/$file" "$D/sdk-interface/public-impedance/output/$file"
+done
+
+mkdir -p "$D/checker"
+tar -xzf "$C/c1-captures.tar.gz" -C "$D/checker"
+cap="$D/checker/build-interface-c2"
+points="$D/sdk-interface/growth/output"
+frame="$cap/cap1/output/sections-0001.csv"
+python3 "$F/check_rate_reversal.py" "$O/benchmarks/growing_fault/check_interface.py" "$points" "$frame" --expect-old-pass > "$D/checker/before.txt"
+python3 "$F/check_rate_reversal.py" "$G/check_interface.py" "$points" "$frame" > "$D/checker/after.txt"
+diff -u "$F/rate-before.txt" "$D/checker/before.txt"
+diff -u "$F/rate-after.txt" "$D/checker/after.txt"
+python3 "$C/replay.py" "$cap/cap1/output" "$cap/cap2/output" > "$D/checker/signed-root.txt"
+diff -u "$C/before.txt" "$D/checker/signed-root.txt"
+
+for c in blocked close overwrite; do
+  python3 "$G/check_history_output.py" "$A" "$D/io-sdk-$c" "$c" --mpiexec "$M"
+done
+(cd "$B/unit_tests" && "$A" --test)
+touch "$B/tests/postprocess/phase_field_surface_energy_at2.x.prm"  # force the physical run behind CTest
+ctest --test-dir "$B" -R '^postprocess/phase_field_surface_energy_at2$' --output-on-failure --no-tests=error
+python3 "$L/check_vertex_file.py" "$A" "$layered" "$D/vertices-sdk" --mpiexec "$M"
+python3 "$L/check_restart_width.py" "$A" "$layered" "$D/legacy-width-sdk" --seeds build-interface-a/old-width
+python3 "$T/phase_ridge/check_pressure.py" "$A" "$ridge" "$D/adiabatic-restart-sdk" --lifecycle
+python3 "$G/check_adiabatic_pressure.py" "$A" "$growth" "$D/constant-sdk" constant \
+  --stage-b build-interface-b/final/compression --pressure-plugin "$P/tests/libpressure_constraint.release.so"
+python3 "$G/check_adiabatic_pressure.py" "$A" "$growth" "$D/adiabatic-history-sdk" lifecycle
+python3 "$G/check_repairs.py" "$A" "$growth" "$D/native-restart-sdk" lifecycle \
+  --legacy-snapshot build-5a-repair/before-checkpoint/restart/03 \
+  --repaired-checkpoints build-5a-repair/qualified-lifecycle/clean/output/restart
+python3 "$G/check_repairs.py" "$A" "$growth" "$D/cold-sdk" friction
+python3 "$G/check_state_free.py" "$A" "$growth" "$D/state-free-sdk"
+python3 "$G/check_state_free.py" "$A" "$growth" "$D/state-free-mpi-sdk" --ranks 2 --mpiexec "$M"
+python3 "$G/run.py" "$A" "$growth" "$D/nine-sdk" --principal-only --mpiexec "$M"
+python3 "$G/compare.py" build-5a-repair/donor-two/output "$D/nine-sdk/principal/output"
+```
+
 ## Interface C2
 
 Both installed examples use `Model name = phase field fault`. The [mature input](../../benchmarks/fixed_fault/mature_trace.prm) specifies `Fault geometry = boundary spanning` and an [ordered vertex table](../../benchmarks/fixed_fault/mature_vertices.txt). The [growing input](../../benchmarks/growing_fault/growing_seed.prm) gives its single phase field the `midpoint fault phase` method. The [guide](IMPLEMENTATION.md#select-the-fault-calculation) gives the parameter blocks, the equivalent inline mature input, the two pressure closures and the accepted output names. The [assignment](INTERFACE_C2_TASK.md) is ready for architecture review. The C1 cross-rank first-turn comparison remains open under its original tolerance.

@@ -1,6 +1,8 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**C2 is ready for architecture review.** The [public inputs and material owners](IMPLEMENTATION.md#select-the-fault-calculation) separate existing material traces from irreversible midpoint growth under one model name. The [working record](STATUS.md#interface-c2) records the installed SDK checks, the frozen controls and the numerical decision outstanding on the adiabatic first turn.
+**Assignment A of the C2 maintainer review is ready for independent review.** See the [public settings, restart and output results](STATUS.md#assignment-a--public-fault-settings-and-accepted-output). Assignment B owns the mature work comparison. Assignment C owns the strip-8 peak investigation.
+
+**C2 established the shared material interface.** The [public inputs and material owners](IMPLEMENTATION.md#select-the-fault-calculation) separate existing material traces from irreversible midpoint growth under one model name. The [working record](STATUS.md#interface-c2) records the installed SDK checks, the frozen controls and the numerical decision outstanding on the adiabatic first turn.
 
 **C1 supplies adiabatic pressure at the actual mature trace and growing strip stations.** See the [input and pressure profile](IMPLEMENTATION.md#use-aspects-adiabatic-pressure-for-friction) and the [C1 verification record](STATUS.md#interface-repairs-after-6b--c1). The strip-8 rank comparison remains open at the original angle budget.
 
