@@ -1,0 +1,16 @@
+# One 5 ms step on the nine-strip mesh. Positive normal compression is in Pa.
+include onecut.prm
+set End time = 0.005
+set Output directory = output-prescribed-compression
+# The reference input uses Surface pressure as the legacy friction setting.
+set Surface pressure =
+subsection Material model
+  subsection Growing fault
+    set Prescribed fault compression = 250
+  end
+end
+# Use the exporter installed beside this input. Each rank writes its native points.
+set Additional shared libraries = ./libgrowing_fault_checks.so
+subsection Postprocess
+  set List of postprocessors = growing fault history
+end

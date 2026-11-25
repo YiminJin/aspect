@@ -108,23 +108,22 @@ namespace aspect::Postprocess
   }
 
   template <int dim>
-  class GrowingFaultSamples : public Interface<dim>, public SimulatorAccess<dim>
+  class GrowingFaultHistory : public Interface<dim>, public SimulatorAccess<dim>
   {
     public:
       void initialize() override
       {
-        if constexpr(dim==2)
-          this->get_signals().pre_nonlinear_solver.connect([this](const SimulatorAccess<dim> &)
-          {
-            if (this->get_timestep_number()!=1) return;
-            const auto &m=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
-            const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
-            std::ofstream out(this->get_output_directory()+"operator-r"+std::to_string(rank)+".txt");
-            out<<std::setprecision(17);
-            check_operator(*this,m,out);
-          });
+        AssertThrow(dim == 2 && dynamic_cast<const GrowingFault::Material<dim> *>(&this->get_material_model()),
+                    ExcMessage("The growing fault history exporter requires the two-dimensional growing fault material."));
       }
+
       std::pair<std::string,std::string> execute(TableHandler &) override
+      {
+        return write_accepted_history(false);
+      }
+
+    protected:
+      std::pair<std::string,std::string> write_accepted_history(const bool verify_phase_enclosure) const
       {
         if constexpr(dim==2)
           {
@@ -141,6 +140,7 @@ namespace aspect::Postprocess
             std::ofstream coefficients(path+"fields-"+tag+"-r"+std::to_string(rank)+".csv");
             points<<std::setprecision(17)<<"cell,q,x,y,weight,section,phi,tauxx,tauyy,tauzz,tauxy,Axx,Ayy,Azz,Axy,signed_shear,absolute_shear\n";
             coefficients<<std::setprecision(17)<<"cell,component,local,value\n";
+            unsigned int invalid_enclosure = 0;
             for (const auto &cell:this->get_dof_handler().active_cell_iterators())
               if (cell->is_locally_owned())
                 {
@@ -156,10 +156,13 @@ namespace aspect::Postprocess
                     {
                       const auto [component,j]=fe.system_to_component_index(i);
                       coefficients<<cell->id()<<','<<component<<','<<j<<','<<solution[ids[i]]<<'\n';
-                      if (component==c) patch[j]=solution[ids[i]];
+                      if (verify_phase_enclosure && component==c) patch[j]=solution[ids[i]];
                     }
-                  const auto range=PhaseField::enclosure<2>(patch);
-                  AssertThrow(range.first>=-2.e-14 && range.second<=1.+2.e-14,ExcMessage("Endpoint polynomial violates physical bounds."));
+                  if (verify_phase_enclosure)
+                    {
+                      const auto range = PhaseField::enclosure<2>(patch);
+                      invalid_enclosure |= !(range.first>=-2.e-14 && range.second<=1.+2.e-14);
+                    }
                   for (unsigned int q=0; q<phase.size(); ++q)
                     {
                       const auto &v=history.cells.at(cell->id())[q];
@@ -173,6 +176,8 @@ namespace aspect::Postprocess
                       points<<','<<v.signed_shear<<','<<v.absolute_shear<<'\n';
                     }
                 }
+            if (verify_phase_enclosure)
+              AssertThrow(!Utilities::MPI::max(invalid_enclosure,comm),ExcMessage("Endpoint polynomial violates physical bounds."));
             dealii::Utilities::System::MemoryStats memory;
             dealii::Utilities::System::get_memory_stats(memory);
             std::ofstream usage(path+"memory-"+tag+"-r"+std::to_string(rank)+".txt");
@@ -203,6 +208,34 @@ namespace aspect::Postprocess
 
           }
         return {"Growing fault","native section and point history"};
+      }
+  };
+  ASPECT_REGISTER_POSTPROCESSOR(GrowingFaultHistory,"growing fault history",
+                                "Write accepted strip records, native point history and the physical work ledger. "
+                                "The native stress columns tauxx, tauyy, tauzz and tauxy are tension-positive "
+                                "deviatoric components in Pa at the accepted endpoint.")
+
+  template <int dim>
+  class GrowingFaultSamples : public GrowingFaultHistory<dim>
+  {
+    public:
+      std::pair<std::string,std::string> execute(TableHandler &) override
+      {
+        return this->write_accepted_history(true);
+      }
+
+      void initialize() override
+      {
+        if constexpr(dim==2)
+          this->get_signals().pre_nonlinear_solver.connect([this](const SimulatorAccess<dim> &)
+          {
+            if (this->get_timestep_number()!=1) return;
+            const auto &m=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
+            const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
+            std::ofstream out(this->get_output_directory()+"operator-r"+std::to_string(rank)+".txt");
+            out<<std::setprecision(17);
+            check_operator(*this,m,out);
+          });
       }
   };
   ASPECT_REGISTER_POSTPROCESSOR(GrowingFaultSamples,"growing fault samples","Observe the published midpoint bulk and strip histories.")
