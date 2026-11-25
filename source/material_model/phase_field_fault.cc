@@ -5,7 +5,7 @@
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/adiabatic_conditions/interface.h>
-#include <aspect/material_model/rheology/rate_and_state_friction.h>
+#include <aspect/material_model/rheology/fault_resistance.h>
 #include <aspect/simulator/assemblers/fault_stress.h>
 #include <aspect/geometry_model/box.h>
 #include <aspect/geometry_model/initial_topography_model/zero_topography.h>
@@ -17,6 +17,54 @@ namespace aspect
   {
     namespace
     {
+      // The first row names columns so the donor's x,y,core-phase triples
+      // cannot be mistaken for a material identity, position or age.
+      template <int dim>
+      void read_vertices(const std::string &text, std::vector<Point<dim>> &vertices,
+                         std::vector<double> &ages,std::vector<double> &shear)
+      {
+        std::istringstream input(text);
+        std::vector<std::string> header;
+        std::string line;
+        while (std::getline(input,line))
+          {
+            line=line.substr(0,line.find('#'));
+            std::istringstream row(line);
+            std::vector<std::string> tokens {std::istream_iterator<std::string>(row),{}};
+            if (tokens.empty()) continue;
+            if (header.empty())
+              {
+                header=std::move(tokens);
+                AssertThrow(header.size()>=3 && header[0]=="id" && header[1]=="x_m" && header[2]=="y_m",
+                            ExcMessage("Expected vertex header id x_m y_m; anonymous donor core-phase triples are ambiguous."));
+                std::set<std::string> used;
+                for (unsigned int j=3; j<header.size(); ++j)
+                  {
+                    const bool age=header[j]=="initial_age_s";
+                    AssertThrow((age || header[j]=="background_shear_Pa") && used.insert(header[j]).second,
+                                ExcMessage("Unknown or duplicate vertex column "+header[j]));
+                    AssertThrow((age?ages:shear).empty(),ExcMessage("Duplicate inline and file source for "+header[j]));
+                  }
+                continue;
+              }
+            AssertThrow(tokens.size()==header.size() && tokens[0]==std::to_string(vertices.size()),
+                        ExcMessage("Vertex rows require consecutive material IDs from zero and one value per named column."));
+            Point<dim> point;
+            for (unsigned int j=1; j<header.size(); ++j)
+              {
+                std::istringstream number(tokens[j]);
+                double value;
+                AssertThrow((number>>value) && number.peek()==std::char_traits<char>::eof() && std::isfinite(value),
+                            ExcMessage("Invalid vertex value in "+header[j]));
+                if (j<3) point[j-1]=value;
+                else if (header[j]=="initial_age_s") ages.push_back(value);
+                else shear.push_back(value);
+              }
+            vertices.push_back(point);
+          }
+        AssertThrow(vertices.size()>=2,ExcMessage("A material trace requires at least two ordered vertices."));
+      }
+
       /** Accepted in-plane deviatoric stress components in Pa for visualization. */
       template <int dim>
       struct FaultPhysicalStress : NamedAdditionalMaterialOutputs<dim>
@@ -167,10 +215,7 @@ namespace aspect
     template <int dim>
     const std::vector<double> &PhaseFieldFault<dim>::label_ages() const
     {
-      // Only RSF interprets its saved scalar as an age in seconds.
-      static const std::vector<double> empty;
-      const auto *rsf=dynamic_cast<const Rheology::RateStateHistory *>(friction.get());
-      return rsf ? rsf->state() : empty;
+      return friction->ages_in_seconds();
     }
 
     template <int dim>
@@ -191,28 +236,25 @@ namespace aspect
                         "with accepted velocity and requires bounded phase and physical stress transport. Fixed "
                         "interior holds the vertices fixed. Automatic preserves earlier inputs by selecting advected "
                         "interior for the phase field composition role and boundary spanning for the generic role.");
+      prm.declare_entry("Fault vertex file","",Patterns::FileName(),
+                        "Ordered ASCII table: id x_m y_m, optionally initial_age_s and background_shear_Pa. "
+                        "IDs start at zero. Row order sets slip sense; shear persists through all timesteps.");
       prm.declare_entry("Fault vertices","",Patterns::List(Patterns::List(Patterns::Double(),2,2),0,
                                                            Patterns::List::max_int_value,";"),"Ordered x,y label positions in metres separated by semicolons. "
                         "The default joins the ends of the left box boundary.");
-      prm.declare_entry("Degradation magnitude","1",Patterns::Double(0.),"Positive energetic degradation magnitude m for the measured mature AT1 distance profile with curvature one.");
+      prm.declare_entry("Degradation magnitude","1",Patterns::Double(0.),"Scale of mature excess compliance and of its projected normal integral. At fixed phase it cancels in the normalized slip weight.");
       prm.declare_entry("Fit trace to phase","true",Patterns::Bool(),"Fit the ordered seed to the initialized FE ridge. Constant phase retains the seed.");
       prm.declare_entry("Profile half width","0",Patterns::Double(0.),"Normal association support in metres. Zero uses the full physical cross-section.");
       prm.declare_entry("Shear modulus","1e10",Patterns::Double(0.),"Elastic shear modulus in Pa.");
       prm.declare_entry("Initialization interval","1",Patterns::Double(0.),"Maxwell interval in seconds for the initial Stokes solve.");
-      prm.declare_entry("Background shear traction","0",Patterns::Double(),"Initial surface shear loading in Pa, positive along the slip sense.");
+      prm.declare_entry("Background shear traction","0",Patterns::Double(),"Persistent shear loading in Pa along the slip sense; the per-vertex column overrides this uniform value.");
       prm.declare_entry("Background compression","",Patterns::List(Patterns::Double(0.),0,1),
                         "Compression in Pa added to resolved normal traction (default 5e7 Pa). "
                         "Leave empty for adiabatic pressure, which supplies the complete compression.");
-      prm.declare_entry("Reference friction coefficient","0.6",Patterns::Double(0.),"Dimensionless reference friction coefficient.");
-      prm.declare_entry("Direct effect","0.01",Patterns::Double(0.),"Dimensionless direct effect parameter.");
-      prm.declare_entry("Evolution effect","0.015",Patterns::Double(0.),"Dimensionless evolution effect parameter.");
-      prm.declare_entry("Reference speed","1e-6",Patterns::Double(0.),"Reference slip speed in m/s.");
+      Rheology::FaultResistance::declare_parameters(prm,Rheology::FaultResistance::Route::mature);
       prm.declare_entry("Minimum speed","1e-20",Patterns::Double(0.),"Minimum admissible sliding speed in m/s.");
-      prm.declare_entry("Slip distance","0.01",Patterns::Double(0.),"Characteristic slip distance in m.");
-      prm.declare_entry("Radiation damping","0",Patterns::Double(0.),"Radiation damping coefficient in Pa s/m.");
       prm.declare_entry("Initial label ages","",Patterns::List(Patterns::Double(0.)),"Optional ordered initial material ages in seconds.");
-      prm.declare_entry("Initial label shear tractions","",Patterns::List(Patterns::Double()),"Optional ordered initial material shear tractions in Pa.");
-      prm.declare_entry("Initial age","1",Patterns::Double(0.),"Initial section age in seconds.");
+      prm.declare_entry("Initial label shear tractions","",Patterns::List(Patterns::Double()),"Optional persistent shear tractions in Pa, ordered by vertex.");
       prm.leave_subsection();
       prm.leave_subsection();
     }
@@ -241,6 +283,10 @@ namespace aspect
                              p.checkpoint_steps == 0 && p.checkpoint_time_secs == 0 &&
                              p.additional_checkpoint_times.empty() && !checkpoint_on_termination;
       prm.enter_subsection("Material model");
+      AssertThrow(prm.get({"Growing fault"},"Prescribed fault compression").empty() &&
+                  prm.get_double({"Growing fault"},"Seed tangent angle")==0. &&
+                  Utilities::string_to_double(Utilities::split_string_list(prm.get({"Growing fault"},"Forward seed tip")))==std::vector<double>({0.,0.}),
+                  ExcMessage("Growing fault seed and compression settings require the midpoint fault phase method."));
       prm.enter_subsection("Simple model");
       // The Simple model subsection supplies the single-lithology background
       // constants. Only EOS entry zero is consumed, irrespective of DG stress.
@@ -279,7 +325,7 @@ namespace aspect
                   ExcMessage("Adiabatic friction supplies the complete pressure; omit Background compression."));
       background_compression = prm.get("Background compression").empty() ? 5e7 : prm.get_double("Background compression");
       const double initial_speed=prm.get_double("Reference speed");
-      friction=make_resistance(prm);
+      friction=Rheology::FaultResistance::create(prm,Rheology::FaultResistance::Route::mature);
       minimum_speed=prm.get_double("Minimum speed");
       const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
       AssertThrow(Plugins::plugin_type_matches<InitialTopographyModel::ZeroTopography<dim>>(this->get_initial_topography_model()),
@@ -294,6 +340,15 @@ namespace aspect
           point[1] = coordinates.at(1);
           vertices.push_back(point);
         }
+      auto ages=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label ages")));
+      initial_shear=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label shear tractions")));
+      const auto filename=Utilities::expand_ASPECT_SOURCE_DIR(prm.get("Fault vertex file"));
+      if (!filename.empty())
+        {
+          AssertThrow(vertices.empty(),ExcMessage("Choose Fault vertex file or inline Fault vertices."));
+          read_vertices(Utilities::read_and_distribute_file_content(filename,this->get_mpi_communicator()),vertices,ages,initial_shear);
+        }
+      friction->set_initial_ages(std::move(ages));
       if (vertices.empty())
         {
           vertices = {box.get_origin(),box.get_origin()};
@@ -309,7 +364,6 @@ namespace aspect
                                  support > 0. ? support : std::numeric_limits<double>::max(),interior_seed);
       const auto count=labels().size();
       friction->initialize(count);
-      initial_shear=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label shear tractions")));
       if (initial_shear.empty()) initial_shear.assign(count,background_shear);
       AssertThrow(initial_shear.size()==count,ExcMessage("Material initial shear must match the number of fault vertices."));
       maxwell_memory.assign(count,0.);
@@ -353,16 +407,6 @@ namespace aspect
     }
 
     template <int dim>
-    std::unique_ptr<Rheology::FaultResistance> PhaseFieldFault<dim>::make_resistance(ParameterHandler &prm) const
-    {
-      const Rheology::RateAndStateFriction law= {prm.get_double("Reference friction coefficient"),prm.get_double("Direct effect"),
-                                                 prm.get_double("Evolution effect"),prm.get_double("Reference speed"),prm.get_double("Slip distance"),prm.get_double("Radiation damping")
-                                                };
-      return std::make_unique<Rheology::RateStateHistory>(law,prm.get_double("Initial age"),
-                                                          Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label ages"))));
-    }
-
-    template <int dim>
     void PhaseFieldFault<dim>::accept_section(const std::vector<double> &rates,const double dt)
     {
       section().trace.accept_section_rates(rates,dt);
@@ -381,7 +425,8 @@ namespace aspect
     template <int dim>
     std::string PhaseFieldFault<dim>::label_checkpoint_key() const
     {
-      if (dynamic_cast<const Rheology::RateStateHistory *>(friction.get()))
+      // Preserve the original RSF archive key. All other laws use their registered identifier.
+      if (friction->name()=="rate and state")
         return "Material fault labels v1";
       return "Material fault labels "+friction->name();
     }
@@ -409,6 +454,8 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::load(const std::map<std::string,std::string> &status)
     {
+      AssertThrow(!status.count("Native growing fault v1") && !status.count("Native growing fault v2"),
+                  ExcMessage("Cannot resume a growing fault checkpoint with mature trace mechanics."));
       if (!interior_seed) return;
       const auto profile = status.find("Mature friction pressure profile");
       AssertThrow((profile!=status.end()) == normal_stress.uses_adiabat() &&
@@ -439,8 +486,9 @@ namespace aspect
     }
 
     ASPECT_REGISTER_MATERIAL_MODEL(PhaseFieldFault,"phase field fault",
-                                   "Plane-strain mature fault with independent Q1 material labels. "
+                                   "Plane-strain fault mechanics. The midpoint fault phase method selects irreversible AT1 growth on material strips. "
+                                   "Other supported field methods use an existing ordered trace with Q1 material labels. "
                                    "Static or transported DG phase supplies the normalized slip distribution. "
-                                   "The named additional outputs fault_tau_xx, fault_tau_yy and fault_tau_xy read accepted physical stress in Pa.")
+                                   "Mature named outputs fault_tau_xx, fault_tau_yy and fault_tau_xy read accepted stress in Pa; growing fault history exports native tensors.")
   }
 }

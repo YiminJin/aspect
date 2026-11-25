@@ -42,13 +42,14 @@ def main():
     base = (here/'onecut.prm').read_text()
     run('incompatible', base.replace('Model name = growing fault', 'Model name = simple'),
         'requires a material providing the Maxwell/AT1 midpoint response')
-    settings = base.replace('Model name = growing fault', 'Model name = linear strip resistance')
+    settings = base.replace('Model name = growing fault', 'Model name = phase field fault')
+    settings += subsection('Material model',subsection('Growing fault','set Resistance law = linear dashpot'))
     run('incompatible-energy',settings.replace('Crack geometry = AT1','Crack geometry = AT2'),
         'requires the configured AT1 surface energy')
     # The RSF-only scales and monotonicity guard must never reach the dashpot.
     settings += subsection('Material model', subsection('Growing fault',
                            'set Initial age = 0\nset Direct effect = 0\nset Radiation damping = 0'))
-    settings += subsection('Postprocess', 'set List of postprocessors = midpoint publication')
+    settings += subsection('Postprocess', 'set List of postprocessors = midpoint publication, stateless fault archive check')
     settings += subsection('Time stepping', 'set List of model names = convection time step, check returned midpoint')
     settings += subsection('Checkpointing', 'set Steps between checkpoint = 1\nset Number of checkpoints to keep = 4')
     trajectories = []
@@ -68,7 +69,7 @@ def main():
         raise ValueError('The matched reversed loading did not reverse signed strip rates')
 
     trace = (here.parent/'fixed_fault/fixed_fault.prm').read_text()
-    trace = trace.replace('Model name = phase field fault', 'Model name = linear trace resistance')
+    trace += subsection('Material model',subsection('Phase field fault','set Resistance law = linear dashpot'))
     trace += subsection('Material model',subsection('Phase field fault','set Initial age = 0\nset Direct effect = 0'))
     trace += subsection('Postprocess', 'set List of postprocessors = fixed fault statistics')
     out = run('mature', trace)
@@ -78,6 +79,7 @@ def main():
     interior += subsection('Material model', subsection('Phase field fault',
                            'set Fault geometry = fixed interior\nset Fault vertices = .5,.05; .5,.95\nset Fit trace to phase = false'))
     interior += subsection('Checkpointing', 'set Steps between checkpoint = 1\nset Number of checkpoints to keep = 3')
+    interior += subsection('Postprocess','set List of postprocessors = mature fault statistics, stateless fault archive check')
     interior_output = run('mature-interior',interior)
     if not (interior_output/'restart/02/resume.z').is_file():
         raise ValueError('Missing state-free mature checkpoint')

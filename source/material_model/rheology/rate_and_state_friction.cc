@@ -5,6 +5,7 @@
 
 #include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <aspect/global.h>
+#include <deal.II/base/parameter_handler.h>
 
 namespace aspect
 {
@@ -168,5 +169,33 @@ namespace aspect
         ages=std::move(values);
       }
     }
+  }
+}
+
+namespace aspect::MaterialModel::Rheology
+{
+  namespace
+  {
+    void declare_rsf(ParameterHandler &prm, const FaultResistance::Route route)
+    {
+      const bool growing=route==FaultResistance::Route::growing;
+      prm.declare_entry("Initial age",growing?"10":"1",Patterns::Double(0.),"Initial state age in seconds.");
+      prm.declare_entry("Reference friction coefficient","0.6",growing?Patterns::Double():Patterns::Double(0.),"Dimensionless reference coefficient.");
+      prm.declare_entry("Direct effect",growing?"0.015":"0.01",Patterns::Double(0.),"Dimensionless direct effect.");
+      prm.declare_entry("Evolution effect",growing?"0.02":"0.015",Patterns::Double(0.),"Dimensionless evolution effect.");
+      prm.declare_entry("Reference speed",growing?"0.001":"1e-6",Patterns::Double(0.),"Reference slip speed in m/s.");
+      prm.declare_entry("Slip distance","0.01",Patterns::Double(0.),"Characteristic slip distance in m.");
+      prm.declare_entry("Radiation damping",growing?"1000":"0",Patterns::Double(0.),"Radiation impedance in Pa s/m.");
+    }
+
+    std::unique_ptr<FaultResistance> read_rsf(const ParameterHandler &prm,FaultResistance::Route)
+    {
+      const RateAndStateFriction law= {prm.get_double("Reference friction coefficient"),prm.get_double("Direct effect"),
+                                       prm.get_double("Evolution effect"),prm.get_double("Reference speed"),
+                                       prm.get_double("Slip distance"),prm.get_double("Radiation damping")
+                                      };
+      return std::make_unique<RateStateHistory>(law,prm.get_double("Initial age"));
+    }
+    const auto registered_rsf=(FaultResistance::register_law("rate and state",declare_rsf,read_rsf),true);
   }
 }

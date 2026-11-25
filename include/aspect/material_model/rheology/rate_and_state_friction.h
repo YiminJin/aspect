@@ -49,6 +49,14 @@ namespace aspect
           void validate_midpoint() const override;
           bool admits_duration(double h,double pressure) const override;
           std::vector<double> parameters() const override;
+          void set_initial_ages(std::vector<double> values) override
+          {
+            ages=std::move(values);
+          }
+          const std::vector<double> &ages_in_seconds() const override
+          {
+            return ages;
+          }
           void initialize(unsigned int count) override;
           void accept_rate(unsigned int i,double rate,double dt) override;
           const std::vector<double> &state() const override

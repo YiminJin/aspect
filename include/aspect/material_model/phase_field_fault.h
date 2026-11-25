@@ -52,8 +52,6 @@ namespace aspect
         void save(std::map<std::string,std::string> &status) const override;
         void load(const std::map<std::string,std::string> &status) override;
       protected:
-        /** Select the local resistance in the Phase field fault subsection. */
-        virtual std::unique_ptr<Rheology::FaultResistance> make_resistance(ParameterHandler &) const;
         /** Compression (Pa) for a section quadrature sample with the given
          * physical foot on the current trace. Local, with fixed geometry. */
         double normal_compression(const Point<dim> &foot, double pressure, double normal_deviatoric_stress) const;

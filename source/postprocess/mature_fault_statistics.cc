@@ -12,13 +12,15 @@ namespace aspect
 {
   namespace Postprocess
   {
-    /** Accepted label profiles and arclength averages on the stationary fault. */
+    /** Accepted label profiles and arclength averages on the current mature material trace. */
     template <int dim>
-    class FixedFaultStatistics : public Interface<dim>, public SimulatorAccess<dim>
+    class MatureFaultStatistics : public Interface<dim>, public SimulatorAccess<dim>
     {
       public:
         std::pair<std::string,std::string> execute(TableHandler &statistics) override
         {
+          AssertThrow(dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model()),
+                      ExcMessage("Mature fault statistics require a mature material trace."));
           const auto &model = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
           const auto &labels = model.labels();
           const auto &ages = model.label_ages();
@@ -63,7 +65,15 @@ namespace aspect
         }
     };
 
-    ASPECT_REGISTER_POSTPROCESSOR(FixedFaultStatistics,"fixed fault statistics",
-                                  "Write accepted label coordinates, age, slip and rate and their arclength averages.")
+    ASPECT_REGISTER_POSTPROCESSOR(MatureFaultStatistics,"mature fault statistics",
+                                  "Write accepted material vertex positions, optional age, signed slip, rate and arclength averages.")
+    // Retain the parameter-file spelling used by the stationary controls.
+    namespace
+    {
+      aspect::internal::Plugins::RegisterHelper<Interface<2>,MatureFaultStatistics<2>>
+      legacy_statistics_2(&Manager<2>::register_postprocessor,"fixed fault statistics","Compatibility name for mature fault statistics.");
+      aspect::internal::Plugins::RegisterHelper<Interface<3>,MatureFaultStatistics<3>>
+      legacy_statistics_3(&Manager<3>::register_postprocessor,"fixed fault statistics","Compatibility name for mature fault statistics.");
+    }
   }
 }

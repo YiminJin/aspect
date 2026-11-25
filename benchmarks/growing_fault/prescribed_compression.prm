@@ -10,7 +10,6 @@ subsection Material model
   end
 end
 # Use the exporter installed beside this input. Each rank writes its native points.
-set Additional shared libraries = ./libgrowing_fault_checks.so
 subsection Postprocess
   set List of postprocessors = growing fault history
 end

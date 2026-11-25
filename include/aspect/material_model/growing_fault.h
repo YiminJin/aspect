@@ -120,9 +120,6 @@ namespace aspect::GrowingFault
       {
         return anchor;
       }
-    protected:
-      /** Select a constitutive law in the Growing fault parameter subsection. */
-      virtual std::unique_ptr<MaterialModel::Rheology::FaultResistance> make_resistance(ParameterHandler &) const;
     private:
       unsigned int order,field;
       double degrees, compression;

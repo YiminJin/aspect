@@ -225,7 +225,11 @@ namespace aspect
                                                     std::ref(parameters),
                                                     std::ref(prm),
                                                     std::cref(*geometry_model))),
-    material_model (MaterialModel::create_material_model<dim>(prm)),
+    material_model (prm.get({"Material model"},"Model name") == "phase field fault" &&
+                    std::find(parameters.compositional_field_methods.begin(),parameters.compositional_field_methods.end(),
+                              Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase) != parameters.compositional_field_methods.end()
+                    ? MaterialModel::create_material_model<dim>("growing fault")
+                    : MaterialModel::create_material_model<dim>(prm)),
     gravity_model (GravityModel::create_gravity_model<dim>(prm)),
     prescribed_stokes_solution (PrescribedStokesSolution::create_prescribed_stokes_solution<dim>(prm)),
     adiabatic_conditions (AdiabaticConditions::create_adiabatic_conditions<dim>(prm)),

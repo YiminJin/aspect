@@ -3,6 +3,7 @@
 #define _aspect_material_model_rheology_fault_resistance_h
 
 #include <aspect/global.h>
+#include <deal.II/base/parameter_handler.h>
 
 namespace aspect::MaterialModel::Rheology
 {
@@ -27,6 +28,28 @@ namespace aspect::MaterialModel::Rheology
   {
     public:
       virtual ~FaultResistance() = default;
+      enum class Route
+      {
+        mature, growing
+      };
+      using Declare = void (*)(ParameterHandler &, Route);
+      using Create = std::unique_ptr<FaultResistance> (*)(const ParameterHandler &, Route);
+
+      /** Register a surface law once for both the positive-speed and signed
+       * contracts. Parameters are relative to the active material subsection. */
+      static void register_law(const std::string &name, Declare declare, Create create);
+      static void declare_parameters(ParameterHandler &, Route);
+      static std::unique_ptr<FaultResistance> create(const ParameterHandler &, Route);
+      /** Optional initial ages in seconds, ordered by material identity. */
+      virtual void set_initial_ages(std::vector<double> ages)
+      {
+        AssertThrow(ages.empty(),ExcMessage("The selected fault resistance law does not accept initial ages."));
+      }
+      virtual const std::vector<double> &ages_in_seconds() const
+      {
+        static const std::vector<double> empty;
+        return empty;
+      }
       /** Stable checkpoint identifier of the law. */
       virtual std::string name() const = 0;
       /** Evaluate at Q1 coordinate xi between vertices i and i+1. */

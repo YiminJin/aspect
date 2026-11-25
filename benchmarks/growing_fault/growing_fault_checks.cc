@@ -1,7 +1,8 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
-#include <aspect/postprocess/interface.h>
+#include <aspect/postprocess/growing_fault_history.h>
 #include <aspect/geometry_model/interface.h>
 #include <aspect/material_model/growing_fault.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/simulator_signals.h>
 #include <aspect/simulator/solver/midpoint_system.h>
 #include <aspect/phase_field/bernstein_bounds.h>
@@ -133,135 +134,36 @@ namespace aspect::Postprocess
   }
 
   template <int dim>
-  class GrowingFaultHistory : public Interface<dim>, public SimulatorAccess<dim>
+  class GrowingFaultSamples : public GrowingFaultHistory<dim>
   {
     public:
-      void initialize() override
-      {
-        AssertThrow(dim == 2 && dynamic_cast<const GrowingFault::Material<dim> *>(&this->get_material_model()),
-                    ExcMessage("The growing fault history exporter requires the two-dimensional growing fault material."));
-      }
-
-      std::pair<std::string,std::string> execute(TableHandler &) override
-      {
-        return write_accepted_history(false);
-      }
-
-    protected:
-      std::pair<std::string,std::string> write_accepted_history(const bool verify_phase_enclosure) const
+      std::pair<std::string,std::string> execute(TableHandler &statistics) override
       {
         if constexpr(dim==2)
           {
             const auto &m=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
-            const auto &history=m.history();
-            const auto comm=this->get_mpi_communicator();
-            const auto rank=Utilities::MPI::this_mpi_process(comm);
-            const auto path=this->get_output_directory();
-            const auto tag=Utilities::int_to_string(history.step,4);
-            const auto &fe=this->get_fe();
-            const auto &solution=this->get_solution();
             const auto c=this->introspection().component_indices.compositional_fields[m.phase_field()];
-            std::ofstream points(path+"points-"+tag+"-r"+std::to_string(rank)+".csv");
-            std::ofstream coefficients(path+"fields-"+tag+"-r"+std::to_string(rank)+".csv");
-            points<<std::setprecision(17)<<"cell,q,x,y,weight,section,phi,tauxx,tauyy,tauzz,tauxy,Axx,Ayy,Azz,Axy,signed_shear,absolute_shear\n";
-            coefficients<<std::setprecision(17)<<"cell,component,local,value\n";
-            unsigned int invalid_enclosure = 0;
+            const auto &fe=this->get_fe();
+            std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
+            unsigned int invalid=0;
             for (const auto &cell:this->get_dof_handler().active_cell_iterators())
               if (cell->is_locally_owned())
                 {
-                  const auto &rule=m.sections().cells.at(cell->id());
-                  FEValues<2> values(this->get_mapping(),fe,rule.quadrature,update_values|update_JxW_values|update_quadrature_points);
-                  values.reinit(cell);
-                  std::vector<double> phase(rule.quadrature.size());
-                  values[FEValuesExtractors::Scalar(c)].get_function_values(solution,phase);
-                  std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
                   cell->get_dof_indices(ids);
                   PhaseField::BernsteinPatch<2> patch;
-                  for (unsigned int i=0; i<ids.size(); ++i)
-                    {
-                      const auto [component,j]=fe.system_to_component_index(i);
-                      coefficients<<cell->id()<<','<<component<<','<<j<<','<<solution[ids[i]]<<'\n';
-                      if (verify_phase_enclosure && component==c) patch[j]=solution[ids[i]];
-                    }
-                  if (verify_phase_enclosure)
-                    {
-                      const auto range = PhaseField::enclosure<2>(patch);
-                      invalid_enclosure |= !(range.first>=-2.e-14 && range.second<=1.+2.e-14);
-                    }
-                  for (unsigned int q=0; q<phase.size(); ++q)
-                    {
-                      const auto &v=history.cells.at(cell->id())[q];
-                      const auto &p=values.quadrature_point(q);
-                      points<<cell->id()<<','<<q<<','<<p[0]<<','<<p[1]<<','<<values.JxW(q)<<','<<rule.section[q]<<','<<phase[q];
-                      for (const auto *tensor:
-                      {
-                        &v.stress,&v.cohesive_strain
-                      })
-                      points<<','<<(*tensor)[0][0]<<','<<(*tensor)[1][1]<<','<<(*tensor)[2][2]<<','<<(*tensor)[0][1];
-                      points<<','<<v.signed_shear<<','<<v.absolute_shear<<'\n';
-                    }
+                  for (unsigned int j=0; j<patch.size(); ++j)
+                    patch[j]=this->get_solution()[ids[fe.component_to_system_index(c,j)]];
+                  const auto range=PhaseField::enclosure<2>(patch);
+                  invalid |= !(range.first>=-2.e-14 && range.second<=1.+2.e-14);
                 }
-            if (verify_phase_enclosure)
-              AssertThrow(!Utilities::MPI::max(invalid_enclosure,comm),ExcMessage("Endpoint polynomial violates physical bounds."));
-            dealii::Utilities::System::MemoryStats memory;
-            dealii::Utilities::System::get_memory_stats(memory);
-            std::ofstream usage(path+"memory-"+tag+"-r"+std::to_string(rank)+".txt");
-            usage<<memory.VmHWM<<" KiB peak RSS, "<<sizeof(GrowingFault::PointHistory)<<" bytes/native point history\n";
-            if (rank==0)
-              {
-                std::ofstream strips(path+"sections-"+tag+".csv");
-                const auto &ages=m.friction().state();
-                strips<<std::setprecision(17)<<"section,xi,ds,beta,formed,"<<(ages.empty()?"":"age,")<<"slip,V,force\n";
-                for (unsigned int k=0; k<history.sections.size(); ++k)
-                  {
-                    const auto &s=history.sections[k];
-                    strips<<k<<','<<.5*(m.sections().edges[k]+m.sections().edges[k+1])<<','<<m.sections().length(k,s.angle)<<','<<s.angle
-                          <<','<<s.formed<<',';
-                    if (!ages.empty()) strips<<ages[k]<<',';
-                    strips<<s.slip<<','<<s.rate<<','<<s.resistance<<'\n';
-                  }
-                if (!history.friction_pressures.stations.empty())
-                  {
-                    std::ofstream pressures(path+"friction-pressure-"+tag+".csv");
-                    pressures << std::setprecision(17) << "section,x,y,depth,compression,V\n";
-                    for (unsigned int k=0; k<history.sections.size(); ++k)
-                      {
-                        const auto &point = history.friction_pressures.stations[k];
-                        pressures << k << ',' << point[0] << ',' << point[1] << ',' << this->get_geometry_model().depth(point)
-                                  << ',' << history.friction_pressures.values[k] << ',' << history.sections[k].rate << '\n';
-                      }
-                  }
-                // The initial seed has no completed step-work ledger.
-                if (history.step>0)
-                  {
-                    std::ofstream book(path+"balance-"+tag+".csv");
-                    const auto &b=m.balance();
-                    book<<std::setprecision(17)<<"step,time,bulk,cohesive,fracture,Wext,Db,Dc,Df,phase_remainder,phase_work,energy_change,mechanical_residual,phase_KKT,adjoint_error,iterations\n"
-                        <<history.step<<','<<history.time<<','<<b.bulk<<','<<b.cohesive<<','<<b.fracture<<','<<b.prescribed_velocity_work<<','<<b.bulk_loss<<','<<b.cohesive_loss
-                        <<','<<b.friction_work<<','<<b.compliance_remainder<<','<<b.phase_work<<','<<b.storage_change<<','<<b.mechanical<<','<<b.kkt<<','<<b.adjoint_defect<<','<<b.iterations<<'\n';
-                  }
-              }
-
+            AssertThrow(!Utilities::MPI::max(invalid,this->get_mpi_communicator()),ExcMessage("Endpoint polynomial violates physical bounds."));
           }
-        return {"Growing fault","native section and point history"};
-      }
-  };
-  ASPECT_REGISTER_POSTPROCESSOR(GrowingFaultHistory,"growing fault history",
-                                "Write accepted strip records, native point history and the physical work ledger. "
-                                "The native stress columns tauxx, tauyy, tauzz and tauxy are tension-positive "
-                                "deviatoric components in Pa at the accepted endpoint.")
-
-  template <int dim>
-  class GrowingFaultSamples : public GrowingFaultHistory<dim>
-  {
-    public:
-      std::pair<std::string,std::string> execute(TableHandler &) override
-      {
-        return this->write_accepted_history(true);
+        return GrowingFaultHistory<dim>::execute(statistics);
       }
 
       void initialize() override
       {
+        GrowingFaultHistory<dim>::initialize();
         if constexpr(dim==2)
           this->get_signals().pre_nonlinear_solver.connect([this](const SimulatorAccess<dim> &)
           {
@@ -458,4 +360,103 @@ namespace aspect::TimeStepping
       std::vector<double> old,half;
   };
   ASPECT_REGISTER_TIME_STEPPING_MODEL(RetryGrowingFault,"retry growing fault","Exercise two solved midpoint rollbacks.")
+}
+
+namespace aspect::MaterialModel
+{
+  // Read parameter files produced by the original state-free benchmark.
+  // These aliases only translate its old selector into the registered law.
+  template <int dim, template<int> class Base>
+  class LegacyDashpotSelector : public Base<dim>
+  {
+    public:
+      static void declare_parameters(ParameterHandler &) {}
+      void parse_parameters(ParameterHandler &prm) override
+      {
+        const std::vector<std::string> section= {"Material model",
+                                                 std::is_same_v<Base<dim>,PhaseFieldFault<dim>>?"Phase field fault":"Growing fault"
+                                                };
+        const auto selection=prm.get(section,"Resistance law");
+        AssertThrow(selection=="rate and state" || selection=="linear dashpot",
+                    ExcMessage("Legacy dashpot selector conflicts with Resistance law."));
+        prm.enter_subsection(section[0]);
+        prm.enter_subsection(section[1]);
+        prm.set("Resistance law","linear dashpot");
+        prm.leave_subsection();
+        prm.leave_subsection();
+        Base<dim>::parse_parameters(prm);
+      }
+  };
+  namespace
+  {
+    template <int dim>
+    void register_legacy_selectors()
+    {
+      using Strip=LegacyDashpotSelector<dim,GrowingFault::Material>;
+      using Trace=LegacyDashpotSelector<dim,PhaseFieldFault>;
+      using aspect::internal::Plugins::RegisterHelper;
+      RegisterHelper<Interface<dim>,Strip>(&register_material_model<dim>,"linear strip resistance","Legacy growing dashpot input.");
+      RegisterHelper<Interface<dim>,Trace>(&register_material_model<dim>,"linear trace resistance","Legacy mature dashpot input.");
+    }
+    const auto legacy_registered=(register_legacy_selectors<2>(),register_legacy_selectors<3>(),true);
+  }
+
+}
+
+namespace aspect::Postprocess
+{
+  template <int dim>
+  class StatelessArchiveCheck : public Interface<dim>, public SimulatorAccess<dim>
+  {
+    public:
+      void initialize() override
+      {
+        this->get_signals().pre_checkpoint_store_user_data.connect([this](auto &)
+        {
+          std::map<std::string,std::string> status;
+          this->get_material_model().save(status);
+          if (const auto *material=dynamic_cast<const GrowingFault::Material<dim> *>(&this->get_material_model()))
+            {
+              const auto entry=status.find("Native growing fault v2");
+              if (entry==status.end()) return;
+              std::istringstream bytes(entry->second);
+              aspect::iarchive archive(bytes);
+              std::vector<double> signature, edges, state;
+              unsigned int order, step;
+              double angle, time;
+              std::string name;
+              std::vector<GrowingFault::SectionHistory> strips;
+              archive >> signature >> order >> angle >> edges >> step >> time >> name >> strips >> state;
+              AssertThrow(name=="linear dashpot" && strips.size()+1==edges.size() && state.empty()
+                          && material->friction().state().empty(), ExcMessage("State-free strip archive contains constitutive history."));
+            }
+          else
+            {
+              const auto &trace=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> &>(this->get_material_model());
+              const auto entry=status.find("Material fault labels linear dashpot");
+              if (entry==status.end()) return;
+              std::istringstream bytes(entry->second);
+              unsigned int count;
+              bytes >> count;
+              AssertThrow(count==trace.labels().size() && trace.label_ages().empty(),ExcInternalError());
+              std::string row;
+              std::getline(bytes,row);
+              for (unsigned int i=0; i<count; ++i)
+                {
+                  std::getline(bytes,row);
+                  std::istringstream fields(row);
+                  std::vector<double> values {std::istream_iterator<double>(fields),std::istream_iterator<double>()};
+                  // x,y,width,background shear,rate,slip,Maxwell memory.
+                  AssertThrow(values.size()==7 && values[4]==trace.labels()[i].rate &&
+                              values[6]==trace.label_memory()[i],ExcMessage("State-free vertex archive contains additional history."));
+                }
+            }
+        });
+      }
+      std::pair<std::string,std::string> execute(TableHandler &) override
+      {
+        return {};
+      }
+  };
+  ASPECT_REGISTER_POSTPROCESSOR(StatelessArchiveCheck,"stateless fault archive check","Check the wire format of the two state-free fault archives.")
 }

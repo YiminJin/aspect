@@ -1,6 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/material_model/growing_fault.h>
-#include <aspect/material_model/rheology/rate_and_state_friction.h>
+#include <aspect/material_model/rheology/fault_resistance.h>
 #include <aspect/geometry_model/box.h>
 #include <aspect/adiabatic_conditions/interface.h>
 #include <deal.II/fe/fe_values.h>
@@ -33,16 +33,10 @@ namespace aspect::GrowingFault
     prm.declare_entry("Seed tangent angle","0",Patterns::Double(),"Angle in degrees counterclockwise from x.");
     prm.declare_entry("Forward seed tip","0,0",Patterns::List(Patterns::Double(),2,2),"Physical tip of the initial contiguous seed in metres.");
     prm.declare_entry("Section quadrature order","6",Patterns::Integer(2),"Gauss points per strip subinterval and chord.");
-    prm.declare_entry("Initial age","10",Patterns::Double(0),"Initial state age in seconds.");
+    MaterialModel::Rheology::FaultResistance::declare_parameters(prm,MaterialModel::Rheology::FaultResistance::Route::growing);
     prm.declare_entry("Shear modulus","1e6",Patterns::Double(0),"Shear modulus in Pa.");
     prm.declare_entry("Viscosity","1e8",Patterns::Double(0),"Maxwell viscosity in Pa s.");
     prm.declare_entry("Cohesion","1000",Patterns::Double(0),"Cohesive strength in Pa.");
-    prm.declare_entry("Reference friction coefficient","0.6",Patterns::Double(),"Dimensionless reference friction coefficient.");
-    prm.declare_entry("Direct effect","0.015",Patterns::Double(0),"Positive direct effect coefficient a.");
-    prm.declare_entry("Evolution effect","0.02",Patterns::Double(0),"Nonnegative evolution coefficient b.");
-    prm.declare_entry("Reference speed","0.001",Patterns::Double(0),"Reference speed in m/s.");
-    prm.declare_entry("Slip distance","0.01",Patterns::Double(0),"State evolution distance in metres.");
-    prm.declare_entry("Radiation damping","1000",Patterns::Double(0),"Radiation impedance in Pa s/m.");
     prm.leave_subsection();
     prm.leave_subsection();
   }
@@ -60,6 +54,9 @@ namespace aspect::GrowingFault
     normal_stress = NormalStress::parse(prm,NormalStress::Source::prescribed_constant);
     const bool legacy_compression = !prm.get("Surface pressure").empty();
     prm.enter_subsection("Material model");
+    AssertThrow(prm.get({"Phase field fault"},"Fault geometry")=="automatic" &&
+                prm.get({"Phase field fault"},"Fault vertices").empty() && prm.get({"Phase field fault"},"Fault vertex file").empty(),
+                ExcMessage("Midpoint fault phase selects growing strips and cannot accept mature trace geometry."));
     prm.enter_subsection("Growing fault");
     compression = normal_stress.uses_adiabat() ? 0. : p.surface_pressure;
     AssertThrow(!normal_stress.uses_adiabat() || prm.get("Prescribed fault compression").empty(),
@@ -81,7 +78,7 @@ namespace aspect::GrowingFault
     AssertThrow(strength>0.,ExcMessage("Growing fault requires positive cohesion."));
     point_law= {G,prm.get_double("Viscosity"),Kf*2.*G/(strength*strength)};
     AssertThrow(G>0. && point_law.eta>0.,ExcMessage("Growing fault requires positive Maxwell scales."));
-    law=make_resistance(prm);
+    law=MaterialModel::Rheology::FaultResistance::create(prm,MaterialModel::Rheology::FaultResistance::Route::growing);
     law->validate_midpoint();
     prm.leave_subsection();
     prm.leave_subsection();
@@ -90,15 +87,6 @@ namespace aspect::GrowingFault
     this->model_dependence.compressibility=MaterialModel::NonlinearDependence::none;
     this->model_dependence.specific_heat=MaterialModel::NonlinearDependence::none;
     this->model_dependence.thermal_conductivity=MaterialModel::NonlinearDependence::none;
-  }
-
-  template <int dim>
-  std::unique_ptr<MaterialModel::Rheology::FaultResistance> Material<dim>::make_resistance(ParameterHandler &prm) const
-  {
-    const MaterialModel::Rheology::RateAndStateFriction parameters= {prm.get_double("Reference friction coefficient"),prm.get_double("Direct effect"),prm.get_double("Evolution effect"),
-                                                                     prm.get_double("Reference speed"),prm.get_double("Slip distance"),prm.get_double("Radiation damping")
-                                                                    };
-    return std::make_unique<MaterialModel::Rheology::RateStateHistory>(parameters,prm.get_double("Initial age"));
   }
 
   template <int dim>
@@ -311,6 +299,8 @@ namespace aspect::GrowingFault
   template <int dim>
   void Material<dim>::load(const std::map<std::string,std::string> &status)
   {
+    AssertThrow(status.count("Native growing fault v1") || status.count("Native growing fault v2"),
+                ExcMessage("Checkpoint has no native growing fault history for the selected route."));
     const auto profile = status.find("Growing friction pressure profile");
     AssertThrow((profile!=status.end()) == normal_stress.uses_adiabat(),
                 ExcMessage("Growing fault friction pressure source differs from the checkpoint."));
@@ -336,5 +326,5 @@ namespace aspect::GrowingFault
   }
 
   ASPECT_REGISTER_MATERIAL_MODEL(Material,"growing fault",
-                                 "Fixed material strips with coupled plane-strain Maxwell, section RSF and irreversible midpoint AT1 evolution.")
+                                 "Compatibility spelling for phase field fault with midpoint fault phase: plane-strain Maxwell response, signed strip resistance and irreversible AT1 evolution.")
 }

@@ -14,7 +14,6 @@ subsection Adiabatic conditions model
     set Function expression = 293; p0 + dp_dz*depth; 1
   end
 end
-set Additional shared libraries = ./libgrowing_fault_checks.so
 subsection Postprocess
   set List of postprocessors = growing fault history
 end
