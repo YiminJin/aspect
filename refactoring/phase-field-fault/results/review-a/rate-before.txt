@@ -1,0 +1,7 @@
+Canonical one-field and legacy four-field accepted native stress and strips match
+Strip 8: 1.3271218197676033e-13 -> -1.3271218197676033e-13 m/s
+Canonical one-field and legacy four-field accepted native stress and strips match
+Reviewed checker accepted reverse
+Strip 8: 0 -> 1e-25 m/s
+Canonical one-field and legacy four-field accepted native stress and strips match
+Reviewed checker accepted perturb-zero

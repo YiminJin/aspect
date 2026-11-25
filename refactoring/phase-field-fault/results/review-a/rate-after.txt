@@ -1,0 +1,5 @@
+Canonical one-field and legacy four-field accepted native stress and strips match
+Strip 8: 1.3271218197676033e-13 -> -1.3271218197676033e-13 m/s
+Interface comparison rejected reverse: V at (8,): reference 1.3271218197676033e-13, target -1.3271218197676033e-13, difference -2.6542e-13, tolerance 1.3271e-25
+Strip 8: 0 -> 1e-25 m/s
+Interface comparison rejected perturb-zero: V at (8,): reference 0, target 1e-25, difference 1e-25, tolerance 0

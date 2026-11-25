@@ -2,6 +2,7 @@
 import argparse
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import xml.etree.ElementTree as ET
@@ -13,6 +14,40 @@ from check_repairs import subsection
 
 def material(route, values):
     return subsection('Material model', subsection(route,values))
+
+
+def compare_growing_frames(canonical, legacy, with_age=True):
+    """Compare the same physical input expressed through the two parameter routes."""
+    for tag in ('0000', '0001'):
+        a, b = (rows(d.glob(f'points-{tag}-r*.csv'), ('cell', 'q')) for d in (canonical, legacy))
+        if a.keys() != b.keys() or any(a[k]['section'] != b[k]['section'] for k in a):
+            raise ValueError(f'Native identities or strip membership changed at frame {tag}')
+        # Both decks use the same mesh and chord quadrature. Stresses are in
+        # Pa; phi, cohesive strain and the two point shear histories have no units.
+        for col in ('x', 'y', 'weight'):
+            compare_values(a, b, col, 0., 0.)
+        for col in ('tauxx', 'tauyy', 'tauzz', 'tauxy'):
+            compare_values(a, b, col, 1e-12, 1e-12)
+        for col in ('phi', 'Axx', 'Ayy', 'Azz', 'Axy'):
+            compare_values(a, b, col, 1e-15, 1e-12)
+        for col in ('signed_shear', 'absolute_shear'):
+            compare_values(a, b, col, 0., 1e-12)
+
+        a, b = (rows([d/f'sections-{tag}.csv'], ('section',)) for d in (canonical, legacy))
+        if a.keys() != b.keys() or any(a[k]['formed'] != b[k]['formed'] for k in a):
+            raise ValueError(f'Strip identities or formation flags changed at frame {tag}')
+        compare_values(a, b, 'xi', 0., 0.)                 # fixed strip coordinate (m)
+        compare_values(a, b, 'ds', 1e-14, 1e-12)           # current arclength (m)
+        compare_values(a, b, 'beta', 1e-14, 1e-12)         # direction (rad)
+        if any(('age' in next(iter(table.values()))) != with_age for table in (a, b)):
+            raise ValueError(f'Unexpected constitutive history at frame {tag}')
+        if with_age:
+            compare_values(a, b, 'age', 1e-12, 1e-12)      # accepted RSF history (s)
+        # Signed speed (m/s), integrated slip (m) and resistance (Pa) have
+        # no absolute floor. Zero must remain zero, and either creep direction
+        # must agree even when the rate is well below 1e-12 m/s.
+        for col in ('V', 'slip', 'force'):
+            compare_values(a, b, col, 0., 1e-12)
 
 
 def main():
@@ -51,11 +86,7 @@ def main():
     inputs=[growing/'onecut.prm',growing/'adiabatic_pressure.prm']
     seed=run('growth',example,extra_files=inputs)
     legacy=run('legacy-growth',(growing/'adiabatic_pressure.prm').read_text(),extra_files=inputs[:1])
-    for tag in ('0000','0001'):
-        for files,keys in [('points-'+tag+'-r*.csv',('cell','q')),('sections-'+tag+'.csv',('section',))]:
-            a,b=(rows(d.glob(files),keys) for d in (seed,legacy))
-            for col in set(next(iter(a.values())))-set(keys):
-                compare_values(a,b,col,1e-12,1e-12)
+    compare_growing_frames(seed,legacy)
     print('Canonical one-field and legacy four-field accepted native stress and strips match',flush=True)
 
     common=(fixed/'mature_trace.prm').read_text()
@@ -106,21 +137,41 @@ def main():
     file.write_text('id x_m y_m background_shear_Pa\n0 0 0 3.85\n1 0 1 3.85\n')
     result=run('persistent',homogeneous,stateless+fault('set Fault vertex file = '+str(file)),plugin=True)
     for step in (1,2):
-        actual=np.loadtxt(result/f'fault-labels-{step:05}.txt')[:,-1]
+        label_file=result/f'fault-labels-{step:05}.txt'
+        if 'age(s)' in label_file.read_text().splitlines()[0]:
+            raise ValueError('Stateless mature law published a constitutive age')
+        actual=np.loadtxt(label_file)[:,-1]
         expected=(3.85-(.02+.0125*step))/20
         np.testing.assert_allclose(actual,expected,rtol=0,atol=2e-12)
         print('Persistent shear, endpoint',step,'expected/measured',expected,actual,flush=True)
     alias=run('legacy-dashpot-trace',homogeneous.replace('Model name = phase field fault','Model name = linear trace resistance'),
               fault('set Background shear traction = 17\nset Fault vertex file = '+str(file)),plugin=True)
     labels_equal(alias,result)
-    alias=run('legacy-dashpot-strip',example.replace('Model name = phase field fault','Model name = linear strip resistance'),extra_files=inputs,plugin=True)
-    explicit=run('dashpot-strip',example,material('Growing fault','set Resistance law = linear dashpot'),inputs,plugin=True)
+    alias=run('legacy-dashpot-strip','include adiabatic_pressure.prm\n'+
+              subsection('Material model','set Model name = linear strip resistance'),extra_files=inputs,plugin=True)
+    explicit=run('dashpot-strip',example,fault('set Resistance law = linear dashpot'),inputs,plugin=True)
     if (alias/'sections-0001.csv').read_bytes()!=(explicit/'sections-0001.csv').read_bytes():
         raise ValueError('Legacy dashpot strip selector changed the law')
+    def check_dashpot(output, impedance):
+        strips=rows([output/'sections-0001.csv'],('section',))
+        for row in strips.values():
+            if 'age' in row:
+                raise ValueError('Stateless growing law published a constitutive age')
+            np.testing.assert_allclose(float(row['force']),impedance*float(row['V']),atol=0,rtol=1e-12,equal_nan=False)
+        print(f'Strip 8, impedance {impedance} Pa s/m: V={strips[(8,)]["V"]} m/s, force={strips[(8,)]["force"]} Pa',flush=True)
+    check_dashpot(explicit,1000.)
+    alternate='set Resistance law = linear dashpot\nset Dashpot impedance = 750'
+    public_impedance=run('public-impedance',example,fault(alternate),inputs,plugin=True)
+    legacy_impedance=run('legacy-impedance','include adiabatic_pressure.prm',
+                         material('Growing fault',alternate),inputs,plugin=True)
+    compare_growing_frames(public_impedance,legacy_impedance,with_age=False)
+    check_dashpot(public_impedance,750.)
+    run('legacy-selector-conflict',example,subsection('Material model','set Model name = linear strip resistance')+
+        fault('set Resistance law = rate and state'),inputs,'Legacy dashpot selector conflicts',plugin=True)
 
     run('wrong-statistics',example,subsection('Postprocess','set List of postprocessors = mature fault statistics'),inputs,'require a mature material trace')
     run('wrong-history',homogeneous,subsection('Postprocess','set List of postprocessors = growing fault history'),expected='requires the two-dimensional growing fault material')
-    run('route-conflict',example,fault('set Fault geometry = fixed interior'),inputs,'cannot accept mature trace geometry')
+    run('route-conflict',example,fault('set Fault geometry = fixed interior'),inputs,'requires mature trace mechanics')
 
     # Both checkpoint writers use the same field names, degrees and Bernstein
     # phase basis. Each reader therefore reaches the material history boundary.
@@ -133,7 +184,12 @@ def main():
     save=subsection('Checkpointing','set Steps between checkpoint = 1\nset Number of checkpoints to keep = 4')
     grow_parent=run('growing-parent',parent,'\nset End time = .005\n'+save)
     mature=parent.replace('single Advection, iterated Newton Stokes','single Advection, iterated Stokes').replace('midpoint fault phase','explicit DG SSPRK3')
-    mature+=material('Growing fault','set Seed tangent angle = 0\nset Forward seed tip = 0,0')
+    # Keep the checkpoint-compatible mesh and FE slots and remove the growth
+    # physics from this mature input. A mature checkpoint must reach the
+    # growing material's archive reader to exercise its wrong-route guard.
+    mature, n = re.subn(r'(?m)^[ \t]*subsection Growing fault\s*\n(?:[ \t]*set [^\n]*\n)*[ \t]*end[ \t]*\n', '', mature)
+    if n != 1:
+        raise ValueError('Expected the growing material subsection in the checkpoint writer')
     mature+=fault('set Fault geometry = fixed interior\nset Fit trace to phase = false\nset Fault vertices = .5,.2; 1,.8\nset Background shear traction = 128\nset Shear modulus = 10\nset Radiation damping = 100\nset Reference speed = .001\nset Direct effect = .1')
     mature+=subsection('Material model',subsection('Simple model','set Viscosity = 10'))
     mature+=subsection('Solver parameters',subsection('Stokes solver parameters','set Linear solver tolerance = 1e-13'))
