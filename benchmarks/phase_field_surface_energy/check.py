@@ -114,6 +114,13 @@ def main():
         local = 2 * area_integral / (c0 * 0.25)
         gradient = 2 * 0.25 * (5/8) / c0
         check_energy(law, stats, (local, gradient, local + gradient), ranks)
+        # Override the two inherited legacy settings with empty entries, so
+        # only the phase-owned subsection can supply the measured functional.
+        owned = (AFFINE + parameters("Fracture energy =", "Length scale =")
+                 + f"subsection Phase field\n  set Crack geometry = {law}\n"
+                   "  set Fracture energy = 2\n  set Length scale = 0.25\nend\n")
+        stats = run(command, destination, f"phase-{law}", owned)
+        check_energy(f"phase-{law}", stats, (local, gradient, local + gradient), ranks)
     if args.mpi:
         # Only the upper-right cell exceeds 1. The global minimum lies
         # in the opposite corner. The nearest Q3 point is this fraction

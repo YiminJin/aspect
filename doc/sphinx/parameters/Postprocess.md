@@ -935,38 +935,38 @@ Units: \si{\year} if the &rsquo;Use years instead of seconds&rsquo; parameter is
 ## **Subsection:** Postprocess / Phase field surface energy
 ::::{dropdown} __Parameter:__ {ref}`Crack geometry<parameters:Postprocess/Phase_20field_20surface_20energy/Crack_20geometry>`
 :name: parameters:Postprocess/Phase_20field_20surface_20energy/Crack_20geometry
-**Default value:** AT1
+**Default value:**
 
-**Pattern:** [Selection AT1|AT2|CZM ]
+**Pattern:** [List of <[Selection AT1|AT2|CZM ]> of length 0...1 (inclusive)]
 
-**Documentation:** Crack-geometric law for the configured phase-field surface functional.
+**Documentation:** Compatibility spelling of the entry in Phase field. Crack-geometric law. The default is AT1.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Fracture energy<parameters:Postprocess/Phase_20field_20surface_20energy/Fracture_20energy>`
 :name: parameters:Postprocess/Phase_20field_20surface_20energy/Fracture_20energy
-**Default value:** 1
+**Default value:**
 
-**Pattern:** [Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]
+**Pattern:** [List of <[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]> of length 0...1 (inclusive)]
 
-**Documentation:** Positive fracture energy per unit crack area Gc in J/m^2.
+**Documentation:** Compatibility spelling of the entry in Phase field. Positive fracture energy per unit crack area Gc in J/m^2. The default is 1.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Length scale<parameters:Postprocess/Phase_20field_20surface_20energy/Length_20scale>`
 :name: parameters:Postprocess/Phase_20field_20surface_20energy/Length_20scale
-**Default value:** 1
+**Default value:**
 
-**Pattern:** [Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]
+**Pattern:** [List of <[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]> of length 0...1 (inclusive)]
 
-**Documentation:** Positive regularization length in metres.
+**Documentation:** Compatibility spelling of the entry in Phase field. Positive regularization length in metres. The default is 1.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Phase composition<parameters:Postprocess/Phase_20field_20surface_20energy/Phase_20composition>`
 :name: parameters:Postprocess/Phase_20field_20surface_20energy/Phase_20composition
-**Default value:** phase_field
+**Default value:**
 
 **Pattern:** [Anything]
 
-**Documentation:** Name of the compositional field that contains the dimensionless phase.
+**Documentation:** Compatibility spelling of the entry in Phase field. Name of the dimensionless phase field. The default is phase_field.
 ::::
 
 (parameters:Postprocess/Point_20values)=

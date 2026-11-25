@@ -106,7 +106,9 @@ For the growing fault, select `midpoint fault phase` on one discontinuous quadra
 field of type `phase field`. The coupled mechanics and irreversible phase solve
 advances this field in the single-advection, iterated Newton Stokes scheme.
 Configure AT1 on the same named composition under
-{ref}`Phase field surface energy <parameters:Postprocess/Phase_20field_20surface_20energy>`.
+the {ref}`Phase field <parameters:Phase_20field>` subsection. Older inputs may use
+`Postprocess / Phase field surface energy` for the same four settings. Settings
+provided in both locations must agree.
 These parameters also select the functional for the optional energy postprocessor.
 With an ordinary composition and no fault material, the postprocessor can measure
 AT1, AT2 or CZM surface energy in two or three dimensions.
