@@ -1,6 +1,8 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**C1 supplies adiabatic pressure at the actual mature trace and growing strip stations.** See the [input and pressure profile](IMPLEMENTATION.md#use-aspects-adiabatic-pressure-for-friction) and the [C1 verification record](STATUS.md#interface-repairs-after-6b--c1). C2 follows architecture review.
+**C2 is ready for architecture review.** The [public inputs and material owners](IMPLEMENTATION.md#select-the-fault-calculation) separate existing material traces from irreversible midpoint growth under one model name. The [working record](STATUS.md#interface-c2) records the installed SDK checks, the frozen controls and the numerical decision outstanding on the adiabatic first turn.
+
+**C1 supplies adiabatic pressure at the actual mature trace and growing strip stations.** See the [input and pressure profile](IMPLEMENTATION.md#use-aspects-adiabatic-pressure-for-friction) and the [C1 verification record](STATUS.md#interface-repairs-after-6b--c1). The strip-8 rank comparison remains open at the original angle budget.
 
 **Stage B of the post-6B interface repairs** Growth has prescribed frictional compression, a shared phase functional, an independent phase face penalty, installed native stress output and startup solver identification. [Input and guide](IMPLEMENTATION.md#change-fault-compression-in-the-small-growing-example) · [Stage B results and commands](STATUS.md#interface-repairs-after-6b--stage-b). Stage C follows architecture review.
 

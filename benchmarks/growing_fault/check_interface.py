@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import xml.etree.ElementTree as ET
 
 import numpy as np
 from compare import rows, compare_values
@@ -71,7 +72,15 @@ def main():
             if (a/f).read_bytes()!=(b/f).read_bytes():
                 raise ValueError(f'Changed material identities or history: {f}')
     labels_equal(table,old)
-    print('Canonical table and inline label files identical at all three clocks',flush=True)
+    for step in range(3):
+        vtu=f'solution/solution-{step:05}.0000.vtu'
+        trees=[ET.parse(directory/vtu) for directory in (table,old)]
+        for name in ('fault_tau_xx','fault_tau_yy','fault_tau_xy'):
+            path=f'.//PointData/DataArray[@Name="{name}"]'
+            a,b=(tree.find(path) for tree in trees)
+            if a is None or b is None or not a.text or (a.attrib,a.text)!=(b.attrib,b.text):
+                raise ValueError(f'Changed accepted {name} at step {step}')
+    print('Canonical table and inline labels and physical stress arrays identical at all three clocks',flush=True)
     def vertex_case(name,content,settings='',error=None,plugin=False):
         file=root/(name+'.txt')
         file.write_text(content)

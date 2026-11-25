@@ -1,5 +1,107 @@
 # Phase-field fault working record
 
+## Interface C2
+
+Both installed examples use `Model name = phase field fault`. The [mature input](../../benchmarks/fixed_fault/mature_trace.prm) specifies `Fault geometry = boundary spanning` and an [ordered vertex table](../../benchmarks/fixed_fault/mature_vertices.txt). The [growing input](../../benchmarks/growing_fault/growing_seed.prm) gives its single phase field the `midpoint fault phase` method. The [guide](IMPLEMENTATION.md#select-the-fault-calculation) gives the parameter blocks, the equivalent inline mature input, the two pressure closures and the accepted output names. The [assignment](INTERFACE_C2_TASK.md) is ready for architecture review. The C1 cross-rank first-turn comparison remains open under its original tolerance.
+
+### What changed ownership
+
+The local HEAD on arrival was `5cd01f7f8d8011001b635724155861d1aff4422e` on `pf-rsf`. The release-to-C1 diff covered 57 files under `source` and `include`. The local working tree also supplied the two interface assignments and the FE verification skill. The proposed `source/simulator/phase_field.cc` was absent from the actual worktree. Inspection included the installed and benchmark consumers, registrations and instantiations, the component/field dispatch and checkpoint records. The donor remained read-only.
+
+```sh
+git status --short --branch
+git ls-files --others --exclude-standard
+git diff --name-status 0d97d2d3311154ca3f01d801b18f3945dc8b8bad..5cd01f7f8 -- include source
+test -e source/simulator/phase_field.cc   # exit 1
+```
+
+| Reader's starting point | Owner and reason |
+|---|---|
+| `source/simulator/core.cc`, Simulator constructor | The release material factory accepts a name. Only the top-level constructor also has the resolved field methods before plugin initialization. For the common name with midpoint phase it asks the same factory for the growing material. All other names use the existing factory path. Only the allocated material installs callbacks. The installed mature, growing, legacy and fault-free cases check this dispatch. |
+| `source/simulator/solver_schemes.cc` → `source/simulator/solver/midpoint_fault.cc` | The branch’s existing midpoint dispatch passes the active material to the solver. Previously the caller cast to a single-provider interface and imported its concrete history, geometry and point law. Now the public entry uses forward declarations. The global solver validates the active material and owns each attempt. Plane selection remains a separate implementation sharing that attempt. The material owns accepted native history keyed by (CellId,q), strip history by ID, archive compatibility and post-accept publication. |
+| `source/material_model/rheology/fault_resistance.cc` and `rate_and_state_friction.cc` in the same directory | One registry constructs a law on either route. One RSF reader retains the two routes’ historical defaults. Positive-speed traction at fixed age and signed stage-aged resistance keep their distinct contracts. A new law registers once. The standalone dashpot has zero stored state and runs both materials. Legacy test material names are confined to the verification plugin. |
+| `source/material_model/rheology/cohesive_maxwell.cc` → `source/phase_field/degradation.cc` | Previously plane selection and the point law each calculated the cohesive fraction. Now the plane search calls the same point-law degradation operation as the response and tangent. The shared phase law also supplies the raw excess compliance used by mature normalization. The crack-density laws, mature tail policy, growth roundoff limit and FE normalization retain their own consumers. |
+| `source/reconstructed_fault/material_sections.cc` | Both pressure and front eligibility interpolate the same knots and arriving-segment orientation. Pressure clips the represented interval to the physical box and measures its midpoint. Front selection evaluates the accepted FE phase on the material graph. The bent-graph test places the last material station at (1.75, 1.175) m and its clipped pressure station at (1.5375, 0.9625) m. |
+| `source/postprocess/growing_fault_history.cc` and `source/postprocess/mature_fault_statistics.cc` | Built-in postprocessors read accepted material state. Growth writes native deviatoric stresses including zz in Pa, strip tables and the work ledger. The mature reporter writes stable label IDs and rates. Its original selector is an alias. The old benchmark exporter now extends the production reporter only to record operator and lifecycle observations. |
+| Shared DG, FE, and install code | The stress adapter and regressions include the generic transport entry directly. Bernstein and DG transport have independent fault-free 2-D/3-D callers. The fault stress assembler contributes an actual Stokes load. The mature coupling retains persistent solver callbacks. None needs the nine-strip fixture. The installed ASPECT package previously included build/source headers in external builds. The build-tree package still points there, while the installed package supplies its own ASPECT and variant-specific World Builder headers. All recorded external compile commands were checked. |
+
+The vertex table uses release ASPECT's read-once-and-distribute utility. Each rank parses the same rows for its replicated material labels. ID order fixes slip sense. Optional age belongs to the selected law. Optional shear replaces uniform background loading on every balance evaluation. Geometry retains the evolved width across a repartitioned restore. The refactor adds no replicated FE vector, native history copy, MPI call in constitutive evaluation, or per-step file read. The accepted graph uses one knot per station. The two-rank affine run retained 112 bytes per native point history and reported peak RSS of 227,900 and 238,748 KiB on its two ranks. Growing mechanics still uses fixed-reference 2-D strips, the mature plane-strain stress adapter still uses three DG fields, and boundary-spanning mature runs still start from initial conditions.
+
+Review commits are `229702810`, `f614a21f1` and `ef37df4a2` for the C1 investigation, `008347958` for the AGENTS baseline and forwarding header, `cc674c852` and `dac70685e` for the SDK, `e75d51747`, `2e701fa43` and `8bd63e6a7` for the shared operators and state owners, `997ce9721` for public dispatch, friction construction and accepted output, and `7dcd303dc` for the parameter files and their crossing and restart regressions.
+
+### C1 first turn at 5 ms
+
+Before moving code, the one- and two-rank runs reproduced the C1 failure on the affine adiabatic profile. The [captured inputs and rows](results/interface-c2/c1-captures.tar.gz), [capture patch](results/interface-c2/capture-c1.patch), [replay](results/interface-c2/replay.py) and [full measurements](results/interface-c2/before.txt) preserve the decision. The post-C2 installed run gave the same two failed quantities.
+
+* The incoming 2,144 FE rows, 4,968 native points and nine strip records compared exactly by physical ID. The first measurable difference is in the returned midpoint fields **before** the plane search. Maximum differences were 8.90e−21 m in displacement, 2.26e−19 in scaled pressure and 2.78e−17 in midpoint phase. The 180 strip-8 native samples then differed by up to 6.76e−14 Pa in predictor stress. Their areas and localization weights matched. In the two-rank run rank one owned all 180 points. The MPI sum equals the sum of the rank partials exactly. In the serial capture, local accumulation differed from the physically ordered sum by up to 3.55e−15 in a traction moment.
+* The independent replay solves the signed RSF root and sums the squared point scores at 65-digit precision on the same inputs. It checks the incoming angle, a distinct off-peak angle of +0.23 rad, and both observed maxima. The gap between maxima was 1.00358e−20 Pa² m² at a curvature of −1.10991e−8 Pa² m²/rad². At those two fixed angles the production score varied by 3.53e−20 and 4.12e−20 Pa² m² between layouts. The direct gap is only 24–28% of that variation. The model resolves the turn from zero more strongly than the difference between these two locations near the peak.
+* All nine pressure stations and pressures agreed exactly. At strip 8 the consumed pressure was 201.6497530187624 Pa. The signed rates at the respective accepted angles were +1.3271218197676033e−13 and +1.3271219891713773e−13 m/s. Their absolute difference was 1.69403774038e−20 m/s, relative difference 1.27647493686e−7. At each actual angle the independent signed-root relative error was at most 7.11e−14 and resistance differed by at most 2.06e−13 Pa. The inter-layout resistance difference was 3.86101e−7 Pa. Formation and ages agreed. Maximum differences were 9.10e−13 Pa in native stress and 3.47e−14 J/m in fracture energy.
+* Production chose −0.14788742977350777 and −0.14788657313582751 rad. The angle difference of 8.5664e−7 exceeds 1.1479e−7 rad. The arclength difference of 3.1999e−8 exceeds 2.5084e−8 m. The checker returns 1. A separately committed candidate (`46b426a3f` on `pf-rsf-c1-score-candidate`; [portable patch](results/interface-c2/stable-score.patch)) uses the resolved creep rate divided by mobility in the centered traction. It passed the original affine comparison (angle difference 6.964e−9 rad, arclength difference 2.602e−10 m) and the off-peak check. It failed the frozen **constant-pressure nine-strip** donor arclength, giving 0.25074188693430988 versus 0.25074191554565439 m, a difference of 2.8611e−8 m against 2.5084e−8 m. The 18-strip recorder also detected changed physical output. [Affine run](results/interface-c2/score2.log) · [Nine-strip failure](results/interface-c2/stable-frozen.txt) · [18-strip result](results/interface-c2/stable-strip18.txt). Production retains the original score. Adopting a different numerical peak evaluation with its changed donor trajectory requires a scientific decision. Neither tolerance nor reference was changed.
+
+### Installed Release qualification
+
+| Check actually run | Measured result |
+|---|---|
+| Public inputs and output | Fresh installed one-field growing input completed through 5 ms with no additional shared library. The accepted native point file and strip table were byte-identical to the captured C1 output. File-based mature output matched the three inline label tables byte for byte. All three named physical stress arrays also had identical VTU payloads at every clock. The old and new selectors ran through the same active route. Both wrong-route checkpoint directions were rejected with the same FE basis and field names. Incompatible postprocessors were diagnosed. |
+| Vertex inputs, transfer and continuation | Bad ID/order, duplicate source or column, missing named header, nonfinite data, nonstraight geometry and age on a stateless law were rejected. Same-layout file/inline labels and native samples matched exactly at all three clocks on one and two ranks. Material ID 9 crossed from owner 0 to owner 1. Serial/MPI maximum difference over exported columns was 1.96e−14 and one-to-two-rank continuation differed by at most 1.48e−14. The finite/full legacy support reader retained evolved radii and diagnosed a changed convention. |
+| Law substitution and return to Stokes | The independently built dashpot-only plugin had no material or output registration. Both public routes reproduced the observer-plugin results. Signed reversed strips passed the analytic root, returned tangent, independently summed directional score and empty archive checks. Two physical mature steps with zero initial DG stress and file shear of 3.85 Pa gave the analytic 0.190875 and 0.19025 m/s despite a scalar 17 Pa. For loaded mature RSF the named accepted xy output was 0.0325 Pa at all 36 samples. The first moving RHS action was 0.00470308600006 against fresh/stale slip work 0.00470308490838/0.00464539098427. Clean, retry and restarted accepted frames matched exactly. |
+| Legacy RSF and pressure | Repaired growing generations 01 and 03 and the legacy snapshot continued. Duration-triggered friction and Maxwell cuts recovered their clean 2.5 ms endpoints. Cold-creep published RSF residual 1.42e−14 Pa, native-rate reconstruction error 2.16e−27 m/s on a 1.35e−24 budget, positive frictional work 8.45e−23 J/m. Constant adiabatic 200 and 250 Pa reproduced Stage B. A +100 Pa Stokes datum shift retained the friction response. Both mature closures passed the fixed and moving checks. The moving pressure error over 854 active points was at most 2.85e−14 Pa. |
+| Independent operators and fault-off controls | Release units passed **2,574 assertions in 61 cases** and the ordinary affine AT2 CTest passed. The fully damaged growth seed reached physical acceptance. Invalid phase was rejected. Increasing mature magnitude from 1 to 4 took the raw normal integral from 1.118343195266272 to 4.473372781065088 m and retained χ = 1 m⁻¹. Near the pole the checked integral was 1534.6965325035212 m. The fitted mature AT1 run passed all 38 IDs at all three clocks. Signed stress face flux errors were at most 3.56e−14 Pa m²/s and the spin-order check passed. In the two-rank fault-free cube the upper integrals were 0.18748774999999998 and −0.062512249999999991. The z partition carried both fields, with serial/MPI coefficient difference at most 1.94e−16. |
+| Frozen growing controls | Fresh two-rank nine-strip runs passed all three donor frames, final integrated slip 0.000169302306477 m². Fresh 18-strip preparation, coarse and half-step solves with retained independent returned-row observations reproduced the complete pre-C2 strict 5B report directory byte for byte. Strict exit 1 still reports exactly four strip-15 angle comparisons, each differing by 2.36894412808e−7 rad. During consolidation this guard detected even a multiplication-order change in the energy ledger. Restoring the original operation order inside the shared owner recovered the original report. |
+
+External CMake projects used ASPECT headers from the fresh install, including the growing operator observer, midpoint schedule, ridge and layered materials, DG tracer, pressure probe, mature retry, stress spin and flux plugins, and the standalone resistance law. The full installed example driver also passed from outside the checkout. Its two-rank energy case found the deliberately invalid phase on precisely one owner. Its 18-strip schedules had identical seed and 5 ms parent tables, with 10 ms phase L² separation 0.007426652667963157 m by Gauss(3) and 0.00742665266796313 m by native integration. Coverage is Release, one and two MPI ranks with one numerical thread per rank, at most four workers. Debug and the unrestricted ASPECT CTest suite were outside this focused rerun.
+
+### Reproduction from the worktree root
+
+Use fresh output destinations. The initial runs used the C1 build before any edits. A second replay used the retained C1 installation, its own unmodified checker and its matching plugin. Its CMake banner reports the configure-time Git revision `1294f2f5d`. The binary and plugin hashes below identify that installation. The original checker exits on the first failing angle. The post-C2 checker records the two discrepancies and compares the signed roots. The archive replay uses Python with mpmath and NumPy and runs without a solver executable.
+
+```sh
+D=$PWD/build-interface-c2
+F=refactoring/phase-field-fault/results/interface-c2
+M=/opt/openmpi/5.0.6/bin/mpirun
+export DEAL_II_NUM_THREADS=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+OLD=$(find "$(cat build-interface-c1/install-location)" -type f -path '*/bin/aspect-release')
+OG=$(dirname "$(dirname "$OLD")")/benchmarks/growing_fault
+sha256sum -c <<CHECKSUM
+36309900fd978c5268237315d5ad273542c2a81eb6e35d6a7d54b79693be0587  $OLD
+43a3c726e078787db9b21f62b65884b1ec89668e431ce4c75cc5d2734a1153d0  $OG/libgrowing_fault_checks.release.so
+CHECKSUM
+python3 "$OG/check_adiabatic_pressure.py" "$OLD" "$OG/libgrowing_fault_checks.release.so" "$D/preinstalled1" profile
+python3 "$OG/check_adiabatic_pressure.py" "$OLD" "$OG/libgrowing_fault_checks.release.so" "$D/preinstalled2" profile --ranks 2 --mpiexec "$M" --serial "$D/preinstalled1"
+S=$(mktemp -d)
+tar -xzf "$F/c1-captures.tar.gz" -C "$S"
+python3 "$F/replay.py" "$S/build-interface-c2/cap1/output" "$S/build-interface-c2/cap2/output" > "$S/report"
+diff -u "$F/before.txt" "$S/report"  # identical
+```
+
+The following recipes contain the individual simulator, CMake, oracle and MPI commands. The frozen, pressure and continuation groups use the independent donor/Stage B/old-checkpoint paths named in the recipe. These archives are comparison inputs only. The two public examples can be run directly from any fresh installation with examples enabled.
+
+```sh
+B=$PWD/build-6b/release
+I=$D/qualified-sdk
+P=$D/sdk-plugins
+bash "$F/sdk.sh" "$B" "$I" "$P"
+for group in public serial mpi moving stress; do
+  bash "$F/verify.sh" "$group" "$B" "$I" "$P" "$D/qualification" "$M" || exit 1
+done
+python3 "$I/benchmarks/layered_moving_fault/check_vertex_file.py" "$I/bin/aspect-release" \
+  "$P/layered_moving_fault/liblayered_moving_fault.release.so" "$D/vertices-qualified" --mpiexec "$M"
+bash "$F/verify.sh" frozen "$B" "$I" "$P" "$D/qualification" "$M"  # strict 5B exit 1
+diff -qr "$D/qualification/strict" build-5b/closeout/final-audit   # exit 0
+bash "$F/verify.sh" profile "$B" "$I" "$P" "$D/qualification" "$M"  # C1 exit 1
+O=$(mktemp -d)
+(cd "$O" && bash "$I/benchmarks/verify_phase_field_fault.sh" "$O/installed-suite-mpi" "$M")
+cp -r "$I/benchmarks/growing_fault" "$I/benchmarks/fixed_fault" "$O/"
+(cd "$O/growing_fault" && "$I/bin/aspect-release" growing_seed.prm)
+(cd "$O/fixed_fault" && "$I/bin/aspect-release" mature_trace.prm)
+for f in sections-0001.csv points-0001-r0.csv; do
+  cmp "$O/growing_fault/output-growing-seed/$f" "$D/preinstalled1/affine/output/$f"
+done
+for f in "$O/fixed_fault/output-mature-trace"/fault-labels-*.txt; do
+  cmp "$f" "$D/qualification/public/inline/output/${f##*/}"
+done
+```
+
 ## Interface repairs after 6B — C1
 
 Edit `Friction normal stress = adiabatic pressure` under `Material model`, then edit `p0=200, dp_dz=50` in the ordinary ASPECT adiabatic function. The [installed input](../../benchmarks/growing_fault/adiabatic_pressure.prm) stops at 5 ms. The [guide](IMPLEMENTATION.md#use-aspects-adiabatic-pressure-for-friction) shows the whole block, the old spellings and both sampling rules.
