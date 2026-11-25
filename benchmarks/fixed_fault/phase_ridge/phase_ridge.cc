@@ -126,7 +126,8 @@ namespace aspect
     };
     ASPECT_REGISTER_MATERIAL_MODEL(ObservedRidge,"observed ridge","Unmodified free RSF solve with a collective fixture probe.")
 
-    // Observe the actual Q3 assembly on the cell containing an interior inclined knot. At initialization the prescribed DG parent stress is zero.
+    // Test the ordinary Stokes RHS on the cell containing an interior inclined
+    // knot. The initial parent stress is zero and the imposed rate is constant.
     template <int dim>
     class MeasuredStressLoad : public Assemblers::FaultStressLoad<dim>
     {
@@ -150,9 +151,13 @@ namespace aspect
           internal::Assembly::CopyData::StokesSystem<dim> isolated(n,false);
           Assemblers::FaultStressLoad<dim>::execute(scratch_base,isolated);
           data.local_rhs+=isolated.local_rhs;
-          const auto &fe=scratch.finite_element_values;
           const auto &intro=this->introspection();
           const auto field=intro.compositional_index_for_name(this->get_parameters().surface_energy_model.composition);
+          // Pair the assembled Q3 vector with a Q2 velocity. Integrate the
+          // unprojected physical slip independently on the section's Q8 rule.
+          FEValues<dim> fe(this->get_mapping(),this->get_fe(),QGauss<dim>(8),
+                           update_values|update_quadrature_points|update_JxW_values);
+          fe.reinit(scratch.cell);
           std::vector<double> phase(fe.n_quadrature_points);
           fe[intro.extractors.compositional_fields[field]].get_function_values(this->get_old_solution(),phase);
           AssertThrow(profile.geometry.cut_quadrature(lo,hi).size()>0,ExcInternalError());
@@ -168,6 +173,11 @@ namespace aspect
               const auto x=this->get_mapping().transform_unit_to_real_cell(scratch.cell,this->get_fe().unit_support_point(idx));
               actual+=isolated.local_rhs(i)*(component==intro.component_indices.velocities[0] ? x[1]*(1.+x[0]) : .4*x[0]);
             }
+          // This prescribed fixture uses one uniform Maxwell coefficient.
+          const auto &viscosities=scratch.material_model_outputs.viscosities;
+          const double kappa=viscosities.front();
+          AssertThrow(std::all_of(viscosities.begin(),viscosities.end(),
+                                  [kappa](const double value) { return value==kappa; }),ExcInternalError());
           for (unsigned int q=0; q<phase.size(); ++q)
             {
               const auto x=fe.quadrature_point(q);
@@ -179,14 +189,14 @@ namespace aspect
               SymmetricTensor<2,dim> strain;
               strain[0][0]=x[1];
               strain[0][1]=.5*(1.4+x[0]);
-              const double work=2.*scratch.material_model_outputs.viscosities[q]*.005*chi*fe.JxW(q)*(f.tangent*(strain*f.normal));
+              const double work=2.*kappa*.005*chi*fe.JxW(q)*(f.tangent*(strain*f.normal));
               reference+=work;
               scale+=std::abs(work);
             }
-          AssertThrow(scale>0. && std::abs(actual-reference)<512.*std::numeric_limits<double>::epsilon()*scale,
-                      ExcMessage("Localized Q3 Stokes RHS failed the signed slip-work check."));
           std::ofstream out(this->get_output_directory()+"rhs-action.txt");
-          out<<std::setprecision(17)<<actual<<' '<<reference<<' '<<scale<<'\n';
+          out<<std::setprecision(17)<<actual<<' '<<reference<<' '<<scale<<std::endl;
+          AssertThrow(scale>0. && std::abs(actual-reference)<512.*std::numeric_limits<double>::epsilon()*scale,
+                      ExcMessage("Projected Stokes RHS failed its independent Q8 slip-work check."));
         }
     };
 
@@ -483,7 +493,8 @@ namespace aspect
                           bulk<<' '<<tau<<' '<<sigma<<' '<<grad[q][0][0]<<' '<<grad[q][0][1]<<' '<<grad[q][1][0]<<' '<<grad[q][1][1]<<' '<<s.foot.active;
                           if (compare_donor_load)
                             {
-                              // Isolate the actual returned tensor in Pa. The initial
+                              // Isolate the pointwise constitutive slip stress in Pa
+                              // for the donor comparison. The initial
                               // parent is identically zero. On a physical step cancel
                               // the same parent with a zero-phase material evaluation.
                               Stress slip=m.endpoint_stress(cell,x,phi[q],Stress());

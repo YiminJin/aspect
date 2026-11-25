@@ -46,7 +46,7 @@ namespace aspect
         {
           return accepted->profile;
         }
-        /** Stress used by Stokes at the current endpoint, in Pa. */
+        /** Physical endpoint stress in Pa, evaluated before the boundary-spanning weak-load projection. */
         SymmetricTensor<2,dim> endpoint_stress(const typename DoFHandler<dim>::active_cell_iterator &cell,
                                                const Point<dim> &x, double phase, const SymmetricTensor<2,dim> &strain) const;
         void save(std::map<std::string,std::string> &status) const override;

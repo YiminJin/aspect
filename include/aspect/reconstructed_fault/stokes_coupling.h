@@ -30,7 +30,7 @@ namespace aspect
       void connect_section_balance();
       /** Transport (when selected), rotate and project the accepted physical stress on owned cells. */
       void prepare_parent();
-      /** Spatial stress (Pa) added to the implicit plane-strain viscous stress. */
+      /** Constitutive stress offset (Pa) for physical stress evaluation and publication. */
       SymmetricTensor<2,dim> stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
                                            const Point<dim> &position, double phase) const;
 
@@ -68,6 +68,17 @@ namespace aspect
       };
       std::map<CellId,Reaction> reaction;
       std::vector<double> reaction_rates;
+
+      /** DGQ2 moments of the boundary-spanning slip stress in Pa on owned
+       * cells with section support. Rebuilt from prescribed or solved trial
+       * rates before Stokes assembly. These are weak loads, never history. */
+      std::map<CellId,std::vector<Stress>> boundary_slip_load;
+      void project_boundary_slip_load(const LinearAlgebra::BlockVector &fields);
+      Stress slip_stress(const Point<dim> &position, double phase) const;
+      Stress bulk_stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
+                                const Point<dim> &position, const Point<dim> &unit) const;
+      Stress stokes_stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
+                                  const Point<dim> &position, double phase) const;
       /** Replace trial moments and optionally measure the change from the last Stokes assembly. */
       double project_reaction(const LinearAlgebra::BlockVector &iterate, bool compare_with_assembly);
       /** Owned DGQ2 rotated spatial parent in Pa. Apply the local Maxwell beta

@@ -36,9 +36,13 @@ def main():
     parser.add_argument("grid", type=int, choices=[32, 64])
     parser.add_argument("--ranks", type=int, choices=[1, 2], default=1)
     parser.add_argument("--retry-plugin", type=Path, help="Existing fixed_fault test library for a rejected 25 ms attempt")
+    parser.add_argument("--advect-stress", action="store_true",
+                        help="Transport the accepted DG stress before the free section solve")
     args = parser.parse_args()
     if args.retry_plugin and args.case != "free":
         parser.error("--retry-plugin applies to the free-RSF trajectory")
+    if args.advect_stress and args.case != "free":
+        parser.error("--advect-stress applies to the free-RSF trajectory")
     dest = args.directory.resolve()
     dest.mkdir(parents=True)
     vertical = args.case in ("vertical", "narrow", "translated")
@@ -80,6 +84,17 @@ end
     dt = 0.1 if native else 0.0125
     end = 2*dt if free else dt
     libraries = str(args.plugin.resolve())
+    if args.advect_stress:
+        extra += """
+subsection Material model
+  subsection Phase field fault
+    set Advect physical stress = true
+    subsection Exterior parent stress
+      set Function expression = 0;0;0
+    end
+  end
+end
+"""
     if args.retry_plugin:
         libraries += ", " + str(args.retry_plugin.resolve())
         extra += """

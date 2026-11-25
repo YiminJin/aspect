@@ -150,7 +150,7 @@ def check_case(root, case, grid):
     recovered, rays = normal_projection(phase, vertices, init[:, 3], nominal_width)
     print(f"  nominal profile half width {nominal_width:.9g} m: maximum omitted fraction {max(rays[:,2]):.8g}")
     integral_error = max(abs(recovered-init[:, 3]))
-    # Compare the actual bulk Q3 points with the Q8 section rule on the same
+    # Compare raw pointwise quadratures (the Stokes RHS uses projected work) on the same
     # nonconstant manufactured rate and virtual traction used by the probe.
     lengths = np.linalg.norm(np.diff(vertices, axis=0), axis=1)
     station = np.r_[0, np.cumsum(lengths)]
@@ -161,7 +161,7 @@ def check_case(root, case, grid):
     w = gauss(3)[1]
     volumes = w[points["q"]//3]*w[points["q"]%3]/grid**2
     q3 = volumes @ (virtual*points["chi"]*((1-xi)*v[j]+xi*v[j+1]))
-    print(f"{case}-{grid} Q3 minus Q8 bulk work {q3-metrics(output,0)['work'][0]:.6g}")
+    print(f"{case}-{grid} raw Q3 minus Q8 work {q3-metrics(output,0)['work'][0]:.6g}")
     if case == "free":
         # Reassemble the seed's first normal moment directly from FE points.
         # The seed is centered and straight, so an unbiased fit would have zero RHS.
@@ -225,16 +225,6 @@ def check_case(root, case, grid):
     previous = init
     outputs = sorted(output.glob("labels-*-0.txt"))
     require(len(outputs) == (3 if free else 2), f"Unexpected clock count for {case}")
-    if free and grid == 32:
-        record = Path(__file__).with_name("3a-repair-free-labels.csv")
-        reference = np.loadtxt(record, delimiter=",", skiprows=1)
-        history = np.vstack([labels(output, step) for step in range(3)])
-        np.testing.assert_array_equal(history[:, 0], np.tile(np.arange(38), 3))
-        np.testing.assert_array_equal(history[:, 7], np.repeat([0., .0125, .025], 38))
-        np.testing.assert_array_equal(history[:, [0, 7]], reference[:, [0, 7]])
-        near(history[:, 1:7], reference[:, 1:7], 1.e-10, 1.e-8)
-        print(f"  corrected 3A reference: 38 labels at all three clocks; max absolute differences "
-              f"(x, y, I, age, slip, rate) {np.max(np.abs(history[:, 1:7]-reference[:, 1:7]), axis=0)}")
     for step in range(len(outputs)):
         current = labels(output, step)
         near(current[:, 7], expected_dt*step, 1.e-16)
@@ -274,6 +264,16 @@ def check_case(root, case, grid):
             sampled = bulk(output, step)
             for key in ("cell", "q", "phi"):
                 np.testing.assert_array_equal(sampled[key], points[key])
+    if free and grid == 32:
+        record = Path(__file__).with_name("3a-repair-free-labels.csv")
+        reference = np.loadtxt(record, delimiter=",", skiprows=1)
+        history = np.vstack([labels(output, step) for step in range(3)])
+        np.testing.assert_array_equal(history[:, 0], np.tile(np.arange(38), 3))
+        np.testing.assert_array_equal(history[:, 7], np.repeat([0., .0125, .025], 38))
+        np.testing.assert_array_equal(history[:, [0, 7]], reference[:, [0, 7]])
+        near(history[:, 1:7], reference[:, 1:7], 1.e-10, 1.e-8)
+        print(f"  corrected 3A reference: 38 labels at all three clocks; max absolute differences "
+              f"(x, y, I, age, slip, rate) {np.max(np.abs(history[:, 1:7]-reference[:, 1:7]), axis=0)}")
     return metrics(output, 1)["moments"]
 
 
@@ -442,6 +442,22 @@ def plot(root, path):
     plt.close(fig)
 
 
+def check_retry(root):
+    clean, retry = root/"free-32/output", root/"free-32-retry/output"
+    require((retry.parent/"run.log").read_text().count("Repeating the current time step") == 1,
+            "Expected one rejected long step")
+    require(len(list(retry.glob("labels-*-0.txt"))) == 3, "Rejected state was published")
+    for step in range(3):
+        near(labels(clean, step), labels(retry, step), 1.e-10, 1.e-8)
+        a, b = bulk(clean, step), bulk(retry, step)
+        for key in ("q", "cell", "phi"):
+            np.testing.assert_array_equal(a[key], b[key])
+        for key in a.dtype.names[2:]:
+            near(a[key], b[key], 1.e-10, 1.e-8)
+        print(f"free retry {step}: label {np.max(abs(labels(clean,step)-labels(retry,step))):.3g}, "
+              f"bulk {max(np.max(abs(a[key]-b[key])) for key in a.dtype.names[2:]):.3g}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path)
@@ -464,7 +480,7 @@ def main():
                 near(actual,reference,512*np.finfo(float).eps*scale)
             defects = [check_moments(args.root/f"{case}-{grid}",grid,1,.1) for grid in grids]
             require(len(defects)==1 or defects[1]<defects[0] or max(defects)<=.01, "Cut moments failed refinement")
-            print(f"  signed Q3 load on {case}: {actual:.12g} vs {reference:.12g}, scale {scale:.6g}")
+            print(f"  assembled Q3 vs raw Q8 slip work on {case}: {actual:.12g} vs {reference:.12g}, scale {scale:.6g}")
         if case=="free":
             for step in (1,2):
                 defects=[check_moments(args.root/f"free-{grid}",grid,step,.0125) for grid in grids]
@@ -479,19 +495,7 @@ def main():
         np.savetxt(args.history, history, fmt=["%d"]+["%.17g"]*7, delimiter=",", comments="",
                    header="label_id,x_m,y_m,I_h_m,age_s,slip_m,rate_m_per_s,time_s")
     if args.retry:
-        clean, retry = args.root/"free-32/output", args.root/"free-32-retry/output"
-        require((retry.parent/"run.log").read_text().count("Repeating the current time step") == 1,
-                "Expected one rejected long step")
-        require(len(list(retry.glob("labels-*-0.txt"))) == 3, "Rejected state was published")
-        for step in range(3):
-            near(labels(clean, step), labels(retry, step), 1.e-10, 1.e-8)
-            a, b = bulk(clean, step), bulk(retry, step)
-            for key in ("q", "cell", "phi"):
-                np.testing.assert_array_equal(a[key], b[key])
-            for key in a.dtype.names[2:]:
-                near(a[key], b[key], 1.e-10, 1.e-8)
-            print(f"free retry {step}: label {np.max(abs(labels(clean,step)-labels(retry,step))):.3g}, "
-                  f"bulk {max(np.max(abs(a[key]-b[key])) for key in a.dtype.names[2:]):.3g}")
+        check_retry(args.root)
     if args.plot:
         plot(args.root, args.plot)
     if args.donor:

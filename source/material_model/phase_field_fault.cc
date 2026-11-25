@@ -203,7 +203,7 @@ namespace aspect
             for (unsigned int c=0; c<stress_fields.size(); ++c)
               physical->output_values[c][q] = in.composition[q][stress_fields[c]];
           if (offset)
-            offset->stress[q] = coupling.stress_offset(in.current_cell,in.position[q],in.composition[q][phase_field]);
+            offset->stress[q] = coupling.stokes_stress_offset(in.current_cell,in.position[q],in.composition[q][phase_field]);
         }
     }
 

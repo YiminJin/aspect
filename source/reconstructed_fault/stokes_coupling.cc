@@ -16,6 +16,9 @@ namespace aspect
 {
   namespace
   {
+    // Both directions of the boundary-spanning slip transfer use this measure.
+    constexpr unsigned int section_quadrature_order = 8;
+
     // A constant pressure changes the weak momentum balance if an exterior
     // face admits normal test velocity. A prescribed tangential component
     // still allows this flux. A periodic pair cancels it.
@@ -93,7 +96,10 @@ namespace aspect
   {
     material.bind_candidate(iterate);
     trial_rates = solve_rates(iterate);
-    if (material.interior_seed) project_reaction(iterate,false);
+    if (material.interior_seed)
+      project_reaction(iterate,false);
+    else
+      project_boundary_slip_load(iterate);
   }
 
   template <int dim>
@@ -203,13 +209,15 @@ namespace aspect
           FETools::compute_projection_from_quadrature_points(projector,rotated,coefficients);
         }
 
+    if (!material.interior_seed)
+      project_boundary_slip_load(fields);
   }
 
   template <int dim>
   std::vector<typename FaultStokesCoupling<dim>::BulkPoint>
   FaultStokesCoupling<dim>::sample_bulk(const LinearAlgebra::BlockVector &iterate) const
   {
-    const QGauss<dim> rule(8);
+    const QGauss<dim> rule(section_quadrature_order);
     FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_values | update_gradients | update_quadrature_points | update_JxW_values);
     FullMatrix<double> basis(rule.size(),stress_element().n_dofs_per_cell());
     FETools::compute_interpolation_to_quadrature_points_matrix(stress_element(),rule,basis);
@@ -282,10 +290,52 @@ namespace aspect
 
   template <int dim>
   typename FaultStokesCoupling<dim>::Stress
-  FaultStokesCoupling<dim>::stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
-                                          const Point<dim> &position, const double phase) const
+  FaultStokesCoupling<dim>::slip_stress(const Point<dim> &position, const double phase) const
   {
-    const auto unit = this->get_mapping().transform_real_to_unit_cell(cell,position);
+    const auto &profile = material.section().profile;
+    const auto transfer = profile.sample(position,phase);
+    return -2.*material.stiffness(position)*symmetrize(profile.slip_gradient(transfer,transfer.rate(trial_rates)));
+  }
+
+  template <int dim>
+  void FaultStokesCoupling<dim>::project_boundary_slip_load(const LinearAlgebra::BlockVector &fields)
+  {
+    // On an affine Cartesian cell eps(v_Q2) belongs to tensor-product Q2.
+    // Project the signed slip stress using the section measure: testing its
+    // DGQ2 representation at Stokes Q3 then reproduces every Q8 shear row.
+    const QGauss<dim> rule(section_quadrature_order);
+    const auto &dg = stress_element();
+    FullMatrix<double> projection(dg.n_dofs_per_cell(),rule.size());
+    FETools::compute_projection_from_quadrature_points_matrix(dg,rule,rule,projection);
+    FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_values | update_quadrature_points);
+    const auto &field = this->introspection().extractors.compositional_fields[material.phase_field];
+    std::vector<double> phase(rule.size());
+    std::vector<Stress> slip(rule.size());
+    const auto is_zero = [](const Stress &stress)
+    {
+      return stress == Stress();
+    };
+    boundary_slip_load.clear();
+    for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+      if (cell->is_locally_owned())
+        {
+          fe.reinit(cell);
+          fe[field].get_function_values(fields,phase);
+          for (unsigned int q=0; q<rule.size(); ++q)
+            slip[q] = slip_stress(fe.quadrature_point(q),phase[q]);
+          if (std::all_of(slip.begin(),slip.end(),is_zero))
+            continue;
+          auto &coefficients = boundary_slip_load[cell->id()];
+          coefficients.resize(dg.n_dofs_per_cell());
+          FETools::compute_projection_from_quadrature_points(projection,slip,coefficients);
+        }
+  }
+
+  template <int dim>
+  typename FaultStokesCoupling<dim>::Stress
+  FaultStokesCoupling<dim>::bulk_stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
+                                               const Point<dim> &position, const Point<dim> &unit) const
+  {
     if (!reaction.empty())
       {
         // For Cartesian Q2 velocity the test gradient lies in DGQ2. Integrating
@@ -297,12 +347,39 @@ namespace aspect
           offset+=stress_element().shape_value(i,unit)*(frozen.stress[i]-material.viscous_stress(frozen.strain[i],position));
         return offset;
       }
-    const auto transfer = material.section().profile.sample(position,phase);
-    Stress result = -2.*material.stiffness(position)*symmetrize(material.section().profile.slip_gradient(transfer,transfer.rate(trial_rates)));
+    Stress result;
     const auto &parent = objective_parent.at(cell->id());
     for (unsigned int i=0; i<parent.size(); ++i)
       result += material.relaxation(position)*stress_element().shape_value(i,unit)*parent[i];
     return result;
+  }
+
+  template <int dim>
+  typename FaultStokesCoupling<dim>::Stress
+  FaultStokesCoupling<dim>::stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
+                                          const Point<dim> &position, const double phase) const
+  {
+    const auto unit = this->get_mapping().transform_real_to_unit_cell(cell,position);
+    auto offset = bulk_stress_offset(cell,position,unit);
+    if (reaction.empty())
+      offset += slip_stress(position,phase);
+    return offset;
+  }
+
+  template <int dim>
+  typename FaultStokesCoupling<dim>::Stress
+  FaultStokesCoupling<dim>::stokes_stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
+                                                 const Point<dim> &position, const double phase) const
+  {
+    if (material.interior_seed)
+      return stress_offset(cell,position,phase);
+    const auto unit = this->get_mapping().transform_real_to_unit_cell(cell,position);
+    auto offset = bulk_stress_offset(cell,position,unit);
+    const auto load = boundary_slip_load.find(cell->id());
+    if (load != boundary_slip_load.end())
+      for (unsigned int i=0; i<load->second.size(); ++i)
+        offset += stress_element().shape_value(i,unit)*load->second[i];
+    return offset;
   }
 
   template <int dim>

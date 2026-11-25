@@ -81,6 +81,9 @@ end
         if ranks > 1:
             cmd = [os.environ.get("MPIEXEC", "mpirun"), "-np", str(ranks)] + cmd
         env = dict(os.environ, DEAL_II_NUM_THREADS="1", OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")
+        # Resolve the example's nested includes from the installed tree when
+        # using the installed driver, including in an unrelated working directory.
+        env.setdefault("ASPECT_SOURCE_DIR", str(Path(__file__).resolve().parents[3]))
         with (dest / "log").open("w") as log:
             subprocess.run(cmd, cwd=dest, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
         frames.append(read_frame(dest / "output", ranks))
@@ -123,8 +126,11 @@ def main():
         expected = (0.569668517088, 0.494235968293)
         if any(abs(result[k]-v) > 1e-12 for k, v in zip(("stokes", "section"), expected)):
             raise ValueError("Failed to reproduce the predicted pre-repair counterexample")
-    elif abs(result["stokes"]-result["section"]) > 2e-13:
-        raise ValueError("Stokes and section work differ on the same mesh")
+    else:
+        if abs(result["section"]-0.494235968293) > 1.e-12:
+            raise ValueError("The reverse action misses the signed Gauss-8 integral of the middle hat")
+        if abs(result["stokes"]-result["section"]) > 2e-13:
+            raise ValueError("Stokes and section work differ on the same mesh")
 
 
 if __name__ == "__main__":

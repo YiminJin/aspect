@@ -1,15 +1,18 @@
 """In a scratch directory, build a Release unity binary that records the real section matrix.
-Pass the absolute pf-rsf worktree path. Use the configured build-slice objects.
+Pass the pf-rsf worktree path and the matching configured unity build.
 """
 from pathlib import Path
-import sys, shlex, subprocess, json
+import argparse, shlex, subprocess, json
 scratch=Path.cwd()
-repo=Path(sys.argv[1]).resolve(); build=repo/'build-slice'
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("worktree", type=Path)
+parser.add_argument("--build", type=Path, help="Configured Release build for the sources being recorded")
+parser.add_argument("--moving", action="store_true")
+args = parser.parse_args()
+repo = args.worktree.resolve()
+build = args.build.resolve() if args.build else repo/'build-slice'
 source=repo/'source/reconstructed_fault/stokes_coupling.cc'
 original=source.read_text()
-moving = sys.argv[2:] == ["--moving"]
-if sys.argv[2:] and not moving:
-    raise SystemExit("usage: capture.py WORKTREE [--moving]")
 def inject(text, anchor, addition):
     if text.count(anchor)!=1: raise ValueError(anchor)
     return text.replace(anchor,addition+anchor)
@@ -40,7 +43,7 @@ s=inject(s,'        if (residual <= 64.*std::numeric_limits<double>::epsilon())'
                 << ' ' << rhs[j] << ' ' << scale[j] << ' ' << material.stiffness(accepted[j].position) << '\n';
           }
 ''')
-if moving:
+if args.moving:
     # The third Picard preparation at the second endpoint has a frozen Q8
     # reaction. Record its stress defect relative to the unprojected point law.
     s = s.replace("this->get_timestep_number()==2 && this->get_nonlinear_iteration()==0",

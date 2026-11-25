@@ -1,5 +1,156 @@
 # Phase-field fault working record
 
+## Assignment B — mature boundary-spanning work
+
+The pre-repair experiment is commit `7dea28403` on top of `269cfd8b0cf516a3ccff8cfd67dc591a191b58b1`. It uses the actual repaired-A Release executable and an external test material. The second commit projects the boundary-spanning slip load and contains the post-repair measurements. The original fitted-fault trajectory remains a strict, failing comparison for author review.
+
+**One-cell experiment.** Set an upward straight trace in the unit square with labels at heights 0, 0.5 and 1 m, uniform FE phase 0.35, full normal support, fitting off and zero initial stress. At zero physical duration impose trial rates of 0.005 m/s except at the middle label, where separate runs use 0.004 and 0.006 m/s. Restore the accepted rates before either measurement. This fixes the material geometry, phase, accepted stress, friction age and Maxwell coefficient. A test material uses the ordinary material evaluation and Stokes assembler. Its wrapper isolates that assembler's real local RHS and pairs it with the nodal coefficients of the virtual FE velocity before boundary elimination. The reverse experiment inserts the same affine velocity into the bulk FE vector, calls `sample_bulk`, assembles the middle row with `BulkPoint::add_balance` and subtracts the corresponding zero-velocity row. Both evaluations disable friction in that row and have the same rates and background stress. The prescribed-rate diagnostic bypasses the free scalar resistance solve; the free-ridge and tangent controls below exercise that solve.
+
+With oriented tangent **t** and normal **n**, choose **v** = **t** (**n**·**x**)/s. Then 2 **t**·ε(**v**) **n** = 1/s. The physical slip stress is −2κχV sym(**t**⊗**n**) in Pa and Stokes subtracts its internal virtual work. On the section, the driving shear enters with a positive sign. Divide the centered Stokes power difference (W per metre out of plane) by the rate interval 0.002 m/s, κ = −10 expm1(−0.1) = 0.951625819640 Pa s and the virtual shear rate. On the section side take the corresponding middle-row action per unit rate and divide by the same κ and shear rate. Both normalized quantities have units of metres. Here χ = 1/m and integration of the triangular rate hat on either side of the middle label gives exactly 0.5 m.
+
+| Operator | Stokes RHS (m) | Section row (m) | Absolute paired difference (m) | Absolute errors vs split integral, Stokes / section (m) |
+|---|---:|---:|---:|---:|
+| Repaired-A executable | 0.5696685170880651 | 0.4942359682927365 | 0.0754325487953286 | 0.0696685170880651 / 0.0057640317072635 |
+| Assignment B | 0.4942359682927365 | 0.4942359682927365 | 0 | 0.0057640317072635 / 0.0057640317072635 |
+
+The default equality check fails on the old executable. Its two actions separately agree with the predicted Gauss rules within 3e−13 m. The first differing operation is the cell integration over the interior kink of the middle hat.
+
+**Production path.** At attempt entry `PhaseFieldFault::update → FaultStokesCoupling::prepare_parent` prepares the load for the incoming rates, including prescribed initialization. Picard preparation calls `solve_rates`, which samples the actual bulk strain on Q8 and assembles the Q1 section rows. For a boundary-spanning trace the coupling then mass-projects the signed, pointwise slip stress with those trial rates and that same Q8 rule into the owned cell's DGQ2 basis. The Maxwell coefficient is inside this projection. `PhaseFieldFault::evaluate → stokes_stress_offset → FaultStressLoad::execute` supplies the resulting load on the ordinary assembly points, including RHS-only assembly. For affine Cartesian Q2 velocity, every component of the symmetric test gradient belongs to DGQ2. The product with projected DGQ2 stress is integrated exactly by tensor Gauss(3), so these two discrete actions agree for every local velocity test. The coupling owns both relevant FE spaces and the trial state. No change to upstream Stokes assembly, constraints or quadrature was necessary. After convergence and the timestep repeat decision, `accept_step` projects the **physical** constitutive response with the existing cut-cell rule and commits rates, slip and law history. The projected polynomial can extend beyond the physical support inside a cut cell. Only its tested moments enter the weak load. The load projection is trial scratch. Interior mechanics uses its existing coupled stress projection.
+
+**Refinement.** The inclined DGQ2 phase ridge is exactly represented on each mesh. The middle label at (0.485, 0.47) m lies inside a cell on all three grids. Independent integration in physical normal and tangent coordinates splits at the knot and box-face switches. With the same independently reconstructed Q1 normalization, increasing reference quadrature from 32 to 48 gives 0.5625094965211721 m with a difference of 3.33e−16 m.
+
+| Cells | Original Stokes error (m) | Repaired Stokes error (m) | Section error (m) | Repaired absolute paired difference (m) |
+|---|---:|---:|---:|---:|
+| 8 × 8 | 1.427e−5 | 8.197e−6 | 8.197e−6 | 1.44e−15 |
+| 16 × 16 | 4.108e−6 | 1.362e−6 | 1.362e−6 | 2.00e−15 |
+| 32 × 32 | 8.740e−7 | 5.102e−7 | 5.102e−7 | 4.44e−16 |
+
+On the two-rank finest grid the two owners supplied 0.292742780859308 m and 0.269767225911386 m to the Stokes action. All 1,024 owned Stokes contributions matched serial by CellId with zero difference. The global two-rank paired difference was 2.22e−16 m. Figure 1 shows the absolute integration error in metres at each cell size. The repaired and reverse curves coincide at plotting resolution.
+
+```text
+refactoring/phase-field-fault/results/transfer-work/work-error.png
+refactoring/phase-field-fault/results/transfer-work/README.md
+refactoring/phase-field-fault/results/transfer-work/original.csv
+refactoring/phase-field-fault/results/transfer-work/repaired.csv
+refactoring/phase-field-fault/results/transfer-work/one-cell-original.json
+refactoring/phase-field-fault/results/transfer-work/one-cell-repaired.json
+```
+
+**Representative source in reading order.**
+
+```text
+source/reconstructed_fault/stokes_coupling.cc
+source/material_model/phase_field_fault.cc
+source/simulator/assemblers/fault_stress.cc
+benchmarks/fixed_fault/transfer_work/transfer_work.cc
+benchmarks/fixed_fault/transfer_work/refinement.py
+```
+
+**Frozen trajectory.** On the corrected 3A free 32² case the geometry, label IDs, FE phase, Q1 normalizer and clocks match the original by identity. The repaired-A run reproduces the frozen rates to 5.13e−16 m/s. With the new load all 38 rates at each clock exceed the original 1e−10 absolute + 1e−8 relative budget. The first change in the coupled solve occurs at initialization, with zero parent DG stress. In ID order the first rate is 0.0531066967154 m/s at ID 0, previously 0.0523372349263 m/s. The largest initial shift is at label 4, where the rate changes from 0.135738292686 to 0.138155428500 m/s. At 12.5 and 25 ms the largest rate changes occur on label 33 (+2.46844e−4 and +2.57488e−4 m/s). At 25 ms its slip changes by +6.30415e−6 m and age by −6.88433e−3 s. The largest accepted stress change at 25 ms is +0.0135088 Pa in xx on cell `0_3:110`, point 3. The original reference, budgets and strict checker are retained. The separate table records all three clocks, including the identities and magnitudes of the largest component shifts.
+
+```text
+benchmarks/fixed_fault/phase_ridge/3a-repair-free-labels.csv
+refactoring/phase-field-fault/results/transfer-work/free32-shift.csv
+```
+
+**Baseline and work replay.** Commands below run from the worktree root in Bash. The probe reads the benchmark inputs shipped by the project. New outputs go to fresh directories. For a clean reproduction, build the first commit in an independent Release prefix as `OLD` and the second as `I`. The first commit contains the fixture and still has the 269cfd8b0 production operator. Repeating the pre-repair inclined sweep with the accepted rates explicitly restored before observation changed the section sums by at most 4e−15 m. The current original.csv records that repeat. The originally measured pre-repair binary in `build-review-a2/install` has SHA-256 `6f40962852cf5a854fcc65c07c349b2dc183e1aefb3736412fb06ad2cd259997`.
+
+```bash
+W=$PWD
+D=$W/build-review-b
+B=$W/build-6b/release
+OLD=$W/build-review-a2/install
+I=$D/install
+T=$W/benchmarks/fixed_fault/transfer_work
+E=$W/refactoring/phase-field-fault/results/transfer-work
+export MPIEXEC=/opt/openmpi/5.0.6/bin/mpirun
+export PATH="$(dirname "$MPIEXEC"):$PATH"
+export OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OMP_NUM_THREADS=1
+mkdir -p "$D"
+
+# Measure before editing production.
+cmake -S "$T" -B "$D/probe-old" -DAspect_DIR="$OLD/lib/cmake/Aspect"
+cmake --build "$D/probe-old" -j1
+P0=$D/probe-old/libtransfer_work.release.so
+python3 "$T/run.py" "$OLD/bin/aspect-release" "$P0" "$D/probe-before-fixed-parent" --baseline
+python3 -u "$T/refinement.py" run "$OLD/bin/aspect-release" "$P0" "$D/inclined-original-fixed-parent" original
+
+# Rebuild ASPECT, install the public headers, runtime and examples, and compile the probe.
+cmake -S . -B "$B" -DCMAKE_INSTALL_PREFIX="$I" -DASPECT_INSTALL_EXAMPLES=ON
+cmake --build "$B" --target aspect -j2
+for component in runtime includes examples Unspecified; do
+  cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -DCMAKE_INSTALL_COMPONENT="$component" -P "$B/cmake_install.cmake"
+done
+A=$I/bin/aspect-release
+cmake -S "$T" -B "$D/probe-new" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/probe-new" -j1
+P=$D/probe-new/libtransfer_work.release.so
+python3 "$I/benchmarks/fixed_fault/transfer_work/run.py" "$A" "$P" "$D/probe-after"
+python3 -u "$T/refinement.py" run "$A" "$P" "$D/inclined-repaired" repaired
+python3 "$T/refinement.py" plot "$E/original.csv" "$E/repaired.csv" "$D/work-error.png"
+```
+
+**Numerical controls and resources.** The homogeneous case reproduced the 0.0325 Pa accepted xy stress at all 36 graphical samples at 12.5 ms. All three clocks of the three-label case matched the donor snapshots to 5.69e−14 maximum absolute difference. Clean and forced-retry snapshots matched exactly and the tensile predictor cutback differed from its clean control by at most 1.04e−14. On the fitted prescribed cut cell, the previous Q3 RHS gave −2.4015476910499975 W/m for the nonconstant FE virtual shear. The independent Q8 integral is −2.4015438438455536 W/m. The new local RHS gives −2.4015438438455536 W/m. Applying that same corrected oracle to the old assembler fails. The original rate-tangent recorder and an independently linked recorder for this change both passed on one and two ranks, with static and transported physical stress. At the first Picard assembly of the second physical step the centered difference at relative increment 5e−5 matched the repaired row-19 action to 1.838e−10 relative. Each MPI owner supplied 22,365 active Q8 points. Reversing the sign gives relative error 2 and dropping the outer or inner χ gives 0.421 or 0.143. Uninstrumented and recorded serial static cases have byte-identical accepted bulk and label frames.
+
+The additional distributed storage is nine symmetric 2-D tensors (216 coefficient bytes plus allocation and map metadata) per owned cell with nonzero Q8 slip stress. The Q8 mass projection is local, uses one temporary reference matrix and sample vectors per sweep, and has no MPI communication. The 32² free run required 143 ordinary Stokes assemblies on both executables. Single-rank run.py measured 227,612 KiB peak RSS before and 227,652 KiB after, with wall times 21.697 and 28.389 s. These single runs included other work on the machine. The homogeneous, three-label, localized, retry and MPI budgets have kept their original values.
+
+The free case reduced 22,365 active section points on each rank. The keyed one-/two-rank accepted DG stress differences were at most 4.29e−14 Pa. Retry reproduced all three frames exactly. For the prescribed fitted case, independent cut-cell physical-stress moments had scaled defects of 2.094e−9 and 9.346e−10 on the 32² and 64² grids. Using unsplit Q8 for *accepted history* on the same 64² data would give 0.01894 against the original 0.01 budget. The free 64² case's scaled defects were 1.245e−10 and 3.580e−11 at 12.5 and 25 ms. The matched-Q1 prescribed donor control checked 23,984 active identities and 12,880 outside the active set. Its final common-convention normal-stress error was 4.61e−11 Pa. This is a common-input constitutive comparison. The 4A receiving-cell Stokes action was −0.29364437004440325 Pa m² (independent −0.29364437004440386, old-cell −0.30845803705181207). Its independent face-transfer defect was at most 3.55e−14 Pa m²/s and retry reproduced accepted stresses and labels exactly. The moving layered interior donor, clean/retry, MPI and restart comparisons passed, with zero endpoint difference on retry and restart. The Release unit suite passed 2,574 assertions in 61 tests, and the ordinary affine AT2 CTest passed.
+
+**Control replay.** The original installed free case and the repaired run use SDK plugins compiled with their respective headers. The old executable passes its strict free-32 reference. The new strict comparison exits nonzero on 266 of 684 entries in that same table. The independent group completes the MPI, retry, moment and donor checks at their original tolerances.
+
+```bash
+R0=$OLD/benchmarks/fixed_fault/phase_ridge
+cmake -S "$R0" -B "$D/old-sdk-ridge" -DAspect_DIR="$OLD/lib/cmake/Aspect"
+cmake --build "$D/old-sdk-ridge" -j1
+R=$I/benchmarks/fixed_fault/phase_ridge
+P0=$D/old-sdk-ridge/libphase_ridge.release.so
+ASPECT_SOURCE_DIR=$OLD python3 -B "$R0/run.py" "$OLD/bin/aspect-release" "$P0" "$D/before-ridge/free-32" free 32
+(CD_BASE="$D/before-ridge" PYTHONPATH="$R0" python3 -c 'import os; from pathlib import Path; from check import check_case; check_case(Path(os.environ["CD_BASE"]), "free", 32)')
+for group in plugins serial ridge retry mpi layered; do
+  bash "$E/controls.sh" "$group" "$D" "$I" || exit 1
+done
+bash "$E/controls.sh" strict "$D" "$I"   # expected to fail at frozen free-32
+archive=$W/../aspect/benchmarks/reconstructed_fault/bp5/moment-inclined/native_history_reference/output-native_history_reference
+bash "$E/controls.sh" independent "$D" "$I" "$archive" "$W/build-3a-repair/donor-cell/output"
+python3 "$E/controls.py" "$D/before-ridge/free-32/output" "$D/ridge/free-32/output" "$R/3a-repair-free-labels.csv" "$D/free32-shift.csv"
+
+mkdir "$D/tangent-new"
+(cd "$D/tangent-new" && python3 "$W/refactoring/phase-field-fault/rate_tangent/capture.py" "$W" --build "$B")
+rp=$D/control-plugins/phase_ridge/libphase_ridge.release.so
+for mode in static advected; do
+  extra=()
+  if [[ $mode == advected ]]; then extra=(--advect-stress); fi
+  for ranks in 1 2; do
+    python3 -B "$R/run.py" "$D/tangent-new/aspect-review" "$rp" "$D/tangent-new/$mode-$ranks" free 32 --ranks "$ranks" "${extra[@]}"
+  done
+  python3 -BO "$W/refactoring/phase-field-fault/rate_tangent/check_row.py" "$D/tangent-new/$mode-1" "$D/tangent-new/$mode-2"
+done
+cmake -S tests -B "$D/stress-plugins" -DAspect_DIR="$I/lib/cmake/Aspect" -DASPECT_BINARY="$A" \
+  -DCMAKE_BUILD_TYPE=Release -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+cmake --build "$D/stress-plugins" --target dg_stress_transport dg_stress_spin_order fixed_fault -j1
+python3 -u benchmarks/fixed_fault/check_transport.py "$A" "$D/stress-plugins" "$D/transport-4a" --mpiexec "$MPIEXEC"
+(cd "$B/unit_tests" && "$A" --test)
+ctest --test-dir "$B" -R '^postprocess/phase_field_surface_energy_at2$' --no-tests=error --output-on-failure
+```
+
+For the final installed-source check, a fresh SDK build of the probe ran from outside the checkout. The final one-cell and refinement tables reproduced the reported values exactly and the three free-32 frames matched byte for byte. The local B measurement qualifies the weak transfer on the supported affine 2-D boxes. Approval of the shifted free trajectory and subsequent scientific assignments remain with the author.
+
+```bash
+TI=$I/benchmarks/fixed_fault/transfer_work
+cmake -S "$TI" -B "$D/installed-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/installed-plugin" -j1
+PI=$D/installed-plugin/libtransfer_work.release.so
+(cd /tmp && env -u ASPECT_SOURCE_DIR python3 "$TI/run.py" "$A" "$PI" "$D/final-one-cell")
+(cd /tmp && env -u ASPECT_SOURCE_DIR python3 "$TI/refinement.py" run "$A" "$PI" "$D/final-inclined" repaired)
+cmp "$D/final-inclined/work.csv" "$D/inclined-repaired/work.csv"
+ASPECT_SOURCE_DIR=$I python3 -B "$R/run.py" "$A" "$rp" "$D/final-free32" free 32
+for n in 0 1 2; do
+  for f in labels bulk; do
+    cmp "$D/final-free32/output/$f-$n-0.txt" "$D/ridge/free-32/output/$f-$n-0.txt" || exit 1
+  done
+done
+```
+
 ## Assignment A review repairs
 
 The three-commit review starts at `0e6b2233cb98fbe2ce7cca63c2e5f2de39b1eb15`. Commit `447a3f180` repairs parameter resolution and `15d25cef7` repairs the exporter. The third commit, containing this record, pins the signed stress and corrects the configuration table. Assignment B awaits author review.
