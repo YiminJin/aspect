@@ -211,7 +211,7 @@ namespace aspect::GrowingFault
   std::vector<double> Material<dim>::checkpoint_parameters() const
   {
     const auto &energy=this->get_parameters().surface_energy_model;
-    std::vector<double> signature= {energy.fracture_energy,energy.length_scale,this->get_parameters().discontinuous_penalty,
+    std::vector<double> signature= {energy.fracture_energy,energy.length_scale,this->get_parameters().phase_discontinuous_penalty,
                                     compression,anchor[0],anchor[1],point_law.G,point_law.eta,point_law.m
                                    };
     const auto parameters=law->parameters();

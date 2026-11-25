@@ -1255,11 +1255,14 @@ namespace aspect
         prm.declare_entry ("Discontinuous penalty", "10.",
                            Patterns::Double (0.),
                            "The value used to penalize discontinuities in the discontinuous Galerkin "
-                           "method. This is used only for the temperature field, and not for the composition "
-                           "field, as pure advection does not use the interior penalty method. This "
+                           "temperature equation. It also supplies the default for the midpoint fault phase "
+                           "interior-face penalty. Pure advection uses no interior penalty. This "
                            "is largely empirically decided -- it must be large enough to ensure "
                            "the bilinear form is coercive, but not so large as to penalize "
                            "discontinuity at all costs.");
+        prm.declare_entry ("Phase discontinuous penalty", "", Patterns::List(Patterns::Double(0.),0,1),
+                           "Dimensionless multiplier of the symmetric interior penalty on DG faces in the "
+                           "midpoint fault phase equation. An empty entry inherits Discontinuous penalty.");
         prm.declare_entry ("Use limiter for discontinuous temperature solution", "false",
                            Patterns::Bool (),
                            "Whether to apply the bound preserving limiter as a correction after computing "
@@ -2068,6 +2071,8 @@ namespace aspect
 
         stabilization_gamma                 = prm.get_double ("gamma");
         discontinuous_penalty               = prm.get_double ("Discontinuous penalty");
+        phase_discontinuous_penalty         = prm.get("Phase discontinuous penalty").empty()
+                                              ? discontinuous_penalty : prm.get_double("Phase discontinuous penalty");
         use_limiter_for_discontinuous_temperature_solution
           = prm.get_bool("Use limiter for discontinuous temperature solution");
         use_limiter_for_discontinuous_composition_solution

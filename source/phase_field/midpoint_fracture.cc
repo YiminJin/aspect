@@ -49,7 +49,7 @@ namespace aspect::PhaseField
                 FEValues<2> other(sim.get_mapping(),element,Quadrature<2>(unit),flags);
                 other.reinit(Triangulation<2>::cell_iterator(neighbor));
                 const auto columns=indices(neighbor);
-                const double sigma=sim.get_parameters().discontinuous_penalty*std::pow(element.degree+1,2)*k
+                const double sigma=sim.get_parameters().phase_discontinuous_penalty*std::pow(element.degree+1,2)*k
                                    *cell->face(f)->measure()/std::min(cell->measure(),neighbor->measure());
                 for (unsigned int q=0; q<face.size(); ++q)
                   for (unsigned int i=0; i<rows.size(); ++i)

@@ -768,6 +768,8 @@ namespace aspect
     std::vector<double>            stabilization_beta;
     double                         stabilization_gamma;
     double                         discontinuous_penalty;
+    /** Effective dimensionless interior-face penalty for the midpoint phase equation. */
+    double                         phase_discontinuous_penalty;
     bool                           use_limiter_for_discontinuous_temperature_solution;
     std::vector<bool>              use_limiter_for_discontinuous_composition_solution;
     double                         global_temperature_max_preset;

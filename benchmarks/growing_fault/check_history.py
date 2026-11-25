@@ -8,11 +8,11 @@ import numpy as np
 from compare import rows
 
 
-def fracture_energy(patches, dx):
+def fracture_energy(patches, dx, penalty=10.):
     # Independent scalar energy, integrated once per interior face. Gauss(4)
     # is exact for every polynomial product here. Outward normal points from
     # the current cell to its positive-axis neighbor.
-    ell, Kf, penalty = .25, 26.6666666667/((8/3)*.25), 10
+    ell, Kf = .25, 26.6666666667/((8/3)*.25)
     q, w = np.polynomial.legendre.leggauss(4)
     q, w = (q+1)/2, w/2
     def basis(x):

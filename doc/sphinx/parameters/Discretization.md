@@ -96,7 +96,7 @@ For an in-depth discussion of these issues and a quantitative evaluation of the 
 
 **Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
 
-**Documentation:** The value used to penalize discontinuities in the discontinuous Galerkin method. This is used only for the temperature field, and not for the composition field, as pure advection does not use the interior penalty method. This is largely empirically decided -- it must be large enough to ensure the bilinear form is coercive, but not so large as to penalize discontinuity at all costs.
+**Documentation:** The value used to penalize discontinuities in the discontinuous Galerkin temperature equation. It also supplies the default for the midpoint fault phase interior-face penalty. Pure advection uses no interior penalty. This is largely empirically decided -- it must be large enough to ensure the bilinear form is coercive, but not so large as to penalize discontinuity at all costs.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Global composition maximum<parameters:Discretization/Stabilization_20parameters/Global_20composition_20maximum>`
@@ -142,6 +142,15 @@ For an in-depth discussion of these issues and a quantitative evaluation of the 
 **Pattern:** [List of <[Anything]> of length 0...4294967295 (inclusive)]
 
 **Documentation:** Select for which compositional fields to skip the entropy viscosity stabilization at Dirichlet boundaries. This is only advisable for compositional fields that have intrinsic physical diffusion terms, otherwise oscillations may develop. The parameter should contain a list of compositional field names.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Phase discontinuous penalty<parameters:Discretization/Stabilization_20parameters/Phase_20discontinuous_20penalty>`
+:name: parameters:Discretization/Stabilization_20parameters/Phase_20discontinuous_20penalty
+**Default value:**
+
+**Pattern:** [List of <[Double 0...MAX_DOUBLE (inclusive)]> of length 0...1 (inclusive)]
+
+**Documentation:** Dimensionless multiplier of the symmetric interior penalty on DG faces in the midpoint fault phase equation. An empty entry inherits Discontinuous penalty.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Stabilization method<parameters:Discretization/Stabilization_20parameters/Stabilization_20method>`
