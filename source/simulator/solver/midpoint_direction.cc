@@ -4,6 +4,74 @@
 
 namespace aspect::GrowingFault
 {
+  namespace
+  {
+    // Verify the tip against the accepted DG field before installing any
+    // formed plane. A taper may vanish at the tip: inspect the incoming
+    // centreline over half a strip width, capped at one phase length. The
+    // strip width is at most the smallest Cartesian cell altitude.
+    void check_initial_seed_tip(const SimulatorAccess<2> &sim, const Point<2> &tip,
+                                const Tensor<1,2> &tangent, const double reach,
+                                const unsigned int field)
+    {
+      const auto &fe = sim.get_fe();
+      const auto phase = sim.introspection().extractors.compositional_fields[field];
+      const QGauss<1> line(3); // Q2 restricted to an oblique line is at most quartic.
+      bool tip_in_mesh = false;
+      double phase_in_band = 0.;
+      for (const auto &cell : sim.get_dof_handler().active_cell_iterators())
+        if (cell->is_locally_owned())
+          {
+            // Work in unit coordinates: a face tolerance is measured in
+            // roundoff multiples of the corresponding physical cell width.
+            const auto &lo = cell->vertex(0);
+            const auto &hi = cell->vertex(3);
+            constexpr double face_tolerance = 64.*std::numeric_limits<double>::epsilon();
+            double first = 0., last = reach;
+            Point<2> unit_tip;
+            Tensor<1,2> direction;
+            for (unsigned int d=0; d<2; ++d)
+              {
+                unit_tip[d] = (tip[d]-lo[d])/(hi[d]-lo[d]);
+                direction[d] = -tangent[d]/(hi[d]-lo[d]);
+                if (direction[d] == 0.)
+                  {
+                    if (unit_tip[d] < -face_tolerance || unit_tip[d] > 1.+face_tolerance)
+                      last = 0.;
+                  }
+                else
+                  {
+                    const double a = -unit_tip[d]/direction[d];
+                    const double b = (1.-unit_tip[d])/direction[d];
+                    first = std::max(first,std::min(a,b));
+                    last = std::min(last,std::max(a,b));
+                  }
+              }
+            tip_in_mesh |= GeometryInfo<2>::is_inside_unit_cell(unit_tip,face_tolerance);
+            if (last <= first)
+              continue;
+            std::vector<Point<2>> points;
+            for (const auto &q : line.get_points())
+              points.push_back(GeometryInfo<2>::project_to_unit_cell(unit_tip+(first+(last-first)*q[0])*direction));
+            FEValues<2> values(sim.get_mapping(),fe,Quadrature<2>(points),update_values);
+            values.reinit(cell);
+            std::vector<double> trace(points.size());
+            values[phase].get_function_values(sim.get_old_solution(),trace);
+            // A DG face can have two traces. Positive support on either
+            // incident cell suffices; no averaging across MPI owners.
+            double integral = 0.;
+            for (unsigned int q=0; q<trace.size(); ++q)
+              integral += line.weight(q)*trace[q];
+            phase_in_band = std::max(phase_in_band,integral*((last-first)/reach));
+          }
+      const auto comm = sim.get_mpi_communicator();
+      AssertThrow(Utilities::MPI::max(static_cast<unsigned int>(tip_in_mesh),comm),
+                  ExcMessage("Forward seed tip lies outside the mesh."));
+      AssertThrow(Utilities::MPI::max(phase_in_band,comm) > 64.*std::numeric_limits<double>::epsilon(),
+                  ExcMessage("No local phase support immediately behind the forward seed tip."));
+    }
+  }
+
   void MidpointSystem::freeze_direction_neighborhood()
   {
     const auto &geometry=material.sections();
@@ -17,6 +85,7 @@ namespace aspect::GrowingFault
     const unsigned int anchor=station(tip_xi-ell);
     if (material.history().step==0)
       {
+        check_initial_seed_tip(sim, seed, geometry.tangent, std::min(ell,0.5*geometry.width(0)), field);
         std::vector<unsigned int> positive(formed.size());
         for (const auto &[id,cell]:cells)
           for (const auto &p:cell.points) if (p.old_phase>0.) positive[p.strip]=1;

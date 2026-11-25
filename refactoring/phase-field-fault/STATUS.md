@@ -46,6 +46,37 @@ R=refactoring/phase-field-fault/results/interface-stage-a
 MPLCONFIGDIR=/tmp/pf-rsf-stage-a-mpl python3 "$R/plot_wall_clock.py" "$D/before-wall" "$D/final/wall" "$R/wall-clock.png"
 ~~~
 
+### Physical location of the growing seed
+
+A tapered initial crack may end on a cell or MPI face. Previously the initial formation test used only the tangent coordinate of the tip and positive phase somewhere on the anchor strip. Starting from the nine-strip seed at (1.4330127019, 0.75) m, offsets of +1 and −0.6 m along the normal preserve that tangent coordinate. With stationary walls the outside tip (0.9330127019, 1.6160254038) m formed seven sections in 6B. The inside but detached tip (1.7330127019, 0.2303847577) m formed nine.
+
+Before assigning the first formed flag, `MidpointSystem::freeze_direction_neighborhood` checks membership in the physical mesh and the initialized Bernstein phase on the segment immediately upstream. Its length is the smaller of one phase length and half a strip width. A strip is at most one minimum Cartesian cell altitude wide. Clipping that segment to each owned cell accounts for DG jumps. Three Gauss points integrate the quartic restriction exactly on a cell. A cell face allows 64 double epsilons in unit coordinates. A cell contribution above 64 epsilons in mean phase over the short segment establishes support. Both tests reduce over all ranks, using either incident trace on a shared face.
+
+The new two-rank run diagnosed both displaced tips on **both** owners before physical publication. The original taper reached 5 ms. The separate x = 1 m partition taper was zero at the tip and everywhere on rank one. Rank zero supplied the support. Four sections formed. The old checker failure was acceptance of the two displaced tips.
+
+~~~bash
+python3 "$G/check_seed_tip.py" "$OLD/bin/aspect" "$OP" "$D/before-seed"  # expected exit 1
+python3 "$G/check_seed_tip.py" "$B/aspect" "$P" "$D/final/seed"
+~~~
+
+The frozen nine-strip constant-load case passed every scheduled donor frame through 15 ms. Integrated signed slip ended at 0.000169302306477 m². Fresh two-rank 18-strip calculations reproduced the common 5 ms parent and both 5B schedules. The 32 physical endpoint tables match the retained target tables byte for byte. The strict audit used fresh targets, archived donor trajectories and the retained returned-row observations. It exited 1 with precisely the four documented strip-15 angle comparisons (2.36894413e−7 rad), and its full output directory matched the 5B closeout byte for byte. The original strict tolerances still apply.
+
+~~~bash
+F=$D/final
+python3 "$G/run.py" "$B/aspect" "$P" "$F/nine" --principal-only --mpiexec "$MPI"
+python3 "$G/compare.py" build-5a-repair/donor-two/output "$F/nine/principal/output"
+python3 "$G/timestep/run.py" parent "$F/strip18/parent" "$M" --aspect "$B/aspect" --plugin "$P" --launcher "$MPI"
+python3 "$G/timestep/run.py" coarse "$F/strip18/coarse" "$M" --aspect "$B/aspect" --plugin "$P" --launcher "$MPI" --parent "$F/strip18/parent/output"
+python3 "$G/timestep/run.py" half "$F/strip18/half" "$M" --aspect "$B/aspect" --plugin "$P" --launcher "$MPI"
+for case in parent coarse half; do
+  ln -s "$PWD/build-5b/donor-$case" "$F/strip18/donor-$case"
+done
+rc=0
+python3 "$G/timestep/audit.py" "$F/strip18" build-5a-repair/reference "$F/strict" --returned-rows build-5b/rows || rc=$?
+test "$rc" = 1
+diff -qr "$F/strict" build-5b/closeout/final-audit
+~~~
+
 ## Increment 6B
 
 **Consolidation is ready for review on the repaired 6A source at `282617e22`.** The [implementation guide](IMPLEMENTATION.md) follows an accepted step from each field method to its physical outputs. It maps the parameter choices to the supported dimensions, pressure datum, phase basis, crack law, retry and checkpoint rules. The three Sphinx parameter sections were regenerated from the installed, plugin-free energy case. The sole new build rule packages the existing coefficient observer with the scalar benchmark. This increment required no production C++ edit.
