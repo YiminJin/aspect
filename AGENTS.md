@@ -45,6 +45,7 @@ The implementation belongs in this worktree. The research donor is `../aspect-pf
 - Write code in the style of its neighbors. Read the checkout’s contribution rules, formatter configuration and PR template. Use Doxygen for public interfaces and non-obvious persistent state. Explain units, stress frame, stage factors, measures and collective calls at the point where a wrong interpretation changes the result. Keep related residual and derivative calculations easy to read together.
 - Prefer a small public interface with visible data flow. A short top-level call that hides an entire second timestep driver fails review. An optional handler earns its place by owning a coherent resource or operation. Keep experimental selectors, environment hooks and run-specific names out of production interfaces.
 - Preserve the ordinary ASPECT path when the feature is off. Keep fixes to the scientific method distinguishable from code movement and shared API changes. Keep worktree planning material separate from patches prepared for upstream review.
+- For a change visible to an ASPECT user, begin with the smallest realistic .prm example and name the nearest existing ASPECT example to follow. Show what the scientist edits to change one physical assumption. Keep numerical implementation choices internal wherever the physics determines them. Put ordered spatial data in files with documented units and identity. Before handoff, read the example as a new user and trace each setting to the calculation it actually controls.
 
 ### Editing established ASPECT core
 
