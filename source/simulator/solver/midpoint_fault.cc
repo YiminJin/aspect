@@ -1,5 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/simulator/solver/midpoint_system.h>
+#include <aspect/simulator/solver/midpoint_fault.h>
 #include <aspect/phase_field/bernstein_bounds.h>
 #include <numeric>
 #include <aspect/simulator.h>
@@ -109,7 +110,7 @@ namespace aspect::GrowingFault
 
   }
 
-  MidpointSystem::MidpointSystem(const SimulatorAccess<2> &simulator,const MidpointMaterial &m,const LinearAlgebra::BlockVector &solution)
+  MidpointSystem::MidpointSystem(const SimulatorAccess<2> &simulator,const Material<2> &m,const LinearAlgebra::BlockVector &solution)
     : sim(simulator),material(m),comm(sim.get_mpi_communicator()),h(.5*sim.get_timestep()),G(m.maxwell().G),B(m.maxwell().relaxation(h)),
       Kf(sim.get_parameters().surface_energy_model.fracture_energy/(sim.get_parameters().surface_energy_model.geometry.normalization()
                                                                     *sim.get_parameters().surface_energy_model.length_scale)),field(m.phase_field()),phase_block(sim.introspection().block_indices.compositional_fields[field]),
@@ -342,9 +343,9 @@ namespace aspect::GrowingFault
             const auto r=mat.response(old,t.strain,t.phase,h,S,f,traction_remainder[k]);
             if (publish)
               {
-                PointHistory end {2.*r.stress-old.stress,2.*r.cohesive_strain-old.cohesive_strain,
-                                  old.signed_shear+2.*h*r.rate,old.absolute_shear+2.*h *std::abs(r.rate)
-                                 };
+                PointHistory end {{2.*r.stress-old.stress,2.*r.cohesive_strain-old.cohesive_strain},
+                  old.signed_shear+2.*h*r.rate,old.absolute_shear+2.*h *std::abs(r.rate)
+                };
                 e.candidate.cells[id].push_back(end);
                 admitted[k]|=(formed[k] || eligible[k]) && t.phase>0.;
                 detached|=!formed[k] && !eligible[k] && (end.absolute_shear!=0. || end.cohesive_strain.norm()!=0.);
@@ -677,7 +678,7 @@ namespace aspect::GrowingFault
     }
   }
 
-  static void solve_midpoint(const SimulatorAccess<2> &sim,const MidpointMaterial &material, LinearAlgebra::BlockVector &solution, History &next, Balance &balance)
+  static void solve_midpoint(const SimulatorAccess<2> &sim,const Material<2> &material, LinearAlgebra::BlockVector &solution, History &next, Balance &balance)
   {
     TimerOutput::Scope timer(sim.get_computing_timer(),"Coupled midpoint fault");
     MidpointSystem system(sim,material,solution);
@@ -733,7 +734,7 @@ namespace aspect::GrowingFault
     const auto &methods=p.compositional_field_methods;
     const auto selected=std::find(methods.begin(),methods.end(),Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase);
     if (selected==methods.end()) return;
-    const auto *provider=dynamic_cast<const MidpointMaterial *>(&model);
+    const auto *provider=dynamic_cast<const Material<dim> *>(&model);
     AssertThrow(provider,ExcMessage("Midpoint fault phase requires a material providing the Maxwell/AT1 midpoint response."));
     const auto field=provider->phase_field();
     p.surface_energy_model.validate();
@@ -762,8 +763,9 @@ namespace aspect::GrowingFault
   template void validate_midpoint_material(const Parameters<2> &,const MaterialModel::Interface<2> &);
   template void validate_midpoint_material(const Parameters<3> &,const MaterialModel::Interface<3> &);
 
-  SolverControl advance_midpoint(const SimulatorAccess<2> &sim,MidpointMaterial &material,LinearAlgebra::BlockVector &solution)
+  SolverControl advance_midpoint(const SimulatorAccess<2> &sim,MaterialModel::Interface<2> &model,LinearAlgebra::BlockVector &solution)
   {
+    auto &material=dynamic_cast<Material<2> &>(model);
     SolverControl control(sim.get_parameters().max_nonlinear_iterations,sim.get_parameters().nonlinear_tolerance);
     material.begin_attempt();
     const auto field=material.phase_field();

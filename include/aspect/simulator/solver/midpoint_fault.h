@@ -1,9 +1,18 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #ifndef _aspect_midpoint_fault_h
 #define _aspect_midpoint_fault_h
-#include <aspect/material_model/growing_fault/midpoint_material.h>
-#include <aspect/simulator_access.h>
+#include <aspect/global.h>
 #include <deal.II/lac/solver_control.h>
+
+namespace aspect
+{
+  template <int dim> struct Parameters;
+  template <int dim> class SimulatorAccess;
+  namespace MaterialModel
+  {
+    template <int dim> class Interface;
+  }
+}
 
 namespace aspect::GrowingFault
 {
@@ -19,6 +28,6 @@ namespace aspect::GrowingFault
   /** Assemble and solve the plane-strain stage on the fixed material mesh.
    * The accepted history and old FE fields remain immutable. Trial history
    * is returned to the material owner pending the ordinary repeat decision. */
-  SolverControl advance_midpoint(const SimulatorAccess<2> &, MidpointMaterial &, LinearAlgebra::BlockVector &);
+  SolverControl advance_midpoint(const SimulatorAccess<2> &, MaterialModel::Interface<2> &, LinearAlgebra::BlockVector &);
 }
 #endif

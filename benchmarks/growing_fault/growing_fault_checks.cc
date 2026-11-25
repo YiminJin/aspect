@@ -14,7 +14,7 @@ namespace aspect::Postprocess
   namespace
   {
     using namespace GrowingFault;
-    void check_operator(const SimulatorAccess<2> &sim,const MidpointMaterial &material, std::ostream &out)
+    void check_operator(const SimulatorAccess<2> &sim,const Material<2> &material, std::ostream &out)
     {
       MidpointSystem op(sim,material,sim.get_solution());
       if (!op.friction_pressures.stations.empty())

@@ -1,5 +1,5 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
-#include <aspect/material_model/growing_fault/section_response.h>
+#include <aspect/material_model/rheology/cohesive_maxwell.h>
 #include <aspect/phase_field/degradation.h>
 
 namespace aspect::GrowingFault
@@ -16,7 +16,7 @@ namespace aspect::GrowingFault
     return 1./(1.+h*G/eta);
   }
 
-  PointResponse CohesiveMaxwell::response(const PointHistory &old, const Stress &increment,
+  PointResponse CohesiveMaxwell::response(const MaxwellState &old, const Stress &increment,
                                           const double phase, const double h, const Stress &S, const double f, const double traction_remainder) const
   {
     const double phi=physical_phase(phase);

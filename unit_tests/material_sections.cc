@@ -1,7 +1,7 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include "common.h"
 #include <aspect/material_model/rheology/rate_and_state_friction.h>
-#include <aspect/material_model/growing_fault/section_response.h>
+#include <aspect/material_model/rheology/cohesive_maxwell.h>
 #include <aspect/reconstructed_fault/material_sections.h>
 #include <aspect/reconstructed_fault/onset_score.h>
 #include <deal.II/distributed/tria.h>
@@ -84,7 +84,7 @@ TEST_CASE("Intact cohesive Maxwell response has the analytic locked and phase de
   increment[0][1]=.0001;
   increment[2][2]=-.00003;
   increment[0][0]=.00003;
-  PointHistory old;
+  MaxwellState old;
   old.stress[0][1]=-20.;
   const auto response=law.response(old,increment,0.,h,plane,30.);
   const auto predictor=(old.stress+2.*law.G*increment)/(1.+h*law.G/law.eta);

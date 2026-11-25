@@ -1065,8 +1065,7 @@ namespace aspect
       if (std::find(parameters.compositional_field_methods.begin(), parameters.compositional_field_methods.end(),
                     Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase) != parameters.compositional_field_methods.end())
         {
-          auto &provider = dynamic_cast<GrowingFault::MidpointMaterial &>(*material_model);
-          const SolverControl control = GrowingFault::advance_midpoint(SimulatorAccess<dim>(*this), provider, solution);
+          const SolverControl control = GrowingFault::advance_midpoint(SimulatorAccess<dim>(*this), *material_model, solution);
           current_linearization_point = solution;
           nonlinear_iteration = control.last_step();
           signals.post_nonlinear_solver(control);
