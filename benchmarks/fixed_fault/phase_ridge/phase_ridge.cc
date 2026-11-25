@@ -57,7 +57,7 @@ namespace aspect
         }
         double initial_composition(const Point<dim> &x, const unsigned int field) const override
         {
-          if (field!=this->introspection().compositional_index_for_name("phase_field")) return 0.;
+          if (field!=this->introspection().compositional_index_for_name(this->get_parameters().surface_energy_model.composition)) return 0.;
           std::array<unsigned int,2> index;
           std::array<double,2> unit;
           for (unsigned int d=0; d<2; ++d)
@@ -152,7 +152,7 @@ namespace aspect
           data.local_rhs+=isolated.local_rhs;
           const auto &fe=scratch.finite_element_values;
           const auto &intro=this->introspection();
-          const auto field=intro.compositional_index_for_name("phase_field");
+          const auto field=intro.compositional_index_for_name(this->get_parameters().surface_energy_model.composition);
           std::vector<double> phase(fe.n_quadrature_points);
           fe[intro.extractors.compositional_fields[field]].get_function_values(this->get_old_solution(),phase);
           AssertThrow(profile.geometry.cut_quadrature(lo,hi).size()>0,ExcInternalError());
@@ -230,7 +230,7 @@ namespace aspect
           FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_values|update_quadrature_points);
           std::vector<double> phase(rule.size()), rates;
           for (const auto &label : m.labels()) rates.push_back(label.rate);
-          const auto field = this->introspection().compositional_index_for_name("phase_field");
+          const auto field = this->introspection().compositional_index_for_name(this->get_parameters().surface_energy_model.composition);
           const auto rank = Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
           std::ofstream out(this->get_output_directory()+"trace-pressure-"+std::to_string(this->get_timestep_number())
                             +"-r"+std::to_string(rank)+".csv");
@@ -344,7 +344,7 @@ namespace aspect
           for (unsigned int q=0; q<line.size(); ++q) unit[q][0]=line.point(q)[0];
           FEValues<dim> fe(this->get_mapping(),this->get_fe(),Quadrature<dim>(unit),update_values|update_quadrature_points);
           std::vector<double> phi(line.size());
-          const auto field=this->introspection().compositional_index_for_name("phase_field");
+          const auto field=this->introspection().compositional_index_for_name(this->get_parameters().surface_energy_model.composition);
           const auto &profile=m.phase_profile();
           std::ofstream out(path);
           out<<std::setprecision(17)<<"x y w phase h slip_gradient\n";
@@ -420,7 +420,7 @@ namespace aspect
           const auto &ex=this->introspection().extractors;
           const auto &solution=this->get_solution();
           const auto &profile=m.phase_profile();
-          const auto phase=this->introspection().compositional_index_for_name("phase_field");
+          const auto phase=this->introspection().compositional_index_for_name(this->get_parameters().surface_energy_model.composition);
           const auto xx=this->introspection().compositional_index_for_name("fault_stress_xx");
           const auto yy=this->introspection().compositional_index_for_name("fault_stress_yy");
           const auto xy=this->introspection().compositional_index_for_name("fault_stress_xy");

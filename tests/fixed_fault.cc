@@ -6,6 +6,7 @@
 #include <aspect/simulator/assemblers/fault_stress.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/simulator_access.h>
+#include <aspect/simulator_signals.h>
 #include <aspect/time_stepping/interface.h>
 #include <deal.II/fe/fe_values.h>
 #include <fstream>
@@ -40,6 +41,19 @@ namespace aspect
           prm.leave_subsection();
         }
 
+        void initialize() override
+        {
+          this->get_signals().pre_nonlinear_solver.connect([this](const SimulatorAccess<dim> &)
+          {
+            if (this->get_timestep_number()!=0 || Utilities::MPI::this_mpi_process(this->get_mpi_communicator())!=0)
+              return;
+            const auto &material=Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
+            std::ofstream rates(this->get_output_directory()+"initial-vertex-rates");
+            for (const auto &label : material.labels())
+              rates << std::setprecision(17) << label.rate << '\n';
+          });
+        }
+
         std::pair<std::string,std::string> execute(TableHandler &) override
         {
           const auto &model = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
@@ -59,7 +73,11 @@ namespace aspect
           std::ofstream snapshot(directory+"fault-"+std::to_string(step)+"-"+std::to_string(rank)+".txt");
           snapshot << std::setprecision(17) << this->get_time() << ' ' << this->get_timestep();
           for (unsigned int i=0; i<labels.size(); ++i)
-            snapshot << ' ' << labels[i].position << ' ' << model.label_ages().at(i) << ' ' << labels[i].slip << ' ' << labels[i].rate;
+            {
+              snapshot << ' ' << labels[i].position;
+              if (!model.label_ages().empty()) snapshot << ' ' << model.label_ages().at(i);
+              snapshot << ' ' << labels[i].slip << ' ' << labels[i].rate;
+            }
           snapshot << '\n';
 
           const double rate[] = {0.17074374817067778,0.16359216623205453,0.16724399270585846};
@@ -92,7 +110,7 @@ namespace aspect
           const auto xx = fields.compositional_index_for_name("fault_stress_xx");
           const auto yy = fields.compositional_index_for_name("fault_stress_yy");
           const auto xy = fields.compositional_index_for_name("fault_stress_xy");
-          const auto phase = fields.compositional_index_for_name("phase_field");
+          const auto phase = fields.compositional_index_for_name(this->get_parameters().surface_energy_model.composition);
           if (step == 0)
             check_density(xx);
           for (const auto &cell : this->get_dof_handler().active_cell_iterators())

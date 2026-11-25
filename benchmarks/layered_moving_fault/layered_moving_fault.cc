@@ -331,7 +331,7 @@ namespace aspect
           const auto &intro=this->introspection();
           const std::array<unsigned int,4> fields_by_role= {{
               intro.compositional_index_for_name("fault_stress_xx"),intro.compositional_index_for_name("fault_stress_yy"),
-              intro.compositional_index_for_name("fault_stress_xy"),intro.compositional_index_for_name("phase_field")
+              intro.compositional_index_for_name("fault_stress_xy"),intro.compositional_index_for_name(this->get_parameters().surface_energy_model.composition)
             }
           };
           std::array<std::vector<double>,4> composition;

@@ -253,6 +253,9 @@ namespace aspect
                         "Leave empty for adiabatic pressure, which supplies the complete compression.");
       Rheology::FaultResistance::declare_parameters(prm,Rheology::FaultResistance::Route::mature);
       prm.declare_entry("Minimum speed","1e-20",Patterns::Double(0.),"Minimum admissible sliding speed in m/s.");
+      prm.declare_entry("Initial slip rate","",Patterns::List(Patterns::Double(0.),0,1),
+                        "Positive initial material vertex speed in m/s, used before the first section solve. "
+                        "An empty entry uses Reference speed for compatibility with earlier trace inputs.");
       prm.declare_entry("Initial label ages","",Patterns::List(Patterns::Double(0.)),"Optional ordered initial material ages in seconds.");
       prm.declare_entry("Initial label shear tractions","",Patterns::List(Patterns::Double()),"Optional persistent shear tractions in Pa, ordered by vertex.");
       prm.leave_subsection();
@@ -277,7 +280,18 @@ namespace aspect
       prm.leave_subsection();
       normal_stress = Rheology::FrictionNormalStress::parse(prm,Rheology::FrictionNormalStress::Source::resolved_traction);
       const auto &p = this->get_parameters();
-      phase_field = this->introspection().compositional_index_for_name("phase_field");
+      const auto &intro = this->introspection();
+      phase_field = intro.compositional_index_for_name(p.surface_energy_model.composition);
+      const std::array<std::string,3> names = {{"fault_stress_xx","fault_stress_yy","fault_stress_xy"}};
+      AssertThrow(intro.n_compositional_fields == 4,ExcMessage("Expected three fault stress fields and one phase composition."));
+      for (unsigned int c=0; c<names.size(); ++c)
+        {
+          stress_fields[c] = intro.compositional_index_for_name(names[c]);
+          AssertThrow(stress_fields[c]!=phase_field,
+                      ExcMessage("Phase composition cannot be a mature fault stress component: "+names[c]));
+          AssertThrow(p.composition_descriptions[stress_fields[c]].type == CompositionalFieldDescription::stress,
+                      ExcMessage(names[c]+" must have compositional type stress."));
+        }
       const bool transport_phase = p.compositional_field_methods[phase_field] == Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3;
       const bool fresh_run = prm.get("Resume computation") == "false" && p.resume_checkpoint_id == 0 && p.resume_time < 0. &&
                              p.checkpoint_steps == 0 && p.checkpoint_time_secs == 0 &&
@@ -304,7 +318,7 @@ namespace aspect
       advect_vertices = geometry == "advected interior" || (geometry == "automatic" && phase_role);
       interior_seed = advect_vertices || geometry == "fixed interior";
       AssertThrow(!advect_vertices || transport_phase,
-                  ExcMessage("An advected interior seed requires bounded SSPRK3 transport of phase_field."));
+                  ExcMessage("An advected interior seed requires bounded SSPRK3 transport of the selected phase composition."));
       AssertThrow(!transport_phase || interior_seed,
                   ExcMessage("Transported phase requires an interior fault seed."));
       AssertThrow(interior_seed || fresh_run,
@@ -324,7 +338,8 @@ namespace aspect
       AssertThrow(!normal_stress.uses_adiabat() || prm.get("Background compression").empty(),
                   ExcMessage("Adiabatic friction supplies the complete pressure; omit Background compression."));
       background_compression = prm.get("Background compression").empty() ? 5e7 : prm.get_double("Background compression");
-      const double initial_speed=prm.get_double("Reference speed");
+      const double initial_speed=prm.get("Initial slip rate").empty() ?
+                                 prm.get_double("Reference speed") : prm.get_double("Initial slip rate");
       friction=Rheology::FaultResistance::create(prm,Rheology::FaultResistance::Route::mature);
       minimum_speed=prm.get_double("Minimum speed");
       const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
@@ -372,7 +387,7 @@ namespace aspect
       AssertThrow(std::min({viscosity,modulus,initial_interval,minimum_speed,initial_speed}) > 0.,
                   ExcMessage("The fault material requires positive material, time and speed scales."));
       AssertThrow(initial_speed >= minimum_speed,
-                  ExcMessage("The reference speed must be at least the minimum admissible speed."));
+                  ExcMessage("The initial slip rate must be at least the minimum admissible speed."));
       AssertThrow(dim == 2 && !p.enable_elasticity && p.nonlinear_solver == (transport_phase ? Parameters<dim>::NonlinearSolver::single_Advection_iterated_Stokes : Parameters<dim>::NonlinearSolver::no_Advection_iterated_Stokes)
                   && p.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg && p.stokes_velocity_degree == 2
                   && !p.run_postprocessors_on_nonlinear_iterations && !p.mesh_deformation_enabled && !p.include_melt_transport && (normal_stress.uses_adiabat() || p.pressure_normalization == "no")
@@ -386,17 +401,11 @@ namespace aspect
       AssertThrow(p.initial_adaptive_refinement == 0 && p.adaptive_refinement_interval == 0 &&
                   p.additional_refinement_times.empty(),
                   ExcMessage("The stationary FE phase profile requires a fixed Cartesian mesh."));
-      const auto &intro = this->introspection();
-      const std::array<std::string,3> names = {{"fault_stress_xx","fault_stress_yy","fault_stress_xy"}};
-      AssertThrow(intro.n_compositional_fields == 4,ExcMessage("Expected three fault stress fields and phase_field."));
-      for (unsigned int c=0; c<3; ++c)
-        {
-          stress_fields[c] = intro.compositional_index_for_name(names[c]);
-          AssertThrow(p.composition_descriptions[stress_fields[c]].type == CompositionalFieldDescription::stress,
-                      ExcMessage(names[c]+" must have compositional type stress."));
-        }
-      AssertThrow((interior_seed ? phase_role : p.composition_descriptions[phase_field].type == CompositionalFieldDescription::generic),
-                  ExcMessage("Interior mechanics requires the phase field role. Boundary-spanning mechanics requires generic phase."));
+      // Both static roles use the same nodal DG basis. Only phase-role SSPRK3
+      // supplies the bounded Bernstein representation for transported damage.
+      AssertThrow(phase_role || (!transport_phase && p.composition_descriptions[phase_field].type == CompositionalFieldDescription::generic),
+                  ExcMessage("Mature phase requires a generic or phase field composition for static DG, "
+                             "or a phase field composition for bounded SSPRK3 transport."));
       for (unsigned int c=0; c<intro.n_compositional_fields; ++c)
         AssertThrow(p.composition_degrees[c] == 2 && p.use_discontinuous_composition_discretization[c] &&
                     p.compositional_field_methods[c] == (transport_phase && c==phase_field ? Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3 : Parameters<dim>::AdvectionFieldMethod::static_field),
@@ -447,6 +456,12 @@ namespace aspect
         }
       // Retain the repaired RSF wire format, including its per-label age.
       status[label_checkpoint_key()]=out.str();
+      std::ostringstream signature;
+      {
+        aspect::oarchive archive(signature);
+        archive << friction->name() << friction->parameters();
+      }
+      status["Mature fault resistance v1"]=signature.str();
       if (normal_stress.uses_adiabat())
         status["Mature friction pressure profile"] = normal_stress.checkpoint_profile(*this);
     }
@@ -457,6 +472,19 @@ namespace aspect
       AssertThrow(!status.count("Native growing fault v1") && !status.count("Native growing fault v2"),
                   ExcMessage("Cannot resume a growing fault checkpoint with mature trace mechanics."));
       if (!interior_seed) return;
+      // Older archives identify the law only through its label-record key.
+      // Check the additional physical signature before installing any history.
+      const auto signature=status.find("Mature fault resistance v1");
+      if (signature!=status.end())
+        {
+          std::istringstream bytes(signature->second);
+          aspect::iarchive archive(bytes);
+          std::string law;
+          std::vector<double> parameters;
+          archive >> law >> parameters;
+          AssertThrow(law==friction->name(),ExcMessage("Mature fault resistance law differs from the checkpoint."));
+          AssertThrow(parameters==friction->parameters(),ExcMessage("Mature fault resistance parameters differ from the checkpoint."));
+        }
       const auto profile = status.find("Mature friction pressure profile");
       AssertThrow((profile!=status.end()) == normal_stress.uses_adiabat() &&
                   (profile==status.end() || profile->second==normal_stress.checkpoint_profile(*this)),
