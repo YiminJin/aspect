@@ -68,7 +68,7 @@ macro(ASPECT_SETUP_PLUGIN _target)
       # release):
       target_include_directories(${_target} PRIVATE
         "${WORLD_BUILDER_SOURCE_DIR}/include/"
-        "${Aspect_DIR}/world_builder/include/")
+        "@PLUGIN_WORLD_BUILDER_CONFIG_DIR@/world_builder/include/")
     endif()
 
     list(APPEND _target_libs ${_target})
@@ -98,7 +98,7 @@ macro(ASPECT_SETUP_PLUGIN _target)
       # release):
       target_include_directories(${_release_target_name} PRIVATE
         "${WORLD_BUILDER_SOURCE_DIR}/include/"
-        "${Aspect_DIR}/world_builder_release/include/")
+        "@PLUGIN_WORLD_BUILDER_CONFIG_DIR@/world_builder_release/include/")
     endif()
 
     list(APPEND _target_libs ${_release_target_name})
