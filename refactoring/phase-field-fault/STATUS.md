@@ -1,5 +1,148 @@
 # Phase-field fault working record
 
+## Assignment A review repairs
+
+The three-commit review starts at `0e6b2233cb98fbe2ce7cca63c2e5f2de39b1eb15`. Commit `447a3f180` repairs parameter resolution and `15d25cef7` repairs the exporter. The third commit, containing this record, pins the signed stress and corrects the configuration table. Assignment B awaits author review.
+
+| Finding in the independent review | Discriminating input and observed result |
+|---|---|
+| 1 · Historical growing viscosity | At 5 ms, cell `0_0:`, point 0, pre-A gave +75.978862635792 Pa with or without a Simple-only viscosity of 1e6 Pa s. Reviewed A gave +75.978862635792 and +75.791283897615 Pa respectively. The repair restores +75.978862635792 in both cases. Explicit historical growing viscosity 1e6 gave +75.791283897615 with Simple omitted or set to 5e24. Each historical pair matched across the complete native file. Under the public material name, Simple-only 1e6 still selects 1e6. |
+| 2 · Noncontiguous shards | With only a genuine point shard named `points-0001-r2.csv` left at 5 ms, reviewed A exited successfully and its reader encountered duplicate `('0_0:',0)`. The repaired serial output contained only the new rank-zero shard and all 4,968 physical IDs matched clean serial exactly. The original contiguous two-to-one overwrite also passed. |
+| 3 · Literal SDK parameter names | The public dotted name `Dashpot impedance (Pa.s/m) = 750` previously gave force/rate = 1000, while the legacy path gave 750. Both now give 750 Pa s/m on all nine strips. At strip 8 the test law returned 3.3346184129390892e−8 m/s and 2.5009638097043168e−5 Pa. Both strip files matched byte for byte. |
+| 4 · Real declaration context | The SDK law sized its list from the already-declared Dimension. The fault-free affine input ran on pre-A, failed on A's detached handler and ran after repair, measuring AT1 energy 3.1171875 J/m. Known entries attach actions at declaration. Opaque SDK callbacks execute once per route on the real handler. A run loading an extra resistance law takes one transient deal.II XML snapshot per parameter handler to discover literal entry boundaries. The built-in-only path skips that snapshot. |
+| 5 · Typed duplicates | Public nested weights `1, 2` and historical `1.0, 2.0` previously conflicted. They now produce the same complete accepted strip table as one spelling alone and force/rate = 1500 Pa s/m. Historical `2, 2` fails before publication and names both full paths. Numeric comparison uses the declared scalar type and list separators. A string, expression or opaque value needs matching text. |
+| 6 · MPI failure ordering | Three actual writers owned 1,548, 1,728 and 1,692 points. A two-rank overwrite with rank 1's point filename blocked exited 1 and named that file and rank. The previous exporter deleted all three old rank-2 files on that failure. The repair preserved points, fields and memory files byte for byte. The failed frame remained unreadable at the blocked file. Clearing it and retrying reproduced the clean two-rank points (4,968) and FE records (1,280) at 0 and 5 ms. Other frames survived. Forced close and cleanup failures also reached all ranks. |
+| 7 · Effective constants | Rank zero printed one pair from the growing material's Maxwell law. Omitting all shared settings printed 1e6 Pa and 1e8 Pa s. Supplying 2e6 Pa changed the printed modulus and accepted shear to +151.954052677598 Pa. Supplying 1e6 Pa s changed the printed viscosity and accepted shear to +75.791283897615 Pa. The complete parameter listing includes inactive declarations; `original.prm` retains the input. |
+| 8 · Signed stress regression | Negating the single material-point shear in every equivalent spelling passed the reviewed checker. The repaired checker separately rejected −75.978862635792 Pa at 1 MPa and −151.954052677598 Pa at 2 MPa. Both positive references pass at the verified clock. The absolute-plus-relative native stress budget is the frozen 5A budget, 1e−6 Pa + 1e−7 times the reference magnitude. |
+| 9 · Old selector compatibility | The benchmark plugin now observes its two selector spellings locally. An explicit RSF selection with a legacy dashpot material gave the intended conflict. The legacy selectors still ran both physical dashpot paths. The installed law interface keeps its original RSF default and callback signature. The retained pre-A law library reproduced the freshly built library's strip and native point files, including at 750 Pa s/m, and its mature labels at 25 ms. |
+| 10 · Whitespace | A reindented standalone seed reached the first physical endpoint. Reviewed A's settings checker stopped at the subsection lookup before running a control. The repaired checker ran both parameter spellings, both moduli and the conflict controls from the same reindented example and reproduced its original report. |
+| 11 · Named phase and basis | The guide now identifies `Phase field / Phase composition`, the two supported static roles under explicit geometry, bounded transported phase and the old automatic inference rule. Static `damage`, with the reporter on or off, retained labels and physical stress at all three clocks. The local, gradient and total energies were 0.15, 0.00375 and 0.15375 J/m at 25 ms. The FE observer saw `FE_DGQBernstein<2>(2)` in all four cells of the advected-interior `damage` run at 12.5 ms. |
+
+**Call path and scope.** The material declaration hook observes the existing Simple viscosity after release plugins have declared it. The fault materials and RSF declare their own inputs. When the active material parses, the resolver checks supplied values before constructing the Maxwell response and resistance law. The ordinary installed executable loads both new and previously compiled SDK laws. The exporter completes and checks each rank's writes and closes, reduces writer failures, then lets rank zero enumerate the directory and remove obsolete files for that step. It broadcasts cleanup failures. This uses one directory scan per successful frame and constant extra space for the scan. A failed write can still leave a partially overwritten frame.
+
+**Compatibility controls.** New RSF and dashpot checkpoints reproduced the clean 25 ms labels and all physical stress arrays and rejected changes to the same law's coefficients. The pre-A archive continued identically with its original settings; that format lacks a parameter signature. With initial rate fixed at 0.01 m/s, changing the RSF reference speed from 0.001 to 0.002 m/s changed the solved rate from 0.167243992706 to 0.188984539709 m/s. The stateless law accepted an inactive zero RSF reference speed. Reversed loading reversed the signed strip rates on two MPI ranks. The largest analytic root error was 2.78e−17 m/s and the maximum force error was 2.85e−14 Pa. The stored strip-8 sign mutation still fails the public comparator and the independent root replay reproduces the retained reference. The separate strip-8 angle investigation and four historical strip-15 angle exceptions keep their existing status. All requested checks ran, including non-root MPI failure and successful retry. The scoped Release unit run passed 2,574 assertions in 61 cases and the affine AT2 CTest passed.
+
+**Review the code** in these files, in declaration, consumer, output and test order.
+
+```text
+source/material_model/rheology/fault_resistance.cc
+source/material_model/fault_parameters.cc
+source/material_model/growing_fault.cc
+source/postprocess/growing_fault_history.cc
+benchmarks/growing_fault/parameter_compatibility/check.py
+benchmarks/growing_fault/check_material_settings.py
+```
+
+### Installed reproduction
+
+Use fresh output directories. Pre-A, reviewed A and the repaired binary have SHA-256 `13b77da9c2beda96f4c24441956919579c9d5eb3eb3e933c37c3d22846183901`, `577fc4a59d051c67291745f4c7cd779bb9385e557c150bca19bdd4af820465c8` and `6f40962852cf5a854fcc65c07c349b2dc183e1aefb3736412fb06ad2cd259997` respectively. The local run reused the Release build and installed into its own prefix. Numerical runs used one thread per rank, with up to three ranks and four total workers.
+
+```sh
+D=$PWD/build-review-a2
+I=$D/install
+B=$PWD/build-6b/release
+O=$PWD/build-interface-c2/qualified-sdk
+PRE=$O/bin/aspect-release
+REVIEW=$PWD/build-c2-review-a/install/bin/aspect-release
+A=$I/bin/aspect-release
+G=$I/benchmarks/growing_fault
+T=$I/benchmarks/fixed_fault
+F=$PWD/refactoring/phase-field-fault/results/review-a
+C=$PWD/refactoring/phase-field-fault/results/interface-c2
+M=/opt/openmpi/5.0.6/bin/mpirun
+export OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+cmake -S . -B "$B" -DCMAKE_INSTALL_PREFIX="$I" -DASPECT_INSTALL_EXAMPLES=ON
+cmake --build "$B" --target aspect -j2
+for c in runtime includes examples Unspecified; do
+  cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -DCMAKE_INSTALL_COMPONENT="$c" -P "$B/cmake_install.cmake"
+done
+cmake -S "$G" -B "$D/plugin-growth" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/plugin-growth" -j2
+cmake -S "$G/parameter_compatibility" -B "$D/probe" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/probe" -j1
+P=$D/plugin-growth/libgrowing_fault_checks.release.so
+python3 "$G/parameter_compatibility/check.py" "$A" "$D/probe/libfault_parameter_probe.release.so" "$D/review-compat"
+python3 "$G/check_interface.py" "$A" "$P" "$D/review-interface"
+python3 "$G/check_state_free.py" "$A" "$P" "$D/review-law2" --ranks 2 --mpiexec "$M"
+for c in gap retry overwrite close blocked cleanup; do
+  python3 "$G/check_history_output.py" "$A" "$D/writer-$c" "$c" --mpiexec "$M"
+done
+(cd "$B/unit_tests" && "$A" --test)
+touch "$B/tests/postprocess/phase_field_surface_energy_at2.x.prm"
+ctest --test-dir "$B" -R '^postprocess/phase_field_surface_energy_at2$' --output-on-failure --no-tests=error
+```
+
+The first four viscosity measurements used the retained executables with the historical material name and all other settings held fixed. To replay them from the generated historical inputs above, use the following. Run the same two exporter failure checks (`gap`, `retry`) against `$REVIEW` in separate destinations to reproduce the duplicate and the lost shards.
+
+```sh
+for version in pre-A reviewed; do
+  exe=$PRE
+  if [ "$version" = reviewed ]; then exe=$REVIEW; fi
+  for edit in growth-1e+08 growth-1e+08-simple; do
+    dir=$D/$version-$edit
+    mkdir "$dir"
+    cp "$D/review-compat/$edit/input.prm" "$dir/"
+    (cd "$dir" && "$exe" input.prm > log)
+    awk -F, '$1=="0_0:" && $2==0 {print $11}' "$dir/output/points-0001-r0.csv"
+  done
+done
+law=$PWD/build-interface-c2/sdk-plugins/tests/libdashpot.release.so
+for name in persistent dashpot-strip public-impedance; do
+  dst=$D/review-retained-$name
+  mkdir "$dst"
+  cp "$D/review-interface/$name/"*.prm "$dst/"
+  printf '\nset Additional shared libraries = %s\n' "$law" >> "$dst/input.prm"
+  (cd "$dst" && "$A" input.prm >log)
+  if [ "$name" = persistent ]; then
+    for step in 00000 00001 00002; do
+      cmp "$dst/output/fault-labels-$step.txt" "$D/review-interface/$name/output/fault-labels-$step.txt"
+    done
+  else
+    for csv in points-0001-r0.csv sections-0001.csv; do
+      cmp "$dst/output/$csv" "$D/review-interface/$name/output/$csv"
+    done
+  fi
+done
+```
+
+The separate pre-A SDK probe also ran on pre-A and reviewed A in the fault-free affine case. To reproduce the earlier dotted-name and list failures independently of the missing Dimension, build a scratch copy of the probe against the reviewed SDK with its single Dimension lookup replaced by the literal 2, and use it in the generated `literal-public`, `literal-legacy` and `typed-equal` decks on `$REVIEW`. This changes only the declaration context required by the 2-D test law. All positive repair checks use the unmodified SDK source.
+
+The C2 SDK recipe in `results/interface-c2/sdk.sh` supplies the external test plugin CMake project. The local run used its retained `test-src` to rebuild both test plugins against the new prefix. The intentionally corrupted stress runs execute the real solver, negate the selected native value in both equivalent outputs, then invoke the installed comparator. In the independent strip-8 replay only the sections come from the archive; point files come from the installed run and the archived root inputs feed a separate constitutive calculation.
+
+```sh
+cmake -S build-c2-review-a/plugins/test-src -B "$D/test-plugins" \
+  -DAspect_DIR="$I/lib/cmake/Aspect" -DSDK="$I" -DTEST_SOURCE="$PWD/tests"
+cmake --build "$D/test-plugins" --target fixed_fault dashpot -j1
+python3 "$T/check_mature_settings.py" "$A" "$D/test-plugins/libfixed_fault.release.so" \
+  "$D/test-plugins/libdashpot.release.so" "$D/review-mature" --legacy-writer "$PRE"
+python3 "$G/check_material_settings.py" "$A" "$D/review-settings"
+for g in 1 2; do
+  python3 "$F/check_stress_sign.py" "$G/check_material_settings.py" "$A" "$D/review-negative-$g" --modulus "$g"
+done
+mkdir -p "$D/reindent/benchmarks/growing_fault"
+ln -s "$T" "$D/reindent/benchmarks/fixed_fault"
+cp "$G/check_material_settings.py" "$D/reindent/benchmarks/growing_fault/"
+sed 's/^ /  /' "$G/growing_seed.prm" > "$D/reindent/benchmarks/growing_fault/growing_seed.prm"
+PYTHONPATH="$G" python3 "$D/reindent/benchmarks/growing_fault/check_material_settings.py" "$A" "$D/review-reindented"
+mkdir "$D/capture"
+tar -xzf "$C/c1-captures.tar.gz" -C "$D/capture"
+cap=$D/capture/build-interface-c2
+python3 "$F/check_rate_reversal.py" "$G/check_interface.py" "$D/review-interface/growth/output" \
+  "$cap/cap1/output/sections-0001.csv" > "$D/review-rate.txt"
+diff -u "$F/rate-after.txt" "$D/review-rate.txt"
+python3 "$C/replay.py" "$cap/cap1/output" "$cap/cap2/output" > "$D/review-root.txt"
+diff -u "$C/before.txt" "$D/review-root.txt"
+python3 "$F/plot_modulus.py" "$D/review-settings/public-1/output" "$D/review-settings/public-2/output" "$D/review-modulus.png"
+cmp "$F/public-modulus.png" "$D/review-modulus.png"
+```
+
+**Figure.** Accepted native shear stress in Pa at 5 ms at G = 1 and 2 MPa, and their difference at matched physical points. Regeneration from the installed frames reproduced the existing figure byte for byte.
+
+```text
+refactoring/phase-field-fault/results/review-a/public-modulus.png
+refactoring/phase-field-fault/results/review-a/plot_modulus.py
+```
+
 ## Assignment A — Public fault settings and accepted output
 
 Ready for independent review on `pf-rsf`. Start `14358d2a56c2542aace26e91adafbc69e1ee71e2`. The separate exporter repair is `60115004e`, phase identity and mature restart are `f831e29d5`, material input resolution is `402cc4a71`, and the signed comparison, mutation and figure are `75b0e27a1e13aa9798fbccf8085acf1cd3aa6c9a`. The last of these is the tested implementation endpoint. The documentation commit immediately after it closes the review range. The [guide](IMPLEMENTATION.md#select-the-fault-calculation) gives the input and accepted output conventions.

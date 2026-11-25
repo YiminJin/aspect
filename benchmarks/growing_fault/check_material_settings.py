@@ -1,12 +1,38 @@
 """Check the modulus in the accepted native stress, aliases and route-specific defaults."""
 import argparse
 import csv
+import math
 import os
 from pathlib import Path
 import re
 import subprocess
 
 from check_repairs import subsection
+
+
+def take_material_subsection(text, name):
+    """Return the rest of the input and the contents of Material model / name."""
+    lines = text.splitlines(keepends=True)
+    path = []
+    for i, line in enumerate(lines):
+        token = line.partition('#')[0].strip()
+        words = token.split(maxsplit=1)
+        if words[:1] == ['subsection']:
+            path.append(words[1])
+            if path == ['Material model', name]:
+                start = i
+        elif token == 'end':
+            if path == ['Material model', name]:
+                return ''.join(lines[:start] + lines[i+1:]), ''.join(lines[start+1:i])
+            path.pop()
+    raise ValueError(f'Missing subsection Material model / {name}')
+
+
+def remove_setting(settings, name):
+    settings, count = re.subn(r'(?m)^[ \t]*set[ \t]+' + re.escape(name) + r'[ \t]*=[^\n]*$', '', settings)
+    if count != 1:
+        raise ValueError(f'Expected one setting of {name}, found {count}')
+    return settings
 
 
 def main():
@@ -20,8 +46,8 @@ def main():
     example = Path(__file__).with_name('growing_seed.prm').read_text()
     public = 'Phase field fault'
     legacy = 'Growing fault'
-    public_block = re.search(r'^ subsection Phase field fault\n(.*?)^ end$', example, re.M | re.S).group()
-    legacy_block = public_block.replace('subsection '+public, 'subsection '+legacy)
+    omitted, shared = take_material_subsection(example, public)
+    shared = remove_setting(shared, 'Shear modulus')
     env = dict(os.environ, DEAL_II_NUM_THREADS='1', OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1')
 
     def run(name, content, diagnostic=()):
@@ -48,24 +74,27 @@ def main():
             if (a/f).read_bytes() != (b/f).read_bytes():
                 raise ValueError(f'{a.name}, {b.name}: different accepted file {f}')
 
-    def first_stress(directory):
-        with (directory/'points-0001-r0.csv').open() as stream:
-            return float(next(r for r in csv.DictReader(stream) if (r['cell'],r['q'])==('0_0:','0'))['tauxy'])
+    def modulus_input(section, mpa):
+        settings = shared + f'\nset Shear modulus = {mpa}e6'
+        return omitted + subsection('Material model', subsection(section, settings))
 
-    stresses = []
-    for n in (1, 2):
-        modulus = f'{n}e6'
-        canonical = example.replace(public_block, public_block.replace('Shear modulus = 1e6', 'Shear modulus = '+modulus))
-        old = example.replace(public_block, legacy_block.replace('Shear modulus = 1e6', 'Shear modulus = '+modulus))
-        result = run(f'public-{n}', canonical)
-        compare(result, run(f'legacy-{n}', old))
-        stresses.append(first_stress(result))
-    if abs(stresses[0]-stresses[1]) < 1:
-        raise ValueError(f'Changing the public G did not change the native shear stress on the Pa scale: {stresses}')
-    print('Accepted 5 ms, cell 0_0:, q=0, tau_xy (Pa) at G=1 and 2 MPa:', *stresses)
+    for n, reference in ((1, 75.978862635792), (2, 151.95405267759796)):
+        result = run(f'public-{n}', modulus_input(public, n))
+        compare(result, run(f'legacy-{n}', modulus_input(legacy, n)))
+        with (result/'balance-0001.csv').open() as stream:
+            clock = float(next(csv.DictReader(stream))['time'])
+        if not math.isclose(clock, .005, rel_tol=0., abs_tol=1e-15):
+            raise ValueError(f'G={n} MPa: expected accepted time 0.005 s, found {clock} s')
+        with (result/'points-0001-r0.csv').open() as stream:
+            sample, = (row for row in csv.DictReader(stream) if (row['cell'], row['q']) == ('0_0:', '0'))
+        stress = float(sample['tauxy'])
+        # Use the frozen nine-strip native stress budget (Pa) at this same material point.
+        if not abs(stress-reference) <= 1e-6 + 1e-7*abs(reference):
+            raise ValueError(f'G={n} MPa: signed tauxy at 5 ms, cell 0_0:, q=0 was {stress} Pa, expected {reference} Pa')
+        print(f'G={n} MPa: signed tauxy at 5 ms, cell 0_0:, q=0 = {stress} Pa')
 
     base = root/'public-1/output'
-    compare(base, run('omitted', example.replace(public_block, '')))
+    compare(base, run('omitted', omitted))
     compare(base, run('equal', example+setting(legacy, 'Shear modulus', '1000000.0')))
     # Both spellings equal a historical default in this negative control.
     run('both-defaults', example+setting(public,'Shear modulus','1e10')+setting(legacy,'Shear modulus','1e6'),
@@ -80,9 +109,8 @@ def main():
         ['Fit trace to phase requires mature trace mechanics'])
     fixed = (Path(__file__).resolve().parents[1]/'fixed_fault/fixed_fault.prm').read_text()
     old_trace = run('mature-legacy-viscosity', fixed)
-    public_viscosity, n = re.subn(r'(?m)^ +subsection Simple model\n +set Viscosity = 10\n +end$', '', fixed)
-    if n != 1:
-        raise ValueError('Missing the historical Simple viscosity in the mature control')
+    rest, simple = take_material_subsection(fixed, 'Simple model')
+    public_viscosity = rest + subsection('Material model', subsection('Simple model', remove_setting(simple, 'Viscosity')))
     new_trace = run('mature-public-viscosity', public_viscosity+setting(public, 'Viscosity', '10'))
     for step in range(3):
         name = f'fault-labels-{step:05}.txt'

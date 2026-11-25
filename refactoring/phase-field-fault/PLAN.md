@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**Assignment A of the C2 maintainer review is ready for independent review.** See the [public settings, restart and output results](STATUS.md#assignment-a--public-fault-settings-and-accepted-output). Assignment B owns the mature work comparison. Assignment C owns the strip-8 peak investigation.
+**The eleven Assignment A review findings have been repaired.** The [working record](STATUS.md#assignment-a-review-repairs) gives the installed compatibility, signed-stress and three-rank output results. Assignment B, the mature work-transfer comparison, follows author review. Assignment C owns the strip-8 peak investigation.
 
 **C2 established the shared material interface.** The [public inputs and material owners](IMPLEMENTATION.md#select-the-fault-calculation) separate existing material traces from irreversible midpoint growth under one model name. The [working record](STATUS.md#interface-c2) records the installed SDK checks, the frozen controls and the numerical decision outstanding on the adiabatic first turn.
 
