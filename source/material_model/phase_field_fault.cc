@@ -4,7 +4,7 @@
 */
 
 #include <aspect/material_model/phase_field_fault.h>
-#include <aspect/material_model/rheology/friction_normal_stress.h>
+#include <aspect/adiabatic_conditions/interface.h>
 #include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <aspect/simulator/assemblers/fault_stress.h>
 #include <aspect/geometry_model/box.h>
@@ -71,6 +71,15 @@ namespace aspect
       if (advect_vertices && this->get_timestep()>0.)
         candidate->trace.advect_with_accepted_velocity(*this,this->get_timestep());
       candidate->profile.initialize(*this,phase_field,fields,degradation_magnitude,8);
+    }
+
+    template <int dim>
+    double PhaseFieldFault<dim>::normal_compression(const Point<dim> &foot, const double pressure,
+                                                    const double normal_deviatoric_stress) const
+    {
+      if (normal_stress.uses_adiabat())
+        return this->get_adiabatic_conditions().pressure(foot);
+      return background_compression + pressure - normal_deviatoric_stress;
     }
 
     template <int dim>
@@ -191,7 +200,9 @@ namespace aspect
       prm.declare_entry("Shear modulus","1e10",Patterns::Double(0.),"Elastic shear modulus in Pa.");
       prm.declare_entry("Initialization interval","1",Patterns::Double(0.),"Maxwell interval in seconds for the initial Stokes solve.");
       prm.declare_entry("Background shear traction","0",Patterns::Double(),"Initial surface shear loading in Pa, positive along the slip sense.");
-      prm.declare_entry("Background compression","5e7",Patterns::Double(0.),"Compression in Pa added to the dynamic normal traction.");
+      prm.declare_entry("Background compression","",Patterns::List(Patterns::Double(0.),0,1),
+                        "Compression in Pa added to resolved normal traction (default 5e7 Pa). "
+                        "Leave empty for adiabatic pressure, which supplies the complete compression.");
       prm.declare_entry("Reference friction coefficient","0.6",Patterns::Double(0.),"Dimensionless reference friction coefficient.");
       prm.declare_entry("Direct effect","0.01",Patterns::Double(0.),"Dimensionless direct effect parameter.");
       prm.declare_entry("Evolution effect","0.015",Patterns::Double(0.),"Dimensionless evolution effect parameter.");
@@ -222,6 +233,7 @@ namespace aspect
       prm.enter_subsection("Termination criteria");
       const bool checkpoint_on_termination = prm.get_bool("Checkpoint on termination");
       prm.leave_subsection();
+      normal_stress = Rheology::FrictionNormalStress::parse(prm,Rheology::FrictionNormalStress::Source::resolved_traction);
       const auto &p = this->get_parameters();
       phase_field = this->introspection().compositional_index_for_name("phase_field");
       const bool transport_phase = p.compositional_field_methods[phase_field] == Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3;
@@ -263,7 +275,9 @@ namespace aspect
       modulus = prm.get_double("Shear modulus");
       initial_interval = prm.get_double("Initialization interval");
       background_shear = prm.get_double("Background shear traction");
-      background_compression = prm.get_double("Background compression");
+      AssertThrow(!normal_stress.uses_adiabat() || prm.get("Background compression").empty(),
+                  ExcMessage("Adiabatic friction supplies the complete pressure; omit Background compression."));
+      background_compression = prm.get("Background compression").empty() ? 5e7 : prm.get_double("Background compression");
       const double initial_speed=prm.get_double("Reference speed");
       friction=make_resistance(prm);
       minimum_speed=prm.get_double("Minimum speed");
@@ -307,9 +321,9 @@ namespace aspect
                   ExcMessage("The reference speed must be at least the minimum admissible speed."));
       AssertThrow(dim == 2 && !p.enable_elasticity && p.nonlinear_solver == (transport_phase ? Parameters<dim>::NonlinearSolver::single_Advection_iterated_Stokes : Parameters<dim>::NonlinearSolver::no_Advection_iterated_Stokes)
                   && p.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg && p.stokes_velocity_degree == 2
-                  && !p.run_postprocessors_on_nonlinear_iterations && !p.mesh_deformation_enabled && !p.include_melt_transport && p.pressure_normalization == "no"
+                  && !p.run_postprocessors_on_nonlinear_iterations && !p.mesh_deformation_enabled && !p.include_melt_transport && (normal_stress.uses_adiabat() || p.pressure_normalization == "no")
                   && p.nonlinear_solver_failure_strategy != Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep,
-                  ExcMessage("The fault material requires a fixed 2-D Q2 box with ASPECT elasticity disabled, block AMG, no pressure normalization, "
+                  ExcMessage("The fault material requires a fixed 2-D Q2 box with ASPECT elasticity disabled, block AMG, no pressure normalization for resolved traction, "
                              "a composition solve for selected phase transport, iterated Stokes, and convergence or retry."));
       AssertThrow(!p.enable_prescribed_dilation && (p.formulation_mass_conservation ==
                                                     Parameters<dim>::Formulation::MassConservation::incompressible || p.formulation_mass_conservation ==
@@ -388,13 +402,18 @@ namespace aspect
         }
       // Retain the repaired RSF wire format, including its per-label age.
       status[label_checkpoint_key()]=out.str();
-
+      if (normal_stress.uses_adiabat())
+        status["Mature friction pressure profile"] = normal_stress.checkpoint_profile(*this);
     }
 
     template <int dim>
     void PhaseFieldFault<dim>::load(const std::map<std::string,std::string> &status)
     {
       if (!interior_seed) return;
+      const auto profile = status.find("Mature friction pressure profile");
+      AssertThrow((profile!=status.end()) == normal_stress.uses_adiabat() &&
+                  (profile==status.end() || profile->second==normal_stress.checkpoint_profile(*this)),
+                  ExcMessage("Mature fault friction pressure source or profile differs from the checkpoint."));
       const auto entry=status.find(label_checkpoint_key());
       AssertThrow(entry!=status.end(),ExcMessage("Missing interior fault labels in checkpoint."));
       std::istringstream in(entry->second);

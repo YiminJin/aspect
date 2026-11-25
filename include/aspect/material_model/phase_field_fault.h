@@ -8,6 +8,7 @@
 
 #include <aspect/material_model/equation_of_state/linearized_incompressible.h>
 #include <aspect/reconstructed_fault/stokes_coupling.h>
+#include <aspect/material_model/rheology/friction_normal_stress.h>
 #include <deal.II/base/parsed_function.h>
 
 namespace aspect
@@ -53,6 +54,9 @@ namespace aspect
       protected:
         /** Select the local resistance in the Phase field fault subsection. */
         virtual std::unique_ptr<Rheology::FaultResistance> make_resistance(ParameterHandler &) const;
+        /** Compression (Pa) for a section quadrature sample with the given
+         * physical foot on the current trace. Local, with fixed geometry. */
+        double normal_compression(const Point<dim> &foot, double pressure, double normal_deviatoric_stress) const;
         /** Eulerian Maxwell viscosity (Pa s) at the constitutive point. */
         virtual double bulk_viscosity(const Point<dim> &) const
         {
@@ -104,6 +108,7 @@ namespace aspect
         std::unique_ptr<Functions::ParsedFunction<dim>> inflow_stress;
         bool fit_trace, trace_initialized = false;
         double conductivity, viscosity, modulus, background_shear, background_compression;
+        Rheology::FrictionNormalStress normal_stress;
         double initial_interval, minimum_speed;
     };
   }

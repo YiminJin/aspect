@@ -53,11 +53,16 @@ namespace aspect
   void FaultStokesCoupling<dim>::initialize()
   {
     auto &signals = this->get_signals();
-    signals.set_assemblers.connect([](const SimulatorAccess<dim> &sim, Assemblers::Manager<dim> &assemblers)
+    signals.set_assemblers.connect([this](const SimulatorAccess<dim> &sim, Assemblers::Manager<dim> &assemblers)
     {
-      AssertThrow(has_normal_traction_boundary(sim),
+      const bool anchored = has_normal_traction_boundary(sim);
+      AssertThrow(material.normal_stress.uses_adiabat() || anchored,
                   ExcMessage("Fault friction requires a pressure datum from a nonperiodic box face "
                              "with unconstrained normal velocity (prescribed or natural normal traction)."));
+      if (material.normal_stress.uses_adiabat())
+        AssertThrow(anchored == (sim.get_parameters().pressure_normalization=="no"),
+                    ExcMessage("Use a normal-traction boundary with no pressure normalization, or normalize "
+                               "the bulk pressure in a closed velocity box with adiabatic fault friction."));
       // For the 3-D deviator in plane strain the velocity matrix needs
       // -2*kappa/3 div(u) div(v), even with incompressible continuity.
       AssertThrow(sim.get_prescribed_dilation_manager().get_active_plugin_names().empty(),
@@ -212,6 +217,8 @@ namespace aspect
     std::vector<double> pressure(rule.size()), phase(rule.size());
     std::vector<BulkPoint> samples;
     bool locally_closed = true;
+    Point<dim> invalid_position;
+    double invalid_pressure = 0.;
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
         {
@@ -238,9 +245,16 @@ namespace aspect
               else
                 for (unsigned int i=0; i<parent.size(); ++i)
                   stress+=basis(q,i)*parent[i]*material.relaxation(x);
-              const double compression = material.background_compression + pressure[q] - frame.normal*(stress*frame.normal);
-              locally_closed &= std::isfinite(compression) && compression > 0.;
               const auto &foot=transfer.foot;
+              const Point<dim> position = material.section().trace.labels()[foot.first_vertex].position
+                                          + (foot.xi*frame.length)*frame.tangent;
+              const double compression = material.normal_compression(position,pressure[q],frame.normal*(stress*frame.normal));
+              if (!(std::isfinite(compression) && compression>0.))
+                {
+                  locally_closed = false;
+                  invalid_position = position;
+                  invalid_pressure = compression;
+                }
               const double shear=foot.interpolate(material.initial_shear[foot.first_vertex],material.initial_shear[foot.first_vertex+1]);
               samples.push_back({transfer,fe.JxW(q),shear + stress*symmetrize(frame.dyad),compression,material.stiffness(fe.quadrature_point(q))});
             }
@@ -249,6 +263,17 @@ namespace aspect
     // All ranks reject this trial before evaluating friction or staging rates.
     if (!Utilities::MPI::min(static_cast<unsigned int>(locally_closed),this->get_mpi_communicator()))
       {
+        if (material.normal_stress.uses_adiabat())
+          {
+            const auto comm = this->get_mpi_communicator();
+            const auto owner = Utilities::MPI::min(locally_closed ? numbers::invalid_unsigned_int :
+                                                   Utilities::MPI::this_mpi_process(comm),comm);
+            std::ostringstream message;
+            message << "Invalid adiabatic fault compression " << invalid_pressure << " Pa at trace position "
+                    << invalid_position << " m. Friction requires finite positive compression.";
+            const auto diagnostic = Utilities::MPI::broadcast(comm,message.str(),owner);
+            AssertThrow(false,ExcMessage(diagnostic));
+          }
         this->get_pcout() << "Fault trial requires finite, positive normal compression." << std::endl;
         throw ExcNonlinearSolverNoConvergence();
       }

@@ -116,6 +116,7 @@ namespace aspect
     {
       public:
         static void declare_parameters(ParameterHandler &) {}
+        using PhaseFieldFault<dim>::normal_compression;
         // All ranks in RidgeProbe enter after acceptance and before the next
         // attempt replaces the relaxed parent. No collective on material reads.
         auto collect_attempt_samples(const LinearAlgebra::BlockVector &fields) const
@@ -216,6 +217,52 @@ namespace aspect
   }
   namespace Postprocess
   {
+    /** Pair the actual section row samples with the FE quadrature identities. */
+    template <int dim>
+    class PressureProbe : public Interface<dim>, public SimulatorAccess<dim>
+    {
+      public:
+        std::pair<std::string,std::string> execute(TableHandler &) override
+        {
+          const auto &m = Plugins::get_plugin_as_type<const MaterialModel::ObservedRidge<dim>>(this->get_material_model());
+          const auto points = m.collect_attempt_samples(this->get_solution());
+          const QGauss<dim> rule(8);
+          FEValues<dim> fe(this->get_mapping(),this->get_fe(),rule,update_values|update_quadrature_points);
+          std::vector<double> phase(rule.size()), rates;
+          for (const auto &label : m.labels()) rates.push_back(label.rate);
+          const auto field = this->introspection().compositional_index_for_name("phase_field");
+          const auto rank = Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
+          std::ofstream out(this->get_output_directory()+"trace-pressure-"+std::to_string(this->get_timestep_number())
+                            +"-r"+std::to_string(rank)+".csv");
+          out<<std::setprecision(17)<<"cell,q,x,y,left,xi,foot_x,foot_y,ax,ay,bx,by,N,V,volume,chi,shear,stiffness,delta_pressure,delta_normal\n";
+          unsigned int index=0;
+          for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+            if (cell->is_locally_owned())
+              {
+                fe.reinit(cell);
+                fe[this->introspection().extractors.compositional_fields[field]].get_function_values(this->get_solution(),phase);
+                for (unsigned int q=0; q<rule.size(); ++q)
+                  {
+                    const auto x=fe.quadrature_point(q);
+                    if (m.phase_profile().sample(x,phase[q]).chi==0.) continue;
+                    const auto &p=points.at(index++);
+                    const auto &foot=p.transfer.foot;
+                    const auto &a=m.labels()[foot.first_vertex].position;
+                    const auto &b=m.labels()[foot.first_vertex+1].position;
+                    const Point<dim> position=a+foot.xi*(b-a);
+                    const double base=m.normal_compression(position,3.,2.);
+                    out<<cell->id()<<','<<q<<','<<x[0]<<','<<x[1]<<','<<foot.first_vertex<<','<<foot.xi
+                       <<','<<position[0]<<','<<position[1]<<','<<a[0]<<','<<a[1]<<','<<b[0]<<','<<b[1]<<','<<p.compression<<','<<p.transfer.rate(rates)
+                       <<','<<p.volume<<','<<p.transfer.chi<<','<<p.driving_shear<<','<<p.stiffness
+                       <<','<<m.normal_compression(position,4.,2.)-base<<','<<m.normal_compression(position,3.,3.)-base<<'\n';
+                  }
+              }
+          AssertThrow(index==points.size(),ExcInternalError());
+          return {"Fault friction pressure","sampled section rows"};
+        }
+    };
+    ASPECT_REGISTER_POSTPROCESSOR(PressureProbe,"fault friction pressure samples","Export Q8 fault pressure, material projection and slip rate.")
+
     template <int dim>
     class RidgeProbe : public Interface<dim>, public SimulatorAccess<dim>
     {
@@ -243,7 +290,7 @@ namespace aspect
           G=prm.get_double("Shear modulus");
           initial_dt=prm.get_double("Initialization interval");
           initial_age=prm.get_double("Initial age");
-          compression=prm.get_double("Background compression");
+          compression=prm.get("Background compression").empty() ? 5e7 : prm.get_double("Background compression");
           shear=prm.get_double("Background shear traction");
           law= {prm.get_double("Reference friction coefficient"),prm.get_double("Direct effect"),prm.get_double("Evolution effect"),
                 prm.get_double("Reference speed"),prm.get_double("Slip distance"),prm.get_double("Radiation damping")
