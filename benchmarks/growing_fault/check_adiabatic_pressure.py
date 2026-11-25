@@ -40,7 +40,7 @@ def check_profile(out, p0, slope):
         # Independently invert the signed stage-aged law at the published force.
         # This relative check also applies when two layouts select different angles.
         force = float(strip[k,]['force'])
-        lo, hi = -1., 1.
+        lo, hi = (-1., 1.) if force else (0., 0.)
         for _ in range(200):
             mid = (lo+hi)/2.
             if resistance(mid,n) < force:

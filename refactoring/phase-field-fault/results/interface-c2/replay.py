@@ -1,5 +1,6 @@
 """Replay the captured first turn and final signed strip root on each C1 layout."""
 import csv
+from math import fsum
 import sys
 from pathlib import Path
 import mpmath as mp
@@ -47,11 +48,27 @@ def main(paths):
     if len(data[0])!=180 or data[0].keys()!=data[1].keys():
         raise ValueError('Missing strip points')
     print('Point deltas area,kernel,F,u,v,phi',*[max(abs(v[j]-data[1][k][j]) for k,v in data[0].items()) for j in range(6)])
+    reductions=[]
     for p,pts in zip(paths,data):
         width=float(list(csv.DictReader((p/'sections-0000.csv').open()))[8]['ds'])
         free,mob,beta,pressure=map(mp.mpf,(p/'root-input').read_text().split())
         direct=Direct(pts,width,pressure)
         live=[list(map(float,l.split())) for l in (p/'turn-sums-0').read_text().splitlines()]
+        local=[]
+        for sums_file in sorted(p.glob('turn-sums-*')):
+            rank=sums_file.name.split('-')[-1]
+            sample_file=p/('turn-points-'+rank)
+            own={}
+            for line in sample_file.read_text().splitlines():
+                cell,q,*v=line.split()
+                own[cell,int(q)]=tuple(map(float,v))
+            recorded=list(map(float,sums_file.read_text().splitlines()[0].split()))
+            ordered=moments(dict(sorted(own.items())))[:9] if own else [0.]*9
+            print('rank',rank,'contributed',len(own),'points; local minus ordered',[a-b for a,b in zip(recorded,ordered)])
+            local.append(recorded)
+        combined=list(map(fsum,zip(*local)))
+        print('MPI minus sum of rank partials',[a-b for a,b in zip(live[1][:9],combined)])
+        reductions.append(live[1])
         print('global minus ordered moments',[a-b for a,b in zip(live[1],moments(pts))])
         for a,f,score in live[2:]:
             force,reference=direct.value(mp.mpf(a))
@@ -70,6 +87,7 @@ def main(paths):
         if abs(mp.mpf(row['beta'])-beta)>mp.mpf('1e-17') or abs(mp.mpf(row['V'])/v-1)>mp.mpf('1e-10') or abs(reaction(v)-mp.mpf(row['force']))>mp.mpf('1e-10'):
             raise ValueError('Published pair differs from the reconstructed signed strip root')
         print('final angle, signed rate, relative root error, resistance error',float(beta),row['V'],float(mp.mpf(row['V'])/v-1),float(mp.mpf(row['force'])-reaction(v)))
+    print('Two-rank minus serial reduced moments',[a-b for a,b in zip(reductions[1],reductions[0])])
 
 
 if __name__=='__main__':
