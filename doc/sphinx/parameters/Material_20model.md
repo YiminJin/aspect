@@ -5,6 +5,15 @@
 ## **Subsection:** Material model
 
 
+::::{dropdown} __Parameter:__ {ref}`Friction normal stress<parameters:Material_20model/Friction_20normal_20stress>`
+:name: parameters:Material_20model/Friction_20normal_20stress
+**Default value:** model default
+
+**Pattern:** [Selection model default|adiabatic pressure|resolved normal traction|prescribed constant ]
+
+**Documentation:** Source of fault compression in Pa. Adiabatic pressure supplies the complete normal stress from ASPECT&rsquo;s adiabatic conditions at the fault. Model default preserves resolved normal traction on mature faults and prescribed constant compression on growing strips.
+::::
+
 ::::{dropdown} __Parameter:__ {ref}`Material averaging<parameters:Material_20model/Material_20averaging>`
 :name: parameters:Material_20model/Material_20averaging
 **Default value:** default averaging
@@ -3840,11 +3849,11 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 
 ::::{dropdown} __Parameter:__ {ref}`Background compression<parameters:Material_20model/Phase_20field_20fault/Background_20compression>`
 :name: parameters:Material_20model/Phase_20field_20fault/Background_20compression
-**Default value:** 5e7
+**Default value:**
 
-**Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
+**Pattern:** [List of <[Double 0...MAX_DOUBLE (inclusive)]> of length 0...1 (inclusive)]
 
-**Documentation:** Compression in Pa added to the dynamic normal traction.
+**Documentation:** Compression in Pa added to resolved normal traction (default 5e7 Pa). Leave empty for adiabatic pressure, which supplies the complete compression.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Background shear traction<parameters:Material_20model/Phase_20field_20fault/Background_20shear_20traction>`

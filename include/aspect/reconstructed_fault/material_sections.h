@@ -34,6 +34,15 @@ namespace aspect
       MaterialSections(const Triangulation<2> &mesh, MPI_Comm comm,
                        double seed_angle_degrees, unsigned int gauss_order);
 
+      /** Arclength midpoints of the in-box fault portion of each strip.
+       * Follow the straight seed to its tip and the connected accepted
+       * station angles beyond it. Continue the last tangent through virgin
+       * strips. Every strip needs a friction root, hence a nonempty cut.
+       * Local operation on replicated geometry, frozen for one attempt. */
+      std::vector<Point<2>> pressure_stations(const Point<2> &tip, const Point<2> &upper,
+                                               const std::vector<double> &angles,
+                                               const std::vector<unsigned int> &formed) const;
+
       double coordinate(const Point<2> &point) const;
       double width(unsigned int section) const;
       double length(unsigned int section, double beta) const;

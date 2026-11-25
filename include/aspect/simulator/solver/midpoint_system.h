@@ -3,6 +3,7 @@
 #define _aspect_midpoint_system_h
 #include <aspect/simulator/solver/midpoint_fault.h>
 #include <aspect/phase_field/midpoint_fracture.h>
+#include <aspect/reconstructed_fault/onset_score.h>
 
 namespace aspect::GrowingFault
 {
@@ -61,6 +62,7 @@ namespace aspect::GrowingFault
     const unsigned int field,phase_block;
     const Index nv,phase_begin,n;
     PhaseField::FractureRows fracture;
+    const SectionPressures friction_pressures;
     std::map<CellId,Cell> cells;
     Values initial,lower,upper,mass,angles;
     std::map<Index,double> fixed;
@@ -68,6 +70,10 @@ namespace aspect::GrowingFault
     /** Collective, once per attempt. Track the connected accepted graph and
      * freeze the material-point weights in the forward disk. */
     void freeze_direction_neighborhood();
+    /** Local score and resistance at one prospective angle, using globally
+     * reduced moments and the section compression frozen for this attempt. */
+    OnsetScore score_plane(unsigned int section, const double *moments,
+                           const double *centered_moments, double angle) const;
     /** Collective, after a converged stage. Compare candidate planes at the
      * returned fields and request a fresh assembly when a trial angle turns. */
     bool select_prospective_planes(const Values &);

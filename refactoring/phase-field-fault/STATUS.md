@@ -1,5 +1,109 @@
 # Phase-field fault working record
 
+## Interface repairs after 6B — C1
+
+Edit `Friction normal stress = adiabatic pressure` under `Material model`, then edit `p0=200, dp_dz=50` in the ordinary ASPECT adiabatic function. The [installed input](../../benchmarks/growing_fault/adiabatic_pressure.prm) stops at 5 ms. The [guide](IMPLEMENTATION.md#use-aspects-adiabatic-pressure-for-friction) shows the whole block, the old spellings and both sampling rules.
+
+![Actual section pressures and accepted slip rates at the dipping stations](results/interface-c1/pressure-depth.png)
+
+**Pressure and slip.** The lower and upper cuts of the 30° seed in the 2 × 1 m box are at along-seed coordinates −1 and +1 m relative to the box centre. Intersect these with each strip, take the midpoint, then calculate depth as 1 m minus its y coordinate. The pressure recorder reads the actual attempt vector used by friction. At 5 ms, the native point histories, FE fields, strip tables and work ledger at constant 200 and 250 Pa each matched the corresponding Stage B output byte for byte. The signed RSF recomputed at the half-step age on the affine profile gave a maximum force error of 2.14e−14 Pa over all nine strips.
+
+| Route and physical time | Depth (m) | Analytic compression (Pa) | Consumed (Pa) | Accepted rate (m/s, one rank) |
+|---|---:|---:|---:|---:|
+| Growing, strip 0, 5 ms | 0.9670049396 | 248.350246981 | 248.350246981 | 2.86410793411e−15 |
+| Growing, strip 4, 5 ms | 0.5000000000 | 225 | 225 | 1.15320747992e−14 |
+| Growing, strip 8, 5 ms | 0.0329950604 | 201.649753019 | 201.649753019 | 1.32712181977e−13 |
+| Mature, dipping trace, 12.5 ms | 0.7985534509 | 239.927672544 | 239.927672544 | 4.94839987869e−4 |
+| Mature, dipping trace, 12.5 ms | 0.2014465491 | 210.072327456 | 210.072327456 | 1.05153304210e−3 |
+
+**Mature coupling.** Picard preparation and its post-solve convergence check both enter `FaultStokesCoupling::solve_rates → sample_bulk → PhaseFieldFault::normal_compression`. The last operation calls `get_adiabatic_conditions().pressure(foot)`. Fixed geometry, bulk iterate, projected stress defect and incoming age stay fixed during the Q1 rate solve. Q8 rows at bulk depths 0.9950362321 and 0.6020706697 m gave the same 239.927672544 Pa at their material projection. Independent projection, RSF and weak Q1 row sums used the actual accepted rates. On the 4 × 4 mesh the fixed trace contributed 430 supported Q8 points on each of two ranks. The one- and two-rank samples agreed by CellId and q. Adding 1 Pa to pressure and, separately, 1 Pa to the normal deviator changed prescribed compression by 0 and 0 Pa. The resolved control changed by +1 and −1 Pa with fixed shear. The new moving case raised the first vertex from y=0.2 to 0.2124999049 m in one interval. Its 854 active samples matched the current trace profile to 2.85e−14 Pa at 12.5 ms. Across the four cases, the independent relative Q1 balance defect was below 1.4e−16. The old homogeneous fixture still returned +0.0325 Pa shear on all 36 sampled points.
+
+Only the *computed-column fault check* used nonzero gravity. Its ordinary Stokes body force and the ASPECT computed adiabat used vertical gravity 0.05 m/s² and mature Simple-model EOS density 1,000 kg/m³ with zero thermal expansivity. The maximum error against 200 Pa + ρgz at the friction evaluator was 8.47e−12 Pa. This is a sliding synthetic column. The growing material supplied unit density and zero gravity. The stock fault-off surface-normalization comparison used its own vertical gravity.
+
+**Growing coupling.** At attempt entry `MidpointSystem` asks `Material::section_pressures` for one compression per strip. `MaterialSections::pressure_stations` clips the accepted graph to the box and strip and takes its arclength midpoint. The material calls `get_adiabatic_conditions().pressure(station)`. All strips need a root, including unformed strips. A seed offset that leaves strip 8 without a segment was rejected by ID. The signed root, its bordered tangent, prospective angle scores, bulk return and frictional work share that section pressure. The physical acceptance hook publishes the measured pressure and station with the history. By 15 ms the turned strip 8 was sampled at (1.864891870, 0.959005753) m, giving 202.049712353 Pa. An independent intersection of the incoming bent graph with the box reproduced this value.
+
+The prospective-plane probe used the actual eligible strips 7 and 8, actual section pressures, two specified point stresses and two angles. The independent checker solved the scalar root by bisection and summed squared traction at the two points. On strip 7 at 0.23 rad the production score was 12.05666872846 Pa² m² and its resistance was 127.9978363621 Pa. Both ranks matched the direct score. This exercises the scoring operation called by the search, with controlled traction moments. The whole installed calculation separately exercises selection on the solved fields. The six midpoint directional differences at relative step 1e−4 passed the existing tangent threshold.
+
+**Datum, cutback and restart.** At constant 200 Pa, all 128 cell-local Q1 pressure entries shifted by +100 Pa within 5.7e−13 Pa. Strip 0 changed from 7.347445843285936e−14 to 7.347445843285852e−14 m/s. Raising friction compression to 250 Pa gave 2.621345769163710e−15 m/s. With damping 1.15 Pa s/m at 5 ms, the shallow/deep admissibility bounds were 1.0082487651 and 1.2417512349 Pa s/m. Both the increasing and reversed pressure profiles cut once to 2.5 ms and matched their clean half-steps. Reversing the gradient makes the first strip admissible at the rejected duration. Fixed negative values gave hard errors naming the position and pressure. Zero at the surface with positive pressure at every consumed station was admitted.
+
+The growing 5 ms checkpoint reproduced the accepted 10 and 15 ms FE, native, strip, pressure and work records. The mature fixed-interior continuation reproduced the complete 25 ms Q8 file byte for byte. Both rejected a changed slope at the same surface pressure and switching to the legacy closure. Growth also rejected the reverse switch. A three-knot ASCII profile continued with the same table and detected a changed pressure column at the same filename. Retained scalar growth checkpoints and finite/full-width mature records passed the existing continuation and mismatch checks. Time-dependent computed surface conditions and arbitrary adiabatic plugins have no qualified checkpoint identity. The default and explicit 100 Pa ordinary inputs gave 0 and 100 Pa respectively at all eight top samples of ASPECT's computed-adiabat visualization. The Stage B empty spelling remains accepted for include overrides. No release parameter declaration or solver flow changed in C1.
+
+**Strict comparisons.** Each rank owned 2,484 native points in the oblique growing run. All nine positions, depths and consumed pressures agreed exactly across rank counts. The eight unturned rates passed a relative 1e−10 comparison. At strip 8 the single/two-rank first-turn angles were −0.1478874297735 and −0.1478865731358 rad. Their difference of 8.5664e−7 exceeds 1.1479e−7 rad. The derived arclength difference of 3.1999e−8 exceeds 2.5084e−8 m. The strict checker reports both failures. The largest signed rate difference was 1.69404e−20 m/s and the force difference was 3.86102e−7 Pa. Formation flags and ages agreed, native stress differences were at most 9.10e−13 Pa, and the fracture ledger differed by 3.47e−14 J/m. Pressure agrees before the direction decision. Cross-layout angle identity remains open on this affine fixture. The earlier near-flat strip-8 investigation applies to the constant fixture. The present check does not independently measure the solved affine peak curvature.
+
+The fresh two-rank frozen nine-strip run passed all donor frames. The fresh 18-strip schedules reproduced the original strict 5B report directory byte for byte, including exit 1 and exactly the four strip-15 angle failures. The returned-row inputs to the 5B audit are retained observations. The new affine comparison has its own result and retains its own red exit. Release unit tests passed 2,571 assertions in 60 cases. The scoped AT2 CTest passed.
+
+**Review boundaries.** The first commit (`11af961e3`) declares the shared pressure choice, profiles and compatibility tests. The second (`a0952d9b4`) implements mature sampling and its tests. The third adds strip sampling and this qualification. The read-only donor reference was `pf-rsf-particle-free` at `abbc9b0c0574c9f4de7a64d9662d539b93599f2b`. Its reconstructed surface and constitutive evaluator distinguish reference pressure from resolved normal traction. C1 uses the complete ASPECT profile and one accepted geometry per attempt. The mature foot and existing Q8 row retain their bulk measures. Growing storage adds one point and one pressure per spatial strip (24 bytes of values per strip per copy on this 2-D build) in the attempt vector and the reported history. No new mesh field, quadrature loop over all ranks, simulator hook, or solver backend was needed. Next review is C1, followed by C2.
+
+### C1 commands
+
+Run from the worktree root with fresh output subdirectories. The local Release build has examples enabled. One numerical thread per rank. The two-rank commands need local MPI socket access.
+
+~~~bash
+W=$PWD
+B=$W/build-6b/release
+D=$W/build-interface-c1
+G=benchmarks/growing_fault
+R=benchmarks/fixed_fault/phase_ridge
+L=benchmarks/layered_moving_fault
+A=$B/aspect
+P=$B/$G/libgrowing_fault_checks.release.so
+Q=$B/$R/libphase_ridge.release.so
+M=$B/$G/timestep/libmidpoint_fields.release.so
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+OLD=$(cat build-interface-b/outside)/tmp/pf-rsf-6b-arSr9jxf/install/bin/aspect-release
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+cmake --build "$B" -j4 --target aspect growing_fault_checks phase_ridge layered_moving_fault midpoint_fields
+(cd "$B/unit_tests" && ../aspect --test)
+ctest --test-dir "$B" -R phase_field_surface_energy_at2 --output-on-failure
+python3 "$R/check_pressure.py" "$A" "$Q" "$D/trace-serial"
+python3 "$R/check_pressure.py" "$A" "$Q" "$D/trace-mpi" --ranks 2 --mpiexec "$MPI" --serial "$D/trace-serial"
+python3 "$R/check_pressure.py" "$A" "$Q" "$D/trace-restart" --lifecycle
+python3 "$G/check_adiabatic_pressure.py" "$A" "$P" "$D/growth1" profile
+python3 "$G/check_adiabatic_pressure.py" "$A" "$P" "$D/constant-final" constant --stage-b build-interface-b/final/compression --pressure-plugin build-4c/tests/libpressure_constraint.release.so
+python3 "$G/check_adiabatic_pressure.py" "$A" "$P" "$D/history" lifecycle
+python3 "$G/check_adiabatic_pressure.py" "$A" "$P" "$D/growth-qualified" profile --ranks 2 --mpiexec "$MPI" --serial "$D/growth1"  # exit 1, strip 8 beta and ds
+python3 "$G/check_physical_inputs.py" "$A" "$P" "$D/scalar-legacy" compression --pressure-plugin build-4c/tests/libpressure_constraint.release.so
+python3 "$G/check_physical_inputs.py" "$A" "$P" "$D/legacy-restart" restart --old-output build-interface-b/old-nine/principal/output
+python3 "$L/check_restart_width.py" "$A" "$B/$L/liblayered_moving_fault.release.so" "$D/legacy-width" --seeds build-interface-a/old-width
+python3 benchmarks/fixed_fault/check_stress_output.py "$A" "$D/mature-homogeneous"
+bash "$G/check_surface_pressure.sh" "$OLD" "$A" tests/simpler_box.prm "$D/stock-plugin"
+F=refactoring/phase-field-fault/results/interface-c1
+MPLCONFIGDIR=/tmp/pf-rsf-c1-mpl python3 "$F/plot_pressure.py" "$D/trace-serial/affine/output" "$D/growth1/affine/output" "$F/pressure-depth.png"
+~~~
+
+~~~bash
+F=$D/frozen
+mkdir -p "$F"
+python3 "$G/run.py" "$A" "$P" "$F/nine" --principal-only --mpiexec "$MPI"
+python3 "$G/compare.py" build-5a-repair/donor-two/output "$F/nine/principal/output"
+python3 "$G/timestep/run.py" parent "$F/strip18/parent" "$M" --aspect "$A" --plugin "$P" --launcher "$MPI"
+python3 "$G/timestep/run.py" coarse "$F/strip18/coarse" "$M" --aspect "$A" --plugin "$P" --launcher "$MPI" --parent "$F/strip18/parent/output"
+python3 "$G/timestep/run.py" half "$F/strip18/half" "$M" --aspect "$A" --plugin "$P" --launcher "$MPI"
+for c in parent coarse half; do ln -s "$W/build-5b/donor-$c" "$F/strip18/donor-$c"; done
+python3 "$G/timestep/audit.py" "$F/strip18" build-5a-repair/reference "$F/strict" --returned-rows build-5b/rows  # exit 1
+diff -qr "$F/strict" build-5b/closeout/final-audit
+~~~
+
+Installed test outside the checkout with a fresh staging prefix (actual staging directory `/tmp/pf-rsf-c1-Majezp`).
+
+~~~bash
+S=$(mktemp -d /tmp/pf-rsf-c1-XXXXXX)
+I=$S$(sed -n 's/^CMAKE_INSTALL_PREFIX:PATH=//p' "$B/CMakeCache.txt")
+for component in runtime examples; do
+  DESTDIR="$S" cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -DCMAKE_INSTALL_COMPONENT="$component" -P "$B/cmake_install.cmake"
+done
+DESTDIR="$S" cmake --install "$B/$G" --component examples
+mkdir "$S/example"
+cd "$S/example"
+cp "$I/$G"/{onecut,adiabatic_pressure,prescribed_compression}.prm .
+ln -s "$I/$G/libgrowing_fault_checks.release.so" .
+"$I/bin/aspect-release" adiabatic_pressure.prm
+cmp output-adiabatic-pressure/friction-pressure-0001.csv "$D/growth1/affine/output/friction-pressure-0001.csv"
+"$I/bin/aspect-release" prescribed_compression.prm
+cmp output-prescribed-compression/sections-0001.csv "$W/build-interface-b/final/compression/250/output/sections-0001.csv"
+cd "$W"
+~~~
+
 ## Interface repairs after 6B — Stage B
 
 Stage B is ready for review on the Stage A baseline `10d6f7bac`. The [small growing-fault input](../../benchmarks/growing_fault/prescribed_compression.prm) includes the unchanged 8 × 4 nine-strip fixture. The [guide](IMPLEMENTATION.md#change-fault-compression-in-the-small-growing-example) describes the input line, accepted tensor files and effective solvers. Stage C is the next interface assignment after review.

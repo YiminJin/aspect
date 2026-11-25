@@ -113,14 +113,15 @@ namespace aspect::GrowingFault
     : sim(simulator),material(m),comm(sim.get_mpi_communicator()),h(.5*sim.get_timestep()),G(m.maxwell().G),B(m.maxwell().relaxation(h)),
       Kf(sim.get_parameters().surface_energy_model.fracture_energy/(sim.get_parameters().surface_energy_model.geometry.normalization()
                                                                     *sim.get_parameters().surface_energy_model.length_scale)),field(m.phase_field()),phase_block(sim.introspection().block_indices.compositional_fields[field]),
-      nv(solution.block(0).size()),phase_begin(nv+solution.block(1).size()),n(phase_begin+solution.block(phase_block).size()),fracture(sim,field)
+      nv(solution.block(0).size()),phase_begin(nv+solution.block(1).size()),n(phase_begin+solution.block(phase_block).size()),fracture(sim,field),
+      friction_pressures(m.section_pressures())
   {
     AssertThrow(h>0.,ExcMessage("Midpoint mechanics needs a positive stage duration."));
     // Both admissibility bounds depend on this attempt's half-duration and
     // hold on every rank. Let the time-step manager retry from the same parent.
-    if (h*G>m.maxwell().eta ||
-        !m.friction().admits_duration(h,m.prescribed_fault_compression()))
-      throw ExcNonlinearSolverNoConvergence();
+    if (h*G>m.maxwell().eta) throw ExcNonlinearSolverNoConvergence();
+    for (const double pressure : friction_pressures.values)
+      if (!m.friction().admits_duration(h,pressure)) throw ExcNonlinearSolverNoConvergence();
     const auto &old=sim.get_old_solution();
     const auto &fe=sim.get_fe();
     const auto &intro=sim.introspection();
@@ -279,7 +280,7 @@ namespace aspect::GrowingFault
     transfer.sum(comm);
     for (unsigned int k=0; k<ns; ++k)
       e.roots.push_back(material.friction().solve_strip(k,transfer.free_rate[k],transfer.mobility[k],
-                                                        h,material.prescribed_fault_compression()));
+                                                        h,friction_pressures.values[k]));
     // In exact arithmetic the weighted sum of the returned point rates is V.
     // In cold creep even the rounding error of the scalar resistance can be
     // much larger than V/M. Recover that low part of the traction before
@@ -319,7 +320,11 @@ namespace aspect::GrowingFault
       }
     std::vector<unsigned int> admitted(ns,0);
     unsigned int detached=0;
-    if (publish) e.candidate.sections=parent.sections;
+    if (publish)
+      {
+        e.candidate.sections=parent.sections;
+        if (!friction_pressures.stations.empty()) e.candidate.friction_pressures=friction_pressures;
+      }
     for (const auto &[id,cell]:cells)
       {
         const auto &states=trials.at(id);

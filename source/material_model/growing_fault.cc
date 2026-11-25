@@ -2,6 +2,7 @@
 #include <aspect/material_model/growing_fault.h>
 #include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <aspect/geometry_model/box.h>
+#include <aspect/adiabatic_conditions/interface.h>
 #include <deal.II/fe/fe_values.h>
 #include <numeric>
 
@@ -55,17 +56,21 @@ namespace aspect::GrowingFault
     field=this->introspection().compositional_index_for_name(energy.composition);
     AssertThrow(&this->get_material_model()==this && p.compositional_field_methods[field]==Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase,
                 ExcMessage("Growing fault requires a top-level midpoint material and a midpoint fault phase."));
+    using NormalStress = MaterialModel::Rheology::FrictionNormalStress;
+    normal_stress = NormalStress::parse(prm,NormalStress::Source::prescribed_constant);
     const bool legacy_compression = !prm.get("Surface pressure").empty();
     prm.enter_subsection("Material model");
     prm.enter_subsection("Growing fault");
-    compression = p.surface_pressure;
+    compression = normal_stress.uses_adiabat() ? 0. : p.surface_pressure;
+    AssertThrow(!normal_stress.uses_adiabat() || prm.get("Prescribed fault compression").empty(),
+                ExcMessage("Adiabatic friction supplies the complete pressure; omit Prescribed fault compression."));
     if (!prm.get("Prescribed fault compression").empty())
       {
         compression = prm.get_double("Prescribed fault compression");
         AssertThrow(!legacy_compression || compression == p.surface_pressure,
                     ExcMessage("Conflicting Prescribed fault compression and Surface pressure in growing fault input."));
       }
-    AssertThrow(std::isfinite(compression) && compression > 0.,
+    AssertThrow(normal_stress.uses_adiabat() || (std::isfinite(compression) && compression > 0.),
                 ExcMessage("Growing fault requires a finite, positive prescribed fault compression in Pa."));
     degrees=prm.get_double("Seed tangent angle");
     const auto coordinates=Utilities::string_to_double(Utilities::split_string_list(prm.get("Forward seed tip")));
@@ -196,6 +201,40 @@ namespace aspect::GrowingFault
   }
 
   template <int dim>
+  SectionPressures Material<dim>::section_pressures() const
+  {
+    SectionPressures result;
+    result.values.assign(accepted.sections.size(),compression);
+    if constexpr (dim==2)
+      if (normal_stress.uses_adiabat())
+        {
+          const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
+          std::vector<double> angles;
+          std::vector<unsigned int> formed;
+          for (const auto &section : accepted.sections)
+            {
+              angles.push_back(section.angle);
+              formed.push_back(section.formed);
+            }
+          result.stations = geometry->pressure_stations(anchor,box.get_origin()+box.get_extents(),angles,formed);
+          for (unsigned int k=0; k<result.values.size(); ++k)
+            {
+              const auto &point = result.stations[k];
+              const double pressure = this->get_adiabatic_conditions().pressure(point);
+              if (!(std::isfinite(pressure) && pressure>0.))
+                {
+                  std::ostringstream message;
+                  message << "Invalid adiabatic fault compression " << pressure << " Pa at strip " << k
+                          << " position " << point << " m. Friction requires finite positive compression.";
+                  AssertThrow(false,ExcMessage(message.str()));
+                }
+              result.values[k] = pressure;
+            }
+        }
+    return result;
+  }
+
+  template <int dim>
   void Material<dim>::begin_attempt()
   {
     trial.reset();
@@ -225,6 +264,7 @@ namespace aspect::GrowingFault
   void Material<dim>::save(std::map<std::string,std::string> &status) const
   {
     if (!geometry) return;
+    const auto pressure_profile = normal_stress.checkpoint_profile(*this);
     using CellRecord=std::pair<std::array<Point<2>,4>,std::vector<PointHistory>>;
     std::map<std::string,CellRecord> local;
     if constexpr(dim==2)
@@ -246,6 +286,16 @@ namespace aspect::GrowingFault
           ar << checkpoint_parameters() << order << degrees << geometry->edges << accepted.step << accepted.time << law->name() << accepted.sections << law->state() << all;
         }
         status["Native growing fault v2"]=out.str();
+        if (normal_stress.uses_adiabat())
+          {
+            std::ostringstream bytes;
+            {
+              aspect::oarchive archive(bytes);
+              archive << pressure_profile << accepted.friction_pressures.stations
+                      << accepted.friction_pressures.values;
+            }
+            status["Growing friction pressure profile"] = bytes.str();
+          }
         if (balance_available)
           {
             std::ostringstream bytes;
@@ -261,6 +311,18 @@ namespace aspect::GrowingFault
   template <int dim>
   void Material<dim>::load(const std::map<std::string,std::string> &status)
   {
+    const auto profile = status.find("Growing friction pressure profile");
+    AssertThrow((profile!=status.end()) == normal_stress.uses_adiabat(),
+                ExcMessage("Growing fault friction pressure source differs from the checkpoint."));
+    if (profile!=status.end())
+      {
+        std::istringstream bytes(profile->second);
+        aspect::iarchive archive(bytes);
+        std::string definition;
+        archive >> definition >> accepted.friction_pressures.stations >> accepted.friction_pressures.values;
+        AssertThrow(definition==normal_stress.checkpoint_profile(*this),
+                    ExcMessage("Growing fault friction pressure profile differs from the checkpoint."));
+      }
     legacy_checkpoint=status.find("Native growing fault v2")==status.end();
     restored=status.at(legacy_checkpoint ? "Native growing fault v1" : "Native growing fault v2");
     const auto entry=status.find("Growing fault accepted balance v1");

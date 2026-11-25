@@ -1,0 +1,20 @@
+# Nine-strip, 30-degree seed in a 2 m by 1 m box. Run beside the installed exporter.
+include onecut.prm
+set End time = 0.005
+set Output directory = output-adiabatic-pressure
+subsection Material model
+  set Friction normal stress = adiabatic pressure
+end
+subsection Adiabatic conditions model
+  set Model name = function
+  subsection Function
+    set Variable names = depth
+    set Function constants = p0=200, dp_dz=50
+    # Temperature (K), pressure (Pa), density (kg/m^3). Depth increases down in metres.
+    set Function expression = 293; p0 + dp_dz*depth; 1
+  end
+end
+set Additional shared libraries = ./libgrowing_fault_checks.so
+subsection Postprocess
+  set List of postprocessors = growing fault history
+end

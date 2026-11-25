@@ -17,6 +17,89 @@ namespace aspect::GrowingFault
     Utilities::MPI::sum(mobility,comm,mobility);
   }
 
+  std::vector<Point<2>> MaterialSections::pressure_stations(const Point<2> &tip, const Point<2> &upper,
+                                                             const std::vector<double> &angles, const std::vector<unsigned int> &formed) const
+  {
+    const double tip_xi = coordinate(tip);
+    const Tensor<1,2> normal({-tangent[1],tangent[0]});
+    const auto direction = [&](const double beta)
+    {
+      return tangent + std::tan(beta)*normal;
+    };
+    for (unsigned int d=0; d<2; ++d)
+      AssertThrow(tip[d]>=origin[d] && tip[d]<=upper[d],ExcMessage("Forward seed tip lies outside the mesh."));
+
+    // Knots of the same station-to-station graph used to track the front.
+    // The angle at the arriving formed station gives dz/dxi = tan(beta).
+    std::vector<double> xi {edges.front()};
+    std::vector<Point<2>> knots {tip+(edges.front()-tip_xi) *tangent};
+    if (tip_xi>edges.front())
+      {
+        xi.push_back(tip_xi);
+        knots.push_back(tip);
+      }
+    double beta = 0.;
+    for (unsigned int k=0; k<angles.size(); ++k)
+      {
+        const double mid = .5*(edges[k]+edges[k+1]);
+        if (mid<=tip_xi) continue;
+        if (!formed[k]) break;
+        beta = angles[k];
+        knots.push_back(knots.back()+(mid-xi.back())*direction(beta));
+        xi.push_back(mid);
+      }
+    if (xi.back()<edges.back())
+      {
+        knots.push_back(knots.back()+(edges.back()-xi.back())*direction(beta));
+        xi.push_back(edges.back());
+      }
+
+    // Intersect each graph piece with both the strip and the physical box.
+    // A strip can contain a bend, so locate its midpoint by arclength.
+    std::vector<Point<2>> result;
+    unsigned int piece = 0;
+    for (unsigned int k=0; k<angles.size(); ++k)
+      {
+        std::vector<std::pair<Point<2>,Point<2>>> cuts;
+        double length = 0.;
+        while (piece+1<xi.size() && xi[piece+1]<=edges[k]) ++piece;
+        for (unsigned int j=piece; j+1<xi.size() && xi[j]<edges[k+1]; ++j)
+          {
+            const auto slope = (knots[j+1]-knots[j])/(xi[j+1]-xi[j]);
+            double lo = std::max(xi[j],edges[k])-xi[j];
+            double hi = std::min(xi[j+1],edges[k+1])-xi[j];
+            for (unsigned int d=0; d<2; ++d)
+              if (slope[d]!=0.)
+                {
+                  const double a = (origin[d]-knots[j][d])/slope[d];
+                  const double b = (upper[d]-knots[j][d])/slope[d];
+                  lo = std::max(lo,std::min(a,b));
+                  hi = std::min(hi,std::max(a,b));
+                }
+              else if (knots[j][d]<origin[d] || knots[j][d]>upper[d])
+                hi = lo;
+            if (hi>lo)
+              {
+                cuts.emplace_back(knots[j]+lo*slope,knots[j]+hi*slope);
+                length += cuts.back().first.distance(cuts.back().second);
+              }
+          }
+        AssertThrow(length>0.,ExcMessage("Strip "+std::to_string(k)+" needs a friction rate but has no in-box fault segment for adiabatic pressure."));
+        double remaining = .5*length;
+        for (const auto &[start,end] : cuts)
+          {
+            const double span = start.distance(end);
+            if (remaining<=span)
+              {
+                result.push_back(start+(remaining/span)*(end-start));
+                break;
+              }
+            remaining -= span;
+          }
+      }
+    return result;
+  }
+
   double MaterialSections::coordinate(const Point<2> &p) const
   {
     return tangent*(p-origin);

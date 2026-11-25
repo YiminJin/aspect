@@ -2,6 +2,7 @@
 #ifndef _aspect_material_model_growing_fault_h
 #define _aspect_material_model_growing_fault_h
 #include <aspect/material_model/interface.h>
+#include <aspect/material_model/rheology/friction_normal_stress.h>
 #include <aspect/simulator_access.h>
 #include <aspect/material_model/growing_fault/midpoint_material.h>
 
@@ -46,10 +47,7 @@ namespace aspect::GrowingFault
         AssertThrow(balance_available,ExcMessage("No accepted balance is available for this growing fault checkpoint or initial state."));
         return last_balance;
       }
-      double prescribed_fault_compression() const override
-      {
-        return compression;
-      }
+      SectionPressures section_pressures() const override;
       unsigned int phase_field() const override
       {
         return field;
@@ -72,6 +70,7 @@ namespace aspect::GrowingFault
     private:
       unsigned int order,field;
       double degrees, compression;
+      MaterialModel::Rheology::FrictionNormalStress normal_stress;
       Point<2> anchor;
       CohesiveMaxwell point_law;
       std::unique_ptr<MaterialModel::Rheology::FaultResistance> law;

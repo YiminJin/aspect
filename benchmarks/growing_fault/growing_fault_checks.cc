@@ -1,5 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/postprocess/interface.h>
+#include <aspect/geometry_model/interface.h>
 #include <aspect/material_model/growing_fault.h>
 #include <aspect/simulator_signals.h>
 #include <aspect/simulator/solver/midpoint_system.h>
@@ -16,6 +17,30 @@ namespace aspect::Postprocess
     void check_operator(const SimulatorAccess<2> &sim,const MidpointMaterial &material, std::ostream &out)
     {
       MidpointSystem op(sim,material,sim.get_solution());
+      if (!op.friction_pressures.stations.empty())
+        {
+          op.freeze_direction_neighborhood();
+          // A two-point candidate with unequal stresses, support and phase.
+          // The independent checker uses the pointwise score and its own RSF root.
+          const auto a = onset_moments(.03,.8,.4,-70.,210.);
+          const auto b = onset_moments(.02,.6,.7,155.,140.);
+          std::array<double,9> moments;
+          for (unsigned int j=0; j<9; ++j) moments[j]=a[j]+b[j];
+          const double centered[3] = {a[8] *b[8]/moments[8]*225.*225.,
+                                      -a[8] *b[8]/moments[8]*225.*70.,
+                                      a[8] *b[8]/moments[8]*70.*70.
+                                     };
+          for (unsigned int k=0; k<op.eligible.size(); ++k)
+            if (op.eligible[k])
+              for (const double angle :
+              {
+                0.,.23
+              })
+          {
+            const auto result=op.score_plane(k,moments.data(),centered,angle);
+            out<<"pressure-score "<<k<<' '<<angle<<' '<<result.resistance<<' '<<result.score<<'\n';
+          }
+        }
       auto x=op.initial;
       std::fill(op.eligible.begin(),op.eligible.end(),1u);
       for (unsigned int i=0; i<op.nv; ++i) x[i]+=2.e-5*std::sin(1.+i);
@@ -194,6 +219,17 @@ namespace aspect::Postprocess
                           <<','<<s.formed<<',';
                     if (!ages.empty()) strips<<ages[k]<<',';
                     strips<<s.slip<<','<<s.rate<<','<<s.resistance<<'\n';
+                  }
+                if (!history.friction_pressures.stations.empty())
+                  {
+                    std::ofstream pressures(path+"friction-pressure-"+tag+".csv");
+                    pressures << std::setprecision(17) << "section,x,y,depth,compression,V\n";
+                    for (unsigned int k=0; k<history.sections.size(); ++k)
+                      {
+                        const auto &point = history.friction_pressures.stations[k];
+                        pressures << k << ',' << point[0] << ',' << point[1] << ',' << this->get_geometry_model().depth(point)
+                                  << ',' << history.friction_pressures.values[k] << ',' << history.sections[k].rate << '\n';
+                      }
                   }
                 // The initial seed has no completed step-work ledger.
                 if (history.step>0)

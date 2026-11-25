@@ -144,6 +144,16 @@ namespace aspect::GrowingFault
     Utilities::MPI::max(eligible,comm,eligible);
   }
 
+  OnsetScore MidpointSystem::score_plane(const unsigned int k, const double *moments,
+                                         const double *centered_moments, const double angle) const
+  {
+    const auto resistance = [&](const double free, const double mobility)
+    {
+      return material.friction().solve_strip(k,free,mobility,h,friction_pressures.values[k]).resistance;
+    };
+    return candidate_onset(moments,centered_moments,resistance,G*B*h*material.sections().length(k,angle),angle);
+  }
+
   bool MidpointSystem::select_prospective_planes(const Values &x)
   {
     const auto &geometry=material.sections();
@@ -205,13 +215,9 @@ namespace aspect::GrowingFault
         {
           const auto *m=&moments[9*k];
           if (m[8]==0. || (m[3]+m[4]==0. && m[0]==0. && m[1]==0.)) continue;
-          const auto resistance=[&](double free,double mobility)
+          const auto score = [&](const double angle)
           {
-            return material.friction().solve_strip(k,free,mobility,h,material.prescribed_fault_compression()).resistance;
-          };
-          const auto score=[&](const double angle)
-          {
-            return candidate_onset(m,&centered[3*k],resistance,G*B*h*geometry.length(k,angle),angle).score;
+            return score_plane(k,m,&centered[3*k],angle).score;
           };
           const double limit=numbers::PI/4.,spacing=2.*limit/128.;
           unsigned int best=0;
