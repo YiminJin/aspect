@@ -55,7 +55,8 @@ def prepare(work):
 # and evaluate the sum of squared point tractions directly. Never use the
 # centered variance or subtract two O(stress^2) terms in this reference.
 class Direct:
-    def __init__(self,data,width):
+    def __init__(self,data,width,pressure=200):
+        self.pressure=mp.mpf(pressure)
         self.p=[list(map(mp.mpf,v[:5])) for v in data.values()]
         self.width=mp.mpf(float(width))
         self.raw=(mp.fsum(a*F*u for a,_,F,u,_ in self.p),
@@ -74,7 +75,7 @@ class Direct:
             k=abs(speed)/mp.mpf(.01)
             age=10*mp.exp(-k*h)-mp.expm1(-k*h)/k if k else 10+h
             a,b,V0=map(mp.mpf,(.015,.02,.001))
-            return 200*a*mp.asinh(speed/(2*V0)*mp.exp((mp.mpf(.6)+b*mp.log(age*V0/mp.mpf(.01)))/a))+1000*speed
+            return self.pressure*a*mp.asinh(speed/(2*V0)*mp.exp((mp.mpf(.6)+b*mp.log(age*V0/mp.mpf(.01)))/a))+1000*speed
         # At this stage the actual creep speed is about 1.5e-13 m/s.
         velocity=mp.findroot(lambda v:v+mobility*reaction(v)-free,(mp.mpf('1e-13'),mp.mpf('2e-13')),tol=mp.mpf('1e-52'))
         f=reaction(velocity)

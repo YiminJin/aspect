@@ -1,0 +1,76 @@
+diff --git a/source/simulator/solver/midpoint_direction.cc b/source/simulator/solver/midpoint_direction.cc
+index 268ffe094..127dac17e 100644
+--- a/source/simulator/solver/midpoint_direction.cc
++++ b/source/simulator/solver/midpoint_direction.cc
+@@ -1,6 +1,7 @@
+ /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
+ #include <aspect/simulator/solver/midpoint_system.h>
+ #include <aspect/reconstructed_fault/onset_score.h>
++#include <fstream>
+ 
+ namespace aspect::GrowingFault
+ {
+@@ -163,6 +164,19 @@ namespace aspect::GrowingFault
+     })) return false;
+     // First three moments use the entire strip. Only the last six apply the
+     // compact physical-area kernel to the squared candidate traction.
++    const bool capture=angles.size()==9 && angles[8]==0. && material.history().step==0;
++    std::ofstream samples_file, sums, fields;
++    if (capture)
++      {
++        const auto suffix=std::to_string(Utilities::MPI::this_mpi_process(comm));
++        samples_file.open(sim.get_output_directory()+"turn-points-"+suffix);
++        sums.open(sim.get_output_directory()+"turn-sums-"+suffix);
++        fields.open(sim.get_output_directory()+"turn-fields-"+suffix);
++        fields<<std::setprecision(17); sums<<std::setprecision(17); samples_file<<std::setprecision(17);
++        for (const auto &[id,cell]:cells)
++          for (unsigned int j=0;j<cell.indices.size();++j)
++            fields<<id<<' '<<j<<' '<<x[cell.indices[j]]<<'\n';
++      }
+     Values moments(9*angles.size()), centered(3*angles.size());
+     struct WeightedStress
+     {
+@@ -193,10 +207,12 @@ namespace aspect::GrowingFault
+           phi=physical_phase(phi);
+           const double c=material.maxwell().m*phi*(1.+phi),d=(1.-phi)*(1.-phi),F=c/(c+d);
+           const double w=p.area*(1.-F)*(1.-F)*p.kernel;
++          if (capture && k==8) samples_file<<id<<' '<<q<<' '<<p.area<<' '<<p.kernel<<' '<<F<<' '<<u<<' '<<v<<' '<<phi<<'\n';
+           const auto local=onset_moments(p.area,p.kernel,F,u,v);
+           for (unsigned int j=0; j<9; ++j) moments[9*k+j]+=local[j];
+           if (w>0.) samples.push_back({k,w,u,v});
+         }
++    if(capture) {for(unsigned int j=72;j<81;++j) sums<<moments[j]<<" "; sums<<"\n";}
+     Utilities::MPI::sum(moments,comm,moments);
+     // Center before squaring when the creep resistance nearly cancels the
+     // predictor. The second pass uses the same global weighted means on every rank.
+@@ -209,6 +225,17 @@ namespace aspect::GrowingFault
+         centered[3*p.k+2]+=p.weight*dv*dv;
+       }
+     Utilities::MPI::sum(centered,comm,centered);
++    if(capture)
++      {
++        for(unsigned int j=72;j<81;++j) sums<<moments[j]<<" ";
++        for(unsigned int j=24;j<27;++j) sums<<centered[j]<<" ";
++        sums<<"\n";
++        for(double a:{0.,.23,-.14788742977350777,-.14788657313582751})
++          {
++            const auto r=score_plane(8,&moments[72],&centered[24],a);
++            sums<<a<<" "<<r.resistance<<" "<<r.score<<"\n";
++          }
++      }
+     bool changed=false;
+     for (unsigned int k=0; k<angles.size(); ++k)
+       if (eligible[k])
+diff --git a/source/simulator/solver/midpoint_fault.cc b/source/simulator/solver/midpoint_fault.cc
+index 55f55dc7d..fa67eec02 100644
+--- a/source/simulator/solver/midpoint_fault.cc
++++ b/source/simulator/solver/midpoint_fault.cc
+@@ -281,6 +281,8 @@ namespace aspect::GrowingFault
+     for (unsigned int k=0; k<ns; ++k)
+       e.roots.push_back(material.friction().solve_strip(k,transfer.free_rate[k],transfer.mobility[k],
+                                                         h,friction_pressures.values[k]));
++    if(publish && ns==9 && sim.get_timestep_number()==1 && !Utilities::MPI::this_mpi_process(comm))
++      std::ofstream(sim.get_output_directory()+"root-input")<<std::setprecision(17)<<transfer.free_rate[8]<<" "<<transfer.mobility[8]<<" "<<angles[8]<<" "<<friction_pressures.values[8]<<"\n";
+     // In exact arithmetic the weighted sum of the returned point rates is V.
+     // In cold creep even the rounding error of the scalar resistance can be
+     // much larger than V/M. Recover that low part of the traction before

@@ -37,6 +37,17 @@ def check_profile(out, p0, slope):
                                    [x,y,1-y,n],atol=5e-13,rtol=0.)
         np.testing.assert_equal(float(r['V']),v)
         np.testing.assert_allclose(float(strip[k,]['force']),resistance(v,n),atol=1e-10,rtol=0.)
+        # Independently invert the signed stage-aged law at the published force.
+        # This relative check also applies when two layouts select different angles.
+        force = float(strip[k,]['force'])
+        lo, hi = -1., 1.
+        for _ in range(200):
+            mid = (lo+hi)/2.
+            if resistance(mid,n) < force:
+                lo = mid
+            else:
+                hi = mid
+        np.testing.assert_allclose(v,(lo+hi)/2.,rtol=1e-10,atol=0.)
         if slope and k in (0, 8):
             pts=[q for q in point.values() if int(q['section'])==k]
             centroid=sum(float(q['weight'])*float(q['y']) for q in pts)/sum(float(q['weight']) for q in pts)
@@ -142,6 +153,8 @@ def main():
             for k in a:
                 if float(a[k]['beta'])==float(b[k]['beta']):
                     np.testing.assert_allclose(float(a[k]['V']),float(b[k]['V']),atol=0.,rtol=1e-10)
+            va,vb = (float(table[8,]['V']) for table in (a,b))
+            print('strip 8 signed rates, absolute and relative difference:', va,vb,abs(vb-va),abs(vb/va-1.))
             failures=[]
             def compare(left,right,field,atol,rtol):
                 try:
