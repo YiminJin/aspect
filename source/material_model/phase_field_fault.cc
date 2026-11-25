@@ -4,6 +4,7 @@
 */
 
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/rheology/friction_normal_stress.h>
 #include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <aspect/simulator/assemblers/fault_stress.h>
 #include <aspect/geometry_model/box.h>
@@ -166,6 +167,7 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::declare_parameters(ParameterHandler &prm)
     {
+      Rheology::FrictionNormalStress::declare_parameters(prm);
       prm.enter_subsection("Material model");
       prm.enter_subsection("Phase field fault");
       prm.declare_entry("Advect physical stress","false",Patterns::Bool(),

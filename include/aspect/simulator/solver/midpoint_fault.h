@@ -3,6 +3,7 @@
 #define _aspect_midpoint_fault_h
 #include <aspect/material_model/growing_fault/midpoint_material.h>
 #include <aspect/simulator_access.h>
+#include <deal.II/lac/solver_control.h>
 
 namespace aspect::GrowingFault
 {

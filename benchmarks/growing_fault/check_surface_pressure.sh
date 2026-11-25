@@ -26,6 +26,7 @@ end
 subsection Postprocess
   subsection Visualization
     set Output format = gnuplot
+    set List of output variables = adiabat
   end
 end
 PRM
@@ -36,6 +37,12 @@ PRM
     awk 'NF && !/^#/ {print $5}' "$scratch/$version$p/output/solution/solution-00000.0000.gnuplot" > "$scratch/$version$p/p"
   done
   cmp "$scratch/old$p/p" "$scratch/new$p/p"
+  # Simpler material, no fault. The stock compute-profile plugin reads the
+  # surface value through SimulatorAccess and the visualization samples it.
+  awk -v expected="$p" '/^# <x>/ {for(i=2;i<=NF;i++) if($i=="<adiabatic_pressure>") col=i-1}
+    NF && !/^#/ && $2==1 {if(!col || $col!=expected) exit 1; found++}
+    END {if(!found) exit 1; print found,"top samples, plugin surface pressure",expected,"Pa"}' \
+    "$scratch/new$p/output/solution/solution-00000.0000.gnuplot"
 done
 paste "$scratch/new0/p" "$scratch/new100/p" | awk '{e=$2-$1-100; if(e<0)e=-e; if(e>max)max=e} END {print NR,"pressure samples, max printed shift error",max+0,"Pa"; exit(NR==0 || max>0.0006)}'
 

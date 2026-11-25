@@ -3,6 +3,8 @@
   License version 2 or later. See the file LICENSE for details.
 */
 #include "common.h"
+#include <aspect/adiabatic_conditions/interface.h>
+#include <aspect/material_model/rheology/friction_normal_stress.h>
 #include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <aspect/reconstructed_fault/material_fault_trace.h>
 
@@ -107,4 +109,29 @@ TEST_CASE("A material fault retains simple open connectivity")
   vertices[1].position=Point<2>(1.,1.);
   vertices[2].position=Point<2>(-1.,1.);
   REQUIRE_THROWS(fault.replace_material_labels(vertices));
+}
+
+TEST_CASE("Fault normal stress selection preserves the historical route defaults")
+{
+  using Pressure = aspect::MaterialModel::Rheology::FrictionNormalStress;
+  dealii::ParameterHandler prm;
+  Pressure::declare_parameters(prm);
+  for (auto legacy :
+       {
+         Pressure::Source::resolved_traction, Pressure::Source::prescribed_constant
+       })
+    CHECK_FALSE(Pressure::parse(prm,legacy).uses_adiabat());
+  prm.enter_subsection("Material model");
+  prm.set("Friction normal stress","resolved normal traction");
+  prm.leave_subsection();
+  REQUIRE_THROWS(Pressure::parse(prm,Pressure::Source::prescribed_constant));
+  aspect::AdiabaticConditions::declare_parameters<2>(prm);
+  prm.enter_subsection("Material model");
+  prm.set("Friction normal stress","adiabatic pressure");
+  prm.leave_subsection();
+  for (auto legacy :
+       {
+         Pressure::Source::resolved_traction, Pressure::Source::prescribed_constant
+       })
+    CHECK(Pressure::parse(prm,legacy).uses_adiabat());
 }
