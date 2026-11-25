@@ -9,7 +9,7 @@
 :name: parameters:Postprocess/List_20of_20postprocessors
 **Default value:**
 
-**Pattern:** [MultipleSelection ODE statistics|Stokes residual|basic statistics|boundary densities|boundary pressures|boundary strain rate residual statistics|boundary velocity residual statistics|command|composition statistics|composition velocity statistics|core statistics|crystal preferred orientation|current surface|depth average|domain volume statistics|dynamic topography|entropy statistics|entropy viscosity statistics|finite element information|fluid velocity statistics|geoid|global statistics|gravity calculation|heat flux densities|heat flux map|heat flux statistics|heating statistics|load balance statistics|mass flux statistics|material statistics|matrix statistics|maximum depth of field|melt statistics|memory statistics|mobility statistics|particle count statistics|particle distribution score|particle distribution statistics|particle information|particles|point values|pressure statistics|rotation statistics|sea level|spherical velocity statistics|temperature statistics|timing statistics|topography|velocity boundary statistics|velocity statistics|viscous dissipation statistics|visualization|volume of fluid statistics ]
+**Pattern:** [MultipleSelection ODE statistics|Stokes residual|basic statistics|boundary densities|boundary pressures|boundary strain rate residual statistics|boundary velocity residual statistics|command|composition statistics|composition velocity statistics|core statistics|crystal preferred orientation|current surface|depth average|domain volume statistics|dynamic topography|entropy statistics|entropy viscosity statistics|finite element information|fixed fault statistics|fluid velocity statistics|geoid|global statistics|gravity calculation|heat flux densities|heat flux map|heat flux statistics|heating statistics|load balance statistics|mass flux statistics|material statistics|matrix statistics|maximum depth of field|melt statistics|memory statistics|mobility statistics|particle count statistics|particle distribution score|particle distribution statistics|particle information|particles|phase field surface energy|point values|pressure statistics|rotation statistics|sea level|spherical velocity statistics|temperature statistics|timing statistics|topography|velocity boundary statistics|velocity statistics|viscous dissipation statistics|visualization|volume of fluid statistics ]
 
 **Documentation:** A comma separated list of postprocessor objects that should be run at the end of each time step. Some of these postprocessors will declare their own parameters which may, for example, include that they will actually do something only every so many time steps or years. Alternatively, the text &lsquo;all&rsquo; indicates that all available postprocessors should be run after each time step.
 
@@ -31,7 +31,7 @@ The following postprocessors are available:
 
 &lsquo;command&rsquo;: A postprocessor that executes a command line process.
 
-&lsquo;composition statistics&rsquo;: A postprocessor that computes some statistics about the compositional fields, if present in this simulation. In particular, it computes maximal and minimal values of each field, as well as the total mass contained in this field as defined by the integral $m_i(t) = \int_\Omega c_i(\mathbf x,t) \; \text{d}x$.
+&lsquo;composition statistics&rsquo;: A postprocessor that computes some statistics about the compositional fields, if present in this simulation. In particular, it computes maximal and minimal values of each field sampled at its support points (generalized interpolation points for Bernstein fields), as well as the total mass contained in this field as defined by the integral $m_i(t) = \int_\Omega c_i(\mathbf x,t) \; \text{d}x$.
 
 &lsquo;composition velocity statistics&rsquo;: A postprocessor that computes the root mean square velocity over the area spanned by each compositional field (i.e. where the field values are larger or equal to 0.5.
 
@@ -57,6 +57,8 @@ The file format then consists of lines with Euclidean coordinates followed by th
 &lsquo;entropy viscosity statistics&rsquo;: A postprocessor that computes the maximum and volume averagedentropy viscosity stabilization for the temperature field.
 
 &lsquo;finite element information&rsquo;: A postprocessor that prints the names and finite element spaces of all solution variables at time zero. For compositional fields, it also prints the compositional field type.
+
+&lsquo;fixed fault statistics&rsquo;: Write accepted label coordinates, age, slip and rate and their arclength averages.
 
 &lsquo;fluid velocity statistics&rsquo;: A postprocessor that computes the maximum fluid velocity in the computational domain. The fluid velocity is either the melt velocity or the Darcy velocity depending on the advection method chosen for the porosity compositional field.
 
@@ -115,6 +117,8 @@ In geodynamics, the term &ldquo;mass flux&rdquo; is often understood to be the q
 &lsquo;particle information&rsquo;: A postprocessor that prints the particle properties in every particle manager at time zero.
 
 &lsquo;particles&rsquo;: A Postprocessor that creates particles that follow the velocity field of the simulation. The particles can be generated and propagated in various ways and they can carry a number of constant or time-varying properties. The postprocessor can write output positions and properties of all particles at chosen intervals, although this is not mandatory. It also allows other parts of the code to query the particles for information.
+
+&lsquo;phase field surface energy&rsquo;: Measure the local and gradient parts of the crack-surface functional $G_c/c_0 \int_\Omega (\alpha(\phi)/\ell + \ell |\nabla\phi|^2)\,dx$ and their sum. The units are J/m of out-of-plane thickness in 2D and J in 3D. Sampled phase must be finite and in [0,1], allowing 64 double-precision machine epsilons for roundoff at either endpoint. Admitted values are used as sampled. For DG fields the gradient is elementwise (broken). The functional omits face jumps and fluxes.
 
 &lsquo;point values&rsquo;: A postprocessor that evaluates the solution (i.e., velocity, pressure, temperature, and compositional fields along with other fields that are treated as primary variables) at the end of every time step or after a user-specified time interval at a given set of points and then writes this data into the file <point\_values.txt> in the output directory. The points at which the solution should be evaluated are specified in the section `Postprocess/Point values` in the input file.
 
@@ -925,6 +929,44 @@ Units: \si{\year} if the &rsquo;Use years instead of seconds&rsquo; parameter is
 **Documentation:** The time interval between each generation of output files. A value of zero indicates that output should be generated every time step.
 
 Units: \si{\year} if the &rsquo;Use years instead of seconds&rsquo; parameter is set; \si{\second} otherwise.
+::::
+
+(parameters:Postprocess/Phase_20field_20surface_20energy)=
+## **Subsection:** Postprocess / Phase field surface energy
+::::{dropdown} __Parameter:__ {ref}`Crack geometry<parameters:Postprocess/Phase_20field_20surface_20energy/Crack_20geometry>`
+:name: parameters:Postprocess/Phase_20field_20surface_20energy/Crack_20geometry
+**Default value:** AT1
+
+**Pattern:** [Selection AT1|AT2|CZM ]
+
+**Documentation:** Crack-geometric law for the configured phase-field surface functional.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Fracture energy<parameters:Postprocess/Phase_20field_20surface_20energy/Fracture_20energy>`
+:name: parameters:Postprocess/Phase_20field_20surface_20energy/Fracture_20energy
+**Default value:** 1
+
+**Pattern:** [Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]
+
+**Documentation:** Positive fracture energy per unit crack area Gc in J/m^2.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Length scale<parameters:Postprocess/Phase_20field_20surface_20energy/Length_20scale>`
+:name: parameters:Postprocess/Phase_20field_20surface_20energy/Length_20scale
+**Default value:** 1
+
+**Pattern:** [Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]
+
+**Documentation:** Positive regularization length in metres.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Phase composition<parameters:Postprocess/Phase_20field_20surface_20energy/Phase_20composition>`
+:name: parameters:Postprocess/Phase_20field_20surface_20energy/Phase_20composition
+**Default value:** phase_field
+
+**Pattern:** [Anything]
+
+**Documentation:** Name of the compositional field that contains the dimensionless phase.
 ::::
 
 (parameters:Postprocess/Point_20values)=

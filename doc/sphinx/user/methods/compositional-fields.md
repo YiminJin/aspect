@@ -101,3 +101,12 @@ An empty method list defaults to `field`. A single entry applies to every compos
 Existing inputs using `SSPRK3 fields = tracer` select the same explicit method
 after this expansion. A name may occur once in that list and its method must be
 either `field` or `explicit DG SSPRK3`.
+
+For the growing fault, select `midpoint fault phase` on one discontinuous quadratic
+field of type `phase field`. The coupled mechanics and irreversible phase solve
+advances this field in the single-advection, iterated Newton Stokes scheme.
+Configure AT1 on the same named composition under
+{ref}`Phase field surface energy <parameters:Postprocess/Phase_20field_20surface_20energy>`.
+These parameters also select the functional for the optional energy postprocessor.
+With an ordinary composition and no fault material, the postprocessor can measure
+AT1, AT2 or CZM surface energy in two or three dimensions.

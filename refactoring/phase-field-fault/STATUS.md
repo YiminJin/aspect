@@ -1,8 +1,139 @@
 # Phase-field fault working record
 
+## Increment 6B
+
+**Consolidation is ready for review on the repaired 6A source at `282617e22`.** The [implementation guide](IMPLEMENTATION.md) follows an accepted step from each field method to its physical outputs. It maps the parameter choices to the supported dimensions, pressure datum, phase basis, crack law, retry and checkpoint rules. The three Sphinx parameter sections were regenerated from the installed, plugin-free energy case. The sole new build rule packages the existing coefficient observer with the scalar benchmark. This increment required no production C++ edit.
+
+### Installed verification
+
+A fresh GCC 12.4 Release build used deal.II 9.6.2 and a temporary prefix outside both worktrees. The examples run used the installed binary, input files, shared libraries, Python checkers and corrected 38-label CSV. It started from initial conditions, including generating its own checkpoints. The runner sets `ASPECT_SOURCE_DIR` to the prefix for parameter-file includes. One numerical thread per rank, one or two local MPI ranks. The donor comparisons below were separate reads of frozen data **after** the installed runs.
+
+| Path | Measurement and what it exercises |
+| --- | --- |
+| Phase only | On two ranks with eight owned cells each, the affine local / gradient / total energies in J/m were AT1 **3 / 0.1171875 / 3.1171875**, AT2 **2.333333333333333 / 0.1562500000000001 / 2.489583333333333**, CZM **3.607512043416295 / 0.09947183943243462 / 3.706983882848730**. The one-rank runs passed the same analytic tolerances. The straight AT1 crack gave 2 J/m and the 3-D extrusion gave 9.3515625 J. A violation confined to one of two owners produced the global sampled range [0.000873239495, 1.038887324] and an error before energy publication. |
+| Fixed 60° fault, 32² cells | Against the shipped reference, all 38 material IDs matched at 0, 12.5 and 25 ms. Maximum defects in normalized-profile integral, age, slip and solved speed were 5.69e−14 m, 1.07e−14 s, 9.55e−18 m and 7.08e−16 m/s. The largest fitted contact offset was 0.004598 m. Independent ray projection, history, tangent and work checks passed in the same checker. |
+| Moving layered fault, 24 × 8 cells | The first returned Stokes residual was 0.000751667 at tolerance 0.001. The stress projection change of 0.521772 forced the second assembly. Accepted cell work error was 4.23e−15. Permuting the named fields changed the physical columns by zero. The frozen/advected initial weak action was 0.02305764357870983 in both modes. The two physical endpoints passed the independent comparison to the retained donor. Maximum label-speed defects were 1.373e−9 and 1.185e−9 m/s. |
+| 3-D passive tracer, bounded phase and implicit companion | The two-rank upper-slab integrals were **0.18748774999999998** and **−0.062512249999999991** for phase and tracer. The stage-weighted transfers across the owned z-face were +0.0037375 and −0.0012625. All 162 coefficients per clock agreed with serial within 1.94e−16. The implicit companion matched the all-implicit run exactly, with a 0.00019024 difference from the explicit tracer. |
+| Growing nine-strip fault, 8 × 4 cells | Two ranks passed the returned-state checks, two rejected attempts, early and later checkpoint continuations, and the independent Maxwell, cohesive and SIPG checks. Final native rate defects were 8.76e−17 and 1.041e−17 /s. Discrete fracture energy was 6.54587065429 J/m including 0.559564641945 J/m of face terms. The separate all-frame donor comparison passed through 15 ms with integrated signed slip **1.69302306477e−4 m²**. |
+| Growing 18-strip fault, 16 × 8 cells | Both installed schedules reproduced the identical seed and accepted 5 ms parent. The installed plot checker gave a 10 ms coarse/fine phase distance of 0.007426652667963157 m by mapped Gauss(3) and 0.007426652667963130 m at the native points. The regenerated PNG matched the tracked figure byte for byte. Coarse continued from that checkpoint. Fine solved from initial conditions through 7.5 and 10 ms. The strict comparison against retained donor frames exited **1** with exactly four `strip/beta` failures, all inherited from the first strip-15 turn. The 32 physical tables at the four audited physical endpoints matched the retained returned-row runs byte for byte. Including those rows reproduced the final 5B strict report directory byte for byte. At 7.5 ms the residual check found 169 tolerance-resolved downhill rows and maximum endpoint load 0.00171295730 J/m. |
+
+The fresh 18-strip calculations reproduce the 5B timestep sensitivity. They add no evidence of timestep-converged physical front advance. For Example 1 the fitted and layered controls precede the matched multi-dip BP3 series. Example 3 still needs the gravity/pressure reference, equilibrium and regional pilot. The [per-example table](IMPLEMENTATION.md#qualification-by-paper-example) distinguishes these open qualifications. The installed tests exercised prebuilt benchmark observers. External plugin SDK relocation is outside this result. The exported `AspectConfig.cmake` still contains build/source include paths. The executable and five installed observers resolved all shared libraries outside the source and build trees. The scoped installation covered the fault and transport targets. A full examples build, the Debug suite and the stock per-iteration CTest were outside this run. Their [6A record](#increment-6a) and checked-in references remain available.
+
+### Matched cost
+
+Linux Release on an Intel Core Ultra 7 165H, Open MPI core binding, one numerical thread per rank. Each pair used the same initial condition, mesh, accepted clocks, tolerances and stock reporting on both executables. Checkpoints and native CSV observers were off during measurement. Pair 0 warms both executables. The four timed pairs alternate launch order. End-to-end includes MPI/Python startup and teardown. ASPECT time is its last total wall-clock timer. RSS is the median **per rank** of the solver child's kernel-reported lifetime high-water mark in KiB, measured with `wait4`. The baseline binary identities are pinned in the commands below.
+
+| Case and reporting | Executable | Median elapsed (s) | Median ASPECT (s) | Median peak RSS by rank (KiB) | Assemblies or reported midpoint evaluations at successive clocks |
+| --- | --- | ---: | ---: | --- | --- |
+| Four-cell mature, fixed fault and velocity statistics | Pre-6A | 2.1157 | 0.3310 | 245014 | 28 / 12 / 13 |
+| Same, one rank | Installed | 2.1503 | 0.3415 | 245432 | 28 / 12 / 13 |
+| Nine strips, composition and velocity statistics | Pre-6A | 3.9508 | 2.115 | 245140 / 221302 | 0 / 5 / 4 / 4 |
+| Same, two ranks | Installed | 3.9691 | 2.090 | 225274 / 238326 | 0 / 5 / 4 / 4 |
+| Nine strips, velocity statistics alone | Archived research donor | 5.0444 | 3.205 | 253614 / 234048 | 0 / 5 / 4 / 4 |
+| Same, two ranks | Installed | 3.9440 | 2.130 | 234898 / 230618 | 0 / 5 / 4 / 4 |
+
+The two pre-6A comparisons had byte-identical statistics and identical nonlinear counts. Elapsed medians changed by +1.6% and +0.5%. In the donor pair the published RMS and maximum velocities matched at the precision of the statistics columns at all four clocks. The installed median elapsed time was 21.8% lower. The algorithms do different work within each Newton iteration. For example, the second timed donor run spent 1.34 s in 822 Stokes inverse calls, while the target took 1.95 s in the entire coupled solve over its three physical steps. The target gathers the sparse correction to rank zero for factorization. These measurements cover small controls through 15 or 25 ms.
+
+<details>
+<summary>Four timed pairs per comparison, in launch-pair order</summary>
+
+Elapsed time includes launch. RSS entries within each column follow rank order. Pair 0 was excluded from all medians.
+
+| Comparison | Pair | Baseline elapsed / ASPECT (s) | Installed elapsed / ASPECT (s) | Baseline RSS (KiB) | Installed RSS (KiB) |
+| --- | ---: | --- | --- | --- | --- |
+| Pre-6A, mature | 1 | 2.032531 / 0.322 | 2.101715 / 0.347 | 245228 | 245140 |
+| Pre-6A, mature | 2 | 2.044968 / 0.332 | 2.155937 / 0.36 | 244900 | 245256 |
+| Pre-6A, mature | 3 | 2.186439 / 0.33 | 2.163190 / 0.336 | 245020 | 245636 |
+| Pre-6A, mature | 4 | 2.277130 / 0.337 | 2.144622 / 0.333 | 245008 | 245608 |
+| Pre-6A, growing | 1 | 3.984146 / 2.12 | 3.978511 / 2.08 | 245092 / 221108 | 224484 / 238948 |
+| Pre-6A, growing | 2 | 4.044442 / 2.12 | 3.959615 / 2.1 | 225972 / 239912 | 224216 / 237704 |
+| Pre-6A, growing | 3 | 3.886065 / 2.09 | 3.892227 / 2.08 | 245188 / 221496 | 226064 / 239912 |
+| Pre-6A, growing | 4 | 3.917551 / 2.11 | 4.179945 / 2.19 | 245420 / 220924 | 243188 / 218912 |
+| Donor, growing | 1 | 4.996893 / 3.2 | 3.900986 / 2.13 | 254620 / 234024 | 225116 / 239604 |
+| Donor, growing | 2 | 5.186060 / 3.22 | 3.941706 / 2.13 | 253200 / 234072 | 226600 / 240240 |
+| Donor, growing | 3 | 5.045092 / 3.2 | 3.946375 / 2.13 | 253368 / 233620 | 246064 / 221632 |
+| Donor, growing | 4 | 5.043632 / 3.21 | 3.998729 / 2.15 | 253860 / 234324 | 243196 / 217904 |
+
+</details>
+
+The 8 × 4 mesh has 4,968 native points, 2,484 per owner. Each accepted or candidate native record is 112 bytes. One such field costs 278,208 bytes per rank before container overhead. The nine strip records and 639 stage coordinates are replicated. The nine force borders bring the factored system to 648 rows. Checkpoint packing gathers native history on root. On the 192-cell moving mesh each owned DGQ2 planar stress field has 5,184 doubles globally. Two fields used by the projected correction total 82,944 bytes. Explicit transport also holds owned mass-inverted cell/face blocks, a substep parent and current-stage/halo coefficients. These lifetimes and root gathers limit extrapolation of the RSS results. [Earlier allocation inventory](#increment-4c--coupled-layered-moving-fault) · [Native storage and solver](../../source/simulator/solver/midpoint_fault.cc)
+
+### Reproduction
+
+From the worktree root. The actual external directory was `/tmp/pf-rsf-6b-arSr9jxf`. Select a new directory for each replay. The scripts use Linux, Python 3 with NumPy and Matplotlib, and a functioning local Open MPI launcher. The default compiler/link line on this host failed to resolve MPI symbols. The successful configuration below supplies the compiler and MPI library used by the reviewed build. Local MPI launches needed socket access outside the command sandbox.
+
+~~~bash
+W=$PWD
+S=$(mktemp -d /tmp/pf-rsf-6b-XXXXXXXX)
+P=$S/install
+C=$W/build-6b/release
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+export DEAL_II_NUM_THREADS=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1
+cmake -S . -B "$C" -DCMAKE_BUILD_TYPE=Release -DDEAL_II_DIR=/opt/dealii/9.6-local \
+  -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++ -DCMAKE_CXX_STANDARD_LIBRARIES=/opt/openmpi/5.0.6/lib/libmpi.so \
+  -DASPECT_INSTALL_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX="$P"
+cmake --build "$C" -j4 --target aspect phase_ridge layered_moving_fault growing_fault_checks midpoint_fields explicit_dg_compositions
+for component in runtime includes data Unspecified examples; do
+  cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -DCMAKE_INSTALL_COMPONENT="$component" -P "$C/cmake_install.cmake"
+done
+for ex in fixed_fault/phase_ridge layered_moving_fault growing_fault growing_fault/timestep explicit_dg_transport; do
+  cmake --install "$C/benchmarks/$ex" --component examples
+done
+(cd "$S" && bash "$P/benchmarks/verify_phase_field_fault.sh" installed-run "$MPI" >installed-run.log 2>&1)
+~~~
+
+The final driver, including figure generation, also passed end to end in a second fresh directory with `(cd "$S" && bash "$P/benchmarks/verify_phase_field_fault.sh" recheck "$MPI" >recheck.log 2>&1)`. Both PNGs matched the retained figure.
+
+The parameter reference was checked against this installation's actual declarations. Run the repository converter in scratch, then compare the three sections ignoring only whitespace formatting. All source links in the implementation guide and the new MyST parameter reference target resolved. The local Python environment lacked Sphinx, so an HTML build was not run.
+
+~~~bash
+mkdir -p "$S/docgen/doc/sphinx/parameters"
+(cd "$S/docgen" && python3 "$W/contrib/utilities/jsontomarkdown.py" "$S/installed-run/energy/AT1/output/parameters.json")
+for name in Compositional_20fields Material_20model Postprocess; do
+  diff -BZ "$W/doc/sphinx/parameters/$name.md" "$S/docgen/doc/sphinx/parameters/$name.md"
+done
+~~~
+
+The next commands compare those fresh results with earlier evidence. The independent nine-strip and moving endpoint checks use the installed checkers. For the 18-strip audit the temporary links pair each fresh target schedule with its original two-rank donor schedule. The returned-row files are retained observations from 5B.
+
+~~~bash
+G=$P/benchmarks/growing_fault
+D=$S/installed-run
+R=$W/build-5a-repair/reference
+PYTHONPATH="$P/benchmarks/layered_moving_fault" python3 -B -c \
+  'from pathlib import Path; import sys; from check import endpoint; endpoint(*map(Path,sys.argv[1:]))' \
+  "$D/moving/principal/output" "$W/build-4c/donor/output" >"$S/moving-donor.log"
+python3 -B "$G/compare.py" "$W/build-5a-repair/donor-two/output" "$D/growing/principal/output" >"$S/growing-donor.log"
+mkdir "$S/audit-input"
+for case in parent coarse half; do
+  ln -s "$D/strip18/$case" "$S/audit-input/$case"
+  ln -s "$W/build-5b/donor-$case" "$S/audit-input/donor-$case"
+done
+rc=0
+python3 -B "$G/timestep/audit.py" "$S/audit-input" "$R" "$S/strict-with-rows" \
+  --returned-rows "$W/build-5b/rows" >"$S/strict-with-rows.log" || rc=$?
+test "$rc" = 1
+diff -qr "$S/strict-with-rows" "$W/build-5b/closeout/final-audit"
+~~~
+
+For measurements the two executables receive identical parameter files in the pre-6A pair. The scientific donor pair uses the archived input and the equivalent installed input, with benchmark observers and checkpoints disabled and the same velocity reporting. Timing environment overrides from other donor experiments should be unset. The driver preserves each input, log, per-rank RSS and the timing CSV with elapsed seconds to six decimal places.
+
+~~~bash
+B=$W/build-6a/baseline/aspect-release
+T=$R/tip/runtime/aspect-release
+printf '%s  %s\n' 8769c98b64923906964379ef78917567eb93edc40da93b9d38765b187184022d "$B" \
+  e640fa627141ea98343fee14526c532f005281d336da32aa2d2f3467c5589b10 "$T" | sha256sum -c -
+(cd "$S" && python3 -B "$P/benchmarks/measure_fault_cost.py" "$B" "$P/bin/aspect-release" cost-final --mpiexec "$MPI")
+(cd "$S" && python3 -B "$P/benchmarks/measure_fault_cost.py" "$T" "$P/bin/aspect-release" donor-cost \
+  --donor-input "$R/runs/localized-onecut/input.prm" --mpiexec "$MPI")
+~~~
+
+The installed executable in this run had SHA-256 `7008c034b3723e7f5dfebb204fa5211f1cdf1f8d7fd9da0ec28a9f233cca5647`. A local copy of the run logs, both cost CSVs, the phase plot and the final strict report is in `build-6b/evidence`. The next action is review of the guide, installed coverage and cost. Example qualification remains separate.
+
+
 ## Increment 6A
 
-**Closed on pf-rsf after the four review findings. Increment 6B consolidation is next.** The baseline is `0d605a75a`. Commit `044470d21` makes `explicit DG SSPRK3` an ordinary compositional field method. Commit `88977cc87` extracts the shared Stokes Picard iteration. For the parsing rule, read the method-list expansion in the first file. For both dispatch decisions, read `assemble_and_solve_composition()`, `solve_stokes_by_picard_iteration()` and its two callers in the second.
+**Closed on pf-rsf after the four review findings.** The baseline is `0d605a75a`. Commit `044470d21` makes `explicit DG SSPRK3` an ordinary compositional field method. Commit `88977cc87` extracts the shared Stokes Picard iteration. For the parsing rule, read the method-list expansion in the first file. For both dispatch decisions, read `assemble_and_solve_composition()`, `solve_stokes_by_picard_iteration()` and its two callers in the second.
 
 ~~~text
 source/simulator/parameters.cc

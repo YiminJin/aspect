@@ -355,9 +355,13 @@ if __name__ == '__main__':
     parser.add_argument('legacy_plugins', nargs='?', type=lambda p: Path(p).resolve(),
                         help='directory containing the coefficient probe for the legacy writer (defaults to plugins)')
     parser.add_argument('--mpiexec',default='mpiexec')
+    parser.add_argument('--slabs-only', action='store_true',
+                        help='run the two-slab serial, partition and implicit controls with the installed coefficient observer')
     args = parser.parse_args()
     args.mode = args.aspect.name.split('-')[-1]
     slabs(args)
+    if args.slabs_only:
+        raise SystemExit(0)
     individual_fields(args)
     solved_velocity(args)
     asymmetric(args)
