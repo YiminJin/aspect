@@ -49,6 +49,8 @@ namespace aspect::GrowingFault
   {
     public:
       virtual ~MidpointMaterial() = default;
+      /** Positive prescribed normal compression (Pa) in the signed strip law. */
+      virtual double prescribed_fault_compression() const = 0;
       virtual unsigned int phase_field() const = 0;
       virtual const CohesiveMaxwell &maxwell() const = 0;
       virtual const MaterialModel::Rheology::FaultResistance &friction() const = 0;

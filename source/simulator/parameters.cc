@@ -313,11 +313,12 @@ namespace aspect
                        "pressure is normalized so that the domain average is zero. If `no' is "
                        "given, the no pressure normalization is performed.");
 
-    prm.declare_entry ("Surface pressure", "0.",
-                       Patterns::Double(),
+    prm.declare_entry ("Surface pressure", "",
+                       Patterns::List(Patterns::Double(), 0, 1),
                        "The value the pressure is normalized to in each time step when "
                        "`Pressure normalization' is set to `surface' with default value 0. "
-                       "This setting is ignored in all other cases."
+                       "An empty entry uses 0 Pa. In a growing fault input an explicit value also supplies "
+                       "the legacy spelling of Prescribed fault compression."
                        "\n\n"
                        "The mathematical equations that describe thermal convection "
                        "only determine the pressure up to an arbitrary constant. On "
@@ -1819,7 +1820,7 @@ namespace aspect
                              "did not detect its presence when you called `cmake'."));
 #endif
 
-    surface_pressure                = prm.get_double ("Surface pressure");
+    surface_pressure                = prm.get("Surface pressure").empty() ? 0. : prm.get_double("Surface pressure");
     adiabatic_surface_temperature   = prm.get_double ("Adiabatic surface temperature");
     pressure_normalization          = prm.get("Pressure normalization");
 
@@ -2499,6 +2500,9 @@ namespace aspect
     if (std::find(compositional_field_methods.begin(), compositional_field_methods.end(),
                   AdvectionFieldMethod::midpoint_fault_phase) != compositional_field_methods.end())
       GrowingFault::parse_midpoint_wall_velocity(prm, *this);
+    else if (prm.get("Surface pressure").empty())
+      // Preserve the numeric default for ordinary plugin parameter readers.
+      prm.set("Surface pressure", "0.");
 
     // then, finally, let user additions that do not go through the usual
     // plugin mechanism, declare their parameters if they have subscribed

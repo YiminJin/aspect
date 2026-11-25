@@ -207,7 +207,7 @@ namespace aspect::GrowingFault
           if (m[8]==0. || (m[3]+m[4]==0. && m[0]==0. && m[1]==0.)) continue;
           const auto resistance=[&](double free,double mobility)
           {
-            return material.friction().solve_strip(k,free,mobility,h,sim.get_parameters().surface_pressure).resistance;
+            return material.friction().solve_strip(k,free,mobility,h,material.prescribed_fault_compression()).resistance;
           };
           const auto score=[&](const double angle)
           {

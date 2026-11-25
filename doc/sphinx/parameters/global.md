@@ -212,11 +212,11 @@ In order to use this parameter, your cluster must obviously be using the Lustre 
 
 ::::{dropdown} __Parameter:__ {ref}`Surface pressure<parameters:Surface_20pressure>`
 :name: parameters:Surface_20pressure
-**Default value:** 0.
+**Default value:**
 
-**Pattern:** [Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]
+**Pattern:** [List of <[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]> of length 0...1 (inclusive)]
 
-**Documentation:** The value the pressure is normalized to in each time step when &lsquo;Pressure normalization&rsquo; is set to &lsquo;surface&rsquo; with default value 0. This setting is ignored in all other cases.
+**Documentation:** The value the pressure is normalized to in each time step when &lsquo;Pressure normalization&rsquo; is set to &lsquo;surface&rsquo; with default value 0. An empty entry uses 0 Pa. In a growing fault input an explicit value also supplies the legacy spelling of Prescribed fault compression.
 
 The mathematical equations that describe thermal convection only determine the pressure up to an arbitrary constant. On the other hand, for comparison and for looking up material parameters it is important that the pressure be normalized somehow. We do this by enforcing a particular average pressure value at the surface of the domain, where the geometry model determines where the surface is. This parameter describes what this average surface pressure value is supposed to be. By default, it is set to zero, but one may want to choose a different value for example for simulating only the volume of the mantle below the lithosphere, in which case the surface pressure should be the lithostatic pressure at the bottom of the lithosphere.
 

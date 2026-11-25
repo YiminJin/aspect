@@ -233,7 +233,15 @@ namespace aspect
 
       double surface_pressure;
       ia >> surface_pressure;
-      AssertThrow (surface_pressure == parameters.surface_pressure,
+      // Legacy midpoint inputs used this slot for prescribed frictional
+      // compression. The material checks its effective value in native history.
+      // The pressure gauge on this route is a DoF constraint.
+      const bool midpoint_pressure = parameters.pressure_normalization == "no" &&
+                                     std::find(parameters.compositional_field_methods.begin(),
+                                               parameters.compositional_field_methods.end(),
+                                               Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase)
+                                     != parameters.compositional_field_methods.end();
+      AssertThrow (surface_pressure == parameters.surface_pressure || midpoint_pressure,
                    ExcMessage ("The value of surface pressure that was stored "
                                "in the checkpoint file is not the same as the one "
                                "you currently set in your input file. "

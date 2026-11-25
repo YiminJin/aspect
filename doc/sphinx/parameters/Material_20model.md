@@ -1880,6 +1880,15 @@ Units: \si{\pascal\second}
 **Documentation:** Initial state age in seconds.
 ::::
 
+::::{dropdown} __Parameter:__ {ref}`Prescribed fault compression<parameters:Material_20model/Growing_20fault/Prescribed_20fault_20compression>`
+:name: parameters:Material_20model/Growing_20fault/Prescribed_20fault_20compression
+**Default value:**
+
+**Pattern:** [List of <[Double 0...MAX_DOUBLE (inclusive)]> of length 0...1 (inclusive)]
+
+**Documentation:** Positive compression in Pa used by the signed fault resistance law. An empty entry uses the explicitly supplied Surface pressure from legacy growing fault inputs.
+::::
+
 ::::{dropdown} __Parameter:__ {ref}`Radiation damping<parameters:Material_20model/Growing_20fault/Radiation_20damping>`
 :name: parameters:Material_20model/Growing_20fault/Radiation_20damping
 **Default value:** 1000

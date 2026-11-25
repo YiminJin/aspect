@@ -26,6 +26,9 @@ namespace aspect::GrowingFault
   {
     prm.enter_subsection("Material model");
     prm.enter_subsection("Growing fault");
+    prm.declare_entry("Prescribed fault compression", "", Patterns::List(Patterns::Double(0.),0,1),
+                      "Positive compression in Pa used by the signed fault resistance law. An empty entry "
+                      "uses the explicitly supplied Surface pressure from legacy growing fault inputs.");
     prm.declare_entry("Seed tangent angle","0",Patterns::Double(),"Angle in degrees counterclockwise from x.");
     prm.declare_entry("Forward seed tip","0,0",Patterns::List(Patterns::Double(),2,2),"Physical tip of the initial contiguous seed in metres.");
     prm.declare_entry("Section quadrature order","6",Patterns::Integer(2),"Gauss points per strip subinterval and chord.");
@@ -52,8 +55,18 @@ namespace aspect::GrowingFault
     field=this->introspection().compositional_index_for_name(energy.composition);
     AssertThrow(&this->get_material_model()==this && p.compositional_field_methods[field]==Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase,
                 ExcMessage("Growing fault requires a top-level midpoint material and a midpoint fault phase."));
+    const bool legacy_compression = !prm.get("Surface pressure").empty();
     prm.enter_subsection("Material model");
     prm.enter_subsection("Growing fault");
+    compression = p.surface_pressure;
+    if (!prm.get("Prescribed fault compression").empty())
+      {
+        compression = prm.get_double("Prescribed fault compression");
+        AssertThrow(!legacy_compression || compression == p.surface_pressure,
+                    ExcMessage("Conflicting Prescribed fault compression and Surface pressure in growing fault input."));
+      }
+    AssertThrow(std::isfinite(compression) && compression > 0.,
+                ExcMessage("Growing fault requires a finite, positive prescribed fault compression in Pa."));
     degrees=prm.get_double("Seed tangent angle");
     const auto coordinates=Utilities::string_to_double(Utilities::split_string_list(prm.get("Forward seed tip")));
     anchor=Point<2>(coordinates[0],coordinates[1]);
@@ -199,7 +212,7 @@ namespace aspect::GrowingFault
   {
     const auto &energy=this->get_parameters().surface_energy_model;
     std::vector<double> signature= {energy.fracture_energy,energy.length_scale,this->get_parameters().discontinuous_penalty,
-                                    this->get_parameters().surface_pressure,anchor[0],anchor[1],point_law.G,point_law.eta,point_law.m
+                                    compression,anchor[0],anchor[1],point_law.G,point_law.eta,point_law.m
                                    };
     const auto parameters=law->parameters();
     signature.insert(signature.end(),parameters.begin(),parameters.end());

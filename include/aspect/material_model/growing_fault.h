@@ -46,6 +46,10 @@ namespace aspect::GrowingFault
         AssertThrow(balance_available,ExcMessage("No accepted balance is available for this growing fault checkpoint or initial state."));
         return last_balance;
       }
+      double prescribed_fault_compression() const override
+      {
+        return compression;
+      }
       unsigned int phase_field() const override
       {
         return field;
@@ -67,7 +71,7 @@ namespace aspect::GrowingFault
       virtual std::unique_ptr<MaterialModel::Rheology::FaultResistance> make_resistance(ParameterHandler &) const;
     private:
       unsigned int order,field;
-      double degrees;
+      double degrees, compression;
       Point<2> anchor;
       CohesiveMaxwell point_law;
       std::unique_ptr<MaterialModel::Rheology::FaultResistance> law;

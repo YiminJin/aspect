@@ -119,7 +119,7 @@ namespace aspect::GrowingFault
     // Both admissibility bounds depend on this attempt's half-duration and
     // hold on every rank. Let the time-step manager retry from the same parent.
     if (h*G>m.maxwell().eta ||
-        !m.friction().admits_duration(h,sim.get_parameters().surface_pressure))
+        !m.friction().admits_duration(h,m.prescribed_fault_compression()))
       throw ExcNonlinearSolverNoConvergence();
     const auto &old=sim.get_old_solution();
     const auto &fe=sim.get_fe();
@@ -279,7 +279,7 @@ namespace aspect::GrowingFault
     transfer.sum(comm);
     for (unsigned int k=0; k<ns; ++k)
       e.roots.push_back(material.friction().solve_strip(k,transfer.free_rate[k],transfer.mobility[k],
-                                                        h,sim.get_parameters().surface_pressure));
+                                                        h,material.prescribed_fault_compression()));
     // In exact arithmetic the weighted sum of the returned point rates is V.
     // In cold creep even the rounding error of the scalar resistance can be
     // much larger than V/M. Recover that low part of the traction before
@@ -741,8 +741,8 @@ namespace aspect::GrowingFault
                 std::count(p.compositional_field_methods.begin(),p.compositional_field_methods.end(),
                            Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase)==1 &&
                 p.nonlinear_solver_failure_strategy!=Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep &&
-                p.surface_pressure>0. && p.pressure_normalization=="no",
-                ExcMessage("Growing fault requires a single midpoint fault phase, plane strain, native elasticity off, single Advection, iterated Newton Stokes, prescribed positive surface pressure and no pressure normalization. Nonconvergence must abort or request a retry."));
+                p.pressure_normalization=="no",
+                ExcMessage("Growing fault requires a single midpoint fault phase, plane strain, native elasticity off, single Advection, iterated Newton Stokes, and no pressure normalization. Nonconvergence must abort or request a retry."));
     AssertThrow(!p.mesh_deformation_enabled && !p.initial_adaptive_refinement && !p.adaptive_refinement_interval &&
                 p.additional_refinement_times.empty() && p.stokes_velocity_degree==2 && !p.use_equal_order_interpolation_for_stokes &&
                 !p.use_locally_conservative_discretization && !p.include_melt_transport,
