@@ -4,6 +4,7 @@
 */
 
 #include <aspect/material_model/rheology/rate_and_state_friction.h>
+#include <aspect/material_model/fault_parameters.h>
 #include <aspect/global.h>
 #include <deal.II/base/parameter_handler.h>
 
@@ -179,13 +180,13 @@ namespace aspect::MaterialModel::Rheology
     void declare_rsf(ParameterHandler &prm, const FaultResistance::Route route)
     {
       const bool growing=route==FaultResistance::Route::growing;
-      prm.declare_entry("Initial age",growing?"10":"1",Patterns::Double(0.),"Initial state age in seconds.");
-      prm.declare_entry("Reference friction coefficient","0.6",Patterns::Double(),"Dimensionless reference coefficient.");
-      prm.declare_entry("Direct effect",growing?"0.015":"0.01",Patterns::Double(0.),"Dimensionless direct effect.");
-      prm.declare_entry("Evolution effect",growing?"0.02":"0.015",Patterns::Double(0.),"Dimensionless evolution effect.");
-      prm.declare_entry("Reference speed",growing?"0.001":"1e-6",Patterns::Double(0.),"Reference slip speed in m/s.");
-      prm.declare_entry("Slip distance","0.01",Patterns::Double(0.),"Characteristic slip distance in m.");
-      prm.declare_entry("Radiation damping",growing?"1000":"0",Patterns::Double(0.),"Radiation impedance in Pa s/m.");
+      FaultParameters::declare_entry(prm,"Initial age",growing?"10":"1",Patterns::Double(0.),"Initial state age in seconds.");
+      FaultParameters::declare_entry(prm,"Reference friction coefficient","0.6",Patterns::Double(),"Dimensionless reference coefficient.");
+      FaultParameters::declare_entry(prm,"Direct effect",growing?"0.015":"0.01",Patterns::Double(0.),"Dimensionless direct effect.");
+      FaultParameters::declare_entry(prm,"Evolution effect",growing?"0.02":"0.015",Patterns::Double(0.),"Dimensionless evolution effect.");
+      FaultParameters::declare_entry(prm,"Reference speed",growing?"0.001":"1e-6",Patterns::Double(0.),"Reference slip speed in m/s.");
+      FaultParameters::declare_entry(prm,"Slip distance","0.01",Patterns::Double(0.),"Characteristic slip distance in m.");
+      FaultParameters::declare_entry(prm,"Radiation damping",growing?"1000":"0",Patterns::Double(0.),"Radiation impedance in Pa s/m.");
     }
 
     std::unique_ptr<FaultResistance> read_rsf(const ParameterHandler &prm,const FaultResistance::Route route)

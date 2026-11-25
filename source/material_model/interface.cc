@@ -208,9 +208,12 @@ namespace aspect
       prm.leave_subsection ();
 
       std::get<dim>(registered_plugins).declare_parameters (prm);
-      // The fault accepts the Simple viscosity as a historical input. Attach
-      // its input observers once all three material subsections exist.
-      FaultParameters::observe_material_inputs<dim>(prm);
+      // Simple viscosity is also a historical input of the mature fault.
+      prm.enter_subsection("Material model");
+      prm.enter_subsection("Simple model");
+      FaultParameters::observe_entry(prm,"Viscosity",Patterns::Double(0.));
+      prm.leave_subsection();
+      prm.leave_subsection();
     }
 
 

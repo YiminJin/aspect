@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect 3.1 REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(fault_parameter_probe)
+add_library(fault_parameter_probe SHARED weighted_dashpot.cc)
+ASPECT_SETUP_PLUGIN(fault_parameter_probe)

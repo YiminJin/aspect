@@ -28,16 +28,16 @@ namespace aspect::GrowingFault
   {
     prm.enter_subsection("Material model");
     prm.enter_subsection("Growing fault");
-    prm.declare_entry("Prescribed fault compression", "", Patterns::List(Patterns::Double(0.),0,1),
-                      "Positive compression in Pa used by the signed fault resistance law. An empty entry "
-                      "uses the explicitly supplied Surface pressure from legacy growing fault inputs.");
-    prm.declare_entry("Seed tangent angle","0",Patterns::Double(),"Angle in degrees counterclockwise from x.");
-    prm.declare_entry("Forward seed tip","0,0",Patterns::List(Patterns::Double(),2,2),"Physical tip of the initial contiguous seed in metres.");
-    prm.declare_entry("Section quadrature order","6",Patterns::Integer(2),"Gauss points per strip subinterval and chord.");
+    MaterialModel::FaultParameters::declare_entry(prm,"Prescribed fault compression", "", Patterns::List(Patterns::Double(0.),0,1),
+                                                  "Positive compression in Pa used by the signed fault resistance law. An empty entry "
+                                                  "uses the explicitly supplied Surface pressure from legacy growing fault inputs.");
+    MaterialModel::FaultParameters::declare_entry(prm,"Seed tangent angle","0",Patterns::Double(),"Angle in degrees counterclockwise from x.");
+    MaterialModel::FaultParameters::declare_entry(prm,"Forward seed tip","0,0",Patterns::List(Patterns::Double(),2,2),"Physical tip of the initial contiguous seed in metres.");
+    MaterialModel::FaultParameters::declare_entry(prm,"Section quadrature order","6",Patterns::Integer(2),"Gauss points per strip subinterval and chord.");
+    MaterialModel::FaultParameters::declare_entry(prm,"Shear modulus","1e6",Patterns::Double(0),"Shear modulus in Pa.");
+    MaterialModel::FaultParameters::declare_entry(prm,"Viscosity","1e8",Patterns::Double(0),"Maxwell viscosity in Pa s.");
+    MaterialModel::FaultParameters::declare_entry(prm,"Cohesion","1000",Patterns::Double(0),"Cohesive strength in Pa.");
     MaterialModel::Rheology::FaultResistance::declare_parameters(prm,MaterialModel::Rheology::FaultResistance::Route::growing);
-    prm.declare_entry("Shear modulus","1e6",Patterns::Double(0),"Shear modulus in Pa.");
-    prm.declare_entry("Viscosity","1e8",Patterns::Double(0),"Maxwell viscosity in Pa s.");
-    prm.declare_entry("Cohesion","1000",Patterns::Double(0),"Cohesive strength in Pa.");
     prm.leave_subsection();
     prm.leave_subsection();
   }
@@ -93,6 +93,8 @@ namespace aspect::GrowingFault
   {
     this->get_pcout() << "   Growing fault midpoint solver: bordered matrix gathered on MPI rank 0, "
                       << "UMFPACK direct factorization (separate velocity and pressure blocks)." << std::endl;
+    this->get_pcout() << "   Fault Maxwell material (growing strips): shear modulus = " << point_law.G
+                      << " Pa, viscosity = " << point_law.eta << " Pa s." << std::endl;
     this->get_signals().post_resume_load_user_data.connect([this](parallel::distributed::Triangulation<dim> &)
     {
       initialize_native_history();

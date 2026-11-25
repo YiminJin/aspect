@@ -6,16 +6,22 @@
 
 namespace aspect::MaterialModel::FaultParameters
 {
-  /** Attach explicit-input observers once all material plugins have declared
-   * their settings. The two fault declarations identify shared coefficients
-   * (including external laws) and controls belonging to only one route. */
-  template <int dim>
-  void observe_material_inputs(dealii::ParameterHandler &);
+  /** Declare a material or resistance coefficient in its owning subsection.
+   * Keep track of explicit assignments, including a supplied default value,
+   * so the two fault routes may retain different defaults for omitted entries. */
+  void declare_entry(dealii::ParameterHandler &, const std::string &name,
+                     const std::string &value, const dealii::Patterns::PatternBase &pattern,
+                     const std::string &documentation);
 
-  /** Was the named shared input explicitly assigned in this material
-   * subsection, including an assignment equal to its declared default? */
-  bool explicitly_set(const dealii::ParameterHandler &, const std::string &subsection,
-                      const std::string &name);
+  /** Observe an existing declaration made by an upstream owner (the Simple
+   * viscosity or the parsed function for mature exterior stress). */
+  void observe_entry(dealii::ParameterHandler &, const std::string &name,
+                     const dealii::Patterns::PatternBase &pattern);
+
+  /** After the registered resistance laws have declared both material
+   * subsections, observe any coefficients added by external declare_entry
+   * callbacks. They use the ordinary deal.II plugin interface. */
+  void observe_external_coefficients(dealii::ParameterHandler &);
 
   /** Resolve explicit inputs for the active fault before reading material or
    * law parameters. Omitted entries retain that route's declared defaults. */

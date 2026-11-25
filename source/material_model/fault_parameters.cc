@@ -1,36 +1,36 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/material_model/fault_parameters.h>
-#include <aspect/material_model/growing_fault.h>
-#include <aspect/material_model/phase_field_fault.h>
-
+#include <deal.II/base/utilities.h>
 #include <boost/algorithm/string/join.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace aspect::MaterialModel::FaultParameters
 {
+  using namespace dealii;
+
   namespace
   {
     using Path = std::vector<std::string>;
     const std::string trace = "Phase field fault", strips = "Growing fault", simple = "Simple model";
 
-    struct SharedInput
+    struct Entry
     {
-      bool numeric;
-      std::map<std::string,std::string> values;
+      std::set<std::string> declared_in;
+      std::map<std::string,std::string> supplied;
+      std::unique_ptr<const Patterns::PatternBase> pattern;
+      std::string external_pattern;
     };
 
-    struct ExplicitInputs
+    struct MaterialInputs
     {
-      std::map<Path,SharedInput> shared;
-      std::map<std::string,std::set<std::string>> restricted;
+      std::map<Path,Entry> entries;
+      std::set<std::string> completed_law_declarations;
     };
 
-    // deal.II 9.6 exposes explicit assignments via actions, including values
-    // equal to defaults. Each handler owns its observations through its actions.
-    // The weak index keeps independent handlers and their lifetimes separate.
-    std::shared_ptr<ExplicitInputs> inputs(const ParameterHandler &prm)
+    // Actions own the observations for the lifetime of their parameter handler.
+    std::shared_ptr<MaterialInputs> inputs(const ParameterHandler &prm)
     {
-      static std::map<const ParameterHandler *,std::weak_ptr<ExplicitInputs>> handlers;
+      static std::map<const ParameterHandler *,std::weak_ptr<MaterialInputs>> handlers;
       for (auto it=handlers.begin(); it!=handlers.end();)
         if (it->second.expired())
           it=handlers.erase(it);
@@ -39,132 +39,214 @@ namespace aspect::MaterialModel::FaultParameters
       auto &entry=handlers[&prm];
       if (auto state=entry.lock())
         return state;
-      auto state=std::make_shared<ExplicitInputs>();
+      auto state=std::make_shared<MaterialInputs>();
       entry=state;
       return state;
     }
 
-    // ParameterHandler's documented JSON contains the original names, subsection
-    // hierarchy and validation patterns. Walk only the two small fault schemas,
-    // so an independently compiled law can use ordinary declare_entry().
-    void collect_entries(const boost::property_tree::ptree &section, const Path &parent,
-                         std::map<Path,bool> &entries)
+    // ParameterHandler's XML and get_current_path() encode each non-alphanumeric
+    // byte as _hh. Split the encoded path before restoring literal punctuation.
+    std::string decode_name(const std::string &encoded)
     {
-      for (const auto &[name,node]:section)
+      std::string name;
+      for (unsigned int i=0; i<encoded.size(); ++i)
+        if (encoded[i]=='_')
+          {
+            name+=static_cast<char>(std::stoul(encoded.substr(i+1,2),nullptr,16));
+            i+=2;
+          }
+        else
+          name+=encoded[i];
+      return name;
+    }
+
+    Entry &observe(ParameterHandler &prm, const std::string &section, const Path &path)
+    {
+      const auto state=inputs(prm);
+      auto &entry=state->entries[path];
+      if (entry.declared_in.insert(section).second)
+        prm.add_action(path.back(),[state,path,section](const std::string &value)
         {
+          state->entries.at(path).supplied[section]=value;
+        },false);
+      return entry;
+    }
+
+    // The public deal.II 9.6 declaration callback predates named section
+    // iterators. Its XML format retains entry boundaries even for names
+    // containing periods, and stores the machine-readable validation pattern.
+    void observe_external_entries(ParameterHandler &prm, const std::string &section,
+                                  const boost::property_tree::ptree &tree, const Path &parent,
+                                  const MaterialInputs &state)
+    {
+      for (const auto &[encoded,node]:tree)
+        {
+          const auto name=decode_name(encoded);
           Path path=parent;
           path.push_back(name);
-          if (const auto pattern=node.get_optional<std::string>("pattern_description"))
-            entries[path]=pattern->find("[Double ")==0 || pattern->find("[Integer ")==0;
-          else
-            collect_entries(node,path,entries);
+          if (const auto description=node.get_optional<std::string>("pattern_description"))
+            {
+              const auto entry=state.entries.find(path);
+              if (entry==state.entries.end() || !entry->second.declared_in.count(section))
+                observe(prm,section,path).external_pattern=*description;
+            }
+          else if (!node.get_optional<std::string>("alias"))
+            {
+              prm.enter_subsection(name);
+              observe_external_entries(prm,section,node,path,state);
+              prm.leave_subsection();
+            }
         }
     }
 
-    // Both operations use paths relative to Material model. Leave the caller
-    // in its original subsection, including for nested law coefficients.
-    template <typename Operation>
-    void at_entry(ParameterHandler &prm,const std::string &section,const Path &path,
-                  const Operation &operation)
+    // A plugin may supply its own PatternBase. deal.II's generic factory
+    // aborts on an unknown pattern, including one nested in a list. Ask the
+    // List factory for its declared separators only after confirming that
+    // the scalar leaf is one of the two numeric types we compare.
+    std::unique_ptr<Patterns::PatternBase> external_numeric_pattern(const std::string &description)
     {
-      prm.enter_subsection(section);
-      for (auto it=path.begin(); it!=std::prev(path.end()); ++it)
-        prm.enter_subsection(*it);
-      operation(path.back());
-      for (unsigned int i=0; i<path.size(); ++i)
-        prm.leave_subsection();
+      const std::string list_prefix="[List of <";
+      std::size_t start=0;
+      while (description.compare(start,list_prefix.size(),list_prefix)==0)
+        start+=list_prefix.size();
+      const auto end=description.find(']',start);
+      if (end==std::string::npos)
+        return nullptr;
+      const auto leaf=description.substr(start,end-start+1);
+      std::unique_ptr<Patterns::PatternBase> number=Patterns::Double::create(leaf);
+      if (!number)
+        number=Patterns::Integer::create(leaf);
+      if (number && start!=0)
+        return Patterns::List::create(description);
+      return number;
     }
 
-    void observe(ParameterHandler &prm,const std::string &section,const Path &path,
-                 const bool shared,const bool numeric)
+    bool equal_values(const Patterns::PatternBase &pattern, const std::string &a, const std::string &b)
     {
-      const auto state=inputs(prm);
-      at_entry(prm,section,path,[&](const auto &name)
-      {
-        prm.add_action(name,[=](const std::string &value)
+      if (a==b)
+        return true;
+      if (dynamic_cast<const Patterns::Double *>(&pattern))
+        return Patterns::Tools::Convert<double>::to_value(a)==Patterns::Tools::Convert<double>::to_value(b);
+      if (dynamic_cast<const Patterns::Integer *>(&pattern))
+        return Patterns::Tools::Convert<long int>::to_value(a)==Patterns::Tools::Convert<long int>::to_value(b);
+      if (const auto *list=dynamic_cast<const Patterns::List *>(&pattern))
         {
-          if (shared)
-            {
-              auto &input=state->shared[path];
-              input.numeric=numeric;
-              input.values[section]=value;
-            }
-          else
-            state->restricted[section].insert(boost::algorithm::join(path," / "));
-        },false);
-      });
+          const auto left=Utilities::split_string_list(a,list->get_separator());
+          const auto right=Utilities::split_string_list(b,list->get_separator());
+          return left.size()==right.size() && std::equal(left.begin(),left.end(),right.begin(),[&](const auto &l,const auto &r)
+          {
+            return equal_values(list->get_base_pattern(),l,r);
+          });
+        }
+      return false;
     }
   }
 
-  template <int dim>
-  void observe_material_inputs(ParameterHandler &prm)
+  void observe_entry(ParameterHandler &prm,const std::string &name,const Patterns::PatternBase &pattern)
   {
-    ParameterHandler declarations;
-    PhaseFieldFault<dim>::declare_parameters(declarations);
-    GrowingFault::Material<dim>::declare_parameters(declarations);
-    std::stringstream json;
-    declarations.print_parameters(json,ParameterHandler::JSON);
-    boost::property_tree::ptree tree;
-    boost::property_tree::read_json(json,tree);
-    const auto &material=tree.get_child("Material model");
-    std::map<Path,bool> trace_entries,strip_entries;
-    collect_entries(material.get_child(trace), {},trace_entries);
-    collect_entries(material.get_child(strips), {},strip_entries);
-    prm.enter_subsection("Material model");
-    for (const auto &[path,numeric]:trace_entries)
-      observe(prm,trace,path,strip_entries.count(path),numeric);
-    for (const auto &[path,numeric]:strip_entries)
-      observe(prm,strips,path,trace_entries.count(path),numeric);
-    observe(prm,simple, {"Viscosity"},true,true);
-    prm.leave_subsection();
+    const auto components=Utilities::split_string_list(prm.get_current_path(),".");
+    // A law can also be declared on its own; only the two material scopes
+    // and the historical Simple viscosity participate in cross-route aliases.
+    if (components.size()<2 || decode_name(components[0])!="Material model")
+      return;
+    const auto section=decode_name(components[1]);
+    if (section!=trace && section!=strips && section!=simple)
+      return;
+    Path path;
+    for (auto it=components.begin()+2; it!=components.end(); ++it)
+      path.push_back(decode_name(*it));
+    path.push_back(name);
+    auto &entry=observe(prm,section,path);
+    if (!entry.pattern)
+      entry.pattern=pattern.clone();
   }
 
-  bool explicitly_set(const ParameterHandler &prm,const std::string &section,const std::string &name)
+  void declare_entry(ParameterHandler &prm, const std::string &name, const std::string &value,
+                     const Patterns::PatternBase &pattern, const std::string &documentation)
+  {
+    prm.declare_entry(name,value,pattern,documentation);
+    observe_entry(prm,name,pattern);
+  }
+
+  void observe_external_coefficients(ParameterHandler &prm)
   {
     const auto state=inputs(prm);
-    const auto input=state->shared.find({name});
-    return input!=state->shared.end() && input->second.values.count(section);
+    const auto path=prm.get_current_path();
+    const auto components=Utilities::split_string_list(path,".");
+    if (components.size()!=2 || decode_name(components[0])!="Material model")
+      return;
+    const auto current=decode_name(components[1]);
+    if ((current!=trace && current!=strips) || !state->completed_law_declarations.insert(current).second ||
+        state->completed_law_declarations.size()!=2)
+      return;
+
+    // Only a process loading additional resistance laws needs this discovery.
+    // Each opaque callback has already run once per route on the real handler.
+    std::stringstream xml;
+    prm.print_parameters(xml,ParameterHandler::XML | ParameterHandler::KeepDeclarationOrder);
+    boost::property_tree::ptree document;
+    boost::property_tree::read_xml(xml,document);
+    const auto &root=document.get_child("ParameterHandler");
+    prm.leave_subsection();
+    const std::string sections[] = {trace,strips};
+    for (const auto &section : sections)
+      {
+        prm.enter_subsection(section);
+        observe_external_entries(prm,section,root.get_child(prm.get_current_path()), {},*state);
+        prm.leave_subsection();
+      }
+    prm.enter_subsection(current);
   }
 
   void resolve(ParameterHandler &prm,const bool growing)
   {
     const auto state=inputs(prm);
     const auto &active=growing?strips:trace;
-    const auto &other=growing?trace:strips;
-    const auto &incompatible=state->restricted[other];
-    AssertThrow(incompatible.empty(),ExcMessage("Material model / "+other+" / "+*incompatible.begin()+
-                                                (growing?" requires mature trace mechanics.":" requires growing strip mechanics.")));
-
     prm.enter_subsection("Material model");
-    for (auto &[path,input]:state->shared)
+    const bool historical_growth = growing && prm.get("Model name")!="phase field fault";
+
+    for (auto &[path,entry]:state->entries)
       {
-        auto first=input.values.find(trace);
-        if (first==input.values.end())
-          first=input.values.begin();
-        for (const auto &[section,value]:input.values)
-          {
-            const bool equal=(value==first->second ||
-                              (input.numeric && Utilities::string_to_double(value)==Utilities::string_to_double(first->second)));
-            const auto name=boost::algorithm::join(path," / ");
-            AssertThrow(equal,ExcMessage("Conflicting Material model / "+first->first+" / "+name+
-                                         " and Material model / "+section+" / "+name+"."));
-          }
-        // Simple historically supplies the mature bulk viscosity. Growing
-        // mechanics and external law constructors read their active subsection.
-        const auto &target=(!growing && path==Path {"Viscosity"}) ? simple : active;
-        if (!input.values.count(target))
-          {
-            at_entry(prm,target,path,[&](const auto &name)
+        // Simple viscosity never entered the Maxwell law of the historical
+        // growing material. The public material accepts it as a viscosity alias.
+        auto values=entry.supplied;
+        if (historical_growth)
+          values.erase(simple);
+        if (values.empty())
+          continue;
+        const auto name=boost::algorithm::join(path," / ");
+        auto first=values.find(trace);
+        if (first==values.end())
+          first=values.begin();
+        AssertThrow(entry.declared_in.count(active),
+                    ExcMessage("Material model / "+first->first+" / "+name+
+                               (growing?" requires mature trace mechanics.":" requires growing strip mechanics.")));
+        for (const auto &[section,value]:values)
+          if (value!=first->second)
             {
-              prm.set(name,first->second);
-            });
+              // Single-spelling inputs (including custom SDK patterns) go
+              // directly to their registered reader. Only a duplicate with
+              // different text needs a typed comparison.
+              if (!entry.pattern)
+                entry.pattern=external_numeric_pattern(entry.external_pattern);
+              AssertThrow(entry.pattern && equal_values(*entry.pattern,value,first->second),
+                          ExcMessage("Conflicting Material model / "+first->first+" / "+name+
+                                     " and Material model / "+section+" / "+name+"."));
+            }
+
+        const auto &target=(!growing && path==Path {"Viscosity"}) ? simple : active;
+        if (!values.count(target))
+          {
+            prm.enter_subsection(target);
+            for (auto it=path.begin(); it!=std::prev(path.end()); ++it)
+              prm.enter_subsection(*it);
+            prm.set(path.back(),first->second);
+            for (unsigned int i=0; i<path.size(); ++i)
+              prm.leave_subsection();
             // set() also ran the observation action. This copy was not supplied.
-            input.values.erase(target);
+            entry.supplied.erase(target);
           }
       }
     prm.leave_subsection();
   }
-
-  template void observe_material_inputs<2>(ParameterHandler &);
-  template void observe_material_inputs<3>(ParameterHandler &);
 }

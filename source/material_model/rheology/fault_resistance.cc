@@ -1,5 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/material_model/rheology/fault_resistance.h>
+#include <aspect/material_model/fault_parameters.h>
 #include <deal.II/base/parameter_handler.h>
 
 namespace aspect::MaterialModel::Rheology
@@ -28,8 +29,10 @@ namespace aspect::MaterialModel::Rheology
         names+=name;
         law.first(prm,route);
       }
-    prm.declare_entry("Resistance law","rate and state",Patterns::Selection(names),
-                      "Surface resistance law evaluated on the active material trace or growing strips.");
+    FaultParameters::declare_entry(prm,"Resistance law","rate and state",Patterns::Selection(names),
+                                   "Surface resistance law evaluated on the active material trace or growing strips.");
+    if (registered_laws().size()>1)
+      FaultParameters::observe_external_coefficients(prm);
   }
 
   std::unique_ptr<FaultResistance> FaultResistance::create(const ParameterHandler &prm,const Route route)
