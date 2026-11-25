@@ -6,7 +6,7 @@
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/simulator/assemblers/interface.h>
-#include <aspect/simulator/solver/dg_stress_transport.h>
+#include <aspect/simulator/solver/dg_transport.h>
 #include <aspect/simulator_signals.h>
 
 #include <fstream>
