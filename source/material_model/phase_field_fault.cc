@@ -39,6 +39,7 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::initialize()
     {
+      this->get_pcout() << "   Mature fault Stokes solver: ASPECT block AMG." << std::endl;
       coupling.initialize_simulator(this->get_simulator());
       coupling.initialize();
       coupling.connect_section_balance();

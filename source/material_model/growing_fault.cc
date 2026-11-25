@@ -99,6 +99,8 @@ namespace aspect::GrowingFault
   template <int dim>
   void Material<dim>::initialize()
   {
+    this->get_pcout() << "   Growing fault midpoint solver: bordered matrix gathered on MPI rank 0, "
+                      << "UMFPACK direct factorization (separate velocity and pressure blocks)." << std::endl;
     this->get_signals().post_resume_load_user_data.connect([this](parallel::distributed::Triangulation<dim> &)
     {
       initialize_native_history();
