@@ -1,0 +1,22 @@
+# Run from the fixed_fault example directory. Rows point from bottom to top.
+include fixed_fault.prm
+set Output directory = output-mature-trace
+subsection Material model
+  set Model name = phase field fault
+  set Friction normal stress = adiabatic pressure
+  subsection Phase field fault
+    set Fault geometry = boundary spanning
+    set Fault vertex file = mature_vertices.txt
+    set Background compression =
+  end
+end
+subsection Adiabatic conditions model
+  set Model name = function
+  subsection Function
+    set Variable names = depth
+    set Function expression = 293; 5; 1
+  end
+end
+subsection Postprocess
+  set List of postprocessors = mature fault statistics, visualization
+end

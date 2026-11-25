@@ -7,6 +7,21 @@ import shutil
 import subprocess
 
 
+def crossing_input(settings):
+    # Place a single material ID close to the partition; retain the
+    # exact same straight curve, phase profile, loading and age laws.
+    x = -.00001
+    for name, value, sep in (("Fault vertices", f"{x},{.6*x}", "; "),
+                             ("Initial label ages", f"{10+2*math.sin(2*x):.17g}", ", "),
+                             ("Initial label shear tractions", f"{3.7+.15*math.cos(3*x):.17g}", ", ")):
+        line = next(row for row in settings.splitlines() if row.strip().startswith(f"set {name} = "))
+        prefix, entries = line.split(" = ")
+        data = entries.split(sep)
+        data[9] = value
+        settings = settings.replace(line, prefix+" = "+sep.join(data))
+    return settings
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ("aspect", "plugin", "retry_plugin", "destination"):
@@ -25,17 +40,7 @@ def main():
         settings = base
         plugins = str(args.plugin)
         if case.startswith("crossing-"):
-            # Place a single material ID close to the partition; retain the
-            # exact same straight curve, phase profile, loading and age laws.
-            x = -.00001
-            for name, value, sep in (("Fault vertices", f"{x},{.6*x}", "; "),
-                                     ("Initial label ages", f"{10+2*math.sin(2*x):.17g}", ", "),
-                                     ("Initial label shear tractions", f"{3.7+.15*math.cos(3*x):.17g}", ", ")):
-                line = next(row for row in settings.splitlines() if row.strip().startswith(f"set {name} = "))
-                prefix, entries = line.split(" = ")
-                data = entries.split(sep)
-                data[9] = value
-                settings = settings.replace(line, prefix+" = "+sep.join(data))
+            settings = crossing_input(base)
         elif case == "retry":
             plugins += ","+str(args.retry_plugin)
             settings += """

@@ -90,7 +90,7 @@ end
             for directory in (output,root/"constant/output"):
                 chi=np.loadtxt(directory/"bulk-0-0.txt",skiprows=1,usecols=6)
                 near(chi,np.ones_like(chi),1.e-12)
-            print("Unit-width normal, m=1 and m=4:",raw[0],values[0],"m; normalized chi=1/m throughout")
+            print("Unit-width normal, m=1 and m=4:",raw[0],values[0],"m; normalized chi=1 m^-1 throughout")
         if case=="pole":
             q12,w12=gauss(12)
             d=.99*(1-4*(q12-.5)**2)

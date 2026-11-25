@@ -1,0 +1,17 @@
+# Run from the growing_fault example directory. Only phase has FE storage.
+include adiabatic_pressure.prm
+set Output directory = output-growing-seed
+subsection Material model
+  set Model name = phase field fault
+end
+subsection Compositional fields
+  set Number of fields = 1
+  set Names of fields = phase_field
+  set Types of fields = phase field
+  set Compositional field methods = midpoint fault phase
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = .2*max(0,1-(max(0,((0.86602540378443871)*(x-(1))+(0.49999999999999994)*(y-(0.5))))/.5)^2)*max(0,1-(((-(0.49999999999999994))*(x-(1))+(0.86602540378443871)*(y-(0.5)))/.25)^2)
+  end
+end

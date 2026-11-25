@@ -1,0 +1,4 @@
+id x_m y_m initial_age_s background_shear_Pa
+0 0.5 0.0 10 3.85
+1 0.5 0.5 11 3.80
+2 0.5 1.0 12 3.75
