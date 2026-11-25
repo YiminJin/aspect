@@ -62,23 +62,7 @@ namespace aspect::Postprocess
         const std::string point_file = path+"points-"+suffix+".csv";
         const std::string field_file = path+"fields-"+suffix+".csv";
         const std::string section_file = path+"sections-"+tag+".csv";
-        bool rewriting = false;
         std::string error;
-        if (rank==0)
-          try
-            {
-              // A previous writer may have stopped before writing its strip
-              // table. Check for its point file and the first surplus rank.
-              const std::string surplus = tag+"-r"+std::to_string(n_ranks);
-              rewriting = std::filesystem::exists(section_file) || std::filesystem::exists(point_file)
-                          || std::filesystem::exists(path+"points-"+surplus+".csv")
-                          || std::filesystem::exists(path+"fields-"+surplus+".csv")
-                          || std::filesystem::exists(path+"memory-"+surplus+".txt");
-            }
-          catch (const std::filesystem::filesystem_error &exc)
-            {
-              error = exc.what();
-            }
         const auto finish_file = [&error](std::ofstream &out, const std::string &filename)
         {
           // Opening, a buffered write, and the final flush can each fail.
@@ -166,7 +150,17 @@ namespace aspect::Postprocess
               }
           }
 
-        if (rewriting && error.empty())
+        // Preserve any surviving shards of the old layout if a writer fails.
+        const auto failed_rank = Utilities::MPI::min(error.empty() ? n_ranks : rank, comm);
+        if (failed_rank < n_ranks)
+          {
+            error = Utilities::MPI::broadcast(comm, error, failed_rank);
+            AssertThrow(false, ExcMessage("Growing fault history writer rank "+std::to_string(failed_rank)+": "+error));
+          }
+
+        // A prior frame may contain only a high-numbered rank. Inspect this
+        // clock's actual files after all new writers have successfully closed.
+        if (rank==0)
           try
             {
               remove_obsolete_files(path, tag, n_ranks, !history.friction_pressures.stations.empty(),
@@ -176,12 +170,8 @@ namespace aspect::Postprocess
             {
               error = exc.what();
             }
-        const auto failed_rank = Utilities::MPI::min(error.empty() ? n_ranks : rank, comm);
-        if (failed_rank < n_ranks)
-          {
-            error = Utilities::MPI::broadcast(comm, error, failed_rank);
-            AssertThrow(false, ExcMessage("Growing fault history writer rank "+std::to_string(failed_rank)+": "+error));
-          }
+        error = Utilities::MPI::broadcast(comm, error, 0);
+        AssertThrow(error.empty(), ExcMessage("Growing fault history cleanup on rank 0: "+error));
       }
     return {"Growing fault","native section and point history"};
   }
