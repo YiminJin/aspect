@@ -1,8 +1,126 @@
 # Phase-field fault working record
 
+## Interface repairs after 6B — Stage B
+
+Stage B is ready for review on the Stage A baseline `10d6f7bac`. The [small growing-fault input](../../benchmarks/growing_fault/prescribed_compression.prm) includes the unchanged 8 × 4 nine-strip fixture. The [guide](IMPLEMENTATION.md#change-fault-compression-in-the-small-growing-example) describes the input line, accepted tensor files and effective solvers. Stage C is the next interface assignment after review.
+
+### What the scientist can now do
+
+**Change frictional compression independently of the pressure datum.** Line 9 of the small input sets `Material model / Growing fault / Prescribed fault compression` in Pa. The archived input used the top-level `set Surface pressure = 200`. The small input clears that inherited spelling and sets compression to 250 Pa. In the first accepted step, an independent evaluation of signed RSF at the half-step age matched every published strip resistance to within 1e−10 Pa.
+
+| At 5 ms, one rank | Strip 0 signed rate (m/s) | Strip 0 resistance (Pa) |
+| --- | ---: | ---: |
+| Prescribed compression 200 Pa | 7.347445843285936e−14 | 49.998750051839593 |
+| Prescribed compression 250 Pa | 2.621345769163710e−15 | 49.998750052499005 |
+| Compression 200 Pa, Q1 datum shifted +100 Pa | 7.347445843285853e−14 | 49.998750051839572 |
+
+The compression increase slowed strip 0 by a factor of 28.0293. In the gauge control every one of the 128 cell-local pressure coefficients shifted by 100 Pa within 5.69e−13 Pa. The largest gauge-induced rate change on strips 0–7 was 8.33e−28 m/s. At the prospectively turning strip 8 the angle differed by 4.72e−7 rad, the force by 2.11e−7 Pa and the rate by 1.07e−20 m/s on one rank. This is the strip with the previously measured flat score maximum. The gauge test establishes the independence of the friction input and the resolved creep at fixed orientation. With damping 1.1 Pa s/m the stage-duration check accepted 5 ms at 200 Pa and cut 5 ms to 2.5 ms at 250 Pa, as predicted by the stage-age monotonicity bound.
+
+![Signed rates by material strip at 5 ms](results/interface-stage-b/compression.png)
+
+*Signed slip rate in m/s at the first accepted step for all nine strips. The open circles show the measured response to the gauge change at 200 Pa. The squares show the response to raising prescribed compression to 250 Pa.*
+
+**Configure the fracture model independently of reporting.** `Phase field` owns the four settings for toughness, length, law and phase composition. The material calibration, midpoint phase rows, prospective direction search and optional reporter use the one configured `SurfaceEnergyModel`. The canonical and legacy settings and the reporter on/off controls gave byte-identical 5 ms native point tables. A renamed phase field (`damage`) matched the original returned state. Raising toughness from 26.6666666667 to 40 J/m² changed the native response and the accepted discrete fracture energy from 6.545712633853 to 9.818568950768 J/m. Coupled growth diagnosed AT2 and CZM. Independent affine phase-only runs using each spelling gave the following energies in J/m. Two ranks owned eight cells each.
+
+| Law | Local, one rank | Gradient, one rank | Total, one rank | Total, two ranks |
+| --- | ---: | ---: | ---: | ---: |
+| AT1 | 3.000000000000000 | 0.1171874999999999 | 3.117187500000000 | 3.117187500000000 |
+| AT2 | 2.333333333333334 | 0.1562499999999999 | 2.489583333333334 | 2.489583333333333 |
+| CZM | 3.607512043416293 | 0.0994718394324345 | 3.706983882848727 | 3.706983882848730 |
+
+**Set a separate DG phase penalty.** The optional `Discretization / Stabilization parameters / Phase discontinuous penalty` inherits the existing temperature penalty by default. On the accepted Bernstein Q2 field the independent check integrates the jump energy once per interior face. With the normal pointing from minus to plus, its integrand is $G_c\ell/c_0\,[9\gamma [d]^2/\Delta x-(\nabla d^-+\nabla d^+)\cdot n\,[d]]$ on this square mesh. The check reconstructs both traces and physical gradients from the coefficients. Gauss(4) is exact for these face products. The solver assembles the two test sides with mapped Gauss(5) and uses the resulting rows in the phase obstacle and energy ledger.
+
+| Effective phase penalty | Net face contribution (J/m) | Volume + face energy (J/m) | Absolute difference from ledger (J/m) |
+| ---: | ---: | ---: | ---: |
+| 10 | 1.594782677035 | 6.545712633854 | 4.35e−14 |
+| 20 | 3.629281366759 | 8.631607494145 | 2.84e−14 |
+
+Changing the temperature setting with the phase penalty held fixed preserved the returned fields. Substituting the other penalty in the independent integral missed the ledger by more than 0.1 J/m at fixed coefficients. For comparison, the volume-only reporter at penalty 10 measured 4.950929956819 J/m.
+
+**Read the accepted physical stress.** The installed `growing fault history` postprocessor reads the accepted material point history by CellId and quadrature index after the simulator accepts a step. At 5 ms on rank zero, cell `0_0:`, point 0, the 200 Pa run gave $\tau_{xy}=+75.978862635150577$ Pa. The CSV also carries xx, yy and zz in the same spatial, tension-positive convention. Across the three loaded endpoints, the largest residual in the independent four-component native Maxwell rate identity was 7.46e−17 /s. Reversing the slip sign gave 0.03613 /s at 15 ms. The installed mature control compared all three named `fault_tau_*` outputs with the accepted DG coefficients at 36 graphical points. At 12.5 ms its shear was +0.0325 Pa and the ordinary compression-positive viscous visualization showed −0.0121783 Pa. The [guide](IMPLEMENTATION.md#read-stress-at-an-accepted-endpoint) gives the paths, component signs and the time-level requirement for total stress.
+
+**Identify the active solver.** Startup reported ASPECT block AMG in the mature run and the MPI-rank-zero bordered UMFPACK solve in both growing runs. Selecting either block AMG or block GMG for the growing layout matched every accepted field, native point, strip and balance column at 5 ms. The direct Stokes layout failed with the separate-block diagnostic. The mature model diagnosed GMG and direct selection. A multigrid operator for the growing equations remains separate work.
+
+### What changed for an existing input
+
+The old 200 and 250 Pa inputs matched their canonical counterparts. Equal spellings are accepted. Conflicting explicit spellings, including a legacy surface pressure of zero and explicit phase values equal to the historical defaults, fail at configuration. Empty entries inherit the other spelling before physical defaults are applied. Ordinary ASPECT continues to use a numeric zero surface pressure by default. The original mature background compression and resolved traction path is unchanged.
+
+The necessary shared ASPECT edits are in `Parameters::declare_parameters` and `parse_parameters` for omission-aware surface pressure and the independent phase penalty, and `load_and_check_critical_parameters` for an old growing checkpoint. The stock reader compared raw surface pressure before the material could compare its checkpoint signature. On the midpoint route with normalization disabled the material now checks the effective compression in its original slot, along with the effective phase penalty and toughness. The wire format is unchanged. A Stage A checkpoint of the accepted 5 ms state (slot 02, next solve at 10 ms) continued under canonical input with temperature penalty 20 and phase penalty 10. At 10 and 15 ms its fields, tensors, strips and ledgers matched the old uninterrupted output byte for byte. Independent changes to compression, toughness and phase penalty each failed at load. A fault-free surface-normalized box matched the old statistics and all 64 printed pressures at default 0 Pa and at explicit 100 Pa. An ordinary 100 Pa checkpoint continued at 100 Pa and rejected a change to 0 Pa.
+
+Fresh frozen two-rank runs used one thread per rank. All nine-strip donor frames passed through 15 ms, ending at 1.69302306477e−4 m² of integrated signed slip. For 18 strips, the common parent and both step schedules reproduced the existing strict audit directory byte for byte. The audit used fresh target trajectories, archived donor trajectories and retained returned-row measurements. It exited 1 with the four documented strip-15 angle comparisons, each 2.36894412808e−7 rad. The original tolerances stand. The affine AT2 CTest and the Release unit suite passed (2,566 assertions in 59 cases). This Stage B qualification used Release.
+
+### Which checks would fail on the old code
+
+Start the source review at `source/material_model/growing_fault.cc` for compression and the checkpoint signature, `source/phase_field/surface_energy_model.cc` for the shared functional, and `source/phase_field/midpoint_fracture.cc` for the face operator. The growing stress exporter is in `benchmarks/growing_fault/growing_fault_checks.cc`. Stage B adds no numerical FE state or replicated history.
+
+The Stage A binary rejected `Prescribed fault compression` as an undeclared entry. It only knew the postprocessing subsection for the functional, always inherited the temperature penalty, and had no observation-only `growing fault history` selection or startup backend diagnostic. The five implementation commits are `711ec07b8` (compression and restart), `0d84a299a` (shared functional), `ac23fd734` (effective phase penalty), `6a873bafc` (accepted history exporter and small input), and `b3a67a9b2` (solver identification). The old binary used for the comparison had SHA-256 `f20056135169791e6e26749bede25f10bf3c966e18b2ebc27156e461bc3da8e4`. Its matching growing-fault plugin had SHA-256 `8e634f5aae975c41c19080fc919d560d6026819f3f83afcd5a3ab83cec8b97e9`. Use that pair or a separate build of the Stage A source. Output destinations below must be fresh.
+
+~~~bash
+W=$PWD
+B=$W/build-6b/release
+D=$W/build-interface-b
+F=$D/final
+G=benchmarks/growing_fault
+P=$B/$G/libgrowing_fault_checks.release.so
+M=$B/$G/timestep/libmidpoint_fields.release.so
+O=$D/baseline/aspect-release
+OP=$D/baseline/$G/libgrowing_fault_checks.release.so
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+mkdir -p "$F"
+cmake --build "$B" -j4 --target aspect growing_fault_checks midpoint_fields layered_moving_fault
+python3 "$G/run.py" "$O" "$OP" "$D/old-nine" --ranks 1 --principal-only
+for group in compression functional faces backend restart; do
+  python3 "$G/check_physical_inputs.py" "$B/aspect" "$P" "$F/$group" "$group" \
+    --pressure-plugin build-4c/tests/libpressure_constraint.release.so --old-output "$D/old-nine/principal/output"
+done
+bash "$G/check_surface_pressure.sh" "$O" "$B/aspect" tests/simpler_box.prm "$F/stock"
+ctest --test-dir "$B" -R phase_field_surface_energy_at2 --output-on-failure
+"$B/aspect" --test
+R=refactoring/phase-field-fault/results/interface-stage-b
+MPLCONFIGDIR=/tmp/pf-rsf-interface-b-mpl python3 "$R/plot_compression.py" "$F/compression" "$R/compression.png"
+~~~
+
+The pressure plugin is the repository's `tests/pressure_constraint.cc` connector. It sets the physical pressure DoF to 100 Pa. The final named-field extension to the functional check also ran in a fresh `$F/functional-named` directory. For the frozen comparisons use the following commands.
+
+~~~bash
+python3 "$G/run.py" "$B/aspect" "$P" "$F/nine" --principal-only --mpiexec "$MPI"
+python3 "$G/compare.py" build-5a-repair/donor-two/output "$F/nine/principal/output"
+python3 "$G/timestep/run.py" parent "$F/strip18/parent" "$M" --aspect "$B/aspect" --plugin "$P" --launcher "$MPI"
+python3 "$G/timestep/run.py" coarse "$F/strip18/coarse" "$M" --aspect "$B/aspect" --plugin "$P" --launcher "$MPI" --parent "$F/strip18/parent/output"
+python3 "$G/timestep/run.py" half "$F/strip18/half" "$M" --aspect "$B/aspect" --plugin "$P" --launcher "$MPI"
+for case in parent coarse half; do ln -s "$W/build-5b/donor-$case" "$F/strip18/donor-$case"; done
+rc=0
+python3 "$G/timestep/audit.py" "$F/strip18" build-5a-repair/reference "$F/strict" --returned-rows build-5b/rows || rc=$?
+test "$rc" = 1 && diff -qr "$F/strict" build-5b/closeout/final-audit
+~~~
+
+For the installed run, the existing Release configuration had examples enabled and an absolute plugin installation prefix. Staging both components under a fresh `DESTDIR` kept the previous installation intact.
+
+~~~bash
+S=$(mktemp -d /tmp/pf-rsf-interface-b-XXXXXX)
+prefix=$(sed -n 's/^CMAKE_INSTALL_PREFIX:PATH=//p' "$B/CMakeCache.txt")
+I=$S$prefix
+for component in runtime examples; do
+  DESTDIR="$S" cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -DCMAKE_INSTALL_COMPONENT="$component" -P "$B/cmake_install.cmake"
+done
+DESTDIR="$S" cmake --install "$B/$G" --component examples
+cd "$S"
+mkdir example
+cp "$I/$G/onecut.prm" "$I/$G/prescribed_compression.prm" example/
+ln -s "$I/$G/libgrowing_fault_checks.release.so" example/
+(cd example && "$I/bin/aspect-release" prescribed_compression.prm)
+cmp example/output-prescribed-compression/sections-0001.csv "$F/compression/250/output/sections-0001.csv"
+python3 "$I/$G/check_physical_inputs.py" "$I/bin/aspect-release" "$I/$G/libgrowing_fault_checks.release.so" "$S/final-history" history
+python3 "$I/benchmarks/fixed_fault/check_stress_output.py" "$I/bin/aspect-release" "$S/final-mature"
+python3 "$I/benchmarks/phase_field_surface_energy/check.py" "$I/bin/aspect-release" "$S/final-energy"
+python3 "$I/benchmarks/phase_field_surface_energy/check.py" "$I/bin/aspect-release" "$S/final-energy-mpi" --mpi "$MPI"
+cd "$W"
+~~~
+
 ## Interface repairs after 6B — Stage A
 
-**Stage A is ready for numerical review.** The next assignment is Stage B after review.
+**Stage A numerical closeout.**
 
 Reviewed and implemented from `cde1a89fb04c6fbd2c7fb68514cefa1fa94579da`. The retained 6B Release executable prints `282617e22` and has SHA-256 `7008c034b3723e7f5dfebb204fa5211f1cdf1f8d7fd9da0ec28a9f233cca5647`. The two commits have identical production source and headers. The original input files, donor data and tolerance tables supplied all controls. Each reproduction used fresh output directories. The local author instructions and the assignment arrived separately from the numerical patch.
 

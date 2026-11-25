@@ -1,6 +1,8 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**Stage A of the post-6B interface repairs is ready for review.** It covers the growing wall clock, physical seed tip and mature trace support on restart. [Measured results and replay commands](STATUS.md#interface-repairs-after-6b--stage-a). Stage B awaits the author’s review.
+**Stage B of the post-6B interface repairs is ready for review.** Growth has prescribed frictional compression, a shared phase functional, an independent phase face penalty, installed native stress output and startup solver identification. [Input and guide](IMPLEMENTATION.md#change-fault-compression-in-the-small-growing-example) · [Stage B results and commands](STATUS.md#interface-repairs-after-6b--stage-b). Stage C follows architecture review.
+
+**Stage A** repaired the growing wall clock, physical seed tip and mature trace support on restart. [Numerical closeout](STATUS.md#interface-repairs-after-6b--stage-a).
 
 **Increment 6B consolidates the installed paths for architecture review.** Read the [implementation and parameter guide](IMPLEMENTATION.md) and the [installation and cost record](STATUS.md#increment-6b). The three paper cases have separate scientific qualification requirements.
 
