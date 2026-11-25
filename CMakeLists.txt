@@ -977,6 +977,8 @@ install(FILES "${CMAKE_BINARY_DIR}/AspectConfigVersion.cmake"
 # set up compiler flags, include paths, etc. to compile an
 # ASPECT plugin.
 # Config for the build dir:
+set(PLUGIN_INCLUDE_DIRS ${ASPECT_INCLUDE_DIRS})
+set(PLUGIN_WORLD_BUILDER_DIR "${WORLD_BUILDER_SOURCE_DIR}")
 set(CONFIG_DIR "${CMAKE_BINARY_DIR}")
 configure_file(
   ${CMAKE_SOURCE_DIR}/cmake/AspectConfig.cmake.in
@@ -987,7 +989,17 @@ install(FILES ${CMAKE_BINARY_DIR}/forinstall/AspectConfig.cmake
         DESTINATION "lib/cmake/Aspect/")
 
 
-# Config for the install dir:
+# Installed plugins must see the installed SDK, including its generated headers.
+list(REMOVE_ITEM PLUGIN_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/include" "${CMAKE_BINARY_DIR}/include/"
+     "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/contrib/catch" "${WORLD_BUILDER_SOURCE_DIR}/include/")
+list(PREPEND PLUGIN_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
+set(PLUGIN_WORLD_BUILDER_DIR "${CMAKE_INSTALL_PREFIX}")
+if(ASPECT_WITH_WORLD_BUILDER)
+  install(DIRECTORY "${WORLD_BUILDER_SOURCE_DIR}/include/" DESTINATION include COMPONENT includes)
+  foreach(dir world_builder world_builder_release)
+    install(DIRECTORY "${CMAKE_BINARY_DIR}/${dir}/include/" DESTINATION include COMPONENT includes OPTIONAL)
+  endforeach()
+endif()
 set(CONFIG_DIR "${CMAKE_INSTALL_PREFIX}/bin")
 configure_file(
   ${CMAKE_SOURCE_DIR}/cmake/AspectConfig.cmake.in
