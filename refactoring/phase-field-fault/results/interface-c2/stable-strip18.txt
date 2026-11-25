@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/home/ein/repository/aspect-pf-rsf/benchmarks/growing_fault/timestep/audit.py", line 463, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/ein/repository/aspect-pf-rsf/benchmarks/growing_fault/timestep/audit.py", line 389, in main
+    raise ValueError(f'Row recorder changed physical output {f}')
+ValueError: Row recorder changed physical output /home/ein/repository/aspect-pf-rsf/build-interface-c2/score-frozen/strip18/parent/output/balance-0001.csv
+Only in build-5b/closeout/final-audit: coarse-2.csv
+Only in build-5b/closeout/final-audit: coarse-window.csv
+Only in build-5b/closeout/final-audit: half-2.csv
+Only in build-5b/closeout/final-audit: half-3.csv
+Only in build-5b/closeout/final-audit: half-window.csv
+Only in build-5b/closeout/final-audit: intervals.json
+Only in build-5b/closeout/final-audit: parent-1.csv
+Only in build-5b/closeout/final-audit: separation.csv

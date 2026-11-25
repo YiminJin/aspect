@@ -1,0 +1,7 @@
+  File "/home/ein/repository/aspect-pf-rsf/benchmarks/growing_fault/compare.py", line 74, in frozen
+    compare_values(old, new, name, 1e-7 if name=='beta' else 1e-11, 1e-7)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ein/repository/aspect-pf-rsf/benchmarks/growing_fault/compare.py", line 41, in compare_values
+    raise ValueError(f'{column} at {keys[i]}: reference {left[i]:.17g}, target {right[i]:.17g}, '
+                     f'difference {right[i]-left[i]:.5g}, tolerance {atol+rtol*abs(left[i]):.5g}')
+ValueError: ds at (8,): reference 0.25074191554565439, target 0.25074188693430988, difference -2.8611e-08, tolerance 2.5084e-08
