@@ -4,11 +4,60 @@
 #include <numeric>
 #include <aspect/simulator.h>
 #include <aspect/gravity_model/interface.h>
+#include <deal.II/base/parsed_function.h>
 #include <deal.II/dofs/dof_tools.h>
+#include <deal.II/numerics/vector_tools_constraints.h>
+#include <deal.II/numerics/vector_tools_boundary.h>
 #include <deal.II/lac/sparse_direct.h>
 
 namespace aspect::GrowingFault
 {
+  template <int dim>
+  void parse_midpoint_wall_velocity(ParameterHandler &prm, Parameters<dim> &parameters)
+  {
+    prm.enter_subsection("Boundary velocity model");
+    const auto entries = Utilities::split_string_list(prm.get("Prescribed velocity boundary indicators"));
+    bool uses_function = false;
+    for (const auto &entry : entries)
+      {
+        const auto parts = Utilities::split_string_list(entry, ':');
+        AssertThrow(parts.size() == 2, ExcMessage("Expected a boundary indicator and velocity plugin separated by ':'."));
+        AssertThrow(parts[1] == "function" || parts[1] == "zero velocity",
+                    ExcMessage("Growing fault cannot evaluate wall velocity plugin '" + parts[1] +
+                               "' at the attempted midpoint."));
+        uses_function |= parts[1] == "function";
+      }
+    if (uses_function)
+      {
+        prm.enter_subsection("Function");
+        const auto coordinates = Utilities::Coordinates::string_to_coordinate_system(prm.get("Coordinate system"));
+        auto function = std::make_shared<Functions::ParsedFunction<dim>>(dim);
+        function->parse_parameters(prm);
+        const double unit = parameters.convert_to_years ? year_in_seconds : 1.;
+        // Growth requires a Cartesian box, for which the release velocity
+        // function rejects spherical unit vectors. Its arguments may still
+        // be expressed in depth or spherical coordinates.
+        parameters.midpoint_wall_velocity =
+          [function, coordinates, unit](const GeometryModel::Interface<dim> &geometry,
+                                        const Point<dim> &position, const double seconds)
+        {
+          if (function->get_time() != seconds/unit)
+            function->set_time(seconds/unit);
+          const auto point = geometry.cartesian_to_other_coordinates(position, coordinates);
+          const auto arguments = Utilities::convert_array_to_point<dim>(point.get_coordinates());
+          Tensor<1,dim> velocity;
+          for (unsigned int d=0; d<dim; ++d)
+            velocity[d] = function->value(arguments,d)/unit;
+          return velocity;
+        };
+        prm.leave_subsection();
+      }
+    prm.leave_subsection();
+  }
+
+  template void parse_midpoint_wall_velocity(ParameterHandler &, Parameters<2> &);
+  template void parse_midpoint_wall_velocity(ParameterHandler &, Parameters<3> &);
+
   namespace
   {
     Stress plane_strain(const SymmetricTensor<2,2> &d)
@@ -18,6 +67,44 @@ namespace aspect::GrowingFault
       embedded[1][1]=d[1][1];
       embedded[0][1]=d[0][1];
       return deviator(embedded);
+    }
+
+    // Interpolate at the attempted midpoint in the same boundary order and
+    // component masks as Simulator::compute_current_velocity_boundary_constraints.
+    // Leave the ordinary boundary manager and its endpoint clock untouched.
+    AffineConstraints<double> midpoint_velocity_constraints(const SimulatorAccess<2> &sim, const double time)
+    {
+      const auto &manager = sim.get_boundary_velocity_manager();
+      const auto &intro = sim.introspection();
+      AffineConstraints<double> walls;
+      const auto &mapping = sim.get_mapping();
+      const auto &dofs = sim.get_dof_handler();
+      for (const auto id : manager.get_zero_boundary_velocity_indicators())
+        VectorTools::interpolate_boundary_values(mapping, dofs, id, Functions::ZeroFunction<2>(intro.n_components),
+                                                 walls, intro.component_masks.velocities);
+      const auto &tangential = manager.get_tangential_boundary_velocity_indicators();
+      if (!tangential.empty())
+        VectorTools::compute_no_normal_flux_constraints(dofs, intro.component_indices.velocities[0], tangential,
+                                                        walls, mapping);
+
+      const auto &ids = manager.get_active_plugin_boundary_indicators();
+      const auto &names = manager.get_active_plugin_names();
+      for (const auto id : manager.get_prescribed_boundary_velocity_indicators())
+        {
+          unsigned int functions = 0;
+          for (unsigned int i=0; i<names.size(); ++i)
+            if (ids[i] == id && names[i] == "function")
+              ++functions;
+          Utilities::VectorFunctionFromVelocityFunctionObject<2> velocity(intro.n_components,
+                                                                          [&](const Point<2> &point)
+          {
+            return functions == 0 ? Tensor<1,2>() :
+                   functions * sim.get_parameters().midpoint_wall_velocity(sim.get_geometry_model(), point, time);
+          });
+          VectorTools::interpolate_boundary_values(mapping, dofs, id, velocity, walls, manager.get_component_mask(id));
+        }
+      walls.close();
+      return walls;
     }
 
   }
@@ -58,18 +145,21 @@ namespace aspect::GrowingFault
     for (const auto &[row,value]:fracture.mass) mass[phase_begin+row]=value;
     Utilities::MPI::sum(mass,comm,mass);
 
+    const double parent_time = m.history().step == 0 ? sim.get_parameters().start_time : m.history().time;
+    const auto walls = midpoint_velocity_constraints(sim, parent_time+h);
     const auto &constraints=sim.get_current_constraints();
     const auto boundary=DoFTools::extract_boundary_dofs(sim.get_dof_handler(),intro.component_masks.velocities);
     unsigned int invalid=0;
     for (const auto i:boundary)
-      if (intro.index_sets.system_partitioning[0].is_element(i)) invalid|=!constraints.is_constrained(i);
+      if (intro.index_sets.system_partitioning[0].is_element(i)) invalid|=!constraints.is_constrained(i) || !walls.is_constrained(i);
     std::map<Index,double> owned_constraints;
     for (const auto &line:constraints.get_lines())
       {
         if (line.index<nv && intro.index_sets.system_partitioning[0].is_element(line.index))
           {
             invalid|=!line.entries.empty();
-            owned_constraints[line.index]=h*line.inhomogeneity;
+            const double velocity = walls.is_constrained(line.index) ? walls.get_inhomogeneity(line.index) : line.inhomogeneity;
+            owned_constraints[line.index]=h*velocity;
           }
         if (line.index>=nv && line.index<phase_begin && intro.index_sets.system_partitioning[1].is_element(line.index-nv))
           {

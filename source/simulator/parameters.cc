@@ -25,6 +25,7 @@
 #include <aspect/melt.h>
 #include <aspect/volume_of_fluid/handler.h>
 #include <aspect/simulator/solver/stokes_matrix_free.h>
+#include <aspect/simulator/solver/midpoint_fault.h>
 #include <aspect/newton.h>
 #include <aspect/mesh_deformation/free_surface.h>
 
@@ -2495,6 +2496,9 @@ namespace aspect
     prm.leave_subsection ();
 
     explicit_composition_inflow = Transport::parse_explicit_composition_parameters(prm, *this);
+    if (std::find(compositional_field_methods.begin(), compositional_field_methods.end(),
+                  AdvectionFieldMethod::midpoint_fault_phase) != compositional_field_methods.end())
+      GrowingFault::parse_midpoint_wall_velocity(prm, *this);
 
     // then, finally, let user additions that do not go through the usual
     // plugin mechanism, declare their parameters if they have subscribed

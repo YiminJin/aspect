@@ -1,5 +1,51 @@
 # Phase-field fault working record
 
+## Interface repairs after 6B — Stage A
+
+Reviewed and implemented from `cde1a89fb04c6fbd2c7fb68514cefa1fa94579da`. The retained 6B Release executable prints `282617e22` and has SHA-256 `7008c034b3723e7f5dfebb204fa5211f1cdf1f8d7fd9da0ec28a9f233cca5647`. The two commits have identical production source and headers. The original input files, donor data and tolerance tables supplied all controls. Each reproduction used fresh output directories. The local author instructions and the assignment arrived separately from the numerical patch.
+
+### Wall loading at the attempted midpoint
+
+A scientist can apply a time-dependent velocity function on a growing-fault wall. The existing nine-strip input supplies the spatial load. Multiplying both velocity components by `min(t/.005,1)` in SI units supplies the 5 ms ramp. On the reviewed executable this produced the same native stress and bulk energy as the constant full load.
+
+| First accepted state, 5 ms | Bulk energy (J/m) | Largest native absolute xy shear stress (Pa) |
+|---|---:|---:|
+| Constant half load | 0.002724863755109 | 37.9894330100 |
+| Ramp, reviewed 6B | 0.01089945502034 | 75.9788659625 |
+| Ramp, Stage A | 0.002724863755109 | 37.9894330100 |
+| Constant full load | 0.01089945502034 | 75.9788659625 |
+
+`Simulator::solve_single_advection_iterated_newton_stokes` dispatches the selected phase to `advance_midpoint`. At each attempt `MidpointSystem` prescribes the Q2 wall displacement $a_D=h v_D(t_n+h)$, $h=\Delta t/2$, using the initial or last accepted physical clock. The endpoint fields and native history go through the existing coupled solve and acceptance hook. The release velocity manager updates its functions at the simulator clock. Its public interface takes only a boundary ID and a point. The shared-core addition in `include/aspect/parameters.h` and `source/simulator/parameters.cc` holds and parses one independent function only for the midpoint phase method, following the explicit-composition inflow precedent. Boundary IDs, component masks and prescribed-value interpolation come from the ordinary manager and deal.II. The solver retains interior velocity constraints and the pressure datum in Pa scaled internally by $G$. A selected plugin without a supported midpoint evaluator fails at parameter parsing.
+
+The independent check computes the affine wall velocity in the material frame at each mapped boundary node. It reconstructs the boundary-only Q2 lift and Q1 pressure in each cell and integrates $\Delta t \sum_q J_q (\tau_{mid}:\epsilon(v_{lift})-p\,\nabla\cdot v_{lift})$, with native midpoint stress from the two accepted endpoint tensors. At 5 ms the old ramp missed displacement by 1.99491e−5 m and work by 0.00544986 J/m. The repaired ramp missed by 4.34e−21 m and 8.67e−19 J/m, with external work 0.002724931881415 J/m. The years input gave the same energy. A 10 ms attempt starting at 5 ms was solved, rejected, cut to 5 ms and repeated at that duration. The clean and retried fields passed the keyed comparisons. Maximum native stress and work differences at the returned endpoint were both zero. ASPECT's endpoint clocks differed by 1.73e−18 s. The checker also rejected an incomplete component mask and the unsupported ASCII wall plugin. The independent pressure control published 100 Pa at DoF 306 and retained the interior actuator's 1.27157e−9 J/m work with stationary walls.
+
+![Wall loads at the first accepted endpoint](results/interface-stage-a/wall-clock.png)
+
+*Bulk elastic energy per metre out of plane and maximum absolute native deviatoric xy stress at 5 ms. Both constant controls retain their values. The ramp reaches the half-load response when the prescribed displacement uses the midpoint velocity.*
+
+Commands from the worktree root. Each driver creates its own parameter files and refuses an existing destination. All scientific runs used one numerical thread per MPI rank. The wall and restart checks used one rank.
+
+~~~bash
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+B=$PWD/build-6b/release
+D=$PWD/build-interface-a
+OLD=/tmp/pf-rsf-6b-arSr9jxf/install
+G=benchmarks/growing_fault
+P=$B/$G/libgrowing_fault_checks.release.so
+OP=$OLD/$G/libgrowing_fault_checks.release.so
+M=$B/$G/timestep/libmidpoint_fields.release.so
+L=benchmarks/layered_moving_fault
+LP=$B/$L/liblayered_moving_fault.release.so
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+mkdir -p "$D/final"
+cmake --build "$B" -j3 --target aspect growing_fault_checks midpoint_fields layered_moving_fault
+python3 "$G/check_wall_clock.py" "$OLD/bin/aspect" "$OP" "$D/before-wall"  # expected exit 1 at ramp
+python3 "$G/check_wall_clock.py" "$B/aspect" "$P" "$D/final/wall"
+python3 "$G/check_repairs.py" "$B/aspect" "$P" "$D/constraints" constraints --pressure-plugin build-4c/tests/libpressure_constraint.release.so
+R=refactoring/phase-field-fault/results/interface-stage-a
+MPLCONFIGDIR=/tmp/pf-rsf-stage-a-mpl python3 "$R/plot_wall_clock.py" "$D/before-wall" "$D/final/wall" "$R/wall-clock.png"
+~~~
+
 ## Increment 6B
 
 **Consolidation is ready for review on the repaired 6A source at `282617e22`.** The [implementation guide](IMPLEMENTATION.md) follows an accepted step from each field method to its physical outputs. It maps the parameter choices to the supported dimensions, pressure datum, phase basis, crack law, retry and checkpoint rules. The three Sphinx parameter sections were regenerated from the installed, plugin-free energy case. The sole new build rule packages the existing coefficient observer with the scalar benchmark. This increment required no production C++ edit.

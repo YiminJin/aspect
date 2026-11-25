@@ -846,6 +846,11 @@ namespace aspect
     /** Prescribed inflow used by explicit compositions at the SSPRK3 stage time. */
     Transport::CompositionInflow<dim> explicit_composition_inflow;
 
+    /** Independent evaluator of the prescribed velocity function for the growing
+     * fault solver. The time argument is in seconds and the result is in m/s. */
+    std::function<Tensor<1,dim>(const GeometryModel::Interface<dim> &, const Point<dim> &, double)>
+    midpoint_wall_velocity;
+
     /**
      * Map from compositional index to a pair "particle property", "component",
      * where particle property is a string that can be mapped to one of the

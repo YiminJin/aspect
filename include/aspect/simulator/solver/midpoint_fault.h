@@ -6,6 +6,10 @@
 
 namespace aspect::GrowingFault
 {
+  /** Read the wall function for an independent midpoint clock. */
+  template <int dim>
+  void parse_midpoint_wall_velocity(ParameterHandler &, Parameters<dim> &);
+
   /** Validate the configured phase method against the top-level material
    * after plugin parsing, before any independent composition can be skipped. */
   template <int dim>
