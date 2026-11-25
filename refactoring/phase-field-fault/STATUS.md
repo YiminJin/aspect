@@ -2,7 +2,7 @@
 
 ## Increment 6A
 
-**Ready for review on pf-rsf.** The baseline is `0d605a75a`. Commit `044470d21` makes `explicit DG SSPRK3` an ordinary compositional field method. The following commit extracts the shared Stokes Picard iteration. For the parsing rule, read the method-list expansion in the first file. For both dispatch decisions, read `assemble_and_solve_composition()`, `solve_stokes_by_picard_iteration()` and its two callers in the second.
+**Closed on pf-rsf after the four review findings. Increment 6B consolidation is next.** The baseline is `0d605a75a`. Commit `044470d21` makes `explicit DG SSPRK3` an ordinary compositional field method. Commit `88977cc87` extracts the shared Stokes Picard iteration. For the parsing rule, read the method-list expansion in the first file. For both dispatch decisions, read `assemble_and_solve_composition()`, `solve_stokes_by_picard_iteration()` and its two callers in the second.
 
 ~~~text
 source/simulator/parameters.cc
@@ -26,16 +26,16 @@ The SSPRK3 operator, Maxwell response, section residual and accepted-state equat
 | Ordinary run | Result |
 | --- | --- |
 | Mixed 2-D, Release and Debug | At 0, 12.5 and 25 ms the two spellings gave **zero** difference in every keyed coefficient of both fields, with either field first. The maximum implicit/explicit differences at the two physical endpoints were 0.0001600393 and 0.0002158711. Release signed-tracer error against the strong-form oracle was 3.05e−16. The one-/two-rank differences were 1.39e−16 in Release and 1.67e−16 in Debug. Both ranks owned cells and the checker rejected an empty second owner. |
-| Setup, matrix and completion | In both orders the implicit field registered one volume, one boundary-face and one interior-face assembler and ran its implicit solve. The explicit field registered zero of each and made zero implicit solves. Six completion signals covered the two fields and three clocks, in order. Mixed diagonal nonzero counts were (324, 0), including explicit-first. Broadcast with a redundant legacy name agreed exactly with naming both tracers. Its group used (0, 0), compared with (324, 0) on the saved pre-6A executable. This measures allocated entries. |
+| Setup, matrix and completion | In both orders the implicit field registered one volume, one boundary-face and one interior-face assembler and ran its implicit solve. The explicit field registered zero of each and made zero implicit solves. Six completion signals covered the two fields and three clocks, in order. At each of 0, 12.5 and 25 ms, both mixed orders matched the measured all-implicit diagonal counts (324, 0) in Release and Debug. Broadcast with a redundant legacy name agreed exactly with naming both tracers. Its group used (0, 0), compared with (324, 0) on the saved pre-6A executable. This measures allocated entries. |
 | Rejections | Both incompatible legacy methods, a duplicate and an unknown name failed with the requested diagnostics. Canonical explicit selection rejected a nonzero reaction on the tracer before any physical publication. A reacting implicit companion still advanced. The compatibility suite retained its prescribed-DoF rejection, temperature-only prescription, Q2 velocity restriction and implicit Q7 control. |
 | Bounded phase and 3-D signed/phase slab | The bounded ridge, divergent/limited phase, stage inflow and retry controls passed. The 3-D upper-slab integrals were 0.18748774999999998 and −0.062512249999999991, absolute errors 2.78e−17 and 1.39e−17. Stage-weighted z-partition transfers were +0.0037375 and −0.0012625. All 162 coefficients per clock agreed between one and two ranks within 1.94e−16. Asymmetric-face and time-dependent inflow controls also passed. |
 | Checkpoints | A three-field checkpoint written with the old spelling resumed with the canonical methods and matched the uninterrupted 3-D run exactly. Repeating with the saved **pre-6A executable** as writer gave zero difference. Two-rank resumed vs serial uninterrupted differed by 1.05e−15. The genuine pre-basis 3-D writer's nodal continuation matched exactly, and the legacy-to-Bernstein reader rejected it. In 2-D the driver exercised known and ambiguous legacy metadata, both mismatch directions and a mixed-field basis swap. |
 | Fixed fault and transported physical stress | The direct Picard caller matched all homogeneous reference checks. Clean/retried physical history was identical at all three clocks, including all 36 displayed stress samples at the first endpoint. With transported stress the measured Stokes load was −0.29364437004440336 Pa m², analytic −0.29364437004440386, stale receiving-cell prediction −0.3084580370518121. Retried labels and stress matched exactly. |
-| Moving layered fault | At tolerance 0.001 the first returned bulk residual was 0.000751667 and the projection changed by 0.521772. The veto forced a second assembly. Published cell work error was 4.23e−15. The two physical endpoints passed the existing donor budgets, with zero clean/retry and clean/restart differences and 2.46e−14 maximum one-/two-rank difference. Using the canonical method and a completion subscriber on the retry, phase signalled once on attempt numbers 0, 1, 1, 2. Nonlinear completion counts were 13, 9, 7, 7. The 25 ms attempt was rejected. All nine accepted bulk, surface and load files matched the clean run byte for byte. |
-| Growing fault | On two ranks all three accepted nine-strip frames passed the donor comparison. Final integrated slip was 1.69302306477e−4 m². Independent final native Maxwell and cohesive rate defects were 8.76e−17 and 1.041e−17 per second. |
+| Moving layered fault | At tolerance 0.001 the first returned bulk residual was 0.000751667 and the projection changed by 0.521772. The veto forced a second assembly. Published cell work error was 4.23e−15. The two physical endpoints passed the existing donor budgets, with zero clean/retry and clean/restart differences and 2.46e−14 maximum one-/two-rank difference. Using the canonical method and a completion subscriber on the retry, phase signalled once on attempt numbers 0, 1, 1, 2. Nonlinear completion counts were 13, 9, 7, 7. The 25 ms attempt was rejected. All nine accepted bulk, surface and load files matched the clean run byte for byte. These files verify accepted state. The signal counts measure phase and nonlinear-solver completions. |
+| Growing fault | The original 6A verification ran the nine-strip Newton case afresh on two ranks. All three accepted frames passed the donor comparison. Final integrated slip was 1.69302306477e−4 m². Independent final native Maxwell and cohesive rate defects were 8.76e−17 and 1.041e−17 per second. |
 | Stock feature-off Picard and matrix layout | Five of six scoped Release CTests passed. The stock per-iteration screen comparison still differs from its checked-in reference in the Debug/Release library suffix and near-zero top pressure (final −2.984e−16 Pa here, +1.318e−16 Pa in the reference). Running the same input and solver-history subscriber on the saved and rebuilt executables with identical relative output paths gave byte-identical statistics, nine residuals, nine linear-solver reports and five successful nonlinear notifications with iteration counts 5, 1, 1, 1, 1. The stock matrix-layout CTest passed, and its before/after block counts and statistics agreed exactly. |
 
-The retained 5B strict audit again exited 1 with precisely the four strip-15 angle failures. Its output directory matched the Increment 5 closeout tables byte for byte. This was a replay on the frozen outputs. Example 2 still requires timestep-converged physical front advance. The installed reproduction, resource measurements, final guide and per-example qualification survey belong to 6B after author review. Regional gravity remains a separate qualification.
+The retained 5B strict audit again exited 1 with precisely the four strip-15 angle failures. Its output directory matched the Increment 5 closeout tables byte for byte. This was a replay on the frozen outputs. Example 2 still requires timestep-converged physical front advance. The installed reproduction, resource measurements, final guide and per-example qualification survey belong to 6B. Regional gravity remains a separate qualification.
 
 ### Reproduction
 
@@ -56,10 +56,6 @@ L=$W/build-4c-closeout/plugin/liblayered_moving_fault.release.so
 G=$W/build-5a/plugin/libgrowing_fault_checks.release.so
 MPI=/opt/openmpi/5.0.6/bin/mpirun
 export ASPECT_SOURCE_DIR="$W" DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MPLCONFIGDIR="$D/mpl"
-# Save the existing Release executable and its observer libraries before rebuilding.
-mkdir -p "$D/baseline"
-cp "$B" "$D/baseline/"
-cp build-4c/tests/lib{explicit_dg_compositions,postprocess_iterations_iterated_Stokes}.release.so "$D/baseline/"
 cmake --build build-slice --target aspect -j4
 cmake --build build-slice-debug --target aspect -j2
 cmake -S tests -B "$T" -DAspect_DIR="$W/build-slice" -DASPECT_BINARY="$B" -DCMAKE_BUILD_TYPE=Release -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
@@ -86,17 +82,82 @@ python3 -B "$N/timestep/audit.py" build-5b build-5a-repair/reference "$D/strict5
 diff -qr "$D/strict5b" build-5b/closeout/final-audit
 ~~~
 
-The matched baseline executable's SHA-256 was `8769c98b64923906964379ef78917567eb93edc40da93b9d38765b187184022d`. For the additional binary-to-binary restart, use the same 3-D slab driver settings as `seed-bernstein` with the saved executable and matching probe, copy that output as the resume parent, and run `continued-bernstein` with the current executable. Compare all clocks and coefficients with `direct-bernstein`. For the moving retry count, append the canonical methods `static, static, static, explicit DG SSPRK3` and an empty legacy list to the retry input, load the coefficient and nonlinear-history plugins in addition to its existing libraries, and add `DG method setup` to its postprocessors. The extra local commands and their actual input files are retained under the run directory.
+The standalone CTest configuration initially omitted `ASPECT_BINARY` and its launcher failed before invoking ASPECT. The commands above use the corrected configuration. A first matched statistics comparison also counted the two different absolute visualization paths as a difference. Running both binaries in separate directories with the same relative output setting gave a direct file comparison. The original CTest reference and all physical tolerances are preserved.
+
+### Focused review closeout
+
+The cross-binary and matched Picard replays take the saved pre-6A executable and its corresponding test plugins as **read-only inputs**. The tracked driver checks the required SHA-256 digests before creating a run directory. It requires a different reader binary and a fresh destination outside the baseline. These digests identify the Release artifacts retained for the reviewed `0d605a75a` baseline. A clean checkout needs those artifacts supplied separately for the two historical comparisons.
+
+| Retained artifact | SHA-256 |
+| --- | --- |
+| Checkpoint writer | `8769c98b64923906964379ef78917567eb93edc40da93b9d38765b187184022d` |
+| DG coefficient probe loaded by the writer | `d3f170879cc20b33a1b84f99172ade28a255e1ac5328209b82edf6456ddae12b` |
+| Stock Picard material plugin loaded by the writer | `4e483bf9c9bdcd8434139ebdbbeb3041e5f332c33c6f61b7927316b789b1731e` |
+
+The old writer published through 0.02 s with the legacy selection. ASPECT writes the checkpoint after advancing its clock, so slot 03 contains that accepted parent and the next solve time, 0.03 s. The reader resumed from this snapshot and solved only step 3 with the canonical methods. Against a fresh uninterrupted run, all four clocks, both slab IDs, the three field names and their FE bases agreed. The maximum difference across 162 coefficients per clock was **zero**. Damage used quadratic Bernstein, and companion and tracer used nodal DGQ2. Substituting either the current executable or its current DG probe failed the corresponding digest check before the destination existed. Selecting the retained baseline directory as output also failed. All three baseline digests were identical before and after the checks.
+
+Both tracked replay commands reproduced the moving accepted-state and matched stock Picard results in the table above from fresh runs. The stock screen reference and its matched-baseline explanation are preserved.
+
+The all-implicit control supplied the expected counts separately at each clock. Substituting 162 for the measured 324 in the explicit-first run at 25 ms made the checker fail at that clock. The all-explicit group used (0, 0) throughout. In both orders the implicit companion still followed the all-implicit solution, while the signed tracer followed the independent explicit oracle. The guide check removed the fixture’s field-method, DG and mesh-refinement subsections, inserted the documented excerpt, and advanced the two-cell box to 12.5 ms. Both fields matched the original fixture exactly.
+
+The commands below use the variables in the reproduction block above. Run from the worktree root and choose a new output root on replay. The current ASPECT build and test plugins can be built as above. For a fresh build of the layered test plugin, configure with `cmake -S "$M" -B "$Q/layered-plugin" -DAspect_DIR="$W/build-slice" -DCMAKE_BUILD_TYPE=Release`, build that directory and set `L` to its shared library. Each historical input path may point to an independently supplied copy with the recorded digest.
 
 ~~~bash
-python3 -B "$D/resume-baseline.py"
-bash "$D/observe-retry.sh"
-bash "$D/matched-picard.sh"
-cmp "$D/matched-baseline/output/statistics" "$D/matched-current/output/statistics"
-cmp "$D/matched-baseline/iterations" "$D/matched-current/iterations"
+R=refactoring/phase-field-fault/replay_6a.py
+A=$W/build-6a/baseline
+Q=$W/build-6a-review
+mkdir "$Q"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+python3 -B "$R" restart "$B" "$T" "$Q/verified-restart" --writer "$A/aspect-release" --writer-plugins "$A"
+python3 -B "$R" stock-picard "$B" "$T" "$Q/verified-stock" --writer "$A/aspect-release" --writer-plugins "$A"
+python3 -B "$R" moving-retry "$B" "$T" "$Q/verified-retry" --layered-plugin "$L"
+python3 -B "$R" guide "$B" "$T" "$Q/verified-guide"
+python3 -B "$S/check.py" "$B" "$T" "$Q/mixed-release" --only mixed --mpiexec "$MPI"
+python3 -B "$S/check.py" "$BD" "$TD" "$Q/mixed-debug" --only mixed --mpiexec "$MPI"
 ~~~
 
-The standalone CTest configuration initially omitted `ASPECT_BINARY` and its launcher failed before invoking ASPECT. The commands above use the corrected configuration. A first matched statistics comparison also counted the two different absolute visualization paths as a difference. Running both binaries in separate directories with the same relative output setting gave a direct file comparison. The original CTest reference and all physical tolerances are preserved.
+To reproduce the provenance rejections, each command must exit nonzero with its indicated diagnostic. Both invalid writer/probe runs leave their destinations absent.
+
+~~~bash
+set -eu
+if python3 -B "$R" restart "$B" "$T" "$Q/wrong-writer" --writer "$B" --writer-plugins "$A" >"$Q/wrong-writer.log" 2>&1; then exit 1; fi
+rg 'pre-6A writer SHA-256 mismatch' "$Q/wrong-writer.log"
+test ! -e "$Q/wrong-writer"
+if python3 -B "$R" restart "$B" "$T" "$Q/wrong-plugin" --writer "$A/aspect-release" --writer-plugins "$T" >"$Q/wrong-plugin.log" 2>&1; then exit 1; fi
+rg 'pre-6A plugin SHA-256 mismatch' "$Q/wrong-plugin.log"
+test ! -e "$Q/wrong-plugin"
+if python3 -B "$R" restart "$B" "$T" "$A" --writer "$A/aspect-release" --writer-plugins "$A" >"$Q/protected-baseline.log" 2>&1; then exit 1; fi
+rg 'destination is inside the baseline' "$Q/protected-baseline.log"
+~~~
+
+The sparsity negative control changes a single diagonal entry in memory and passes the resulting log to the ordinary checker. The run files and the control counts remain available for inspection.
+
+~~~bash
+PYTHONPATH="$S" python3 -B - "$Q/mixed-release" <<'PY'
+from pathlib import Path
+import sys
+from check import check_method_setup, composition_block_counts, read_output, require
+
+root = Path(sys.argv[1])
+mixed = read_output(root/'method-first/output', 1)
+control = composition_block_counts((root/'default/run.log').read_text(), read_output(root/'default/output', 1))
+lines = (root/'method-first/run.log').read_text().splitlines()
+clock = mixed[2][0]
+count = control[clock][0]
+row = max(i for i, line in enumerate(lines) if line.strip() == 'system matrix nnz by block:') + 4
+entries = lines[row].split()
+require(int(entries[3]) == count, 'unexpected starting count')
+entries[3] = str(count // 2)
+lines[row] = ' '.join(entries)
+try:
+    check_method_setup('\n'.join(lines), 'method-first', {'tracer': True, 'companion': False}, mixed, control)
+except ValueError as error:
+    require(str(error) == f'method-first at {clock}: composition blocks ({count//2}, 0), expected ({count}, 0)', str(error))
+    print('Mutation rejected:', error)
+else:
+    raise ValueError('substituted positive sparsity was accepted')
+PY
+~~~
 
 ## Increment 5 closeout
 

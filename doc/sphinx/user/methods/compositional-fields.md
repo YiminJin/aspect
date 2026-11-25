@@ -74,6 +74,13 @@ For example, this input advances the companion with the ordinary implicit method
 and the tracer with third-order strong-stability-preserving Runge–Kutta (SSPRK3).
 
 ```text
+subsection Mesh refinement
+  set Time steps between mesh refinement = 0
+end
+subsection Discretization
+  set Composition polynomial degree = 2
+  set Use discontinuous composition discretization = true
+end
 subsection Compositional fields
   set Number of fields = 2
   set Names of fields = companion, tracer

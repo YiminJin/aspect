@@ -151,8 +151,26 @@ def oracle(data,field,initial,velocity,divergence,exterior,bounded,*,expected_ra
     return ref.limited-entry_scales
 
 
-def check_method_setup(args, name, expected, frames):
-    log = (args.directory/name/'run.log').read_text()
+def composition_block_counts(log, frames):
+    """Read the two nodal composition blocks from each accepted timestep's matrix statistics."""
+    counts = {}
+    for step_log in log.split('*** Timestep ')[1:]:
+        header, body = step_log.split('\n', 1)
+        match = re.fullmatch(r'(\d+):\s+t=(\S+) seconds, dt=(\S+) seconds', header)
+        require(match is not None, f'unrecognized timestep header {header}')
+        step, time, dt = match.groups()
+        clock = (float(time), float(dt))
+        require(int(step) in frames and frames[int(step)][0] == clock and clock not in counts,
+                f'unexpected matrix clock {header}')
+        matrices = body.split('system matrix nnz by block:')
+        require(len(matrices) == 2, f'expected one system matrix at {clock}')
+        rows = [line.split() for line in matrices[1].strip().splitlines()[:5]]
+        counts[clock] = tuple(int(rows[i][i].replace(',', '')) for i in (3, 4))
+    require(len(counts) == len(frames), 'missing matrix statistics')
+    return counts
+
+
+def check_method_setup(log, name, expected, frames, expected_blocks):
     setup = re.findall(r'^DG setup (\w+) (\d) (\d+) (\d+) (\d+)$', log, re.M)
     completions = re.findall(r'DG completion (\d+) (\w+)$', log, re.M)
     require(completions == [(str(step), field) for step in sorted(frames) for field in expected],
@@ -163,15 +181,12 @@ def check_method_setup(args, name, expected, frames):
         require(row == (field, str(int(explicit)), str(count), str(count), str(count)),
                 f'{name}: wrong assembler setup {row}')
         require(log.count(f'Solving {field} system') == count*len(frames), f'{name}: wrong implicit solve count')
-    # Both nodal tracers share the first composition's matrix storage.
-    matrices = log.split('system matrix nnz by block:')[1:]
-    require(len(matrices) == len(frames), f'{name}: missing matrix statistics')
-    for matrix in matrices:
-        rows = [line.split() for line in matrix.strip().splitlines()[:5]]
-        diagonal = [int(rows[i][i].replace(',', '')) for i in (3, 4)]
-        require((diagonal[0] > 0) == (False in expected.values()) and diagonal[1] == 0,
-                f'{name}: wrong shared composition blocks {diagonal}')
-    print(f'{name}: {setup}, composition diagonal nnz {diagonal}, '
+    counts = composition_block_counts(log, frames)
+    require(counts.keys() == expected_blocks.keys(), f'{name}: different matrix clocks')
+    for clock, diagonal in counts.items():
+        require(diagonal == expected_blocks[clock],
+                f'{name} at {clock}: composition blocks {diagonal}, expected {expected_blocks[clock]}')
+    print(f'{name}: {setup}, composition diagonal nnz by clock {counts}, '
           f'{len(completions)} field completions', flush=True)
 
 
@@ -180,22 +195,28 @@ def mixed(args):
     u=constant_velocity(1,0)
     zero=lambda x,y:np.zeros_like(x)
     a=run(args,'mixed')
-    b=run(args,'default',fields(SSPRK3_fields=''))
     swap=run(args,'swapped',fields(Names_of_fields='tracer, companion'))
     statistics = section('Postprocess', setting('List of postprocessors',
                          'DG coefficient samples, DG method setup, matrix statistics'))
+    b = run(args, 'default', fields(SSPRK3_fields='') + statistics)
+    implicit_blocks = composition_block_counts((args.directory/'default/run.log').read_text(), b)
+    require(all(first > 0 and second == 0 for first, second in implicit_blocks.values()),
+            f'all-implicit control lacks shared sparsity: {implicit_blocks}')
+    print('all-implicit composition diagonal nnz by clock', implicit_blocks, flush=True)
     for name, names, methods, legacy in [
             ('method-last', 'companion, tracer', 'field, explicit DG SSPRK3', a),
             ('method-first', 'tracer, companion', 'explicit DG SSPRK3, field', swap)]:
         case = run(args, name, fields(Names_of_fields=names, Compositional_field_methods=methods,
                                      SSPRK3_fields='') + statistics)
         print(name, 'old/new coefficient defect', compare(case, legacy, 0.), flush=True)
-        check_method_setup(args, name, {field: field=='tracer' for field in names.split(', ')}, case)
+        log = (args.directory/name/'run.log').read_text()
+        check_method_setup(log, name, {field: field=='tracer' for field in names.split(', ')}, case, implicit_blocks)
     both = run(args, 'both-by-name', fields(SSPRK3_fields='companion, tracer'))
     broadcast = run(args, 'broadcast', fields(Compositional_field_methods='explicit DG SSPRK3') + statistics)
     # The old input still names tracer, redundantly, while broadcast also selects companion.
     print('broadcast/redundant coefficient defect', compare(broadcast, both, 0.), flush=True)
-    check_method_setup(args, 'broadcast', {'companion': True, 'tracer': True}, broadcast)
+    check_method_setup((args.directory/'broadcast/run.log').read_text(), 'broadcast',
+                       {'companion': True, 'tracer': True}, broadcast, {clock: (0, 0) for clock in implicit_blocks})
     for invalid in ('static', 'midpoint fault phase'):
         run(args, 'conflict-'+invalid.replace(' ', '-'), fields(Compositional_field_methods='field, '+invalid),
             fail='conflicts with compositional field method '+invalid+' for tracer')
