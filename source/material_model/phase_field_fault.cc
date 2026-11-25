@@ -400,16 +400,19 @@ namespace aspect
       in>>n;
       AssertThrow(n==restored.size(),ExcMessage("Incompatible interior fault topology in checkpoint."));
       auto state=friction->state();
+      std::vector<double> shear(n), memory(n);
       for (unsigned int i=0; i<n; ++i)
         {
           auto &p=restored[i];
-          in>>p.position>>p.half_width>>initial_shear[i];
+          in>>p.position>>p.half_width>>shear[i];
           if (!state.empty()) in>>state[i];
-          in>>p.rate>>p.slip>>maxwell_memory[i];
+          in>>p.rate>>p.slip>>memory[i];
         }
-      friction->restore_state(std::move(state));
       AssertThrow(in,ExcMessage("Incomplete interior fault checkpoint."));
       accepted->trace.replace_material_labels(std::move(restored));
+      initial_shear=std::move(shear);
+      maxwell_memory=std::move(memory);
+      friction->restore_state(std::move(state));
       trace_initialized=false;
     }
 

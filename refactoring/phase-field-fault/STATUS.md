@@ -2,6 +2,8 @@
 
 ## Interface repairs after 6B — Stage A
 
+**Stage A is ready for numerical review.** The next assignment is Stage B after review.
+
 Reviewed and implemented from `cde1a89fb04c6fbd2c7fb68514cefa1fa94579da`. The retained 6B Release executable prints `282617e22` and has SHA-256 `7008c034b3723e7f5dfebb204fa5211f1cdf1f8d7fd9da0ec28a9f233cca5647`. The two commits have identical production source and headers. The original input files, donor data and tolerance tables supplied all controls. Each reproduction used fresh output directories. The local author instructions and the assignment arrived separately from the numerical patch.
 
 ### Wall loading at the attempted midpoint
@@ -76,6 +78,59 @@ python3 "$G/timestep/audit.py" "$F/strip18" build-5a-repair/reference "$F/strict
 test "$rc" = 1
 diff -qr "$F/strict" build-5b/closeout/final-audit
 ~~~
+
+### Sampling width in a mature interior checkpoint
+
+An ordinary restart now preserves the normal sampling convention used by the accepted material trace. The existing record has one radius in metres per vertex. Zero means the whole in-box cross-section. Every finite material radius must be strictly positive and finite. `PhaseFieldFault::load` reads into temporary records. `MaterialFaultTrace::replace_material_labels` checks all radii against the configured convention before replacing any label. Compatible records keep each evolved radius and the existing wire format.
+
+In the translated, deforming two-label case the initial 2.1 m radii stretched to 2.102646045632970 and 2.102646045640989 m by 12.5 ms. The reviewed executable accepted a switch to full support, publishing zero widths at 25 ms. The reverse switch failed later, reporting a missing fraction of one in the phase profile. Stage A rejects both at load with the checkpoint support diagnostic. Keeping finite support gave 2.105280614108319 and 2.105280614125659 m at 25 ms. Full rays kept zeros at both labels. For both conventions every exported label and bulk column matched the uninterrupted run exactly, using checkpoints from the reviewed writer and from the new writer.
+
+~~~bash
+python3 "$L/check_restart_width.py" "$OLD/bin/aspect" "$OLD/$L/liblayered_moving_fault.release.so" "$D/old-width"  # expected exit 1
+python3 "$L/check_restart_width.py" "$B/aspect" "$LP" "$D/final/width" --seeds "$D/old-width"
+python3 "$L/check_restart_width.py" "$B/aspect" "$LP" "$D/current-width"
+~~~
+
+**Ordinary ASPECT control.** A fault-free 2-D box with time-dependent prescribed velocity reached the full endpoint value on both executables. The statistics files matched byte for byte, including an RMS velocity of 5e−8 m/s at 5 ms. The starting fixture was `tests/simpler_box.prm`. Reproduce from the same shell as above.
+
+~~~bash
+mkdir -p "$F/stock"
+for version in before after; do
+  prm="$F/stock/$version.prm"
+  cp tests/simpler_box.prm "$prm"
+  cat >> "$prm" <<EOF
+
+set End time = .005
+set Maximum time step = .005
+set Output directory = $F/stock/$version
+subsection Mesh refinement
+  set Initial global refinement = 2
+end
+subsection Gravity model
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Boundary velocity model
+  set Zero velocity boundary indicators =
+  set Tangential velocity boundary indicators =
+  set Prescribed velocity boundary indicators = left:function, right:function, top:function, bottom:function
+  subsection Function
+    set Variable names = x,y,t
+    set Function expression = 1e-5*t;0
+  end
+end
+subsection Postprocess
+  set List of postprocessors = velocity statistics
+end
+EOF
+  if test "$version" = before; then exe=$OLD/bin/aspect; else exe=$B/aspect; fi
+  "$exe" "$prm" > "$F/stock/$version.log" 2>&1
+done
+cmp "$F/stock/before/statistics" "$F/stock/after/statistics"
+~~~
+
+Coverage is the Release build on the qualified 2-D meshes. The wall and mature restart comparisons used one rank, and the seed and frozen nine- and 18-strip comparisons used two. The seed check establishes local FE support at initialization. The 5B strip-15 angle exception and the requirement for timestep-converged physical front advance retain their original status.
 
 ## Increment 6B
 

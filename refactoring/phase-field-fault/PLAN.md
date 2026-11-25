@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**Stage A of the post-6B interface repairs is ready for review.** It covers the growing wall clock, physical seed tip and mature trace support on restart. [Measured results and replay commands](STATUS.md#interface-repairs-after-6b--stage-a). Stage B awaits the author’s review.
+
 **Increment 6B consolidates the installed paths for architecture review.** Read the [implementation and parameter guide](IMPLEMENTATION.md) and the [installation and cost record](STATUS.md#increment-6b). The three paper cases have separate scientific qualification requirements.
 
 **[Increment 6A](INCREMENT_6A_TASK.md) is closed.** `Compositional field methods` selects implicit fields, explicit DG SSPRK3 tracers or bounded phase, and the growing fault's deferred midpoint phase. The older `SSPRK3 fields` list resolves to the same per-field method after default and single-entry expansion. The no-advection scheme enters the shared Stokes Picard loop directly. The single-advection scheme advances temperature and compositions once per attempt before entering that loop. The growing fault uses the separate coupled Newton/phase solve. [6A verification and core edits](STATUS.md#increment-6a)

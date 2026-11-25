@@ -65,9 +65,15 @@ namespace aspect
   void MaterialFaultTrace<dim>::replace_material_labels(std::vector<Label> labels)
   {
     AssertThrow(labels.size()==material_labels.size(),ExcMessage("Material fault topology changed."));
-    if (initial_half_width==std::numeric_limits<double>::max())
-      for (auto &label:labels)
-        label.half_width=0.;
+    // The existing checkpoint format uses zero at every vertex for a full
+    // ray. A finite radius is material history and may have stretched since
+    // initialization. Validate its convention before installing any record.
+    const bool full_ray = initial_half_width == std::numeric_limits<double>::max();
+    for (const auto &label : labels)
+      AssertThrow(full_ray ? label.half_width == 0. :
+                  (std::isfinite(label.half_width) && label.half_width > 0.),
+                  ExcMessage("Checkpoint normal support convention differs from the configured trace "
+                             "or contains an invalid material radius."));
     material_labels=std::move(labels);
     rebuild_segments();
   }

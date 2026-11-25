@@ -101,6 +101,8 @@ namespace aspect
        * Replace the ordered vertex records at initialization, checkpoint
        * restore or acceptance and rebuild their frames. The caller supplies
        * one entry for each existing material identity in its original order.
+       * Zero radii denote full normal rays. Finite material radii retain
+       * their saved lengths. The support convention must match this trace.
        * Local; the caller gives identical records on every rank.
        */
       void replace_material_labels(std::vector<Label> labels);
