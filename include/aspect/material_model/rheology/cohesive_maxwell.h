@@ -2,6 +2,7 @@
 #ifndef _aspect_material_model_rheology_cohesive_maxwell_h
 #define _aspect_material_model_rheology_cohesive_maxwell_h
 #include <aspect/global.h>
+#include <aspect/phase_field/degradation.h>
 
 namespace aspect::GrowingFault
 {
@@ -28,6 +29,9 @@ namespace aspect::GrowingFault
   {
     double G, eta, m;
     double relaxation(double h) const;
+    /** Energetic degradation used by the point update and prospective plane
+     * search at this native phase. Handles roundoff at the physical limits. */
+    PhaseField::CohesiveDegradation degradation(double phase) const;
     /** Evaluate a native point at the fixed midpoint iterate. At publication
      * traction_remainder (Pa) recovers the low part of the driving traction
      * lost when subtracting the strip resistance. */

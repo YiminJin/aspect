@@ -1,7 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/simulator/solver/midpoint_system.h>
 #include <aspect/reconstructed_fault/onset_score.h>
-#include <aspect/phase_field/degradation.h>
 
 namespace aspect::GrowingFault
 {
@@ -184,8 +183,7 @@ namespace aspect::GrowingFault
           const Stress predictor=B*(old.stress+2.*G*increment);
           const double u0=.5*(predictor[1][1]-predictor[0][0]),v0=predictor[0][1];
           const double u=cos2*u0-sin2*v0,v=sin2*u0+cos2*v0;
-          phi=physical_phase(phi);
-          const double F=PhaseField::CohesiveDegradation(phi,material.maxwell().m).fraction();
+          const double F=material.maxwell().degradation(phi).fraction();
           const double w=p.area*(1.-F)*(1.-F)*p.kernel;
           const auto local=onset_moments(p.area,p.kernel,F,u,v);
           for (unsigned int j=0; j<9; ++j) moments[9*k+j]+=local[j];

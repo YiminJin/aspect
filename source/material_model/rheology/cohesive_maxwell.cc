@@ -1,6 +1,5 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/material_model/rheology/cohesive_maxwell.h>
-#include <aspect/phase_field/degradation.h>
 
 namespace aspect::GrowingFault
 {
@@ -16,17 +15,21 @@ namespace aspect::GrowingFault
     return 1./(1.+h*G/eta);
   }
 
+  PhaseField::CohesiveDegradation CohesiveMaxwell::degradation(const double phase) const
+  {
+    return {physical_phase(phase),m};
+  }
+
   PointResponse CohesiveMaxwell::response(const MaxwellState &old, const Stress &increment,
                                           const double phase, const double h, const Stress &S, const double f, const double traction_remainder) const
   {
-    const double phi=physical_phase(phase);
     const double B=relaxation(h);
-    const PhaseField::CohesiveDegradation degradation(phi,m);
+    const auto law=degradation(phase);
     PointResponse r;
-    r.fraction=degradation.fraction();
-    r.fraction_derivative=degradation.fraction_derivative();
-    r.driving_factor=degradation.driving_factor();
-    r.driving_factor_derivative=degradation.driving_factor_derivative();
+    r.fraction=law.fraction();
+    r.fraction_derivative=law.fraction_derivative();
+    r.driving_factor=law.driving_factor();
+    r.driving_factor_derivative=law.driving_factor_derivative();
     const double old_e=2.*(old.cohesive_strain*S);
     const Stress predictor=B*(old.stress+2.*G*increment);
     r.force=(predictor*S+G*B*old_e-f)+traction_remainder;
@@ -56,7 +59,6 @@ namespace aspect::GrowingFault
         AssertThrow(A.norm()==0.,ExcMessage("Intact material point carries cohesive strain."));
         return 0.;
       }
-    const PhaseField::CohesiveDegradation degradation(phi,m);
-    return degradation.cohesive_energy(G*(A*A));
+    return degradation(phi).cohesive_energy(G*(A*A));
   }
 }
