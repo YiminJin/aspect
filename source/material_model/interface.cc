@@ -19,6 +19,7 @@
 */
 
 
+#include <aspect/material_model/fault_parameters.h>
 #include <aspect/global.h>
 #include <aspect/simulator_access.h>
 #include <aspect/material_model/interface.h>
@@ -207,6 +208,9 @@ namespace aspect
       prm.leave_subsection ();
 
       std::get<dim>(registered_plugins).declare_parameters (prm);
+      // The fault accepts the Simple viscosity as a historical input. Attach
+      // its input observers once all three material subsections exist.
+      FaultParameters::observe_material_inputs<dim>(prm);
     }
 
 

@@ -3,6 +3,7 @@
   License version 2 or later. See the file LICENSE for details.
 */
 
+#include <aspect/material_model/fault_parameters.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/adiabatic_conditions/interface.h>
 #include <aspect/material_model/rheology/fault_resistance.h>
@@ -245,7 +246,9 @@ namespace aspect
       prm.declare_entry("Degradation magnitude","1",Patterns::Double(0.),"Scale of mature excess compliance and of its projected normal integral. At fixed phase it cancels in the normalized slip weight.");
       prm.declare_entry("Fit trace to phase","true",Patterns::Bool(),"Fit the ordered seed to the initialized FE ridge. Constant phase retains the seed.");
       prm.declare_entry("Profile half width","0",Patterns::Double(0.),"Normal association support in metres. Zero uses the full physical cross-section.");
-      prm.declare_entry("Shear modulus","1e10",Patterns::Double(0.),"Elastic shear modulus in Pa.");
+      prm.declare_entry("Viscosity","5e24",Patterns::Double(0.),
+                        "Maxwell viscosity in Pa s. The default is 5e24 for a mature trace and 1e8 for growing strips.");
+      prm.declare_entry("Shear modulus","1e10",Patterns::Double(0.),"Elastic shear modulus in Pa. With no explicit setting, mature traces use 1e10 and growing strips use 1e6.");
       prm.declare_entry("Initialization interval","1",Patterns::Double(0.),"Maxwell interval in seconds for the initial Stokes solve.");
       prm.declare_entry("Background shear traction","0",Patterns::Double(),"Persistent shear loading in Pa along the slip sense; the per-vertex column overrides this uniform value.");
       prm.declare_entry("Background compression","",Patterns::List(Patterns::Double(0.),0,1),
@@ -278,6 +281,7 @@ namespace aspect
       prm.enter_subsection("Termination criteria");
       const bool checkpoint_on_termination = prm.get_bool("Checkpoint on termination");
       prm.leave_subsection();
+      FaultParameters::resolve(prm, /* growing = */ false);
       normal_stress = Rheology::FrictionNormalStress::parse(prm,Rheology::FrictionNormalStress::Source::resolved_traction);
       const auto &p = this->get_parameters();
       const auto &intro = this->introspection();
@@ -297,10 +301,6 @@ namespace aspect
                              p.checkpoint_steps == 0 && p.checkpoint_time_secs == 0 &&
                              p.additional_checkpoint_times.empty() && !checkpoint_on_termination;
       prm.enter_subsection("Material model");
-      AssertThrow(prm.get({"Growing fault"},"Prescribed fault compression").empty() &&
-                  prm.get_double({"Growing fault"},"Seed tangent angle")==0. &&
-                  Utilities::string_to_double(Utilities::split_string_list(prm.get({"Growing fault"},"Forward seed tip")))==std::vector<double>({0.,0.}),
-                  ExcMessage("Growing fault seed and compression settings require the midpoint fault phase method."));
       prm.enter_subsection("Simple model");
       // The Simple model subsection supplies the single-lithology background
       // constants. Only EOS entry zero is consumed, irrespective of DG stress.

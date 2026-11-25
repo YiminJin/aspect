@@ -2,6 +2,7 @@
 #include <aspect/postprocess/growing_fault_history.h>
 #include <aspect/geometry_model/interface.h>
 #include <aspect/material_model/growing_fault.h>
+#include <aspect/material_model/fault_parameters.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/simulator_signals.h>
 #include <aspect/simulator/solver/midpoint_system.h>
@@ -376,9 +377,11 @@ namespace aspect::MaterialModel
         const std::vector<std::string> section= {"Material model",
                                                  std::is_same_v<Base<dim>,PhaseFieldFault<dim>>?"Phase field fault":"Growing fault"
                                                 };
-        const auto selection=prm.get(section,"Resistance law");
-        AssertThrow(selection=="rate and state" || selection=="linear dashpot",
-                    ExcMessage("Legacy dashpot selector conflicts with Resistance law."));
+        const std::array<std::string,2> material_subsections = {"Phase field fault","Growing fault"};
+        for (const auto &spelling : material_subsections)
+          AssertThrow(!FaultParameters::explicitly_set(prm,spelling,"Resistance law") ||
+                      prm.get({"Material model",spelling},"Resistance law")=="linear dashpot",
+                      ExcMessage("Legacy dashpot selector conflicts with Material model / "+spelling+" / Resistance law."));
         prm.enter_subsection(section[0]);
         prm.enter_subsection(section[1]);
         prm.set("Resistance law","linear dashpot");

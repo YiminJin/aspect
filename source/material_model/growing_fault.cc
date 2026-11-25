@@ -1,4 +1,5 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
+#include <aspect/material_model/fault_parameters.h>
 #include <aspect/material_model/growing_fault.h>
 #include <aspect/material_model/rheology/fault_resistance.h>
 #include <aspect/geometry_model/box.h>
@@ -44,6 +45,7 @@ namespace aspect::GrowingFault
   template <int dim>
   void Material<dim>::parse_parameters(ParameterHandler &prm)
   {
+    MaterialModel::FaultParameters::resolve(prm, /* growing = */ true);
     const auto &p=this->get_parameters();
     const auto &energy=p.surface_energy_model;
     energy.validate();
@@ -54,9 +56,6 @@ namespace aspect::GrowingFault
     normal_stress = NormalStress::parse(prm,NormalStress::Source::prescribed_constant);
     const bool legacy_compression = !prm.get("Surface pressure").empty();
     prm.enter_subsection("Material model");
-    AssertThrow(prm.get({"Phase field fault"},"Fault geometry")=="automatic" &&
-                prm.get({"Phase field fault"},"Fault vertices").empty() && prm.get({"Phase field fault"},"Fault vertex file").empty(),
-                ExcMessage("Midpoint fault phase selects growing strips and cannot accept mature trace geometry."));
     prm.enter_subsection("Growing fault");
     compression = normal_stress.uses_adiabat() ? 0. : p.surface_pressure;
     AssertThrow(!normal_stress.uses_adiabat() || prm.get("Prescribed fault compression").empty(),
