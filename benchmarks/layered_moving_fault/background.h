@@ -12,6 +12,8 @@ namespace LayeredReference
   constexpr std::array<double,8> weights= {{.1012285362903763,.2223810344533745,.3137066458778873,.3626837833783620,.3626837833783620,.3137066458778873,.2223810344533745,.1012285362903763}};
   struct Field
   {
+    // Normal deviatoric stress (xx = -yy) and shear stress in Pa, followed
+    // by the horizontal shear rate du_x/dy in 1/s at each column Gauss point.
     std::vector<double> a,xy,gamma;
     explicit Field(unsigned n=0):a(n),xy(n),gamma(n) {}
   };
@@ -24,7 +26,8 @@ namespace LayeredReference
       std::vector<double> y,eta;
       explicit Background(unsigned panels=64,bool homogeneous=false):panels(panels),h(4./panels),homogeneous(homogeneous)
       {
-        for (unsigned p=0; p<panels; ++p)for (double x:nodes)
+        for (unsigned p=0; p<panels; ++p)
+          for (double x:nodes)
             {
               double point=bottom+h*(p+.5+.5*x);
               y.push_back(point);
@@ -34,10 +37,14 @@ namespace LayeredReference
       double integral(const std::vector<double> &f) const
       {
         double s=0;
-        for (unsigned i=0; i<f.size(); ++i)s+=.5*h*weights[i%8]*f[i];
+        for (unsigned i=0; i<f.size(); ++i)
+          s+=.5*h*weights[i%8]*f[i];
         return s;
       }
-      Field advance(const Field &parent,double dt,double &q) const
+      // Rotate and relax the accepted stress, then solve the common traction
+      // (Pa) that makes the integrated shear rate equal the wall speed jump.
+      // Return the trial column and write that traction into the output argument.
+      Field advance(const Field &parent, double dt, double &shear_traction) const
       {
         if (!(dt>0) || parent.a.size()!=y.size())throw std::runtime_error("Invalid background parent/dt");
         Field next(y.size());
@@ -51,11 +58,11 @@ namespace LayeredReference
             inv[i]=1./kappa;
             ratio[i]=b[i]/kappa;
           }
-        q=(delta_u+integral(ratio))/integral(inv);
+        shear_traction = (delta_u+integral(ratio))/integral(inv);
         for (unsigned i=0; i<y.size(); ++i)
           {
-            next.xy[i]=q;
-            next.gamma[i]=(q-b[i])*inv[i];
+            next.xy[i] = shear_traction;
+            next.gamma[i] = (shear_traction-b[i])*inv[i];
           }
         return next;
       }
@@ -65,7 +72,9 @@ namespace LayeredReference
         for (unsigned i=0; i<8; ++i)
           {
             double b=1.;
-            for (unsigned j=0; j<8; ++j)if (i!=j)b*=(x-nodes[j])/(nodes[i]-nodes[j]);
+            for (unsigned j=0; j<8; ++j)
+              if (i!=j)
+                b *= (x-nodes[j])/(nodes[i]-nodes[j]);
             sum+=b*f[8*p+i];
           }
         return sum;
@@ -81,7 +90,8 @@ namespace LayeredReference
         for (unsigned p=0; p<panels; ++p)
           {
             result[p+1]=result[p];
-            for (unsigned i=0; i<8; ++i)result[p+1]+=.5*h*weights[i]*f[8*p+i];
+            for (unsigned i=0; i<8; ++i)
+              result[p+1]+=.5*h*weights[i]*f[8*p+i];
           }
         return result;
       }
@@ -90,7 +100,8 @@ namespace LayeredReference
         const unsigned p=std::min(panels-1,unsigned(std::max(0.,std::floor((point-bottom)/h))));
         const double length=std::max(0.,std::min(h,point-bottom-p*h));
         double sum=0.;
-        for (unsigned i=0; i<8; ++i)sum+=weights[i]*interpolate(field.gamma,p,-1.+length/h*(1.+nodes[i]));
+        for (unsigned i=0; i<8; ++i)
+          sum+=weights[i]*interpolate(field.gamma,p,-1.+length/h*(1.+nodes[i]));
         return translation-1.+prefix[p]+.5*length*sum;
       }
   };

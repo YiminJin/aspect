@@ -80,7 +80,7 @@ class Frame:
                 np.tile(h*h*np.outer(w,w).ravel(),192))
 
     def transfer(self, points, phi):
-        """Nearest admitted segment, increasing material ID at equal distance."""
+        """Choose the nearest admitted segment. Equal distances retain the first material ID."""
         n = len(points)
         dist = np.full(n, np.inf)
         ids = np.zeros(n, dtype=int)

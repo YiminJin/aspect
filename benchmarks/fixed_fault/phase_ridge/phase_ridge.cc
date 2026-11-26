@@ -26,11 +26,16 @@ namespace aspect
         {
           prm.enter_subsection("Initial composition model");
           prm.enter_subsection("Stationary ridge");
-          prm.declare_entry("Angle","60",Patterns::Double(),"Angle from +x, in degrees.");
-          prm.declare_entry("Center x","0",Patterns::Double(),"Horizontal translation in metres.");
-          prm.declare_entry("Grid cells","32",Patterns::Integer(1),"Cells in each side of the centered square.");
-          prm.declare_entry("Bilinear donor phase","false",Patterns::Bool(),"Embed the historical donor Q1 profile in DGQ2.");
-          prm.declare_entry("Profile table","",Patterns::Anything(),"Distance in metres and phase.");
+          prm.declare_entry("Angle", "60", Patterns::Double(),
+                            "Angle from +x, in degrees.");
+          prm.declare_entry("Center x", "0", Patterns::Double(),
+                            "Horizontal translation in metres.");
+          prm.declare_entry("Grid cells", "32", Patterns::Integer(1),
+                            "Cells in each side of the centered square.");
+          prm.declare_entry("Bilinear donor phase", "false", Patterns::Bool(),
+                            "Embed the historical donor Q1 profile in DGQ2.");
+          prm.declare_entry("Profile table", "", Patterns::Anything(),
+                            "Distance in metres and phase.");
           prm.leave_subsection();
           prm.leave_subsection();
         }
@@ -176,8 +181,12 @@ namespace aspect
           // This prescribed fixture uses one uniform Maxwell coefficient.
           const auto &viscosities=scratch.material_model_outputs.viscosities;
           const double kappa=viscosities.front();
-          AssertThrow(std::all_of(viscosities.begin(),viscosities.end(),
-                                  [kappa](const double value) { return value==kappa; }),ExcInternalError());
+          const auto has_reference_viscosity = [kappa](const double value)
+          {
+            return value == kappa;
+          };
+          AssertThrow(std::all_of(viscosities.begin(),viscosities.end(),has_reference_viscosity),
+                      ExcInternalError());
           for (unsigned int q=0; q<phase.size(); ++q)
             {
               const auto x=fe.quadrature_point(q);
@@ -374,8 +383,11 @@ namespace aspect
               }
         }
 
-        void section_checks(const Material &m,const std::vector<PointLoad> &points,
-                            const std::vector<double> &rates,double kappa,std::ostream &out) const
+        void section_checks(const Material &m,
+                            const std::vector<PointLoad> &points,
+                            const std::vector<double> &rates,
+                            double kappa,
+                            std::ostream &out) const
         {
           const auto &profile=m.phase_profile();
           const unsigned int n=rates.size();
@@ -390,7 +402,11 @@ namespace aspect
               minus[j]=test[j]-eps*direction[j];
             }
           std::vector<double> residual(n),scale(n);
-          std::vector<double> d(n),u(n-1),b(n),bp(n),bm(n),scratch(n),scratch_d(n),scratch_u(n-1);
+          // Assemble the production tridiagonal tangent at the test speeds,
+          // then evaluate only residuals at the two perturbed speed vectors.
+          std::vector<double> diagonal(n), upper(n-1), test_residual(n);
+          std::vector<double> residual_plus(n), residual_minus(n);
+          std::vector<double> scratch_scale(n), scratch_diagonal(n), scratch_upper(n-1);
           double work=0.;
           for (const auto &p:points)
             {
@@ -401,31 +417,45 @@ namespace aspect
               const auto grad=profile.slip_gradient(p.transfer,p.transfer.rate(test));
               work+=p.volume*virtual_traction*(frame.tangent*(grad*frame.normal));
               const double age=foot.interpolate(parent_age[foot.first_vertex],parent_age[foot.first_vertex+1]);
-              p.add_balance(p.transfer.rate(test),law.resistance(p.transfer.rate(test),age,p.compression),b,d,u,scratch);
-              p.add_balance(p.transfer.rate(plus),law.resistance(p.transfer.rate(plus),age,p.compression),bp,scratch_d,scratch_u,scratch);
-              p.add_balance(p.transfer.rate(minus),law.resistance(p.transfer.rate(minus),age,p.compression),bm,scratch_d,scratch_u,scratch);
-              p.add_balance(p.transfer.rate(rates),law.resistance(p.transfer.rate(rates),age,p.compression),residual,scratch_d,scratch_u,scale);
+              p.add_balance(p.transfer.rate(test),
+                            law.resistance(p.transfer.rate(test),age,p.compression),
+                            test_residual,diagonal,upper,scratch_scale);
+              p.add_balance(p.transfer.rate(plus),
+                            law.resistance(p.transfer.rate(plus),age,p.compression),
+                            residual_plus,scratch_diagonal,scratch_upper,scratch_scale);
+              p.add_balance(p.transfer.rate(minus),
+                            law.resistance(p.transfer.rate(minus),age,p.compression),
+                            residual_minus,scratch_diagonal,scratch_upper,scratch_scale);
+              p.add_balance(p.transfer.rate(rates),
+                            law.resistance(p.transfer.rate(rates),age,p.compression),
+                            residual,scratch_diagonal,scratch_upper,scale);
             }
           const auto comm=this->get_mpi_communicator();
           for (auto *v:
                {
-                 &load,&d,&u,&bp,&bm,&residual,&scale
+                 &load,&diagonal,&upper,&residual_plus,&residual_minus,&residual,&scale
                }) Utilities::MPI::sum(*v,comm,*v);
           const double section_work=std::inner_product(load.begin(),load.end(),test.begin(),0.);
           out<<"work "<<Utilities::MPI::sum(work,comm)<<' '<<section_work<<'\n';
           double error=0.,largest=0.,balance=0.;
           for (unsigned int j=0; j<n; ++j)
             {
-              const double action=d[j]*direction[j]+(j ? u[j-1]*direction[j-1] : 0.)+(j+1<n ? u[j]*direction[j+1] : 0.);
-              error=std::max(error,std::abs(action+(bp[j]-bm[j])/(2.*eps)));
+              const double action=diagonal[j]*direction[j]
+                                  + (j ? upper[j-1]*direction[j-1] : 0.)
+                                  + (j+1<n ? upper[j]*direction[j+1] : 0.);
+              error=std::max(error,std::abs(action+(residual_plus[j]-residual_minus[j])/(2.*eps)));
               largest=std::max(largest,std::abs(action));
               balance=std::max(balance,std::abs(residual[j])/scale[j]);
             }
           out<<"tangent "<<error<<' '<<largest<<'\n'<<"residual "<<balance<<'\n';
         }
 
-        void sample_fields(const Material &m,const std::vector<double> &rates,double kappa,
-                           const std::vector<PointLoad> &points,std::ostream &metrics,const std::string &path) const
+        void sample_fields(const Material &m,
+                           const std::vector<double> &rates,
+                           double kappa,
+                           const std::vector<PointLoad> &points,
+                           std::ostream &metrics,
+                           const std::string &path) const
         {
           const auto &ex=this->introspection().extractors;
           const auto &solution=this->get_solution();

@@ -77,7 +77,8 @@ namespace aspect
         {
           prm.enter_subsection("Material model");
           prm.enter_subsection("Transfer work probe");
-          prm.declare_entry("Middle rate increment","0",Patterns::Double(),"Middle-vertex perturbation at initialization, in m/s.");
+          prm.declare_entry("Middle rate increment", "0", Patterns::Double(),
+                            "Middle-vertex perturbation at initialization, in m/s.");
           prm.leave_subsection();
           prm.leave_subsection();
         }
@@ -120,7 +121,8 @@ namespace aspect
           auto &trace = const_cast<MaterialFaultTrace<dim>&>(this->phase_profile().geometry);
           AssertThrow(trace.labels().size() == 3, ExcMessage("The transfer test requires three straight labels."));
           std::vector<double> rates;
-          for (const auto &label : trace.labels()) rates.push_back(label.rate);
+          for (const auto &label : trace.labels())
+            rates.push_back(label.rate);
           auto perturbed_rates = rates;
           perturbed_rates[1] += increment;
           AssertThrow(perturbed_rates[1] > 0., ExcMessage("The rate perturbation must preserve positive speed."));
@@ -146,7 +148,8 @@ namespace aspect
                   for (unsigned int j=0; j<this->get_fe().base_element(intro.base_elements.velocities).n_dofs_per_cell(); ++j)
                     {
                       const auto i = this->get_fe().component_to_system_index(intro.component_indices.velocities[d],j);
-                      if (!this->get_dof_handler().locally_owned_dofs().is_element(ids[i])) continue;
+                      if (!this->get_dof_handler().locally_owned_dofs().is_element(ids[i]))
+                        continue;
                       const auto x = this->get_mapping().transform_unit_to_real_cell(cell,this->get_fe().unit_support_point(i));
                       owned(ids[i]) = virtual_velocity(trace,x)[d];
                     }
@@ -169,7 +172,8 @@ namespace aspect
           const auto rank = Utilities::MPI::this_mpi_process(comm);
           std::ofstream file(this->get_output_directory()+"section-r"+std::to_string(rank)+".txt");
           file << std::setprecision(17) << middle_row(with_shear)-middle_row(at_rest) << ' ' << at_rest.size();
-          for (const auto value : this->phase_profile().normal_integrals()) file << ' ' << value;
+          for (const auto value : this->phase_profile().normal_integrals())
+            file << ' ' << value;
           file << '\n';
           file.close();
           AssertThrow(file,ExcIO());
