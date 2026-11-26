@@ -65,7 +65,7 @@ namespace aspect
 
     // Advance a separately rotated parent on the actual mesh, including its
     // consistent time-dependent inflow. Return xy at the receiving cell center.
-    double reverse_order(const SimulatorAccess<2> &sim,const double rate)
+    double receiver_shear_after_upstream_rotation(const SimulatorAccess<2> &sim, const double rate)
     {
       RotatedParent exterior(rate);
       const auto &intro = sim.introspection();
@@ -147,7 +147,7 @@ namespace aspect
                   }
               AssertThrow(Utilities::MPI::max(error,comm)<1.e-10,ExcMessage("Incorrect accepted quadratic shear velocity."));
               if constexpr (dim==2)
-                reversed=reverse_order(*this,rate);
+                upstream_rotated_shear = receiver_shear_after_upstream_rotation(*this,rate);
             }
           else
             {
@@ -160,15 +160,15 @@ namespace aspect
                 if (cell->is_locally_owned() && cell->center()[0]>.5)
                   {
                     fe.reinit(cell);
-                    fe[intro.extractors.compositional_fields[intro.compositional_index_for_name("fault_stress_xy")]]
-                    .get_function_values(this->get_solution(),xy);
+                    const auto xy_field = intro.compositional_index_for_name("fault_stress_xy");
+                    fe[intro.extractors.compositional_fields[xy_field]].get_function_values(this->get_solution(),xy);
                     fe[velocity].get_function_gradients(this->get_solution(),gradient);
                     // Remove the exactly DGQ2-representable endpoint strain and
                     // Q1 slip terms, and undo Maxwell relaxation, in Pa.
                     // Here t=e_y and n=-e_x, so subtracting slip adds V to 2D_xy.
-                    const double slip=.5*(labels.front().rate+labels.back().rate);
+                    const double slip_rate = .5*(labels.front().rate+labels.back().rate);
                     const double kappa=-10.*std::expm1(-interval);
-                    observed=std::exp(interval)*(xy[0]-kappa*(gradient[0][0][1]+gradient[0][1][0]+slip));
+                    observed=std::exp(interval)*(xy[0]-kappa*(gradient[0][0][1]+gradient[0][1][0]+slip_rate));
                   }
               observed=Utilities::MPI::sum(observed,comm);
               RotatedParent analytic(rate);
@@ -184,10 +184,10 @@ namespace aspect
               analytic.set_time(interval);
               if (Utilities::MPI::this_mpi_process(comm)==0)
                 std::ofstream(this->get_output_directory()+"spin-values") << std::setprecision(17)
-                                                                          << observed << ' ' << expected << ' ' << reversed << ' ' << rate << '\n';
-              AssertThrow(std::abs(reversed-analytic.value(Point<2>(.75,.5),2))<1.e-7,
+                                                                          << observed << ' ' << expected << ' ' << upstream_rotated_shear << ' ' << rate << '\n';
+              AssertThrow(std::abs(upstream_rotated_shear-analytic.value(Point<2>(.75,.5),2))<1.e-7,
                           ExcMessage("Reversed control missed the upstream shear."));
-              AssertThrow(std::abs(reversed-expected)>7.e-4 && std::abs(observed-expected)<5.e-10,
+              AssertThrow(std::abs(upstream_rotated_shear-expected)>7.e-4 && std::abs(observed-expected)<5.e-10,
                           ExcMessage("The accepted shear requires rotation at the receiving point after transport."));
               if (Utilities::MPI::this_mpi_process(comm)==0)
                 std::ofstream(this->get_output_directory()+"spin-check") << "Transported parent rotated at the receiving cell.\n";
@@ -195,7 +195,8 @@ namespace aspect
           return {"DG spin order","checked"};
         }
       private:
-        double rate=0.,reversed=0.;
+        double rate = 0.;
+        double upstream_rotated_shear = 0.;
     };
     ASPECT_REGISTER_POSTPROCESSOR(SpinOrderProbe,"DG spin order check","Observe the order of bulk stress advection and rotation.")
   }

@@ -147,24 +147,30 @@ class Reference:
                 self.limited+=int(changed)
         return state
 
-    def advance(self,parent,time,duration,limit_internal=True):
-        mass0=np.dot(self.areas,parent@mean_weights)
-        current=self.filter(parent.copy())
-        steps=max(1,math.ceil(duration*self.rate))
-        h=duration/steps
+    def advance(self, parent, time, duration, limit_internal=True):
+        """Advance physical nodal values and return their integrated mass change.
+
+        The source is the integral of the scalar times velocity divergence. Outward
+        upwind flux is positive. The three SSPRK stages contribute weights
+        1/6, 1/6 and 2/3 to the balance over each substep.
+        """
+        initial_mass = np.dot(self.areas, parent @ mean_weights)
+        current = self.filter(parent.copy())
+        steps = max(1, math.ceil(duration*self.rate))
+        h = duration/steps
         for k in range(steps):
-            t=time+k*h
-            v0,s0,f0=self.action(current,t)
-            a=current+h*v0
+            t = time + k*h
+            rate0, source0, flux0 = self.action(current, t)
+            first = current + h*rate0
             if limit_internal:
-                self.filter(a)
-            v1,s1,f1=self.action(a,t+h)
-            b=(3*current+a+h*v1)/4
+                self.filter(first)
+            rate1, source1, flux1 = self.action(first, t+h)
+            second = (3*current + first + h*rate1)/4
             if limit_internal:
-                self.filter(b)
-            v2,s2,f2=self.action(b,t+h/2)
-            current=self.filter((current+2*b+2*h*v2)/3)
-            self.integrated_source+=h*(s0+s1+4*s2)/6
-            self.integrated_flux+=h*(f0+f1+4*f2)/6
-            self.balance+=h*((s0-f0)+(s1-f1)+4*(s2-f2))/6
-        return current, np.dot(self.areas,current@mean_weights)-mass0
+                self.filter(second)
+            rate2, source2, flux2 = self.action(second, t+h/2)
+            current = self.filter((current + 2*second + 2*h*rate2)/3)
+            self.integrated_source += h*(source0 + source1 + 4*source2)/6
+            self.integrated_flux += h*(flux0 + flux1 + 4*flux2)/6
+            self.balance += h*((source0-flux0) + (source1-flux1) + 4*(source2-flux2))/6
+        return current, np.dot(self.areas, current @ mean_weights) - initial_mass
