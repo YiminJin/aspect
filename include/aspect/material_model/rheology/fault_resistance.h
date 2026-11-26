@@ -38,8 +38,8 @@ namespace aspect::MaterialModel::Rheology
       /** Register a surface law once for both the positive-speed and signed
        * contracts. Parameters are relative to the active material subsection. */
       static void register_law(const std::string &name, Declare declare, Create create);
-      static void declare_parameters(ParameterHandler &, Route);
-      static std::unique_ptr<FaultResistance> create(const ParameterHandler &, Route);
+      static void declare_parameters(ParameterHandler &prm, Route route);
+      static std::unique_ptr<FaultResistance> create(const ParameterHandler &prm, Route route);
       /** Optional initial ages in seconds, ordered by material identity. */
       virtual void set_initial_ages(std::vector<double> ages)
       {
@@ -53,23 +53,30 @@ namespace aspect::MaterialModel::Rheology
       /** Stable checkpoint identifier of the law. */
       virtual std::string name() const = 0;
       /** Evaluate at Q1 coordinate xi between vertices i and i+1. */
-      virtual FaultTraction at_speed(unsigned int i, double xi, double speed, double compression) const = 0;
+      virtual FaultTraction at_speed(unsigned int i,
+                                     double       xi,
+                                     double       speed,
+                                     double       compression) const = 0;
       /** Eliminate V = Vfree - M f on one entire strip at half-duration h.
        * sign(V) sets the shear sense. This is distinct from the mature
        * positive-speed response evaluated at fixed incoming state. */
-      virtual SectionRoot solve_strip(unsigned int i,double free_rate,double mobility,double h,double compression) const = 0;
+      virtual SectionRoot solve_strip(unsigned int i,
+                                      double       free_rate,
+                                      double       mobility,
+                                      double       h,
+                                      double       compression) const = 0;
       /** Validate the material's signed midpoint law and its attempt duration. */
       virtual void validate_midpoint() const {}
-      virtual bool admits_duration(double, double) const
+      virtual bool admits_duration(double /*half_duration*/, double /*compression*/) const
       {
         return true;
       }
       /** Physical parameters whose values must agree on checkpoint restore. */
       virtual std::vector<double> parameters() const = 0;
       /** Seed optional history once for the ordered vertices or strips. */
-      virtual void initialize(unsigned int) {}
+      virtual void initialize(unsigned int /*number_of_material_ids*/) {}
       /** Publish one material identity at the accepted signed rate in m/s. */
-      virtual void accept_rate(unsigned int, double, double) {}
+      virtual void accept_rate(unsigned int /*material_id*/, double /*rate*/, double /*timestep*/) {}
       /** Optional scalar history for checkpoints. A stateful law supplies one
        * value per material identity; a state-free law supplies none. */
       virtual const std::vector<double> &state() const

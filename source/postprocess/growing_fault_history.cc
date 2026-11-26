@@ -13,8 +13,11 @@ namespace aspect::Postprocess
   {
     // Existing readers glob the rank-local files for a given step. When a
     // frame is rewritten, retire only this exporter's obsolete files for it.
-    void remove_obsolete_files(const std::string &directory, const std::string &step,
-                               const unsigned int n_ranks, const bool has_pressures, const bool has_balance)
+    void remove_obsolete_files(const std::string  &directory,
+                               const std::string  &step,
+                               const unsigned int n_ranks,
+                               const bool         has_pressures,
+                               const bool         has_balance)
     {
       const std::regex shard("(points|fields|memory)-"+step+"-r([1-9][0-9]*)\\.(csv|txt)");
       for (const auto &entry : std::filesystem::directory_iterator(directory))
@@ -48,15 +51,15 @@ namespace aspect::Postprocess
   {
     if constexpr(dim==2)
       {
-        const auto &m=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
-        const auto &history=m.history();
+        const auto &material=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
+        const auto &history=material.history();
         const auto comm=this->get_mpi_communicator();
         const auto rank=Utilities::MPI::this_mpi_process(comm);
         const auto path=this->get_output_directory();
         const auto tag=Utilities::int_to_string(history.step,4);
         const auto &fe=this->get_fe();
         const auto &solution=this->get_solution();
-        const auto c=this->introspection().component_indices.compositional_fields[m.phase_field()];
+        const auto c=this->introspection().component_indices.compositional_fields[material.phase_field()];
         const auto n_ranks = Utilities::MPI::n_mpi_processes(comm);
         const std::string suffix = tag+"-r"+std::to_string(rank);
         const std::string point_file = path+"points-"+suffix+".csv";
@@ -77,7 +80,7 @@ namespace aspect::Postprocess
         for (const auto &cell:this->get_dof_handler().active_cell_iterators())
           if (cell->is_locally_owned())
             {
-              const auto &rule=m.sections().cells.at(cell->id());
+              const auto &rule=material.sections().cells.at(cell->id());
               FEValues<2> values(this->get_mapping(),fe,rule.quadrature,update_values|update_JxW_values|update_quadrature_points);
               values.reinit(cell);
               std::vector<double> phase(rule.quadrature.size());
@@ -91,15 +94,15 @@ namespace aspect::Postprocess
                 }
               for (unsigned int q=0; q<phase.size(); ++q)
                 {
-                  const auto &v=history.cells.at(cell->id())[q];
+                  const auto &point_history=history.cells.at(cell->id())[q];
                   const auto &p=values.quadrature_point(q);
                   points<<cell->id()<<','<<q<<','<<p[0]<<','<<p[1]<<','<<values.JxW(q)<<','<<rule.section[q]<<','<<phase[q];
                   for (const auto *tensor:
                   {
-                    &v.stress,&v.cohesive_strain
+                    &point_history.stress,&point_history.cohesive_strain
                   })
                   points<<','<<(*tensor)[0][0]<<','<<(*tensor)[1][1]<<','<<(*tensor)[2][2]<<','<<(*tensor)[0][1];
-                  points<<','<<v.signed_shear<<','<<v.absolute_shear<<'\n';
+                  points<<','<<point_history.signed_shear<<','<<point_history.absolute_shear<<'\n';
                 }
             }
         finish_file(points, point_file);
@@ -113,14 +116,15 @@ namespace aspect::Postprocess
         if (rank==0)
           {
             std::ofstream strips(section_file);
-            const auto &ages=m.friction().ages_in_seconds();
+            const auto &ages=material.friction().ages_in_seconds();
             strips<<std::setprecision(17)<<"section,xi,ds,beta,formed,"<<(ages.empty()?"":"age,")<<"slip,V,force\n";
             for (unsigned int k=0; k<history.sections.size(); ++k)
               {
                 const auto &s=history.sections[k];
-                strips<<k<<','<<.5*(m.sections().edges[k]+m.sections().edges[k+1])<<','<<m.sections().length(k,s.angle)<<','<<s.angle
+                strips<<k<<','<<.5*(material.sections().edges[k]+material.sections().edges[k+1])<<','<<material.sections().length(k,s.angle)<<','<<s.angle
                       <<','<<s.formed<<',';
-                if (!ages.empty()) strips<<ages[k]<<',';
+                if (!ages.empty())
+                  strips<<ages[k]<<',';
                 strips<<s.slip<<','<<s.rate<<','<<s.resistance<<'\n';
               }
             finish_file(strips, section_file);
@@ -138,11 +142,11 @@ namespace aspect::Postprocess
                 finish_file(pressures, pressure_file);
               }
             // The seed and some older native checkpoints have no work ledger.
-            if (m.has_accepted_balance())
+            if (material.has_accepted_balance())
               {
                 const std::string balance_file = path+"balance-"+tag+".csv";
                 std::ofstream book(balance_file);
-                const auto &b=m.balance();
+                const auto &b=material.balance();
                 book<<std::setprecision(17)<<"step,time,bulk,cohesive,fracture,Wext,Db,Dc,Df,phase_remainder,phase_work,energy_change,mechanical_residual,phase_KKT,adjoint_error,iterations\n"
                     <<history.step<<','<<history.time<<','<<b.bulk<<','<<b.cohesive<<','<<b.fracture<<','<<b.prescribed_velocity_work<<','<<b.bulk_loss<<','<<b.cohesive_loss
                     <<','<<b.friction_work<<','<<b.compliance_remainder<<','<<b.phase_work<<','<<b.storage_change<<','<<b.mechanical<<','<<b.kkt<<','<<b.adjoint_defect<<','<<b.iterations<<'\n';
@@ -163,8 +167,11 @@ namespace aspect::Postprocess
         if (rank==0)
           try
             {
-              remove_obsolete_files(path, tag, n_ranks, !history.friction_pressures.stations.empty(),
-                                    m.has_accepted_balance());
+              remove_obsolete_files(path,
+                                    tag,
+                                    n_ranks,
+                                    !history.friction_pressures.stations.empty(),
+                                    material.has_accepted_balance());
             }
           catch (const std::exception &exc)
             {

@@ -75,9 +75,11 @@ namespace aspect::MaterialModel::FaultParameters
     // The public deal.II 9.6 declaration callback predates named section
     // iterators. Its XML format retains entry boundaries even for names
     // containing periods, and stores the machine-readable validation pattern.
-    void observe_external_entries(ParameterHandler &prm, const std::string &section,
-                                  const boost::property_tree::ptree &tree, const Path &parent,
-                                  const MaterialInputs &state)
+    void observe_external_entries(ParameterHandler                  &prm,
+                                  const std::string                 &section,
+                                  const boost::property_tree::ptree &tree,
+                                  const Path                        &parent,
+                                  const MaterialInputs              &state)
     {
       for (const auto &[encoded,node]:tree)
         {
@@ -88,12 +90,12 @@ namespace aspect::MaterialModel::FaultParameters
             {
               const auto entry=state.entries.find(path);
               if (entry==state.entries.end() || !entry->second.declared_in.count(section))
-                observe(prm,section,path).external_pattern=*description;
+                observe(prm, section, path).external_pattern=*description;
             }
           else if (!node.get_optional<std::string>("alias"))
             {
               prm.enter_subsection(name);
-              observe_external_entries(prm,section,node,path,state);
+              observe_external_entries(prm, section, node, path, state);
               prm.leave_subsection();
             }
         }
@@ -121,7 +123,9 @@ namespace aspect::MaterialModel::FaultParameters
       return number;
     }
 
-    bool equal_values(const Patterns::PatternBase &pattern, const std::string &a, const std::string &b)
+    bool equal_values(const Patterns::PatternBase &pattern,
+                      const std::string           &a,
+                      const std::string           &b)
     {
       if (a==b)
         return true;
@@ -142,7 +146,9 @@ namespace aspect::MaterialModel::FaultParameters
     }
   }
 
-  void observe_entry(ParameterHandler &prm,const std::string &name,const Patterns::PatternBase &pattern)
+  void observe_entry(ParameterHandler            &prm,
+                     const std::string           &name,
+                     const Patterns::PatternBase &pattern)
   {
     const auto components=Utilities::split_string_list(prm.get_current_path(),".");
     // A law can also be declared on its own; only the two material scopes
@@ -161,11 +167,14 @@ namespace aspect::MaterialModel::FaultParameters
       entry.pattern=pattern.clone();
   }
 
-  void declare_entry(ParameterHandler &prm, const std::string &name, const std::string &value,
-                     const Patterns::PatternBase &pattern, const std::string &documentation)
+  void declare_entry(ParameterHandler            &prm,
+                     const std::string           &name,
+                     const std::string           &value,
+                     const Patterns::PatternBase &pattern,
+                     const std::string           &documentation)
   {
     prm.declare_entry(name,value,pattern,documentation);
-    observe_entry(prm,name,pattern);
+    observe_entry(prm, name, pattern);
   }
 
   void observe_external_coefficients(ParameterHandler &prm)
@@ -192,7 +201,7 @@ namespace aspect::MaterialModel::FaultParameters
     for (const auto &section : sections)
       {
         prm.enter_subsection(section);
-        observe_external_entries(prm,section,root.get_child(prm.get_current_path()), {},*state);
+        observe_external_entries(prm, section, root.get_child(prm.get_current_path()), {}, *state);
         prm.leave_subsection();
       }
     prm.enter_subsection(current);

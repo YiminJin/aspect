@@ -27,7 +27,11 @@ namespace aspect
         FaultTraction resistance(double speed, double age, double compression) const;
 
         /** Eliminate the signed, stage-aged RSF relation on a material strip. */
-        SectionRoot solve_strip(double free_rate,double mobility,double age,double h,double compression) const;
+        SectionRoot solve_strip(double free_rate,
+                                double mobility,
+                                double age,
+                                double h,
+                                double compression) const;
 
         /** Age in seconds after sliding at constant speed for dt seconds. */
         double advance_age(double speed, double age, double dt) const;
@@ -38,16 +42,24 @@ namespace aspect
       class RateStateHistory : public FaultResistance
       {
         public:
-          RateStateHistory(const RateAndStateFriction &law, double initial_age,
-                           std::vector<double> initial_ages = {});
+          RateStateHistory(const RateAndStateFriction &law,
+                           double                     initial_age,
+                           std::vector<double>        initial_ages = {});
           std::string name() const override
           {
             return "rate and state";
           }
-          FaultTraction at_speed(unsigned int i,double xi,double speed,double pressure) const override;
-          SectionRoot solve_strip(unsigned int i,double free_rate,double mobility,double h,double compression) const override;
+          FaultTraction at_speed(unsigned int i,
+                                 double       xi,
+                                 double       speed,
+                                 double       pressure) const override;
+          SectionRoot solve_strip(unsigned int i,
+                                  double       free_rate,
+                                  double       mobility,
+                                  double       h,
+                                  double       compression) const override;
           void validate_midpoint() const override;
-          bool admits_duration(double h,double pressure) const override;
+          bool admits_duration(double h, double pressure) const override;
           std::vector<double> parameters() const override;
           void set_initial_ages(std::vector<double> values) override
           {
@@ -58,7 +70,7 @@ namespace aspect
             return ages;
           }
           void initialize(unsigned int count) override;
-          void accept_rate(unsigned int i,double rate,double dt) override;
+          void accept_rate(unsigned int i, double rate, double dt) override;
           const std::vector<double> &state() const override
           {
             return ages;

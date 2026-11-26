@@ -36,19 +36,21 @@ def check(output, coefficient=.9):
     for k, section in accepted.items():
         rate, force, length = (float(section[n]) for n in ('V','force','ds'))
         parent_age, parent_slip = (float(incoming[k][n]) for n in ('age','slip'))
-        terms = []
-        scale = []
+        # Integrate changes in native signed shear over physical area, divided
+        # by strip arclength and the full accepted interval to obtain m/s.
+        native_rate_terms = []
+        roundoff_scale_terms = []
         for key in sorted(new):
             if int(new[key]['section']) == k[0]:
                 weight = float(new[key]['weight'])/(dt*length)
                 after, before = (float(tab[key]['signed_shear']) for tab in (new,old))
-                terms.append(weight*(after-before))
-                scale.append(weight*(abs(after)+abs(before)))
-        recovered = fsum(terms)
+                native_rate_terms.append(weight * (after - before))
+                roundoff_scale_terms.append(weight * (abs(after) + abs(before)))
+        recovered = fsum(native_rate_terms)
         # Binary64 point storage, multiply/divide by physical measures, and
         # the rounded local update. Conditioning is set by the sum of absolute
         # inventories divided by dt, even when their signed sum nearly vanishes.
-        bound = 32.*sys.float_info.epsilon*fsum(scale)
+        bound = 32.*sys.float_info.epsilon*fsum(roundoff_scale_terms)
         native_work.append(dt*length*force*recovered)
         work_budget.append(dt*length*abs(force)*bound)
         expected = resistance(rate,parent_age,dt/2,coefficient)

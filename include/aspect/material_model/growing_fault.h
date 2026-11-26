@@ -24,7 +24,10 @@ namespace aspect::GrowingFault
   /** Replicated, ordered material-strip history. Slip is signed and in metres. */
   struct SectionHistory
   {
-    double slip=0., angle=0., rate=0., resistance=0.;
+    double slip = 0.;       //!< Accumulated signed slip (m).
+    double angle = 0.;      //!< Plane angle relative to the seed tangent (rad).
+    double rate = 0.;       //!< Signed midpoint rate of the accepted interval (m/s).
+    double resistance = 0.; //!< Signed resistance at that rate and stage age (Pa).
     bool formed=false;
     template <class Archive> void serialize(Archive &ar, const unsigned int)
     {
@@ -40,7 +43,9 @@ namespace aspect::GrowingFault
     std::vector<Point<2>> stations;
   };
 
-  /** Accepted or trial strip and point state at one physical clock. */
+  /** Accepted or trial endpoint at one physical clock. Every rank has all
+   * strip records and pressure stations. Each rank owns the native points in
+   * its cells, ordered by the material quadrature rule. */
   struct History
   {
     unsigned int step=0;
@@ -54,8 +59,12 @@ namespace aspect::GrowingFault
    * Prescribed-velocity work includes both wall and interior reactions. */
   struct Balance
   {
-    double bulk=0.,cohesive=0.,fracture=0.,prescribed_velocity_work=0.,bulk_loss=0.,cohesive_loss=0.,friction_work=0.;
-    double compliance_remainder=0.,phase_work=0.,storage_change=0.,adjoint_defect=0.,mechanical=0.,kkt=0.;
+    double bulk = 0., cohesive = 0., fracture = 0.;
+    double prescribed_velocity_work = 0.;
+    double bulk_loss = 0., cohesive_loss = 0., friction_work = 0.;
+    double compliance_remainder = 0., phase_work = 0., storage_change = 0.;
+    double adjoint_defect = 0.;   //!< Native friction work minus signed strip work (J/m).
+    double mechanical = 0., kkt = 0.; //!< Scaled mechanical and phase convergence measures.
     unsigned int iterations=0;
     template <class Archive> void serialize(Archive &ar, const unsigned int)
     {
@@ -72,19 +81,23 @@ namespace aspect::GrowingFault
   class Material : public MaterialModel::Interface<dim>, public SimulatorAccess<dim>
   {
     public:
-      static void declare_parameters(ParameterHandler &);
-      void parse_parameters(ParameterHandler &) override;
+      static void declare_parameters(ParameterHandler &prm);
+      void parse_parameters(ParameterHandler &prm) override;
       void initialize() override;
       bool is_compressible() const override
       {
         return false;
       }
-      void evaluate(const MaterialModel::MaterialModelInputs<dim> &,MaterialModel::MaterialModelOutputs<dim> &) const override;
-      void save(std::map<std::string,std::string> &) const override;
-      void load(const std::map<std::string,std::string> &) override;
+      void evaluate(const MaterialModel::MaterialModelInputs<dim> &in,
+                    MaterialModel::MaterialModelOutputs<dim>      &out) const override;
+      void save(std::map<std::string,std::string> &status) const override;
+      void load(const std::map<std::string,std::string> &status) override;
 
+      /** Discard any rejected trial. Seed owned native points on the first call. */
       void begin_attempt();
-      void stage_candidate(History &&,const Balance &);
+
+      /** Hold this converged endpoint until the simulator accepts or repeats the step. */
+      void stage_candidate(History &&candidate, const Balance &ledger);
       const History &history() const
       {
         return accepted;
@@ -103,10 +116,11 @@ namespace aspect::GrowingFault
         AssertThrow(balance_available,ExcMessage("No accepted balance is available for this growing fault checkpoint or initial state."));
         return last_balance;
       }
+      /** Freeze the per-strip compression (Pa) from the accepted graph for one attempt. */
       SectionPressures section_pressures() const;
       unsigned int phase_field() const
       {
-        return field;
+        return phase_field_index;
       }
       const CohesiveMaxwell &maxwell() const
       {
@@ -114,19 +128,21 @@ namespace aspect::GrowingFault
       }
       const MaterialModel::Rheology::FaultResistance &friction() const
       {
-        return *law;
+        return *resistance_law;
       }
       const Point<2> &seed_tip() const
       {
-        return anchor;
+        return seed_tip_position;
       }
     private:
-      unsigned int order,field;
-      double degrees, compression;
+      unsigned int quadrature_order;
+      unsigned int phase_field_index;
+      double seed_angle_degrees;
+      double prescribed_compression; //!< Constant compression in Pa when that source is selected.
       MaterialModel::Rheology::FrictionNormalStress normal_stress;
-      Point<2> anchor;
+      Point<2> seed_tip_position;
       CohesiveMaxwell point_law;
-      std::unique_ptr<MaterialModel::Rheology::FaultResistance> law;
+      std::unique_ptr<MaterialModel::Rheology::FaultResistance> resistance_law;
       std::unique_ptr<MaterialSections> geometry;
       History accepted;
       std::unique_ptr<History> trial;
@@ -134,8 +150,8 @@ namespace aspect::GrowingFault
       bool balance_available=false;
       void initialize_native_history();
       /** Deferred until ASPECT restores the mesh and reconstructs native rules. */
-      std::string restored;
-      bool legacy_checkpoint=false;
+      std::string checkpoint_bytes;
+      bool restore_v1=false;
       std::vector<double> checkpoint_parameters() const;
   };
 }
