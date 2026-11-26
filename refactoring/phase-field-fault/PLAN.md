@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**Material unification is ready for architecture review.** Both public inputs and the historical growth name use the ordinary `PhaseFieldFault` factory. The material selects trace or strip state from the configured phase composition. [Ownership, tested paths and pre-refactor checkpoint continuations](results/material-unification/README.md).
+
 **The curved-fault baseline and replay repair is ready for review before material-model unification.** The [frozen public trajectory and replay controls](results/mature-release/baseline-repair.md) bind the three accepted clocks to physical IDs, native fields and the public output. The station-by-station bend deficit, including its negative-normal contribution, is part of the baseline for the ownership change.
 
 **The curved phase initializer is ready for review.** The [one-vertex FE measurement](results/mature-release/phase-width.md) qualifies initialization from finite-segment distance. The [bend slip inventory](results/mature-release/bend-slip.md) measures a 3.98% shortfall in this geometry. Mechanical normalization needs a separate derivation and review before using returned slip quantitatively at regional bends.

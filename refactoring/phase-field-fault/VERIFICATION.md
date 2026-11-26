@@ -60,13 +60,13 @@ source/phase_field/midpoint_fracture.cc
 
 The two paths use the same material-law interface with different time levels. On the mature trace, `solve_rates` interpolates trial speed at the Q8 sample. The material interpolates the incoming RSF ages at that sample before evaluating traction and its fixed-age slope. The weak row contracts the supplied response with the Q1 test and the same normalized transfer used by Stokes. After convergence, the post-repeat hook commits slip and speed on the trace, law history at the material IDs, and Maxwell memory in the material. The section/profile pair moves by owning pointer, keeping the profile bound to its own trace.
 
-For growing strips the simulator constructs the midpoint system with separate references to simulator services and to the active growing material. The strip transfer reduces free rate and mobility over physical area divided by current arclength. Its resistance law eliminates the signed speed and returns force and condensed derivative. Each prospective direction repeats that solve over its complete strip; the direct score alone has compact support. At acceptance the physical owner advances the law, including unformed strips. A new checkpoint contains an independent law identity and exactly its declared state. The repaired v1 reader splits interleaved RSF ages from its kinematic records and preserves balance availability.
+For growing strips the simulator constructs the midpoint system with separate references to simulator services and to the active material-owned strip history. The strip transfer reduces free rate and mobility over physical area divided by current arclength. Its resistance law eliminates the signed speed and returns force and condensed derivative. Each prospective direction repeats that solve over its complete strip; the direct score alone has compact support. At acceptance the physical owner advances the law, including unformed strips. A new checkpoint contains an independent law identity and exactly its declared state. The repaired v1 reader splits interleaved RSF ages from its kinematic records and preserves balance availability.
 
 For the state-free control, run the parameter-file regression in the [working record](STATUS.md#ownership-cleanup-before-5b). It differentiates the pointwise direction score, reconstructs the signed linear root and condensed slope from FE gradients and old tensors, compares stored native transfer, and differences the actual returned matrix. Reversing the loading changes the sign of the physical rates. A mature Q1 dashpot has a separate uniform-traction solution. Both checkpoint probes read the physical wire records.
 
 ~~~text
 include/aspect/material_model/rheology/fault_resistance.h
-include/aspect/material_model/growing_fault.h
+include/aspect/material_model/phase_field_fault/strip_material_history.h
 include/aspect/reconstructed_fault/material_sections.h
 source/simulator/solver/midpoint_fault.cc
 source/reconstructed_fault/stokes_coupling.cc
@@ -99,7 +99,7 @@ source/simulator/solver_schemes.cc
 source/simulator/solver/midpoint_fault.cc
 source/phase_field/midpoint_fracture.cc
 source/simulator/solver/midpoint_direction.cc
-source/material_model/growing_fault.cc
+source/material_model/phase_field_fault/strip_material_history.cc
 ~~~
 
 ### Verify a change to a row or transfer
