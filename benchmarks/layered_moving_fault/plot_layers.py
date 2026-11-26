@@ -7,7 +7,31 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
 
-from check import Frame, read
+from check import read
+
+
+def accepted_positions(output):
+    """Read replicated rank-zero surface coordinates at the three poster times (s)."""
+    clock = read(output/'layered-background.csv')
+    frames = []
+    ids = None
+    positions = []
+    for time in (0., .0125, .025):
+        matches = clock[np.isclose(clock['time'], time, rtol=0, atol=1e-14)]
+        if len(matches) != 1:
+            raise ValueError(f'Expected one accepted frame at {time:g} s, found {len(matches)}')
+        frame = matches[0]
+        surface = np.sort(read(output/f'material-{frame["step"]}-surface-0.csv'), order='i')
+        current_ids = surface['i']
+        if current_ids.dtype.kind not in 'iu' or len(current_ids) < 2 or np.any(np.diff(current_ids) == 0):
+            raise ValueError(f'Expected distinct material vertex IDs at {time:g} s')
+        if ids is None:
+            ids = current_ids
+        elif not np.array_equal(ids, current_ids):
+            raise ValueError(f'Material vertex IDs changed at {time:g} s')
+        frames.append(frame)
+        positions.append(np.column_stack((surface['x'], surface['y'])))
+    return np.array(frames), ids, np.array(positions)
 
 
 def main():
@@ -16,15 +40,11 @@ def main():
     parser.add_argument('destination', type=Path, help='directory for layered-motion.png and layered-motion.pdf')
     args = parser.parse_args()
 
-    # Use the same keyed physical frames as the layered donor comparison.
-    clocks = read(args.output/'layered-background.csv')
-    np.testing.assert_array_equal(clocks['step'], [0, 1, 2])
+    clocks, ids, positions = accepted_positions(args.output)
     times = clocks['time']
-    np.testing.assert_allclose(times, [0., .0125, .025], rtol=0, atol=1e-14)
-    frames = [Frame(args.output, step) for step in clocks['step']]
-    positions = np.array([frame.X for frame in frames])
-    labels = [0, 9, 19]
-    profile = read(args.output/'background-0.csv')
+    # Mark the two ends and the middle material vertex (lower middle for even counts).
+    marked = np.unique([0, (len(ids)-1)//2, len(ids)-1])
+    profile = read(args.output/f'background-{clocks["step"][0]}.csv')
     params = json.loads((args.output/'parameters.json').read_text())
     translation = float(params['Postprocess']['Layered background']['Translation']['value'])
     mean_wall_motion = times * translation
@@ -53,15 +73,15 @@ def main():
     for i, (color, style) in enumerate([('#1b2935', '--'), ('#60717b', ':'), ('#ad371a', '-')]):
         section.plot(*positions[i].T, color=color, linestyle=style, linewidth=2,
                      label=f'{1e3*times[i]:g} ms')
-    # Replot the same three material IDs at successive endpoints. Label the
+    # Replot the same material IDs at successive endpoints. Label the
     # IDs once; only the final clock has filled symbols.
     marker_shapes = ['s', 'o', '^']
-    for label, marker in zip(labels, marker_shapes):
-        section.plot(*positions[0, label], marker=marker, markerfacecolor='white',
+    for index, marker in zip(marked, marker_shapes):
+        section.plot(*positions[0, index], marker=marker, markerfacecolor='white',
                      markeredgecolor='#202c32', ms=6, lw=0)
-        section.plot(*positions[-1, label], marker=marker, markerfacecolor='#ad371a',
+        section.plot(*positions[-1, index], marker=marker, markerfacecolor='#ad371a',
                      markeredgecolor='white', ms=7, lw=0)
-        section.annotate(f'ID {label}', positions[-1, label], xytext=(0, 12), ha='center',
+        section.annotate(f'ID {ids[index]}', positions[-1, index], xytext=(0, 12), ha='center',
                          textcoords='offset points', fontsize=11,
                          bbox={'boxstyle': 'round,pad=.18', 'facecolor': 'white',
                                'edgecolor': 'none', 'alpha': .92})
@@ -74,13 +94,14 @@ def main():
 
     motion.axhline(0, color='#78848d', lw=1.1)
     offsets = 1e3 * (dx - mean_wall_motion[:, None])
-    for label, marker, color in zip(labels, marker_shapes, ['#785378', '#147b72', '#a73319']):
-        motion.plot(times*1e3, offsets[:, label], marker=marker, lw=2.2, markersize=6, color=color)
-        motion.annotate(f'ID {label}', (times[-1]*1e3, offsets[-1, label]), xytext=(7, 0),
+    for index, marker, color in zip(marked, marker_shapes, ['#785378', '#147b72', '#a73319']):
+        motion.plot(times*1e3, offsets[:, index], marker=marker, lw=2.2, markersize=6, color=color)
+        motion.annotate(f'ID {ids[index]}', (times[-1]*1e3, offsets[-1, index]), xytext=(7, 0),
                         textcoords='offset points', va='center', fontsize=12, color=color)
     motion.set(xlim=(-1, 31), xticks=times*1e3, xlabel='Accepted time (ms)',
                ylabel='Horizontal displacement − mean wall motion (mm)')
-    motion.set_title('Differential motion of three vertices', loc='left', pad=13)
+    count = 'three' if len(marked) == 3 else 'two'
+    motion.set_title(f'Differential motion of {count} vertices', loc='left', pad=13)
     motion.grid(axis='y', color='#dce3e3', linewidth=.7)
     motion.set_axisbelow(True)
     args.destination.mkdir(parents=True, exist_ok=True)
@@ -90,9 +111,9 @@ def main():
                     bbox_inches='tight', pad_inches=.18, metadata=metadata)
     plt.close(fig)
     print(f'Mean wall motion at {1e3*times[-1]:g} ms: {1e3*mean_wall_motion[-1]:g} mm')
-    for label in labels:
-        print(f'ID {label}: x = {positions[0,label,0]:.10g} to {positions[-1,label,0]:.10g} m, '
-              f'Δx = {1e3*dx[-1,label]:.9f} mm, relative displacement = {offsets[-1,label]:.9f} mm.')
+    for index in marked:
+        print(f'ID {ids[index]}: x = {positions[0,index,0]:.10g} to {positions[-1,index,0]:.10g} m, '
+              f'Δx = {1e3*dx[-1,index]:.9f} mm, relative displacement = {offsets[-1,index]:.9f} mm.')
 
 
 if __name__ == '__main__':
