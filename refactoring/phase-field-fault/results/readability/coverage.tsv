@@ -1,0 +1,316 @@
+Disposition	Path relative to worktree root	Review note
+inspected	AGENTS.md	Worktree readability and upstream core rules
+inspected	CMakeLists.txt	Installed SDK, runtime, benchmark and canonical CSV installation rules
+inspected	benchmarks/explicit_dg_transport/CMakeLists.txt	Installed SDK plugin build
+edited	benchmarks/explicit_dg_transport/check.py	Measured result, time level or independent operator control
+edited	benchmarks/explicit_dg_transport/check_3d.py	Measured result, time level or independent operator control
+inspected	benchmarks/explicit_dg_transport/check_compatibility.py	Check compatibility benchmark control
+input inspected	benchmarks/explicit_dg_transport/mixed.prm	Existing parameter spelling, physical inputs and include chain
+edited	benchmarks/explicit_dg_transport/reference.py	Measured result, time level or independent operator control
+input inspected	benchmarks/explicit_dg_transport/slabs.prm	Existing parameter spelling, physical inputs and include chain
+inspected	benchmarks/fixed_fault/check_lifecycle.py	Check lifecycle benchmark control
+inspected	benchmarks/fixed_fault/check_mature_settings.py	Check mature settings benchmark control
+inspected	benchmarks/fixed_fault/check_stress_output.py	Check stress output benchmark control
+inspected	benchmarks/fixed_fault/check_transport.py	Check transport benchmark control
+inspected	benchmarks/fixed_fault/compare_snapshots.py	Compare snapshots benchmark control
+input inspected	benchmarks/fixed_fault/fixed_fault.prm	Existing parameter spelling, physical inputs and include chain
+input inspected	benchmarks/fixed_fault/mature_trace.prm	Existing parameter spelling, physical inputs and include chain
+input inspected	benchmarks/fixed_fault/mature_vertices.txt	Existing parameter spelling, physical inputs and include chain
+reference / generated	benchmarks/fixed_fault/phase_ridge/3a-repair-free-labels.csv	Reference output or archived measurement
+inspected	benchmarks/fixed_fault/phase_ridge/CMakeLists.txt	Installed SDK plugin build
+inspected	benchmarks/fixed_fault/phase_ridge/check.py	Check benchmark control
+inspected	benchmarks/fixed_fault/phase_ridge/check_normalization.py	Check normalization benchmark control
+inspected	benchmarks/fixed_fault/phase_ridge/check_pressure.py	Check pressure benchmark control
+inspected	benchmarks/fixed_fault/phase_ridge/moments.py	Moments benchmark control
+edited	benchmarks/fixed_fault/phase_ridge/phase_ridge.cc	Measured result, time level or independent operator control
+reference / generated	benchmarks/fixed_fault/phase_ridge/q8-free-32-labels.csv	Reference output or archived measurement
+inspected	benchmarks/fixed_fault/phase_ridge/run.py	Run benchmark control
+reference / generated	benchmarks/fixed_fault/stationary-reference/fault-0-0.txt	Reference output or archived measurement
+reference / generated	benchmarks/fixed_fault/stationary-reference/fault-1-0.txt	Reference output or archived measurement
+reference / generated	benchmarks/fixed_fault/stationary-reference/fault-2-0.txt	Reference output or archived measurement
+input inspected	benchmarks/fixed_fault/stationary.prm	Existing parameter spelling, physical inputs and include chain
+inspected	benchmarks/fixed_fault/transfer_work/CMakeLists.txt	Installed SDK plugin build
+inspected	benchmarks/fixed_fault/transfer_work/refinement.py	Refinement benchmark control
+inspected	benchmarks/fixed_fault/transfer_work/run.py	Run benchmark control
+edited	benchmarks/fixed_fault/transfer_work/transfer_work.cc	Measured result, time level or independent operator control
+inspected	benchmarks/growing_fault/CMakeLists.txt	Standalone scientific checker/probe target; matched installed SDK required
+input inspected	benchmarks/growing_fault/adiabatic_pressure.prm	Existing input, parameter spellings, and physical settings retained for installed comparisons
+inspected	benchmarks/growing_fault/check_adiabatic_pressure.py	Run the installed depth profile and compare the compression used by the two strip operations
+inspected	benchmarks/growing_fault/check_admission.py	Exercise an isolated, positive-phase band outside the forward disk at rest and under load
+inspected	benchmarks/growing_fault/check_history.py	Independent midpoint balance from the onecut mesh, stage velocity and native endpoints
+inspected	benchmarks/growing_fault/check_history_output.py	Exercise native growing-history files with the installed exporter across MPI partition changes
+inspected	benchmarks/growing_fault/check_interface.py	Exercise both public fault routes, their inputs and the two checkpoint formats
+inspected	benchmarks/growing_fault/check_material_settings.py	Check the modulus in the accepted native stress, aliases and route-specific defaults
+inspected	benchmarks/growing_fault/check_physical_inputs.py	Change one physical input of the nine-strip fault and read its accepted response
+inspected	benchmarks/growing_fault/check_repairs.py	Exercise the 5A repair cases through ordinary ASPECT parameter files
+edited	benchmarks/growing_fault/check_section_publication.py	Independent first-step cold-creep audit from the published native histories
+inspected	benchmarks/growing_fault/check_seed_tip.py	Locate a tapered initial FE seed across an MPI face and reject normally displaced tips
+inspected	benchmarks/growing_fault/check_state_free.py	Run signed strip and positive-speed Q1 controls with a stateless material
+inspected	benchmarks/growing_fault/check_surface_pressure.sh	Legacy pressure alias consistency and conflict diagnostic
+inspected	benchmarks/growing_fault/check_wall_clock.py	Compare midpoint wall displacement, native stress and work for a ramp and constant controls
+inspected	benchmarks/growing_fault/compare.py	Compare every accepted target frame with the frozen nine-strip native output
+edited	benchmarks/growing_fault/growing_fault_checks.cc	Tangent/work directional differences and sample writer; checks use same native data path
+input inspected	benchmarks/growing_fault/growing_seed.prm	Embedded phase, frame and loading settings traced; public example redesign belongs to D
+inspected	benchmarks/growing_fault/linear_resistance.cc	External state-free trace/strip resistance law; covered by existing stateless tests
+reference / generated	benchmarks/growing_fault/nine-strip-geometry.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+input inspected	benchmarks/growing_fault/onecut.prm	Embedded phase, frame and loading settings traced; public example redesign belongs to D
+inspected	benchmarks/growing_fault/parameter_compatibility/CMakeLists.txt	Standalone scientific checker/probe target; matched installed SDK required
+inspected	benchmarks/growing_fault/parameter_compatibility/check.py	Run through installed ASPECT with a separately built resistance-law plugin
+inspected	benchmarks/growing_fault/parameter_compatibility/weighted_dashpot.cc	External law compatibility probe for qualified parameter aliases
+input inspected	benchmarks/growing_fault/prescribed_compression.prm	Existing input, parameter spellings, and physical settings retained for installed comparisons
+inspected	benchmarks/growing_fault/run.py	Run the nine-strip control and its two rollback and checkpoint comparisons
+inspected	benchmarks/growing_fault/timestep/CMakeLists.txt	Standalone scientific checker/probe target; matched installed SDK required
+edited	benchmarks/growing_fault/timestep/audit.py	Independent mapped Q2/SIPG, section transfer and physical-work checks for the 5B fixture
+inspected	benchmarks/growing_fault/timestep/check_closeout.py	Exercise the four 5B review findings against retained, keyed physical records
+edited	benchmarks/growing_fault/timestep/frames.py	Compare every keyed donor column that has a counterpart in the target
+inspected	benchmarks/growing_fault/timestep/midpoint_fields.cc	Physical cell extents and field component/local index on owned native cells
+inspected	benchmarks/growing_fault/timestep/plot_phase.py	Map the two accepted phase increments from their common 5 ms obstacle
+inspected	benchmarks/growing_fault/timestep/run.py	Run one original schedule on two ranks in a new directory; preserve failure output
+inspected	benchmarks/layered_moving_fault/CMakeLists.txt	Installed SDK plugin build
+edited	benchmarks/layered_moving_fault/background.h	Measured result, time level or independent operator control
+edited	benchmarks/layered_moving_fault/check.py	Measured result, time level or independent operator control
+inspected	benchmarks/layered_moving_fault/check_restart_width.py	Check restart width benchmark control
+inspected	benchmarks/layered_moving_fault/check_review.py	Check review benchmark control
+inspected	benchmarks/layered_moving_fault/check_vertex_file.py	Check vertex file benchmark control
+input inspected	benchmarks/layered_moving_fault/layered.prm	Embedded phase, frame and loading settings traced; public example redesign belongs to D
+inspected	benchmarks/layered_moving_fault/layered_moving_fault.cc	Existing layered moving fault interface or implementation
+inspected	benchmarks/layered_moving_fault/run.py	Run benchmark control
+input inspected	benchmarks/layered_moving_fault/traction_step.prm	Existing parameter spelling, physical inputs and include chain
+input inspected	benchmarks/layered_moving_fault/translated_horizontal.prm	Existing parameter spelling, physical inputs and include chain
+edited	benchmarks/measure_fault_cost.py	Physical RMS and maximum velocity columns in a timed run
+input inspected	benchmarks/phase_field_surface_energy/affine.prm	Existing parameter spelling, physical inputs and include chain
+inspected	benchmarks/phase_field_surface_energy/check.py	Check benchmark control
+input inspected	benchmarks/phase_field_surface_energy/straight_crack.prm	Existing parameter spelling, physical inputs and include chain
+edited	benchmarks/verify_phase_field_fault.sh	Installed verifier and common-parent comparisons
+inspected	cmake/AspectConfig.cmake.in	Installed headers, external plugin includes and link directory
+inspected	doc/modules/changes/20261124_Codex	Working guidance and scientific scope
+reference / generated	doc/sphinx/parameters/Compositional_20fields.md	Generated parameter index or help
+reference / generated	doc/sphinx/parameters/Discretization.md	Generated parameter index or help
+reference / generated	doc/sphinx/parameters/Material_20model.md	Generated parameter index or help
+reference / generated	doc/sphinx/parameters/Phase_20field.md	Generated parameter index or help
+reference / generated	doc/sphinx/parameters/Postprocess.md	Generated parameter index or help
+reference / generated	doc/sphinx/parameters/global.md	Generated parameter index or help
+reference / generated	doc/sphinx/parameters/index.md	Generated parameter index or help
+inspected	doc/sphinx/user/methods/compositional-fields.md	Working guidance and scientific scope
+inspected	doc/sphinx/user/run-aspect/checkpoint-restart.md	Working guidance and scientific scope
+edited	include/aspect/fe_dgq_bernstein.h	Non-nodal DG basis and support points
+inspected	include/aspect/introspection.h	Explicit field selection and compositional FE basis identity
+edited	include/aspect/material_model/fault_parameters.h	Resolve canonical/legacy parameter entries without changing declarations, defaults or conflicts
+edited	include/aspect/material_model/growing_fault.h	Growing material owns accepted point/strip history and law initialization; solver owns each trial
+inspected	include/aspect/material_model/phase_field_fault.h	Previously revised public contract; accepted label diagnostics and candidate history
+edited	include/aspect/material_model/rheology/cohesive_maxwell.h	Half-step increment and full 3-D deviator at native quadrature; tangent paired with its residual
+edited	include/aspect/material_model/rheology/fault_resistance.h	Single material-owned trace/strip law factory and optional history consumption
+inspected	include/aspect/material_model/rheology/friction_normal_stress.h	Pressure closure resolved in material and checked on restart against physical profile
+edited	include/aspect/material_model/rheology/rate_and_state_friction.h	Signed, stage-aged strip root and positive-rate, frozen-age trace response
+inspected	include/aspect/parameters.h	Method enum, resolved transport and immutable phase configuration
+edited	include/aspect/phase_field/bernstein_bounds.h	FE phase representation, constitutive law or cell/face operator
+inspected	include/aspect/phase_field/crack_geometry.h	Phase model, operator or observer contract
+edited	include/aspect/phase_field/degradation.h	FE phase representation, constitutive law or cell/face operator
+edited	include/aspect/phase_field/midpoint_fracture.h	FE phase representation, constitutive law or cell/face operator
+inspected	include/aspect/phase_field/surface_energy_model.h	Phase model, operator or observer contract
+inspected	include/aspect/postprocess/growing_fault_history.h	Per-rank accepted stress/history serialization, aggregate failure handling and output naming
+inspected	include/aspect/postprocess/phase_field_surface_energy.h	Phase model, operator or observer contract
+edited	include/aspect/reconstructed_fault/material_fault_trace.h	Fault trace, point transfer or accepted section response
+edited	include/aspect/reconstructed_fault/material_sections.h	Native chord-rule membership and strip area/arclength; identity/order fixed across attempts
+edited	include/aspect/reconstructed_fault/onset_score.h	Second moments and signed root used in cold-creep direction score
+edited	include/aspect/reconstructed_fault/phase_profile.h	Fault trace, point transfer or accepted section response
+edited	include/aspect/reconstructed_fault/stokes_coupling.h	Fault trace, point transfer or accepted section response
+inspected	include/aspect/simulator.h	Simulator-owned solves and Picard loop
+inspected	include/aspect/simulator/assemblers/fault_stress.h	Trace response and weak stress work
+edited	include/aspect/simulator/solver/dg_transport.h	Numerical field update, order and accepted-parent ownership
+edited	include/aspect/simulator/solver/explicit_composition.h	Numerical field update, order and accepted-parent ownership
+edited	include/aspect/simulator/solver/midpoint_fault.h	Ordinary midpoint (velocity/pressure/phase/strip) Newton solve, signed-rate and work verification
+edited	include/aspect/simulator/solver/midpoint_system.h	Native strip-stage reductions, joint residual/tangent and candidate binding
+edited	include/aspect/simulator_signals.h	Pre-assembly, coupled convergence and post-accept signal contracts
+inspected	refactoring/phase-field-fault/IMPLEMENTATION.md	Working guidance and scientific scope
+historical record	refactoring/phase-field-fault/INCREMENT_3A_REPAIR.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/INCREMENT_3A_TASK.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/INCREMENT_3B_TASK.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/INCREMENT_4A_TASK.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/INCREMENT_4B_TASK.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/INCREMENT_4C_TASK.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/INCREMENT_5A_REVIEW_REPAIRS.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/INCREMENT_5A_TASK.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/INCREMENT_5B_COMPLETION.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/INCREMENT_5B_TASK.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/INCREMENT_6A_TASK.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/INTERFACE_C2_TASK.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/PF_RSF_OWNERSHIP_CLEANUP.md	Assignment and decision record
+updated record	refactoring/phase-field-fault/PLAN.md	Assignment and decision record
+historical record	refactoring/phase-field-fault/STATIONARY_COUPLING_TASK.md	Assignment and decision record
+updated record	refactoring/phase-field-fault/STATUS.md	Assignment and decision record
+inspected	refactoring/phase-field-fault/VERIFICATION.md	Working guidance and scientific scope
+edited	refactoring/phase-field-fault/rate_tangent/capture.py	Live recorder for completed native point and section bands on the selected Picard iterate
+inspected	refactoring/phase-field-fault/rate_tangent/check_moving.py	Reference replay, provenance or independent comparison
+edited	refactoring/phase-field-fault/rate_tangent/check_row.py	Reference replay, provenance or independent comparison
+inspected	refactoring/phase-field-fault/replay_6a.py	Reference replay, provenance or independent comparison
+inspected	refactoring/phase-field-fault/replay_fixed_reference.py	Reference replay, provenance or independent comparison
+inspected	refactoring/phase-field-fault/replay_stationary_reference.py	Reference replay, provenance or independent comparison
+reference / generated	refactoring/phase-field-fault/results/3a-free-labels.csv	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/3a-repair-free-labels.csv	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/3a-repair-transects.png	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/3a-transects.png	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/4c-layered-crossing.png	Reference output or archived measurement
+historical record	refactoring/phase-field-fault/results/direction-c1/README.md	Evidence provenance, reproduction commands and scope of comparison inspected
+inspected	refactoring/phase-field-fault/results/direction-c1/affine.py	Reproduce the strict C1 affine control on one/two ranks and verify the captured state
+reference / generated	refactoring/phase-field-fault/results/direction-c1/archive-peaks.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+inspected	refactoring/phase-field-fault/results/direction-c1/capture.py	Build a scratch ASPECT executable which observes both selectors on each solved midpoint state
+inspected	refactoring/phase-field-fault/results/direction-c1/check_frozen.py	Verify the first frozen strip-8 turn and its accepted arclength on two ranks
+inspected	refactoring/phase-field-fault/results/direction-c1/check_golden.py	Locate the first differing golden-section comparison and check its sign on the frozen field
+reference / generated	refactoring/phase-field-fault/results/direction-c1/common-angles.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/direction-c1/frozen-arclength.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/direction-c1/frozen-endpoints.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/direction-c1/frozen-golden.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/direction-c1/peak-convergence.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/direction-c1/peak-curves.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/direction-c1/peak-summary.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+inspected	refactoring/phase-field-fault/results/direction-c1/peaks.py	Independent pointwise strip-8 objective on the solved first midpoint field
+inspected	refactoring/phase-field-fault/results/direction-c1/plot.py	Plot the direct point-score loss at each selected orientation, including the close pair at the summit
+reference / generated	refactoring/phase-field-fault/results/direction-c1/strip-8-score.png	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/direction-c1/turns.tar.gz	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+historical record	refactoring/phase-field-fault/results/direction-c2/README.md	Evidence provenance, reproduction commands and scope of comparison inspected
+reference / generated	refactoring/phase-field-fault/results/direction-c2/accepted-peaks.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+inspected	refactoring/phase-field-fault/results/direction-c2/check_peak.py	Compare an ordinary accepted strip-8 trajectory to the independent C1 native-point peak
+inspected	refactoring/phase-field-fault/results/direction-c2/check_reversal.py	Reverse both wall components in the installed affine nine-strip input at 5 ms
+reference / generated	refactoring/phase-field-fault/results/direction-c2/peak-errors.png	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+inspected	refactoring/phase-field-fault/results/direction-c2/plot_peaks.py	Plot ordinary strip-8 endpoint errors against the direct native-point peaks at 5 ms
+inspected	refactoring/phase-field-fault/results/direction-c2/review_controls.sh	Installed wall reversal and six geometry-corruption controls, reviewed C2 checker remains its own commit
+inspected	refactoring/phase-field-fault/results/direction-c2/run_strip18.sh	Same-source ordinary and returned-row schedules run outside the checkout
+reference / generated	refactoring/phase-field-fault/results/direction-c2/strip18-audit.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+historical record	refactoring/phase-field-fault/results/direction-c2/strip18.md	Evidence provenance, reproduction commands and scope of comparison inspected
+inspected	refactoring/phase-field-fault/results/interface-c1/plot_pressure.py	Reproduces figure from measured fields
+reference / generated	refactoring/phase-field-fault/results/interface-c1/pressure-depth.png	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/interface-c2/before.txt	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/interface-c2/c1-captures.tar.gz	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/interface-c2/capture-c1.patch	Reference output or archived measurement
+inspected	refactoring/phase-field-fault/results/interface-c2/replay.py	Historical replay or observation for the recorded revision
+reference / generated	refactoring/phase-field-fault/results/interface-c2/score1.log	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/interface-c2/score2.log	Reference output or archived measurement
+inspected	refactoring/phase-field-fault/results/interface-c2/sdk.sh	Historical replay or observation for the recorded revision
+reference / generated	refactoring/phase-field-fault/results/interface-c2/stable-frozen.txt	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/interface-c2/stable-score.patch	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/interface-c2/stable-strip18.txt	Reference output or archived measurement
+inspected	refactoring/phase-field-fault/results/interface-c2/verify.sh	Historical replay or observation for the recorded revision
+inspected	refactoring/phase-field-fault/results/interface-stage-a/plot_wall_clock.py	Reproduces figure from measured fields
+reference / generated	refactoring/phase-field-fault/results/interface-stage-a/wall-clock.png	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/interface-stage-b/compression.png	Reference output or archived measurement
+inspected	refactoring/phase-field-fault/results/interface-stage-b/plot_compression.py	Reproduces figure from measured fields
+inspected	refactoring/phase-field-fault/results/review-a/check_rate_reversal.py	Historical replay or observation for the recorded revision
+inspected	refactoring/phase-field-fault/results/review-a/check_stress_sign.py	Historical replay or observation for the recorded revision
+inspected	refactoring/phase-field-fault/results/review-a/plot_modulus.py	Historical replay or observation for the recorded revision
+reference / generated	refactoring/phase-field-fault/results/review-a/public-modulus.png	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/review-a/rate-after.txt	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/review-a/rate-before.txt	Reference output or archived measurement
+edited	refactoring/phase-field-fault/results/strip18/capture_rows.py	Live recorder after both convergence tests, before candidate field publication
+reference / generated	refactoring/phase-field-fault/results/strip18/frame-comparisons.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/strip18/intervals.json	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/strip18/moments.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/strip18/peak.json	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+inspected	refactoring/phase-field-fault/results/strip18/peak.py	Resolve strip 15's centered score on the two captured selector inputs
+reference / generated	refactoring/phase-field-fault/results/strip18/phase-increments.pdf	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/strip18/phase-increments.png	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+inspected	refactoring/phase-field-fault/results/strip18/physical-files.sha256	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/strip18/review-checks.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/strip18/selector-choices.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+inspected	refactoring/phase-field-fault/results/strip18/selector_buffers.py	GDB callbacks for the pinned x86-64 Open MPI selector reductions
+reference / generated	refactoring/phase-field-fault/results/strip18/strip15-direction.pdf	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/strip18/strip15-direction.png	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+reference / generated	refactoring/phase-field-fault/results/strip18/strip15.csv	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+inspected	refactoring/phase-field-fault/results/strip18/turn.py	Observe strip 15 at its first virgin-plane decision; replay its reduced score
+historical record	refactoring/phase-field-fault/results/transfer-work/README.md	Assignment and decision record
+inspected	refactoring/phase-field-fault/results/transfer-work/controls.py	Reference replay, provenance or independent comparison
+inspected	refactoring/phase-field-fault/results/transfer-work/controls.sh	Reference replay, provenance or independent comparison
+reference / generated	refactoring/phase-field-fault/results/transfer-work/free32-shift.csv	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/transfer-work/one-cell-original.json	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/transfer-work/one-cell-repaired.json	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/transfer-work/original.csv	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/transfer-work/repaired.csv	Reference output or archived measurement
+reference / generated	refactoring/phase-field-fault/results/transfer-work/work-error.png	Reference output or archived measurement
+historical record	refactoring/phase-field-fault/strip8/README.md	Assignment and decision record
+inspected	refactoring/phase-field-fault/strip8/capture.py	Historical replay or observation for the recorded revision
+edited	refactoring/phase-field-fault/strip8/endpoints.py	All 152 historical donor/target columns, keyed by physical clock and identity
+reference / generated	refactoring/phase-field-fault/strip8/evidence.tar.gz	Reference output or archived measurement
+inspected	refactoring/phase-field-fault/strip8/observer.h	Historical replay or observation for the recorded revision
+inspected	refactoring/phase-field-fault/strip8/reductions.py	Historical replay or observation for the recorded revision
+inspected	refactoring/phase-field-fault/strip8/replay.py	Historical replay or observation for the recorded revision
+inspected	refactoring/phase-field-fault/test_replay_stationary_reference.py	Reference replay, provenance or independent comparison
+edited	source/material_model/fault_parameters.cc	Resolve canonical/legacy parameter entries without changing declarations, defaults or conflicts
+edited	source/material_model/growing_fault.cc	Growing material owns accepted point/strip history and law initialization; solver owns each trial
+inspected	source/material_model/interface.cc	Parameter declaration and material factory registration
+inspected	source/material_model/phase_field_fault.cc	Previously revised material; trace callers and parameter-to-material path inspected
+edited	source/material_model/rheology/cohesive_maxwell.cc	Half-step increment and full 3-D deviator at native quadrature; tangent paired with its residual
+edited	source/material_model/rheology/fault_resistance.cc	Single material-owned trace/strip law factory and optional history consumption
+inspected	source/material_model/rheology/friction_normal_stress.cc	Pressure closure resolved in material and checked on restart against physical profile
+edited	source/material_model/rheology/rate_and_state_friction.cc	Signed, stage-aged strip root and positive-rate, frozen-age trace response
+inspected	source/phase_field/crack_geometry.cc	Phase model, operator or observer contract
+edited	source/phase_field/degradation.cc	FE phase representation, constitutive law or cell/face operator
+edited	source/phase_field/midpoint_fracture.cc	FE phase representation, constitutive law or cell/face operator
+edited	source/phase_field/surface_energy_model.cc	FE phase representation, constitutive law or cell/face operator
+inspected	source/postprocess/composition_statistics.cc	Physical samples for a non-nodal phase
+edited	source/postprocess/growing_fault_history.cc	Per-rank accepted stress/history serialization, aggregate failure handling and output naming
+inspected	source/postprocess/mature_fault_statistics.cc	Existing mature fault statistics interface or implementation
+inspected	source/postprocess/phase_field_surface_energy.cc	Phase model, operator or observer contract
+inspected	source/prescribed_solution/interface.cc	Nodal components in a mixed system
+edited	source/reconstructed_fault/material_fault_trace.cc	Fault trace, point transfer or accepted section response
+edited	source/reconstructed_fault/material_sections.cc	Native chord-rule membership and strip area/arclength; identity/order fixed across attempts
+edited	source/reconstructed_fault/phase_profile.cc	Fault trace, point transfer or accepted section response
+edited	source/reconstructed_fault/stokes_coupling.cc	Fault trace, point transfer or accepted section response
+inspected	source/simulator/assemblers/fault_stress.cc	Trace response and weak stress work
+edited	source/simulator/checkpoint_restart.cc	Per-field basis compatibility before loading coefficients
+edited	source/simulator/core.cc	Construction of configured material and accepted-step notification
+edited	source/simulator/initial_conditions.cc	Nodal interpolation and non-nodal FE initialization
+edited	source/simulator/introspection.cc	Independent versus grouped compositional elements
+edited	source/simulator/parameters.cc	Canonical/legacy method selection, defaults and public help
+edited	source/simulator/solver/dg_transport.cc	Numerical field update, order and accepted-parent ownership
+edited	source/simulator/solver/explicit_composition.cc	Numerical field update, order and accepted-parent ownership
+edited	source/simulator/solver/midpoint_direction.cc	Disk membership, prospective plane score, updating candidate section map by material ID
+edited	source/simulator/solver/midpoint_fault.cc	Ordinary midpoint (velocity/pressure/phase/strip) Newton solve, signed-rate and work verification
+edited	source/simulator/solver_schemes.cc	Composition dispatch and joint Picard veto
+edited	tests/CMakeLists.txt	CTest output-filter dependencies
+edited	tests/dg_stress_spin_order.cc	Measured result, time level or independent operator control
+input inspected	tests/dg_stress_spin_order.prm	Existing parameter spelling, physical inputs and include chain
+reference / generated	tests/dg_stress_spin_order/spin-check	Reference output or archived measurement
+edited	tests/dg_stress_transport.cc	Measured result, time level or independent operator control
+input inspected	tests/dg_stress_transport.prm	Existing parameter spelling, physical inputs and include chain
+inspected	tests/dg_stress_transport.sh	Run or filter for dg stress transport
+reference / generated	tests/dg_stress_transport/transport-checks	Reference output or archived measurement
+edited	tests/explicit_dg_compositions.cc	Measured result, time level or independent operator control
+input inspected	tests/explicit_dg_compositions.prm	Existing parameter spelling, physical inputs and include chain
+inspected	tests/explicit_dg_compositions.sh	Run or filter for explicit dg compositions
+reference / generated	tests/explicit_dg_compositions/mixed-check	Reference output or archived measurement
+input inspected	tests/explicit_dg_phase.prm	Existing parameter spelling, physical inputs and include chain
+inspected	tests/explicit_dg_phase.sh	Run or filter for explicit dg phase
+reference / generated	tests/explicit_dg_phase/screen-output	Reference output or archived measurement
+input inspected	tests/explicit_dg_phase_statistics.prm	Existing parameter spelling, physical inputs and include chain
+inspected	tests/explicit_dg_phase_statistics.sh	Run or filter for explicit dg phase statistics
+reference / generated	tests/explicit_dg_phase_statistics/screen-output	Reference output or archived measurement
+input inspected	tests/explicit_dg_slabs.prm	Existing parameter spelling, physical inputs and include chain
+inspected	tests/explicit_dg_slabs.sh	Run or filter for explicit dg slabs
+reference / generated	tests/explicit_dg_slabs/screen-output	Reference output or archived measurement
+edited	tests/fixed_fault.cc	Measured result, time level or independent operator control
+input inspected	tests/fixed_fault.prm	Existing parameter spelling, physical inputs and include chain
+reference / generated	tests/fixed_fault/fault-checks	Reference output or archived measurement
+inspected	tests/growing_fault.cc	Growing material owns accepted point/strip history and law initialization; solver owns each trial
+input inspected	tests/growing_fault.prm	Existing input, parameter spellings, and physical settings retained for installed comparisons
+inspected	tests/growing_fault.sh	CTest logs filtered for golden output without changing the solve
+reference / generated	tests/growing_fault/screen-output	Frozen scientific output, provenance or plotted reference retained byte-for-byte
+input inspected	tests/layered_fault_traction_step.prm	Existing parameter spelling, physical inputs and include chain
+inspected	tests/layered_fault_traction_step.sh	Run or filter for layered fault traction step
+reference / generated	tests/layered_fault_traction_step/screen-output	Reference output or archived measurement
+inspected	tests/layered_moving_fault.cc	Regression observer for layered moving fault
+input inspected	tests/layered_moving_fault.prm	Existing parameter spelling, physical inputs and include chain
+edited	tests/layered_moving_fault.sh	Measured result, time level or independent operator control
+reference / generated	tests/layered_moving_fault/screen-output	Reference output or archived measurement
+inspected	tests/phase_field_model_without_reporter.cc	Regression observer for phase field model without reporter
+input inspected	tests/phase_field_model_without_reporter.prm	Existing parameter spelling, physical inputs and include chain
+reference / generated	tests/phase_field_model_without_reporter/configured-model	Reference output or archived measurement
+input inspected	tests/postprocess/phase_field_surface_energy_at2.prm	Existing parameter spelling, physical inputs and include chain
+inspected	tests/postprocess/phase_field_surface_energy_at2.sh	Run or filter for phase field surface energy at2
+reference / generated	tests/postprocess/phase_field_surface_energy_at2/screen-output	Reference output or archived measurement
+inspected	tests/stationary_fault.cc	Regression observer for stationary fault
+input inspected	tests/stationary_fault.prm	Existing parameter spelling, physical inputs and include chain
+inspected	tests/stationary_fault.sh	Run or filter for stationary fault
+reference / generated	tests/stationary_fault/fault-checks	Reference output or archived measurement
+inspected	unit_tests/fixed_fault.cc	Independent checks of fixed fault
+edited	unit_tests/material_sections.cc	Native chord-rule membership and strip area/arclength; identity/order fixed across attempts
+edited	unit_tests/phase_field.cc	Measured result, time level or independent operator control

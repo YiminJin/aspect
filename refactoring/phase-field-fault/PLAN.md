@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**The branch-wide readability pass is ready for review.** The [working record](STATUS.md#branch-wide-readability-review-before-assignment-d) and [release-diff coverage and replay commands](results/readability/README.md) identify the local behavior baseline, separately reviewable changes and same-source recorder checks. The historical four strip-15 comparisons retain their original strict result. Assignment D will address the public examples.
+
 **Assignment C2 review is closed.** The ordinary growing-fault solver now evaluates the centered direction score with the signed strip rate. Strip 8 agrees with the direct native-point peak on constant and affine pressure. Only its nine-strip angle and arclength at 5, 10 and 15 ms have revised references. The full historical comparison and original budgets remain available. The same-source 18-strip replay retains the four historical strip-15 angle exceptions. See the [C2 results and commands](results/direction-c2/README.md) and [C1 decision on identical fields](results/direction-c1/README.md).
 
 **Assignment B is closed.** The strict free-32 control uses the approved Q8 slip-load reference at the original tolerances. The historical Q3 trajectory and the measured change remain available in the [closeout record](STATUS.md#assignment-b-closeout). The [mature material readability pass](STATUS.md#mature-fault-material-readability) is ready for review. Reusing the repeated Q8 geometry search is deferred performance work.
