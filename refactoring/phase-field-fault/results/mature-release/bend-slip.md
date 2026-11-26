@@ -96,11 +96,16 @@ R=$PWD/refactoring/phase-field-fault/results/mature-release
 E=$(mktemp -d /tmp/aspect-slip-return.XXXXXXXX)
 export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
 python3 -BO "$R/measure_slip_return.py" "$I" "$L" "$P" "$E/slip"
-cat "$E/slip/slip-return.csv"
+cat "$E/slip/slip-return-candidate.csv"
 ```
 
-The driver writes the three five-row tables and can check the same output with
-`--replay`. Both observers are needed only for measurement. The public example
+The driver writes the candidate table under the run directory. Both fresh runs
+and `--replay` compare all nine values for each (case, material ID) against the
+committed [station inventory](slip-return.csv) from
+`ae676e24095909196f885073b1146babce50292b`. The cross-build budget is
+10⁻¹⁰ m + 10⁻⁸ times the absolute reference value. The independent Q8,
+support-split and quadrature checks above retain their own tolerances.
+Both observers are needed only for measurement. The public example
 runs with the installed executable alone. The fresh runs for this report were at
 `/tmp/aspect-curve-phase.McM7BMnA/slip-verified`. Its public-bend time-zero
 bulk and label files matched the independent public observed run byte for byte.
@@ -126,3 +131,50 @@ with p.open('w', newline='') as f:
 PYTHON
 python3 -BO "$R/measure_slip_return.py" "$I" "$L" "$P" "$E/bad-q8" --replay
 ```
+
+## Discriminating the bend and the side of lost slip
+
+Fresh runs of the three installed cases on one rank, with one thread, reproduced
+the committed 15-row station table byte for byte. The SHA-256 of the reference
+was `22f3d7ac26adb969056cdc64a584daa3109778637976ce1120c4434f871f4cb3`
+before and after these checks. The tests below point the replay at isolated
+candidate directories. Run them after the fresh command above.
+
+```sh
+mkdir "$E/chord-as-bend" "$E/reversed-side" "$E/reversed-checker"
+for geometry in horizontal straight-chord public-bend; do
+  ln -s "$E/slip/$geometry" "$E/reversed-side/$geometry"
+done
+for geometry in horizontal straight-chord; do
+  ln -s "$E/slip/$geometry" "$E/chord-as-bend/$geometry"
+done
+ln -s "$E/slip/straight-chord" "$E/chord-as-bend/public-bend"
+if python3 -BO "$R/measure_slip_return.py" "$I" "$L" "$P" "$E/chord-as-bend" --replay \
+    > "$E/chord.log" 2>&1; then exit 1; fi
+grep 'ValueError: public-bend ID 0 line_m:' "$E/chord.log"
+
+python3 - "$R" "$E/reversed-checker" <<'PYTHON'
+import sys
+from pathlib import Path
+src, scratch = map(Path, sys.argv[1:])
+file = 'measure_slip_return.py'
+text = (src/file).read_text()
+if text.count('midpoint_offset < 0.') != 1:
+    raise ValueError('Expected one negative-normal side classification')
+(scratch/file).write_text(text.replace('midpoint_offset < 0.', 'midpoint_offset > 0.'))
+(scratch/'slip-return.csv').symlink_to(src/'slip-return.csv')
+PYTHON
+if python3 -BO "$E/reversed-checker/measure_slip_return.py" "$I" "$L" "$P" \
+    "$E/reversed-side" --replay > "$E/side.log" 2>&1; then exit 1; fi
+grep 'ValueError: public-bend ID 0 negative_side_loss_m:' "$E/side.log"
+```
+
+Substituting the whole chord trajectory (vertices, phase, ray integrals and
+returned weights) gave self-consistent quadrature. Its measured line length at
+bend ID 0 was 0.151162165 m against 0.127475488 m, a discrepancy of
++0.023686677 m. The frozen comparison rejected it. Reversing just the side of
+the discarded weight left all other columns unchanged at every station. All
+five bend-side entries changed. At ID 0 the reversed classification reported
+zero against 0.000154862055 m, and at ID 2 it lost the full 0.0287778685 m
+negative-side contribution. The replay failed at ID 0 on
+`negative_side_loss_m`.

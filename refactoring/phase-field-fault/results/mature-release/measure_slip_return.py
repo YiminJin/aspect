@@ -1,6 +1,7 @@
 """Measure area returned by a unit mature slip speed on bent and straight traces."""
 import argparse
 import csv
+import math
 import os
 from pathlib import Path
 import subprocess
@@ -11,6 +12,47 @@ from numpy.polynomial.legendre import leggauss
 
 
 CASES = ('horizontal', 'straight-chord', 'public-bend')
+COLUMNS = ('line_m', 'Q8_m', 'Q8_independent_m', 'cut_m', 'independent_m',
+           'all_eligible_m', 'defect_m', 'overlap_loss_m', 'negative_side_loss_m')
+REFERENCE = Path(__file__).with_name('slip-return.csv')
+
+
+def read_inventory(path):
+    """Index the scalar return (metres) by geometry and material vertex ID."""
+    rows = {}
+    with path.open(newline='') as stream:
+        reader = csv.DictReader(stream)
+        if reader.fieldnames != ['case', 'id', *COLUMNS]:
+            raise ValueError(f'{path}: unexpected station inventory header')
+        for row in reader:
+            if None in row or None in row.values():
+                raise ValueError(f'{path}: incomplete or extra columns on row {reader.line_num}')
+            key = (row['case'], int(row['id']))
+            if key in rows:
+                raise ValueError(f'{path}: duplicate station {key}')
+            values = {column: float(row[column]) for column in COLUMNS}
+            if not all(map(math.isfinite, values.values())):
+                raise ValueError(f'{path}: nonfinite station inventory at {key}')
+            rows[key] = values
+    return rows
+
+
+def compare_inventory(candidate_path):
+    expected = read_inventory(REFERENCE)
+    candidate = read_inventory(candidate_path)
+    if candidate.keys() != expected.keys():
+        raise ValueError(f'Inventory station identities differ: missing {sorted(expected.keys()-candidate.keys())}, '
+                         f'unexpected {sorted(candidate.keys()-expected.keys())}')
+    for (case, label), row in expected.items():
+        for column, reference in row.items():
+            value = candidate[case, label][column]
+            # Use the mature cross-build budget, scaled by the frozen value.
+            tolerance = 1.e-10 + 1.e-8*abs(reference)
+            if abs(value-reference) > tolerance:
+                raise ValueError(f'{case} ID {label} {column}: candidate {value:.17g}, '
+                                 f'reference {reference:.17g}, difference {value-reference:.9g} m '
+                                 f'exceeds {tolerance:.9g} m')
+    print(f'Frozen station inventory passed for {len(expected)} (case, ID) rows and {len(COLUMNS)} columns.')
 
 
 def run_cases(prefix, plugins, destination):
@@ -164,10 +206,12 @@ def measure(prefix, destination):
     sys.path.insert(0, str(prefix/'benchmarks/fixed_fault/curved_mature'))
     from check_curve import Fields, association, cell_rule, compliance, normal_integrals, table
 
-    with (destination/'slip-return.csv').open('w', newline='') as stream:
+    candidate_path = destination/'slip-return-candidate.csv'
+    if candidate_path.exists() and candidate_path.samefile(REFERENCE):
+        raise ValueError(f'Candidate output aliases the frozen station table: {candidate_path}')
+    with candidate_path.open('w', newline='') as stream:
         writer = csv.writer(stream, lineterminator='\n')
-        writer.writerow(('case', 'id', 'line_m', 'Q8_m', 'Q8_independent_m', 'cut_m', 'independent_m',
-                         'all_eligible_m', 'defect_m', 'overlap_loss_m', 'negative_side_loss_m'))
+        writer.writerow(('case', 'id', *COLUMNS))
         for name in CASES:
             out = destination/name/'output'
             rows = table(out/'slip-transfer-0.csv')
@@ -210,6 +254,7 @@ def measure(prefix, destination):
                   f'Q8 vs direct {max(abs(q8-discrete)):.3g} m, '
                   f'max station cut vs independent {max(abs(cut-selected)):.3g} m, '
                   f'Q6 vs Q10 {np.max(abs(np.array(coarse)-fine)):.3g} m', flush=True)
+    compare_inventory(candidate_path)
 
 
 if __name__ == '__main__':

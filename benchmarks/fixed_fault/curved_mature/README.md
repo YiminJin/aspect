@@ -51,3 +51,21 @@ the samples are placed.
 The separately named `vertical_gaussian.prm` reproduces the historical
 manufactured profile measured in the vertical direction. Its two-sided
 normal width decreases as the dip steepens.
+
+## Compare a solver build with the public reference
+
+The installed `public-reference` directory contains the serial 0, 12.5 and
+25 ms results from revision `ae676e240`. With the matching `moving fault
+samples` observer, compare accepted rows by material ID and native values by
+cell ID and quadrature index. Supply the separate bare public output to also
+check the files a user gets without an observer:
+
+```sh
+python3 -BO "$case_dir/check_public_reference.py" observed/output --public-output public/output
+```
+
+The public header is `# label x(m) y(m) age(s) slip(m) rate(m/s)`.
+The last two columns are cumulative slip distance and the accepted endpoint
+speed. The checker tests those meanings against the native label state and
+checks that the speed integrated over each accepted timestep gives the slip
+increment. It opens the reference read-only.

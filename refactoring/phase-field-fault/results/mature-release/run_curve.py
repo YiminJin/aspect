@@ -3,6 +3,7 @@ import argparse
 import os
 from pathlib import Path
 import subprocess
+import sys
 
 
 def main():
@@ -60,9 +61,13 @@ def main():
             if len(labels) != 3:
                 raise ValueError(f'{name}: expected three accepted frames in {directory}/output')
             if name == 'observed':
+                bare = args.destination/'public/output'
                 for label in labels:
-                    if label.read_bytes() != (args.destination/'public/output'/label.name).read_bytes():
+                    if label.read_bytes() != (bare/label.name).read_bytes():
                         raise ValueError(f'Public and observed labels differ at {label.name}')
+                if not args.vertical_gaussian:
+                    subprocess.run([sys.executable, '-B', case/'check_public_reference.py',
+                                    directory/'output', '--public-output', bare], check=True)
             print(f'{name}: accepted 0, 12.5 and 25 ms', flush=True)
 
 

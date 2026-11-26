@@ -148,6 +148,8 @@ def check_rotated_parent(output, fields, v, s, integrals, dt):
         return relax*np.einsum('ijab,ab->ij', rotated.reshape(n,n,8,8), w8)
     actual = np.max(abs(observed-rotated_means(epsilon)))
     wrong = np.max(abs(observed-rotated_means(-epsilon)))
+    if not (np.isfinite(actual) and np.isfinite(wrong)):
+        raise ValueError(f'Nonfinite rotated-parent shear error: correct {actual:g}, wrong sign {wrong:g} Pa')
     if actual > 2e-13 or wrong <= 1e-7:
         raise ValueError(f'Rotated parent shear: correct {actual:g}, wrong sign {wrong:g} Pa')
     print(f'Cell-mean rotated parent shear: max error {actual:.4g} Pa, wrong slip spin {wrong:.6g} Pa')
