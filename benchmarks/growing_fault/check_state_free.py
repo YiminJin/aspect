@@ -7,7 +7,8 @@ import subprocess
 import numpy as np
 
 from check_history import check
-from check_repairs import subsection
+from parameter_file import function, subsection, wall_components
+from compare import rows
 
 
 def main():
@@ -40,11 +41,11 @@ def main():
         return output
 
     base = (here/'onecut.prm').read_text()
-    run('incompatible', base.replace('Model name = growing fault', 'Model name = simple'),
+    run('incompatible', base + subsection('Material model', 'set Model name = simple'),
         'requires a material providing the Maxwell/AT1 midpoint response')
-    settings = base.replace('Model name = growing fault', 'Model name = phase field fault')
+    settings = base + subsection('Material model', 'set Model name = phase field fault')
     settings += subsection('Material model',subsection('Growing fault','set Resistance law = linear dashpot'))
-    run('incompatible-energy',settings.replace('Crack geometry = AT1','Crack geometry = AT2'),
+    run('incompatible-energy',settings + subsection('Postprocess', subsection('Phase field surface energy', 'set Crack geometry = AT2')),
         'requires the configured AT1 surface energy')
     # The RSF-only scales and monotonicity guard must never reach the dashpot.
     settings += subsection('Material model', subsection('Growing fault',
@@ -57,11 +58,20 @@ def main():
         prm = settings
         if name == 'reverse':
             # Reflect the entire affine, divergence-free loading history.
-            walls = prm.split('subsection Boundary velocity model',1)[1]
-            line = next(s for s in walls.splitlines() if 'set Function expression' in s)
-            prefix, expr = line.split(' = ')
-            prm = prm.replace(line, prefix+' = '+';'.join('-('+v+')' for v in expr.split(';')))
+            prm += subsection('Boundary velocity model', function(';'.join(f'-({v})' for v in wall_components(forward))))
         out = run(name, prm)
+        if name == 'forward':
+            forward = out
+        else:
+            fields = [rows(path.glob('fields-0001-r*.csv'), ('cell','component','local')) for path in (forward, out)]
+            if fields[0].keys() != fields[1].keys():
+                raise ValueError('Mismatched forward/reverse velocity DoFs')
+            for d in (0, 1):
+                keys = [k for k in fields[0] if k[1] == d]
+                a, b = (np.array([float(f[k]['value']) for k in keys]) for f in fields)
+                if not keys or not np.isfinite([a,b]).all() or np.max(abs(a)) == 0:
+                    raise ValueError(f'Missing, nonfinite or inactive velocity component {d}')
+                np.testing.assert_allclose(b, -a, rtol=2e-7, atol=2e-12, equal_nan=False)
         trajectories.append(check(out, linear_impedance=1000.))
         print(next(line.strip() for line in (out.parent/'log').read_text().splitlines()
                    if 'Returned midpoint tangent relative error' in line))
@@ -75,7 +85,7 @@ def main():
     out = run('mature', trace)
     # The interior-seed path supports a native label checkpoint. The provider
     # decodes the saved records and checks the seven geometric/Maxwell values.
-    interior = trace.replace('stress, stress, stress, generic','stress, stress, stress, phase field')
+    interior = trace + subsection('Compositional fields', 'set Types of fields = stress, stress, stress, phase field')
     interior += subsection('Material model', subsection('Phase field fault',
                            'set Fault geometry = fixed interior\nset Fault vertices = .5,.05; .5,.95\nset Fit trace to phase = false'))
     interior += subsection('Checkpointing', 'set Steps between checkpoint = 1\nset Number of checkpoints to keep = 3')

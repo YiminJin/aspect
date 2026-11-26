@@ -27,6 +27,21 @@ def mature_profile(ell):
     return distance, phase
 
 
+def line_in_box(center, tangent, lower, upper):
+    """Return ordered boundary contacts by clipping the seed line along both coordinates."""
+    enter, leave = -math.inf, math.inf
+    for origin, direction, lo, hi in zip(center, tangent, lower, upper):
+        if direction == 0:
+            if not lo <= origin <= hi:
+                raise ValueError('Seed lies outside the box')
+        else:
+            a, b = sorted(((lo-origin)/direction, (hi-origin)/direction))
+            enter, leave = max(enter, a), min(leave, b)
+    if enter >= leave:
+        raise ValueError('Seed does not have two distinct boundary contacts')
+    return np.clip(center + enter*tangent, lower, upper), np.clip(center + leave*tangent, lower, upper)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("aspect", type=Path)
@@ -34,33 +49,43 @@ def main():
     parser.add_argument("directory", type=Path)
     parser.add_argument("case", choices=["vertical", "narrow", "translated", "inclined", "inclined-q1", "inclined-fit", "free"])
     parser.add_argument("grid", type=int, choices=[32, 64])
+    parser.add_argument("--angle", type=float, help="Seed angle in degrees counterclockwise from +x")
     parser.add_argument("--ranks", type=int, choices=[1, 2], default=1)
+    parser.add_argument("--mesh-plugin", type=Path, help="Also export FE coefficients with the midpoint mesh fields observer")
     parser.add_argument("--retry-plugin", type=Path, help="Existing fixed_fault test library for a rejected 25 ms attempt")
     parser.add_argument("--advect-stress", action="store_true",
                         help="Transport the accepted DG stress before the free section solve")
     args = parser.parse_args()
+    if args.angle is not None and not math.isfinite(args.angle):
+        parser.error("--angle must be finite")
     if args.retry_plugin and args.case != "free":
         parser.error("--retry-plugin applies to the free-RSF trajectory")
     if args.advect_stress and args.case != "free":
         parser.error("--advect-stress applies to the free-RSF trajectory")
     dest = args.directory.resolve()
     dest.mkdir(parents=True)
-    vertical = args.case in ("vertical", "narrow", "translated")
+    vertical_control = args.case in ("vertical", "narrow", "translated")
     ell = 0.078125 if args.case == "narrow" else 0.15625
     center = 0.07 if args.case == "translated" else 0.
     offset = 0.015625 if args.case in ("inclined-fit", "translated") else 0.
-    angle = 90 if vertical else 60
+    angle = args.angle if args.angle is not None else (90 if vertical_control else 60)
+    radians = math.radians(angle)
+    # Preserve an exact zero component for horizontal and vertical seeds.
+    tangent = np.array([0. if angle % 180 == 90 else math.cos(radians),
+                        0. if angle % 180 == 0 else math.sin(radians)])
+    tx, ty = tangent
+    lower, upper = np.array([-.5,-.5]), np.array([.5,.5])
+    first, last = line_in_box(np.array([center+offset,0.]), tangent, lower, upper)
     distance, phase = mature_profile(ell)
     table = dest / "profile.txt"
     np.savetxt(table, np.column_stack((distance, phase)))
-    ys = np.linspace(-0.5, 0.5, 8 if vertical else 38)
-    vertices = "; ".join(f"{center+offset+(0 if vertical else y/math.sqrt(3)):.17g},{y:.17g}" for y in ys)
+    vertices = "; ".join(f"{x:.17g},{y:.17g}" for x,y in np.linspace(first, last, 8 if vertical_control else 38))
     free = args.case == "free"
     # Match the donor's mechanical interval, viscosity, modulus and prescribed
     # boundary components for the inclined transfer control. Leave bottom y free
     # for the production pressure datum. Its natural normal traction is zero.
-    native = not vertical and not free
-    extra = """
+    native = not vertical_control and not free
+    extra = f"""
 subsection Material model
   subsection Simple model
     set Viscosity = 1e20
@@ -74,7 +99,9 @@ end
 subsection Boundary velocity model
   set Prescribed velocity boundary indicators = left:function, right:function, top:function, bottom x:function
   subsection Function
-    set Function expression = 0.005*(-sqrt(3)/2*x+0.5*y);0.005*sqrt(3)*(-sqrt(3)/2*x+0.5*y)
+    # Imposed shear rate 0.01/s in the ridge frame; rotate both wall components.
+    set Function constants = xc={center:.17g}, tx={tx:.17g}, ty={ty:.17g}
+    set Function expression = 0.01*tx*(-ty*(x-xc)+tx*y);0.01*ty*(-ty*(x-xc)+tx*y)
   end
 end
 subsection Boundary traction model
@@ -84,6 +111,8 @@ end
     dt = 0.1 if native else 0.0125
     end = 2*dt if free else dt
     libraries = str(args.plugin.resolve())
+    if args.mesh_plugin:
+        libraries += ", " + str(args.mesh_plugin.resolve())
     if args.advect_stress:
         extra += """
 subsection Material model
@@ -116,8 +145,10 @@ set End time = {end}
 {'set Max nonlinear iterations = 180' if free else ''}
 subsection Geometry model
   subsection Box
-    set Box origin X coordinate = -0.5
-    set Box origin Y coordinate = -0.5
+    set Box origin X coordinate = {lower[0]}
+    set Box origin Y coordinate = {lower[1]}
+    set X extent = {upper[0]-lower[0]}
+    set Y extent = {upper[1]-lower[1]}
     set X repetitions = 4
     set Y repetitions = 4
   end
@@ -132,6 +163,7 @@ subsection Time stepping
 end
 subsection Boundary traction model
   subsection Function
+    # Laboratory vertical traction (Pa) stays fixed when changing the seed dip.
     set Function expression = 0;0.02+t+0.12*y
   end
 end
@@ -156,7 +188,7 @@ subsection Material model
   end
 end
 subsection Postprocess
-  set List of postprocessors = fixed fault statistics, ridge probe
+  set List of postprocessors = fixed fault statistics, ridge probe{", midpoint mesh fields" if args.mesh_plugin else ""}
 end
 {extra}""")
     command = [str(args.aspect.resolve()), str(prm)]

@@ -7,7 +7,7 @@ import sys
 
 import numpy as np
 
-from check_repairs import subsection, function
+from parameter_file import subsection, function, wall_components
 from compare import continuation
 sys.path.insert(0, str(Path(__file__).resolve().parent/'timestep'))
 from audit import ORDER, shapes, tensor
@@ -68,14 +68,15 @@ def main():
     root = args.destination
     root.mkdir(parents=True,exist_ok=False)
     base = Path(__file__).with_name('onecut.prm').read_text()
-    wall = base.split('subsection Boundary velocity model')[1].split('set Function expression = ')[1].splitlines()[0].split(';')
     observer = args.plugin.parent/'timestep/libmidpoint_fields.release.so'
     env = os.environ | dict(OMP_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1',DEAL_II_NUM_THREADS='1')
     def run(name, factor, extra='', steps=1, diagnostic=None):
         d = root/name
         d.mkdir()
-        expr = ';'.join(f'({u})*({factor})' for u in wall)
-        prm = base + subsection('Boundary velocity model',function(expr)) + extra
+        prm = base + extra
+        if factor is not None:
+            expr = ';'.join(f'({u})*({factor})' for u in wall)
+            prm += subsection('Boundary velocity model',function(expr))
         prm += f'\nset Output directory = {d/"output"}\nset Additional shared libraries = {args.plugin}, {observer}\n'
         prm += subsection('Postprocess','set List of postprocessors = midpoint publication, midpoint mesh fields')
         prm += subsection('Termination criteria',f'set Termination criteria = end step\nset End step = {steps}')
@@ -88,7 +89,9 @@ def main():
         else:
             result.check_returncode()
         return d/'output'
-    outputs = {name:run(name, factor) for name,factor in [('full','1'),('half','0.5'),('ramp','min(t/.005,1)')]}
+    outputs = {'full': run('full', None)}
+    wall = wall_components(outputs['full'])
+    outputs.update((name,run(name, factor)) for name,factor in [('half','0.5'),('ramp','min(t/.005,1)')])
     year = 60*60*24*365.2425
     duration = .005/year
     settings = (f'\nset Use years instead of seconds = true\nset Maximum first time step = {duration:.17g}'

@@ -7,14 +7,7 @@ import subprocess
 
 from check_section_publication import check as check_cold
 from compare import continuation, rows
-
-
-def subsection(name, settings):
-    return f'\nsubsection {name}\n{settings}\nend\n'
-
-
-def function(expression):
-    return subsection('Function', f'set Function expression = {expression}')
+from parameter_file import composition_names, function, resolved_function, subsection
 
 
 def main():
@@ -57,14 +50,19 @@ def main():
         return output
 
     wall=lambda expr:subsection('Boundary velocity model',function(expr))
-    phase=lambda expr:subsection('Initial composition model',function('0;0;0;'+expr))
     gravity=lambda expr:subsection('Gravity model','set Model name = function\n'+function(expr))
     if args.group=='friction':
         cold=run('cold',subsection('Material model',subsection('Growing fault','set Reference friction coefficient = .9')))
         check_cold(cold)
+        names, phase_name = composition_names(cold)
+        phase_index = names.index(phase_name)
+        def phase(expr):
+            components = resolved_function(cold,'Initial composition model')['Function expression']['value'].split(';')
+            components[phase_index] = expr
+            return subsection('Initial composition model',function(';'.join(components)))
         one=run('fully-damaged',phase('1'))
         fields=[rows(one.glob(f'fields-{step:04}-r*.csv'),('cell','component','local')) for step in (0,1)]
-        if any(fields[0][k]['value']!=fields[1][k]['value'] for k in fields[0] if k[1]==7):
+        if any(fields[0][k]['value']!=fields[1][k]['value'] for k in fields[0] if k[1]==4+phase_index):
             raise ValueError('Changed incoming coefficients at the fully damaged obstacle')
         for step in (0,1):
             pts=rows(one.glob(f'points-{step:04}-r*.csv'),('cell','q'))
@@ -151,34 +149,32 @@ def main():
                 if float(book['time'])!=.0025: raise ValueError('Unexpected cutback clock')
             print(label,'automatic cut recovered the clean 2.5 ms endpoint')
     if args.group=='geometry':
-        clean=run('origin',end='.015')
-        shifted=(base.replace('set X extent = 2','set Box origin X coordinate = 10000\n  set X extent = 2')
-                 .replace('1.4330127018922194,0.75','10001.433012701892,0.75').replace('x-(1)','x-(10001)'))
-        translated=run('translated',source=shifted,end='.015')
-        p,q=(rows(folder.glob('points-0000-r*.csv'),('cell','q')) for folder in (clean,translated))
-        if p.keys()!=q.keys() or len(p)!=4968 or any(p[k]['section']!=q[k]['section'] for k in p):
-            raise ValueError('Translated geometry changed quadrature identities or strip membership')
-        position=max(max(abs(float(q[k]['x'])-10000-float(p[k]['x'])),abs(float(q[k]['y'])-float(p[k]['y']))) for k in p)
-        if position>4.e-12: raise ValueError(f'Translated physical quadrature positions differ by {position} m')
-        for step in range(4):
-            a,b=(rows([folder/f'sections-{step:04}.csv'],('section',)) for folder in (clean,translated))
-            if any(a[k]['xi']!=b[k]['xi'] or a[k]['formed']!=b[k]['formed'] or
-                   (step==0 and a[k]['ds']!=b[k]['ds']) for k in a):
-                raise ValueError(f'Translated stations, widths or formation differ at clock {step}')
-        print('Translated native points',len(p),'maximum physical position defect',position,'m')
+        from check_seed_frame import check_geometry
+        check_geometry(run, args.plugin.parent/'timestep/libmidpoint_fields.release.so')
     if args.group=='companion':
         clean=run('standard',end='.01')
-        reordered=(base.replace('tau_xx, tau_yy, tau_xy, phase_field','phase_field, tau_xx, tau_yy, tracer')
-                   .replace('generic, generic, generic, phase field','phase field, generic, generic, generic')
-                   .replace('static, static, static, midpoint fault phase','midpoint fault phase, static, static, field'))
-        seed=next(l for l in base.splitlines() if 'Function expression = 0;0;0;' in l)
-        reordered=reordered.replace(seed,seed.replace('0;0;0;','')+';0;0;x')
-        mixed=run('phase-first',source=reordered,end='.01')
-        def values(path,step,component):
+        names, phase_name = composition_names(clean)
+        expressions = resolved_function(clean, 'Initial composition model')['Function expression']['value'].split(';')
+        initial = dict(zip(names, expressions, strict=True))
+        order = [phase_name, 'tau_xx', 'tau_yy', 'tracer']
+        extra = subsection('Compositional fields',
+                           'set Names of fields = ' + ', '.join(order) +
+                           '\nset Types of fields = phase field, generic, generic, generic' +
+                           '\nset Compositional field methods = midpoint fault phase, static, static, field')
+        initial['tracer'] = 'x'
+        extra += subsection('Initial composition model', function(';'.join(initial[name] for name in order)))
+        mixed=run('phase-first',extra,end='.01')
+        def values(path,step,name):
+            # Two velocity components, pressure and temperature precede compositions.
+            component = 4 + composition_names(path)[0].index(name)
             fields=rows(path.glob(f'fields-{step:04}-r*.csv'),('cell','component','local'))
-            return {(cell,j):float(row['value']) for (cell,c,j),row in fields.items() if c==component}
-        if any(values(clean,n,7)!=values(mixed,n,4) for n in (0,1,2)): raise ValueError('Phase changed under field permutation')
-        a,b=values(mixed,1,7),values(mixed,2,7)
+            result = {(cell,j):float(row['value']) for (cell,c,j),row in fields.items() if c==component}
+            if not result:
+                raise ValueError(f'{path}: missing {name} coefficients')
+            return result
+        if any(values(clean,n,phase_name)!=values(mixed,n,phase_name) for n in (0,1,2)):
+            raise ValueError(f'{phase_name} changed under field permutation')
+        a,b=values(mixed,1,'tracer'),values(mixed,2,'tracer')
         change=max(abs(a[k]-b[k]) for k in a)
         if change<1.e-8: raise ValueError('Implicit companion failed to advance')
         print('Maximum companion coefficient change',change)
