@@ -83,6 +83,8 @@ python3 -B "$E/plot.py" "$R/tables" "$R/strip-8-score.png"
 
 ## Reproduce through ASPECT
 
+Use the C1 source and checker at `bffffca07` for this historical live replay. When checking these retained outputs with the C2 benchmark, pass `--historical-donor` to reproduce C1's nine-strip donor comparisons.
+
 The ordinary executable comes from the Release build qualified immediately before this assignment. The only intervening commit changed project instructions. The observer builder uses this checkout, its matching unity build/compile commands, and the archived candidate patch. It compiles the two scoring bodies and the current search into a scratch executable. Both run on each eligible strip at the same call. By default production supplies the angle to the ordinary reassembly and publication path. The environment switch below applies only to the scratch executable. It lets the candidate supply that angle in a separate ordinary parameter-file run. Use fresh destinations when rerunning.
 
 ```bash

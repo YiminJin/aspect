@@ -5,6 +5,12 @@ and engineering shear are dimensionless. Section xi, ds and slip are metres,
 V is the signed area-averaged rate in m/s and force is the signed RSF reaction
 in Pa. Each energy column is work per metre out of plane. No rank ordering
 or unit conversion enters these comparisons.
+
+nine-strip-geometry.csv records the accepted geometry at three clocks from the frozen
+two-rank C1 candidate run (bffffca07, frozen-arclength.csv in the C1 results).
+Only the angle and arclength of strip 8 use that reference. The donor columns
+identify the original localized-onecut records. Use --historical-donor to
+compare against the supplied donor trajectory in full.
 """
 import argparse
 import csv
@@ -43,11 +49,15 @@ def compare_values(a, b, column, atol, rtol):
     return max(abs(left-right))
 
 
-def frozen(reference, target, archive=False):
+def frozen(reference, target, archive=False, historical_donor=False):
     donor = rows([reference/'bulk-accepted.csv'], ('step',))
     actual = rows(target.glob('balance-000[1-9].csv'), ('step',))
     if set(donor) != {(1,), (2,), (3,)} or donor.keys() != actual.keys():
         raise ValueError('Expected one publication at each of the three physical endpoints')
+    if not historical_donor:
+        geometry = rows([Path(__file__).with_name('nine-strip-geometry.csv')], ('step', 'section'))
+        if set(geometry) != {(1, 8), (2, 8), (3, 8)}:
+            raise ValueError('Expected corrected geometry only for strip 8 at steps 1, 2 and 3')
     # The portable archive retains the last native frame and the full ledger.
     # The replay additionally supplies every intermediate material frame.
     for step in ([3] if archive else range(4)):
@@ -65,13 +75,25 @@ def frozen(reference, target, archive=False):
         if not step:
             continue
         old = rows([reference/f'tip-planes-{tag}.csv'], ('section',))
+        if not historical_donor:
+            expected = geometry[step, 8]
+            strip = old[8,]
+            if (float(expected['time_s']) != float(donor[step,]['time']) or
+                float(expected['donor_beta_rad']) != float(strip['beta']) or
+                float(expected['donor_ds_m']) != float(strip['ds'])):
+                raise ValueError(f'step {step}: corrected geometry requires the frozen two-rank donor')
+            strip['beta'] = expected['beta_rad']
+            strip['ds'] = expected['ds_m']
         new = rows([target/f'sections-{tag}.csv'], ('section',))
         parent = rows([target/f'sections-{step-1:04}.csv'], ('section',))
         for k in old:
             if old[k]['parent_formed'] != parent[k]['formed'] or old[k]['formed'] != new[k]['formed']:
                 raise ValueError(f'Step {step}, strip {k}: formed plane history differs')
         for name in ('xi', 'ds', 'beta', 'age', 'slip'):
-            compare_values(old, new, name, 1e-7 if name=='beta' else 1e-11, 1e-7)
+            try:
+                compare_values(old, new, name, 1e-7 if name=='beta' else 1e-11, 1e-7)
+            except ValueError as exc:
+                raise ValueError(f'step {step}, strip geometry/history: {exc}') from exc
         with (reference/f'tip-sections-{tag}.csv').open() as stream:
             rates = {(i,): r for i, r in enumerate(csv.DictReader(stream))}
         for name in ('V', 'force'):
@@ -101,38 +123,45 @@ def continuation(first, other, steps):
         print(f'Continuation matched at step {step}')
 
 
-def check_corruption(reference, target):
-    # Link the unchanged records and rewrite one copy. Never open a linked
-    # output for writing. The first corrupted clock and physical component
-    # must be identified even when interpreter assertions are disabled.
-    with TemporaryDirectory() as directory:
-        scratch = Path(directory)
-        damaged = sorted(target.glob('points-0001-r*.csv'))[0]
-        for path in target.glob('*.csv'):
-            if path != damaged:
-                (scratch/path.name).symlink_to(path.resolve())
-        with damaged.open() as source, (scratch/damaged.name).open('w') as output:
-            reader = csv.DictReader(source)
-            writer = csv.DictWriter(output, reader.fieldnames)
-            writer.writeheader()
-            row = next(reader)
-            row['tauzz'] = str(float(row['tauzz'])+.001)
-            writer.writerow(row)
-            writer.writerows(reader)
-        try:
-            frozen(reference, scratch)
-        except ValueError as exc:
-            if 'step 1, native points: tauzz' in str(exc):
+def check_corruption(reference, target, historical_donor=False):
+    # Each trial modifies one value in a fresh copy and must identify its
+    # clock, column and (for the revised geometry) material strip.
+    trials = [(sorted(target.glob('points-0001-r*.csv'))[0], 'tauzz', .001, 'step 1, native points: tauzz')]
+    for step in (1, 2, 3):
+        for column, delta in [('beta', 1.3e-7), ('ds', 3e-8)]:
+            trials.append((target/f'sections-{step:04}.csv', column, delta,
+                           f'step {step}, strip geometry/history: {column} at (8,)'))
+
+    for damaged, column, delta, diagnostic in trials:
+        with TemporaryDirectory() as directory:
+            scratch = Path(directory)
+            for path in target.glob('*.csv'):
+                if path != damaged:
+                    (scratch/path.name).symlink_to(path.resolve())
+            with damaged.open() as source, (scratch/damaged.name).open('w') as output:
+                reader = csv.DictReader(source)
+                records = list(reader)
+                row = records[0] if column == 'tauzz' else next(r for r in records if int(r['section']) == 8)
+                row[column] = str(float(row[column]) + delta)
+                writer = csv.DictWriter(output, reader.fieldnames)
+                writer.writeheader()
+                writer.writerows(records)
+            try:
+                frozen(reference, scratch, historical_donor=historical_donor)
+            except ValueError as exc:
+                if diagnostic not in str(exc):
+                    raise
                 print(f'Rejected corrupted copy: {exc}')
-                return
-            raise
-        raise ValueError('Failed to detect a corrupted native stress')
+            else:
+                raise ValueError(f'Failed to detect corrupted {column} in {damaged.name}')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('reference', type=Path)
     parser.add_argument('target', type=Path)
+    parser.add_argument('--historical-donor', action='store_true',
+                        help='use the original donor angle and arclength for strip 8')
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--archive', action='store_true', help='use the retained final native frame and three-step ledger')
     mode.add_argument('--check-corruption', action='store_true')
@@ -141,6 +170,6 @@ if __name__ == '__main__':
     if args.continuation:
         continuation(args.reference, args.target, args.continuation)
     elif args.check_corruption:
-        check_corruption(args.reference, args.target)
+        check_corruption(args.reference, args.target, args.historical_donor)
     else:
-        frozen(args.reference, args.target, args.archive)
+        frozen(args.reference, args.target, args.archive, args.historical_donor)

@@ -49,6 +49,8 @@ Use the [repair matrix and reproduction commands](STATUS.md#increment-5a-review-
 
 ## Growing fault midpoint control (5A)
 
+The default nine-strip comparator takes strip 8's beta (rad) and ds (m) at 5, 10 and 15 ms from the adjacent installed `nine-strip-geometry.csv`. Its six reviewed entries are the candidate rows in `results/direction-c1/frozen-arclength.csv` at `bffffca07`, obtained on the frozen 8 × 4 two-rank input. The original donor columns in the table identify the corresponding `localized-onecut` frames. All other quantities and comparison tolerances come from the existing donor comparison. Pass `--historical-donor` to `benchmarks/growing_fault/compare.py` to reproduce the donor comparison in full, including with `--archive` for the portable final frame.
+
 Start with the [5A working record](STATUS.md#increment-5a--single-forward-front) for the input identities, reproduced clocks, exact commands and first failing points. The canonical layout is two MPI processes, one thread each. The nine-strip test qualifies one fixed 2-D mesh, constitutive law and short trajectory. The [strip 8 evidence and replay instructions](strip8/README.md) compare the pre-turn stage by CellId and quadrature index, replay both selectors on live and ordered moments, and check every endpoint column through 15 ms. The independent control solves the whole-strip resistance and sums the disk-weighted squared traction point by point.
 
 ### Follow one step in source order
