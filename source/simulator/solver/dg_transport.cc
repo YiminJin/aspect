@@ -365,7 +365,7 @@ namespace aspect
                   valid=false;
               const auto comm=sim.get_mpi_communicator();
               const auto bad_ranks=Utilities::MPI::sum(static_cast<unsigned int>(!valid),comm);
-              AssertThrow(bad_ranks==0,ExcMessage("Inadmissible Bernstein phase mean at transport component_entry on "+
+              AssertThrow(bad_ranks==0,ExcMessage("Inadmissible Bernstein phase mean at transport entry on "+
                                                   std::to_string(bad_ranks)+" of "+std::to_string(Utilities::MPI::n_mpi_processes(comm))+" ranks."));
             }
         if (op.maximum_inverse_substep==0. || duration==0.)
