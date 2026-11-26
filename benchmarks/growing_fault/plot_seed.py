@@ -10,6 +10,7 @@ from matplotlib.lines import Line2D
 import numpy as np
 
 from compare import rows
+from parameter_file import composition_names
 
 
 def bernstein(x):
@@ -38,8 +39,19 @@ def phase_patches(output, step, origin, extent, repetitions, component):
         # mapping, basis and component against the native point observations.
         native_x = bernstein((x - lower[0]) / widths[0])
         native_y = bernstein((y - lower[1]) / widths[1])
+        # The CSV contains physical coordinates rounded by the FE mapping.
+        # Recovering a reference coordinate loses O(ulp(x)/cell_width) after
+        # a large translation. Each Q2 derivative is a Bernstein convex
+        # combination of twice the adjacent coefficient differences.
+        unit_slopes = 2*np.array([np.max(abs(np.diff(coefficients, axis=axis))) for axis in (1, 0)])
+        face_ulp = np.spacing(np.maximum(abs(lower), abs(lower + widths)))
+        # Allow two ulps per axis for mapping the point and locating the
+        # origin of its cell. Retain the arithmetic floor on the default box.
+        tolerance = max(1e-13, np.dot(unit_slopes, 2*face_ulp/widths) +
+                        8*np.finfo(float).eps*np.max(abs(coefficients)))
         np.testing.assert_allclose(np.einsum('qi,ij,qj->q', native_y, coefficients, native_x),
-                                   phi, rtol=0, atol=1e-13)
+                                   phi, rtol=0, atol=tolerance, equal_nan=False,
+                                   err_msg=f'Bernstein phase on cell {cell} at step {step}')
         key = tuple(indices[0])
         if key in patches:
             raise ValueError(f'Multiple DG patches at Cartesian index {key}')
@@ -58,6 +70,7 @@ def first_turn(output, tip, tangent, normal, origin):
     # Reconstruct the station-to-station graph. The arriving station owns
     # the signed angle; xi is distance projected on the original tangent.
     joint = tip
+    start_station = None
     previous_xi = (tip - origin) @ tangent
     for (section,), strip in sorted(accepted.items()):
         xi = float(strip['xi'])
@@ -70,34 +83,30 @@ def first_turn(output, tip, tangent, normal, origin):
         if beta != 0 and not int(seed[section,]['formed']):
             width = float(seed[section,]['ds'])
             np.testing.assert_allclose(float(strip['ds']), width / np.cos(beta), rtol=0, atol=1e-14)
-            return section, joint, arrival, beta
-        joint, previous_xi = arrival, xi
+            return start_station, section, joint, arrival, beta
+        start_station, joint, previous_xi = section, arrival, xi
     raise ValueError('No newly formed section turned ahead of the seed tip')
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('output', type=Path, help='ordinary growing fault history output directory')
-    parser.add_argument('destination', type=Path, help='directory for growing-seed.png and growing-seed.pdf')
-    args = parser.parse_args()
-    prm = json.loads((args.output/'parameters.json').read_text())
+def plot_seed(output):
+    """Construct both panels from the initial and first accepted physical frames."""
+    prm = json.loads((output/'parameters.json').read_text())
     box = prm['Geometry model']['Box']
     origin, extent, repetitions = (
         np.array([float(box[name.format(d)]['value']) for d in ('X', 'Y')])
         for name in ('Box origin {} coordinate', '{} extent', '{} repetitions'))
-    names = prm['Compositional fields']['Names of fields']['value'].replace(' ', '').split(',')
-    phase = prm['Phase field']['Phase composition']['value'] or 'phase_field'
+    names, phase = composition_names(output)
     component = 4 + names.index(phase)  # 2 velocities, pressure, temperature
-    patches = [phase_patches(args.output, step, origin, extent, repetitions, component)
+    patches = [phase_patches(output, step, origin, extent, repetitions, component)
                for step in (0, 1)]
-    time_ms = 1e3 * float(rows([args.output/'balance-0001.csv'], ('step',))[1,]['time'])
+    time_ms = 1e3 * float(rows([output/'balance-0001.csv'], ('step',))[1,]['time'])
     np.testing.assert_allclose(time_ms, 5., rtol=0, atol=1e-12)
     material = prm['Material model']['Growing fault']
     alpha = np.deg2rad(float(material['Seed tangent angle']['value']))
     tangent = np.array([np.cos(alpha), np.sin(alpha)])
     normal = np.array([-tangent[1], tangent[0]])
     tip = np.array([float(v) for v in material['Forward seed tip']['value'].split(',')])
-    section, joint, arrival, beta = first_turn(args.output, tip, tangent, normal, origin)
+    start_station, section, joint, arrival, beta = first_turn(output, tip, tangent, normal, origin)
     along = (arrival-joint) @ tangent
     offset = (arrival-joint) @ normal
 
@@ -135,28 +144,42 @@ def main():
     # Show physical distances with equal scales so the angle is undistorted.
     detail.axhline(0, color='#677585', linestyle='--', lw=1.4)
     detail.plot([0, along], [0, offset], 'o-', color=turn_color, ms=6, lw=3)
-    detail.annotate(f'Station {section-1}', (0, 0), xytext=(-4, 10), textcoords='offset points')
-    detail.annotate(f'Station {section}', (along, offset), xytext=(-1, -21), ha='right',
+    start_name = 'Prescribed tip' if start_station is None else f'Station {start_station}'
+    detail.annotate(start_name, (0, 0), xytext=(-4, 10 if offset < 0 else -19), textcoords='offset points')
+    detail.annotate(f'Station {section}', (along, offset), xytext=(-1, -21 if offset < 0 else 10), ha='right',
                     textcoords='offset points', color=turn_color)
     angles = np.linspace(beta, 0)
     radius = .49*along
     detail.plot(radius*np.cos(angles), radius*np.sin(angles), color='#283743', lw=1.3)
-    detail.annotate(f'{abs(np.rad2deg(beta)):.2f}° clockwise',
-                    (.5*along, .25*offset), xytext=(.62*along, .15*along),
+    sense = 'clockwise' if beta < 0 else 'counterclockwise'
+    detail.annotate(f'{abs(np.rad2deg(beta)):.2f}° {sense}',
+                    (.5*along, .25*offset), xytext=(.59, .85 if offset < 0 else .15),
+                    textcoords='axes fraction', ha='center',
                     arrowprops={'arrowstyle': '-', 'color': '#5e6870'}, color='#242e38')
-    detail.set(xlim=(-.11*along, 1.18*along), ylim=(-.38*along, .35*along),
+    padding = .23*along
+    detail.set(xlim=(-.11*along, 1.18*along),
+               ylim=(min(-.38*along, offset-padding), max(.35*along, offset+padding)),
                xlabel='Along seed from bend, Δs (m)', ylabel='Normal offset, Δn (m)', aspect='equal')
     detail.set_title(f'Selected direction in strip {section}', loc='left', pad=13)
     detail.yaxis.set_major_locator(plt.MultipleLocator(.05))
+    print(f'Strip {section} at {time_ms:g} ms: beta {beta:.16g} rad, {np.degrees(beta):.9f} degrees; '
+          f'laboratory inclination {np.degrees(alpha+beta):.9f} degrees. '
+          f'{start_name} to station {section} in seed coordinates ({along:.9g}, {offset:.9g}) m.')
+    return fig
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('output', type=Path, help='ordinary growing fault history output directory')
+    parser.add_argument('destination', type=Path, help='directory for growing-seed.png and growing-seed.pdf')
+    args = parser.parse_args()
+    fig = plot_seed(args.output)
     args.destination.mkdir(parents=True, exist_ok=True)
     for extension in ('png', 'pdf'):
         metadata = {'CreationDate': None, 'ModDate': None} if extension == 'pdf' else None
         fig.savefig(args.destination/f'growing-seed.{extension}', dpi=350, bbox_inches='tight',
                     pad_inches=.18, metadata=metadata)
     plt.close(fig)
-    print(f'Strip {section} at {time_ms:g} ms: beta {beta:.16g} rad, {np.degrees(beta):.9f} degrees; '
-          f'laboratory inclination {np.degrees(alpha+beta):.9f} degrees. '
-          f'Station separation in seed coordinates ({along:.9g}, {offset:.9g}) m.')
 
 
 if __name__ == '__main__':
