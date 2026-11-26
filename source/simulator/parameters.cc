@@ -1260,7 +1260,8 @@ namespace aspect
                            "is largely empirically decided -- it must be large enough to ensure "
                            "the bilinear form is coercive, but not so large as to penalize "
                            "discontinuity at all costs.");
-        prm.declare_entry ("Phase discontinuous penalty", "", Patterns::List(Patterns::Double(0.),0,1),
+        prm.declare_entry ("Phase discontinuous penalty", "",
+                           Patterns::List(Patterns::Double(0.), 0, 1),
                            "Dimensionless multiplier of the symmetric interior penalty on DG faces in the "
                            "midpoint fault phase equation. An empty entry inherits Discontinuous penalty.");
         prm.declare_entry ("Use limiter for discontinuous temperature solution", "false",
@@ -1447,11 +1448,14 @@ namespace aspect
                          "the field types, not all of the code will make use of it. It is "
                          "the user's responsibility to check that the chosen material model "
                          "and other plugins interpret the compositional fields as intended.");
-      prm.declare_entry ("SSPRK3 fields", "", Patterns::List(Patterns::Anything()),
+      prm.declare_entry ("SSPRK3 fields", "",
+                         Patterns::List(Patterns::Anything()),
                          "Compatibility spelling for selecting explicit DG SSPRK3 by composition name. "
                          "Each listed field must have method field or explicit DG SSPRK3.");
       prm.declare_entry ("Compositional field methods", "",
-                         Patterns::List (Patterns::Selection("field|explicit DG SSPRK3|particles|volume of fluid|static|midpoint fault phase|melt field|darcy field|prescribed field|prescribed field with diffusion")),
+                         Patterns::List (Patterns::Selection("field|explicit DG SSPRK3|particles|volume of fluid|static|"
+                                                             "midpoint fault phase|melt field|darcy field|prescribed field|"
+                                                             "prescribed field with diffusion")),
                          "A comma separated list denoting the solution method of each "
                          "compositional field. Each entry of the list must be "
                          "one of the currently implemented field methods."

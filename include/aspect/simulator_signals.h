@@ -312,19 +312,28 @@ namespace aspect
      */
     boost::signals2::signal<void (const SimulatorAccess<dim> &)> pre_nonlinear_solver;
 
-    /** Before each Stokes assembly in the no-advection and single-advection
-     * Picard schemes, prepare the coupled unknowns from the current iterate.
-     * A slot may request that the velocity matrix and preconditioner be rebuilt. */
+    /**
+     * Before each Stokes assembly in the no-advection and single-advection
+     * Picard schemes, prepare coupled unknowns from the current iterate.
+     * The rebuild request starts false. A slot may set it to true to rebuild
+     * the velocity matrix and preconditioner. Leave an earlier request set.
+     */
     boost::signals2::signal<void (const LinearAlgebra::BlockVector &, bool &)> prepare_stokes_picard_iteration;
 
-    /** At bulk convergence in the no-advection and single-advection Picard
+    /**
+     * At bulk convergence in the no-advection and single-advection Picard
      * schemes, check and stage the coupled endpoint from the returned solution.
-     * Slots may set the second argument to false to request another iteration.
-     * The usual nonlinear iteration limit and failure policy apply. */
+     * The convergence flag starts true. A slot may clear it to request another
+     * iteration. Leave an earlier veto in effect. The usual nonlinear iteration
+     * limit and failure policy apply.
+     */
     boost::signals2::signal<void (const LinearAlgebra::BlockVector &, bool &)> check_stokes_picard_convergence;
 
-    /** Publish staged physical history into the accepted solution after the
-     * repeat decision and before postprocessing or advancing solution history. */
+    /**
+     * Publish staged physical history into the accepted solution after the
+     * repeat decision and before endpoint postprocessing or advancing solution
+     * history. A repeated attempt never reaches this signal.
+     */
     boost::signals2::signal<void (LinearAlgebra::BlockVector &)> post_accept_timestep;
 
     /**

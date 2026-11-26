@@ -84,6 +84,22 @@ namespace aspect
 {
   namespace
   {
+    // The public fault model uses a different material history when a
+    // compositional field is advanced by the coupled midpoint solver.
+    template <int dim>
+    std::unique_ptr<MaterialModel::Interface<dim>>
+    create_configured_material_model(const Parameters<dim> &parameters,
+                                     ParameterHandler      &prm)
+    {
+      const auto &methods = parameters.compositional_field_methods;
+      if (prm.get({"Material model"}, "Model name") == "phase field fault"
+          && std::find(methods.begin(), methods.end(), Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase)
+          != methods.end())
+        return MaterialModel::create_material_model<dim>("growing fault");
+
+      return MaterialModel::create_material_model<dim>(prm);
+    }
+
     /**
      * Helper function to construct the final std::vector of FEVariable before
      * it is used to construct the Introspection object. Create the default
@@ -225,11 +241,7 @@ namespace aspect
                                                     std::ref(parameters),
                                                     std::ref(prm),
                                                     std::cref(*geometry_model))),
-    material_model (prm.get({"Material model"},"Model name") == "phase field fault" &&
-                    std::find(parameters.compositional_field_methods.begin(),parameters.compositional_field_methods.end(),
-                              Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase) != parameters.compositional_field_methods.end()
-                    ? MaterialModel::create_material_model<dim>("growing fault")
-                    : MaterialModel::create_material_model<dim>(prm)),
+    material_model (create_configured_material_model(parameters, prm)),
     gravity_model (GravityModel::create_gravity_model<dim>(prm)),
     prescribed_stokes_solution (PrescribedStokesSolution::create_prescribed_stokes_solution<dim>(prm)),
     adiabatic_conditions (AdiabaticConditions::create_adiabatic_conditions<dim>(prm)),
@@ -324,7 +336,7 @@ namespace aspect
     if (SimulatorAccess<dim> *sim = dynamic_cast<SimulatorAccess<dim>*>(material_model.get()))
       sim->initialize_simulator (*this);
     material_model->parse_parameters (prm);
-    GrowingFault::validate_midpoint_material(parameters,*material_model);
+    GrowingFault::validate_midpoint_material(parameters, *material_model);
     material_model->initialize ();
 
     // Make sure that the material model supports elasticity when it is requested,

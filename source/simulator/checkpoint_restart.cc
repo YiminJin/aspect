@@ -143,7 +143,8 @@ namespace aspect
       return names;
     }
 
-    // Validate the selected slot before loading any mesh coefficients.
+    // Equal DoF counts do not distinguish nodal values from Bernstein
+    // coefficients. Check each field's basis before reading the FE vector.
     template <int dim>
     void check_composition_bases(const Parameters<dim> &parameters,
                                  const FiniteElement<dim> &finite_element,
@@ -152,20 +153,21 @@ namespace aspect
                                  const MPI_Comm mpi_communicator,
                                  const unsigned int archive_version)
     {
-      const auto bases = composition_basis_names(finite_element, introspection);
+      const auto current_bases = composition_basis_names(finite_element, introspection);
       const auto metadata = Utilities::fexists(checkpoint_path + "metadata.txt", mpi_communicator)
                             ? read_checkpoint_metadata(checkpoint_path) : CheckpointMetadata();
       if (metadata.composition_bases)
         {
-          AssertThrow(metadata.composition_bases->size() == bases.size(),
+          const auto &saved_bases = *metadata.composition_bases;
+          AssertThrow(saved_bases.size() == current_bases.size(),
                       ExcMessage("Checkpoint composition basis count differs from the current FE."));
-          for (unsigned int c=0; c<bases.size(); ++c)
-            AssertThrow((*metadata.composition_bases)[c] == bases[c],
+          for (unsigned int c=0; c<current_bases.size(); ++c)
+            AssertThrow(saved_bases[c] == current_bases[c],
                         ExcMessage("Checkpoint basis for field " + introspection.name_for_compositional_index(c)
-                                   + " is " + (*metadata.composition_bases)[c] + ", current basis is " + bases[c] + "."));
+                                   + " is " + saved_bases[c] + ", current basis is " + current_bases[c] + "."));
         }
       else if (!parameters.use_operator_splitting && !parameters.include_melt_transport)
-        for (unsigned int c=0; c<bases.size(); ++c)
+        for (unsigned int c=0; c<current_bases.size(); ++c)
           if (parameters.use_discontinuous_composition_discretization[c] && parameters.composition_degrees[c] == 2)
             {
               if constexpr (dim == 3)
@@ -175,7 +177,7 @@ namespace aspect
                   AssertThrow(!(parameters.compositional_field_methods[c] == Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3 &&
                                 parameters.composition_descriptions[c].type == CompositionalFieldDescription::phase_field),
                               ExcMessage("Legacy 3-D checkpoint has nodal basis for field " + introspection.name_for_compositional_index(c)
-                                         + ", current basis is " + bases[c] + "."));
+                                         + ", current basis is " + current_bases[c] + "."));
                 }
               else
                 AssertThrow(false, ExcMessage("Ambiguous legacy DGQ2 checkpoint basis for field " + introspection.name_for_compositional_index(c)
@@ -882,10 +884,12 @@ namespace aspect
     std::map<std::string,std::string> material_state;
     if (version>=2)
       {
-        if constexpr (Archive::is_saving::value) material_model->save(material_state);
+        if constexpr (Archive::is_saving::value)
+          material_model->save(material_state);
         ar &material_state;
       }
-    if constexpr (Archive::is_loading::value) material_model->load(material_state);
+    if constexpr (Archive::is_loading::value)
+      material_model->load(material_state);
     ar &postprocess_manager;
     ar &boundary_temperature_manager;
     ar &boundary_convective_heating_manager;

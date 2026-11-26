@@ -862,9 +862,9 @@ namespace aspect
     nonlinear_iteration = 0;
     while (true)
       {
-        bool rebuild = false;
-        signals.prepare_stokes_picard_iteration(current_linearization_point, rebuild);
-        if (rebuild)
+        bool coupled_rebuild_requested = false;
+        signals.prepare_stokes_picard_iteration(current_linearization_point, coupled_rebuild_requested);
+        if (coupled_rebuild_requested)
           rebuild_stokes_matrix = rebuild_stokes_preconditioner = true;
 
         relative_residual =
@@ -883,9 +883,11 @@ namespace aspect
         AssertThrow(state != SolverControl::failure, ExcNonlinearSolverNoConvergence());
         if (state == SolverControl::success)
           {
-            bool converged = true;
-            signals.check_stokes_picard_convergence(solution, converged);
-            if (converged)
+            // The bulk residual has passed. A coupled material can still
+            // request reassembly using the velocity returned by this solve.
+            bool coupled_fields_converged = true;
+            signals.check_stokes_picard_convergence(solution, coupled_fields_converged);
+            if (coupled_fields_converged)
               break;
             pcout << "      Coupled Stokes unknowns require another Picard iteration." << std::endl;
             AssertThrow(nonlinear_iteration < max_nonlinear_iterations, ExcNonlinearSolverNoConvergence());
@@ -1062,15 +1064,20 @@ namespace aspect
     assemble_and_solve_composition();
 
     if constexpr (dim == 2)
-      if (std::find(parameters.compositional_field_methods.begin(), parameters.compositional_field_methods.end(),
-                    Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase) != parameters.compositional_field_methods.end())
-        {
-          const SolverControl control = GrowingFault::advance_midpoint(SimulatorAccess<dim>(*this), *material_model, solution);
-          current_linearization_point = solution;
-          nonlinear_iteration = control.last_step();
-          signals.post_nonlinear_solver(control);
-          return;
-        }
+      {
+        const auto &methods = parameters.compositional_field_methods;
+        const auto phase_method = Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase;
+        if (std::find(methods.begin(), methods.end(), phase_method) != methods.end())
+          {
+            // The composition loop deferred this phase field. Its midpoint
+            // solve returns both the mechanical and phase endpoint.
+            const SolverControl control = GrowingFault::advance_midpoint(SimulatorAccess<dim>(*this), *material_model, solution);
+            current_linearization_point = solution;
+            nonlinear_iteration = control.last_step();
+            signals.post_nonlinear_solver(control);
+            return;
+          }
+      }
 
     // Now store the linear_tolerance we started out with, because we might change
     // it within this timestep.
