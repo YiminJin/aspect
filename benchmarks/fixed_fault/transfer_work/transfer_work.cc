@@ -4,6 +4,7 @@
 */
 
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/postprocess/interface.h>
 #include <aspect/simulator/assemblers/fault_stress.h>
 #include <aspect/simulator_signals.h>
 #include <fstream>
@@ -198,5 +199,73 @@ namespace aspect
 
     ASPECT_REGISTER_MATERIAL_MODEL(TransferWork,"fault transfer work probe",
                                    "Prescribed-rate virtual-work diagnostic for a three-vertex material trace.")
+  }
+
+  namespace Postprocess
+  {
+    // Apply a unit speed to the accepted trace. The area integral of chi
+    // distributed to the two Q1 stations has units of m in two dimensions.
+    // This measures the scalar transfer independently of the solved rates.
+    template <int dim>
+    class IntegratedSlipTransfer : public Interface<dim>, public SimulatorAccess<dim>
+    {
+      public:
+        std::pair<std::string,std::string> execute(TableHandler &) override
+        {
+          const auto &material = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
+          const auto &profile = material.phase_profile();
+          const unsigned int n_labels = material.labels().size();
+          const auto phase = this->introspection().compositional_index_for_name(this->get_parameters().surface_energy_model.composition);
+          const QGauss<dim> section_rule(8);
+          const UpdateFlags flags = update_values | update_quadrature_points | update_JxW_values;
+          FEValues<dim> section(this->get_mapping(), this->get_fe(), section_rule, flags);
+          std::vector<double> native(n_labels), cut(n_labels);
+          const auto integrate = [&](const FEValues<dim> &fe, std::vector<double> &rows)
+          {
+            std::vector<double> values(fe.n_quadrature_points);
+            fe[this->introspection().extractors.compositional_fields[phase]].get_function_values(this->get_solution(), values);
+            for (unsigned int q=0; q<values.size(); ++q)
+              profile.sample(fe.quadrature_point(q), values[q]).add_load(fe.JxW(q), rows);
+          };
+
+          for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+            if (cell->is_locally_owned())
+              {
+                section.reinit(cell);
+                integrate(section, native);
+                // Integrate the same weight again, splitting cells on support
+                // edges and changes in the winning segment inside overlaps.
+                const auto rule = profile.geometry.cut_quadrature(cell->vertex(0), cell->vertex(GeometryInfo<dim>::vertices_per_cell-1));
+                if (rule.size() == 0)
+                  integrate(section, cut);
+                else
+                  {
+                    FEValues<dim> split(this->get_mapping(), this->get_fe(), rule, flags);
+                    split.reinit(cell);
+                    integrate(split, cut);
+                  }
+              }
+          const auto comm = this->get_mpi_communicator();
+          Utilities::MPI::sum(native, comm, native);
+          Utilities::MPI::sum(cut, comm, cut);
+          unsigned int wrote_file = 1;
+          if (Utilities::MPI::this_mpi_process(comm) == 0)
+            {
+              std::ofstream file(this->get_output_directory()+"slip-transfer-"+std::to_string(this->get_timestep_number())+".csv");
+              file << std::setprecision(17) << "id,x_m,y_m,normal_integral_m,Q8_m,cut_m\n";
+              for (unsigned int i=0; i<n_labels; ++i)
+                file << i << ',' << material.labels()[i].position[0] << ',' << material.labels()[i].position[1] << ','
+                     << profile.normal_integrals()[i] << ',' << native[i] << ',' << cut[i] << '\n';
+              file.close();
+              wrote_file = file.good();
+            }
+          AssertThrow(Utilities::MPI::min(wrote_file, comm), ExcMessage("Could not write integrated slip transfer."));
+          return {"Slip transfer", "integrated accepted scalar weights"};
+        }
+    };
+
+    ASPECT_REGISTER_POSTPROCESSOR(IntegratedSlipTransfer, "integrated slip transfer",
+                                  "For a constant test speed, integrate the accepted scalar transfer weight with each "
+                                  "Q1 station shape, using native section and support-resolved bulk quadrature.")
   }
 }
