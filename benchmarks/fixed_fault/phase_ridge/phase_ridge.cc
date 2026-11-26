@@ -198,7 +198,7 @@ namespace aspect
               SymmetricTensor<2,dim> strain;
               strain[0][0]=x[1];
               strain[0][1]=.5*(1.4+x[0]);
-              const double work=2.*kappa*.005*chi*fe.JxW(q)*(f.tangent*(strain*f.normal));
+              const double work=2.*kappa*.005*chi*fe.JxW(q)*profile.slip_sense*(f.tangent*(strain*f.normal));
               reference+=work;
               scale+=std::abs(work);
             }
@@ -413,7 +413,7 @@ namespace aspect
               const auto foot=p.transfer.foot;
               const auto &frame=profile.geometry.segment(foot.first_vertex);
               const double virtual_traction=.7+std::sin(3.*(frame.station+frame.length*foot.xi));
-              p.transfer.add_load(p.volume*virtual_traction,load);
+              p.transfer.add_load(p.volume*profile.slip_sense*virtual_traction,load);
               const auto grad=profile.slip_gradient(p.transfer,p.transfer.rate(test));
               work+=p.volume*virtual_traction*(frame.tangent*(grad*frame.normal));
               const double age=foot.interpolate(parent_age[foot.first_vertex],parent_age[foot.first_vertex+1]);
@@ -513,7 +513,7 @@ namespace aspect
                       if (order==8 && s.chi==0.) continue;
                       const auto &frame=profile.geometry.segment(s.foot.first_vertex);
                       const auto stress=m.endpoint_stress(cell,x,phi[q],symmetrize(grad[q]));
-                      const double tau=shear+frame.tangent*(stress*frame.normal);
+                      const double tau=shear+profile.slip_sense*(frame.tangent*(stress*frame.normal));
                       const double sigma=compression+p[q]-frame.normal*(stress*frame.normal);
                       if (order==3)
                         {

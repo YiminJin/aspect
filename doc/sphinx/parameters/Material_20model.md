@@ -3916,7 +3916,7 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 
 **Pattern:** [FileName (Type: input)]
 
-**Documentation:** Ordered ASCII table: id x_m y_m, optionally initial_age_s and background_shear_Pa. IDs start at zero. Row order sets slip sense; shear persists through all timesteps.
+**Documentation:** Ordered ASCII table: id x_m y_m, optionally initial_age_s and background_shear_Pa. IDs start at zero. Row order sets the tangent; shear persists through all timesteps.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Fault vertices<parameters:Material_20model/Phase_20field_20fault/Fault_20vertices>`
@@ -3934,7 +3934,7 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 
 **Pattern:** [Bool]
 
-**Documentation:** Fit the ordered seed to the initialized FE ridge. Constant phase retains the seed.
+**Documentation:** Fit a straight boundary-spanning seed to the initialized FE phase ridge. Constant phase retains the seed. Set to false to use the prescribed vertex positions, including curved traces.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Initial age<parameters:Material_20model/Phase_20field_20fault/Initial_20age>`
@@ -3980,6 +3980,15 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 **Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
 
 **Documentation:** Maxwell interval in seconds for the initial Stokes solve.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Mature slip sense<parameters:Material_20model/Phase_20field_20fault/Mature_20slip_20sense>`
+:name: parameters:Material_20model/Phase_20field_20fault/Mature_20slip_20sense
+**Default value:** along tangent
+
+**Pattern:** [Selection along tangent|opposite tangent ]
+
+**Documentation:** The tangent follows increasing vertex ID and its counterclockwise normal points to the positive side. Positive slip speed moves this side relative to the negative side along or opposite the tangent. Background shear is measured in this slip sense. Accumulated slip and aging use the positive speed in either sense.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Minimum speed<parameters:Material_20model/Phase_20field_20fault/Minimum_20speed>`

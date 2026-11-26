@@ -106,8 +106,7 @@ namespace aspect
 
     template <int dim>
     PhaseFieldFault<dim>::PhaseFieldFault()
-      : coupling(*this),
-        accepted(std::make_unique<Section>())
+      : coupling(*this)
     {}
 
     template <int dim>
@@ -142,7 +141,7 @@ namespace aspect
       if (!interior_seed || candidate)
         return;
 
-      candidate = std::make_unique<Section>();
+      candidate = std::make_unique<Section>(accepted->profile.slip_sense);
       candidate->trace = accepted->trace;
       if (advect_vertices && this->get_timestep() > 0.)
         candidate->trace.advect_with_accepted_velocity(*this, this->get_timestep());
@@ -290,8 +289,15 @@ namespace aspect
           FaultParameters::declare_entry(prm, "Fault vertex file", "",
                                          Patterns::FileName(),
                                          "Ordered ASCII table: id x_m y_m, optionally initial_age_s and "
-                                         "background_shear_Pa. IDs start at zero. Row order sets slip sense; "
+                                         "background_shear_Pa. IDs start at zero. Row order sets the tangent; "
                                          "shear persists through all timesteps.");
+          FaultParameters::declare_entry(prm, "Mature slip sense", "along tangent",
+                                         Patterns::Selection("along tangent|opposite tangent"),
+                                         "The tangent follows increasing vertex ID and its counterclockwise "
+                                         "normal points to the positive side. Positive slip speed moves this "
+                                         "side relative to the negative side along or opposite the tangent. "
+                                         "Background shear is measured in this slip sense. Accumulated slip "
+                                         "and aging use the positive speed in either sense.");
           FaultParameters::declare_entry(prm, "Fault vertices", "",
                                          Patterns::List(Patterns::List(Patterns::Double(), 2, 2),
                                                         0, Patterns::List::max_int_value, ";"),
@@ -303,8 +309,9 @@ namespace aspect
                                          "At fixed phase it cancels in the normalized slip weight.");
           FaultParameters::declare_entry(prm, "Fit trace to phase", "true",
                                          Patterns::Bool(),
-                                         "Fit the ordered seed to the initialized FE ridge. Constant phase "
-                                         "retains the seed.");
+                                         "Fit a straight boundary-spanning seed to the initialized FE phase "
+                                         "ridge. Constant phase retains the seed. Set to false to use the "
+                                         "prescribed vertex positions, including curved traces.");
           FaultParameters::declare_entry(prm, "Profile half width", "0",
                                          Patterns::Double(0.),
                                          "Normal association support in metres. Zero uses the full physical "
@@ -425,6 +432,7 @@ namespace aspect
         prm.enter_subsection("Phase field fault");
         {
           const std::string fault_geometry = prm.get("Fault geometry");
+          accepted = std::make_unique<Section>(prm.get("Mature slip sense") == "along tangent" ? 1 : -1);
           // Older inputs selected the geometry through the role of the phase composition.
           has_phase_field_role =
             parameters.composition_descriptions[phase_field].type == CompositionalFieldDescription::phase_field;

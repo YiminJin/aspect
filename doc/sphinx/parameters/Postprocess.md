@@ -102,7 +102,7 @@ In geodynamics, the term &ldquo;mass flux&rdquo; is often understood to be the q
 
 &lsquo;matrix statistics&rsquo;: A postprocessor that computes some statistics about the matrices. In particular, it outputs total memory consumption, total non-zero elements, and non-zero elements per block, for system matrix and system preconditioner matrix.
 
-&lsquo;mature fault statistics&rsquo;: Write accepted material vertex positions, optional age, signed slip, rate and arclength averages.
+&lsquo;mature fault statistics&rsquo;: Write accepted material vertex positions, optional age, accumulated slip distance, positive slip speed and arclength averages.
 
 &lsquo;maximum depth of field&rsquo;: A postprocessor that for each compositional field outputs the largest depth at which a quadrature point is found where the field has a value of 0.5 or larger. For fields that do not represent materials, but for example track a certain quantity like strain, this value of 0.5 does not necessarily make sense.
 

@@ -16,7 +16,8 @@ namespace aspect
     namespace
     {
       // A Q2-representable virtual velocity in m/s with engineering shear
-      // rate 1/s in the fault frame. Thus 2 t.eps(v).n = 1/s.
+      // rate 1/s in the first segment's geometric frame. For a bend this
+      // single affine test resolves a different shear on the next segment.
       template <int dim>
       Tensor<1,dim> virtual_velocity(const MaterialFaultTrace<dim> &trace, const Point<dim> &x)
       {
@@ -119,7 +120,7 @@ namespace aspect
           // the accepted rates before either action. At zero physical duration
           // no spin, displacement, age or stress depends on the perturbation.
           auto &trace = const_cast<MaterialFaultTrace<dim>&>(this->phase_profile().geometry);
-          AssertThrow(trace.labels().size() == 3, ExcMessage("The transfer test requires three straight labels."));
+          AssertThrow(trace.labels().size() == 3, ExcMessage("The transfer test requires three ordered labels."));
           std::vector<double> rates;
           for (const auto &label : trace.labels())
             rates.push_back(label.rate);
@@ -177,6 +178,19 @@ namespace aspect
           file << '\n';
           file.close();
           AssertThrow(file,ExcIO());
+
+          // On the one-cell signed-work test capture the production normal
+          // traction at every active Q8 point in the same frozen bulk field.
+          if (this->get_triangulation().n_global_active_cells() == 1)
+            {
+              std::ofstream samples(this->get_output_directory()+"compression.csv");
+              samples << std::setprecision(17) << "segment,xi,rest_Pa,shear_Pa\n";
+              for (unsigned int i=0; i<at_rest.size(); ++i)
+                samples << at_rest[i].transfer.foot.first_vertex << ',' << at_rest[i].transfer.foot.xi << ','
+                        << at_rest[i].compression << ',' << with_shear[i].compression << '\n';
+              samples.close();
+              AssertThrow(samples,ExcIO());
+            }
         }
       private:
         double increment;

@@ -274,7 +274,7 @@ namespace aspect
                                                                material.label_background_shear[foot.first_vertex+1]);
               samples.push_back({transfer,
                                  fe.JxW(q),
-                                 background_shear + stress*symmetrize(frame.dyad),
+                                 background_shear + stress*symmetrize(material.active_section().profile.slip_dyad(foot.first_vertex)),
                                  compression,
                                  material.effective_maxwell_viscosity(fe.quadrature_point(q))
                                 });

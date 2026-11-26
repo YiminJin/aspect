@@ -238,9 +238,15 @@ namespace aspect
   }
 
   template <int dim>
+  Tensor<2,dim> FaultPhaseProfile<dim>::slip_dyad(const unsigned int segment_index) const
+  {
+    return slip_sense * geometry.segment(segment_index).dyad;
+  }
+
+  template <int dim>
   Tensor<2,dim> FaultPhaseProfile<dim>::slip_gradient(const Sample &sample,const double rate) const
   {
-    return (sample.chi*rate)*geometry.segment(sample.foot.first_vertex).dyad;
+    return (sample.chi*rate)*slip_dyad(sample.foot.first_vertex);
   }
 #define INSTANTIATE(dim) template class FaultPhaseProfile<dim>;
   ASPECT_INSTANTIATE(INSTANTIATE)

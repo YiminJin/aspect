@@ -143,8 +143,10 @@ namespace aspect
          */
         struct Section
         {
+          explicit Section(const int slip_sense) : profile(trace, slip_sense) {}
+
           MaterialFaultTrace<dim> trace;
-          FaultPhaseProfile<dim> profile {trace};
+          FaultPhaseProfile<dim> profile;
         };
 
         /** Use the trial section when present, otherwise the accepted section. */

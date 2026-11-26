@@ -66,7 +66,8 @@ namespace aspect
     };
 
     ASPECT_REGISTER_POSTPROCESSOR(MatureFaultStatistics,"mature fault statistics",
-                                  "Write accepted material vertex positions, optional age, signed slip, rate and arclength averages.")
+                                  "Write accepted material vertex positions, optional age, accumulated slip distance, "
+                                  "positive slip speed and arclength averages.")
     // Retain the parameter-file spelling used by the stationary controls.
     namespace
     {
