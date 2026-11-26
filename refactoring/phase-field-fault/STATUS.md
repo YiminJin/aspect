@@ -1,5 +1,82 @@
 # Phase-field fault working record
 
+## Assignment D — Installed fault examples
+
+Started at `3617163671e7aadbe52385b6f11de946db4a5283` on `pf-rsf`. The two [public inputs and run instructions](IMPLEMENTATION.md#run-the-two-poster-examples) and [poster figures, captions and plotting commands](results/iposter/README.md) are ready for review. Both runs used the ordinary installed Release executable from fresh directories outside the checkout. The growing seed needs only ASPECT. The moving example uses its benchmark plugin rebuilt against the matching SDK. C2 production source, reference data and comparison tolerances are unchanged. The default layered loading remains 2 m/s. The code for the growing input is in `fc5b6054b`, frame/load checks in `afba3bc5c`, the layered input, provider and checks in `b15cf0040`, and the plotting scripts and rendered figures in `6f63215fa`.
+
+### Growing seed at 5 ms
+
+The one-field AT1 run and corrected four-field constant-compression run used the same 8 × 4 mesh, 5 ms step, 200 Pa compression and two MPI ranks. Each rank owned 2,484 native samples. Keying the returned tensors by cell and quadrature index gave zero difference in xx, yy, zz and xy in Pa. All nine formed flags, angles, arclengths, signed rates, resistances, ages and cumulative slips matched. Every work and energy term matched, with a maximum absolute difference of 0 J/m (bulk energy 0.0108994550203, fracture energy 6.54571263385, external work 0.0108997275253 J/m). Strip 8 gave β = −0.14786810579423598 rad relative to the seed and ds = 0.25074188693430988 m. Both equal the corrected C2 values. The figure draws the new direction from accepted material stations and reconstructs the FE phase from the exported coefficients. This one step measures initiation.
+
+| Strip | Station depth (m) | Default compression (Pa) | Default rate (m/s) | Compression at 50 Pa/m (Pa) | Rate at 50 Pa/m (m/s) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 0 | 0.967004940 | 200 | 7.34744584e−14 | 248.350246981 | 2.86410793e−15 |
+| 8 | 0.032995060 | 200 | 1.53013875e−13 | 201.649753019 | 1.32712211e−13 |
+
+The [three-run replay](results/iposter/check-growing.sh) and [growing regression commands](results/iposter/growing-checks.md) cover all nine pressure stations, the affine one-/two-rank and off-peak comparison, restart, cutback, 26 interface cases, 14 material-setting cases and all six native writer controls. After a rank-1 write failure the successful retry matched 4,968 native points and 1,280 FE records at both clocks. The [frame and loading commands](results/iposter/frame-checks.md) include the translated growing seed, 20° dip, field permutation, time-dependent and reversed loading, the vertical mature-trace limit and the fixed laboratory traction. Leaving the wall origin behind when translating the seed by 10,000 m gave x and y velocity errors of 71.60254 and 24.01924 m/s. With the correct origin the errors were 4.26e−15 and 2.46e−15 m/s or less. The strict 60° free-32 reference passed at all three clocks. The 64² donor support check covered 23,984 active points and all 12,880 other samples at both clocks.
+
+### Layered moving fault through 25 ms
+
+With the default loading all 13 accepted bulk, label, background and cell-load files matched the retained pre-D public trajectory byte for byte. Against the frozen donor, the largest principal-run 25 ms differences were 3.90e−11 m in vertex position, 1.19e−9 m/s in rate and 2.40e−9 Pa in deviatoric stress. Principal, zero and reverse translation passed their original comparisons. The public plot follows all 20 IDs. At 25 ms vertex 9 had moved +52.149417 mm in x, 2.149417 mm beyond the shared wall motion. The end vertices differed by 11.065447 mm in horizontal displacement.
+
+- At fixed 2 m/s translation, changing the top-minus-bottom velocity contrast from 2 to 1 m/s changed the wall end speeds from (1, 3) to (1.5, 2.5) m/s. The 12.5 ms top shear traction fell from 0.0607273563419 to 0.0303636781710 Pa. Both agree with independent integration of the reference Maxwell column to 1e−12 Pa.
+- Changing the mature degradation magnitude from 50 to 200 at fixed phase changed vertex 9's initial normal compliance integral from 11.7448091151 to 46.9792364606 m. Dividing each of the 20 new integrals by four matched independent cell-split quadrature within 1.42e−14 m. All 1,728 normalized slip weights were unchanged (maximum 3.4048203586 m⁻¹).
+- The shipped 20-row file matched the independent historical inline input at all three clocks. Both input forms gave identical histories on each of one and two ranks. In the crossing control ID 9 moved from rank 0 to rank 1 before 12.5 ms. Resuming its serial inline checkpoint on two ranks with file input agreed with the serial clean trajectory through 25 ms (largest checked difference 1.48e−14 across the recorded columns).
+- The full layered matrix gave zero clean/retry and zero same-layout restart differences. Two-rank endpoints agreed with serial within 2.46e−14 across the checked columns. The tracked 6A retry replay gave phase completions 0, 1, 1, 2 and nine byte-identical accepted physical files. The earlier 12.5 ms checkpoint at the default contrast reproduced the four 25 ms physical files and accepted clock row byte for byte. Changing its contrast to 1 m/s gave the expected checkpoint-identity diagnostic before publication. Full-ray and finite-width continuation passed and their mismatches were rejected. The phase/xx permutation produced zero difference in the named columns.
+
+### Installation and layered verification commands
+
+The retained external run root is `/tmp/aspect-iposter.UpyGyZ`, accessible from the checkout at `build-assignment-d/runs`. The frame/dip experiments are in `/tmp/aspect-frames-d.dCyqX3vz`. For a fresh replay, run the following from the checkout with a new staging directory and external run root. The prior installation supplies the matching baseline executable, SDK and previously built verification plugins. The top-level CMake examples component installs the benchmark sources and data. Only the layered provider needs recompilation for this assignment.
+
+```sh
+W=$PWD
+D=$W/build-assignment-d-replay
+E=$(mktemp -d /tmp/aspect-iposter.XXXXXX)
+mkdir "$D"
+cp -a --reflink=auto build-branch-readability/install "$D/install"
+I=$D/install
+cmake -DCMAKE_INSTALL_PREFIX="$I" -DCMAKE_INSTALL_LOCAL_ONLY=ON \
+  -DCMAKE_INSTALL_COMPONENT=examples -P build-6b/release/cmake_install.cmake
+export ASPECT_SOURCE_DIR="$I" OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 MPLBACKEND=Agg
+MPI=/opt/openmpi/5.0.6/bin/mpirun
+L=$I/benchmarks/layered_moving_fault
+A=$I/bin/aspect-release
+P=$L/liblayered_moving_fault.release.so
+cmake -S "$L" -B "$D/layered-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/layered-plugin" -j 1
+cp "$D/layered-plugin/liblayered_moving_fault.release.so" "$P"
+
+MPIEXEC="$MPI" bash refactoring/phase-field-fault/results/iposter/check-growing.sh "$I" "$E/growing"
+mkdir "$E/layered-public"
+printf 'include %s/layered.prm\nset Additional shared libraries = %s\n' "$L" "$P" >"$E/layered-public/input.prm"
+(cd "$E/layered-public" && "$A" input.prm)
+O=$E/layered-public/output-layered-moving-fault
+B=$W/build-branch-readability/mature/before/clean/output
+for file in "$B"/material-*.csv "$B"/load-*.txt "$B"/background-*.csv "$B"/layered-background.csv; do
+  cmp "$file" "$O/$(basename "$file")" || exit 1
+done
+
+T=$W/build-branch-readability/tests
+python3 -BO "$L/check_review.py" "$A" "$P" "$E/layered-review-final"
+python3 -B "$L/run.py" "$A" "$P" "$T/libfixed_fault.release.so" "$E/layered-matrix" --mpiexec "$MPI"
+python3 -BO "$L/check.py" "$E/layered-matrix" "$W/build-4c/donor/output" "$E/layered-matrix/comparison.png" \
+  --zero "$W/build-4c/donor-zero/output" --reverse "$W/build-4c/donor-reverse/output"
+python3 -BO "$L/check_vertex_file.py" "$A" "$P" "$E/layered-vertices" --mpiexec "$MPI"
+python3 -BO "$L/check_restart_width.py" "$A" "$P" "$E/layered-width"
+python3 -B refactoring/phase-field-fault/replay_6a.py moving-retry "$A" "$T" "$E/layered-6a" --layered-plugin "$P"
+bash refactoring/phase-field-fault/results/iposter/replay_layered_checkpoint.sh "$I" \
+  build-branch-readability/mature/before/seed/output/restart/01 "$O" "$E/old-layered-replay"
+
+cmake -S tests -B "$D/tests" -DAspect_DIR="$I/lib/cmake/Aspect" -DASPECT_BINARY="$A" \
+  -DASPECT_RUN_ALL_TESTS=ON -DASPECT_COMPARE_TEST_RESULTS=ON
+ctest --test-dir "$D/tests" --output-on-failure -R '^(layered_moving_fault|layered_fault_traction_step|growing_fault)$'
+```
+
+The tracked three-run seed replay reproduced the first comparison log byte for byte. All 25 changed benchmark inputs, sources, data files and scripts matched their installed copies. All three scoped CTests passed against their existing references. The installed executable SHA-256 was `d75d72aec4714266631244fbe621fb2a007388c0c85abc5197e6c26517792edc`. Each numerical rank used one thread. The only three-rank run was the writer failure/cleanup control. Figure sources, measured clocks, PDF/PNG outputs and the plotting commands are in the [figure record](results/iposter/README.md).
+
+**Observed limits.** At 45° the growing graph on this 2 × 1 m mesh has no in-box segment for the first adiabatic pressure station. At 32² the exploratory matched-Q1 case omitted roughly 2e−6 of the normal weight and stopped at the existing support guard, as it did with the pre-D driver. Their inputs and stops are retained. All requested scientific comparisons on the supported cases passed. The four historical strip-15 differences retain their strict audit result. The poster covers a single growing initiation step and 25 ms of mature-trace motion. Timestep-converged sustained front advance, the production BP3 sweep and the regional calculation remain open.
+
+
 ## Branch-wide readability review before Assignment D
 
 The scope is the 315 files changed between ASPECT 3.1.0 (`0d97d2d33`) and the local behavior baseline `1f0f5b413`. That entry commit is the C2 checker repair. Entry had no staged or unstaged project-source changes. The incoming review/assignment files and local skill directory were left in place. The [path ledger](results/readability/coverage.tsv) records 67 edited source/verification paths, 123 inspected paths, 28 inspected inputs, 76 reference/generated paths, 19 historical records, and these two updated working documents. The [replay guide](results/readability/README.md) gives the build, install, comparisons and source-specific recorder commands.

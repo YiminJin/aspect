@@ -2,9 +2,95 @@
 
 Start with the **field method** and the **material model** in the parameter file. A passive phase field can be measured or transported on its own. The mature model solves rates along an existing curve. The growing model solves phase, mechanics and section resistance in one midpoint problem. The models retain their historical friction defaults and share an optional prescribed adiabatic pressure. The [parameter reference](../../doc/sphinx/parameters/Material_20model.md) gives the material defaults. The [working record](STATUS.md#increment-6b) gives the installed commands, measurements and reference comparisons.
 
+## Run the two poster examples
+
+Start with an ASPECT Release installation containing the examples and plugin SDK. Set
+`prefix` to its absolute path. The commands below use the installation from the
+[Assignment D checks](STATUS.md#assignment-d--installed-fault-examples).
+Both examples write accepted output in a fresh directory. Distances are in metres
+and times in seconds.
+
+```sh
+prefix=$PWD/build-assignment-d/install
+aspect=$prefix/bin/aspect-release
+growing=$prefix/benchmarks/growing_fault
+layered=$prefix/benchmarks/layered_moving_fault
+export ASPECT_SOURCE_DIR="$prefix"
+export OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+run=$(mktemp -d /tmp/aspect-fault-examples.XXXXXXXX)
+mkdir "$run/seed" "$run/layered"
+cp "$growing/growing_seed.prm" "$run/seed/"
+(cd "$run/seed" && mpirun -np 2 "$aspect" growing_seed.prm)
+```
+
+**Change frictional pressure in the growing seed.** In `Adiabatic conditions model /
+Function`, edit `set Function constants = p0=200, dp_dz=0`. Using `dp_dz=50`
+adds 50 Pa per metre of depth below the top face. The consumed pressure and
+signed rate by strip are in `friction-pressure-0001.csv`. At 5 ms strip 0,
+at a depth of 0.967005 m, sees 248.350247 Pa and slips at 2.86411e−15 m/s.
+With the default constant 200 Pa it slips at 7.34745e−14 m/s. The native
+deviatoric stress in Pa is in `output-growing-seed/points-0001-r*.csv`.
+Read xx, yy, zz and xy by cell and native quadrature index. Positive normal
+stress denotes tension. The work and energy terms are in `balance-0001.csv`
+in J/m of out-of-plane thickness. The four-field compatibility input retains
+its static companion fields and separate native stress history.
+
+The initial phase and all four walls use the same frame. To change its angle
+α counterclockwise from +x or its center, set `xc,yc,tx,ty` in **both**
+`Initial composition model / Function` and `Boundary velocity model / Function`.
+Use `(tx,ty) = (cos α,sin α)`, set `Growing fault / Seed tangent angle` in degrees
+and set `Forward seed tip` to the center plus 0.5 m times that tangent. The
+phase tapers forward from the center and across its normal. The walls impose
+extension along the seed and simple shear across it. The rates in s⁻¹ are
+`extension=0.003, shear=0.020`. Both velocity components rotate with this seed.
+The 20° and 30° growing seeds have friction stations inside the 2 × 1 m domain.
+At 45° with this center the first strip has no in-box station for adiabatic pressure.
+
+**Change the load across the viscosity transition.** Build the layered
+benchmark provider against the same SDK as the executable. Its ordered input
+table is installed beside the parameter file. The `ASPECT_SOURCE_DIR` setting
+above lets an external run locate that table under the installation prefix.
+
+```sh
+cmake -S "$layered" -B "$run/layered-plugin" -DAspect_DIR="$prefix/lib/cmake/Aspect"
+cmake --build "$run/layered-plugin" -j 1
+cp "$layered/layered.prm" "$run/layered/input.prm"
+echo "set Additional shared libraries = $run/layered-plugin/liblayered_moving_fault.release.so" >> "$run/layered/input.prm"
+(cd "$run/layered" && "$aspect" input.prm)
+```
+
+Set `Postprocess / Layered background / Wall velocity contrast = 1` in
+the layered input to halve the default 2 m/s shear loading. Leave
+`Translation = 2` to keep the mean wall motion fixed. The plugin's
+`layered mature fault` material supplies η(y) = 5.5 + 4.5 tanh(y/0.35) Pa s.
+Its `layered background` column supplies the horizontal velocity on the sides
+and bottom, the horizontal traction on top, and the incoming stress for
+physical transport. The upper and lower ends of the side walls then move at
+2.5 and 1.5 m/s. At 12.5 ms the top shear traction falls from 0.06072736 to
+0.03036368 Pa. Read the accepted traction in `layered-background.csv` and
+follow each material ID in `material-2-surface-0.csv` at 25 ms. The accepted
+spatial stress is sampled in `material-2-rank0.csv` in Pa.
+
+The vertex table gives position, age and persistent background shear by ID.
+At fixed phase, changing `Degradation magnitude` scales the excess compliance
+and its normal integral by the same factor. The ratio returning slip to Stokes
+is invariant. For vertex 9, increasing the magnitude from 50 to 200 changed
+the initial raw integral from 11.74481 to 46.97924 m. The largest sampled
+normalized weight stayed at 3.40482 m⁻¹.
+
+Generate both high-resolution PNGs and vector PDFs from these runs. The
+[poster captions and plotting details](results/iposter/README.md) give the
+angle convention, observation windows and measured vertex displacements.
+
+```sh
+export MPLBACKEND=Agg
+python3 "$growing/plot_seed.py" "$run/seed/output-growing-seed" "$run/figures"
+python3 "$layered/plot_layers.py" "$run/layered/output-layered-moving-fault" "$run/figures"
+```
+
 ## Select the fault calculation
 
-Both installed examples select `Material model / Model name = phase field fault`. Run each input in a writable copy of its benchmark directory.
+The two inputs below use the built-in `Material model / Model name = phase field fault`. The layered example above uses its benchmark specialization of the mature material.
 
 | Input | Physical choice | Accepted output |
 |---|---|---|
@@ -15,7 +101,7 @@ The simulator uses the resolved field method when it constructs the top-level ma
 
 ### Change the material response
 
-Edit the shared settings in `Material model / Phase field fault` on either route. In the installed growing seed, changing this single line doubles the shear modulus. The accepted shear stress at the first native point increases from 75.9788626 to 151.9540527 Pa at 5 ms. The [measured field and replay](STATUS.md#assignment-a--public-fault-settings-and-accepted-output) use the same seed, velocity and adiabatic profile for both runs.
+Edit the shared settings in `Material model / Phase field fault` on either route. This line doubles the growing seed’s shear modulus. With the 50 Pa/m pressure gradient, the accepted shear stress at the first native point increases from 75.9788626 to 151.9540527 Pa at 5 ms. The [measured field and replay](STATUS.md#assignment-a--public-fault-settings-and-accepted-output) use the same seed, velocity and adiabatic profile for both runs.
 
 ```text
 subsection Material model

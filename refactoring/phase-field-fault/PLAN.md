@@ -1,6 +1,8 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**The branch-wide readability pass is ready for review.** The [working record](STATUS.md#branch-wide-readability-review-before-assignment-d) and [release-diff coverage and replay commands](results/readability/README.md) identify the local behavior baseline, separately reviewable changes and same-source recorder checks. The historical four strip-15 comparisons retain their original strict result. Assignment D will address the public examples.
+**Assignment D is ready for review.** The [installed growing and layered examples](IMPLEMENTATION.md#run-the-two-poster-examples), [poster figures](results/iposter/README.md) and [working record](STATUS.md#assignment-d--installed-fault-examples) give the controls, measured initiation and material motion, and limits of the two short runs. Production BP3 and the regional simulation remain later assignments.
+
+**The branch-wide readability pass is complete.** The [working record](STATUS.md#branch-wide-readability-review-before-assignment-d) and [release-diff coverage and replay commands](results/readability/README.md) identify the local behavior baseline, separately reviewable changes and same-source recorder checks. The historical four strip-15 comparisons retain their original strict result.
 
 **Assignment C2 review is closed.** The ordinary growing-fault solver now evaluates the centered direction score with the signed strip rate. Strip 8 agrees with the direct native-point peak on constant and affine pressure. Only its nine-strip angle and arclength at 5, 10 and 15 ms have revised references. The full historical comparison and original budgets remain available. The same-source 18-strip replay retains the four historical strip-15 angle exceptions. See the [C2 results and commands](results/direction-c2/README.md) and [C1 decision on identical fields](results/direction-c1/README.md).
 
