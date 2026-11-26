@@ -1,0 +1,11 @@
+# Run in a fresh directory with a protected copy of job 3616642's step-4229 parent.
+include job3616642.prm
+set Output directory = ./output
+set Resume computation = true
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 4237
+    set Stop after first event = false
+    set Graceful wall seconds = 3600
+  end
+end

@@ -1,0 +1,12 @@
+# Resume the successful replay at 4237 with the archived physical end time.
+# Time/diagnostic stops can be adjusted for a different allocation.
+include job3616642.prm
+set Output directory = ./output
+set Resume computation = true
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 2147483647
+    set Stop after first event = false
+    set Graceful wall seconds = 158400
+  end
+end
