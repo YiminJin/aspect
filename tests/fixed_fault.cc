@@ -26,7 +26,8 @@ namespace aspect
         {
           prm.enter_subsection("Postprocess");
           prm.enter_subsection("Fixed fault probe");
-          prm.declare_entry("Compare homogeneous reference","true",Patterns::Bool(),
+          prm.declare_entry("Compare homogeneous reference", "true",
+                            Patterns::Bool(),
                             "Check both equivalent labels and every bulk sample against the homogeneous donor.");
           prm.leave_subsection();
           prm.leave_subsection();
@@ -75,11 +76,14 @@ namespace aspect
           for (unsigned int i=0; i<labels.size(); ++i)
             {
               snapshot << ' ' << labels[i].position;
-              if (!model.label_ages().empty()) snapshot << ' ' << model.label_ages().at(i);
+              if (!model.label_ages().empty())
+                snapshot << ' ' << model.label_ages().at(i);
               snapshot << ' ' << labels[i].slip << ' ' << labels[i].rate;
             }
           snapshot << '\n';
 
+          // Accepted donor frames in time order (0, 12.5, 25 ms). Rates are
+          // in m/s, ages in seconds, velocity gradients in 1/s and stress in Pa.
           const double rate[] = {0.17074374817067778,0.16359216623205453,0.16724399270585846};
           const double age[] = {10.,7.7554483265394705,5.9829702628709551};
           const double shear_gradient[] = {-0.14972708428112763,0.098036219175796038,-0.063366308920228251};
@@ -112,12 +116,12 @@ namespace aspect
           const auto xy = fields.compositional_index_for_name("fault_stress_xy");
           const auto phase = fields.compositional_index_for_name(this->get_parameters().surface_energy_model.composition);
           if (step == 0)
-            check_density(xx);
+            check_density_ignores_stress(xx);
           for (const auto &cell : this->get_dof_handler().active_cell_iterators())
             if (cell->is_locally_owned())
               {
                 if (step == 0 && points == 0)
-                  check_work(cell);
+                  check_stress_load_work(cell);
                 fe.reinit(cell);
                 fe.get_function_values(this->get_solution(),values);
                 for (unsigned int q=0; q<rule.size(); ++q)
@@ -125,12 +129,15 @@ namespace aspect
                     ++points;
                     snapshot << cell->id() << ' ' << q << ' ' << fe.quadrature_point(q);
                     const auto &v = values[q];
-                    for (const unsigned int component :
+                    // Snapshot columns follow the donor's physical field order.
+                    const auto snapshot_components =
                     {
-                      intro.velocities[0],intro.velocities[1],intro.pressure,intro.temperature,
-                                         intro.compositional_fields[xx],intro.compositional_fields[yy],intro.compositional_fields[xy],intro.compositional_fields[phase]
-                      })
-                    snapshot << ' ' << v[component];
+                      intro.velocities[0], intro.velocities[1], intro.pressure, intro.temperature,
+                      intro.compositional_fields[xx], intro.compositional_fields[yy],
+                      intro.compositional_fields[xy], intro.compositional_fields[phase]
+                    };
+                    for (const unsigned int component : snapshot_components)
+                      snapshot << ' ' << v[component];
                     snapshot << '\n';
                     if (homogeneous)
                       {
@@ -155,7 +162,7 @@ namespace aspect
         // Use the production assembler on a nonconstant prescribed stress. A
         // Q2 velocity w=(x^2+y, xy+y^2) is represented exactly by its nodes.
         // Compare r.w against the analytic gradient, including shear and sign.
-        void check_work(const typename DoFHandler<dim>::active_cell_iterator &cell) const
+        void check_stress_load_work(const typename DoFHandler<dim>::active_cell_iterator &cell) const
         {
           const auto &intro = this->introspection();
           const auto &system = this->get_fe();
@@ -163,10 +170,8 @@ namespace aspect
           const QGauss<dim> rule(4);
           Assemblers::FaultStressLoad<dim> assembler;
           assembler.initialize_simulator(this->get_simulator());
-          for (const bool rebuild :
-          {
-            true,false
-          })
+          const bool rebuild_matrix[] = {true, false};
+          for (const bool rebuild : rebuild_matrix)
           {
             internal::Assembly::Scratch::StokesSystem<dim> scratch(system,this->get_mapping(),rule,QGauss<dim-1>(3),
                                                                    update_gradients | update_quadrature_points | update_JxW_values,update_default,
@@ -177,7 +182,7 @@ namespace aspect
             assembler.create_additional_material_model_outputs(scratch.material_model_outputs);
             auto offset = scratch.material_model_outputs.template get_additional_output_object<MaterialModel::FaultStressOffset<dim>>();
             const auto &fe = scratch.finite_element_values;
-            double expected = 0.;
+            double expected_work = 0.;
             for (unsigned int q=0; q<rule.size(); ++q)
               {
                 const auto &point = fe.quadrature_point(q);
@@ -186,7 +191,7 @@ namespace aspect
                 stress[0][0] = 1.+x*y;
                 stress[1][1] = 2.-y;
                 stress[0][1] = .5+x*y*y;
-                expected -= fe.JxW(q)*(stress[0][0]*2.*x + stress[1][1]*(x+2.*y) + stress[0][1]*(1.+y));
+                expected_work -= fe.JxW(q)*(stress[0][0]*2.*x + stress[1][1]*(x+2.*y) + stress[0][1]*(1.+y));
               }
             assembler.execute(scratch,data);
             double work = 0.;
@@ -203,12 +208,12 @@ namespace aspect
                 work += data.local_rhs[i]*(component == intro.component_indices.velocities[0] ?
                                            p[0]*p[0]+p[1] : p[0]*p[1]+p[1]*p[1]);
               }
-            AssertThrow(std::abs(expected) > 1.e-6 && std::abs(work-expected) < 1.e-12,
+            AssertThrow(std::abs(expected_work) > 1.e-6 && std::abs(work-expected_work) < 1.e-12,
                         ExcMessage("Incorrect stress-offset virtual work."));
           }
         }
 
-        void check_density(const unsigned int stress_field) const
+        void check_density_ignores_stress(const unsigned int stress_field) const
         {
           const auto n = this->n_compositional_fields();
           MaterialModel::MaterialModelInputs<dim> in(2,n);

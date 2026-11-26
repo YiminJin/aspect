@@ -15,20 +15,30 @@ def audit(reference, target, label, writer):
     actual = rows(target.glob('balance-000[1-9].csv'), ('step',))
     if set(ledger) != {(1,),(2,),(3,)} or ledger.keys()!=actual.keys():
         raise ValueError(f'{label}: publication clocks differ')
-    def column(step, name, keys, a, b, atol, rtol):
-        a,b=np.asarray(a,dtype=float),np.asarray(b,dtype=float)
-        if not (len(a)==len(b)==len(keys) and len(a) and np.all(np.isfinite(a)) and np.all(np.isfinite(b))):
+    def column(step, name, keys, reference_values, target_values, atol, rtol):
+        reference_values = np.asarray(reference_values, dtype=float)
+        target_values = np.asarray(target_values, dtype=float)
+        complete = len(reference_values) == len(target_values) == len(keys) and len(keys) > 0
+        if not (complete and np.all(np.isfinite(reference_values)) and np.all(np.isfinite(target_values))):
             raise ValueError(f'{label}, step {step}, {name}: incomplete or nonfinite column')
-        diff=abs(b-a)
-        tol=atol+rtol*abs(a)
-        bad=diff>tol
-        ratio=np.divide(diff,tol,out=np.where(diff==0,0.,np.inf),where=tol>0)
-        worst=int(np.argmax(ratio))
-        writer.writerow([label,step,name,len(keys),sum(bad),max(diff),ratio[worst],keys[worst],a[worst],b[worst]])
+
+        absolute_error = abs(target_values - reference_values)
+        allowance = atol + rtol * abs(reference_values)
+        # A zero allowance tests exact identity (e.g. a strip's formed flag).
+        error_ratio = np.divide(absolute_error, allowance,
+                                out=np.where(absolute_error == 0, 0., np.inf), where=allowance > 0)
+        worst = int(np.argmax(error_ratio))
+        writer.writerow([label, step, name, len(keys), sum(absolute_error > allowance),
+                         max(absolute_error), error_ratio[worst], keys[worst],
+                         reference_values[worst], target_values[worst]])
+
     def compare(step, name, old, new, atol, rtol, new_name=None):
-        if old.keys()!=new.keys(): raise ValueError(f'{label}, step {step}, {name}: identities differ')
-        keys=sorted(old)
-        column(step,name,keys,[old[k][name] for k in keys],[new[k][new_name or name] for k in keys],atol,rtol)
+        if old.keys() != new.keys():
+            raise ValueError(f'{label}, step {step}, {name}: identities differ')
+        keys = sorted(old)
+        column(step, name, keys, [old[k][name] for k in keys],
+               [new[k][new_name or name] for k in keys], atol, rtol)
+
     for step in range(4):
         tag=f'{step:04}'
         old=rows(reference.glob(f'tip-points-{tag}-r*.csv*'),('cell','q'))

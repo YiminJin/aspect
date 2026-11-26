@@ -14,8 +14,10 @@ energy="$examples/phase_field_surface_energy"
 ridge="$examples/fixed_fault/phase_ridge"
 moving="$examples/layered_moving_fault"
 growth="$examples/growing_fault"
+# The same surface functional is integrated with and without a partition.
 python3 "$energy/check.py" "$aspect" "$out/energy"
 python3 "$energy/check.py" "$aspect" "$out/energy-mpi" --mpi "$mpi"
+# The ridge checker compares all accepted label clocks with the Q8 reference.
 python3 "$ridge/run.py" "$aspect" "$ridge/libphase_ridge.release.so" "$out/ridge/free-32" free 32
 PYTHONPATH="$ridge" python3 -c 'from pathlib import Path; from check import check_case; check_case(Path("ridge"), "free", 32)'
 python3 "$moving/check_review.py" "$aspect" "$moving/liblayered_moving_fault.release.so" "$out/moving"
@@ -30,7 +32,9 @@ schedule="$growth/timestep"
 mkdir strip18
 for case in parent coarse half; do
   extra=()
-  if [[ "$case" == coarse ]]; then extra=(--parent "$out/strip18/parent/output"); fi
+  if [[ "$case" == coarse ]]; then
+    extra=(--parent "$out/strip18/parent/output")
+  fi
   python3 "$schedule/run.py" "$case" "$out/strip18/$case" "$schedule/libmidpoint_fields.release.so" \
     --aspect "$aspect" --plugin "$growth/libgrowing_fault_checks.release.so" --launcher "$mpi" "${extra[@]}"
 done

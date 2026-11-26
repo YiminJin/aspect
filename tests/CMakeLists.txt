@@ -340,6 +340,8 @@ function(discover_tests)
       set(_replacement_script "${ASPECT_TEST_SUITE_SOURCE_DIR}/cmake/default")
     endif()
 
+    # Track included benchmark inputs, checker modules and shared observer
+    # targets so that a changed dependency invalidates the cached test output.
     if(_test_source_name STREQUAL "dg_stress_transport")
       list(APPEND _testdepends "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/fixed_fault/check_transport.py")
     elseif(_test_source_name STREQUAL "growing_fault")

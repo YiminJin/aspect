@@ -25,9 +25,14 @@ def measure_rank(aspect):
 
 def velocity_statistics(table):
     lines = table.decode().splitlines()
-    indices = [int(next(line.split(':')[0][2:] for line in lines if line.endswith(name))) - 1
-               for name in ('RMS velocity (m/s)', 'Max. velocity (m/s)')]
-    return [float(line.split()[i]) for line in lines if line and not line.startswith('#') for i in indices]
+    # ASPECT numbers the columns from one in the statistics header.
+    indices = []
+    for name in ('RMS velocity (m/s)', 'Max. velocity (m/s)'):
+        column = next(line.split(':')[0][2:] for line in lines if line.endswith(name))
+        indices.append(int(column) - 1)
+    return [float(line.split()[i])
+            for line in lines if line and not line.startswith('#')
+            for i in indices]
 
 
 def run(binary, directory, settings, ranks, launcher, midpoint, donor=False):
