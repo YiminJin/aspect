@@ -45,7 +45,8 @@ def main():
         launch=[] if ranks==1 else [args.mpiexec,'-np',str(ranks)]
         with (directory/'log').open('w') as log:
             subprocess.run([*launch,args.aspect,'input.prm'],cwd=directory,stdout=log,stderr=subprocess.STDOUT,
-                           env=os.environ|dict(OMP_NUM_THREADS='1',DEAL_II_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1'),check=True)
+                           env=os.environ|dict(ASPECT_SOURCE_DIR=str(here.parents[1]), OMP_NUM_THREADS='1',
+                                               DEAL_II_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1'),check=True)
         return output
 
     # Compare the shipped table itself with the independently retained three

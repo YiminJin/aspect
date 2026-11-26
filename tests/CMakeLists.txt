@@ -342,6 +342,14 @@ function(discover_tests)
 
     # Track included benchmark inputs, checker modules and shared observer
     # targets so that a changed dependency invalidates the cached test output.
+    # These parameter files also open nested inputs through ASPECT_SOURCE_DIR.
+    # Use the same tree that supplies the dependencies below, even when CTest
+    # is invoked from an environment configured to run installed examples.
+    set(_benchmark_environment)
+    if(_test_source_name MATCHES "^(growing_fault|layered_moving_fault|layered_fault_traction_step)$")
+      get_filename_component(_benchmark_root "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
+      set(_benchmark_environment "${CMAKE_COMMAND}" -E env "ASPECT_SOURCE_DIR=${_benchmark_root}")
+    endif()
     if(_test_source_name STREQUAL "dg_stress_transport")
       list(APPEND _testdepends "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/fixed_fault/check_transport.py")
     elseif(_test_source_name STREQUAL "growing_fault")
@@ -402,7 +410,7 @@ function(discover_tests)
       add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/screen-output
         COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/runs
-        COMMAND ${ASPECT_TEST_SUITE_SOURCE_DIR}/cmake/timeout.sh ${TEST_TIME_LIMIT}s ${ASPECT_TEST_SUITE_SOURCE_DIR}/cmake/run_test.sh ${EXPECT} ${ASPECT_BINARY} ${CMAKE_CURRENT_BINARY_DIR}/${_testname}.x.prm ${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/screen-output.tmp
+        COMMAND ${_benchmark_environment} ${ASPECT_TEST_SUITE_SOURCE_DIR}/cmake/timeout.sh ${TEST_TIME_LIMIT}s ${ASPECT_TEST_SUITE_SOURCE_DIR}/cmake/run_test.sh ${EXPECT} ${ASPECT_BINARY} ${CMAKE_CURRENT_BINARY_DIR}/${_testname}.x.prm ${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/screen-output.tmp
         COMMAND ${_replacement_script} screen-output <${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/screen-output.tmp >${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/screen-output
         COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/runs
         DEPENDS ${ASPECT_BINARY} ${CMAKE_CURRENT_BINARY_DIR}/${_testname}.x.prm ${_testdepends})
@@ -410,7 +418,7 @@ function(discover_tests)
       add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/screen-output
         COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/runs
-        COMMAND ${ASPECT_TEST_SUITE_SOURCE_DIR}/cmake/timeout.sh ${TEST_TIME_LIMIT}s mpirun -np ${_mpi_count} ${ASPECT_BINARY} ${CMAKE_CURRENT_BINARY_DIR}/${_testname}.x.prm
+        COMMAND ${_benchmark_environment} ${ASPECT_TEST_SUITE_SOURCE_DIR}/cmake/timeout.sh ${TEST_TIME_LIMIT}s mpirun -np ${_mpi_count} ${ASPECT_BINARY} ${CMAKE_CURRENT_BINARY_DIR}/${_testname}.x.prm
                 > ${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/screen-output.tmp
         COMMAND ${_replacement_script} screen-output <${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/screen-output.tmp >${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/screen-output
         COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/output-${_testname}/runs

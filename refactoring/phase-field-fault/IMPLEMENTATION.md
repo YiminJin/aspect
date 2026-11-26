@@ -6,12 +6,14 @@ Start with the **field method** and the **material model** in the parameter file
 
 Start with an ASPECT Release installation containing the examples and plugin SDK. Set
 `prefix` to its absolute path. The commands below use the installation from the
-[Assignment D checks](STATUS.md#assignment-d--installed-fault-examples).
+[configured-prefix SDK check](results/iposter/installed-review-checks.md). Configure
+ASPECT with `-DCMAKE_INSTALL_PREFIX` set to the intended destination and
+`-DASPECT_INSTALL_EXAMPLES=ON` before installing.
 Both examples write accepted output in a fresh directory. Distances are in metres
 and times in seconds.
 
 ```sh
-prefix=$PWD/build-assignment-d/install
+prefix=$PWD/build-d-review/install
 aspect=$prefix/bin/aspect-release
 growing=$prefix/benchmarks/growing_fault
 layered=$prefix/benchmarks/layered_moving_fault
@@ -67,9 +69,10 @@ Its `layered background` column supplies the horizontal velocity on the sides
 and bottom, the horizontal traction on top, and the incoming stress for
 physical transport. The upper and lower ends of the side walls then move at
 2.5 and 1.5 m/s. At 12.5 ms the top shear traction falls from 0.06072736 to
-0.03036368 Pa. Read the accepted traction in `layered-background.csv` and
-follow each material ID in `material-2-surface-0.csv` at 25 ms. The accepted
-spatial stress is sampled in `material-2-rank0.csv` in Pa.
+0.03036368 Pa. The selected top provider prescribes the accepted column value
+recorded in `layered-background.csv`. Follow each material ID in
+`material-2-surface-0.csv` at 25 ms. The accepted spatial stress is sampled
+in `material-2-rank0.csv` in Pa.
 
 The vertex table gives position, age and persistent background shear by ID.
 At fixed phase, changing `Degradation magnitude` scales the excess compliance

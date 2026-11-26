@@ -1,5 +1,40 @@
 # Phase-field fault working record
 
+## Assignment D review repairs
+
+The dedicated BP3 launcher revision is `b54bde517`. The four subsequent repair
+groups change the poster plotters, benchmark checks, test input selection and
+installation instructions. The numerical solver, reference data and physical
+comparison tolerances are unchanged. The external Release runs used one or two
+MPI ranks and one numerical thread per rank.
+
+| Review findings | Repair and observed discrimination |
+| --- | --- |
+| 1, 2, 3 — growing turn | Reversed extension now shows a +8.472264° counterclockwise turn. At extension 0.012 s⁻¹ the first segment starts at the prescribed tip and the −0.115648 m arrival and both labels fit in the equal-scale detail. |
+| 4, 12 — growing phase | The 10 km translation reproduces native phase within 8.31e−13 using an allowance derived from the stored coordinates, cell widths and Bernstein slopes. A nodal interpretation of the coefficients fails by 0.064765. The legacy selector finds the field named `damage`. |
+| 10, 11 — layered frames | The plot follows material IDs on both the 21-vertex input and the 48-cell mesh. The 6.25 ms input selects steps 0, 2 and 4 by physical time. Shuffling surface rows leaves displacements unchanged. Missing or duplicate clocks and IDs are rejected. |
+| 5 — material angle | With the seed and walls at 20°, changing only the material to 19° moves the incoming friction stations up to 0.02544977 m off the intended trace. The checker rejects the geometry on one and two ranks. |
+| 6 — top traction | The zero-function top provider fails despite an unchanged column reading of 0.030363678171 Pa. At 25 ms its vertex 9 is at x = 0.005927315 m versus 0.009039005 m with the column traction. The independent column integral and side-wall velocity checks still pass on the intended input. |
+| 13 — partitioned phase | The 35° ridge check joins 4,608 samples from each rank and matches all 9,216 mesh/point identities. Duplicating one rank-one index fails. The one-rank 35° and 90° controls pass. |
+| 7, 14 — installed vertex file | The installed checker opens its own table with the ambient source prefix unset. Raising ID 0 shear by 0.1 Pa fails the independent initial rate comparison by 0.02141722 m/s. The table with comments, mixed whitespace and blank lines passes the three clocks, two-rank crossing and one-to-two-rank restart. |
+| 8, 9 — test inputs and SDK | All three benchmark CTests use the source inputs tracked in their Make dependencies and passed with a deliberately altered ambient prefix. Only touching the tracked table schedules a rerun. The plugin compiler dependency, executable symlink and resolved table all lead to the new, destination-configured installation. |
+
+The [growing plot](results/iposter/growing-plot-checks.md),
+[layered plot](results/iposter/layered-plot-checks.md),
+[physical verification](results/iposter/physical-review-checks.md) and
+[installation](results/iposter/installed-review-checks.md) records give the
+exact commands, physical inputs, failures and outputs for each group.
+Both [default figures and captions](results/iposter/README.md) were checked
+against fresh accepted fields. At 5 ms the one-field example matched all four
+stress components at 4,968 native points, all nine strips, and every energy
+and work entry of the corrected four-field case. The strip-8 turn was
+8.472218387° clockwise, with arclength 0.2507418869343099 m. At 25 ms layered
+vertex 9 moved 52.149417217 mm in x, including 50 mm of mean wall translation.
+Both layered figure formats reproduced the previous versions byte for byte.
+Nine accepted physical files matched after a retry. The earlier 12.5 ms
+checkpoint reproduced the four 25 ms physical files and clock on continuation;
+changing the wall contrast triggered the checkpoint identity check.
+
 ## 60° BP3 launcher handoff
 
 The [two-node, 160-rank launcher and replay instructions](results/bp3-preparation/server.md#launcher-and-startup-identity) use the donor at `612b75d35`. The versioned handoff is in `build-bp3-preparation/launcher` with input kit SHA-256 `5cb5e498b789a18fed6451288f8fecd314b3debfd68866c2c6a9c75f9f813d6c`. Both archives passed their checksums. Running `python3 donor_startup.py BP3.o3616642 fault.txt` inside the unpacked kit confirmed both runtime DSOs and all five physical anchors. Removing the restored-BP3 library record and changing one x coordinate by 1 m each failed as expected. The preceding job's stack and repair procedure identify the historical scratch plugin build prefix. The launcher records the selected solver path, both resolved DSOs, build cache and data paths. Stampede3's original ELF hashes and step-4229 restore remain unverified here.
@@ -40,17 +75,16 @@ With the default loading all 13 accepted bulk, label, background and cell-load f
 
 ### Installation and layered verification commands
 
-The retained external run root is `/tmp/aspect-iposter.UpyGyZ`, accessible from the checkout at `build-assignment-d/runs`. The frame/dip experiments are in `/tmp/aspect-frames-d.dCyqX3vz`. For a fresh replay, run the following from the checkout with a new staging directory and external run root. The prior installation supplies the matching baseline executable, SDK and previously built verification plugins. The top-level CMake examples component installs the benchmark sources and data. Only the layered provider needs recompilation for this assignment.
+The retained external run root is `/tmp/aspect-iposter.UpyGyZ`, accessible from the checkout at `build-assignment-d/runs`. The frame/dip experiments are in `/tmp/aspect-frames-d.dCyqX3vz`. For a fresh replay, run the following from the checkout with a new staging directory and external run root. The original staging copied an SDK whose embedded paths led to its earlier prefix. The reviewed replay below configures and installs the SDK directly into its destination. Historical comparisons use the separately identified earlier outputs and test plugins.
 
 ```sh
 W=$PWD
 D=$W/build-assignment-d-replay
 E=$(mktemp -d /tmp/aspect-iposter.XXXXXX)
 mkdir "$D"
-cp -a --reflink=auto build-branch-readability/install "$D/install"
 I=$D/install
-cmake -DCMAKE_INSTALL_PREFIX="$I" -DCMAKE_INSTALL_LOCAL_ONLY=ON \
-  -DCMAKE_INSTALL_COMPONENT=examples -P build-6b/release/cmake_install.cmake
+cmake -S "$W" -B build-6b/release -DCMAKE_INSTALL_PREFIX="$I" -DASPECT_INSTALL_EXAMPLES=ON
+cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -P build-6b/release/cmake_install.cmake
 export ASPECT_SOURCE_DIR="$I" OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 MPLBACKEND=Agg
 MPI=/opt/openmpi/5.0.6/bin/mpirun
 L=$I/benchmarks/layered_moving_fault

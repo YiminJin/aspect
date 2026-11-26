@@ -15,7 +15,16 @@ def material_settings(entries):
 def crossing_vertices():
     """Move material ID 9 just upstream of the partition on the same seed."""
     with Path(__file__).with_name("layered_vertices.txt").open() as stream:
-        rows = list(csv.DictReader(stream, delimiter=" ", skipinitialspace=True))
+        # Use the public table syntax: whitespace separates columns and '#'
+        # starts a comment, including after a row of values.
+        records = (line.partition("#")[0].split() for line in stream)
+        records = (columns for columns in records if columns)
+        header = next(records)
+        rows = []
+        for columns in records:
+            if len(columns) != len(header):
+                raise ValueError("Expected one value per vertex column")
+            rows.append(dict(zip(header, columns)))
     vertex, = (row for row in rows if int(row["id"]) == 9)
     x = -.00001
     vertex.update(x_m=str(x), y_m=str(.6*x), initial_age_s=f"{10+2*math.sin(2*x):.17g}",

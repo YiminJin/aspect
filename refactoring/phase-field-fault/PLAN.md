@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**Assignment D is ready for review.** The [installed growing and layered examples](IMPLEMENTATION.md#run-the-two-poster-examples), [poster figures](results/iposter/README.md) and [working record](STATUS.md#assignment-d--installed-fault-examples) give the controls, measured initiation and material motion, and limits of the two short runs. Production BP3 and the regional simulation remain later assignments.
+**Assignment D is ready for focused re-review.** The [four repair groups](STATUS.md#assignment-d-review-repairs) cover the edited examples, their installed inputs and the discriminating checks for all fourteen findings. The [installed examples](IMPLEMENTATION.md#run-the-two-poster-examples) and [regenerated figures](results/iposter/README.md) give the measured initiation and material motion. The separately pinned BP3 launcher is at `b54bde517`. Production BP3 and the regional simulation remain later assignments.
 
 **60° BP3 server preparation.** The [donor continuation and branch qualification plan](results/bp3-preparation/README.md) starts with recovering the 160-rank step-4229 checkpoint and replaying eight known endpoints. The donor evidence covers one acceleration and substantial slip, with recovery and recurrence still open. A restartable surface-reaching thrust, spatial friction and matched loading, normal feedback and timestep control are prerequisites for a full-size `pf-rsf` run.
 

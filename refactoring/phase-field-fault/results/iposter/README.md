@@ -41,32 +41,29 @@ displacement. The end-to-end difference in horizontal displacement was
 
 ## Reproduce the figures
 
-The [implementation guide](../../IMPLEMENTATION.md) gives the two installed
-ASPECT launches. For the recorded run, the checkout started at
-`3617163671e7aadbe52385b6f11de946db4a5283`. The updated parameter files
-and benchmark provider in this assignment were installed into
-`build-assignment-d/install`. The Release executable's SHA-256 was
-`d75d72aec4714266631244fbe621fb2a007388c0c85abc5197e6c26517792edc`,
-and the layered plugin's was
-`63aeeaa3f50762360db262d3842605b8531cde2fb6340b824e1622d730ef5862`.
-The executable reports its configure-time Git revision `1f0f5b413`.
+The [implementation guide](../../IMPLEMENTATION.md) gives both installed
+launches. The [growing plot](growing-plot-checks.md), [layered plot](layered-plot-checks.md),
+[physical controls](physical-review-checks.md) and [SDK and input checks](installed-review-checks.md)
+record the reviewer’s edited cases and measurements. We regenerated both pairs
+from fresh runs against the destination-configured `build-d-review/install`.
+The layered PNG and PDF reproduced the earlier figures byte for byte.
+The executable and DSO hashes and the actual table path are in the SDK record.
 
-From the worktree root, the following commands render both figures from the
-retained external run directories. For a new run, substitute the output
-directories produced by the two example launches. The scripts read the
+From the worktree root, run the following on the accepted example output.
+For a new simulation substitute its external output directory. The scripts read the
 accepted frames, the resolved parameter values and the physical times in
 those directories. The 350 dpi PNGs are 4175 × 1713 and 4259 × 2025 pixels
 respectively. Both PDFs contain vector geometry and text throughout.
 
 ```sh
-run=/tmp/aspect-iposter.UpyGyZ
-prefix=$PWD/build-assignment-d/install
+run=/tmp/aspect-d-repairs.TphOTorc
+prefix=$PWD/build-d-review/install
 figures=$PWD/refactoring/phase-field-fault/results/iposter
 export MPLBACKEND=Agg OPENBLAS_NUM_THREADS=1
 python3 -B "$prefix/benchmarks/growing_fault/plot_seed.py" \
   "$run/growing/seed/output" "$figures"
 python3 -B "$prefix/benchmarks/layered_moving_fault/plot_layers.py" \
-  "$run/layered-public/output-layered-moving-fault" "$figures"
+  "$run/layered/output-layered-moving-fault" "$figures"
 ```
 
 ## Replay the old layered checkpoint
@@ -82,7 +79,7 @@ only the contrast to 1 m/s rejected the restart with
 ```sh
 bash refactoring/phase-field-fault/results/iposter/replay_layered_checkpoint.sh \
   "$prefix" build-branch-readability/mature/before/seed/output/restart/01 \
-  "$run/layered-public/output-layered-moving-fault" "$run/old-layered-replay"
+  "$run/layered/output-layered-moving-fault" "$run/old-layered-replay"
 ```
 
 Supply a fresh directory as the last argument on each replay. The helper
