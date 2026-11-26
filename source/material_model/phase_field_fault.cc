@@ -5,6 +5,7 @@
 
 #include <aspect/material_model/fault_parameters.h>
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/reconstructed_fault/fault_vertex_table.h>
 #include <aspect/adiabatic_conditions/interface.h>
 #include <aspect/material_model/rheology/fault_resistance.h>
 #include <aspect/simulator/assemblers/fault_stress.h>
@@ -18,75 +19,6 @@ namespace aspect
   {
     namespace
     {
-      /**
-       * Parse the contents of a fault vertex file after distribution to all ranks.
-       * Each data row appends one position (x, y in meters) in material ID order,
-       * starting at zero. Blank lines and comments beginning with '#' are skipped.
-       * Optional columns append initial ages (s) and background shear tractions
-       * (Pa) to their respective vectors. An omitted column preserves its inline
-       * values. Supplying the same property both inline and in the file is an error.
-       */
-      template <int dim>
-      void parse_fault_vertex_table(const std::string       &file_contents,
-                                    std::vector<Point<dim>> &vertices,
-                                    std::vector<double>     &initial_ages,
-                                    std::vector<double>     &background_shear_tractions)
-      {
-        std::istringstream input(file_contents);
-        std::vector<std::string> column_names;
-        std::string line;
-        while (std::getline(input, line))
-          {
-            line = line.substr(0, line.find('#'));
-            std::istringstream row(line);
-            std::vector<std::string> entries;
-            for (std::string entry; row >> entry;)
-              entries.push_back(entry);
-            if (entries.empty())
-              continue;
-
-            if (column_names.empty())
-              {
-                column_names = std::move(entries);
-                AssertThrow(column_names.size() >= 3 &&
-                            column_names[0] == "id" && column_names[1] == "x_m" && column_names[2] == "y_m",
-                            ExcMessage("Expected vertex header id x_m y_m; anonymous donor core-phase triples are ambiguous."));
-                std::set<std::string> optional_columns;
-                for (unsigned int column = 3; column < column_names.size(); ++column)
-                  {
-                    const std::string &name = column_names[column];
-                    const bool is_age = name == "initial_age_s";
-                    AssertThrow((is_age || name == "background_shear_Pa") && optional_columns.insert(name).second,
-                                ExcMessage("Unknown or duplicate vertex column " + name));
-                    const auto &inline_values = is_age ? initial_ages : background_shear_tractions;
-                    AssertThrow(inline_values.empty(),
-                                ExcMessage("Duplicate inline and file source for " + name));
-                  }
-                continue;
-              }
-
-            AssertThrow(entries.size() == column_names.size() && entries[0] == std::to_string(vertices.size()),
-                        ExcMessage("Vertex rows require consecutive material IDs from zero and one value per named column."));
-            Point<dim> position;
-            for (unsigned int column = 1; column < column_names.size(); ++column)
-              {
-                std::istringstream number(entries[column]);
-                double value;
-                AssertThrow((number >> value) && number.peek() == std::char_traits<char>::eof() && std::isfinite(value),
-                            ExcMessage("Invalid vertex value in " + column_names[column]));
-                if (column < 3)
-                  position[column-1] = value;
-                else if (column_names[column] == "initial_age_s")
-                  initial_ages.push_back(value);
-                else
-                  background_shear_tractions.push_back(value);
-              }
-            vertices.push_back(position);
-          }
-        AssertThrow(vertices.size() >= 2,
-                    ExcMessage("A material trace requires at least two ordered vertices."));
-      }
-
       /** Accepted in-plane deviatoric stress components in Pa for visualization. */
       template <int dim>
       struct FaultPhysicalStress : NamedAdditionalMaterialOutputs<dim>
@@ -489,16 +421,23 @@ namespace aspect
           auto initial_ages = Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label ages")));
           label_background_shear = Utilities::string_to_double(
                                      Utilities::split_string_list(prm.get("Initial label shear tractions")));
-          const auto vertex_filename = Utilities::expand_ASPECT_SOURCE_DIR(prm.get("Fault vertex file"));
+          const auto vertex_filename = prm.get("Fault vertex file");
           if (!vertex_filename.empty())
             {
               AssertThrow(prescribed_vertices.empty(), ExcMessage("Choose Fault vertex file or inline Fault vertices."));
-              const std::string vertex_table =
-                Utilities::read_and_distribute_file_content(vertex_filename, this->get_mpi_communicator());
-              parse_fault_vertex_table(vertex_table,
-                                       prescribed_vertices,
-                                       initial_ages,
-                                       label_background_shear);
+              auto table = FaultVertexTable<dim>::read(vertex_filename, this->get_mpi_communicator());
+              prescribed_vertices = std::move(table.positions);
+              if (!table.initial_ages.empty())
+                {
+                  AssertThrow(initial_ages.empty(), ExcMessage("Duplicate inline and file source for initial_age_s"));
+                  initial_ages = std::move(table.initial_ages);
+                }
+              if (!table.background_shear_tractions.empty())
+                {
+                  AssertThrow(label_background_shear.empty(),
+                              ExcMessage("Duplicate inline and file source for background_shear_Pa"));
+                  label_background_shear = std::move(table.background_shear_tractions);
+                }
             }
           friction->set_initial_ages(std::move(initial_ages));
           if (prescribed_vertices.empty())

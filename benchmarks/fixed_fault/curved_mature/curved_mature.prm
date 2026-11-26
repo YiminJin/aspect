@@ -17,11 +17,14 @@ subsection Mesh refinement
   set Initial global refinement = 4
 end
 subsection Initial composition model
-  subsection Function
-    # A smooth vertical phase profile about the piecewise linear trace. The
-    # four slopes change at x = 0.25, 0.50 and 0.75 m. Peak phase is 0.35.
-    set Function constants = width=0.15
-    set Function expression = 0; 0; 0; 0.03+0.32*exp(-((y-(0.82-0.2*x-0.12*max(0,x-0.25)-0.64*max(0,x-0.50)-0.28*max(0,x-0.75)))/width)^2)
+  set List of model names = fault polyline Gaussian
+  subsection Fault polyline Gaussian
+    # The same vertex file sets the phase ridge and the mechanical trace.
+    # Width is the normal e-fold distance in metres. At either end the
+    # distance is measured to the nearest point of the finite polyline.
+    set Background phase = 0.03
+    set Peak phase = 0.35
+    set Gaussian width = 0.15
   end
 end
 subsection Boundary traction model
