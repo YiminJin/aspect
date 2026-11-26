@@ -29,10 +29,13 @@ namespace aspect
   }
 
   template <int dim>
-  void FaultPhaseProfile<dim>::initialize(const SimulatorAccess<dim> &sim, const unsigned int field,
-                                          const LinearAlgebra::BlockVector &fields, const double m, const unsigned int station_subdivisions)
+  void FaultPhaseProfile<dim>::initialize(const SimulatorAccess<dim> &sim,
+                                          const unsigned int phase_field,
+                                          const LinearAlgebra::BlockVector &fields,
+                                          const double degradation_magnitude,
+                                          const unsigned int station_subdivisions)
   {
-    magnitude = m;
+    magnitude = degradation_magnitude;
     const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(sim.get_geometry_model());
     const auto upper = box.get_origin()+box.get_extents();
     const auto &labels = geometry.labels();
@@ -43,9 +46,9 @@ namespace aspect
     std::vector<double> omitted(rays.size());
     bool resolved = true;
     const auto &system = sim.get_fe();
-    const auto component = sim.introspection().component_indices.compositional_fields[field];
+    const auto component = sim.introspection().component_indices.compositional_fields[phase_field];
     const auto &dg = system.base_element(system.component_to_base_index(component).first);
-    const auto block = sim.introspection().block_indices.compositional_fields[field];
+    const auto block = sim.introspection().block_indices.compositional_fields[phase_field];
     std::vector<types::global_dof_index> indices(system.n_dofs_per_cell());
     std::vector<double> phase(dg.n_dofs_per_cell());
     // Check the same static FE field at bulk assembly and section quadrature
@@ -63,7 +66,7 @@ namespace aspect
             {
               fe->reinit(cell);
               std::vector<double> values(fe->n_quadrature_points);
-              (*fe)[sim.introspection().extractors.compositional_fields[field]].get_function_values(fields,values);
+              (*fe)[sim.introspection().extractors.compositional_fields[phase_field]].get_function_values(fields,values);
               locally_admissible &= std::all_of(values.begin(),values.end(),admissible_phase);
             }
           const auto lo = cell->vertex(0);
@@ -74,37 +77,44 @@ namespace aspect
           for (unsigned int j=0; j+1<n; ++j)
             for (unsigned int k=0; k<stations.size(); ++k)
               {
-                const auto &seg = geometry.segment(j);
-                const auto center = labels[j].position+stations.point(k)[0]*seg.length*seg.tangent;
-                double a = -std::numeric_limits<double>::max(), b = -a;
+                const auto &segment = geometry.segment(j);
+                const auto center = labels[j].position+stations.point(k)[0]*segment.length*segment.tangent;
+                // Clip the normal ray to this owned cell in signed metres from the trace.
+                double ray_begin = -std::numeric_limits<double>::max();
+                double ray_end = -ray_begin;
                 for (unsigned int d=0; d<dim; ++d)
                   {
-                    if (std::abs(seg.normal[d]) < 16.*std::numeric_limits<double>::epsilon())
+                    if (std::abs(segment.normal[d]) < 16.*std::numeric_limits<double>::epsilon())
                       {
                         // A face-coincident ray samples the higher-coordinate DG
                         // trace, except at the upper physical boundary.
                         if (center[d]<lo[d] || center[d]>hi[d] || (center[d]==hi[d] && hi[d]!=upper[d]))
                           {
-                            b=a;
+                            ray_end=ray_begin;
                             break;
                           }
                       }
                     else
                       {
-                        const double x=(lo[d]-center[d])/seg.normal[d], y=(hi[d]-center[d])/seg.normal[d];
-                        a=std::max(a,std::min(x,y));
-                        b=std::min(b,std::max(x,y));
+                        const double offset_at_lower_face = (lo[d]-center[d])/segment.normal[d];
+                        const double offset_at_upper_face = (hi[d]-center[d])/segment.normal[d];
+                        ray_begin=std::max(ray_begin,std::min(offset_at_lower_face,offset_at_upper_face));
+                        ray_end=std::min(ray_end,std::max(offset_at_lower_face,offset_at_upper_face));
                       }
                   }
-                if (b<=a) continue;
+                if (ray_end <= ray_begin)
+                  continue;
                 const auto integrand = [&](const double t)
                 {
-                  const auto x = center+t*seg.normal;
+                  const auto x = center+t*segment.normal;
                   Point<dim> unit;
-                  for (unsigned int d=0; d<dim; ++d) unit[d]=(x[d]-lo[d])/(hi[d]-lo[d]);
+                  for (unsigned int d=0; d<dim; ++d)
+                    unit[d] = (x[d]-lo[d])/(hi[d]-lo[d]);
                   double value=0.;
-                  for (unsigned int i=0; i<phase.size(); ++i) value+=dg.shape_value(i,unit)*phase[i];
-                  if (admissible_phase(value)) return weight(value);
+                  for (unsigned int i=0; i<phase.size(); ++i)
+                    value += dg.shape_value(i,unit)*phase[i];
+                  if (admissible_phase(value))
+                    return weight(value);
                   locally_admissible = false;
                   return 0.;
                 };
@@ -115,23 +125,31 @@ namespace aspect
                     sum += ray.weight(q)*integrand(left+(right-left)*ray.point(q)[0]);
                   return (right-left)*sum;
                 };
-                const auto integrate = [&](const auto &self, const double left, const double right,
-                                           const double coarse, const unsigned int depth) -> double
+                const auto integrate_panel = [&](const auto &self,
+                                                 const double left,
+                                                 const double right,
+                                                 const double coarse,
+                                                 const unsigned int depth) -> double
                 {
                   const double mid = .5*(left+right);
-                  const double l=panel(left,mid), r=panel(mid,right);
-                  if (std::abs(l+r-coarse) <= 2.e-12*(l+r)+
-                  32.*std::numeric_limits<double>::epsilon()*m*(right-left))
-                    return l+r;
+                  const double left_integral = panel(left,mid);
+                  const double right_integral = panel(mid,right);
+                  if (std::abs(left_integral+right_integral-coarse) <= 2.e-12*(left_integral+right_integral)+
+                  32.*std::numeric_limits<double>::epsilon()*degradation_magnitude*(right-left))
+                    return left_integral+right_integral;
                   if (depth == 16)
                     {
                       resolved = false;
-                      return l+r;
+                      return left_integral+right_integral;
                     }
-                  return self(self,left,mid,l,depth+1)+self(self,mid,right,r,depth+1);
+                  return self(self,left,mid,left_integral,depth+1)+self(self,mid,right,right_integral,depth+1);
                 };
                 const double width=geometry.normal_support_radius(j,stations.point(k)[0]);
-                const double cuts[4]= {a,std::clamp(-width,a,b),std::clamp(width,a,b),b};
+                // Integrate both tails as well as the admitted interval, so the
+                // width check compares discarded weight to the complete ray.
+                const double cuts[4] = {ray_begin, std::clamp(-width,ray_begin,ray_end),
+                                        std::clamp(width,ray_begin,ray_end), ray_end
+                                       };
                 const unsigned int index=j*stations.size()+k;
                 for (unsigned int side=0; side<3; ++side)
                   if (cuts[side+1]>cuts[side])
@@ -140,9 +158,10 @@ namespace aspect
                       integrand(l);
                       integrand(.5*(l+r));
                       integrand(r);
-                      const double integral=integrate(integrate,l,r,panel(l,r),0);
+                      const double integral=integrate_panel(integrate_panel,l,r,panel(l,r),0);
                       rays[index]+=integral;
-                      if (side!=1) omitted[index]+=integral;
+                      if (side != 1)
+                        omitted[index] += integral;
                     }
               }
         }
@@ -197,10 +216,11 @@ namespace aspect
   {
     const auto foot=geometry.project(x);
     const double h=weight(phase);
-    if (!foot.active || h==0.) return {foot,0.};
-    const double I=foot.interpolate(integrals[foot.first_vertex],integrals[foot.first_vertex+1]);
-    AssertThrow(I>0. && std::isfinite(I),ExcMessage("Active fault weight has invalid Q1 normal integral."));
-    return {foot,h/I};
+    if (!foot.active || h == 0.)
+      return {foot,0.};
+    const double normal_integral = foot.interpolate(integrals[foot.first_vertex],integrals[foot.first_vertex+1]);
+    AssertThrow(normal_integral > 0. && std::isfinite(normal_integral),ExcMessage("Active fault weight has invalid Q1 normal integral."));
+    return {foot,h/normal_integral};
   }
 
   template <int dim>

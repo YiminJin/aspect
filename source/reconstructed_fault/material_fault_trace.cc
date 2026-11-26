@@ -9,9 +9,12 @@
 namespace aspect
 {
   template <int dim>
-  void MaterialFaultTrace<dim>::initialize(const Point<dim> &origin, const Point<dim> &extent,
+  void MaterialFaultTrace<dim>::initialize(const Point<dim> &origin,
+                                           const Point<dim> &extent,
                                            const std::vector<Point<dim>> &vertices,
-                                           const double rate, const double support, const bool interior)
+                                           const double rate,
+                                           const double support,
+                                           const bool interior)
   {
     AssertThrow(dim == 2 && vertices.size() >= 2, ExcMessage("A material fault trace requires at least two ordered vertices in 2-D."));
     const auto direction = vertices.back()-vertices.front();
@@ -83,7 +86,8 @@ namespace aspect
   {
     const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(sim.get_geometry_model());
     std::vector<Point<dim>> vertices;
-    for (const auto &label:material_labels) vertices.push_back(label.position);
+    for (const auto &label:material_labels)
+      vertices.push_back(label.position);
     GridTools::Cache<dim> cache(sim.get_triangulation(),sim.get_mapping());
     Utilities::MPI::RemotePointEvaluation<dim> lookup;
     lookup.reinit(cache,vertices);
@@ -183,9 +187,12 @@ namespace aspect
     // Maximize the actual one-sided DGQ2 face polynomial in the seed window.
     // At an interior face vertex use the interval on its higher-coordinate side.
     template <int dim>
-    Point<dim> find_ridge_contact_on_face(const SimulatorAccess<dim> &sim, unsigned int field,
-                                          const LinearAlgebra::BlockVector &fields, const Point<dim> &seed,
-                                          unsigned int axis, double radius)
+    Point<dim> find_ridge_contact_on_face(const SimulatorAccess<dim> &sim,
+                                          unsigned int field,
+                                          const LinearAlgebra::BlockVector &fields,
+                                          const Point<dim> &seed,
+                                          unsigned int axis,
+                                          double radius)
     {
       const unsigned int along=1-axis;
       const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(sim.get_geometry_model());
@@ -205,7 +212,8 @@ namespace aspect
           {
             const double a=cell->vertex(0)[along], b=cell->vertex(GeometryInfo<dim>::vertices_per_cell-1)[along];
             const double left=std::max(a,seed[along]-radius), right=std::min(b,seed[along]+radius);
-            if (left>=right) continue;
+            if (left>=right)
+              continue;
             fe.reinit(cell);
             fe[sim.introspection().extractors.compositional_fields[field]].get_function_values(fields,values);
             const double c=2.*(values[0]+values[2]-2.*values[1]), slope=values[2]-values[0]-c;
@@ -215,19 +223,23 @@ namespace aspect
               candidates.emplace_back(values[0]+u*(slope+c*u),x);
             };
             add(left);
-            if (right<b || b==upper[along]) add(right);
+            if (right<b || b==upper[along])
+              add(right);
             if (c<0.)
               {
                 const double x=a-(b-a)*slope/(2.*c);
-                if (x>left && x<right) add(x);
+                if (x>left && x<right)
+                  add(x);
               }
             // A flat maximal interval has no uniquely observed crossing.
-            if (std::abs(c)+std::abs(slope)<1.e-13) add(.5*(left+right));
+            if (std::abs(c)+std::abs(slope)<1.e-13)
+              add(.5*(left+right));
           }
       const auto shards=Utilities::MPI::all_gather(sim.get_mpi_communicator(),candidates);
       double peak=-std::numeric_limits<double>::infinity();
       for (const auto &shard:shards)
-        for (const auto &entry:shard) peak=std::max(peak,entry.first);
+        for (const auto &entry:shard)
+          peak=std::max(peak,entry.first);
       double left=upper[along], right=box.get_origin()[along];
       for (const auto &shard:shards)
         for (const auto &entry:shard)
@@ -247,7 +259,8 @@ namespace aspect
   }
 
   template <int dim>
-  void MaterialFaultTrace<dim>::fit_boundary_spanning_seed_to_phase_ridge(const SimulatorAccess<dim> &sim, const unsigned int phase_field,
+  void MaterialFaultTrace<dim>::fit_boundary_spanning_seed_to_phase_ridge(const SimulatorAccess<dim> &sim,
+                                                                          const unsigned int phase_field,
                                                                           const LinearAlgebra::BlockVector &fields)
   {
     const unsigned int n = material_labels.size();
@@ -283,7 +296,8 @@ namespace aspect
               minimum = std::min(minimum,phase[q]);
               maximum = std::max(maximum,phase[q]);
               const double weight = fe.JxW(q)*std::max(0.,phase[q]-.1);
-              if (weight == 0.) continue;
+              if (weight == 0.)
+                continue;
               const auto &x = fe.quadrature_point(q);
               const auto foot = project(x);
               const unsigned int j = foot.first_vertex;
@@ -294,8 +308,10 @@ namespace aspect
                   const double reach=ridge_radius*std::abs(seed_normal[d]);
                   cropped |= center[d]-reach < box.get_origin()[d] || center[d]+reach > upper[d];
                 }
-              if (cropped) continue;
-              if (center.distance(x) > initial_half_width+cell->diameter()) continue;
+              if (cropped)
+                continue;
+              if (center.distance(x) > initial_half_width+cell->diameter())
+                continue;
               const double N[2] = {1.-foot.xi,foot.xi};
               total_weight += weight;
               for (unsigned int i=0; i<2; ++i)
@@ -313,15 +329,18 @@ namespace aspect
     total_weight = Utilities::MPI::sum(total_weight,comm);
     AssertThrow(total_weight>0. || n==2,ExcMessage("No two-sided interior phase support for ridge fitting."));
     const double radius=initial_half_width+Utilities::MPI::max(cell_margin,comm);
-    const auto first_contact=find_ridge_contact_on_face(sim,phase_field,fields,material_labels.front().position,contact_face_axes[0],radius);
-    const auto last_contact=find_ridge_contact_on_face(sim,phase_field,fields,material_labels.back().position,contact_face_axes[1],radius);
+    const auto first_contact = find_ridge_contact_on_face(sim, phase_field, fields,
+                                                          material_labels.front().position, contact_face_axes[0], radius);
+    const auto last_contact = find_ridge_contact_on_face(sim, phase_field, fields,
+                                                         material_labels.back().position, contact_face_axes[1], radius);
     FullMatrix<double> system(n,n);
     Vector<double> b(n), offsets(n);
     for (unsigned int j=0; j<n; ++j)
       {
 
         b[j] = rhs[j]/(total_weight>0. ? total_weight : 1.);
-        for (unsigned int k=0; k<n; ++k) system(j,k) = matrix[j*n+k]/(total_weight>0. ? total_weight : 1.);
+        for (unsigned int k=0; k<n; ++k)
+          system(j,k) = matrix[j*n+k]/(total_weight>0. ? total_weight : 1.);
       }
     // Add the unit-weight squared second differences of the vertex
     // offsets to the normalized data misfit before prescribing the contacts.
@@ -337,7 +356,8 @@ namespace aspect
       0u,n-1
     })
     {
-      for (unsigned int k=0; k<n; ++k) system(j,k)=0.;
+      for (unsigned int k=0; k<n; ++k)
+        system(j,k)=0.;
       system(j,j)=1.;
       b[j]=((j==0 ? first_contact : last_contact)-material_labels[j].position)*seed_normal;
     }
@@ -426,7 +446,8 @@ namespace aspect
         {
           0.,segments[j].length
           })
-        if (s.first<face && s.second>face) cuts.push_back({station.a,station.b,station.c-face});
+        if (s.first<face && s.second>face)
+          cuts.push_back({station.a,station.b,station.c-face});
         const double slope=(material_labels[j+1].half_width-material_labels[j].half_width)/segments[j].length;
         for (const double side :
         {
@@ -439,7 +460,8 @@ namespace aspect
                               normal_distance.c-side*(material_labels[j].half_width+slope*station.c)
           };
           const auto limits=range(edge);
-          if (std::isfinite(radius) && limits.first<0. && limits.second>0.) cuts.push_back(edge);
+          if (std::isfinite(radius) && limits.first<0. && limits.second>0.)
+            cuts.push_back(edge);
         }
         for (const auto &other:normals)
           for (const double sign :
@@ -449,7 +471,8 @@ namespace aspect
         cuts.push_back({normal_distance.a+sign*other.a,normal_distance.b+sign*other.b,normal_distance.c+sign*other.c});
         normals.push_back(normal_distance);
       }
-    if (cuts.empty()) return {};
+    if (cuts.empty())
+      return {};
     Polygon square(4);
     square[1][0]=square[2][0]=square[2][1]=square[3][1]=1.;
     std::vector<Polygon> pieces= {square};
@@ -465,7 +488,8 @@ namespace aspect
                 low=std::min(low,line.value(p));
                 high=std::max(high,line.value(p));
               }
-            if (low>=-epsilon || high<=epsilon) continue;
+            if (low>=-epsilon || high<=epsilon)
+              continue;
             Polygon positive,negative;
             auto prev=piece.back();
             double vp=line.value(prev);
@@ -478,8 +502,10 @@ namespace aspect
                     positive.push_back(cross);
                     negative.push_back(cross);
                   }
-                if (v>=0.) positive.push_back(p);
-                if (v<=0.) negative.push_back(p);
+                if (v>=0.)
+                  positive.push_back(p);
+                if (v<=0.)
+                  negative.push_back(p);
                 prev=p;
                 vp=v;
               }
@@ -487,7 +513,8 @@ namespace aspect
             pieces.push_back(std::move(negative));
           }
       }
-    if (pieces.size()==1) return {};
+    if (pieces.size()==1)
+      return {};
     static const QWitherdenVincentSimplex<2> triangle(5);
     std::vector<Point<dim>> points;
     std::vector<double> weights;
@@ -496,7 +523,8 @@ namespace aspect
         {
           const auto u=piece[k]-piece[0], v=piece[k+1]-piece[0];
           const double det=std::abs(u[0]*v[1]-u[1]*v[0]);
-          if (det==0.) continue;
+          if (det==0.)
+            continue;
           for (unsigned int q=0; q<triangle.size(); ++q)
             {
               points.push_back(piece[0]+triangle.point(q)[0]*u+triangle.point(q)[1]*v);

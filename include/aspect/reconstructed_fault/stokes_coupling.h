@@ -32,17 +32,26 @@ namespace aspect
       void prepare_parent();
       /** Constitutive stress offset (Pa) for physical stress evaluation and publication. */
       SymmetricTensor<2,dim> stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
-                                           const Point<dim> &position, double phase) const;
+                                           const Point<dim> &position,
+                                           double phase) const;
 
       /** One bulk quadrature contribution to section balance. The tangent
-       * is minus the fixed-state derivative with respect to label rates. */
+       * is minus the fixed-state derivative with respect to label rates.
+       * add_balance accumulates into the two residual rows, the two diagonal
+       * entries and their shared upper off-diagonal, and the row scales. */
       struct BulkPoint
       {
         typename FaultPhaseProfile<dim>::Sample transfer;
-        double volume, driving_shear, compression, stiffness;
-        void add_balance(double speed, const MaterialModel::Rheology::FaultTraction &resistance,
-                         std::vector<double> &rhs, std::vector<double> &diagonal,
-                         std::vector<double> &upper, std::vector<double> &scale) const;
+        double volume;        ///< Cell quadrature weight JxW (m² in plane strain).
+        double driving_shear; ///< Resolved shear plus persistent background traction (Pa).
+        double compression;   ///< Positive normal traction supplied to friction (Pa).
+        double stiffness;     ///< Effective Maxwell viscosity at the bulk point (Pa s).
+        void add_balance(double speed,
+                         const MaterialModel::Rheology::FaultTraction &resistance,
+                         std::vector<double> &rhs,
+                         std::vector<double> &diagonal,
+                         std::vector<double> &upper,
+                         std::vector<double> &scale) const;
       };
 
       /** Collectively sample the supplied iterate against the current attempt's
@@ -60,14 +69,15 @@ namespace aspect
       // The material owns both the physical parameters and the accepted curve.
       MaterialModel::PhaseFieldFault<dim> &material;
       std::vector<double> trial_rates;
-      // Moving mechanics uses Q8 cell moments of the complete physical response.
+      // Interior-seed mechanics uses Q8 cell moments of the complete physical response.
       // Freeze its projection defect while Stokes and the Q1 section are linearized.
-      struct Reaction
+      struct ProjectedResponse
       {
-        std::vector<Stress> stress, strain;
+        std::vector<Stress> stress;      ///< DGQ2 projection of complete trial stress (Pa).
+        std::vector<Stress> strain_rate; ///< DGQ2 projection of symmetric velocity gradient (1/s).
       };
-      std::map<CellId,Reaction> reaction;
-      std::vector<double> reaction_rates;
+      std::map<CellId,ProjectedResponse> projected_response;
+      std::vector<double> projected_rates;
 
       /** DGQ2 moments of the boundary-spanning slip stress in Pa on owned
        * cells with section support. Rebuilt from prescribed or solved trial
@@ -76,14 +86,16 @@ namespace aspect
       void project_boundary_slip_load(const LinearAlgebra::BlockVector &fields);
       Stress slip_stress(const Point<dim> &position, double phase) const;
       Stress bulk_stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
-                                const Point<dim> &position, const Point<dim> &unit) const;
+                                const Point<dim> &position,
+                                const Point<dim> &unit) const;
       Stress stokes_stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
-                                  const Point<dim> &position, double phase) const;
+                                  const Point<dim> &position,
+                                  double phase) const;
       /** Replace trial moments and optionally measure the change from the last Stokes assembly. */
-      double project_reaction(const LinearAlgebra::BlockVector &iterate, bool compare_with_assembly);
+      double project_interior_response(const LinearAlgebra::BlockVector &iterate, bool compare_with_assembly);
       /** Owned DGQ2 rotated spatial parent in Pa. Apply the local Maxwell beta
        * after interpolation to each physical constitutive point. */
-      std::map<CellId,std::vector<Stress>> objective_parent;
+      std::map<CellId,std::vector<Stress>> rotated_parent_stress;
   };
 }
 #endif

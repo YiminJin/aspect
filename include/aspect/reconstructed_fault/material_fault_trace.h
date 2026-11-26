@@ -73,9 +73,12 @@ namespace aspect
        * first and last vertices specify the two boundary contacts. Local;
        * all ranks supply the same inputs before the first solve.
        */
-      void initialize(const Point<dim> &origin, const Point<dim> &extent,
-                      const std::vector<Point<dim>> &vertices, double rate,
-                      double support = std::numeric_limits<double>::max(), bool interior = false);
+      void initialize(const Point<dim> &origin,
+                      const Point<dim> &extent,
+                      const std::vector<Point<dim>> &vertices,
+                      double rate,
+                      double support = std::numeric_limits<double>::max(),
+                      bool interior = false);
 
       /**
        * Fit the boundary-spanning seed to the initialized FE phase ridge

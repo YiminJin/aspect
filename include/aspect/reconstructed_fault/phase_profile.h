@@ -22,16 +22,21 @@ namespace aspect
       struct Sample
       {
         typename MaterialFaultTrace<dim>::Projection foot;
-        double chi;
+        double chi; ///< Excess compliance divided by its projected normal integral (1/m).
+        /** Interpolate the two material speeds (m/s) at the projected foot. */
         double rate(const std::vector<double> &rates) const;
+        /** Add the two weighted Q1 test contributions to the supplied rows. */
         void add_load(double integrated_traction, std::vector<double> &rows) const;
       };
 
       /** Integrate h along both physical normal rays at three Gauss stations
        * per surface panel. Collectively check phase, quadrature convergence and the
        * discarded fraction before projecting with the consistent Q1 mass. */
-      void initialize(const SimulatorAccess<dim> &sim, unsigned int phase_field,
-                      const LinearAlgebra::BlockVector &fields, double magnitude, unsigned int station_subdivisions = 1);
+      void initialize(const SimulatorAccess<dim> &sim,
+                      unsigned int phase_field,
+                      const LinearAlgebra::BlockVector &fields,
+                      double degradation_magnitude,
+                      unsigned int station_subdivisions = 1);
       double weight(double phase) const;
       Sample sample(const Point<dim> &x, double phase) const;
       Tensor<2,dim> slip_gradient(const Sample &sample, double rate) const;
