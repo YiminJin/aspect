@@ -1,0 +1,25 @@
+{
+  "source_revision": "ae676e24095909196f885073b1146babce50292b",
+  "mpi_ranks": 1,
+  "numerical_threads": 1,
+  "inputs_and_binaries_sha256": {
+    "benchmarks/fixed_fault/curved_mature/curved_mature.prm": "d26d98659436cc3288432b4aac5d723e49dbd1c420d6b5887b81d016a5600e85",
+    "benchmarks/fixed_fault/curved_mature/vertices.txt": "df118da08cef92a3a6567660fb2c3a0e5639cc45e750a95043cb2c6da1d90d96",
+    "benchmarks/fixed_fault/fixed_fault.prm": "1e3fe3ed579a0d79b1d06da1e0b1294b615eb305857bc55c71ad7628906f3390",
+    "benchmarks/layered_moving_fault/layered_moving_fault.cc": "d9daacd9b4e2e8b4c5c0bddb593e74424d0da51c53fa534b10f39fcd83632a8c",
+    "aspect-release": "dcfc719b7a140f33978f02f63f77011346f4d10a96b635da22412669078d4d1a",
+    "liblayered_moving_fault.release.so": "67a3f871a42068e5ec2ae2aebd5ac050c22b6918d5e968500eea725de8363b2a"
+  },
+  "files_sha256": {
+    "clocks.csv": "46cbb38c2463a12857477c9c053be1659c957c348ab052152219a526cd320cae",
+    "fault-labels-00000.txt": "72484b2d735884c3ad8d5d90bd8edde42215ce50029ad02e7d85244f42005f8b",
+    "material-0-surface-0.csv": "0a3b03a431558d357934ba965da047a8ecc4eb21c0f56b51c1daff2d74855e88",
+    "material-0-rank0.csv.gz": "9cbbf1a755dcd05713f4a7f67d4070850dfaed563f2bca46deef3dc49a8dfdc5",
+    "fault-labels-00001.txt": "693da18e532240531e0eb162c48afd1221087d9de9b9e2bc0ce0e2cc2fe19404",
+    "material-1-surface-0.csv": "4c6b3081b04199cbe764b7bcaf99dc9325893e25588593157df0a353c1993440",
+    "material-1-rank0.csv.gz": "eea25cb6e94983f1b4506ddbb59a00d9c04ed3421c568ada346da73d6e411203",
+    "fault-labels-00002.txt": "7173c83e0b17e073985ecdf547eeca7ff8163eb18041614cfc6c6db7a6275b70",
+    "material-2-surface-0.csv": "9c819ca79742db59e118c35485780108bb006e865db5c84f32422111dffc7dca",
+    "material-2-rank0.csv.gz": "092930c77dbbd67c28ca7c4c713106f071e8c59369a3cf45ae456c6595460c19"
+  }
+}
