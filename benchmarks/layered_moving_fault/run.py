@@ -1,5 +1,6 @@
 """Run the two-step layered controls into a fresh local directory."""
 import argparse
+import csv
 import math
 import os
 from pathlib import Path
@@ -7,19 +8,27 @@ import shutil
 import subprocess
 
 
-def crossing_input(settings):
-    # Place a single material ID close to the partition; retain the
-    # exact same straight curve, phase profile, loading and age laws.
+def material_settings(entries):
+    return f"\nsubsection Material model\n  subsection Phase field fault\n{entries}\n  end\nend\n"
+
+
+def crossing_vertices():
+    """Move material ID 9 just upstream of the partition on the same seed."""
+    with Path(__file__).with_name("layered_vertices.txt").open() as stream:
+        rows = list(csv.DictReader(stream, delimiter=" ", skipinitialspace=True))
+    vertex, = (row for row in rows if int(row["id"]) == 9)
     x = -.00001
-    for name, value, sep in (("Fault vertices", f"{x},{.6*x}", "; "),
-                             ("Initial label ages", f"{10+2*math.sin(2*x):.17g}", ", "),
-                             ("Initial label shear tractions", f"{3.7+.15*math.cos(3*x):.17g}", ", ")):
-        line = next(row for row in settings.splitlines() if row.strip().startswith(f"set {name} = "))
-        prefix, entries = line.split(" = ")
-        data = entries.split(sep)
-        data[9] = value
-        settings = settings.replace(line, prefix+" = "+sep.join(data))
-    return settings
+    vertex.update(x_m=str(x), y_m=str(.6*x), initial_age_s=f"{10+2*math.sin(2*x):.17g}",
+                  background_shear_Pa=f"{3.7+.15*math.cos(3*x):.17g}")
+    return rows
+
+
+def crossing_file_settings(rows, path):
+    with path.open("x") as stream:
+        writer = csv.DictWriter(stream, rows[0].keys(), delimiter=" ", lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+    return material_settings(f"    set Fault vertex file = {path}")
 
 
 def main():
@@ -40,7 +49,7 @@ def main():
         settings = base
         plugins = str(args.plugin)
         if case.startswith("crossing-"):
-            settings = crossing_input(base)
+            settings += crossing_file_settings(crossing_vertices(), run/"vertices.txt")
         elif case == "retry":
             plugins += ","+str(args.retry_plugin)
             settings += """
@@ -64,13 +73,14 @@ end
             settings += f" end\nend\nsubsection Material model\n subsection Layered mature fault\n  set Homogeneous = {str(case.startswith('constant')).lower()}\n end\nend\n"
             if case == "constant-base":
                 # Both exterior parents are zero up to the first physical endpoint.
-                settings = settings.replace("set Model name = layered mature fault","set Model name = phase field fault")
+                settings += "\nsubsection Material model\n  set Model name = phase field fault\nend\n"
+                settings += material_settings("    set Viscosity = 10")
                 settings += "\nset End time = .0125\n"
         elif case.startswith("homogeneous-"):
             # Same inherited Maxwell update in the earlier stationary donor control.
             settings = (here.parent/"fixed_fault/fixed_fault.prm").read_text()
             if case.endswith("wrapper"):
-                settings = settings.replace("set Model name = phase field fault", "set Model name = layered mature fault")
+                settings += "\nsubsection Material model\n  set Model name = layered mature fault\nend\n"
             settings += "\nsubsection Material model\n subsection Layered mature fault\n set Homogeneous = true\n end\nend\nsubsection Postprocess\n set List of postprocessors = fixed fault probe\nend\n"
             plugins += ","+str(args.retry_plugin)
         settings += f"\nset Additional shared libraries = {plugins}\nset Output directory = {run/'output'}\n"

@@ -7,7 +7,7 @@
 #include <algorithm>
 namespace LayeredReference
 {
-  constexpr double G=10., bottom=-2., top=2., delta_u=2., width=.35;
+  constexpr double G=10., bottom=-2., top=2., width=.35;
   constexpr std::array<double,8> nodes= {{-.9602898564975363,-.7966664774136267,-.5255324099163290,-.1834346424956498,.1834346424956498,.5255324099163290,.7966664774136267,.9602898564975363}};
   constexpr std::array<double,8> weights= {{.1012285362903763,.2223810344533745,.3137066458778873,.3626837833783620,.3626837833783620,.3137066458778873,.2223810344533745,.1012285362903763}};
   struct Field
@@ -23,8 +23,10 @@ namespace LayeredReference
       unsigned panels;
       double h;
       bool homogeneous;
+      double velocity_contrast;  // Top minus bottom horizontal speed in m/s.
       std::vector<double> y,eta;
-      explicit Background(unsigned panels=64,bool homogeneous=false):panels(panels),h(4./panels),homogeneous(homogeneous)
+      explicit Background(unsigned panels=64, bool homogeneous=false, double velocity_contrast=2.)
+        : panels(panels), h(4./panels), homogeneous(homogeneous), velocity_contrast(velocity_contrast)
       {
         for (unsigned p=0; p<panels; ++p)
           for (double x:nodes)
@@ -58,7 +60,7 @@ namespace LayeredReference
             inv[i]=1./kappa;
             ratio[i]=b[i]/kappa;
           }
-        shear_traction = (delta_u+integral(ratio))/integral(inv);
+        shear_traction = (velocity_contrast+integral(ratio))/integral(inv);
         for (unsigned i=0; i<y.size(); ++i)
           {
             next.xy[i] = shear_traction;
@@ -102,7 +104,7 @@ namespace LayeredReference
         double sum=0.;
         for (unsigned i=0; i<8; ++i)
           sum+=weights[i]*interpolate(field.gamma,p,-1.+length/h*(1.+nodes[i]));
-        return translation-1.+prefix[p]+.5*length*sum;
+        return translation-.5*velocity_contrast+prefix[p]+.5*length*sum;
       }
   };
 }

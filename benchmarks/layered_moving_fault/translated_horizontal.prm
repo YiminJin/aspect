@@ -26,6 +26,7 @@ end
 
 subsection Material model
   subsection Phase field fault
+    set Fault vertex file =
     set Fault vertices = -0.8,0; 0.8,0
     set Background compression = 1e8
     set Background shear traction = 1e8

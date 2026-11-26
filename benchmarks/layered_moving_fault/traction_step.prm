@@ -1,6 +1,8 @@
 # Overrides for the 4C review reproduction.
 include $ASPECT_SOURCE_DIR/benchmarks/layered_moving_fault/layered.prm
 
+include $ASPECT_SOURCE_DIR/benchmarks/layered_moving_fault/inline_vertices.prm
+
 set End time = .0125
 set Nonlinear solver tolerance = .001
 

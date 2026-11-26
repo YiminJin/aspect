@@ -1,5 +1,6 @@
 """Run the 4C review reproducers using ordinary ASPECT inputs in fresh directories."""
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -10,6 +11,48 @@ import numpy as np
 from check import Frame, basis, gauss, read, require, same
 
 here = Path(__file__).resolve().parent
+
+
+def check_wall_loading(output, contrast, translation):
+    # The side Dirichlet boundaries include both end heights. Reconstruct the
+    # actual Q2 velocity there from its nine Gauss samples on each incident cell.
+    corners = np.array([[-6., -2.], [-6., 2.], [6., -2.], [6., 2.]])
+    expected = np.tile([translation - contrast/2, translation + contrast/2], 2)
+    for step in (0, 1):
+        frame = Frame(output, step)
+        vx = frame.at(corners)[:, 1]
+        same(vx, expected, 1e-12, 'horizontal side-wall end speeds')
+        # Initialization applies 0.1 s without committing stress. The first
+        # physical parent is also unstressed. Uniform traction then gives
+        # du/dy = traction/kappa(y), with integral equal to the imposed jump.
+        u, w = gauss(160)
+        viscosity = 5.5 + 4.5*np.tanh((-2 + 4*u)/.35)
+        dt = .1 if step == 0 else .0125
+        kappa = -viscosity*np.expm1(-10*dt/viscosity)
+        predicted = contrast/(4*np.dot(w, 1/kappa))
+        measured = read(output/'layered-background.csv')['q'][step]
+        same(measured, predicted, 1e-12, 'background shear traction in Pa')
+        print(f'{step}: wall speeds {vx[0]:.12g}, {vx[1]:.12g} m/s, '
+              f'contrast {vx[1]-vx[0]:.12g} m/s, traction {measured:.12g}/{predicted:.12g} Pa')
+
+
+def check_normalization(original, scaled, factor):
+    # Identical initial FE phase/geometry. The raw projected integral is in m
+    # and the normalized slip weight consumed by mechanics is in 1/m.
+    old, new = Frame(original, 0), Frame(scaled, 0)
+    same(new.X, old.X, 0., 'seed positions')
+    same(new.rows['phi'], old.rows['phi'], 0., 'initial phase')
+    integrals = old.normal_mass(24)
+    same(old.surface['I_m'], integrals, 5e-12, 'independent raw normal integral')
+    integral_error = same(new.surface['I_m']/factor, integrals, 5e-12, 'scaled raw normal integral')
+    pts = np.column_stack([old.rows[k] for k in ('x', 'y')])
+    _, _, expected, _ = old.transfer(pts, old.rows['phi'])
+    require(np.max(expected) > 0., 'No active slip weight')
+    same(old.rows['chi'], expected, 5e-12, 'independent normalized weight')
+    weight_error = same(new.rows['chi'], old.rows['chi'], 5e-12, 'normalized slip weight')
+    print(f"magnitude factor {factor}: ID 9 integrals {old.surface['I_m'][9]:.12g}, "
+          f"{new.surface['I_m'][9]:.12g} m; scaled integral error {integral_error:.3g} m; "
+          f"maximum weight {max(expected):.12g}/m, change {weight_error:.3g}/m")
 
 
 def main():
@@ -41,6 +84,17 @@ def main():
 
     base = (here/'layered.prm').read_text()
     principal = run('principal', base)
+    lower_load = run('half-contrast', base + """
+subsection Postprocess
+  subsection Layered background
+    set Wall velocity contrast = 1
+  end
+end
+""")
+    check_wall_loading(principal, 2., 2.)
+    check_wall_loading(lower_load, 1., 2.)
+    scaled = run('scaled-profile', base + fault('Degradation magnitude', 200))
+    check_normalization(principal, scaled, 4.)
     gate = run('traction-step', (here/'traction_step.prm').read_text())
     log = (gate.parent/'log').read_text().split('Timestep 1:')[-1]
     changes = [float(x) for x in re.findall('Relative change in returned fault stress projection: (\\S+)',log)]
@@ -75,7 +129,8 @@ def main():
 
     # For a deforming finite strip compute F^{-T} n independently from the
     # two one-sided Q2 velocity gradients at the seed's horizontal cell face.
-    out = run('deformed',horizontal.replace('0;1\n','-.1*x;1+.1*y\n')+fault('Profile half width',2.1))
+    deformation = "\nsubsection Boundary velocity model\n subsection Function\n  set Function expression = -.1*x;1+.1*y\n end\nend\n"
+    out = run('deformed', horizontal + deformation + fault('Profile half width', 2.1))
     before, after = (read(out/f'material-{step}-surface-0.csv') for step in (0,1))
     bulk = read(out/'material-0-rank0.csv')
     for j,x in enumerate(before['x']):
@@ -101,12 +156,14 @@ def main():
     same(initial_load(frozen),initial_load(principal),1e-14,'zero-duration weak action')
     same(initial.rows['offset_xy'],Frame(principal,0).rows['offset_xy'],1e-12,'initial projected shear')
     # A uniform polynomial gives the same bulk iterate in both nodal and Bernstein bases.
-    static = horizontal.replace('include $ASPECT_SOURCE_DIR/benchmarks/layered_moving_fault/layered.prm',base)
-    static += fault('Fault geometry','fixed interior')
-    with_transport = run('constant-frozen',static)
-    no_transport = static.replace('set SSPRK3 fields = phase_field','set SSPRK3 fields =') \
-                         .replace('static, static, static, field','static, static, static, static') \
-                         .replace('single Advection, iterated Stokes','no Advection, iterated Stokes')
+    static = horizontal + fault('Fault geometry', 'fixed interior')
+    with_transport = run('constant-frozen', static)
+    no_transport = static + """
+set Nonlinear solver scheme = no Advection, iterated Stokes
+subsection Compositional fields
+  set Compositional field methods = static
+end
+"""
     without_transport = run('static-frozen',no_transport)
     same(initial_load(with_transport),initial_load(without_transport),1e-12,'independent mechanical selection')
     run('invalid-selection', no_transport+fault('Fault geometry','advected interior'),
@@ -115,12 +172,29 @@ def main():
           'constant, selected and static',initial_load(with_transport),initial_load(without_transport),flush=True)
 
     # Swap phase and xx, including their roles, methods and nonuniform initial data.
-    ordered = base.replace('fault_stress_xx, fault_stress_yy, fault_stress_xy, phase_field',
-                           'phase_field, fault_stress_yy, fault_stress_xy, fault_stress_xx')
-    ordered = ordered.replace('stress, stress, stress, phase field','phase field, stress, stress, stress')
-    ordered = ordered.replace('static, static, static, field','field, static, static, static')
-    ordered, count = re.subn(r'0;0;0;(\.35\*[^\n]+)',r'\1;0;0;0',ordered)
-    require(count==1,'Missing nonuniform initial data')
+    settings = json.loads((principal/'parameters.json').read_text())
+    fields = settings['Compositional fields']
+    phase = (settings['Phase field']['Phase composition']['value'] or
+             settings['Postprocess']['Phase field surface energy']['Phase composition']['value'] or
+             'phase_field')
+    names = [name.strip() for name in fields['Names of fields']['value'].split(',')]
+    order = list(range(len(names)))
+    phase_slot, stress_slot = names.index(phase), names.index('fault_stress_xx')
+    order[phase_slot], order[stress_slot] = stress_slot, phase_slot
+
+    def reordered(value, separator):
+        pieces = [piece.strip() for piece in value.split(separator)]
+        require(len(pieces) == len(names), 'Need one value per named composition')
+        return separator.join(pieces[i] for i in order)
+
+    ordered = base + '\nsubsection Compositional fields\n'
+    for key in ('Names of fields', 'Types of fields', 'Compositional field methods'):
+        ordered += f"  set {key} = {reordered(fields[key]['value'], ',')}\n"
+    ordered += 'end\n'
+    for model in ('Initial composition model', 'Boundary composition model'):
+        expression = settings[model]['Function']['Function expression']['value']
+        ordered += (f"subsection {model}\n subsection Function\n"
+                    f"  set Function expression = {reordered(expression, ';')}\n end\nend\n")
     permuted = run('permuted',ordered)
     worst = 0.
     for step in (0,1,2):

@@ -347,9 +347,11 @@ function(discover_tests)
     elseif(_test_source_name STREQUAL "growing_fault")
       list(APPEND _testdepends "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/growing_fault/onecut.prm")
     elseif(_test_source_name STREQUAL "layered_moving_fault")
-      list(APPEND _testdepends "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/layered_moving_fault/layered.prm")
+      list(APPEND _testdepends "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/layered_moving_fault/layered_vertices.txt"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/layered_moving_fault/layered.prm")
     elseif(_test_source_name STREQUAL "layered_fault_traction_step")
       list(APPEND _testdepends layered_moving_fault
+        "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/layered_moving_fault/inline_vertices.prm"
         "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/layered_moving_fault/traction_step.prm"
         "${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks/layered_moving_fault/layered.prm")
     elseif(_test_source_name STREQUAL "explicit_dg_slabs")

@@ -39,7 +39,7 @@ namespace aspect
           candidate_time=this->get_time();
           candidate_dt=dt;
           pending=true;
-          AssertThrow(std::abs(reference.integral(candidate.gamma)-2.)<1e-12,
+          AssertThrow(std::abs(reference.integral(candidate.gamma)-reference.velocity_contrast)<1e-12,
                       ExcMessage("Layered reference violates prescribed velocity difference."));
         }
       public:
@@ -47,7 +47,11 @@ namespace aspect
         {
           prm.enter_subsection("Postprocess");
           prm.enter_subsection("Layered background");
-          prm.declare_entry("Translation","0",Patterns::Double());
+          prm.declare_entry("Translation", "0", Patterns::Double(),
+                            "Mean of the top and bottom horizontal wall speeds, in m/s.");
+          prm.declare_entry("Wall velocity contrast", "2", Patterns::Double(),
+                            "Top minus bottom horizontal wall speed, in m/s. The reference column "
+                            "uses this difference to compute its shear traction.");
           prm.leave_subsection();
           prm.leave_subsection();
         }
@@ -69,6 +73,7 @@ namespace aspect
           prm.enter_subsection("Postprocess");
           prm.enter_subsection("Layered background");
           translation=prm.get_double("Translation");
+          const double velocity_contrast = prm.get_double("Wall velocity contrast");
           prm.leave_subsection();
           prm.leave_subsection();
           prm.enter_subsection("Material model");
@@ -77,11 +82,11 @@ namespace aspect
                       ExcMessage("The benchmark column requires G=10 Pa and a 0.1 s initialization."));
           prm.leave_subsection();
           prm.enter_subsection("Layered mature fault");
-          reference=LayeredReference::Background(64,prm.get_bool("Homogeneous"));
+          reference=LayeredReference::Background(64,prm.get_bool("Homogeneous"),velocity_contrast);
           prm.leave_subsection();
           prm.leave_subsection();
           std::ostringstream id;
-          id<<std::setprecision(17)<<"layered-Maxwell-v1:G=10:eta=1..10:width=.35:du=2:init=.1:pref=0:panels=64:U="<<translation<<":constant="<<reference.homogeneous;
+          id<<std::setprecision(17)<<"layered-Maxwell-v1:G=10:eta=1..10:width=.35:du="<<reference.velocity_contrast<<":init=.1:pref=0:panels=64:U="<<translation<<":constant="<<reference.homogeneous;
           identity=id.str();
         }
         void initialize() override
