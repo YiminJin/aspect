@@ -1,5 +1,11 @@
 # Phase-field fault working record
 
+## Assignment C2 review closeout
+
+Starting at `3cb478a30`, the reversal checker now negates the wall function recorded by the forward ASPECT run. The installed Release example and the continued input matched byte for byte on all eight CSVs per direction at 0 and 5 ms. The maximum horizontal and vertical reversal defects were 1.7347e−18 and 1.9516e−18 m/s. The same run with named variables and a nonempty wall constant also matched. Replaying saved fields rejected matching vertical NaNs, a single infinity in the reverse run and missing velocity components. The finite pair passed.
+
+Shifting strip 8 by −3e−8 rad and recomputing arclength passed ordinary comparison. The original corruption probe missed the first angle on this input. With the repair, both corrected and historical modes rejected each of the six geometry errors by clock, quantity and material ID, and each rejected the native zz stress mutation. The [review controls and exact commands](results/direction-c2/README.md#reproduce-the-review-controls) reproduce these checks on one rank with one thread. This verification commit closes C2. The previous strict 18-strip audit retains the four documented strip-15 angle differences.
+
 ## Assignment C2 — stable growing-fault direction score
 
 From `bffffca07`, production commit `34fd65a86` uses the signed root's rate and mobility to evaluate the disk's small excess traction in cold creep. The production call path is `select_prospective_planes → score_plane → candidate_onset → friction().solve_strip`. Read `include/aspect/reconstructed_fault/onset_score.h` for the algebra and `source/simulator/solver/midpoint_direction.cc` for the caller. The correction keeps the same pressure, stage age, signed friction equation, search and gain threshold. The second commit contains the six authorized geometry entries, checker and evidence. The [run record and figure](results/direction-c2/README.md) give exact build, simulation, plotting and rejection-test commands. The [18-strip record](results/direction-c2/strip18.md) gives the same-source recorder build and strict audit command.

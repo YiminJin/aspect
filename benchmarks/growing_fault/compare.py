@@ -36,17 +36,45 @@ def rows(paths, keys):
     return table
 
 
+def allowance(reference, atol, rtol):
+    return atol + rtol * abs(reference)
+
+
 def compare_values(a, b, column, atol, rtol):
     if a.keys() != b.keys():
         raise ValueError(f'{column} identities differ')
     keys = sorted(a)
     left, right = (np.array([float(table[k][column]) for k in keys]) for table in (a, b))
-    passing = np.isfinite(left) & np.isfinite(right) & (abs(left-right) <= atol + rtol*abs(left))
+    tolerance = allowance(left, atol, rtol)
+    passing = np.isfinite(left) & np.isfinite(right) & (abs(left-right) <= tolerance)
     if not passing.all():
         i = np.flatnonzero(~passing)[0]
         raise ValueError(f'{column} at {keys[i]}: reference {left[i]:.17g}, target {right[i]:.17g}, '
-                         f'difference {right[i]-left[i]:.5g}, tolerance {atol+rtol*abs(left[i]):.5g}')
+                         f'difference {right[i]-left[i]:.5g}, tolerance {tolerance[i]:.5g}')
     return max(abs(left-right))
+
+
+def plane_tolerances(column):
+    return (1e-7 if column == 'beta' else 1e-11), 1e-7
+
+
+def reference_planes(reference, step, time, historical_donor):
+    planes = rows([reference/f'tip-planes-{step:04}.csv'], ('section',))
+    if historical_donor:
+        return planes
+
+    geometry = rows([Path(__file__).with_name('nine-strip-geometry.csv')], ('step', 'section'))
+    if set(geometry) != {(1, 8), (2, 8), (3, 8)}:
+        raise ValueError('Expected corrected geometry only for strip 8 at steps 1, 2 and 3')
+    expected = geometry[step, 8]
+    strip = planes[8,]
+    if (float(expected['time_s']) != float(time) or
+        float(expected['donor_beta_rad']) != float(strip['beta']) or
+        float(expected['donor_ds_m']) != float(strip['ds'])):
+        raise ValueError(f'step {step}: corrected geometry requires the frozen two-rank donor')
+    strip['beta'] = expected['beta_rad']
+    strip['ds'] = expected['ds_m']
+    return planes
 
 
 def frozen(reference, target, archive=False, historical_donor=False):
@@ -54,10 +82,6 @@ def frozen(reference, target, archive=False, historical_donor=False):
     actual = rows(target.glob('balance-000[1-9].csv'), ('step',))
     if set(donor) != {(1,), (2,), (3,)} or donor.keys() != actual.keys():
         raise ValueError('Expected one publication at each of the three physical endpoints')
-    if not historical_donor:
-        geometry = rows([Path(__file__).with_name('nine-strip-geometry.csv')], ('step', 'section'))
-        if set(geometry) != {(1, 8), (2, 8), (3, 8)}:
-            raise ValueError('Expected corrected geometry only for strip 8 at steps 1, 2 and 3')
     # The portable archive retains the last native frame and the full ledger.
     # The replay additionally supplies every intermediate material frame.
     for step in ([3] if archive else range(4)):
@@ -74,16 +98,7 @@ def frozen(reference, target, archive=False, historical_donor=False):
                 raise ValueError(f'step {step}, native points: {exc}') from exc
         if not step:
             continue
-        old = rows([reference/f'tip-planes-{tag}.csv'], ('section',))
-        if not historical_donor:
-            expected = geometry[step, 8]
-            strip = old[8,]
-            if (float(expected['time_s']) != float(donor[step,]['time']) or
-                float(expected['donor_beta_rad']) != float(strip['beta']) or
-                float(expected['donor_ds_m']) != float(strip['ds'])):
-                raise ValueError(f'step {step}: corrected geometry requires the frozen two-rank donor')
-            strip['beta'] = expected['beta_rad']
-            strip['ds'] = expected['ds_m']
+        old = reference_planes(reference, step, donor[step,]['time'], historical_donor)
         new = rows([target/f'sections-{tag}.csv'], ('section',))
         parent = rows([target/f'sections-{step-1:04}.csv'], ('section',))
         for k in old:
@@ -91,7 +106,7 @@ def frozen(reference, target, archive=False, historical_donor=False):
                 raise ValueError(f'Step {step}, strip {k}: formed plane history differs')
         for name in ('xi', 'ds', 'beta', 'age', 'slip'):
             try:
-                compare_values(old, new, name, 1e-7 if name=='beta' else 1e-11, 1e-7)
+                compare_values(old, new, name, *plane_tolerances(name))
             except ValueError as exc:
                 raise ValueError(f'step {step}, strip geometry/history: {exc}') from exc
         with (reference/f'tip-sections-{tag}.csv').open() as stream:
@@ -126,13 +141,21 @@ def continuation(first, other, steps):
 def check_corruption(reference, target, historical_donor=False):
     # Each trial modifies one value in a fresh copy and must identify its
     # clock, column and (for the revised geometry) material strip.
-    trials = [(sorted(target.glob('points-0001-r*.csv'))[0], 'tauzz', .001, 'step 1, native points: tauzz')]
+    frozen(reference, target, historical_donor=historical_donor)
+    point_file = sorted(target.glob('points-0001-r*.csv'))[0]
+    with point_file.open() as stream:
+        tauzz = float(next(csv.DictReader(stream))['tauzz'])
+    trials = [(point_file, 'tauzz', tauzz + .001, 'step 1, native points: tauzz')]
+    donor = rows([reference/'bulk-accepted.csv'], ('step',))
     for step in (1, 2, 3):
-        for column, delta in [('beta', 1.3e-7), ('ds', 3e-8)]:
-            trials.append((target/f'sections-{step:04}.csv', column, delta,
+        strip = reference_planes(reference, step, donor[step,]['time'], historical_donor)[8,]
+        for column in ('beta', 'ds'):
+            expected = float(strip[column])
+            outside = expected + 2 * allowance(expected, *plane_tolerances(column))
+            trials.append((target/f'sections-{step:04}.csv', column, outside,
                            f'step {step}, strip geometry/history: {column} at (8,)'))
 
-    for damaged, column, delta, diagnostic in trials:
+    for damaged, column, replacement, diagnostic in trials:
         with TemporaryDirectory() as directory:
             scratch = Path(directory)
             for path in target.glob('*.csv'):
@@ -142,7 +165,7 @@ def check_corruption(reference, target, historical_donor=False):
                 reader = csv.DictReader(source)
                 records = list(reader)
                 row = records[0] if column == 'tauzz' else next(r for r in records if int(r['section']) == 8)
-                row[column] = str(float(row[column]) + delta)
+                row[column] = str(replacement)
                 writer = csv.DictWriter(output, reader.fieldnames)
                 writer.writeheader()
                 writer.writerows(records)

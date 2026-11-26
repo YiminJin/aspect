@@ -128,3 +128,31 @@ PY
 ```
 
 The installed corruption check perturbed each corrected clock separately. Increasing strip 8's angle by 1.3e−7 rad (allowance 1.14787e−7) and its arclength by 3e−8 m (allowance 2.50842e−8) each failed at the changed clock, column and material ID in all six trials. The original native stress control also failed at its changed point after adding 0.001 Pa to τzz at 5 ms (allowance 1e−6 Pa). Logs and the 152-row CSV are under build-direction-c2/references.
+
+## C2 review closeout
+
+At `3cb478a30`, the continued parameter file ran forward to 5 ms. The checker then failed to unpack the wall expression. The repaired checker reads the two components from ASPECT's forward `parameters.json` and overrides only the expression on the reverse run. The continued and single-line cases gave byte-identical fields, native points, sections, pressure and balance (eight CSVs per direction at initialization and 5 ms). Both components were active. Their maximum forward-plus-reverse defects were 1.73472348e−18 and 1.95156391e−18 m/s. A further run used `X,Y,T` and `shear=0.02` for the wall function. Both parameter dumps preserved them and all 16 CSVs also matched the original case.
+
+The old checker accepted 288 matching NaNs per run in the vertical velocity. The repaired replay rejects the first nonfinite component with its run name. A single reverse infinity and a missing forward component were also rejected. Finite saved outputs pass the full reversal check, including both velocities and signed friction.
+
+For the geometry counterexample, subtracting 3e−8 rad from the corrected strip-8 angle at each physical frame gives −0.147868135794236 rad. The initial width divided by its cosine gives 0.2507418880547902 m. That trajectory passes the original tolerances. The old probe then added 1.3e−7 rad to the measured angle and missed the corruption at 5 ms because its net error was only 1.0e−7 rad. Each repaired probe first requires a passing trajectory, then sets one scratch entry two allowances above its **active reference**. Corrected and historical modes each reject three angle errors of approximately +2.2957e−7 rad and three arclength errors of approximately +5.0168e−8 m, at strip 8 and the intended clock. Both modes also reject the 0.001 Pa native zz stress corruption. Matching unshifted and portable-archive comparisons pass in both modes.
+
+### Reproduce the review controls
+
+The driver runs the installed forward and reverse cases from initial conditions, validates the continued input, compares the accepted CSVs byte for byte, then replays the deliberately damaged copies. It uses one rank and one numerical thread. Each geometry probe uses a copy of the trajectory for its reference mode.
+
+```sh
+cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -DCMAKE_INSTALL_COMPONENT=examples -P build-6b/release/cmake_install.cmake
+cmp benchmarks/growing_fault/compare.py build-direction-c2/install/benchmarks/growing_fault/compare.py
+sh refactoring/phase-field-fault/results/direction-c2/review_controls.sh \
+  build-direction-c2/install build-5a-repair/donor-two/output \
+  build-direction-c2/nine/principal/output build-direction-c1/frozen-ordinary/principal/output \
+  build-direction-c2-review/closeout
+```
+
+For a finite saved forward/reverse pair the checker also runs without launching ASPECT.
+
+```sh
+python3 -BO refactoring/phase-field-fault/results/direction-c2/check_reversal.py \
+  build-direction-c2/install/bin/aspect-release build-direction-c2/signed-final --replay
+```
