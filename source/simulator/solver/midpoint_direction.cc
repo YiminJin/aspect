@@ -142,7 +142,7 @@ namespace aspect::GrowingFault
   {
     const auto resistance = [&](const double free, const double mobility)
     {
-      return material.friction().solve_strip(k,free,mobility,h,friction_pressures.values[k]).resistance;
+      return material.friction().solve_strip(k,free,mobility,h,friction_pressures.values[k]);
     };
     return candidate_onset(moments,centered_moments,resistance,G*B*h*material.sections().length(k,angle),angle);
   }

@@ -116,7 +116,7 @@ TEST_CASE("Remote shear controls the resistance inside an onset disk")
   const double angle=.17, h=.0025, length=.21/std::cos(angle), GBh=1.e6*h/(1.+h*.01);
   const auto resistance=[&](double free,double mobility)
   {
-    return law.solve_strip(free,mobility,10.,h,200.).resistance;
+    return law.solve_strip(free,mobility,10.,h,200.);
   };
   const auto cold=candidate_onset(local.data(),variance,resistance,GBh*length,angle);
   const auto loaded=candidate_onset(total.data(),variance,resistance,GBh*length,angle);
@@ -124,6 +124,47 @@ TEST_CASE("Remote shear controls the resistance inside an onset disk")
   REQUIRE(loaded.resistance>100.);
   REQUIRE(loaded.score==Approx(.13*.64*.88*.88*loaded.resistance*loaded.resistance));
   REQUIRE(loaded.score>100.);
+}
+
+TEST_CASE("Cold creep resolves the disk traction under either loading sign")
+{
+  using namespace aspect::GrowingFault;
+  using aspect::MaterialModel::Rheology::SectionRoot;
+  const double impedance = std::ldexp(1.,58);
+  const auto dashpot = [impedance](const double free_rate, const double mobility)
+  {
+    const double rate = free_rate / (1. + impedance * mobility);
+    return SectionRoot{rate, impedance * rate, impedance / (1. + impedance * mobility)};
+  };
+
+  // Two unit areas with F = 1/2, only the first inside the disk.
+  // The section mean is +/-1 Pa and M = 1/4 (m/s)/Pa. The dashpot
+  // resistance rounds to +/-1 Pa, but its small rate is still resolved.
+  const double scale = 4.;
+  const double contrast = std::numeric_limits<double>::epsilon();
+  const double centered[3] = {};
+  for (const double sign : {-1., 1.})
+    {
+      auto moments = onset_moments(1.,1.,.5,0.,sign * (1. + contrast));
+      const auto remote = onset_moments(1.,0.,.5,0.,sign * (1. - contrast));
+      for (unsigned int j=0; j<moments.size(); ++j)
+        moments[j] += remote[j];
+      const auto score = candidate_onset(moments.data(),centered,dashpot,scale,0.);
+
+      // The exact disk traction minus resistance is
+      // sign * (contrast + 1/(1 + M*impedance)). Its score has weight 1/4.
+      const double residual = contrast + 1. / (1. + .25 * impedance);
+      const double expected = .25 * residual * residual;
+      REQUIRE(score.resistance == sign);
+      REQUIRE(std::abs(score.score / expected - 1.) < 1.e-14);
+    }
+
+  // F = 0 gives zero mobility and zero free rate. The small disk shear
+  // still drives onset and exercises the centered score at zero mobility.
+  const auto intact = onset_moments(1.,1.,0.,1.,1.e-8);
+  const auto score = candidate_onset(intact.data(),centered,dashpot,scale,0.);
+  REQUIRE(score.resistance == 0.);
+  REQUIRE(std::abs(score.score / 1.e-16 - 1.) < 1.e-14);
 }
 
 TEST_CASE("Cold creep has a finite condensed section tangent")
