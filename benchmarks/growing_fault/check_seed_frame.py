@@ -79,6 +79,22 @@ def check_frame(output, frame):
     parameters = json.loads((output/'parameters.json').read_text())
     actual_tip = np.fromstring(parameters['Material model']['Growing fault']['Forward seed tip']['value'], sep=',')
     np.testing.assert_allclose(actual_tip, frame.center + .5*t, atol=2e-12, rtol=0)
+    # At the first solve friction samples the straight accepted parent. Use its
+    # physical pressure locations, even when the prescribed pressure is constant.
+    sections = rows([output/'sections-0000.csv'], ('section',))
+    stations = rows([output/'friction-pressure-0001.csv'], ('section',))
+    if len(stations) < 2 or stations.keys() != sections.keys():
+        raise ValueError('Incomplete initial material pressure stations')
+    positions = np.array([[float(stations[k][d]) for d in ('x', 'y')] for k in sorted(stations)])
+    along, normal = ((positions - frame.center) @ rotation).T
+    if not np.isfinite(positions).all() or not np.all(np.diff(along) > 0):
+        raise ValueError('Invalid or unordered material pressure stations')
+    dx, dy = positions[-1] - positions[0]
+    measured_angle = math.degrees(math.atan2(dy, dx))
+    offset = max(abs(normal))
+    if offset > 2e-12:
+        raise ValueError(f'Material pressure stations lie at {measured_angle:.9g} degrees, '
+                         f'expected {frame.degrees:g}; maximum normal offset {offset:.9g} m')
     mesh = rows(output.glob('mesh-0001-r*.csv'), ('cell','component','local'))
     initial = rows(output.glob('mesh-0000-r*.csv'), ('cell','component','local'))
     names, phase_name = composition_names(output)
@@ -111,7 +127,8 @@ def check_frame(output, frame):
     velocities = parsed_velocity(output, offsets+frame.center)
     parsed_error = np.max(abs(velocities-offsets@gradient.T),axis=0)
     wall_error = np.max([abs(value-gradient@(p-np.array(frame.center))) for p,value in walls.items()],axis=0)
-    print(f'{output.parent.name}: tip {actual_tip} m, max cell phase mean error {phase_error:.3g}; '
+    print(f'{output.parent.name}: {len(stations)} pressure stations at {measured_angle:.9g} degrees, '
+          f'tip {actual_tip} m, max cell phase mean error {phase_error:.3g}; '
           f'parsed velocities {velocities.tolist()} m/s; applied wall errors {wall_error} m/s')
     if not np.isfinite(velocities).all() or max(wall_error)>2e-12 or max(parsed_error)>2e-12:
         raise ValueError(f'Applied Cartesian wall velocity error {wall_error} m/s; parsed error {parsed_error} m/s')
@@ -143,6 +160,17 @@ def check_geometry(run, mesh_plugin):
     print('Translated native points',len(p),'maximum physical position defect',position,'m')
     second = SeedFrame((1.,.5), 20.)
     check_frame(measure('second-dip', second.settings(clean)), second)
+    stale_angle = second.settings(clean) + subsection(
+        'Material model', subsection('Growing fault', 'set Seed tangent angle = 19'))
+    stale_stations = measure('stale-material-angle', stale_angle)
+    try:
+        check_frame(stale_stations, second)
+    except ValueError as exc:
+        if 'Material pressure stations lie at' not in str(exc):
+            raise
+        print(f'Stale material angle rejected: {exc}')
+    else:
+        raise ValueError('A stale material angle passed the pressure-station check')
     old_wall = resolved_function(clean,'Boundary velocity model')['Function constants']['value']
     stale = measure('stale-wall-origin', settings+subsection('Boundary velocity model',
                      subsection('Function','set Function constants = '+old_wall)))

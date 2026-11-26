@@ -14,6 +14,18 @@ here = Path(__file__).resolve().parent
 
 
 def check_wall_loading(output, contrast, translation):
+    # The column computes q even when another provider supplies the actual
+    # Stokes boundary load. Verify the providers selected for x on the box top.
+    parameters = json.loads((output/'parameters.json').read_text())
+    selection = parameters['Boundary traction model']['Prescribed traction boundary indicators']['value']
+    providers = []
+    for entry in filter(str.strip, selection.split(',')):
+        indicator, _, provider = entry.partition(':')
+        boundary, *components = indicator.split()
+        if boundary in ('top', '3') and (not components or 'x' in components[0]):
+            providers.append(provider.strip())
+    require(providers == ['layered background'],
+            f'Expected layered background for the top horizontal traction, got {providers}')
     # The side Dirichlet boundaries include both end heights. Reconstruct the
     # actual Q2 velocity there from its nine Gauss samples on each incident cell.
     corners = np.array([[-6., -2.], [-6., 2.], [6., -2.], [6., 2.]])
@@ -33,7 +45,8 @@ def check_wall_loading(output, contrast, translation):
         measured = read(output/'layered-background.csv')['q'][step]
         same(measured, predicted, 1e-12, 'background shear traction in Pa')
         print(f'{step}: wall speeds {vx[0]:.12g}, {vx[1]:.12g} m/s, '
-              f'contrast {vx[1]-vx[0]:.12g} m/s, traction {measured:.12g}/{predicted:.12g} Pa')
+              f'contrast {vx[1]-vx[0]:.12g} m/s, prescribed column traction '
+              f'{measured:.12g}/{predicted:.12g} Pa')
 
 
 def check_normalization(original, scaled, factor):
@@ -84,15 +97,32 @@ def main():
 
     base = (here/'layered.prm').read_text()
     principal = run('principal', base)
-    lower_load = run('half-contrast', base + """
+    half_contrast = base + """
 subsection Postprocess
   subsection Layered background
     set Wall velocity contrast = 1
   end
 end
-""")
+"""
+    lower_load = run('half-contrast', half_contrast)
     check_wall_loading(principal, 2., 2.)
     check_wall_loading(lower_load, 1., 2.)
+    unloaded = run('zero-top-traction', half_contrast + """
+subsection Boundary traction model
+  set Prescribed traction boundary indicators = top:function
+  subsection Function
+    set Function expression = 0;0
+  end
+end
+""")
+    try:
+        check_wall_loading(unloaded, 1., 2.)
+    except ValueError as exc:
+        if 'top horizontal traction' not in str(exc):
+            raise
+        print(f'Zero top-traction provider rejected: {exc}')
+    else:
+        raise ValueError('A zero top-traction provider passed the column-load check')
     scaled = run('scaled-profile', base + fault('Degradation magnitude', 200))
     check_normalization(principal, scaled, 4.)
     gate = run('traction-step', (here/'traction_step.prm').read_text())
