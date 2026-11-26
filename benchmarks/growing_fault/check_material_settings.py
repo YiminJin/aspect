@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import subprocess
 
+from check_adiabatic_pressure import adiabatic_constants
 from check_repairs import subsection
 
 
@@ -44,6 +45,8 @@ def main():
     root = args.destination.resolve()
     root.mkdir(parents=True, exist_ok=False)
     example = Path(__file__).with_name('growing_seed.prm').read_text()
+    # The reference for this regression uses 200 Pa + (50 Pa/m) times depth.
+    example += adiabatic_constants(200, 50)
     public = 'Phase field fault'
     legacy = 'Growing fault'
     omitted, shared = take_material_subsection(example, public)

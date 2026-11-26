@@ -1,5 +1,8 @@
-# One growing 30-degree seed in a 2 by 1 metre box, advanced to 5 ms.
-# Change Material model / Phase field fault / Shear modulus to change elasticity.
+# One growing seed in a 2 m by 1 m box. Time and distance are in seconds and metres.
+# Its center (xc,yc) is (1,0.5) m. The initial tangent (tx,ty) points 30 degrees
+# counterclockwise from +x; the normal (-ty,tx) points to its left.
+# Along-seed coordinate s = tx*(x-xc) + ty*(y-yc).
+# Across-seed coordinate n = -ty*(x-xc) + tx*(y-yc).
 set Dimension = 2
 set End time = 0.005
 set Use years instead of seconds = false
@@ -52,7 +55,12 @@ subsection Initial composition model
  set List of model names = function
  subsection Function
   set Variable names = x,y
-  set Function expression = .2*max(0,1-(max(0,((0.86602540378443871)*(x-(1))+(0.49999999999999994)*(y-(0.5))))/.5)^2)*max(0,1-(((-(0.49999999999999994))*(x-(1))+(0.86602540378443871)*(y-(0.5)))/.25)^2)
+  # The seed tapers to zero along +s at length, and across n at +/-width.
+  # peak is dimensionless; xc, yc, length and width are in metres.
+  set Function constants = xc=1, yc=0.5, tx=0.86602540378443871, ty=0.49999999999999994, \
+                           peak=0.2, length=0.5, width=0.25
+  set Function expression = peak * max(0, 1 - (max(0, tx*(x-xc) + ty*(y-yc))/length)^2) \
+                                 * max(0, 1 - ((-ty*(x-xc) + tx*(y-yc))/width)^2)
  end
 end
 subsection Material model
@@ -71,6 +79,8 @@ subsection Material model
   set Radiation damping = 1000
  end
  subsection Growing fault
+  # To translate or rotate the seed, change xc,yc,tx,ty in BOTH functions,
+  # set this angle in degrees, and set the tip to (xc+length*tx,yc+length*ty).
   set Seed tangent angle = 30
   set Forward seed tip = 1.4330127018922194,0.75
   set Cohesion = 1000
@@ -85,7 +95,15 @@ subsection Boundary velocity model
  set Prescribed velocity boundary indicators = left:function, right:function, bottom:function, top:function
  subsection Function
   set Variable names = x,y,t
-  set Function expression = (0.86602540378443871)*(.02*((-(0.49999999999999994))*(x-(1))+(0.86602540378443871)*(y-(0.5)))+(0.0030000000000000001)*((0.86602540378443871)*(x-(1))+(0.49999999999999994)*(y-(0.5))))-(0.49999999999999994)*(-(0.0030000000000000001)*((-(0.49999999999999994))*(x-(1))+(0.86602540378443871)*(y-(0.5))));(0.49999999999999994)*(.02*((-(0.49999999999999994))*(x-(1))+(0.86602540378443871)*(y-(0.5)))+(0.0030000000000000001)*((0.86602540378443871)*(x-(1))+(0.49999999999999994)*(y-(0.5))))+(0.86602540378443871)*(-(0.0030000000000000001)*((-(0.49999999999999994))*(x-(1))+(0.86602540378443871)*(y-(0.5))))
+  # Extension and shear are rates (1/s). In the seed frame,
+  # v_s = shear*n + extension*s, v_n = -extension*n.
+  # Rotate into Cartesian components (m/s): tx*v_s - ty*v_n; ty*v_s + tx*v_n.
+  set Function constants = xc=1, yc=0.5, tx=0.86602540378443871, ty=0.49999999999999994, \
+                           extension=0.003, shear=0.020
+  set Function expression = tx*(shear*(-ty*(x-xc) + tx*(y-yc)) + extension*(tx*(x-xc) + ty*(y-yc))) \
+                          - ty*(-extension*(-ty*(x-xc) + tx*(y-yc))); \
+                            ty*(shear*(-ty*(x-xc) + tx*(y-yc)) + extension*(tx*(x-xc) + ty*(y-yc))) \
+                          + tx*(-extension*(-ty*(x-xc) + tx*(y-yc)))
  end
 end
 subsection Solver parameters
@@ -103,7 +121,9 @@ subsection Adiabatic conditions model
   set Model name = function
   subsection Function
     set Variable names = depth
-    set Function constants = p0=200, dp_dz=50
+    # Friction uses p0 (Pa) plus dp_dz (Pa/m) times depth.
+    # Set dp_dz=50 for the depth-dependent profile.
+    set Function constants = p0=200, dp_dz=0
     # Temperature (K), pressure (Pa), density (kg/m^3). Depth increases down in metres.
     set Function expression = 293; p0 + dp_dz*depth; 1
   end

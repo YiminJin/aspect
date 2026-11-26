@@ -19,8 +19,7 @@ def main():
     work = args.work.resolve()
     work.mkdir(parents=True, exist_ok=False)
     example = Path(__file__).resolve().parent
-    for name in ('growing_seed.prm', 'adiabatic_pressure.prm', 'onecut.prm'):
-        shutil.copy(example/name, work/name)
+    shutil.copy(example/'growing_seed.prm', work)
     threads = dict.fromkeys(('DEAL_II_NUM_THREADS', 'OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS'), '1')
 
     def run(directory, ranks, attempt=''):

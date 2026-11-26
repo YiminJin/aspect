@@ -13,6 +13,12 @@ from check_repairs import subsection
 from compare import rows, continuation, compare_values
 
 
+def adiabatic_constants(surface_pressure, gradient):
+    """Set the parsed pressure intercept (Pa) and depth gradient (Pa/m)."""
+    constants = f'set Function constants = p0={surface_pressure}, dp_dz={gradient}'
+    return subsection('Adiabatic conditions model', subsection('Function', constants))
+
+
 def resistance(v, pressure, h=.0025):
     x = h * abs(v) / .01
     age = 10 * math.exp(-x) + h * (-math.expm1(-x)/x if x else 1.)
@@ -114,10 +120,10 @@ def main():
     def case(name, p=200, slope=50, extras='', end=.005, probe=False, plugin=None, resume=None, diagnostic=None):
         run=args.destination/name
         run.mkdir()
-        source=(root/'onecut.prm').read_text()
+        shutil.copy(root/'onecut.prm', run)
+        source='include onecut.prm\n'
         if p is not None:
-            example=(root/'adiabatic_pressure.prm').read_text().split('include onecut.prm\n',1)[1]
-            source+='\n'+example.replace('p0=200, dp_dz=50',f'p0={p}, dp_dz={slope}')
+            source=(root/'adiabatic_pressure.prm').read_text() + adiabatic_constants(p, slope)
         if resume:
             shutil.copytree(resume/'restart/02',run/'output/restart/02')
             extras+='\nset Resume computation = true\n'+subsection('Checkpointing','set Resume checkpoint = 2')

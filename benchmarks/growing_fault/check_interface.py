@@ -2,13 +2,14 @@
 import argparse
 import os
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import xml.etree.ElementTree as ET
 
 import numpy as np
 from compare import rows, compare_values
+from check_adiabatic_pressure import adiabatic_constants
+from check_material_settings import take_material_subsection
 from check_repairs import subsection
 
 
@@ -16,38 +17,40 @@ def material(route, values):
     return subsection('Material model', subsection(route,values))
 
 
-def compare_growing_frames(canonical, legacy, with_age=True):
-    """Compare the same physical input expressed through the two parameter routes."""
+def compare_growing_frames(reference, target, with_age=True):
+    """Check both native frames and return the 5 ms maximum differences by quantity."""
     for tag in ('0000', '0001'):
-        a, b = (rows(d.glob(f'points-{tag}-r*.csv'), ('cell', 'q')) for d in (canonical, legacy))
+        errors = {}
+        a, b = (rows(d.glob(f'points-{tag}-r*.csv'), ('cell', 'q')) for d in (reference, target))
         if a.keys() != b.keys() or any(a[k]['section'] != b[k]['section'] for k in a):
             raise ValueError(f'Native identities or strip membership changed at frame {tag}')
         # Both decks use the same mesh and chord quadrature. Stresses are in
         # Pa; phi, cohesive strain and the two point shear histories have no units.
         for col in ('x', 'y', 'weight'):
-            compare_values(a, b, col, 0., 0.)
+            errors[col] = compare_values(a, b, col, 0., 0.)
         for col in ('tauxx', 'tauyy', 'tauzz', 'tauxy'):
-            compare_values(a, b, col, 1e-12, 1e-12)
+            errors[col] = compare_values(a, b, col, 1e-12, 1e-12)
         for col in ('phi', 'Axx', 'Ayy', 'Azz', 'Axy'):
-            compare_values(a, b, col, 1e-15, 1e-12)
+            errors[col] = compare_values(a, b, col, 1e-15, 1e-12)
         for col in ('signed_shear', 'absolute_shear'):
-            compare_values(a, b, col, 0., 1e-12)
+            errors[col] = compare_values(a, b, col, 0., 1e-12)
 
-        a, b = (rows([d/f'sections-{tag}.csv'], ('section',)) for d in (canonical, legacy))
+        a, b = (rows([d/f'sections-{tag}.csv'], ('section',)) for d in (reference, target))
         if a.keys() != b.keys() or any(a[k]['formed'] != b[k]['formed'] for k in a):
             raise ValueError(f'Strip identities or formation flags changed at frame {tag}')
-        compare_values(a, b, 'xi', 0., 0.)                 # fixed strip coordinate (m)
-        compare_values(a, b, 'ds', 1e-14, 1e-12)           # current arclength (m)
-        compare_values(a, b, 'beta', 1e-14, 1e-12)         # direction (rad)
+        errors['xi'] = compare_values(a, b, 'xi', 0., 0.)                 # fixed strip coordinate (m)
+        errors['ds'] = compare_values(a, b, 'ds', 1e-14, 1e-12)           # current arclength (m)
+        errors['beta'] = compare_values(a, b, 'beta', 1e-14, 1e-12)         # direction (rad)
         if any(('age' in next(iter(table.values()))) != with_age for table in (a, b)):
             raise ValueError(f'Unexpected constitutive history at frame {tag}')
         if with_age:
-            compare_values(a, b, 'age', 1e-12, 1e-12)      # accepted RSF history (s)
+            errors['age'] = compare_values(a, b, 'age', 1e-12, 1e-12)      # accepted RSF history (s)
         # Signed speed (m/s), integrated slip (m) and resistance (Pa) have
         # no absolute floor. Zero must remain zero, and either creep direction
         # must agree even when the rate is well below 1e-12 m/s.
         for col in ('V', 'slip', 'force'):
-            compare_values(a, b, col, 0., 1e-12)
+            errors[col] = compare_values(a, b, col, 0., 1e-12)
+    return errors
 
 
 def main():
@@ -83,6 +86,8 @@ def main():
         return work/'output'
 
     example=(growing/'growing_seed.prm').read_text()
+    # The reference for this regression uses 200 Pa + (50 Pa/m) times depth.
+    example += adiabatic_constants(200, 50)
     inputs=[growing/'onecut.prm',growing/'adiabatic_pressure.prm']
     seed=run('growth',example,extra_files=inputs)
     legacy=run('legacy-growth',(growing/'adiabatic_pressure.prm').read_text(),extra_files=inputs[:1])
@@ -91,12 +96,14 @@ def main():
 
     common=(fixed/'mature_trace.prm').read_text()
     data=(fixed/'mature_vertices.txt').read_text()
-    inline='''set Fault vertices = .5,0;.5,.5;.5,1
+    fault=lambda x:material('Phase field fault',x)
+    inline='''set Fault vertex file =
+    set Fault vertices = .5,0;.5,.5;.5,1
     set Initial label ages = 10,11,12
     set Initial label shear tractions = 3.85,3.80,3.75'''
     table=run('mature',common,extra_files=[fixed/'fixed_fault.prm',fixed/'mature_vertices.txt'])
-    old=run('inline',common.replace('set Fault vertex file = mature_vertices.txt',inline)
-            .replace('mature fault statistics','fixed fault statistics'),extra_files=[fixed/'fixed_fault.prm'])
+    old=run('inline',common,fault(inline)+subsection('Postprocess',
+            'set List of postprocessors = fixed fault statistics, visualization'),extra_files=[fixed/'fixed_fault.prm'])
     def labels_equal(a,b):
         for step in range(3):
             f=f'fault-labels-{step:05}.txt'
@@ -115,8 +122,7 @@ def main():
     def vertex_case(name,content,settings='',error=None,plugin=False):
         file=root/(name+'.txt')
         file.write_text(content)
-        return run(name,common.replace('mature_vertices.txt',str(file)),settings,[fixed/'fixed_fault.prm'],error,plugin=plugin)
-    fault=lambda x:material('Phase field fault',x)
+        return run(name,common,fault(f'set Fault vertex file = {file}')+settings,[fixed/'fixed_fault.prm'],error,plugin=plugin)
     for name,text,setting,message in [
         ('donor-format','0.0 0.0 0.35\n','', 'anonymous donor core-phase triples'),
         ('out-of-order',data.replace('1 0.5 0.5','2 0.5 0.5'),'','consecutive material IDs'),
@@ -144,8 +150,8 @@ def main():
         expected=(3.85-(.02+.0125*step))/20
         np.testing.assert_allclose(actual,expected,rtol=0,atol=2e-12)
         print('Persistent shear, endpoint',step,'expected/measured',expected,actual,flush=True)
-    alias=run('legacy-dashpot-trace',homogeneous.replace('Model name = phase field fault','Model name = linear trace resistance'),
-              fault('set Background shear traction = 17\nset Fault vertex file = '+str(file)),plugin=True)
+    alias=run('legacy-dashpot-trace',homogeneous,subsection('Material model','set Model name = linear trace resistance')
+              +fault('set Background shear traction = 17\nset Fault vertex file = '+str(file)),plugin=True)
     labels_equal(alias,result)
     alias=run('legacy-dashpot-strip','include adiabatic_pressure.prm\n'+
               subsection('Material model','set Model name = linear strip resistance'),extra_files=inputs,plugin=True)
@@ -176,20 +182,20 @@ def main():
     # Both checkpoint writers use the same field names, degrees and Bernstein
     # phase basis. Each reader therefore reaches the material history boundary.
     parent=(growing/'onecut.prm').read_text()
-    parent=parent.replace('tau_xx, tau_yy, tau_xy','fault_stress_xx, fault_stress_yy, fault_stress_xy')
-    parent=parent.replace('generic, generic, generic, phase field','stress, stress, stress, phase field')
-    parent=parent.replace('set Model name = growing fault','set Model name = phase field fault')
-    parent+='\nset Surface pressure =\n'+subsection('Material model','set Friction normal stress = adiabatic pressure')
+    parent+=subsection('Compositional fields',
+                       'set Names of fields = fault_stress_xx, fault_stress_yy, fault_stress_xy, phase_field\n'
+                       'set Types of fields = stress, stress, stress, phase field')
+    parent+='\nset Surface pressure =\n'+subsection('Material model','set Model name = phase field fault\n'
+                                                  'set Friction normal stress = adiabatic pressure')
     parent+=subsection('Adiabatic conditions model','set Model name = function\n'+subsection('Function','set Function expression = 293;200;1'))
     save=subsection('Checkpointing','set Steps between checkpoint = 1\nset Number of checkpoints to keep = 4')
     grow_parent=run('growing-parent',parent,'\nset End time = .005\n'+save)
-    mature=parent.replace('single Advection, iterated Newton Stokes','single Advection, iterated Stokes').replace('midpoint fault phase','explicit DG SSPRK3')
     # Keep the checkpoint-compatible mesh and FE slots and remove the growth
     # physics from this mature input. A mature checkpoint must reach the
     # growing material's archive reader to exercise its wrong-route guard.
-    mature, n = re.subn(r'(?m)^[ \t]*subsection Growing fault\s*\n(?:[ \t]*set [^\n]*\n)*[ \t]*end[ \t]*\n', '', mature)
-    if n != 1:
-        raise ValueError('Expected the growing material subsection in the checkpoint writer')
+    mature, _ = take_material_subsection(parent, 'Growing fault')
+    mature+='\nset Nonlinear solver scheme = single Advection, iterated Stokes\n'
+    mature+=subsection('Compositional fields','set Compositional field methods = static, static, static, explicit DG SSPRK3')
     mature+=fault('set Fault geometry = fixed interior\nset Fit trace to phase = false\nset Fault vertices = .5,.2; 1,.8\nset Background shear traction = 128\nset Shear modulus = 10\nset Radiation damping = 100\nset Reference speed = .001\nset Direct effect = .1')
     mature+=subsection('Material model',subsection('Simple model','set Viscosity = 10'))
     mature+=subsection('Solver parameters',subsection('Stokes solver parameters','set Linear solver tolerance = 1e-13'))
