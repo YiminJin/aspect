@@ -1,0 +1,5 @@
+New: A mature phase field fault can use a prescribed curved vertex table,
+select the relative slip direction, and restart a boundary-spanning trace
+from its accepted geometry and material history.
+<br>
+(Codex, 2026/11/26)

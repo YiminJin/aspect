@@ -118,7 +118,7 @@ end
     return straight
 
 
-def solved_motion(aspect, root, vertices, checkpoint):
+def solved_motion(aspect, root, vertices, checkpoint, geometry="boundary spanning"):
     up_dip = np.array([-.5, math.sqrt(3)/2])
     normal = np.array([up_dip[1], -up_dip[0]])
     stations = np.array([.5 + .075*normal, .5 - .075*normal])
@@ -134,7 +134,7 @@ subsection Mesh refinement
 end
 subsection Material model
   subsection Phase field fault
-    set Fault geometry = boundary spanning
+    set Fault geometry = {geometry}
     set Fault vertices = {vertex_entries(vertices)}
     set Fit trace to phase = false
     set Mature slip sense = {sense}
@@ -170,7 +170,7 @@ end
         # significant digits. Check the station, then pair measured velocities.
         np.testing.assert_allclose(rows[:, 1:3], stations, rtol=0., atol=5e-7)
         labels = np.loadtxt(dest/'output/fault-labels-00002.txt')
-        if (labels[:, -2:] <= 0.).any():
+        if not (np.isfinite(labels[:, -2:]).all() and (labels[:, -2:] > 0.).all()):
             raise ValueError('Expected positive accepted speed and slip distance')
         delta = (rows[0, 3:5]-rows[1, 3:5]) @ up_dip
         outcomes.append(delta)
@@ -206,6 +206,11 @@ def main():
     os.environ.update(DEAL_II_NUM_THREADS='1', OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1')
     vertices = compare_work(args.aspect, args.plugin, args.directory)
     solved_motion(args.aspect, args.directory, vertices, args.checkpoint)
+    # Fixed interior uses a separate trial section and a projected stress pair.
+    # Shorten the same seed around the middle vertex so both endpoints are interior.
+    interior = args.directory/'fixed-interior'
+    interior.mkdir()
+    solved_motion(args.aspect, interior, .5+.8*(vertices-.5), False, 'fixed interior')
 
 
 if __name__ == '__main__':

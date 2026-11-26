@@ -1,5 +1,62 @@
 # Phase-field fault working record
 
+## Mature-fault paper-release preparation
+
+Started at `68f6d15102c47a30a1210eb68e906c05130f7e23`, including all four
+local Assignment D repair commits. The three production changes are
+`69342d99a` for segment geometry, `540c4ff5b` for signed shear transfer,
+and `0af424ddf` for accepted boundary-spanning checkpoints. The
+[installed example, figure and command index](results/mature-release/README.md)
+and [public parameter guide](IMPLEMENTATION.md#prescribe-a-curved-mature-fault-and-its-slip-sense)
+are ready for architecture review. Every new calculation began from this
+branch's initial conditions or its own newly written checkpoint. An earlier
+branch installation wrote the two legacy compatibility parents. The donor
+launcher and frozen numerical references retain their previous revisions.
+
+- **Prescribed geometry.** The five supplied IDs stay at the same positions,
+  including contacts (0,0.82) m and (1,0.14) m. Cumulative length is
+  1.26223969 m. Cell-split normal quadrature and an independent trace mass
+  solve agree with the five FE integrals to 1.12e−16 m. The actual local
+  Stokes actions in the left contact and middle bend cells are
+  −0.00080620588233 and −0.00443265883749 m. A wrong global chord misses a
+  near-ridge projection by 0.1734 m. The paired-work check and 2,304 native
+  phase samples exercise the existing nearest-admitted support convention,
+  including overlapping and uncovered regions. [Geometry controls](results/mature-release/geometry-checks.md)
+- **Physical slip sense.** At the same fixed anisotropic stress the straight
+  60° two-way action changes from +0.58901895576274 m to −0.58901895576274 m.
+  Remapping IDs preserves it and every sampled compression is identical
+  between senses. At 25 ms the measured hanging-wall-minus-footwall up-dip
+  velocity changes from +0.0499211 m/s under thrust loading to −0.0384916 m/s
+  in the matched companion. The fixed-interior projected case also reverses
+  (+0.0445088 to −0.0359863 m/s). At the second curved interval swapping
+  just the old slip-spin sign introduces 0.00132274 Pa of cell-mean shear
+  error against the returned physical offset. [Signed contractions and solved samples](results/mature-release/sign-checks.md)
+- **Accepted history.** Serial checkpoint-only continuation and a rejected
+  25 ms attempt followed by 12.5 ms steps reproduce the clean curved
+  endpoints exactly. A serial parent restored on two ranks differs from
+  a two-rank uninterrupted calculation by at most 8.33e−17 m/s in rate,
+  6.39e−16 Pa in native stress and 5.28e−18 J/m in virtual work. A straight
+  seed whose fit displaced its first contact by 0.1692946363 m resumes
+  exactly. Changing sense, a prescribed coordinate, persistent loading or
+  the resistance parameters fails before publication. The old layered RSF
+  and state-free interior formats reproduce their clean endpoints.
+  [Restart commands, wire format and numerical budgets](results/mature-release/restart-checks.md)
+
+The final installed Release solver banner identifies `0af424ddf`. Its full
+unit suite passed 2,605 assertions in 64 cases. The ordinary fixed, stationary
+and layered moving CTests passed (3/3). The strict 38-label fitted regression
+passed at 0, 12.5 and 25 ms. The old homogeneous and three-label lifecycle
+checks, the 27-case public-interface suite and the distinct geometry rejection
+tests passed. Local MPI runs used one or two ranks, one numerical thread
+each. The measured 256-cell one-rank example with checkpoints took 7.26 s
+and peaked at 229,788 KiB process RSS. Full-size timing remains open.
+
+BP3 still needs spatial friction and deep creep, matched loading and normal
+feedback, adaptive timestep and event-cycle verification. The regional
+case still needs its temperature/density model and gravity and pore-pressure
+qualification. The next action is independent review of these small-box
+results before either production calculation.
+
 ## Assignment D review repairs
 
 The dedicated BP3 launcher revision is `b54bde517`. The four subsequent repair

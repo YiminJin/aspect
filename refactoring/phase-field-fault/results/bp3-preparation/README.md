@@ -103,7 +103,11 @@ rebuild, restore, extra terminal I/O and idle time are additional. Neither
 4,000 nor 8,000 is an observed event length or an upper bound. Update the
 estimate at the first recovery and again at the second onset.
 
-### What the current pf-rsf branch needs
+### Qualification since the preparation baseline
+
+The [mature release check](../mature-release/README.md) exercises the prescribed shear sense and boundary-spanning checkpoint on fresh small-box runs. The original preparation findings below describe the earlier baseline. The donor inputs and launcher remain pinned independently. Spatial weakening/strengthening, matched loading and deep creep, the normal-traction comparison, timestep selection and mesh-scale cost remain open for BP3.
+
+### What was missing at the preparation baseline
 
 At `0293a5994`, the mature material, positive-speed RSF and stationary
 phase profile are the relevant branch path. Midpoint crack growth and an
@@ -173,7 +177,8 @@ Assignment D changed examples and their plugin while retaining that core.
 ```sh
 R=refactoring/phase-field-fault/results/bp3-preparation
 E=$(mktemp -d)
-python3 -B "$R/check_branch.py" build-assignment-d/install "$E/probes"
+git show b54bde517:"$R/check_branch.py" > "$E/preparation-check.py"
+python3 -B "$E/preparation-check.py" build-assignment-d/install "$E/probes"
 cat "$E/probes/reference.log"
 python3 -BO "$R/history_test.py"
 ```

@@ -118,7 +118,7 @@ end
 
 `Phase field / Phase composition` names the physical phase read by both fault materials and the surface-energy reporter. Its default is `phase_field`. To call it `damage`, change the composition name in both places. The three mature stress fields remain distinct. Explicit fixed geometry supports the same static DGQ2 phase with either the generic or phase-field role. For moving phase the phase-field role with SSPRK3 selects bounded Bernstein transport.
 
-Set `Fault vertex file = mature_vertices.txt` inside `Material model / Phase field fault`. The [example table](../../benchmarks/fixed_fault/mature_vertices.txt) starts with `id x_m y_m`. IDs are consecutive integers beginning at zero. Positions in metres define an initially straight ordered curve. Increasing ID defines the positive slip direction. Optional named columns `initial_age_s` and `background_shear_Pa` can appear in either order. Comments start with `#`. ASPECT reads the file once on rank zero and distributes it. Relative filenames use the run directory.
+Set `Fault vertex file = mature_vertices.txt` inside `Material model / Phase field fault`. The [example table](../../benchmarks/fixed_fault/mature_vertices.txt) starts with `id x_m y_m`. IDs are consecutive integers beginning at zero. Positions in metres define an ordered, open curve. The tangent points from each ID to the next. Set `Fit trace to phase = false` to keep those positions for a curved seed. The optional fit requires a straight boundary-spanning seed. Optional named columns `initial_age_s` and `background_shear_Pa` can appear in either order. Comments start with `#`. ASPECT reads the file once on rank zero and distributes it. Relative filenames use the run directory.
 
 The example table is equivalent to these inline entries in the mature material subsection.
 
@@ -134,7 +134,59 @@ Set `Resistance law = rate and state` in the public material subsection to selec
 
 For a mature trace, `Initial slip rate` (m/s) seeds the vertices before the first Stokes solve. RSF uses `Reference speed` in its constitutive law. Omitting the initial rate uses the historical reference-speed input, or its mature default of 1e−6 m/s, including for historical stateless runs. An explicit initial rate makes the two choices independent.
 
-New mature interior checkpoints verify the active law's name and physical coefficients before restoring accepted history. Previous label archives can verify the law-specific key, pressure closure and fault support. Those archives require the original law settings to reproduce the trajectory because they did not record the coefficients.
+### Prescribe a curved mature fault and its slip sense
+
+The [installed curved example](../../benchmarks/fixed_fault/curved_mature/curved_mature.prm)
+extends the homogeneous Maxwell/RSF box. Edit the [ordered vertex file](../../benchmarks/fixed_fault/curved_mature/vertices.txt)
+to prescribe the physical curve, including the two endpoints on the box.
+These are its four geometry and kinematic settings:
+
+```text
+subsection Material model
+  subsection Phase field fault
+    set Fault geometry = boundary spanning
+    set Fault vertex file = $ASPECT_SOURCE_DIR/benchmarks/fixed_fault/curved_mature/vertices.txt
+    set Fit trace to phase = false
+    set Mature slip sense = opposite tangent
+  end
+end
+```
+
+On each segment, let **t** point along increasing ID and let **n** be its
+counterclockwise normal. The default `along tangent` gives ε = +1.
+`opposite tangent` gives ε = −1. The positive-normal side slides relative to
+the negative-normal side in direction ε**t**. Reversing vertex order reverses
+both frame vectors and preserves their dyad. The background shear in Pa is
+measured in the selected sense. Speed and accumulated distance are positive
+in either sense. A positive speed on the right-dipping example therefore
+produces up-dip relative motion for the chosen setting.
+
+The box face of each endpoint follows its incident edge. At a corner the
+incident edge selects the face with the largest normal component; a tie selects
+the lower coordinate axis. Unequal edges and changes of dip are allowed.
+A segment admits a point whose perpendicular foot falls between its vertices
+and inside its normal support. At an overlap only the closest admitted
+segment supplies the weight. A point outside every segment's normal strip
+receives zero slip load, even close to a sharp bend. Ray normalization still
+integrates the whole in-box normal at each along-segment station. Consequently
+there is no global unit-integral claim across overlapping or uncovered fans.
+The [figure and independent checks](results/mature-release/README.md) show the
+size of this effect in the small box.
+
+Use normal ASPECT checkpointing for a boundary-spanning or interior mature
+trace. The material saves the ordered accepted positions, radii, speeds, slip
+distances, persistent shear, Maxwell memory and resistance-law state. A
+separate physical identity records the input vertices, box, initial support,
+fit and motion choices, and slip sense. Identical input coordinates can be
+read from a different path. ASPECT restores the bulk FE histories and clock.
+The material rebuilds the segment frames when it restores the accepted
+positions. After mesh and solution transfer it recomputes the normal
+profile on the restored phase. Only a fresh straight seed
+runs the fit. Older mature interior checkpoints retain their original
+along-tangent convention and law-specific readers. Archives lacking a
+prescribed seed identity cannot verify the original vertex coordinates.
+Resuming a boundary-spanning trace requires a checkpoint written with its
+accepted labels and physical trace identity.
 
 ## Use ASPECT's adiabatic pressure for friction
 
@@ -201,9 +253,9 @@ Explicit material advection uses the accepted velocity. Its volume action on a t
 
 ### From bulk work to mature label rates and back to Stokes
 
-1. A Q1 material label retains its index when it moves. Adjacent labels orient each segment and its slip frame. A boundary-spanning seed may be fitted once to the ridge of the initial FE phase. Interior seeds use their prescribed vertices. On initialization or rebinding, the profile integrates $H=m d(1+d)/(1-d)^2$ along the in-box normals and projects the integrals to the labels. The normalized weight $\chi$ has units of inverse length. A finite association width must cover significant weight. Interior checkpoint records store its evolved radius at each vertex. Zero radii designate full in-box normal rays. A restart must use the saved convention. The mature normalized transfer requires a resolved finite normal integral below the degradation pole at $d=1$. [Trace and fit](../../include/aspect/reconstructed_fault/material_fault_trace.h) · [Ray quadrature and normalization](../../source/reconstructed_fault/phase_profile.cc)
-2. At Q8 bulk points, interpolate the trial speed $V=\sum N_jV_j$. The resolved option uses background compression plus dynamic pressure less normal deviatoric stress. The prescribed option evaluates the ASPECT adiabat at the material projection. At fixed incoming age the force balance is tested with $N_i\chi\,dA$. The negative rate derivative contributes $N_iN_j\chi(\kappa\chi + R')\,dA$, with pointwise Maxwell coefficient $\kappa=\eta[1-\exp(-G\Delta t/\eta)]$. Sum the Q1 bands across MPI and solve for all label speeds. Geometry, bulk iterate and projection defect stay fixed during this section Newton solve. [Section sampling, bands and convergence veto](../../source/reconstructed_fault/stokes_coupling.cc) · [Constitutive response contract](../../include/aspect/material_model/rheology/fault_resistance.h)
-3. The kinematic return is $\chi V\,t\otimes n$. The implicit plane-strain deviatoric stress and the material offset form the complete physical stress. The offset includes relaxed memory and $-2\kappa\,\mathrm{sym}(\chi V\,t\otimes n)$. For a boundary-spanning trace, the coupling projects the signed slip stress into cell-local DGQ2 with the same Q8 measure as the section rows. Ordinary Q3 Stokes assembly subtracts the contraction of this load and the relaxed parent stress with the symmetric velocity test gradient. On the supported affine Q2 cells the resulting slip work equals the reverse section work. The physical endpoint retains the pointwise constitutive stress and its existing cut-cell projection at acceptance. For interior mechanics, transport precedes rotation by accepted bulk-minus-slip spin, then relaxation. Picard compares the returned Q8 projected moments with the assembled moments. Accepted DG xx, yy, xy are physical stresses in Pa. [Maxwell coefficient and DG outputs](../../source/material_model/phase_field_fault.cc) · [Weak load](../../source/simulator/assemblers/fault_stress.cc)
+1. A Q1 material label retains its index when it moves. Adjacent labels orient each segment and its slip frame. A straight boundary-spanning seed may be fitted once to the ridge of the initial FE phase. Interior seeds use their prescribed vertices. On initialization or rebinding, the profile integrates $H=m d(1+d)/(1-d)^2$ along the in-box normals and projects the integrals to the labels. The normalized weight $\chi$ has units of inverse length. A finite association width must cover significant weight. Interior checkpoint records store its evolved radius at each vertex. Zero radii designate full in-box normal rays. A restart must use the saved convention. The mature normalized transfer requires a resolved finite normal integral below the degradation pole at $d=1$. [Trace and fit](../../include/aspect/reconstructed_fault/material_fault_trace.h) · [Ray quadrature and normalization](../../source/reconstructed_fault/phase_profile.cc)
+2. At Q8 bulk points, interpolate the trial speed $V=\sum N_jV_j$. The resolved option uses background compression plus dynamic pressure less normal deviatoric stress. The prescribed option evaluates the ASPECT adiabat at the material projection. The signed driving shear is the persistent background shear plus $\varepsilon\,t\cdot\tau n$. At fixed incoming age the force balance is tested with $N_i\chi\,dA$. The negative rate derivative contributes $N_iN_j\chi(\kappa\chi + R')\,dA$, with pointwise Maxwell coefficient $\kappa=\eta[1-\exp(-G\Delta t/\eta)]$. Sum the Q1 bands across MPI and solve for all label speeds. Geometry, bulk iterate and projection defect stay fixed during this section Newton solve. [Section sampling, bands and convergence veto](../../source/reconstructed_fault/stokes_coupling.cc) · [Constitutive response contract](../../include/aspect/material_model/rheology/fault_resistance.h)
+3. The kinematic return is $\chi V\varepsilon\,t\otimes n$. The implicit plane-strain deviatoric stress and the material offset form the complete physical stress. The offset includes relaxed memory and $-2\kappa\,\mathrm{sym}(\chi V\varepsilon\,t\otimes n)$. For a boundary-spanning trace, the coupling projects the signed slip stress into cell-local DGQ2 with the same Q8 measure as the section rows. Ordinary Q3 Stokes assembly subtracts the contraction of this load and the relaxed parent stress with the symmetric velocity test gradient. On the supported affine Q2 cells the resulting slip work equals the reverse section work. The physical endpoint retains the pointwise constitutive stress and its existing cut-cell projection at acceptance. For interior mechanics, transport precedes rotation by accepted bulk-minus-slip spin, then relaxation. Picard compares the returned Q8 projected moments with the assembled moments. Accepted DG xx, yy, xy are physical stresses in Pa. [Maxwell coefficient and DG outputs](../../source/material_model/phase_field_fault.cc) · [Weak load](../../source/simulator/assemblers/fault_stress.cc)
 
 ### From native points to a growing strip
 
@@ -227,7 +279,7 @@ At the midpoint the solver assembles mechanics, continuity, strip borders and th
 | `phase field fault` with `midpoint fault phase` | Use one DGQ2 `phase field` with `midpoint fault phase`, configured AT1 energy and the single-advection / iterated Newton Stokes scheme. Set positive `Material model / Growing fault / Prescribed fault compression` in Pa or select the shared adiabatic profile. Use `Pressure normalization = no`, fully prescribed flux-compatible wall velocity and at most one simple pressure datum. Requires a fixed conforming 2-D Q2/Q1 nonperiodic box, separate velocity and pressure blocks, homogeneous incompressible continuity, zero gravity at native points and elasticity off. Observe only accepted endpoints. The example's static companion compositions are optional storage for the fixture. Point tensors and law state belong to the material. The seed tangent angle is measured counterclockwise from x in degrees. The forward tip is in metres, cohesion in Pa and viscosity in Pa s. |
 | `Discretization / Stabilization parameters / Phase discontinuous penalty` | Dimensionless multiplier in the growing phase's symmetric interior penalty. An empty setting inherits the existing temperature `Discontinuous penalty` (default 10). The discrete fracture ledger includes both the flux and squared-jump terms. Use the independent surface-energy reporter for the volume terms alone. The checkpoint stores the effective phase value. |
 | `Solver parameters / Stokes solver parameters / Stokes solver type` | Mature mechanics uses ASPECT block AMG. For growth, block AMG and block GMG both provide separate velocity and pressure blocks. The midpoint solver gathers the bordered coupled matrix and factors it with UMFPACK on MPI rank zero. The ordinary direct Stokes layout combines velocity and pressure and is rejected. Startup identifies the effective solver. |
-| Retry and restart | A retry reconstructs all trial history from the accepted parent. Boundary-spanning mature runs start fresh with disk checkpoints disabled. Interior and growing runs can restore compatible material checkpoints. The growing reader reconstructs native rules after mesh restoration and checks the mesh, parameters and law before observers run. Composition checkpoints compare the basis per named field. Known legacy nodal discretizations can continue as nodal. An ambiguous pre-metadata 2-D phase needs evidence of the saved selection. [Checkpoint reader](../../source/simulator/checkpoint_restart.cc) · [Basis and lifecycle controls](STATUS.md#increment-6a) |
+| Retry and restart | A retry reconstructs all trial history from the accepted parent. Boundary-spanning and interior mature runs restore accepted geometry and history, and rebuild the derived profile on the restored FE phase. Growing runs can restore compatible native checkpoints. The growing reader reconstructs native rules after mesh restoration and checks the mesh, parameters and law before observers run. Composition checkpoints compare the basis per named field. Known legacy nodal discretizations can continue as nodal. An ambiguous pre-metadata 2-D phase needs evidence of the saved selection. [Checkpoint reader](../../source/simulator/checkpoint_restart.cc) · [Basis and lifecycle controls](STATUS.md#increment-6a) |
 
 The [material parameters](../../doc/sphinx/parameters/Material_20model.md), [composition choices](../../doc/sphinx/parameters/Compositional_20fields.md) and [postprocessor parameters](../../doc/sphinx/parameters/Postprocess.md) list the exact spellings and defaults. The layered rheology, prescribed-rate specimen and linear resistance control are benchmark plugins. RSF is the default on both production routes.
 
@@ -235,8 +287,8 @@ The [material parameters](../../doc/sphinx/parameters/Material_20model.md), [com
 
 | Example | Implemented and exercised | Scientific evidence still required |
 | --- | --- | --- |
-| 1 · Mature dipping fault | The solved 60° fitted AT1 trace has a corrected 38-label history. The layered translating seed exercises transported phase, stress, return work and nonuniform RSF. These small SI boxes qualify transfer and time levels. | Elastic BP3-type 30°, 60° and 90° curves, stations along dip, free-surface intersection and slip-induced normal traction. Compare the lower-crustal rheologies at common 60° loading. |
+| 1 · Mature dipping fault | The solved 60° fitted AT1 trace has a corrected 38-label history. A prescribed right-dipping trace now reproduces both signs of the coupled work and thrust-side motion and continues from its own checkpoint. The layered translating seed exercises transported phase, stress, return work and nonuniform RSF. These small SI boxes qualify transfer and time levels. | Elastic BP3-type 30°, 60° and 90° curves, stations along dip, free-surface intersection and slip-induced normal traction. Compare the lower-crustal rheologies at common 60° loading. |
 | 2 · Single forward front | Two-rank nine-strip native endpoints and coarse/fine 18-strip schedules qualify the implemented stage law. The strict donor comparison retains four angle failures inherited from the first strip-15 turn. | Timestep-converged **physical front advance** at matched clocks. The 5–10 ms coarse/fine windows give added fracture energies of 5.55047/15.04138 µJ/m with no additional strip forming. [Phase increments](results/strip18/phase-increments.png) · [Direction score and off-peak control](results/strip18/peak.json) |
-| 3 · Regional megathrust | The mature path consumes EOS density in ordinary Stokes assembly. Small-box controls cover resolved normal traction, density isolation and adiabatic compression at the current fault position. | An equilibrated gravity column with the fault evaluator, regional temperature and density, pressure/stress reference, then a gravity-loaded transect and station comparison. The growing solver requires zero gravity. |
+| 3 · Regional megathrust | A prescribed curved trace retains its contacts, segment frames, slip sense and history on restart. The mature path consumes EOS density in ordinary Stokes assembly. Small-box controls cover resolved normal traction, density isolation and adiabatic compression at the current fault position. | An equilibrated gravity column with the fault evaluator, regional temperature and density, pressure/stress reference, then a gravity-loaded transect and station comparison. The growing solver requires zero gravity. |
 
 For an installed run, build with `ASPECT_INSTALL_EXAMPLES=ON`, then invoke `bash PREFIX/benchmarks/verify_phase_field_fault.sh NEW_DIRECTORY MPIEXEC` outside the checkout. It uses the installed executable, examples, observers and stationary reference. The checkers use Python with NumPy, Matplotlib and a local two-rank Open MPI launcher. The [working record](STATUS.md#increment-6b) gives the scoped build, independent donor comparison and resource protocol. The [verification guide](VERIFICATION.md) specifies the frozen clocks, units, budgets and expected failures.

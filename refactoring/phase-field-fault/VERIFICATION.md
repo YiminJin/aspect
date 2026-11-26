@@ -2,6 +2,27 @@
 
 The completed `MIDPOINT_UPDATE_CLOSEOUT.md` freezes the implemented midpoint update. The audit found that the irreversible phase equation equilibrates at the stage. Extrapolating that solution to the endpoint leaves further admissible downhill directions for the next solve. A fracture-only calculation reproduced the native second phase increment within 0.014% in spatial L². Preserve this update and its known timestep sensitivity. The proposed endpoint-equilibrated alternative belongs to a separate numerical-method study.
 
+## Mature prescribed geometry, shear sense and boundary restart
+
+Start from branch-owned initial conditions. The [release replay](results/mature-release/README.md)
+uses the public parameter file, its ordered material table and the installed executable.
+The independent normal integrals split each normal at physical cell faces and recover
+the DGQ2 phase from native samples. Check local feet, material arclength, both sides
+of the bend and the overlap convention before interpreting work or velocity. At the
+second interval use the accepted rates and bulk velocity gradients to rotate the old
+stress. Compare the returned shear offset with this independent rotation.
+
+At fixed bulk iterate and parent, pair an actual unconstrained Stokes cell vector with
+a virtual shear and compare it to the reverse section action using the same Q8
+measure. Switch only the sense and repeat after remapping the IDs. At 25 ms
+sample the solved velocities on both sides and compare their signed difference for
+the two senses. Rebuild a boundary checkpoint from its own 12.5 ms parent on one
+and two ranks. Compare accepted ID records and (CellId,q) stresses, the clock and
+the physical virtual work. Require exact serial continuation and retry. Keep the
+original field budgets across layouts and explicitly demonstrate that the straight
+seed moved during its initial fit. The [checkpoint oracle](results/mature-release/restart-checks.md)
+also reads fresh legacy RSF and state-free interior records.
+
 ## 18-strip midpoint timestep comparison
 
 Use the repaired 5A point and strip budgets before comparing schedules. Keys are (CellId, native quadrature index), (CellId, component, local FE index) and the material strip index. Require exact identities, membership, active sets, admissions and publication counts. The physical clocks use 1e−15 s absolute. Geometry and native areas use 1e−14 absolute. Use absolute floors of 1e−9 for phase, 1e−6 Pa for physical stress, pressure and resistance, 1e−10 for strain and shear inventories, 1e−11 for speed (m/s), slip and arclength (m), and age (s), and 1e−7 rad for angles, plus 1e−7 relative for physical fields. The velocity coefficient floor is 1e−10 m/s on the 0.02 m/s loading scale. The phase stage gates remain 1e−9 for mechanics and 1e−7 for projected phase. Compare the physical phase row residual in J/m with 1e−8 absolute (the 1e−7 projected gate times the physical row scale Kf·mass is 6.94e−9 J/m on these cells), plus 1e−7 relative. Scale the whole-window and individual interval reductions by 1e−5 relative with the archived floors of 1e−12 m² for signed slip, 1e−10 m for phase L², and 1e−11 J/m for incremental fracture, work and compliance. Compare ledger terms at 1e−11 J/m plus 1e−6 relative. Keep residual work distinct from the compliance remainder.

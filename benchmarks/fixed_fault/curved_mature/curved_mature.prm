@@ -1,0 +1,35 @@
+# Five material stations on a prescribed, right-dipping fault in a 1 m box.
+# The inherited small Maxwell/RSF example uses seconds, Pa and positive speed.
+include $ASPECT_SOURCE_DIR/benchmarks/fixed_fault/fixed_fault.prm
+set Output directory = output-curved-mature
+
+subsection Material model
+  subsection Phase field fault
+    set Fault geometry = boundary spanning
+    set Fault vertex file = $ASPECT_SOURCE_DIR/benchmarks/fixed_fault/curved_mature/vertices.txt
+    set Fit trace to phase = false
+    # The positive-normal side moves up dip relative to the negative-normal side.
+    set Mature slip sense = opposite tangent
+    set Profile half width = 0
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 4
+end
+subsection Initial composition model
+  subsection Function
+    # A smooth vertical phase profile about the piecewise linear trace. The
+    # four slopes change at x = 0.25, 0.50 and 0.75 m. Peak phase is 0.35.
+    set Function constants = width=0.15
+    set Function expression = 0; 0; 0; 0.03+0.32*exp(-((y-(0.82-0.2*x-0.12*max(0,x-0.25)-0.64*max(0,x-0.50)-0.28*max(0,x-0.75)))/width)^2)
+  end
+end
+subsection Boundary traction model
+  subsection Function
+    # Persistent shear in the vertex table drives slip. The wall load is zero.
+    set Function expression = 0; 0
+  end
+end
+subsection Postprocess
+  set List of postprocessors = mature fault statistics, velocity statistics, visualization
+end
