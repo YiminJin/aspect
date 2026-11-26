@@ -77,11 +77,13 @@ def read_output(output,ranks,dim=2):
 
 
 def field_data(data,step,field):
+    """Return physical boxes, native basis coefficients and owners in geometric order."""
     records=sorted((row for (cell,f),row in data[step][1].items() if f==field),key=lambda r:r[0])
     return [r[0] for r in records],np.array([r[2] for r in records]),[r[3] for r in records]
 
 
 def compare(a,b,tolerance):
+    """Compare accepted coefficients by clock, CellId and field, across owner layouts."""
     require(a.keys()==b.keys(),'different publication counts')
     worst=0.
     for k,(clock,rows) in a.items():
@@ -116,39 +118,46 @@ def constant_velocity(u,v):
 
 
 def oracle(data,field,initial,velocity,divergence,exterior,bounded,*,expected_ranks):
-    boxes,stored,ranks=field_data(data,0,field)
-    require(set(ranks)==set(range(expected_ranks)),f'{field}: missing expected cell owner')
-    ref=Reference(boxes,velocity,divergence,exterior,bounded)
-    vals=np.array([initial(a+(c-a)*nodes_x,b+(d-b)*nodes_y,0.) for a,b,c,d in boxes])
-    for (cell,name),(_,fe,_,_) in data[0][1].items():
-        if name==field:
-            require(('Bernstein' in fe)==bounded,'wrong native basis')
-    original_mass=np.dot(ref.areas,vals@mean_weights)
-    ref.filter(vals)
-    cross=sum(ranks[i]!=ranks[j] and np.any(matrix@vals[j]) for i,j,matrix in ref.upstream)
-    if expected_ranks>1:
-        require(cross>0,'missing active upwind partition face')
-    entry_scales=ref.limited
-    worst=0.
-    for step,(clock,_) in sorted(data.items()):
-        t,dt=clock
+    boxes, _, owners = field_data(data, 0, field)
+    require(set(owners) == set(range(expected_ranks)), f'{field}: missing expected cell owner')
+    reference = Reference(boxes, velocity, divergence, exterior, bounded)
+    expected = np.array([initial(x0 + (x1-x0)*nodes_x, y0 + (y1-y0)*nodes_y, 0.)
+                         for x0,y0,x1,y1 in boxes])
+    for (_, name), (_, fe, _, _) in data[0][1].items():
+        if name == field:
+            require(('Bernstein' in fe) == bounded, 'wrong native basis')
+
+    original_mass = np.dot(reference.areas, expected @ mean_weights)
+    reference.filter(expected)
+    # Count incoming neighbor contributions with nonzero action on the initial
+    # field. An empty output from a second rank cannot qualify a partition face.
+    partition_faces = sum(owners[i] != owners[j] and np.any(matrix @ expected[j])
+                          for i,j,matrix in reference.upstream)
+    if expected_ranks > 1:
+        require(partition_faces > 0, 'missing active upwind partition face')
+    entry_scales = reference.limited
+    worst = 0.
+    for step, (clock, _) in sorted(data.items()):
+        time, dt = clock
         if step:
-            vals,_=ref.advance(vals,t-dt,dt)
+            expected, _ = reference.advance(expected, time-dt, dt)
         else:
-            require(clock==(0.,0.),'initialization has a positive physical interval')
-        boxes2,stored,owners=field_data(data,step,field)
-        require(boxes2==boxes and owners==ranks,'changed mesh or ownership')
-        observed=stored@to_values.T if bounded else stored
-        error=np.max(abs(observed-vals))
-        require(error<3.e-11,f'{field} step {step}: production/strong-form defect {error}')
-        worst=max(worst,error)
-        mass_delta=np.dot(ref.areas,observed@mean_weights)-original_mass
-        require(abs(mass_delta-ref.balance)<1.e-12,'stage-weighted material balance failed')
+            require(clock == (0.,0.), 'initialization has a positive physical interval')
+        current_boxes, coefficients, current_owners = field_data(data, step, field)
+        require(current_boxes == boxes and current_owners == owners, 'changed mesh or ownership')
+        # The strong-form reference advances values at the nine Lobatto nodes.
+        # Convert Bernstein coefficients before comparing pointwise or integrating.
+        observed = coefficients @ to_values.T if bounded else coefficients
+        error = np.max(abs(observed - expected))
+        require(error < 3.e-11, f'{field} step {step}: production/strong-form defect {error}')
+        worst = max(worst, error)
+        mass_delta = np.dot(reference.areas, observed @ mean_weights) - original_mass
+        require(abs(mass_delta - reference.balance) < 1.e-12, 'stage-weighted material balance failed')
     print(f'{field}: {len(boxes)} cells, {len(data)-1} intervals, max nodal defect {worst:.3g}, '
-          f'entry/stage scales {entry_scales}/{ref.limited-entry_scales}, partition faces {cross}, '
-          f'source {ref.integrated_source:.9g}, outward flux {ref.integrated_flux:.9g}, '
-          f'balance defect {mass_delta-ref.balance:.3g}',flush=True)
-    return ref.limited-entry_scales
+          f'entry/stage scales {entry_scales}/{reference.limited-entry_scales}, partition faces {partition_faces}, '
+          f'source {reference.integrated_source:.9g}, outward flux {reference.integrated_flux:.9g}, '
+          f'balance defect {mass_delta-reference.balance:.3g}',flush=True)
+    return reference.limited-entry_scales
 
 
 def composition_block_counts(log, frames):

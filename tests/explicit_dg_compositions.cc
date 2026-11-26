@@ -37,8 +37,14 @@ namespace aspect
                     const auto &base=system.base_element(intro.base_elements.compositional_fields[c]);
                     file << cell->id() << ' ' << intro.name_for_compositional_index(c) << ' ' << base.get_name() << ' '
                          << cell->vertex(0) << ' ' << cell->vertex(GeometryInfo<dim>::vertices_per_cell-1);
+                    // Preserve the base element's local order. For a Bernstein
+                    // field these are coefficients, not pointwise samples.
+                    const auto component = intro.component_indices.compositional_fields[c];
                     for (unsigned int i=0; i<base.n_dofs_per_cell(); ++i)
-                      file << ' ' << this->get_solution()[indices[system.component_to_system_index(intro.component_indices.compositional_fields[c],i)]];
+                      {
+                        const auto local = system.component_to_system_index(component,i);
+                        file << ' ' << this->get_solution()[indices[local]];
+                      }
                     file << '\n';
                   }
               }

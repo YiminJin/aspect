@@ -72,11 +72,18 @@ namespace aspect
           double work = 0.;
           for (unsigned int i=0; i<data.local_rhs.size(); ++i)
             {
-              const auto index = this->introspection().stokes_dof_info[i].local_dof_index;
-              if (this->get_fe().system_to_component_index(index).first == this->introspection().component_indices.velocities[0])
-                work += isolated.local_rhs[i]*this->get_mapping().transform_unit_to_real_cell(scratch.cell,this->get_fe().unit_support_point(index))[0];
+              const auto system_index = this->introspection().stokes_dof_info[i].local_dof_index;
+              const auto component = this->get_fe().system_to_component_index(system_index).first;
+              if (component == this->introspection().component_indices.velocities[0])
+                {
+                  const auto &unit_point = this->get_fe().unit_support_point(system_index);
+                  const auto point = this->get_mapping().transform_unit_to_real_cell(scratch.cell, unit_point);
+                  work += isolated.local_rhs[i] * point[0];
+                }
             }
           const double dt = this->get_timestep();
+          // The test has unit xx strain. Integrate minus the relaxed xx
+          // stress over the receiving half-cell (area 0.5 m²).
           const double exact = -.5*std::exp(-dt)*first_parent(.75,dt)[0][0];
           std::ofstream out(this->get_output_directory()+"load-"+std::to_string(dt));
           out << std::setprecision(17) << work << ' ' << exact << ' ' << exact-.5*std::exp(-dt)*.3*8.*dt << '\n';

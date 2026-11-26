@@ -75,14 +75,17 @@ def columns(parent, boxes, inflow, h, *, velocity=lambda z: 1., transpose=False,
         incoming = inflow(X[0], Y[0], time)
         for k, (values, box) in enumerate(zip(state, boxes)):
             z0, z1 = box[2], box[5]
-            a, b, c = values
-            grad = np.stack((-3*a + 4*b - c, c - a, a - 4*b + 3*c))
+            bottom, middle, top = values
+            # Reference-coordinate P2 derivative on each of the three z planes.
+            grad = np.stack((-3*bottom + 4*middle - top, top - bottom,
+                             bottom - 4*middle + 3*top))
             speed = velocity(z0 + Z * (z1-z0))
-            jump = velocity(z0) * (incoming - a)
+            jump = velocity(z0) * (incoming - bottom)
             action[k] = (-speed * grad + np.array([9., -1.5, 3.])[:, None, None]*jump) / (z1-z0)
-            incoming = c.T if transpose else c
+            # The deliberately transposed upstream trace exchanges x and y.
+            incoming = top.T if transpose else top
             if k == 0 and len(boxes) == 2:
-                transfers.append(float(velocity(z1) * (SIMPSON @ c @ SIMPSON)))
+                transfers.append(float(velocity(z1) * (SIMPSON @ top @ SIMPSON)))
         return action
 
     state = parent

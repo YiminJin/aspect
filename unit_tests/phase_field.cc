@@ -5,6 +5,7 @@
 #include "common.h"
 #include <aspect/phase_field/crack_geometry.h>
 #include <aspect/phase_field/degradation.h>
+#include <aspect/phase_field/midpoint_fracture.h>
 #include <deal.II/base/quadrature_lib.h>
 
 TEST_CASE("Mature energetic degradation uses the physical phase limits")
@@ -64,12 +65,15 @@ TEST_CASE("Crack geometry selection, variations and surface normalization")
     }
 }
 
-#include <aspect/phase_field/midpoint_fracture.h>
-
 TEST_CASE("Midpoint inequality rows respect the signed stage obstacle")
 {
   using aspect::PhaseField::projected_gradient;
-  const double lo=-.008, hi=.5*(1.+lo), mass=.03;
+  // A physical endpoint in [parent,1] gives a midpoint coefficient
+  // in [parent,(1+parent)/2]; an admissible Bernstein parent can have
+  // a negative coefficient.
+  const double lo = -.008;
+  const double hi = .5*(1.+lo);
+  const double mass = .03;
   REQUIRE(projected_gradient(lo,2.,mass,lo,hi)==0.);
   REQUIRE(projected_gradient(hi,-2.,mass,lo,hi)==0.);
   REQUIRE(projected_gradient(.2,0.,mass,lo,hi)==0.);
