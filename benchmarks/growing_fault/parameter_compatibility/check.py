@@ -1,7 +1,7 @@
 """Run through installed ASPECT with a separately built resistance-law plugin."""
 import argparse
 import csv
-from math import isclose
+from math import expm1, isclose
 import os
 from pathlib import Path
 import re
@@ -10,6 +10,81 @@ import subprocess
 
 def material(subsection, entries):
     return f"\nsubsection Material model\n  subsection {subsection}\n{entries}\n  end\nend\n"
+
+
+def check_material_properties(growing, run):
+    """Use different EOS properties from native strip mechanics, even at zero gravity."""
+    curved = growing.parent/"fixed_fault/curved_mature/curved_mature.prm"
+    thermal = material("Simple model", """set Reference density = 12
+set Reference temperature = 300
+set Reference specific heat = 127
+set Thermal conductivity = 2.7
+set Thermal expansion coefficient = .001""")
+    for name, deck, trace in (("public-trace", curved, True),
+                              ("public-seed", growing/"growing_seed.prm", False),
+                              ("historical-strips", growing/"onecut.prm", False)):
+        dt = .0125 if trace else .005
+        inputs = (f"include {deck}\nset End time = {dt}\n" + thermal +
+                  "\nsubsection Postprocess\n set List of postprocessors = fault material properties\nend\n")
+        output = run("properties-"+name, inputs, plugin=True)
+        log = (output.parent/"log").read_text()
+        frames = re.findall(r"^\s*Fault material sample\s+(.*)$", log, flags=re.MULTILINE)
+        if len(frames) != 2:
+            raise ValueError(f"{name}: expected initialization and one accepted physical step")
+        for step, frame in enumerate(frames):
+            counter, *values = frame.split()
+            if int(counter) != step:
+                raise ValueError(f"{name}: unexpected step {counter}")
+            expected = ((12*(1-.001*(320-300)), 127., 2.7, .001,
+                         -10*expm1(-(.1 if step == 0 else dt)), 2)
+                        if trace else (1., 1., 0., 0., 1e8, 1))
+            if any(not isclose(float(x), y, rel_tol=1e-12, abs_tol=0.)
+                   for x, y in zip(values[:6], expected, strict=True)):
+                raise ValueError(f"{name}, step {step}: got {values[:6]}, expected {expected}")
+            named = {key: float(value) for key, value in (record.split("=") for record in values[6:])}
+            stresses = {"fault_tau_xx": .1, "fault_tau_yy": .2, "fault_tau_xy": .3} if trace else {}
+            if named.keys() != stresses.keys() or any(not isclose(named[k], v, rel_tol=1e-12)
+                                                      for k, v in stresses.items()):
+                raise ValueError(f"{name}, step {step}: wrong named material outputs {named}")
+        print(name, "exact PhaseFieldFault type; density, Cp, k, alpha, viscosity, density dependence at step 1:",
+              frames[-1].split()[1:7])
+
+
+def check_formulation_admission(growing, run):
+    seed = f'include {growing/"growing_seed.prm"}\n'
+    trace = f'include {growing.parent/"fixed_fault/fixed_fault.prm"}\n'
+    midpoint = "midpoint fault phase"
+    two_fields = """\nsubsection Compositional fields
+set Number of fields = 2
+set Names of fields = phase_field, companion
+set Types of fields = phase field, phase field
+set Compositional field methods = {methods}
+end\n"""
+    run("wrong-material", seed+"subsection Material model\nset Model name = simple\nend\n",
+        error=("Midpoint fault phase requires a material providing the Maxwell/AT1 midpoint response",))
+    run("wrong-phase", seed+two_fields.format(methods=f"static, {midpoint}"),
+        error=("Growing fault requires a top-level midpoint material and a midpoint fault phase",))
+    run("second-midpoint", seed+two_fields.format(methods=f"{midpoint}, {midpoint}"),
+        error=("Growing fault requires a single midpoint fault phase",))
+    run("wrong-scheme", seed+"set Nonlinear solver scheme = single Advection, iterated Stokes\n",
+        error=("Growing fault requires a single midpoint fault phase",))
+    run("three-dimensional", seed+"set Dimension = 3\n",
+        error=("Midpoint fault phase requires a 2-D DGQ2 phase field",))
+    run("historical-without-midpoint", seed+"subsection Material model\nset Model name = growing fault\nend\n"
+        "subsection Compositional fields\nset Compositional field methods = static\nend\n",
+        error=("Growing fault requires a top-level midpoint material and a midpoint fault phase",))
+    run("trace-wrapper", trace+"""subsection Material model
+set Model name = depth dependent
+subsection Depth dependent model
+  set Base model = phase field fault
+  set Reference viscosity = 10
+  set Depth dependence method = Function
+  subsection Viscosity depth function
+    set Function expression = 20
+  end
+end
+end
+""", error=("Phase field fault must be the top-level material model",))
 
 
 def main():
@@ -35,7 +110,8 @@ def main():
         with (case/"log").open("w") as stream:
             p = subprocess.run([args.aspect, "input.prm"], cwd=case, stdout=stream,
                                stderr=subprocess.STDOUT, timeout=120,
-                               env=os.environ | dict(OMP_NUM_THREADS="1", DEAL_II_NUM_THREADS="1",
+                               env=os.environ | dict(ASPECT_SOURCE_DIR=str(growing.parents[1]),
+                                                     OMP_NUM_THREADS="1", DEAL_II_NUM_THREADS="1",
                                                      OPENBLAS_NUM_THREADS="1"))
         if error:
             message = " ".join((case/"log").read_text().split())
@@ -45,6 +121,9 @@ def main():
         else:
             p.check_returncode()
         return case/"output"
+
+    check_material_properties(growing, run)
+    check_formulation_admission(growing, run)
 
     def check_stress(name, settings, eta, reference, modulus=1e6):
         output = run(name, base+settings)

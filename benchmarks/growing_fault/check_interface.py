@@ -164,6 +164,13 @@ def main():
     explicit=run('dashpot-strip',example,fault('set Resistance law = linear dashpot'),inputs,plugin=True)
     if (alias/'sections-0001.csv').read_bytes()!=(explicit/'sections-0001.csv').read_bytes():
         raise ValueError('Legacy dashpot strip selector changed the law')
+    run('strip-selector-on-trace', homogeneous,
+        subsection('Material model', 'set Model name = linear strip resistance'),
+        expected='Additional information: The linear strip resistance selector requires midpoint strip mechanics.', plugin=True)
+    run('trace-selector-on-strips', example,
+        subsection('Material model', 'set Model name = linear trace resistance')
+        + fault('set Resistance law = linear dashpot'), inputs,
+        expected='Additional information: The linear trace resistance selector requires mature trace mechanics.', plugin=True)
     def check_dashpot(output, impedance):
         strips=rows([output/'sections-0001.csv'],('section',))
         for row in strips.values():
@@ -211,6 +218,13 @@ def main():
     run('growth-to-mature',mature,checkpoint=grow_parent,expected='Cannot resume a growing fault checkpoint')
     trace_parent=run('mature-parent',mature,'\nset End time = .005\n'+save)
     run('mature-to-growth',parent,checkpoint=trace_parent,expected='no native growing fault history')
+    # Change only the law while restoring each RSF parent. The strip reader
+    # checks the law's physical parameter signature before its archived name.
+    dashpot=fault('set Resistance law = linear dashpot')
+    run('growth-changed-law',parent,dashpot,plugin=True,checkpoint=grow_parent,
+        expected='Growing fault physical parameters differ from the checkpoint.')
+    run('trace-changed-law',mature,dashpot,plugin=True,checkpoint=trace_parent,
+        expected='Mature fault resistance law differs from the checkpoint')
 
 
 if __name__=='__main__':

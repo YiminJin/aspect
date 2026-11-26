@@ -46,6 +46,8 @@ namespace aspect::MaterialModel::Rheology
       prm.enter_subsection("Material model");
       prm.enter_subsection(route == FaultResistance::Route::mature ? "Phase field fault" : "Growing fault");
 
+      AssertThrow(!prm.subsection_path_exists({"Nested law"}),
+                  ExcMessage("Duplicate external resistance-law declaration in the same material subsection."));
       prm.declare_entry("Dashpot impedance (Pa.s/m)", "1000", Patterns::Double(0.),
                         "Impedance multiplying the mean weight, in Pa s/m.");
       prm.enter_subsection("Nested law");
