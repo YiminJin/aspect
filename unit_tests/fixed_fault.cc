@@ -54,6 +54,58 @@ TEST_CASE("Finite normal association on an inclined stationary trace")
   CHECK_FALSE(fault.project(Point<2>(-.4,.3)).active);
 }
 
+TEST_CASE("Prescribed curved fault uses material order and local segment normals")
+{
+  using dealii::Point;
+  aspect::MaterialFaultTrace<2> fault;
+  const std::vector<Point<2>> vertices = {{0.,.25}, {.625,.25}, {.375,.75}, {1.,.75}};
+  fault.initialize(Point<2>(), Point<2>(1.,1.), vertices, .01, .1);
+  for (unsigned int j=0; j<vertices.size(); ++j)
+    CHECK(fault.labels()[j].position == vertices[j]);
+
+  // The middle segment is perpendicular to the endpoint chord. Moving
+  // away from it along its normal puts the probe exactly on that chord.
+  const double root_five = std::sqrt(5.);
+  const auto &middle = fault.segment(1);
+  CHECK(middle.station == Approx(.625));
+  CHECK(middle.length == Approx(root_five/4.));
+  CHECK(middle.normal[0] == Approx(-2./root_five));
+  CHECK(middle.normal[1] == Approx(-1./root_five));
+  CHECK(fault.segment(2).station == Approx(.625+root_five/4.));
+  const Point<2> on_chord(.5+2./(16.*root_five), .5+1./(16.*root_five));
+  const auto foot = fault.project(on_chord);
+  REQUIRE(foot.active);
+  CHECK(foot.first_vertex == 1);
+  CHECK(foot.xi == Approx(.5));
+  CHECK((on_chord-vertices[1])*middle.normal == Approx(-1./16.));
+
+  const auto contact_foot = fault.project(Point<2>(0.,.29));
+  REQUIRE(contact_foot.active);
+  CHECK(contact_foot.first_vertex == 0);
+  CHECK(contact_foot.xi == 0.);
+  CHECK(fault.project(vertices[1]).first_vertex == 0);
+  // Inside overlapping normal supports the closest perpendicular wins.
+  const auto overlap_foot = fault.project(Point<2>(.6,.27));
+  REQUIRE(overlap_foot.active);
+  CHECK(overlap_foot.first_vertex == 1);
+  // On the outer side of this bend neither incident segment admits the
+  // point. Proximity to the vertex alone does not give it a slip load.
+  CHECK_FALSE(fault.project(Point<2>(.65,.24)).active);
+}
+
+TEST_CASE("Prescribed mature fault rejects invalid initial topology and coordinates")
+{
+  using dealii::Point;
+  aspect::MaterialFaultTrace<2> fault;
+  const Point<2> origin, extent(1.,1.);
+  REQUIRE_THROWS(fault.initialize(origin, extent, {{0.,.2}, {.8,.8}, {.2,.8}, {1.,.2}}, .01));
+  REQUIRE_THROWS(fault.initialize(origin, extent, {{0.,.2}, {.5,.5}, {.5,.5}, {1.,.8}}, .01));
+  REQUIRE_THROWS(fault.initialize(origin, extent, {{0.,.2}, {.5,1.1}, {1.,.8}}, .01));
+  REQUIRE_THROWS(fault.initialize(origin, extent, {{0.,.2}, {.5,std::numeric_limits<double>::quiet_NaN()}, {1.,.8}}, .01));
+  // The first incident edge runs along the wall at a noncorner endpoint.
+  REQUIRE_THROWS(fault.initialize(origin, extent, {{0.,.2}, {0.,.6}, {1.,.8}}, .01));
+}
+
 TEST_CASE("Fault strip cuts a cell whose four corners name the same segment")
 {
   using dealii::Point;

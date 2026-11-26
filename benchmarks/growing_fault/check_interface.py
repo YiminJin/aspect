@@ -123,12 +123,18 @@ def main():
         file=root/(name+'.txt')
         file.write_text(content)
         return run(name,common,fault(f'set Fault vertex file = {file}')+settings,[fixed/'fixed_fault.prm'],error,plugin=plugin)
+    bent_table = data.replace('1 0.5 0.5', '1 0.7 0.5')
+    prescribed = vertex_case('prescribed-bend', bent_table, fault('set Fit trace to phase = false'))
+    for step in range(3):
+        positions = np.loadtxt(prescribed/f'fault-labels-{step:05}.txt')[:, :3]
+        np.testing.assert_array_equal(positions, [[0, .5, 0.], [1, .7, .5], [2, .5, 1.]])
     for name,text,setting,message in [
         ('donor-format','0.0 0.0 0.35\n','', 'anonymous donor core-phase triples'),
         ('out-of-order',data.replace('1 0.5 0.5','2 0.5 0.5'),'','consecutive material IDs'),
         ('duplicate-column',data.replace('background_shear_Pa','initial_age_s'),'','duplicate vertex column'),
         ('nonfinite',data.replace('11 3.80','11 nan'),'','Invalid vertex value'),
-        ('nonstraight',data.replace('1 0.5 0.5','1 0.7 0.5'),'','straight and strictly ordered'),
+        ('fit-bent-seed',bent_table,fault('set Fit trace to phase = true'),
+         'Set Fit trace to phase = false to use a prescribed curved trace'),
         ('duplicate-vertices',data,fault('set Fault vertices = 0,0; 0,1'),'Choose Fault vertex file'),
         ('duplicate-age',data,fault('set Initial label ages = 1,2,3'),'Duplicate inline and file source'),
         ('age-on-dashpot',data,fault('set Resistance law = linear dashpot'),'does not accept initial ages'),

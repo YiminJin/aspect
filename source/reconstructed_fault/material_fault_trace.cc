@@ -8,60 +8,67 @@
 
 namespace aspect
 {
-  template <int dim>
-  void MaterialFaultTrace<dim>::initialize(const Point<dim> &origin,
-                                           const Point<dim> &extent,
-                                           const std::vector<Point<dim>> &vertices,
-                                           const double rate,
-                                           const double support,
-                                           const bool interior)
+  namespace
   {
-    AssertThrow(dim == 2 && vertices.size() >= 2, ExcMessage("A material fault trace requires at least two ordered vertices in 2-D."));
-    const auto direction = vertices.back()-vertices.front();
-    const unsigned int axis = std::abs(direction[0]) > std::abs(direction[1]) ? 0 : 1;
-    const double length = direction.norm();
     // A face entered as a decimal may round differently from origin + extent.
-    const auto face_tolerance = [&](const unsigned int d)
+    double box_coordinate_tolerance(const double origin, const double extent)
     {
-      return 4.*std::numeric_limits<double>::epsilon() *
-             std::max({std::abs(origin[d]), std::abs(origin[d]+extent[d]), extent[d]});
-    };
-    AssertThrow(length > 0. && support > 0., ExcMessage("Degenerate fault seed or normal support."));
+      return 4. * std::numeric_limits<double>::epsilon() *
+             std::max({std::abs(origin), std::abs(origin+extent), extent});
+    }
+  }
+
+  template <int dim>
+  void MaterialFaultTrace<dim>::initialize(const Point<dim>              &origin,
+                                           const Point<dim>              &extent,
+                                           const std::vector<Point<dim>> &vertices,
+                                           const double                   rate,
+                                           const double                   support,
+                                           const bool                     interior)
+  {
+    AssertThrow(dim == 2 && vertices.size() >= 2,
+                ExcMessage("A material fault trace requires at least two ordered vertices in 2-D."));
+    AssertThrow(std::isfinite(support) && support > 0., ExcMessage("Invalid fault normal support."));
+
+    initial_half_width = support;
+    material_labels.clear();
+    for (const Point<dim> &vertex : vertices)
+      {
+        for (unsigned int d=0; d<dim; ++d)
+          {
+            AssertThrow(std::isfinite(vertex[d]), ExcMessage("A fault vertex has a nonfinite coordinate."));
+            const double upper = origin[d]+extent[d];
+            const double tolerance = box_coordinate_tolerance(origin[d], extent[d]);
+            AssertThrow(interior ? (vertex[d] > origin[d] && vertex[d] < upper) :
+                        (vertex[d] >= origin[d]-tolerance && vertex[d] <= upper+tolerance),
+                        ExcMessage("A seed vertex is outside its supported box region."));
+          }
+        material_labels.push_back({vertex, 0., rate, support == std::numeric_limits<double>::max() ? 0. : support});
+      }
+    rebuild_segments();
+
     if (!interior)
       for (unsigned int contact=0; contact<2; ++contact)
         {
-          const auto &vertex = contact == 1 ? vertices.back() : vertices.front();
+          const auto &vertex = contact == 0 ? vertices.front() : vertices.back();
+          const auto outward = contact == 0 ? -segments.front().tangent : segments.back().tangent;
           contact_face_axes[contact] = dim;
-          double best = 0.;
+          double largest_normal_component = 0.;
           for (unsigned int d=0; d<dim; ++d)
             {
-              const double outward = contact == 1 ? direction[d] : -direction[d];
-              const double face = origin[d] + (outward > 0. ? extent[d] : 0.);
-              if (std::abs(vertex[d]-face) <= face_tolerance(d) && std::abs(outward) > best)
+              // At a corner choose the face crossed most transversely by the
+              // incident edge. Equal components select the lower axis index.
+              const double face = origin[d] + (outward[d] > 0. ? extent[d] : 0.);
+              if (std::abs(vertex[d]-face) <= box_coordinate_tolerance(origin[d], extent[d]) &&
+                  std::abs(outward[d]) > largest_normal_component)
                 {
                   contact_face_axes[contact] = d;
-                  best = std::abs(outward);
+                  largest_normal_component = std::abs(outward[d]);
                 }
             }
-          AssertThrow(contact_face_axes[contact] < dim,ExcMessage("The boundary-spanning seed requires contacts on two box faces."));
+          AssertThrow(contact_face_axes[contact] < dim,
+                      ExcMessage("The boundary-spanning seed requires contacts on two box faces."));
         }
-    seed_tangent = direction/length;
-    seed_normal[0] = -seed_tangent[1];
-    seed_normal[1] = seed_tangent[0];
-    initial_half_width = support;
-    material_labels.clear();
-    for (const auto &vertex : vertices)
-      {
-        for (unsigned int d=0; d<dim; ++d)
-          AssertThrow(interior ? (vertex[d]>origin[d] && vertex[d]<origin[d]+extent[d]) :
-                      (vertex[d] >= origin[d]-face_tolerance(d) && vertex[d] <= origin[d]+extent[d]+face_tolerance(d)),
-                      ExcMessage("A seed vertex is outside its supported box region."));
-        AssertThrow(std::abs((vertex-vertices.front())*seed_normal) <= face_tolerance(axis) &&
-                    (material_labels.empty() || (vertex-material_labels.back().position)*seed_tangent > 0.),
-                    ExcMessage("Initial material vertices must be straight and strictly ordered."));
-        material_labels.push_back({vertex,0.,rate,support==std::numeric_limits<double>::max() ? 0. : support});
-      }
-    rebuild_segments();
   }
 
   template <int dim>
@@ -263,12 +270,27 @@ namespace aspect
                                                                           const unsigned int phase_field,
                                                                           const LinearAlgebra::BlockVector &fields)
   {
+    // This fit estimates offsets in a single seed frame. A prescribed
+    // polyline instead keeps its segment frames throughout initialization.
+    const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(sim.get_geometry_model());
+    const auto upper = box.get_origin()+box.get_extents();
+    const auto chord = material_labels.back().position-material_labels.front().position;
+    const auto seed_tangent = chord/chord.norm();
+    Tensor<1,dim> seed_normal;
+    seed_normal[0] = -seed_tangent[1];
+    seed_normal[1] = seed_tangent[0];
+    const unsigned int axis = std::abs(chord[0]) > std::abs(chord[1]) ? 0 : 1;
+    const double tolerance = box_coordinate_tolerance(box.get_origin()[axis], box.get_extents()[axis]);
+    for (unsigned int j=1; j<material_labels.size(); ++j)
+      AssertThrow(std::abs((material_labels[j].position-material_labels.front().position)*seed_normal) <= tolerance &&
+                  (material_labels[j].position-material_labels[j-1].position)*seed_tangent > 0.,
+                  ExcMessage("Fitting to the phase ridge requires a straight, strictly ordered seed. "
+                             "Set Fit trace to phase = false to use a prescribed curved trace."));
+
     const unsigned int n = material_labels.size();
     const QGauss<dim> rule(sim.get_fe().degree+1);
     FEValues<dim> fe(sim.get_mapping(),sim.get_fe(),rule,update_values|update_JxW_values|update_quadrature_points);
     std::vector<double> phase(rule.size()), matrix(n*n), rhs(n);
-    const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(sim.get_geometry_model());
-    const auto upper=box.get_origin()+box.get_extents();
     double total_weight = 0., cell_margin = 0., ridge_radius=0.;
     // Each bulk observation contributes JxW max(phase-0.1,0) to the Q1
     // least-squares fit of the signed normal displacement from the seed.

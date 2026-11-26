@@ -20,9 +20,10 @@ namespace aspect
    * support is the interval of offsets admitted for the bulk/section transfer.
    *
    * A boundary contact is the endpoint where a boundary-spanning seed meets
-   * a box face. At initialization its vertices can be fitted to the phase
-   * ridge, the band of elevated values in the bulk finite-element phase field
-   * that locates the diffuse fault. A prescribed interior seed has two
+   * a box face. A prescribed polyline retains the input vertices. A straight
+   * boundary-spanning seed can instead be fitted to the phase ridge, the
+   * band of elevated FE phase values that locates the diffuse fault.
+   * A prescribed interior seed has two
    * material endpoints inside the box. It can remain fixed or move with the
    * accepted bulk velocity.
    *
@@ -66,11 +67,13 @@ namespace aspect
       };
 
       /**
-       * Initialize a straight, ordered seed with uniform rate (m/s)
+       * Initialize a simple open polyline in vertex order with uniform rate (m/s)
        * and zero accumulated slip. A finite support is the initial normal
        * radius in metres. The default admits the full in-box cross-section.
        * Interior vertices must all lie strictly inside the box. Otherwise the
-       * first and last vertices specify the two boundary contacts. Local;
+       * first and last vertices specify the two boundary contacts. At a box
+       * corner the incident edge selects the face that it crosses most
+       * transversely, with ties resolved by increasing axis index. Local;
        * all ranks supply the same inputs before the first solve.
        */
       void initialize(const Point<dim> &origin,
@@ -81,7 +84,7 @@ namespace aspect
                       bool interior = false);
 
       /**
-       * Fit the boundary-spanning seed to the initialized FE phase ridge
+       * Fit a straight boundary-spanning seed to the initialized FE phase ridge
        * before its first Stokes assembly. Set the contacts to the phase maxima
        * on their seed faces and displace the interior vertices along the seed
        * normal. Constant phase retains the seed. Collective on the simulator
@@ -153,7 +156,6 @@ namespace aspect
       std::array<unsigned int,2> contact_face_axes; ///< Box face axes at the first and last contacts.
       double initial_half_width;
       std::vector<double> arclength;
-      Tensor<1,dim> seed_tangent, seed_normal;
   };
 }
 #endif
