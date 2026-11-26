@@ -80,15 +80,15 @@ remain a separate design and verification task.
 
 ## Replay
 
-From the checkout root use the installed executable, examples and matching
-observer DSOs from the [release replay](README.md). Each run starts in a new
+From the checkout root use `D` from the [current Release build recipe](README.md#reproduce-the-runs)
+for the installed executable, examples and matching observer DSOs. Each run starts in a new
 directory, stops after its time-zero solve and uses one MPI rank and one numerical
 thread. The horizontal control places all vertices at y = 0.5 m; the straight
 chord preserves both public contacts. Both retain the five x coordinates, all
 material properties, the same phase law and w = 0.15 m.
 
 ```bash
-D=$PWD/build-curve-phase
+: "${D:?Use the current build directory from the Release replay}"
 I=$D/install
 L=$D/layered-plugin/liblayered_moving_fault.release.so
 P=$D/transfer-work-plugin/libtransfer_work.release.so

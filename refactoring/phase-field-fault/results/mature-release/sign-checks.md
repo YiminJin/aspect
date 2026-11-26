@@ -116,13 +116,8 @@ remaining admission diagnostics.
 ```bash
 W=$PWD
 I=$W/build-mature-release/install
-B=$W/build-mature-release
 export ASPECT_SOURCE_DIR=$I OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
-for name in transfer_work phase_ridge; do
-  cmake -S "$I/benchmarks/fixed_fault/$name" -B "$B/plugin-$name" -DAspect_DIR="$I/lib/cmake/Aspect"
-  cmake --build "$B/plugin-$name" -j1
-  cp "$B/plugin-$name/lib$name.release.so" "$I/benchmarks/fixed_fault/$name/"
-done
+# This retained installation already contains the two matching benchmark DSOs.
 E=$(mktemp -d)
 R=$W/refactoring/phase-field-fault/results/bp3-preparation
 python3 -B "$R/check_branch.py" "$I" "$E/bp3-release"

@@ -4,6 +4,15 @@ The completed `MIDPOINT_UPDATE_CLOSEOUT.md` freezes the implemented midpoint upd
 
 ## Mature prescribed geometry, shear sense and boundary restart
 
+For changes to the mature material, run the [installed public replay](results/mature-release/README.md#reproduce-the-runs)
+against the [frozen serial trajectory](results/mature-release/public-baseline.md) at 0, 12.5 and 25 ms.
+The driver reads the reference captured at `ae676e24095909196f885073b1146babce50292b`.
+Match every native column by (CellId, q), every label by material ID, and the public
+headers, units and slip increments. Run the [separate station inventory](results/mature-release/bend-slip.md#replay)
+against the committed values for each (geometry, ID), including its signed-side classification.
+Use the [two-install replay](results/mature-release/vertical-gaussian.md#replay-the-two-installations)
+for the earlier vertical Gaussian.
+
 Start from branch-owned initial conditions. The [release replay](results/mature-release/README.md)
 uses the public parameter file, its ordered material table and the installed executable.
 The independent normal integrals split each normal at physical cell faces and recover

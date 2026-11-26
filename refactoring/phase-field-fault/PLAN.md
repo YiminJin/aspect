@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**The curved-fault baseline and replay repair is ready for review before material-model unification.** The [frozen public trajectory and replay controls](results/mature-release/baseline-repair.md) bind the three accepted clocks to physical IDs, native fields and the public output. The station-by-station bend deficit, including its negative-normal contribution, is part of the baseline for the ownership change.
+
 **The curved phase initializer is ready for review.** The [one-vertex FE measurement](results/mature-release/phase-width.md) qualifies initialization from finite-segment distance. The [bend slip inventory](results/mature-release/bend-slip.md) measures a 3.98% shortfall in this geometry. Mechanical normalization needs a separate derivation and review before using returned slip quantitatively at regional bends.
 
 **Mature-fault release preparation is ready for architecture review.** The [public curved input and slip convention](IMPLEMENTATION.md#prescribe-a-curved-mature-fault-and-its-slip-sense), [measured geometry, work, motion and restarts](results/mature-release/README.md) qualify the two-dimensional shared machinery on small boxes. BP3's spatial friction, loading, normal feedback, adaptive stepping and full-size run, and the regional thermomechanical qualification, remain separate.

@@ -1,5 +1,11 @@
 # Phase-field fault working record
 
+## Curved-fault baseline and replay repair
+
+The public scientific reference is `ae676e24095909196f885073b1146babce50292b`. Commit `be68fe244` archives a fresh installed serial run from that revision. The installed check reads all three accepted clocks, five material IDs, 2,304 native (CellId, q) rows per clock and the public label text at the original budgets. The serial candidate reproduced the reference exactly. At 25 ms the clean two-rank candidate differed from the serial reference by at most 1.51 × 10⁻¹⁵ Pa in stress and 5.83 × 10⁻¹⁶ m/s in rate. The regenerated accepted-solution figure matched the committed PNG byte for byte.
+
+The comparison rejected damping 1.01, a public-only slip/rate swap, an incorrect public unit, substitution of the straight chord for the bend, reversal of only the lost-slip side and a single nonfinite accepted velocity gradient. The unchanged historical and current vertical fixtures passed with their own executables, inputs, observers and drivers. Historical executable and input hashes matched before and after replay. The fresh bend inventory reproduced every committed value, including the 3.97675% total shortfall and the 0.02877787 m negative-side loss at ID 2. This is the scientific baseline for the next ownership assignment. [Commands, measured differences, unchanged controls and figure](results/mature-release/baseline-repair.md).
+
 ## Curved phase initialization and bend slip inventory
 
 Started at `04aaf6db08abec8a06a27134f803cd265e64f7f9` on pf-rsf. The opt-in built-in initial-composition model and the mature material share the ordered vertex-table reader (`91cd47e39`). The initializer uses the configured phase name and ASPECT's distance to each finite segment. It holds two coordinates per vertex per rank during initialization. Mechanics retains its normal-strip admission rule. The [installed example and one-coordinate edit](../../benchmarks/fixed_fault/curved_mature/README.md) require the installed executable and table. The solver, reference values and slip normalization retain their reviewed versions.

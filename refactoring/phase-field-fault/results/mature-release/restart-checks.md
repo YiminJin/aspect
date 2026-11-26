@@ -33,8 +33,8 @@ A branch-generated archive with physical seed metadata checks the full identity.
 
 ## Commands for the original vertical-Gaussian fixture
 
-From the worktree root use the installed Release executable and rebuild all
-observers against that SDK. Each simulator rank uses one numerical thread.
+Use the existing observers built against the historical Release SDK and new
+run directories outside its prefix. Each simulator rank uses one numerical thread.
 The retry plugin is the one compiled by the existing fixed-fault integration
 test. The compatibility control uses the retained pre-change installation
 at `build-assignment-d/install` (Release executable SHA-256
@@ -49,19 +49,33 @@ I=$D/install
 M=/opt/openmpi/5.0.6/bin/mpirun
 R=$I/benchmarks/fixed_fault/curved_mature
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
-cmake -S "$I/benchmarks/growing_fault" -B "$D/law-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
-cmake --build "$D/law-plugin" -j1
-# See geometry-checks.md for the fixed_fault test build and README.md for the layered DSO.
+E=$(mktemp -d /tmp/aspect-historical-restart.XXXXXXXX)
+# This installed historical checker uses curved_mature.prm by default.
 python3 -BO "$R/check_restart.py" "$I" "$D/layered-plugin/liblayered_moving_fault.release.so" \
-  "$D/tests/libfixed_fault.release.so" "$D/restart-qualification" --mpiexec "$M" --vertical-gaussian
+  "$D/tests/libfixed_fault.release.so" "$E/historical-restart" --mpiexec "$M"
 python3 -BO "$R/check_legacy_restart.py" "$W/build-assignment-d/install" "$I" \
   "$D/layered-plugin/liblayered_moving_fault.release.so" "$D/law-plugin/libgrowing_fault_checks.release.so" \
-  "$D/legacy-qualification"
+  "$E/legacy-qualification"
 ```
 
-Each destination must be fresh. The implementation run executed both scripts from the checkout. The final
-replay ran the copies from the installed prefix in a fresh external directory
-and included the persistent-shear negative. The older D review prefix lacked
+For the current version of the same fixture, pass the current installation's
+checker, its two matching plugins and the explicit fixture selector:
+
+```sh
+D=$W/build-curve-phase
+I=$D/install
+python3 -BO "$I/benchmarks/fixed_fault/curved_mature/check_restart.py" "$I" \
+  "$D/layered-plugin/liblayered_moving_fault.release.so" "$D/tests/libfixed_fault.release.so" \
+  "$E/candidate-restart" --mpiexec "$M" --vertical-gaussian
+```
+
+Each destination must be fresh. Both installed vertical restart checkers
+were rerun in separate external directories. In each, serial retry and
+serial continuation reproduced the clean accepted state exactly. At 25 ms
+the one-to-two-rank continuation differed from its clean two-rank run by
+at most 6.39×10⁻¹⁶ Pa in stress on the historical executable and
+5.80×10⁻¹⁶ Pa on the candidate. Both rejected the four incompatible
+checkpoint inputs listed below. The older D review prefix lacked
 the external dashpot DSO. The documented pre-change Assignment D installation
 contains both plugins and successfully wrote both legacy checkpoints.
 

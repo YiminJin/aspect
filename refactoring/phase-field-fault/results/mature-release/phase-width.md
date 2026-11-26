@@ -4,11 +4,14 @@ The public input initializes the Gaussian excess above 0.03 using the distance t
 
 ## Reproduction
 
-From the worktree root, use the matching Release installation and native-field observer built in the [release replay](README.md). The public simulation itself needs only the installed ASPECT executable. These commands make new output directories. For a fresh standalone replay, start with a new `E`.
+From the worktree root, use `D` from the [current Release build recipe](README.md#reproduce-the-runs).
+It contains the installation with the frozen public reference and its matching
+field observer. The public simulation itself needs only the installed ASPECT
+executable. The width comparison starts in a new run directory.
 
 ```bash
 W=$PWD
-D=$W/build-curve-phase
+: "${D:?Use the current build directory from the Release replay}"
 I=$D/install
 P=$D/layered-plugin/liblayered_moving_fault.release.so
 R=$W/refactoring/phase-field-fault/results/mature-release

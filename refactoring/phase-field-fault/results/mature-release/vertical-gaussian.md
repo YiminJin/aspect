@@ -23,9 +23,11 @@ and zero applied wall traction. The labels carry positive RSF speeds ranging
 from 0.112328 to 0.170746 m/s at this clock. The graph shows a difference of
 two bulk velocities at finite separation.
 
-## Run the public input
+## Run the historical input
 
-Only the installed ASPECT executable and example data are needed.
+Use the preserved historical installation (`build-mature-release/install`).
+Its executable reports production revision `0af424ddf`, and its example
+files match `04aaf6db0`. Only the installed executable and data are needed.
 The parameter file extends the existing homogeneous mature example.
 Edit a coordinate in the table to change the prescribed curve, its
 `background_shear_Pa` column to change persistent driving, or
@@ -40,7 +42,7 @@ I=$D/install
 export ASPECT_SOURCE_DIR="$I" OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
 E=$(mktemp -d /tmp/aspect-mature-release.XXXXXXXX)
 C=$I/benchmarks/fixed_fault/curved_mature
-(cd "$E" && "$I/bin/aspect-release" "$C/vertical_gaussian.prm")
+(cd "$E" && "$I/bin/aspect-release" "$C/curved_mature.prm")
 ```
 
 The standard label tables give accepted position, age, slip distance and
@@ -83,69 +85,87 @@ applies to the Stokes cells and the global reverse row. The complete
 five-ID public trajectory solves for every rate through the coupled Picard
 iteration. [Weak form, sign and physical normalization](sign-checks.md)
 
-## Reproduce from the checkout
+## Replay the two installations
 
-Use a configured ASPECT Release build with the matching deal.II dependencies.
-The review run used the existing `build-6b/release` core build. To use a
-clean tree, substitute a new Release build directory configured for your
-installation. Install the executable, headers, configured SDK and examples
-directly into the same new prefix. The top-level-only CMake install below
-installs the core and example files, then the commands build just the
-required verification DSOs using that prefix.
+The historical installation is read-only. Its vertical Gaussian is named
+`curved_mature.prm`. In the current installation, that name selects the
+finite-segment Gaussian and the identical historical input is available as
+`vertical_gaussian.prm`. The [current build recipe](README.md#reproduce-the-runs)
+installs the candidate and its observer into fresh destinations.
 
-```bash
+For the retained local installations the following reproduces the historical
+and candidate label checks, native fields, figures and mechanical work.
+Each driver runs a bare public case followed by its matching observed case
+and three invalid-geometry controls. For the comparison, the historical
+drivers are read from the pinned Git revision, the candidate uses the
+current drivers, and each loads its own observer DSOs. ASPECT resolves
+included files and vertex tables from the corresponding install prefix.
+
+```sh
 W=$PWD
-B=$W/build-6b/release
-D=$W/build-mature-release
-I=$D/install
-mkdir -p "$D"
-cmake -S "$W" -B "$B" -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX="$I" -DASPECT_INSTALL_EXAMPLES=ON
-cmake --build "$B" --target aspect -j3
-cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -P "$B/cmake_install.cmake"
-export ASPECT_SOURCE_DIR="$I" OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
-E=$(mktemp -d /tmp/aspect-mature-release.XXXXXXXX)
-R=$W/refactoring/phase-field-fault/results
-L=$I/benchmarks/layered_moving_fault
-C=$I/benchmarks/fixed_fault/curved_mature
-P=$D/layered-plugin/liblayered_moving_fault.release.so
-cmake -S "$L" -B "$D/layered-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
-cmake --build "$D/layered-plugin" -j1
-for name in transfer_work phase_ridge; do
-  base=$I/benchmarks/fixed_fault/$name
-  cmake -S "$base" -B "$D/plugin-$name" -DAspect_DIR="$I/lib/cmake/Aspect"
-  cmake --build "$D/plugin-$name" -j1
-  cp "$D/plugin-$name/lib$name.release.so" "$base/"
-done
-
-python3 -BO "$R/mature-release/run_curve.py" "$I" "$P" "$E/curve" --vertical-gaussian
-export MPLBACKEND=Agg MPLCONFIGDIR="$E/mpl"
-python3 -BO "$C/check_curve.py" "$E/curve/observed/output" --figure "$E/curve.png"
-python3 -BO "$R/mature-release/check_local_work.py" "$I" "$E/curve/observed/output" "$E/curve-work"
-python3 -B "$R/bp3-preparation/check_branch.py" "$I" "$E/bp3"
+R=$W/refactoring/phase-field-fault/results/mature-release
+old=$W/build-mature-release
+current=$W/build-curve-phase
+E=$(mktemp -d /tmp/aspect-vertical-pair.XXXXXXXX)
+bash "$R/replay_vertical.sh" "$old/install" "$old/layered-plugin/liblayered_moving_fault.release.so" \
+  "$current/install" "$current/layered-plugin/liblayered_moving_fault.release.so" "$E/replay"
 ```
 
-The [geometry commands](geometry-checks.md#commands) build the fixed-fault
-test plugin, run the focused units and the historical straight controls.
-The [checkpoint commands](restart-checks.md#commands) build the external
-resistance law and run the curved/fitted one-/two-rank, retry, negative
-and legacy matrices. Supply the pre-change Release installation with both
-its matching test DSOs to the legacy script. It checks the actual wire
-format written on this run. For the ordinary integration tests and full
-unit suite:
+At all three clocks (0, 12.5 and 25 ms) the two runs agreed exactly on
+phase at 2,304 native points. Across those frames the largest differences
+were 1.67×10⁻¹⁶ m/s in speed, 5.38×10⁻¹⁶ Pa in stress, and 1.23×10⁻¹⁶ J/m
+in integrated virtual work. Regenerating the historical figure produced
+the recorded PNG byte for byte. Both work probes matched independent cell
+integration within 2.01×10⁻¹⁶ m.
 
-```bash
-ctest --test-dir "$D/tests" -j1 --output-on-failure \
-  -R '^(fixed_fault|stationary_fault|layered_moving_fault)$'
-(cd "$B/unit_tests" && "$I/bin/aspect-release" --test)
+Exchanging the layered libraries stops the replay during setup. The error
+identifies the configured and expected SDK paths. This command also checks
+that no run directory was created.
+
+```sh
+if bash "$R/replay_vertical.sh" "$old/install" "$current/layered-plugin/liblayered_moving_fault.release.so" \
+  "$current/install" "$old/layered-plugin/liblayered_moving_fault.release.so" "$E/swapped" \
+  > "$E/swapped.log" 2>&1; then exit 1; fi
+grep 'Layered observer .*expected' "$E/swapped.log"
+test ! -e "$E/swapped"
 ```
 
-The scoped CTests all passed and the full Release unit suite passed 2,605
+Before and after the replay, SHA-256 for the historical executable was
+`4029757b271ef8c016442877529ef8db70cfaf08e20025e468e5696187ce1de5`,
+for its `curved_mature.prm` was
+`2c2581c77785cc1d4bcecf5094d9f0ba3be83994f3df8e9a3f602d9bc7d4abc0`,
+and for its layered observer was
+`2c0959881436db71e2d6671431c288172b5c9844bf47c3ff022c515093adcadc`.
+The inherited parameter file, vertex table and installed work probe
+(`93d0927c438683b6dc569c78f76072c6da2b6beec9af4893eaba06c80b65dbae`)
+were also verified unchanged.
+The candidate used for this particular *vertical* replay reports
+`91cd47e39`, executable
+`1513bf4c64038f729a628cda639d7a4fd6c26dd4876f724ee4d3a079a5d26eb4`
+and observer `6f4ace515f0cb03dc6074c284602234b02da8a9788f9007a533dd933c6563821`.
+The [finite-segment reference](public-baseline.md) has its own capture at
+`ae676e240`. The [geometry](geometry-checks.md#commands),
+[signed transfer](sign-checks.md#reproduce) and
+[restart](restart-checks.md#commands-for-the-original-vertical-gaussian-fixture)
+records preserve the wider historical qualification.
+
+The replay-repair checks used `/tmp/aspect-vertical-pair.X6sWa4gi`. The
+paired run is in `verified`, with its before/after identities and the
+separate swapped-observer diagnostic in `swapped.log`. Both installed
+restart suites, the legacy RSF and stateless continuations, the two straight
+lifecycle suites and the public material-interface suite also passed in
+fresh directories. The signed-work replay reproduced the opposite actions
+of ±0.58901895576274 m. Its strict free-32 comparison covered 38 labels at
+all three clocks, with a maximum speed difference of 1.39×10⁻¹⁵ m/s.
+The historical 12.5 ms checkpoint cost replay measured 417,550 bytes,
+7.06 s elapsed and 209,952 KiB peak RSS for the two-step run.
+
+In the original qualification, the scoped CTests all passed and the full Release unit suite passed 2,605
 assertions in 64 test cases. The earlier D review prefix can supply the old
 layered writer, but lacks the external dashpot DSO. The complete two-law
 replay used the pre-change Assignment D prefix in the linked commands.
 
-The final external replay is in `/tmp/aspect-mature-release.ApY6B8Sb`.
+The original qualification ran in `/tmp/aspect-mature-release.ApY6B8Sb`.
 The executable reported production revision `0af424ddf`, SHA-256
 `4029757b271ef8c016442877529ef8db70cfaf08e20025e468e5696187ce1de5`.
 The measured one-rank public run with per-step checkpoints took 7.26 s
@@ -156,14 +176,15 @@ doubles per prescribed vertex. The normal integrals and stress projection
 are rebuilt from accepted state and the distributed FE fields. The fixed
 mesh and five IDs here establish no full-size BP3 throughput.
 
-To repeat the checkpoint cost measurement on Linux, set the public example's
+To repeat the historical checkpoint cost measurement, use the variables
+from “Run the historical input” above and set that example's
 output to a fresh directory and use one numerical thread as above. The time
 includes initialization, two physical steps, checkpoint writes and
 visualization. File sizes vary with recorded run metadata and paths.
 
 ```bash
 cat > "$E/resource.prm" <<EOF
-include $C/vertical_gaussian.prm
+include $C/curved_mature.prm
 set Output directory = $E/resources
 subsection Checkpointing
   set Steps between checkpoint = 1

@@ -92,16 +92,15 @@ D=$W/build-mature-release
 I=$D/install
 A=$I/bin/aspect-release
 F=$W/benchmarks/fixed_fault
+E=$(mktemp -d /tmp/aspect-historical-geometry.XXXXXXXX)
 export DEAL_II_NUM_THREADS=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
-(cd build-6b/release/unit_tests && "$A" --test 'Prescribed curved fault*,Prescribed mature fault*,Stationary fault spans*,Finite normal association*,Fault strip cuts*,Interior material connectivity*,A material fault retains*')
-cmake -S tests -B "$D/tests" -DAspect_DIR="$I/lib/cmake/Aspect" -DASPECT_BINARY="$A" \
-  -DCMAKE_BUILD_TYPE=Release -DASPECT_COMPARE_TEST_RESULTS=ON -DASPECT_RUN_ALL_TESTS=ON
-cmake --build "$D/tests" --target fixed_fault -j1
+(cd build-6b/release/unit_tests && ASPECT_SOURCE_DIR="$W" "$A" --test 'Prescribed curved fault*,Prescribed mature fault*,Stationary fault spans*,Finite normal association*,Fault strip cuts*,Interior material connectivity*,A material fault retains*')
+# Use the matching retained test plugin. Run outputs go in the fresh directory.
 for case in fixed_fault stationary_fault; do
-  ASPECT_SOURCE_DIR="$W" python3 -Bu "$F/check_lifecycle.py" "$A" "$D/tests/libfixed_fault.release.so" \
-    "$D/lifecycle-$case" --case "$case"
+  ASPECT_SOURCE_DIR="$I" python3 -Bu "$F/check_lifecycle.py" "$A" "$D/tests/libfixed_fault.release.so" \
+    "$E/lifecycle-$case" --case "$case"
 done
-python3 -B "$F/compare_snapshots.py" "$F/stationary-reference" "$D/lifecycle-stationary_fault/clean/output"
-ASPECT_SOURCE_DIR="$I" python3 -Bu benchmarks/growing_fault/check_interface.py "$A" \
-  "$D/law-plugin/libgrowing_fault_checks.release.so" "$D/interface"
+python3 -B "$F/compare_snapshots.py" "$F/stationary-reference" "$E/lifecycle-stationary_fault/clean/output"
+ASPECT_SOURCE_DIR="$I" python3 -Bu "$I/benchmarks/growing_fault/check_interface.py" "$A" \
+  "$D/law-plugin/libgrowing_fault_checks.release.so" "$E/interface"
 ```

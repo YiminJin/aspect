@@ -23,16 +23,24 @@ The ordinary simulator calls `InitialComposition::Manager::initial_composition` 
 
 ## Reproduce the runs
 
-Run from the worktree root. Use a configured ASPECT Release build with the
-matching deal.II dependencies. The commands use a fresh install prefix and
-fresh run directories, with one numerical thread per rank. The public input
+The [public curved baseline](public-baseline.md) belongs to revision
+`ae676e24095909196f885073b1146babce50292b`. Its three public frames are
+distinct from the earlier vertical-Gaussian regression. The default public
+driver checks the freshly installed candidate against the frozen reference.
+The [baseline repair record](baseline-repair.md) gives the measured cross-build
+differences, the single-change controls and the regenerated figure.
+
+Run from the worktree root with the ASPECT Release dependencies configured in
+your environment (this machine uses `DEAL_II_DIR=/opt/dealii/9.6-local`).
+Give the candidate its own new build and installation. The run directories
+are outside both installations. Use one numerical thread per rank. The public input
 works with the installed executable alone. The two external observers below
 export native fields and measure the two transfer actions.
 
 ```sh
 W=$PWD
-B=$W/build-6b/release
-D=$W/build-curve-phase
+D=$(mktemp -d "$W/build-curved-replay.XXXXXXXX")
+B=$D/core
 I=$D/install
 R=$W/refactoring/phase-field-fault/results/mature-release
 C=$I/benchmarks/fixed_fault/curved_mature
@@ -40,7 +48,7 @@ E=$(mktemp -d /tmp/aspect-curve-phase.XXXXXXXX)
 M=/opt/openmpi/5.0.6/bin/mpirun
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
 export MPLBACKEND=Agg MPLCONFIGDIR="$E/mpl" ASPECT_SOURCE_DIR="$I"
-cmake -S "$W" -B "$B" -DCMAKE_BUILD_TYPE=Release \
+cmake -S "$W" -B "$B" -DCMAKE_BUILD_TYPE=Release -DDEAL_II_DIR="${DEAL_II_DIR:-/opt/dealii/9.6-local}" \
   -DCMAKE_INSTALL_PREFIX="$I" -DASPECT_INSTALL_EXAMPLES=ON
 cmake --build "$B" --target aspect -j3
 cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -P "$B/cmake_install.cmake"
@@ -90,35 +98,33 @@ ctest --test-dir "$D/tests" --output-on-failure -j1 -R '^(fixed_fault|stationary
 (cd "$B/unit_tests" && ASPECT_SOURCE_DIR="$W" "$I/bin/aspect-release" --test)
 ```
 
-To compare the retained fixture to a separate installation of the reviewed
-baseline, first run its unmodified parameter file with its matching observer.
-The baseline install used here is the mature-release prefix. Check all clocks,
-IDs, native DG samples and integrated shear work at the established physical-field budgets (10⁻¹⁰ absolute plus 10⁻⁸ relative).
-Between the two builds the native phase was bitwise equal at every clock.
-The normal integrals differed by at most 5.56 × 10⁻¹⁷ m, the returned stress
-by 5.38 × 10⁻¹⁶ Pa, and virtual work by 1.23 × 10⁻¹⁶ J/m. The exact
-serial retry and restart assertions still apply within each build:
+### Replay the historical input against the candidate
+
+The [paired replay](replay_vertical.sh) consumes two completed installations
+and writes to a new run directory. It reads the `04aaf6db0` drivers from Git
+and uses `curved_mature.prm` with the historical executable and observer.
+On the current installation it selects `vertical_gaussian.prm` via
+`--vertical-gaussian`. The work probes and plotters also come from their
+respective releases. Both decks, inherited inputs and vertex tables must
+match the historical source bytes. Keep the layered and transfer-work plugin
+build directories alongside each other as above. The driver checks which SDK
+configured each plugin and verifies the installed transfer-work library
+against its build. It hashes the historical executable, inputs and both
+observers before and after running the solver.
 
 ```sh
 old=$W/build-mature-release
-python3 -BO "$R/run_curve.py" "$old/install" \
-  "$old/layered-plugin/liblayered_moving_fault.release.so" "$E/before"
-python3 -BO - "$C" "$E" <<'PY'
-from pathlib import Path
-import sys
-sys.path.insert(0, sys.argv[1])
-from check_restart import compare, accepted_frame
-root = Path(sys.argv[2])
-for step in range(3):
-    a, b = root/'before/observed/output', root/'vertical/observed/output'
-    compare(a, b, step, exact=False)
-    ua, ub = (accepted_frame(folder, step, 1)[1] for folder in (a, b))
-    if any(ua[k]['phi'] != ub[k]['phi'] for k in ua):
-        raise ValueError('Changed native phase in the historical fixture')
-PY
+bash "$R/replay_vertical.sh" "$old/install" "$old/layered-plugin/liblayered_moving_fault.release.so" \
+  "$I" "$P" "$E/paired-vertical"
 ```
 
-The fresh run root was `/tmp/aspect-curve-phase.McM7BMnA`. The installed
+The [historical replay record](vertical-gaussian.md#replay-the-two-installations)
+gives the executable and input identities and results. The keyed comparison
+checks all three clocks at 10⁻¹⁵ s absolute and all native fields at
+10⁻¹⁰ absolute plus 10⁻⁸ relative. The initialized phase agreed exactly at
+every native point on every frame.
+
+The original initialization qualification used `/tmp/aspect-curve-phase.McM7BMnA`. The installed
 Release executable reported source `91cd47e39`, SHA-256
 `1513bf4c64038f729a628cda639d7a4fd6c26dd4876f724ee4d3a079a5d26eb4`.
 Both figures are reproducible from the observed outputs with NumPy, SciPy
