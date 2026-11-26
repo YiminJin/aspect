@@ -143,10 +143,13 @@ def main():
     for name in ("prefix", "layered_plugin", "retry_plugin", "destination"):
         parser.add_argument(name, type=lambda p: Path(p).resolve())
     parser.add_argument("--mpiexec", default="mpirun")
+    parser.add_argument("--vertical-gaussian", action="store_true",
+                        help="Replay the original vertical-width curved restart fixture")
     args = parser.parse_args()
     args.destination.mkdir(parents=True, exist_ok=False)
     example = args.prefix / "benchmarks/fixed_fault/curved_mature"
-    base = example / "curved_mature.prm"
+    manufactured = example / "vertical_gaussian.prm"
+    base = manufactured if args.vertical_gaussian else example / "curved_mature.prm"
     common = dict(root=args.destination, prefix=args.prefix, mpiexec=args.mpiexec)
     plugins = [args.layered_plugin]
 
@@ -206,20 +209,20 @@ end
     run("changed-friction", base, plugins, settings=OBSERVE + fault("set Radiation damping = 2"),
         checkpoint=seed, diagnostic="Mature fault resistance parameters differ from the checkpoint", **common)
 
-    # Fit a straight, displaced seed to the same FE band. Each ID is compared
-    # to its virgin supplied position before continuing from the measured fit.
+    # This regression deliberately fits an offset straight seed to a phase
+    # band prescribed independently of that seed.
     positions = np.linspace([0., .65], [1., .28], 5)
     inline = "; ".join(f"{x:.17g},{y:.17g}" for x, y in positions)
     fit = OBSERVE + fault("set Fit trace to phase = true\nset Fault vertex file =\n"
                           f"set Fault vertices = {inline}")
-    fitted = run("fitted-clean", base, plugins, settings=fit + SAVE, **common)
+    fitted = run("fitted-clean", manufactured, plugins, settings=fit + SAVE, **common)
     initial = read_rows(fitted / "material-0-surface-0.csv")
     distances = [np.linalg.norm([float(row["x"])-x, float(row["y"])-y])
                  for (x,y), row in zip(positions, initial)]
     if len(initial) != len(positions) or max(distances) < .01:
         raise ValueError("Initial fit must displace a station by more than 1 cm")
     print("Initial fit displacements in material order (m):", *distances, flush=True)
-    resumed = run("fitted-resume", base, plugins, settings=fit, checkpoint=fitted, **common)
+    resumed = run("fitted-resume", manufactured, plugins, settings=fit, checkpoint=fitted, **common)
     check_clocks(resumed, [2])
     compare(fitted, resumed, 2)
 

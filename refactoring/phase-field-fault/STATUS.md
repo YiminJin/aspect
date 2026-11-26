@@ -1,12 +1,24 @@
 # Phase-field fault working record
 
+## Curved phase initialization and bend slip inventory
+
+Started at `04aaf6db08abec8a06a27134f803cd265e64f7f9` on pf-rsf. The opt-in built-in initial-composition model and the mature material share the ordered vertex-table reader (`91cd47e39`). The initializer uses the configured phase name and ASPECT's distance to each finite segment. It holds two coordinates per vertex per rank during initialization. Mechanics retains its normal-strip admission rule. The [installed example and one-coordinate edit](../../benchmarks/fixed_fault/curved_mature/README.md) require the installed executable and table. The solver, reference values and slip normalization retain their reviewed versions.
+
+**FE initialization.** On a 16 × 16 mesh, moving vertex 2 from (0.50, 0.69) to (0.50, 0.57) m moved the time-zero vertical-cut DG ridge by −0.118516463 m. The e-fold distances on both normals were 149.961–150.159 mm before the edit, 149.918–150.159 mm after it, and 149.916–150.106 mm on the inclined straight control. The old vertical fixture still narrows from about 147 to 94 mm. All 2,304 native samples agreed with the independently interpolated polynomial to 3.05 × 10⁻¹⁶ or better. For both new geometries the one- and two-rank samples matched exactly. A converged solve with moved mechanics and frozen original phase failed the moved-field check by 0.159398. With ordinary Simple material, a renamed phase gave the expected integral 0.126599253 m² and the nonzero affine companion retained its integral of 0.5 m². An absent phase name failed at startup. [Width table, vertex/cap checks, figure and commands](results/mature-release/phase-width.md).
+
+**Accepted solution.** On the original five-ID curve, the four up-dip bulk velocities across 0.13 m at 25 ms were 16.711, 33.749, 42.545 and 52.663 mm/s. Positive RSF speeds at the vertices ranged from 0.112716 to 0.169072 m/s. The independent normal integrals agreed within 1.67 × 10⁻¹⁶ m. Both the public case and the named historical fixture matched their clean runs exactly after serial restart and forced retry. The new public serial writer continued on two ranks with a maximum 6.11 × 10⁻¹⁶ Pa stress difference relative to the clean two-rank solution. The original fitted seed still moved its first contact by 0.169294636 m. [Accepted solution, independent checks and full replay](results/mature-release/README.md).
+
+**Scalar slip return.** At unit positive speed the native Q8 action is 1.21084484 m²/s on the curved trace, compared with a line reference of 1.26223969 m²/s. Resolving support edges gives 1.21204363 m²/s (−3.97675%). The largest station deficit is −9.123% at ID 2. The two contact hats are −2.883% and −0.651%. The straight same-contact control is +0.01681% in total; the centered horizontal control gives unity to roundoff. Counting all admissible strips before nearest-segment selection on the same curved FE field recovers 0.04797303 m²/s of the 0.05019606 m²/s shortfall. Independent quadrature confirms the deficit persists on this mesh. Regional interpretation of bulk slip at bends requires a separate normalization review. [Each station, quadrature controls and commands](results/mature-release/bend-slip.md).
+
+**Regression coverage.** Both scoped CTests passed, along with all 27 existing interface cases and 2,605 Release unit assertions in 64 cases. The unit tests require the source-root VERSION file; an initial invocation with the examples prefix as ASPECT_SOURCE_DIR failed that single file-read test. Repeating with the checkout as the source-data root passed. The installed public example and verification runs used the installed example data. The named vertical fixture retained exactly the old FE phase on all three clocks across the two builds; the largest native stress difference was 5.38 × 10⁻¹⁶ Pa. The three-label signed work test now verifies the manufactured field at its nodes before comparing contact and bend cell actions. Handing it the distance-based public field instead failed by 0.10581 in phase. The [original figure, records and historical input](results/mature-release/vertical-gaussian.md) remain available at the existing tolerances.
+
 ## Mature-fault paper-release preparation
 
 Started at `68f6d15102c47a30a1210eb68e906c05130f7e23`, including all four
 local Assignment D repair commits. The three production changes are
 `69342d99a` for segment geometry, `540c4ff5b` for signed shear transfer,
 and `0af424ddf` for accepted boundary-spanning checkpoints. The
-[installed example, figure and command index](results/mature-release/README.md)
+[original example, figure and command index](results/mature-release/vertical-gaussian.md)
 and [public parameter guide](IMPLEMENTATION.md#prescribe-a-curved-mature-fault-and-its-slip-sense)
 are ready for architecture review. Every new calculation began from this
 branch's initial conditions or its own newly written checkpoint. An earlier

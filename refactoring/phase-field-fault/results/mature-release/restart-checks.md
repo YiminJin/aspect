@@ -31,7 +31,7 @@ and restores accepted positions and persistent loading from the records.
 Only the resolved interior geometry and original sense can read this format.
 A branch-generated archive with physical seed metadata checks the full identity.
 
-## Commands
+## Commands for the original vertical-Gaussian fixture
 
 From the worktree root use the installed Release executable and rebuild all
 observers against that SDK. Each simulator rank uses one numerical thread.
@@ -53,7 +53,7 @@ cmake -S "$I/benchmarks/growing_fault" -B "$D/law-plugin" -DAspect_DIR="$I/lib/c
 cmake --build "$D/law-plugin" -j1
 # See geometry-checks.md for the fixed_fault test build and README.md for the layered DSO.
 python3 -BO "$R/check_restart.py" "$I" "$D/layered-plugin/liblayered_moving_fault.release.so" \
-  "$D/tests/libfixed_fault.release.so" "$D/restart-qualification" --mpiexec "$M"
+  "$D/tests/libfixed_fault.release.so" "$D/restart-qualification" --mpiexec "$M" --vertical-gaussian
 python3 -BO "$R/check_legacy_restart.py" "$W/build-assignment-d/install" "$I" \
   "$D/layered-plugin/liblayered_moving_fault.release.so" "$D/law-plugin/libgrowing_fault_checks.release.so" \
   "$D/legacy-qualification"

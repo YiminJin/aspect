@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**The curved phase initializer is ready for review.** The [one-vertex FE measurement](results/mature-release/phase-width.md) qualifies initialization from finite-segment distance. The [bend slip inventory](results/mature-release/bend-slip.md) measures a 3.98% shortfall in this geometry. Mechanical normalization needs a separate derivation and review before using returned slip quantitatively at regional bends.
+
 **Mature-fault release preparation is ready for architecture review.** The [public curved input and slip convention](IMPLEMENTATION.md#prescribe-a-curved-mature-fault-and-its-slip-sense), [measured geometry, work, motion and restarts](results/mature-release/README.md) qualify the two-dimensional shared machinery on small boxes. BP3's spatial friction, loading, normal feedback, adaptive stepping and full-size run, and the regional thermomechanical qualification, remain separate.
 
 **Assignment D is ready for focused re-review.** The [four repair groups](STATUS.md#assignment-d-review-repairs) cover the edited examples, their installed inputs and the discriminating checks for all fourteen findings. The [installed examples](IMPLEMENTATION.md#run-the-two-poster-examples) and [regenerated figures](results/iposter/README.md) give the measured initiation and material motion. The separately pinned BP3 launcher is at `b54bde517`. Production BP3 and the regional simulation remain later assignments.

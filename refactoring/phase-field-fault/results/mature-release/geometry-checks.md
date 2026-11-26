@@ -9,7 +9,7 @@ failure, omit only that setting and retain the example's initial state:
 ```bash
 W=$PWD
 before=$(mktemp -d)
-sed '/set Mature slip sense =/d' benchmarks/fixed_fault/curved_mature/curved_mature.prm > "$before/input.prm"
+sed '/set Mature slip sense =/d' benchmarks/fixed_fault/curved_mature/vertical_gaussian.prm > "$before/input.prm"
 (cd "$before" && ASPECT_SOURCE_DIR="$W" OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 \
     "$W/build-d-review/install/bin/aspect-release" input.prm > log 2>&1)
 rg 'Initial material vertices must be straight' "$before/log"

@@ -9,6 +9,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('prefix', 'layered_plugin', 'destination'):
         parser.add_argument(name, type=lambda s: Path(s).resolve())
+    parser.add_argument('--vertical-gaussian', action='store_true',
+                        help='Replay the manufactured vertical-width regression field')
     args = parser.parse_args()
     case = args.prefix/'benchmarks/fixed_fault/curved_mature'
     aspect = args.prefix/'bin/aspect-release'
@@ -21,7 +23,8 @@ def main():
     for name in ('public', 'observed', 'curved-fit', 'repeated', 'crossed'):
         directory = args.destination/name
         directory.mkdir()
-        entries = [f'include {case}/curved_mature.prm', 'set Output directory = output']
+        base = 'vertical_gaussian.prm' if args.vertical_gaussian else 'curved_mature.prm'
+        entries = [f'include {case / base}', 'set Output directory = output']
         diagnostic = None
         if name == 'observed':
             entries.extend([f'set Additional shared libraries = {args.layered_plugin}',

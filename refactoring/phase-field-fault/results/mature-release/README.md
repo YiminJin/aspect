@@ -1,181 +1,127 @@
-# Prescribed mature faults on the release branch
+# The phase ridge and slip return on a prescribed curve
 
-Start at `68f6d1510` on `pf-rsf`, after the four local Assignment D repair
-commits. The production commits are `69342d99a` (prescribed segment geometry),
-`540c4ff5b` (physical slip sense) and `0af424ddf` (accepted boundary restart).
-The follow-up example and verification files run against those production
-sources. All writer runs, including the legacy controls, start at time zero
-on this branch or its earlier installation. The BP3 donor and distributed
-server checkpoints are separate experiments.
+The [installed example](../../../../benchmarks/fixed_fault/curved_mature/README.md)
+uses one ordered vertex file for both mechanics and the Gaussian phase.
+The [original vertical-Gaussian solution](vertical-gaussian.md) remains a
+regression with its original parameter file contents, reference tables and
+numerical budgets. The mechanical transfer and the Maxwell/RSF update are
+the same in both experiments.
 
-![Accepted FE phase, contacts and local up-dip motion](curve.png)
+![Accepted curved phase and relative up-dip bulk velocity](curve.png)
 
-**Figure.** The prescribed five-vertex fault crosses a 1 m square box in a
-nonuniform static DGQ2 phase band. Squares mark the left and right contacts.
-At 25 ms the four points on the right show the hanging-wall velocity relative
-to the footwall, projected up dip at each segment midpoint. The velocity
-samples lie 0.065 m to either side along the local normal. The measured
-relative velocities are 17.384, 36.699, 53.510 and 73.443 mm/s. Persistent
-vertex shear drives the motion with stationary prescribed wall components
-and zero applied wall traction. The labels carry positive RSF speeds ranging
-from 0.112328 to 0.170746 m/s at this clock. The graph shows a difference of
-two bulk velocities at finite separation.
+**Figure.** Accepted DG phase and up-dip bulk motion at 25 ms. The dashed contour is φ = 0.03 + 0.32/e. Each black cut joins points 0.065 m to either side of a segment midpoint. Their hanging-wall-minus-footwall velocity differences, read in increasing material ID, are **16.711, 33.749, 42.545 and 52.663 mm/s**. The accepted positive RSF speeds are 0.112716–0.169072 m/s. The map uses the same scale for x and y.
 
-## Run the public input
+## What the measurements establish
 
-Only the installed ASPECT executable and example data are needed.
-The parameter file extends the existing homogeneous mature example.
-Edit a coordinate in the table to change the prescribed curve, its
-`background_shear_Pa` column to change persistent driving, or
-`Mature slip sense` in the parameter file to reverse the physical motion.
-These commands were run from a fresh external directory, with launch settings
-equivalent to the `public` case in the replay below.
+- [One edited vertex and the width on both normals](phase-width.md). Lowering ID 2 from 0.69 to 0.57 m moved the DG ridge from 0.688494 to 0.569977 m on the x = 0.50 m cut. Across both sides of all segments, the e-fold distance ranged from 149.961 to 150.159 mm before the edit and from 149.918 to 150.159 mm after it. A separate stale-phase run accepted the moved trace but failed the independent field comparison by 0.159398 in phase. Both geometries gave identical phase on one and two ranks at all 2,304 native Gauss points.
+- [Station-by-station slip return](bend-slip.md). With test speed divided out, the native Q8 bulk action totals 1.21084484 m for a 1.26223969 m bent trace. Splitting cells at the support boundaries gives 1.21204363 m. The largest defect is at ID 2, where the support-resolved return is 9.123% low. The straight chord with the same contacts is 0.0168% high in total. This scalar check holds the accepted state fixed. The separate local virtual-work check still exercises both mechanical transfers.
+- The independently integrated Q1 normalizations on the public trace are **0.21585734, 0.25395855, 0.25445149, 0.26533404 and 0.15984373 m**. The maximum difference from the accepted values is 1.67 × 10⁻¹⁶ m. The 25 ms rotated-parent shear check gives 6.07 × 10⁻¹⁷ Pa, compared with 8.25 × 10⁻⁴ Pa when the slip-spin sign is reversed.
+- The public 12.5 ms checkpoint resumed at 25 ms with exactly the clean serial state at all five IDs and 2,304 native points. The clean/retried frames matched exactly at all three clocks. Restoring the serial checkpoint on two ranks gave the clean two-rank normalizations and coordinates exactly, with maximum differences of 6.94 × 10⁻¹⁷ m/s in speed, 6.11 × 10⁻¹⁶ Pa in stress and 4.50 × 10⁻¹⁸ J/m in virtual work. The displaced straight fit still uses the vertical fixture so fitting and the FE phase remain independent.
+- The original vertical fixture keeps its frozen manufactured field in both the three-ID assembly probe and five-ID field export. Its contact and bend cell work actions were −0.00080620588233 and −0.00443265883749 m. The largest difference from independent cell integration was 2.01 × 10⁻¹⁶ m. Passing the *new* public output to the historical work checker fails before mechanics, with a 0.10581 phase difference at interpolation nodes.
 
-```bash
-W=$PWD
-D=$W/build-mature-release
-I=$D/install
-export ASPECT_SOURCE_DIR="$I" OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
-E=$(mktemp -d /tmp/aspect-mature-release.XXXXXXXX)
-C=$I/benchmarks/fixed_fault/curved_mature
-(cd "$E" && "$I/bin/aspect-release" "$C/curved_mature.prm")
-```
+The ordinary simulator calls `InitialComposition::Manager::initial_composition` while filling the compositional support points. `FaultPolylineGaussian` evaluates the minimum bounded-segment distance and returns the configured phase contribution there. Mechanics and the initializer each read the same table once at setup through `FaultVertexTable::read`, using ASPECT's rank-zero read and broadcast. The initializer retains one copy of the coordinates per rank (two doubles per ID) and scans the four segments for each phase interpolation point. The phase belongs to ASPECT's FE solution after initialization. The [installed guide](../../../../benchmarks/fixed_fault/curved_mature/README.md) gives the one-setting geometry override and the units of each input.
 
-The standard label tables give accepted position, age, slip distance and
-speed. The named visualization fields give the accepted DG stress in Pa.
-The independent verification adds an existing postprocessor to sample
-native fields. Adding it reproduced every standard label table byte for byte.
+## Reproduce the runs
 
-## What each experiment measures
+Run from the worktree root. Use a configured ASPECT Release build with the
+matching deal.II dependencies. The commands use a fresh install prefix and
+fresh run directories, with one numerical thread per rank. The public input
+works with the installed executable alone. The two external observers below
+export native fields and measure the two transfer actions.
 
-| Check | Measured result |
-| --- | --- |
-| [Ordered geometry and old controls](geometry-checks.md) | Incoming IDs and unequal lengths survive initialization. The unit probe places a point on the global chord whose correct normal offset from the middle segment is −1/16 m. The public curved fit, crossed trace and repeated vertex produce distinct input errors. The homogeneous and frozen three-label controls retain their original references. |
-| In-box normal integrals | The four segment lengths sum to 1.26223969 m. The independent projected integrals at IDs 0–4 are 0.21158940, 0.25189317, 0.22521693, 0.18324906 and 0.11352145 m. Maximum error 1.12×10⁻¹⁶ m. |
-| Normal support at the bend and contacts | Each segment admits points whose perpendicular foot lies on it. On the inside of a bend multiple segments may admit a point. The closest wins, with the first ID winning a tie. Outside the end strips or an outer bend a point can have no admitted foot. The bulk samples included 401 with multiple eligible feet and 129 with none. The independent station and slip-weight errors over all 2,304 Q3 points were 2.23×10⁻¹⁶ m and 6.67×10⁻¹⁵ m⁻¹. |
-| Resolved, nonuniform curved work | In the three-ID work probe using the same phase and two contacts, the actual unconstrained Stokes action was −0.00080620588233 m in the left contact cell and −0.00443265883749 m in the bend cell. All 256 cell actions agreed with independent local-frame Q8 integration within 2.0×10⁻¹⁶ m. The total Stokes action was −0.387448270023805 m and the reverse production row was −0.387448270023790 m. |
-| [Physical sense and solved thrust](sign-checks.md) | Actual Stokes and reverse actions agree with ±0.589018955762740 m on the one-cell right-dipping trace; remapping the ordered properties gives the same answers. At fixed stress every measured compression is invariant. Under thrust loading the solved up-dip difference at 25 ms is +0.0499211 m/s; switching the sense gives −0.0384916 m/s. A shortened **fixed interior** seed exercises the candidate section and projected stress contract separately; the paired velocities there are +0.0445088 and −0.0359863 m/s. |
-| Old stress and spin | On the 12.5–25 ms interval, the test reconstructs the old accepted DG tensor, rate and bulk spin at Q8, rotates, then applies Maxwell relaxation. It compares cell-mean shear to the observed Q3 constitutive offset less the independently computed current signed slip stress. The maximum difference was 7.12×10⁻¹⁷ Pa. Changing just the sign of slip in the old spin gives **0.00132274 Pa**. |
-| [Publication and continuation](restart-checks.md) | Clean versus retried and serial checkpoint-only continuation match exactly. After restoring a serial writer on two ranks, the 25 ms stress differs from the clean two-rank result by at most 6.39×10⁻¹⁶ Pa. A straight seed whose fit displaces the first contact by 0.1692946363 m resumes exactly. Incompatible sense, positions, persistent shear and law coefficients are diagnosed. Fresh earlier interior RSF and age-free histories continue on the current binary. |
-
-The phase oracle reconstructs a separate polynomial on each physical cell
-from its nine native Gauss values. It intersects each normal with the box,
-splits it at every Cartesian cell face, uses independent Gauss(16) and
-Gauss(24) panel rules and solves the consistent Q1 mass system on the four
-unequal edges. It retains the three production along-segment stations. Near
-the left contact the normal runs from −0.143666998 to +0.189311382 m and
-integrates to 0.210140888975 m. On either side of the middle bend the last
-station of segment 1 gives 0.237544478347 m and the first station of segment
-2 gives 0.215396560084 m. The tolerance for the projected integral is
-2×10⁻¹³ m. On this mesh the active point (0.53125, 0.71875) m has foot
-(0.50189946, 0.68817652) m; projecting onto the endpoint chord would give
-(0.41035284, 0.54096007) m. Full-ray normalization followed by nearest-foot
-admission does not form a partition of unity around a sharp bend.
-
-For the work probe only, keep the two contacts and middle vertex. The two
-external perturbations change the middle speed by ±0.001 m/s at zero
-physical duration. From the same analytic virtual shear and the same Q8
-measure the independent test computes each cell's action using its own
-in-box integrals and reconstructed DG phase. The 2×10⁻¹³ m absolute budget
-applies to the Stokes cells and the global reverse row. The complete
-five-ID public trajectory solves for every rate through the coupled Picard
-iteration. [Weak form, sign and physical normalization](sign-checks.md)
-
-## Reproduce from the checkout
-
-Use a configured ASPECT Release build with the matching deal.II dependencies.
-The review run used the existing `build-6b/release` core build. To use a
-clean tree, substitute a new Release build directory configured for your
-installation. Install the executable, headers, configured SDK and examples
-directly into the same new prefix. The top-level-only CMake install below
-installs the core and example files, then the commands build just the
-required verification DSOs using that prefix.
-
-```bash
+```sh
 W=$PWD
 B=$W/build-6b/release
-D=$W/build-mature-release
+D=$W/build-curve-phase
 I=$D/install
-mkdir -p "$D"
+R=$W/refactoring/phase-field-fault/results/mature-release
+C=$I/benchmarks/fixed_fault/curved_mature
+E=$(mktemp -d /tmp/aspect-curve-phase.XXXXXXXX)
+M=/opt/openmpi/5.0.6/bin/mpirun
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+export MPLBACKEND=Agg MPLCONFIGDIR="$E/mpl" ASPECT_SOURCE_DIR="$I"
 cmake -S "$W" -B "$B" -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$I" -DASPECT_INSTALL_EXAMPLES=ON
 cmake --build "$B" --target aspect -j3
 cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -P "$B/cmake_install.cmake"
-export ASPECT_SOURCE_DIR="$I" OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
-E=$(mktemp -d /tmp/aspect-mature-release.XXXXXXXX)
-R=$W/refactoring/phase-field-fault/results
-L=$I/benchmarks/layered_moving_fault
-C=$I/benchmarks/fixed_fault/curved_mature
-P=$D/layered-plugin/liblayered_moving_fault.release.so
-cmake -S "$L" -B "$D/layered-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake -S "$I/benchmarks/layered_moving_fault" -B "$D/layered-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
 cmake --build "$D/layered-plugin" -j1
-for name in transfer_work phase_ridge; do
-  base=$I/benchmarks/fixed_fault/$name
-  cmake -S "$base" -B "$D/plugin-$name" -DAspect_DIR="$I/lib/cmake/Aspect"
-  cmake --build "$D/plugin-$name" -j1
-  cp "$D/plugin-$name/lib$name.release.so" "$base/"
-done
+P=$D/layered-plugin/liblayered_moving_fault.release.so
+T=$I/benchmarks/fixed_fault/transfer_work
+cmake -S "$T" -B "$D/transfer-work-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/transfer-work-plugin" -j1
+cp "$D/transfer-work-plugin/libtransfer_work.release.so" "$T/"
+cmake -S "$W/tests" -B "$D/tests" -DAspect_DIR="$I/lib/cmake/Aspect" \
+  -DASPECT_BINARY="$I/bin/aspect-release" -DCMAKE_BUILD_TYPE=Release \
+  -DASPECT_COMPARE_TEST_RESULTS=ON -DASPECT_RUN_ALL_TESTS=ON
+cmake --build "$D/tests" --target fixed_fault -j1
+```
 
-python3 -BO "$R/mature-release/run_curve.py" "$I" "$P" "$E/curve"
-export MPLBACKEND=Agg MPLCONFIGDIR="$E/mpl"
+Run the public solve and the named regression separately. Each driver's
+observed run must reproduce the bare public label tables byte for byte.
+
+```sh
+python3 -BO "$R/run_curve.py" "$I" "$P" "$E/curve"
+python3 -BO "$R/run_curve.py" "$I" "$P" "$E/vertical" --vertical-gaussian
 python3 -BO "$C/check_curve.py" "$E/curve/observed/output" --figure "$E/curve.png"
-python3 -BO "$R/mature-release/check_local_work.py" "$I" "$E/curve/observed/output" "$E/curve-work"
-python3 -B "$R/bp3-preparation/check_branch.py" "$I" "$E/bp3"
+python3 -BO "$C/check_curve.py" "$E/vertical/observed/output"
+python3 -BO "$R/check_local_work.py" "$I" "$E/vertical/observed/output" "$E/work"
+python3 -BO "$R/run_phase_width.py" "$I" "$P" "$E/width" --mpiexec "$M"
+python3 -BO "$C/check_phase_width.py" "$E/curve/observed/output" \
+  "$E/vertical/observed/output" "$E/width" --figure "$E/phase-width.png"
+python3 -BO "$R/check_phase_field_roles.py" "$I" "$E/field-roles"
+python3 -BO "$R/measure_slip_return.py" "$I" "$P" "$T/libtransfer_work.release.so" "$E/slip"
+python3 -BO "$C/check_restart.py" "$I" "$P" "$D/tests/libfixed_fault.release.so" \
+  "$E/restart" --mpiexec "$M"
+python3 -BO "$C/check_restart.py" "$I" "$P" "$D/tests/libfixed_fault.release.so" \
+  "$E/vertical-restart" --mpiexec "$M" --vertical-gaussian
 ```
 
-The [geometry commands](geometry-checks.md#commands) build the fixed-fault
-test plugin, run the focused units and the historical straight controls.
-The [checkpoint commands](restart-checks.md#commands) build the external
-resistance law and run the curved/fitted one-/two-rank, retry, negative
-and legacy matrices. Supply the pre-change Release installation with both
-its matching test DSOs to the legacy script. It checks the actual wire
-format written on this run. For the ordinary integration tests and full
-unit suite:
+For the vertex-table input and constitutive-law regression, build the existing
+external test laws against the same installed SDK. The scoped tests use the
+source checkout for the release unit test that reads the repository VERSION file.
 
-```bash
-ctest --test-dir "$D/tests" -j1 --output-on-failure \
-  -R '^(fixed_fault|stationary_fault|layered_moving_fault)$'
-(cd "$B/unit_tests" && "$I/bin/aspect-release" --test)
+```sh
+cmake -S "$I/benchmarks/growing_fault" -B "$D/law-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/law-plugin" -j1
+python3 -B "$I/benchmarks/growing_fault/check_interface.py" "$I/bin/aspect-release" \
+  "$D/law-plugin/libgrowing_fault_checks.release.so" "$E/interface"
+ctest --test-dir "$D/tests" --output-on-failure -j1 -R '^(fixed_fault|stationary_fault)$'
+(cd "$B/unit_tests" && ASPECT_SOURCE_DIR="$W" "$I/bin/aspect-release" --test)
 ```
 
-The scoped CTests all passed and the full Release unit suite passed 2,605
-assertions in 64 test cases. The earlier D review prefix can supply the old
-layered writer, but lacks the external dashpot DSO. The complete two-law
-replay used the pre-change Assignment D prefix in the linked commands.
+To compare the retained fixture to a separate installation of the reviewed
+baseline, first run its unmodified parameter file with its matching observer.
+The baseline install used here is the mature-release prefix. Check all clocks,
+IDs, native DG samples and integrated shear work at the established physical-field budgets (10⁻¹⁰ absolute plus 10⁻⁸ relative).
+Between the two builds the native phase was bitwise equal at every clock.
+The normal integrals differed by at most 5.56 × 10⁻¹⁷ m, the returned stress
+by 5.38 × 10⁻¹⁶ Pa, and virtual work by 1.23 × 10⁻¹⁶ J/m. The exact
+serial retry and restart assertions still apply within each build:
 
-The final external replay is in `/tmp/aspect-mature-release.ApY6B8Sb`.
-The executable reported production revision `0af424ddf`, SHA-256
-`4029757b271ef8c016442877529ef8db70cfaf08e20025e468e5696187ce1de5`.
-The measured one-rank public run with per-step checkpoints took 7.26 s
-and peaked at 229,788 KiB process RSS while other local checks ran. Its
-12.5 ms checkpoint, including the distributed FE data, occupied 417,551
-bytes across five files. The extra replicated input geometry costs two
-doubles per prescribed vertex. The normal integrals and stress projection
-are rebuilt from accepted state and the distributed FE fields. The fixed
-mesh and five IDs here establish no full-size BP3 throughput.
-
-To repeat the checkpoint cost measurement on Linux, set the public example's
-output to a fresh directory and use one numerical thread as above. The time
-includes initialization, two physical steps, checkpoint writes and
-visualization. File sizes vary with recorded run metadata and paths.
-
-```bash
-cat > "$E/resource.prm" <<EOF
-include $C/curved_mature.prm
-set Output directory = $E/resources
-subsection Checkpointing
-  set Steps between checkpoint = 1
-  set Number of checkpoints to keep = 4
-end
-EOF
-python3 - "$I/bin/aspect-release" "$E/resource.prm" <<'PYTHON'
+```sh
+old=$W/build-mature-release
+python3 -BO "$R/run_curve.py" "$old/install" \
+  "$old/layered-plugin/liblayered_moving_fault.release.so" "$E/before"
+python3 -BO - "$C" "$E" <<'PY'
 from pathlib import Path
-import resource, subprocess, sys, time
-run = Path(sys.argv[2]).parent
-start = time.monotonic()
-with (run/'resource.log').open('w') as log:
-    subprocess.run(sys.argv[1:], cwd=run, stdout=log, stderr=subprocess.STDOUT, check=True)
-print(time.monotonic()-start, 's', resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss, 'KiB')
-print(sum(f.stat().st_size for f in (run/'resources/restart/02').iterdir()), 'checkpoint bytes')
-PYTHON
+import sys
+sys.path.insert(0, sys.argv[1])
+from check_restart import compare, accepted_frame
+root = Path(sys.argv[2])
+for step in range(3):
+    a, b = root/'before/observed/output', root/'vertical/observed/output'
+    compare(a, b, step, exact=False)
+    ua, ub = (accepted_frame(folder, step, 1)[1] for folder in (a, b))
+    if any(ua[k]['phi'] != ub[k]['phi'] for k in ua):
+        raise ValueError('Changed native phase in the historical fixture')
+PY
 ```
+
+The fresh run root was `/tmp/aspect-curve-phase.McM7BMnA`. The installed
+Release executable reported source `91cd47e39`, SHA-256
+`1513bf4c64038f729a628cda639d7a4fd6c26dd4876f724ee4d3a079a5d26eb4`.
+Both figures are reproducible from the observed outputs with NumPy, SciPy
+and Matplotlib. To replay the wrong-field negative, run the work command
+with `"$E/curve/observed/output"` in place of `"$E/vertical/observed/output"`;
+it must report “Expected the manufactured vertical Gaussian in both runs.”

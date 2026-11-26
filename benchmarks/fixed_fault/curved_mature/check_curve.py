@@ -219,24 +219,38 @@ def check(output, vertex_file):
 
 def plot(path, fields, v, updip):
     import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
 
-    fig, (ax, speed) = plt.subplots(1, 2, figsize=(9, 3.8), layout='constrained',
-                                    gridspec_kw={'width_ratios': [1.15, 1]})
+    fig, (ax, speed) = plt.subplots(1, 2, figsize=(9.2, 4.1), layout='constrained',
+                                    gridspec_kw={'width_ratios': [1.25, 1]})
     pixels = (np.arange(256)+.5)/256
     xx, yy = np.meshgrid(pixels, pixels)
     phi = fields.at('phi', np.column_stack([xx.ravel(), yy.ravel()])).reshape(xx.shape)
     img = ax.imshow(phi, origin='lower', extent=(0, 1, 0, 1), cmap='Blues', vmin=0, vmax=.35)
-    ax.plot(*v.T, '-o', color='#853a25', lw=2, ms=4, label='Prescribed trace')
-    ax.scatter(*v[[0,-1]].T, marker='s', s=55, color='#602514', clip_on=False, label='Boundary contacts')
-    ax.legend(loc='lower left', framealpha=.95, fontsize=8)
-    ax.set(xlabel='x (m)', ylabel='y (m)', title='Accepted phase and fault at 25 ms')
-    fig.colorbar(img, ax=ax, shrink=.84, label='Phase')
+    level = .03+.32/np.e
+    ax.contour(xx, yy, phi, levels=[level], colors='#13606b', linestyles='--', linewidths=1.3)
+    trace, = ax.plot(*v.T, '-o', color='#853a25', lw=2, ms=4, label='Prescribed trace')
+    contacts = ax.scatter(*v[[0,-1]].T, marker='s', s=42, color='#602514', clip_on=False,
+                          label='Boundary contacts', zorder=4)
     length = np.linalg.norm(np.diff(v, axis=0), axis=1)
+    tangents = np.diff(v, axis=0)/length[:, None]
+    normals = np.column_stack([-tangents[:, 1], tangents[:, 0]])
+    centers = .5*(v[1:]+v[:-1])
+    for center, normal in zip(centers, normals):
+        cut = center+.065*np.array([-normal, normal])
+        ax.plot(*cut.T, 'o-', color='#282a37', lw=.9, ms=2.6)
+    ax.legend(handles=[trace, contacts,
+                       Line2D([], [], color='#13606b', ls='--', label='Excess phase at 1/e'),
+                       Line2D([], [], color='#282a37', marker='o', ms=3, label='Velocity sample pairs')],
+              loc='lower left', framealpha=.95, fontsize=8)
+    ax.set(xlabel='x (m)', ylabel='y (m)', title='Accepted phase and fault at 25 ms',
+           aspect='equal', xlim=(0, 1), ylim=(0, 1))
+    fig.colorbar(img, ax=ax, shrink=.84, label='Phase')
     mid = np.cumsum(length)-.5*length
     speed.axhline(0, color='.4', lw=.8)
     speed.plot(mid, 1000*updip, 'o-', color='#853a25')
-    speed.set(xlabel='Arclength from left contact (m)', ylabel='Relative up-dip velocity (mm/s)',
-              title='Velocity across the fault at 25 ms')
+    speed.set(xlabel='Arclength from left contact (m)', ylabel='Relative up-dip bulk velocity (mm/s)',
+              title='Velocity across 0.13 m at 25 ms', xlim=(0, length.sum()))
     fig.savefig(path, dpi=210)
     plt.close(fig)
 

@@ -9,7 +9,7 @@ import numpy as np
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ('prefix', 'observed_curve', 'destination'):
+    for name in ('prefix', 'observed_vertical_gaussian', 'destination'):
         parser.add_argument(name, type=lambda s: Path(s).resolve())
     args = parser.parse_args()
     bench = args.prefix/'benchmarks/fixed_fault'
@@ -18,10 +18,10 @@ def main():
     from check_curve import Fields, association, cell_rule, compliance, normal_integrals, table
 
     os.environ['ASPECT_SOURCE_DIR'] = str(args.prefix)
-    # The real middle-row probe has three labels. Keep both contacts and the
-    # central bend, and use the very same resolved DG phase as the five-ID solve.
+    # Use the same manufactured vertical Gaussian in the three-label mechanical
+    # probe and the five-label field export. It is independent of the vertices.
     vertices = np.array([[0., .82], [.5, .69], [1., .14]])
-    settings = f'''include {bench}/curved_mature/curved_mature.prm
+    settings = f'''include {bench}/curved_mature/vertical_gaussian.prm
 set Output directory = output
 set End time = 0
 subsection Material model
@@ -35,9 +35,17 @@ subsection Postprocess
   set List of postprocessors =
 end
 '''
+    field = Fields(args.observed_vertical_gaussian, 0)
+    # Check the physical field before using it as the independent integrand.
+    # DGQ2 interpolates the input at the tensor-product end and midpoint nodes.
+    axis = np.linspace(0., 1., 2*field.n+1)
+    x, y = (z.ravel() for z in np.meshgrid(axis, axis))
+    height = np.interp(x, [0., .25, .5, .75, 1.], [.82, .77, .69, .45, .14])
+    np.testing.assert_allclose(field.at('phi', np.column_stack([x, y])),
+                               .03 + .32*np.exp(-((y-height)/.15)**2), rtol=0., atol=2e-14,
+                               err_msg='Expected the manufactured vertical Gaussian in both runs')
     measured = run_pair(args.prefix/'bin/aspect-release', bench/'transfer_work/libtransfer_work.release.so',
                         args.destination, settings)
-    field = Fields(args.observed_curve, 0)
     q, w = cell_rule(8, field.n)
     edges = np.diff(vertices, axis=0)
     lengths = np.linalg.norm(edges, axis=1)
@@ -55,7 +63,7 @@ end
     expected = np.einsum('ijab,ab->ij', (weight*middle*resolved[k]).reshape(field.n,field.n,8,8),
                          w/field.n**2)
     ids = {}
-    for shard in args.observed_curve.glob('material-0-rank*.csv'):
+    for shard in args.observed_vertical_gaussian.glob('material-0-rank*.csv'):
         for row in table(shard):
             ij = tuple(np.floor(field.n*np.array([float(row['x']), float(row['y'])])).astype(int))
             ids[ij] = row['cell']

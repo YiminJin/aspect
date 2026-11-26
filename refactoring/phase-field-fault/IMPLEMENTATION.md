@@ -138,8 +138,8 @@ For a mature trace, `Initial slip rate` (m/s) seeds the vertices before the firs
 
 The [installed curved example](../../benchmarks/fixed_fault/curved_mature/curved_mature.prm)
 extends the homogeneous Maxwell/RSF box. Edit the [ordered vertex file](../../benchmarks/fixed_fault/curved_mature/vertices.txt)
-to prescribe the physical curve, including the two endpoints on the box.
-These are its four geometry and kinematic settings:
+to prescribe both the physical curve and the initial phase ridge, including
+the two endpoints on the box. The example selects these settings:
 
 ```text
 subsection Material model
@@ -150,7 +150,24 @@ subsection Material model
     set Mature slip sense = opposite tangent
   end
 end
+subsection Initial composition model
+  set List of model names = fault polyline Gaussian
+  subsection Fault polyline Gaussian
+    set Background phase = 0.03
+    set Peak phase = 0.35
+    set Gaussian width = 0.15
+  end
+end
 ```
+
+During ordinary composition initialization, this model reads the coordinates
+from the same `Fault vertex file` parameter. At each physical interpolation
+point it sets the named phase to 0.03 + 0.32 exp[−(d/0.15 m)²]. Here d is the
+minimum distance to the finite segments, including their ends. The 0.15 m
+width describes the initial Gaussian. The separate `Profile half width`
+controls mechanical admission, and the fracture functional owns its length
+scale. After startup ASPECT holds the DG phase field. The [installed instructions](../../benchmarks/fixed_fault/curved_mature/README.md)
+show how to change one vertex in a local copy.
 
 On each segment, let **t** point along increasing ID and let **n** be its
 counterclockwise normal. The default `along tangent` gives ε = +1.
