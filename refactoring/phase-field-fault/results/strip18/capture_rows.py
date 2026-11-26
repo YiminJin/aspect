@@ -1,6 +1,7 @@
 """Link one isolated Release object to record the phase rows that passed both production gates."""
 import argparse
 import json
+import re
 from pathlib import Path
 import shlex
 import subprocess
@@ -13,9 +14,12 @@ out=args.scratch
 out.mkdir(parents=True,exist_ok=False)
 repo=Path(__file__).resolve().parents[4]
 source=repo/'source/simulator/solver/midpoint_fault.cc'
-key='            system.write_candidate_fields(x,solution);'
-original=source.read_text()
-if original.count(key)!=1:
+# Observe the returned midpoint solution after its convergence gates and before
+# field publication. Both the original and current call differ only in spacing.
+publication = r'^ *system\.write_candidate_fields\(x, *solution\);$'
+original = source.read_text()
+calls = list(re.finditer(publication, original, re.MULTILINE))
+if len(calls) != 1:
     raise ValueError('Expected one returned-state publication site')
 probe=r'''
             {
@@ -41,7 +45,8 @@ probe=r'''
                   }
             }
 '''
-(out/source.name).write_text(original.replace(key,probe+key))
+publication_offset = calls[0].start()
+(out/source.name).write_text(original[:publication_offset] + probe + original[publication_offset:])
 target=args.build/'CMakeFiles/aspect.exe.release.dir'
 unity,=[f for f in (target/'Unity').glob('*.cxx') if str(source) in f.read_text()]
 replacement=out/unity.name

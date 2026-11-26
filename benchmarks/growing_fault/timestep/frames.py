@@ -62,15 +62,19 @@ class Comparison:
         self.rows = []
 
     def check(self, name, expected, actual, atol, rtol=0., ids=None):
-        a,b = np.broadcast_arrays(expected,actual)
-        if not (np.isfinite(a).all() and np.isfinite(b).all()):
+        expected, actual = np.broadcast_arrays(expected, actual)
+        if not (np.isfinite(expected).all() and np.isfinite(actual).all()):
             raise ValueError(f'Nonfinite values for {name}')
-        delta = abs(a-b)
-        budget = atol+rtol*abs(a)
-        ratio = delta / np.maximum(1e-300,budget)
+        delta = abs(expected - actual)
+        budget = atol + rtol * abs(expected)
+        ratio = delta / np.maximum(1e-300, budget)
+        # Record the worst normalized discrepancy and its physical identity.
+        # The largest absolute error can occur on a different point.
         i = int(np.argmax(ratio))
-        self.rows.append((name,int(np.sum(delta>budget)),float(delta.max()),float(ratio.flat[i]),
-                          tuple(v[i].item() for v in ids) if ids else i,float(a.flat[i]),float(b.flat[i])))
+        worst_key = tuple(v[i].item() for v in ids) if ids else i
+        self.rows.append((name, int(np.sum(delta > budget)), float(delta.max()),
+                          float(ratio.flat[i]), worst_key,
+                          float(expected.flat[i]), float(actual.flat[i])))
 
     def write(self, path):
         with path.open('w') as stream:
@@ -109,7 +113,16 @@ def compare(step, target, donor, replay, cmp):
     b = shards(target,'points-'+tag,keys)
     ids = aligned(a,b,keys)
     for k in (k for k in b if k not in keys):
-        atol = 0 if k=='section' else 1e-14 if k in ('x','y','weight') else 1e-6 if k.startswith('tau') else 1e-9 if k=='phi' else 1e-10
+        if k == 'section':
+            atol = 0
+        elif k in ('x', 'y', 'weight'):
+            atol = 1e-14
+        elif k.startswith('tau'):
+            atol = 1e-6
+        elif k == 'phi':
+            atol = 1e-9
+        else:
+            atol = 1e-10  # Native strain and engineering shear are dimensionless.
         cmp.check('point/'+k,a[k],b[k],atol,1e-7 if atol>=1e-10 else 0.,ids)
     if not step:
         # The donor writes the virgin incoming history on its first physical

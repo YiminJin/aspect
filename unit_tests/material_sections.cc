@@ -40,7 +40,10 @@ TEST_CASE("Material sections preserve the signed work of an oblique distributed 
                 moment+=J*x[0];
               }
             if (k==1) active=1;
-            const double w=x[0]-2.*x[1], dn=J/geometry.length(k,.1*k);
+            // The point rate is an engineering shear rate (1/s). Its normal
+            // integral over area/current arclength gives the strip rate (m/s).
+            const double w = x[0] - 2.*x[1];
+            const double dn = J/geometry.length(k,.1*k);
             rates.add(k,dn,w,.01);
             perturbed.add(k,dn,w+(cell->center()[0]<1. && q==first_shared?.1:0.),.01);
             point_work+=J*w*forces[k];

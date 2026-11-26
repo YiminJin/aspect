@@ -15,7 +15,9 @@ namespace aspect::Postprocess
   namespace
   {
     using namespace GrowingFault;
-    void check_operator(const SimulatorAccess<2> &sim,const Material<2> &material, std::ostream &out)
+    void check_midpoint_tangent_and_work(const SimulatorAccess<2> &sim,
+                                         const Material<2>        &material,
+                                         std::ostream             &out)
     {
       MidpointSystem op(sim,material,sim.get_solution());
       if (!op.friction_pressures.stations.empty())
@@ -42,46 +44,51 @@ namespace aspect::Postprocess
             out<<"pressure-score "<<k<<' '<<angle<<' '<<result.resistance<<' '<<result.score<<'\n';
           }
         }
-      auto x=op.initial;
+      auto stage_fields=op.initial;
       std::fill(op.eligible.begin(),op.eligible.end(),1u);
-      for (unsigned int i=0; i<op.nv; ++i) x[i]+=2.e-5*std::sin(1.+i);
-      for (unsigned int i=op.phase_begin; i<x.size(); ++i) x[i]=.22+.02*std::sin(i+.7);
-      const auto e=op.assemble_stage(x,true,true);
+      for (unsigned int i=0; i<op.nv; ++i) stage_fields[i]+=2.e-5*std::sin(1.+i);
+      for (unsigned int i=op.phase_begin; i<stage_fields.size(); ++i) stage_fields[i]=.22+.02*std::sin(i+.7);
+      const auto base=op.assemble_stage(stage_fields,true,true);
       for (unsigned int kind=0; kind<3; ++kind)
         {
-          std::vector<double> d(op.n,0.), action(op.n,0.), force(op.angles.size(),0.);
+          std::vector<double> direction(op.n,0.), action(op.n,0.), strip_force_change(op.angles.size(),0.);
           for (unsigned int i=0; i<op.n; ++i)
             if (!op.fixed.count(i))
               {
-                if (i<op.nv && kind!=1) d[i]=.0001*std::cos(i+.3);
-                if (i>=op.phase_begin && kind!=0) d[i]=.03*std::sin(i+.4);
-                if (i>=op.nv && i<op.phase_begin && kind==2) d[i]=.0002*std::cos(i);
+                if (i<op.nv && kind!=1) direction[i]=.0001*std::cos(i+.3);
+                if (i>=op.phase_begin && kind!=0) direction[i]=.03*std::sin(i+.4);
+                if (i>=op.nv && i<op.phase_begin && kind==2) direction[i]=.0002*std::cos(i);
               }
-          for (const auto &[ij,v]:e.jacobian) if (ij.first>=op.n) force[ij.first-op.n]-=v*d[ij.second];
-          Utilities::MPI::sum(force,op.comm,force);
-          for (const auto &[ij,v]:e.jacobian) if (ij.first<op.n)
-              action[ij.first]+=v*(ij.second>=op.n?force[ij.second-op.n]:d[ij.second]);
+          // Eliminate the strip-force rows before pairing the condensed tangent
+          // with the velocity-only, phase-only, or combined direction.
+          for (const auto &[ij, value] : base.jacobian)
+            if (ij.first >= op.n)
+              strip_force_change[ij.first-op.n] -= value * direction[ij.second];
+          Utilities::MPI::sum(strip_force_change,op.comm,strip_force_change);
+          for (const auto &[ij, value] : base.jacobian)
+            if (ij.first < op.n)
+              action[ij.first] += value * (ij.second >= op.n ? strip_force_change[ij.second-op.n] : direction[ij.second]);
           Utilities::MPI::sum(action,op.comm,action);
           for (const double eps:
           {
             .001,.0003,.0001
           })
           {
-            auto xp=x,xm=x;
-            for (unsigned int i=0; i<x.size(); ++i)
+            auto plus_fields=stage_fields,minus_fields=stage_fields;
+            for (unsigned int i=0; i<stage_fields.size(); ++i)
               {
-                xp[i]+=eps*d[i];
-                xm[i]-=eps*d[i];
+                plus_fields[i]+=eps*direction[i];
+                minus_fields[i]-=eps*direction[i];
               }
-            const auto plus=op.assemble_stage(xp,false,false),minus=op.assemble_stage(xm,false,false);
+            const auto plus=op.assemble_stage(plus_fields,false,false),minus=op.assemble_stage(minus_fields,false,false);
             for (unsigned int block=0; block<2; ++block)
               {
                 double error=0.,scale=0.;
                 for (unsigned int i=(block?op.phase_begin:0); i<(block?op.n:op.phase_begin); ++i)
                   if (!op.fixed.count(i))
                     {
-                      const double fd=(plus.residual[i]-minus.residual[i])/(2.*eps);
-                      error+=std::pow(fd-action[i],2);
+                      const double central_difference=(plus.residual[i]-minus.residual[i])/(2.*eps);
+                      error+=std::pow(central_difference-action[i],2);
                       scale+=action[i]*action[i];
                     }
                 const double relative=std::sqrt(error/scale);
@@ -116,16 +123,16 @@ namespace aspect::Postprocess
               }
             for (unsigned int q=0; q<rule.quadrature.size(); ++q)
               {
-                const auto &one=e.candidate.cells.at(cell->id())[q];
+                const auto &endpoint=base.candidate.cells.at(cell->id())[q];
                 const auto &old=material.history().cells.at(cell->id())[q];
-                reference+=values.JxW(q)*.5*(old.stress[0][0]+one.stress[0][0]);
+                reference+=values.JxW(q)*.5*(old.stress[0][0]+endpoint.stress[0][0]);
                 for (unsigned int j=0; j<ids.size(); ++j)
                   if (ids[j]>=op.nv && ids[j]<op.phase_begin)
-                    pressure+=values.JxW(q)*op.G*x[ids[j]]*values[intro.extractors.pressure].value(j,q);
+                    pressure+=values.JxW(q)*op.G*stage_fields[ids[j]]*values[intro.extractors.pressure].value(j,q);
               }
           }
       double work=0.;
-      for (const auto &[i,v]:test) work+=op.G*v*e.residual[i];
+      for (const auto &[i,v]:test) work+=op.G*v*base.residual[i];
       work=Utilities::MPI::sum(work+pressure,op.comm);
       reference=Utilities::MPI::sum(reference,op.comm);
       out<<"deviatoric work "<<work<<" reference "<<reference<<" opposite sign defect "<<std::abs(work+reference)<<'\n';
@@ -172,7 +179,7 @@ namespace aspect::Postprocess
             const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
             std::ofstream out(this->get_output_directory()+"operator-r"+std::to_string(rank)+".txt");
             out<<std::setprecision(17);
-            check_operator(*this,m,out);
+            check_midpoint_tangent_and_work(*this,m,out);
           });
       }
   };

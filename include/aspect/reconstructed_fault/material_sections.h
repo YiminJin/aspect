@@ -31,8 +31,10 @@ namespace aspect
 
       /** Collective construction on a conforming Cartesian mesh. Only strip
        * boundaries and the material frame are replicated. */
-      MaterialSections(const Triangulation<2> &mesh, MPI_Comm comm,
-                       double seed_angle_degrees, unsigned int gauss_order);
+      MaterialSections(const Triangulation<2> &mesh,
+                       MPI_Comm               comm,
+                       double                 seed_angle_degrees,
+                       unsigned int           gauss_order);
 
       /** Seed, connected material stations and forward continuation, ordered by
        * tangent projection in metres. A formed arriving station sets its slope. */
@@ -44,7 +46,8 @@ namespace aspect
       };
 
       /** Construct the replicated graph from the immutable step parent. Local. */
-      AcceptedGraph accepted_graph(const Point<2> &tip, const std::vector<double> &angles,
+      AcceptedGraph accepted_graph(const Point<2>                  &tip,
+                                   const std::vector<double>       &angles,
                                    const std::vector<unsigned int> &formed) const;
 
       /** Arclength midpoints of the in-box fault portion of each strip.
@@ -52,9 +55,10 @@ namespace aspect
        * station angles beyond it. Continue the last tangent through virgin
        * strips. Every strip needs a friction root, hence a nonempty cut.
        * Local operation on replicated geometry, frozen for one attempt. */
-      std::vector<Point<2>> pressure_stations(const Point<2> &tip, const Point<2> &upper,
-                                               const std::vector<double> &angles,
-                                               const std::vector<unsigned int> &formed) const;
+      std::vector<Point<2>> pressure_stations(const Point<2>                  &tip,
+                                              const Point<2>                  &upper,
+                                              const std::vector<double>       &angles,
+                                              const std::vector<unsigned int> &formed) const;
 
       double coordinate(const Point<2> &point) const;
       double width(unsigned int section) const;
@@ -73,8 +77,11 @@ namespace aspect
     struct SectionTransfer
     {
       explicit SectionTransfer(unsigned int n) : free_rate(n), mobility(n) {}
-      void add(unsigned int strip, double area_over_length, double rate, double point_mobility);
-      void sum(MPI_Comm);
+      void add(unsigned int strip,
+               double       area_over_length,
+               double       free_shear_rate,
+               double       point_mobility);
+      void sum(MPI_Comm comm);
       std::vector<double> free_rate, mobility;
     };
   }

@@ -174,15 +174,38 @@ def donor_endpoint_drive(points,planes,rates):
     return drive
 
 
-def endpoint_rows(geom,coeff,gradient,drive):
-    load=geom.load(drive)
-    residual=gradient-load
-    downhill=(coeff<1)&(residual<0)
-    projected=np.clip(coeff-residual/(KF*geom.mass),coeff,1)-coeff
-    return load,residual,downhill,projected>1e-7
+def endpoint_rows(geom, coeff, fracture_gradient, drive):
+    """Test additional feasible damage after accepting these endpoint coefficients.
+
+    The native drive is in Pa. The mapped test-function integrals and fracture
+    gradient give the row residual in J/m. Scaling by KF times the row mass
+    gives the dimensionless projected test used for the resolved count.
+    """
+    load = geom.load(drive)
+    residual = fracture_gradient - load
+    downhill = (coeff < 1) & (residual < 0)
+    projected = np.clip(coeff - residual / (KF * geom.mass), coeff, 1) - coeff
+    return load, residual, downhill, projected > 1e-7
 
 
-def interval(old,new,geom,donor_geom,donor,step,clock,audit_rows,reference_mesh,previous_mesh,cmp,returned_rows=None):
+def interval(old,
+             new,
+             geom,
+             donor_geom,
+             donor,
+             step,
+             clock,
+             audit_rows,
+             reference_mesh,
+             previous_mesh,
+             cmp,
+             returned_rows=None):
+    """Reconstruct one accepted interval from its two physical endpoint exports.
+
+    Use the supplied parent, midpoint, endpoint and duration clocks. Where
+    available, compare reconstructed obstacle rows with the donor archive and
+    with the returned stage captured by the matching ASPECT recorder.
+    """
     p0,p1=old.point,new.point
     aligned(p0,p1,['cell','q','section','x','y','weight'])
     aligned(old.mesh,new.mesh,['cell','component','local','x0','x1','y0','y1'])
@@ -205,6 +228,8 @@ def interval(old,new,geom,donor_geom,donor,step,clock,audit_rows,reference_mesh,
     q=dot(tau,S)-f[k]
     rate=2*dot(A1-A0,S)/dt + (G/ETA)*2*dot(A,S)
     driving=M*(1+3*phi)/(1-phi)**3*q*q/(2*G)
+    # Both stresses and the virtual velocity gradient use the plane-strain
+    # deviator in three dimensions (xx, yy, zz, xy), including the zz work.
     grad,lift,pressure=geom.velocity(new.mesh)
     def strain(g):
         tr=g[:,0,0]+g[:,1,1]
@@ -242,14 +267,14 @@ def interval(old,new,geom,donor_geom,donor,step,clock,audit_rows,reference_mesh,
     active=np.where(pred<=lower,-1,np.where(pred>=upper,1,0))
     KKT=max(abs(stage-np.clip(pred,lower,upper)))
     phase_work=(new.coeff-old.coeff)@residual
-    endfg=geom.H@new.coeff+KF*geom.mass
+    endpoint_fracture_gradient=geom.H@new.coeff+KF*geom.mass
     # Conditional driving at fixed endpoint stress and recoverable strain.
     q1=dot(tau1,S)-resistance(v,sec['age'])[k]
     drive1=M*q1*q1/(2*G)
     positive=phi1>0
     p=phi1[positive]
     drive1[positive]=G*dot(A1,A1)[positive]*(1+3*p)*(1-p)/(M*(p*(1+p))**2)
-    endload,endres,downhill,resolved=endpoint_rows(geom,new.coeff,endfg,drive1)
+    endpoint_load,endpoint_residual,downhill,resolved=endpoint_rows(geom,new.coeff,endpoint_fracture_gradient,drive1)
     check(new.book['phase_KKT'],KKT,2e-12)
     for name,value in [('Wext',wall),('Db',Db),('Dc',Dc),('Df',Df),('fracture',geom.fracture(new.coeff)),
                        ('phase_remainder',rem),('phase_work',phase_work),('bulk',J@dot(tau1,tau1)/(4*G)),('cohesive',J@energy(phi1,A1))]:
@@ -271,17 +296,18 @@ def interval(old,new,geom,donor_geom,donor,step,clock,audit_rows,reference_mesh,
         m=shards(path,f'mesh-{n:04}',['cell','component','local'])
         aligned(m,new.mesh,['cell','component','local','x0','x1','y0','y1'])
         donor_phase.append(m['value'][m['component']==field_names(path).index('phase_field')])
-    dob,deb=donor_phase
-    dsb=(dob+deb)/2
-    donor_res=geom.H@dsb+KF*geom.mass-geom.load(native['Y'])
-    d_pred=dsb-donor_res/(KF*geom.mass)
-    d_status=np.where(d_pred<=dob,-1,np.where(d_pred>=(1+dob)/2,1,0))
+    donor_parent_phase, donor_endpoint_phase = donor_phase
+    donor_stage_phase = (donor_parent_phase + donor_endpoint_phase)/2
+    donor_res=geom.H@donor_stage_phase+KF*geom.mass-geom.load(native['Y'])
+    donor_proposed_phase=donor_stage_phase-donor_res/(KF*geom.mass)
+    donor_stage_status = np.where(donor_proposed_phase <= donor_parent_phase, -1,
+                                  np.where(donor_proposed_phase >= (1 + donor_parent_phase)/2, 1, 0))
     row_ids=[new.mesh[k][new.mesh['component']==new.phase_component] for k in ('cell','local')]
     rates=read([donor/f'tip-sections-{step:04}.csv'],['xi'])
     donor_load=donor_geom.load(donor_endpoint_drive(native,planes,rates))
-    donor_gradient=donor_geom.H@deb+KF*donor_geom.mass
+    donor_gradient=donor_geom.H@donor_endpoint_phase+KF*donor_geom.mass
     cmp.check('reconstructed_row/residual',donor_res,residual,1e-8,1e-7,row_ids)
-    cmp.check('reconstructed_row/classification',d_status,active,0,ids=row_ids)
+    cmp.check('reconstructed_row/classification',donor_stage_status,active,0,ids=row_ids)
     if returned_rows:
         live=shards(returned_rows,f'rows-{step:04}',['cell','i'])
         for values,name in zip(row_ids,['cell','i']):
@@ -296,27 +322,27 @@ def interval(old,new,geom,donor_geom,donor,step,clock,audit_rows,reference_mesh,
         actual_status=np.where(actual_pred<=live['lower'],-1,np.where(actual_pred>=live['upper'],1,0))
         np.testing.assert_array_equal(actual_status,active)
         cmp.check('assembled_row/residual',donor_res,live['residual'],1e-8,1e-7,row_ids)
-        cmp.check('assembled_row/classification',d_status,actual_status,0,ids=row_ids)
+        cmp.check('assembled_row/classification',donor_stage_status,actual_status,0,ids=row_ids)
     if audit_rows:
         donor_rows=shards(audit_rows,f'tip-balance-{step:04}',['cell','i'])
         selected=new.mesh['component']==new.phase_component
         ids=[new.mesh['cell'][selected],new.mesh['local'][selected]]
         for x,y in zip(ids,[donor_rows['cell'],donor_rows['i']]): np.testing.assert_array_equal(x,y)
-        da=donor_rows
-        donor_gradient=da['fracture_gradient']
-        d_pred=da['stage_B']-da['residual']/(KF*da['mass'])
-        classification=np.where(d_pred<=da['lower'],-1,np.where(d_pred>=(1+da['lower'])/2,1,0))
+        donor_row=donor_rows
+        donor_gradient=donor_row['fracture_gradient']
+        donor_proposed_phase=donor_row['stage_B']-donor_row['residual']/(KF*donor_row['mass'])
+        classification=np.where(donor_proposed_phase<=donor_row['lower'],-1,np.where(donor_proposed_phase>=(1+donor_row['lower'])/2,1,0))
         for key,out,tol in [('lower',lower,1e-9),('stage_B',stage,1e-9),('B',new.coeff,1e-9),
                             ('mass',geom.mass,1e-15),('residual',residual,1e-8),('driving_load',load,1e-8),
-                            ('stage_fracture_gradient',fg,1e-8),('fracture_gradient',endfg,1e-8)]:
-            cmp.check('row/'+key,da[key],out,tol,1e-7,ids)
+                            ('stage_fracture_gradient',fg,1e-8),('fracture_gradient',endpoint_fracture_gradient,1e-8)]:
+            cmp.check('row/'+key,donor_row[key],out,tol,1e-7,ids)
         cmp.check('row/classification',classification,active,0,ids=ids)
     donor_endres=donor_gradient-donor_load
-    donor_downhill=(deb<1)&(donor_endres<0)
+    donor_downhill=(donor_endpoint_phase<1)&(donor_endres<0)
     # Feasible additional rise at the *accepted* donor endpoint; its
     # obstacle has already advanced. The stage has its own box and residual.
-    donor_resolved=np.minimum(1-deb,-donor_endres/(KF*donor_geom.mass))>1e-7
-    for name,reference,measured in [('load',donor_load,endload),('residual',donor_endres,endres)]:
+    donor_resolved=np.minimum(1-donor_endpoint_phase,-donor_endres/(KF*donor_geom.mass))>1e-7
+    for name,reference,measured in [('load',donor_load,endpoint_load),('residual',donor_endres,endpoint_residual)]:
         cmp.check('endpoint/'+name,reference,measured,1e-8,1e-7,row_ids)
     for name,reference,measured in [('strict_downhill',donor_downhill,downhill),
                                     ('projected_above_tolerance',donor_resolved,resolved)]:
@@ -324,7 +350,7 @@ def interval(old,new,geom,donor_geom,donor,step,clock,audit_rows,reference_mesh,
     return dict(time_s=new.time,duration_s=dt,stage_s=new.time-h,
                 lower=int(sum(active==-1)),free=int(sum(active==0)),upper=int(sum(active==1)),
                 downhill=int(sum(downhill)),resolved_downhill=int(sum(resolved)),
-                min_abs_endpoint_residual_J_m=float(min(abs(endres))),max_endpoint_load_J_m=float(max(endload)),
+                min_abs_endpoint_residual_J_m=float(min(abs(endpoint_residual))),max_endpoint_load_J_m=float(max(endpoint_load)),
                 kkt=KKT,mechanics=new.book['mechanical_residual'],
                 registrations=int(sum(sec['formed']-old.strip['formed'])),
                 signed_slip_m2=ds@(sec['slip']-old.strip['slip']),phase_increment_L2_m=np.sqrt(J@inc**2),
