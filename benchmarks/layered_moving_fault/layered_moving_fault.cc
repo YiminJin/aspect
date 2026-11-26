@@ -233,6 +233,7 @@ namespace aspect
         void parse_parameters(ParameterHandler &prm) override
         {
           PhaseFieldFault<dim>::parse_parameters(prm);
+          AssertThrow(!this->uses_growing_strips(), ExcMessage("This benchmark requires mature trace mechanics."));
           prm.enter_subsection("Material model");
           prm.enter_subsection("Layered mature fault");
           homogeneous=prm.get_bool("Homogeneous");

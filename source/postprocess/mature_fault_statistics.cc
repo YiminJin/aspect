@@ -19,12 +19,12 @@ namespace aspect
       public:
         std::pair<std::string,std::string> execute(TableHandler &statistics) override
         {
-          AssertThrow(dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model()),
+          const auto *model = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+          AssertThrow(model && !model->uses_growing_strips(),
                       ExcMessage("Mature fault statistics require a mature material trace."));
-          const auto &model = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
-          const auto &labels = model.labels();
-          const auto &ages = model.label_ages();
-          const auto &last = model.phase_profile().geometry.segment(labels.size()-2);
+          const auto &labels = model->labels();
+          const auto &ages = model->label_ages();
+          const auto &last = model->phase_profile().geometry.segment(labels.size()-2);
           const double length = last.station+last.length;
           double age = 0., slip = 0., rate = 0.;
           for (unsigned int j=1; j<labels.size(); ++j)

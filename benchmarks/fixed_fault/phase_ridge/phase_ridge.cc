@@ -121,12 +121,18 @@ namespace aspect
     {
       public:
         static void declare_parameters(ParameterHandler &) {}
+        void parse_parameters(ParameterHandler &prm) override
+        {
+          PhaseFieldFault<dim>::parse_parameters(prm);
+          AssertThrow(!this->uses_growing_strips(), ExcMessage("The ridge probe requires mature trace mechanics."));
+        }
+
         using PhaseFieldFault<dim>::normal_compression;
         // All ranks in RidgeProbe enter after acceptance and before the next
         // attempt replaces the relaxed parent. No collective on material reads.
         auto collect_attempt_samples(const LinearAlgebra::BlockVector &fields) const
         {
-          return this->coupling.sample_bulk(fields);
+          return this->coupling->sample_bulk(fields);
         }
     };
     ASPECT_REGISTER_MATERIAL_MODEL(ObservedRidge,"observed ridge","Unmodified free RSF solve with a collective fixture probe.")
@@ -218,8 +224,8 @@ namespace aspect
         {
           // Retain the prescribed initial rate on every label. Only the free
           // material registers the RSF preparation and convergence callbacks.
-          this->coupling.initialize_simulator(this->get_simulator());
-          this->coupling.initialize();
+          this->coupling->initialize_simulator(this->get_simulator());
+          this->coupling->initialize();
           this->get_signals().set_assemblers.connect([](const SimulatorAccess<dim> &, Assemblers::Manager<dim> &assemblers)
           {
             for (auto &assembler:assemblers.stokes_system)

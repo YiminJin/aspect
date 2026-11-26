@@ -1,6 +1,7 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/simulator/solver/midpoint_system.h>
 #include <aspect/simulator/solver/midpoint_fault.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/phase_field/bernstein_bounds.h>
 #include <numeric>
 #include <aspect/simulator.h>
@@ -114,7 +115,7 @@ namespace aspect::GrowingFault
   }
 
   MidpointSystem::MidpointSystem(const SimulatorAccess<2>         &simulator,
-                                 const Material<2>                &m,
+                                 const StripMaterialHistory<2>    &m,
                                  const LinearAlgebra::BlockVector &solution)
     : sim(simulator),
       material(m),
@@ -748,11 +749,11 @@ namespace aspect::GrowingFault
     }
   }
 
-  static void solve_midpoint(const SimulatorAccess<2>   &sim,
-                             const Material<2>          &material,
-                             LinearAlgebra::BlockVector &solution,
-                             History                    &next,
-                             Balance                    &balance)
+  static void solve_midpoint(const SimulatorAccess<2>      &sim,
+                             const StripMaterialHistory<2> &material,
+                             LinearAlgebra::BlockVector    &solution,
+                             History                       &next,
+                             Balance                       &balance)
   {
     TimerOutput::Scope timer(sim.get_computing_timer(), "Coupled midpoint fault");
     MidpointSystem system(sim, material, solution);
@@ -815,9 +816,9 @@ namespace aspect::GrowingFault
     const auto selected = std::find(methods.begin(), methods.end(), Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase);
     if (selected == methods.end())
       return;
-    const auto *provider = dynamic_cast<const Material<dim> *>(&model);
-    AssertThrow(provider, ExcMessage("Midpoint fault phase requires a material providing the Maxwell/AT1 midpoint response."));
-    const auto field = provider->phase_field();
+    const auto *provider = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&model);
+    AssertThrow(provider && provider->uses_growing_strips(), ExcMessage("Midpoint fault phase requires a material providing the Maxwell/AT1 midpoint response."));
+    const auto field = provider->strip_history().phase_field();
     p.surface_energy_model.validate();
     AssertThrow(&p.surface_energy_model.geometry == &PhaseField::CrackGeometry::select("AT1") &&
                 p.names_of_compositional_fields[selected - methods.begin()] == p.surface_energy_model.composition,
@@ -850,7 +851,10 @@ namespace aspect::GrowingFault
                                  MaterialModel::Interface<2> &model,
                                  LinearAlgebra::BlockVector  &solution)
   {
-    auto &material = dynamic_cast<Material<2> &>(model);
+    auto &fault = dynamic_cast<MaterialModel::PhaseFieldFault<2> &>(model);
+    AssertThrow(fault.uses_growing_strips(),
+                ExcMessage("Midpoint fault phase requires a material providing the Maxwell/AT1 midpoint response."));
+    auto &material = *fault.strips;
     SolverControl control(sim.get_parameters().max_nonlinear_iterations, sim.get_parameters().nonlinear_tolerance);
     material.begin_attempt();
     const auto field = material.phase_field();

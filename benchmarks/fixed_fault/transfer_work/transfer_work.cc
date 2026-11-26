@@ -88,6 +88,7 @@ namespace aspect
         void parse_parameters(ParameterHandler &prm) override
         {
           PhaseFieldFault<dim>::parse_parameters(prm);
+          AssertThrow(!this->uses_growing_strips(), ExcMessage("This benchmark requires mature trace mechanics."));
           prm.enter_subsection("Material model");
           prm.enter_subsection("Transfer work probe");
           increment = prm.get_double("Middle rate increment");
@@ -97,8 +98,8 @@ namespace aspect
 
         void initialize() override
         {
-          this->coupling.initialize_simulator(this->get_simulator());
-          this->coupling.initialize();
+          this->coupling->initialize_simulator(this->get_simulator());
+          this->coupling->initialize();
           // Prescribe these three trial rates during initialization. As in the
           // ridge diagnostic, the free RSF root and convergence veto stay off.
           this->get_signals().set_assemblers.connect([](const SimulatorAccess<dim> &, Assemblers::Manager<dim> &manager)
@@ -139,7 +140,7 @@ namespace aspect
           owned.block(block) = 0.;
           LinearAlgebra::BlockVector sample(intro.index_sets.system_partitioning,intro.index_sets.system_relevant_partitioning,comm);
           sample = owned;
-          const auto at_rest = this->coupling.sample_bulk(sample);
+          const auto at_rest = this->coupling->sample_bulk(sample);
 
           std::vector<types::global_dof_index> ids(this->get_fe().n_dofs_per_cell());
           for (const auto &cell : this->get_dof_handler().active_cell_iterators())
@@ -158,7 +159,7 @@ namespace aspect
               }
           owned.compress(VectorOperation::insert);
           sample = owned;
-          const auto with_shear = this->coupling.sample_bulk(sample);
+          const auto with_shear = this->coupling->sample_bulk(sample);
           AssertThrow(at_rest.size() == with_shear.size(),ExcInternalError());
 
           // The section residual has the positive driving shear. Difference

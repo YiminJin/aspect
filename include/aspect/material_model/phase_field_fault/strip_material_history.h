@@ -1,7 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
-#ifndef _aspect_material_model_growing_fault_h
-#define _aspect_material_model_growing_fault_h
-#include <aspect/material_model/interface.h>
+#ifndef _aspect_material_model_phase_field_fault_strip_material_history_h
+#define _aspect_material_model_phase_field_fault_strip_material_history_h
 #include <aspect/material_model/rheology/friction_normal_stress.h>
 #include <aspect/simulator_access.h>
 #include <aspect/material_model/rheology/cohesive_maxwell.h>
@@ -73,31 +72,49 @@ namespace aspect::GrowingFault
     }
   };
 
-  /** Material owner for a fixed-reference, single-forward-front midpoint
-   * solve. The simulator owns the velocity, pressure and Bernstein phase. The
-   * material owns point tensors and strip history. A fresh attempt borrows
-   * accepted state. Only the post-accept callback publishes its returned pair. */
+  /**
+   * Material state for the growing fault's fixed mesh. Native tensor records
+   * follow the owned (CellId, quadrature point) pairs. Ordered strip records
+   * and their pressure stations are replicated on every rank. The selected
+   * signed resistance law owns any additional strip state, including RSF age.
+   *
+   * The midpoint solver uses the same accepted parent for every assembly and
+   * retry. It stages one endpoint, including its work ledger. The material
+   * promotes that endpoint only after the simulator accepts the step.
+   */
   template <int dim>
-  class Material : public MaterialModel::Interface<dim>, public SimulatorAccess<dim>
+  class StripMaterialHistory
   {
     public:
-      static void declare_parameters(ParameterHandler &prm);
-      void parse_parameters(ParameterHandler &prm) override;
-      void initialize() override;
-      bool is_compressible() const override
-      {
-        return false;
-      }
-      void evaluate(const MaterialModel::MaterialModelInputs<dim> &in,
-                    MaterialModel::MaterialModelOutputs<dim>      &out) const override;
-      void save(std::map<std::string,std::string> &status) const override;
-      void load(const std::map<std::string,std::string> &status) override;
+      StripMaterialHistory(const SimulatorAccess<dim> &simulator,
+                           ParameterHandler           &prm,
+                           unsigned int                phase_field_index);
 
-      /** Discard any rejected trial. Seed owned native points on the first call. */
+      /** Declare geometry, Maxwell and resistance inputs for the strip formulation. */
+      static void declare_parameters(ParameterHandler &prm);
+
+      /**
+       * Build the native rules on the fixed mesh at startup or after mesh
+       * restoration. On restart install saved native tensors, replicated strip
+       * records and law-owned state before the pre-solve observers. Collective.
+       */
+      void initialize_native_history();
+
+      /** Publish the staged endpoint and advance law-owned state by the accepted duration (s). */
+      void accept_endpoint(double duration);
+
+      /** Discard a rejected trial. On first entry collectively build the owned native rules. */
       void begin_attempt();
 
-      /** Hold this converged endpoint until the simulator accepts or repeats the step. */
+      /** Keep a converged endpoint and its full-interval work (J/m) until the repeat decision. */
       void stage_candidate(History &&candidate, const Balance &ledger);
+
+      /** Collectively gather accepted native records and write their checkpoint on rank zero. */
+      void save(std::map<std::string,std::string> &status) const;
+
+      /** Read the checkpoint metadata. The mesh-restoration callback rebinds the native points. */
+      void load(const std::map<std::string,std::string> &status);
+
       const History &history() const
       {
         return accepted;
@@ -135,8 +152,11 @@ namespace aspect::GrowingFault
         return seed_tip_position;
       }
     private:
+      /** The owning material supplies the fixed mesh, reference pressure and MPI communicator. */
+      const SimulatorAccess<dim> &simulator;
+
       unsigned int quadrature_order;
-      unsigned int phase_field_index;
+      const unsigned int phase_field_index;
       double seed_angle_degrees;
       double prescribed_compression; //!< Constant compression in Pa when that source is selected.
       MaterialModel::Rheology::FrictionNormalStress normal_stress;
@@ -148,7 +168,6 @@ namespace aspect::GrowingFault
       std::unique_ptr<History> trial;
       Balance last_balance,trial_balance;
       bool balance_available=false;
-      void initialize_native_history();
       /** Deferred until ASPECT restores the mesh and reconstructs native rules. */
       std::string checkpoint_bytes;
       bool restore_v1=false;

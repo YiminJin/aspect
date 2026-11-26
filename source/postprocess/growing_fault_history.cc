@@ -1,6 +1,7 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/postprocess/growing_fault_history.h>
-#include <aspect/material_model/growing_fault.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/phase_field_fault/strip_material_history.h>
 #include <aspect/geometry_model/interface.h>
 #include <deal.II/fe/fe_values.h>
 #include <filesystem>
@@ -42,7 +43,8 @@ namespace aspect::Postprocess
   template <int dim>
   void GrowingFaultHistory<dim>::initialize()
   {
-    AssertThrow(dim == 2 && dynamic_cast<const GrowingFault::Material<dim> *>(&this->get_material_model()),
+    const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+    AssertThrow(dim == 2 && fault && fault->uses_growing_strips(),
                 ExcMessage("The growing fault history exporter requires the two-dimensional growing fault material."));
   }
 
@@ -51,7 +53,7 @@ namespace aspect::Postprocess
   {
     if constexpr(dim==2)
       {
-        const auto &material=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
+        const auto &material = dynamic_cast<const MaterialModel::PhaseFieldFault<2> &>(this->get_material_model()).strip_history();
         const auto &history=material.history();
         const auto comm=this->get_mpi_communicator();
         const auto rank=Utilities::MPI::this_mpi_process(comm);

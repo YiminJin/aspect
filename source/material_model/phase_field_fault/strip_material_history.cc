@@ -1,17 +1,15 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/material_model/phase_field_fault/input_compatibility.h>
-#include <aspect/material_model/growing_fault.h>
+#include <aspect/material_model/phase_field_fault/strip_material_history.h>
 #include <aspect/material_model/rheology/fault_resistance.h>
 #include <aspect/geometry_model/box.h>
 #include <aspect/adiabatic_conditions/interface.h>
-#include <deal.II/fe/fe_values.h>
-#include <numeric>
 
 namespace aspect::GrowingFault
 {
   namespace
   {
-    // The repaired v1 archive interleaved RSF age with each physical strip.
+    // The v1 archive interleaved RSF age with each physical strip.
     // Decode this representation only when restoring that format.
     struct ArchivedRsfStrip : SectionHistory
     {
@@ -24,7 +22,7 @@ namespace aspect::GrowingFault
   }
 
   template <int dim>
-  void Material<dim>::declare_parameters(ParameterHandler &prm)
+  void StripMaterialHistory<dim>::declare_parameters(ParameterHandler &prm)
   {
     using MaterialModel::FaultInputCompatibility::declare_entry;
     prm.enter_subsection("Material model");
@@ -50,15 +48,14 @@ namespace aspect::GrowingFault
   }
 
   template <int dim>
-  void Material<dim>::parse_parameters(ParameterHandler &prm)
+  StripMaterialHistory<dim>::StripMaterialHistory(const SimulatorAccess<dim> &simulator,
+                                                  ParameterHandler           &prm,
+                                                  const unsigned int          phase_field_index)
+    : simulator(simulator),
+      phase_field_index(phase_field_index)
   {
-    MaterialModel::FaultInputCompatibility::resolve(prm, /* growing = */ true);
-    const auto &p = this->get_parameters();
+    const auto &p = simulator.get_parameters();
     const auto &energy = p.surface_energy_model;
-    energy.validate();
-    phase_field_index = this->introspection().compositional_index_for_name(energy.composition);
-    AssertThrow(&this->get_material_model() == this && p.compositional_field_methods[phase_field_index] == Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase,
-                ExcMessage("Growing fault requires a top-level midpoint material and a midpoint fault phase."));
     using NormalStress = MaterialModel::Rheology::FrictionNormalStress;
     normal_stress = NormalStress::parse(prm, NormalStress::Source::prescribed_constant);
     const bool legacy_compression = !prm.get("Surface pressure").empty();
@@ -89,63 +86,31 @@ namespace aspect::GrowingFault
     resistance_law->validate_midpoint();
     prm.leave_subsection();
     prm.leave_subsection();
-    this->model_dependence.viscosity = MaterialModel::NonlinearDependence::none;
-    this->model_dependence.density = MaterialModel::NonlinearDependence::none;
-    this->model_dependence.compressibility = MaterialModel::NonlinearDependence::none;
-    this->model_dependence.specific_heat = MaterialModel::NonlinearDependence::none;
-    this->model_dependence.thermal_conductivity = MaterialModel::NonlinearDependence::none;
   }
 
   template <int dim>
-  void Material<dim>::initialize()
+  void StripMaterialHistory<dim>::accept_endpoint(const double duration)
   {
-    this->get_pcout() << "   Growing fault midpoint solver: bordered matrix gathered on MPI rank 0, "
-                      << "UMFPACK direct factorization (separate velocity and pressure blocks)." << std::endl;
-    this->get_pcout() << "   Fault Maxwell material (growing strips): shear modulus = " << point_law.G
-                      << " Pa, viscosity = " << point_law.eta << " Pa s." << std::endl;
-    this->get_signals().post_resume_load_user_data.connect([this](parallel::distributed::Triangulation<dim> &)
-    {
-      initialize_native_history();
-    });
-    this->get_signals().post_accept_timestep.connect([this](LinearAlgebra::BlockVector &)
-    {
-      if (trial)
-        {
-          for (unsigned int k = 0; k < trial->sections.size(); ++k)
-            resistance_law->accept_rate(k, trial->sections[k].rate, this->get_timestep());
-          accepted = std::move(*trial);
-          trial.reset();
-          last_balance = trial_balance;
-          balance_available = true;
-        }
-    });
-  }
-
-  template <int dim>
-  void Material<dim>::evaluate(const MaterialModel::MaterialModelInputs<dim> &in,
-                               MaterialModel::MaterialModelOutputs<dim>      &out) const
-  {
-    for (unsigned int q = 0; q < in.n_evaluation_points(); ++q)
+    if (trial)
       {
-        out.viscosities[q] = point_law.eta;
-        out.densities[q] = 1.;
-        out.specific_heat[q] = 1.;
-        out.thermal_conductivities[q] = 0.;
-        out.thermal_expansion_coefficients[q] = out.compressibilities[q] = 0.;
-        out.entropy_derivative_pressure[q] = out.entropy_derivative_temperature[q] = 0.;
-        std::fill(out.reaction_terms[q].begin(), out.reaction_terms[q].end(), 0.);
+        for (unsigned int k = 0; k < trial->sections.size(); ++k)
+          resistance_law->accept_rate(k, trial->sections[k].rate, duration);
+        accepted = std::move(*trial);
+        trial.reset();
+        last_balance = trial_balance;
+        balance_available = true;
       }
   }
 
   template <int dim>
-  void Material<dim>::initialize_native_history()
+  void StripMaterialHistory<dim>::initialize_native_history()
   {
     if constexpr (dim == 2)
       {
-        AssertThrow(dynamic_cast<const GeometryModel::Box<dim>*>(&this->get_geometry_model()) &&
-                    this->get_geometry_model().get_periodic_boundary_pairs().empty(),
+        AssertThrow(dynamic_cast<const GeometryModel::Box<dim>*>(&simulator.get_geometry_model()) &&
+                    simulator.get_geometry_model().get_periodic_boundary_pairs().empty(),
                     ExcMessage("Growing fault requires a fixed nonperiodic box."));
-        geometry = std::make_unique<MaterialSections>(this->get_triangulation(), this->get_mpi_communicator(), seed_angle_degrees, quadrature_order);
+        geometry = std::make_unique<MaterialSections>(simulator.get_triangulation(), simulator.get_mpi_communicator(), seed_angle_degrees, quadrature_order);
         accepted.sections.resize(geometry->edges.size() - 1);
         resistance_law->initialize(accepted.sections.size());
         for (const auto &[cell_id, rule] : geometry->cells)
@@ -184,7 +149,7 @@ namespace aspect::GrowingFault
                         ExcMessage("Incompatible native material strip checkpoint."));
             std::map<std::string, std::pair<std::array<Point<2>, 4>, std::vector<PointHistory>>> points;
             ar >> points;
-            for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+            for (const auto &cell : simulator.get_dof_handler().active_cell_iterators())
               if (cell->is_locally_owned())
                 {
                   auto &history = accepted.cells.at(cell->id());
@@ -201,14 +166,14 @@ namespace aspect::GrowingFault
   }
 
   template <int dim>
-  SectionPressures Material<dim>::section_pressures() const
+  SectionPressures StripMaterialHistory<dim>::section_pressures() const
   {
     SectionPressures result;
     result.values.assign(accepted.sections.size(), prescribed_compression);
     if constexpr (dim == 2)
       if (normal_stress.uses_adiabat())
         {
-          const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
+          const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(simulator.get_geometry_model());
           std::vector<double> angles;
           std::vector<unsigned int> formed;
           for (const auto &section : accepted.sections)
@@ -220,7 +185,7 @@ namespace aspect::GrowingFault
           for (unsigned int k = 0; k < result.values.size(); ++k)
             {
               const auto &point = result.stations[k];
-              const double pressure = this->get_adiabatic_conditions().pressure(point);
+              const double pressure = simulator.get_adiabatic_conditions().pressure(point);
               if (!(std::isfinite(pressure) && pressure > 0.))
                 {
                   std::ostringstream message;
@@ -235,7 +200,7 @@ namespace aspect::GrowingFault
   }
 
   template <int dim>
-  void Material<dim>::begin_attempt()
+  void StripMaterialHistory<dim>::begin_attempt()
   {
     trial.reset();
     if (!geometry)
@@ -243,17 +208,17 @@ namespace aspect::GrowingFault
   }
 
   template <int dim>
-  void Material<dim>::stage_candidate(History &&candidate, const Balance &ledger)
+  void StripMaterialHistory<dim>::stage_candidate(History &&candidate, const Balance &ledger)
   {
     trial = std::make_unique<History>(std::move(candidate));
     trial_balance = ledger;
   }
 
   template <int dim>
-  std::vector<double> Material<dim>::checkpoint_parameters() const
+  std::vector<double> StripMaterialHistory<dim>::checkpoint_parameters() const
   {
-    const auto &energy = this->get_parameters().surface_energy_model;
-    std::vector<double> signature = {energy.fracture_energy, energy.length_scale, this->get_parameters().phase_discontinuous_penalty,
+    const auto &energy = simulator.get_parameters().surface_energy_model;
+    std::vector<double> signature = {energy.fracture_energy, energy.length_scale, simulator.get_parameters().phase_discontinuous_penalty,
                                      prescribed_compression, seed_tip_position[0], seed_tip_position[1], point_law.G, point_law.eta, point_law.m
                                     };
     const auto parameters = resistance_law->parameters();
@@ -262,15 +227,15 @@ namespace aspect::GrowingFault
   }
 
   template <int dim>
-  void Material<dim>::save(std::map<std::string, std::string> &status) const
+  void StripMaterialHistory<dim>::save(std::map<std::string, std::string> &status) const
   {
     if (!geometry)
       return;
-    const auto pressure_profile = normal_stress.checkpoint_profile(*this);
+    const auto pressure_profile = normal_stress.checkpoint_profile(simulator);
     using CellRecord = std::pair<std::array<Point<2>, 4>, std::vector<PointHistory>>;
     std::map<std::string, CellRecord> local;
     if constexpr(dim == 2)
-      for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+      for (const auto &cell : simulator.get_dof_handler().active_cell_iterators())
         if (cell->is_locally_owned())
           {
             auto &record = local[cell->id().to_string()];
@@ -278,8 +243,8 @@ namespace aspect::GrowingFault
               record.first[v] = cell->vertex(v);
             record.second = accepted.cells.at(cell->id());
           }
-    auto parts = Utilities::MPI::gather(this->get_mpi_communicator(), local);
-    if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator()) == 0)
+    auto parts = Utilities::MPI::gather(simulator.get_mpi_communicator(), local);
+    if (Utilities::MPI::this_mpi_process(simulator.get_mpi_communicator()) == 0)
       {
         std::map<std::string, CellRecord> all;
         for (auto &part : parts)
@@ -314,7 +279,7 @@ namespace aspect::GrowingFault
   }
 
   template <int dim>
-  void Material<dim>::load(const std::map<std::string, std::string> &status)
+  void StripMaterialHistory<dim>::load(const std::map<std::string, std::string> &status)
   {
     AssertThrow(status.count("Native growing fault v1") || status.count("Native growing fault v2"),
                 ExcMessage("Checkpoint has no native growing fault history for the selected route."));
@@ -327,7 +292,7 @@ namespace aspect::GrowingFault
         aspect::iarchive archive(bytes);
         std::string definition;
         archive >> definition >> accepted.friction_pressures.stations >> accepted.friction_pressures.values;
-        AssertThrow(definition == normal_stress.checkpoint_profile(*this),
+        AssertThrow(definition == normal_stress.checkpoint_profile(simulator),
                     ExcMessage("Growing fault friction pressure profile differs from the checkpoint."));
       }
     restore_v1 = status.find("Native growing fault v2") == status.end();
@@ -342,6 +307,6 @@ namespace aspect::GrowingFault
       }
   }
 
-  ASPECT_REGISTER_MATERIAL_MODEL(Material, "growing fault",
-                                 "Compatibility spelling for phase field fault with midpoint fault phase: plane-strain Maxwell response, signed strip resistance and irreversible AT1 evolution.")
+  template class StripMaterialHistory<2>;
+  template class StripMaterialHistory<3>;
 }

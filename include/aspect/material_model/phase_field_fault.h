@@ -8,19 +8,28 @@
 
 #include <aspect/material_model/equation_of_state/linearized_incompressible.h>
 #include <aspect/reconstructed_fault/stokes_coupling.h>
+#include <aspect/simulator/solver/midpoint_fault.h>
 #include <aspect/material_model/rheology/friction_normal_stress.h>
 #include <deal.II/base/parsed_function.h>
 
 namespace aspect
 {
+  namespace GrowingFault
+  {
+    template <int dim> class StripMaterialHistory;
+  }
+
   namespace MaterialModel
   {
     /**
-     * Single-lithology Maxwell material in plane strain with mature-fault
-     * friction. Three static DG fields store the accepted spatial deviatoric
-     * stress (xx, yy, xy in Pa). Slip and slip rate live on the ordered
-     * vertices of a piecewise linear material trace. The resistance law owns
-     * any additional constitutive history indexed by those vertices.
+     * Plane-strain phase-field fault material. The method of the configured
+     * phase composition selects the mechanical formulation. A prescribed
+     * trace stores positive slip speeds on ordered material vertices and
+     * accepted spatial deviatoric stresses (xx, yy, xy in Pa) in DG fields.
+     * Midpoint evolution of an AT1 phase instead couples signed rates on
+     * material strips to tensors stored at native material quadrature points.
+     * The selected resistance law owns its optional constitutive state.
+     * Both formulations publish history after the simulator accepts the step.
      *
      * @ingroup MaterialModels
      */
@@ -29,6 +38,16 @@ namespace aspect
     {
       public:
         PhaseFieldFault();
+        ~PhaseFieldFault() override;
+
+        /** Whether the phase method selects signed strip rates with midpoint AT1 evolution. */
+        bool uses_growing_strips() const
+        {
+          return strips != nullptr;
+        }
+
+        /** Read the active strip material and its accepted native history. */
+        const GrowingFault::StripMaterialHistory<dim> &strip_history() const;
 
         static void declare_parameters(ParameterHandler &prm);
         void parse_parameters(ParameterHandler &prm) override;
@@ -49,12 +68,14 @@ namespace aspect
         /** Return the accepted surface Maxwell memory (Pa m) in material ID order. */
         const std::vector<double> &label_memory() const
         {
+          require_mature_trace();
           return maxwell_memory;
         }
 
         /** Return the normalized slip distribution associated with the accepted trace. */
         const FaultPhaseProfile<dim> &phase_profile() const
         {
+          require_mature_trace();
           return accepted->profile;
         }
 
@@ -97,10 +118,25 @@ namespace aspect
         }
 
         /** Couples the local Maxwell response and the section balance to the Stokes equations. */
-        FaultStokesCoupling<dim> coupling;
+        std::unique_ptr<FaultStokesCoupling<dim>> coupling;
 
       private:
         friend class aspect::FaultStokesCoupling<dim>;
+        friend SolverControl GrowingFault::advance_midpoint(const SimulatorAccess<2> &,
+                                                            MaterialModel::Interface<2> &,
+                                                            LinearAlgebra::BlockVector &);
+
+        /** Only the midpoint solver can stage a new strip endpoint. */
+        std::unique_ptr<GrowingFault::StripMaterialHistory<dim>> strips;
+
+        /** Configure the trace, its Maxwell response and RSF inputs after field selection. */
+        void parse_trace_parameters(ParameterHandler &prm);
+
+        void require_mature_trace() const
+        {
+          AssertThrow(accepted, ExcMessage("This operation requires mature trace mechanics."));
+        }
+
         using Stress = SymmetricTensor<2,dim>;
 
         /** Stress (Pa) due to the deviatoric strain rate over the current Maxwell interval. */

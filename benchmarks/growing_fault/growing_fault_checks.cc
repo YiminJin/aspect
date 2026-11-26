@@ -1,7 +1,7 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/postprocess/growing_fault_history.h>
 #include <aspect/geometry_model/interface.h>
-#include <aspect/material_model/growing_fault.h>
+#include <aspect/material_model/phase_field_fault/strip_material_history.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/simulator_signals.h>
 #include <aspect/simulator/solver/midpoint_system.h>
@@ -15,9 +15,9 @@ namespace aspect::Postprocess
   namespace
   {
     using namespace GrowingFault;
-    void check_midpoint_tangent_and_work(const SimulatorAccess<2> &sim,
-                                         const Material<2>        &material,
-                                         std::ostream             &out)
+    void check_midpoint_tangent_and_work(const SimulatorAccess<2>      &sim,
+                                         const StripMaterialHistory<2> &material,
+                                         std::ostream                  &out)
     {
       MidpointSystem op(sim,material,sim.get_solution());
       if (!op.friction_pressures.stations.empty())
@@ -148,7 +148,7 @@ namespace aspect::Postprocess
       {
         if constexpr(dim==2)
           {
-            const auto &m=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
+            const auto &m=dynamic_cast<const MaterialModel::PhaseFieldFault<2> &>(this->get_material_model()).strip_history();
             const auto c=this->introspection().component_indices.compositional_fields[m.phase_field()];
             const auto &fe=this->get_fe();
             std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
@@ -175,7 +175,7 @@ namespace aspect::Postprocess
           this->get_signals().pre_nonlinear_solver.connect([this](const SimulatorAccess<dim> &)
           {
             if (this->get_timestep_number()!=1) return;
-            const auto &m=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
+            const auto &m=dynamic_cast<const MaterialModel::PhaseFieldFault<2> &>(this->get_material_model()).strip_history();
             const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
             std::ofstream out(this->get_output_directory()+"operator-r"+std::to_string(rank)+".txt");
             out<<std::setprecision(17);
@@ -199,7 +199,7 @@ namespace aspect::Postprocess
         });
         this->get_signals().post_nonlinear_solver.connect([this](const SolverControl &control)
         {
-          const auto &m=dynamic_cast<const GrowingFault::Material<dim>&>(this->get_material_model());
+          const auto &m=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> &>(this->get_material_model()).strip_history();
           if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator())==0)
             std::ofstream(this->get_output_directory()+"completions",std::ios::app)
                 <<this->get_timestep_number()<<' '<<m.history().step<<' '<<control.last_step()<<' '
@@ -227,9 +227,8 @@ namespace aspect::Postprocess
     private:
       void record_parent(const std::string &when) const
       {
-        const auto &m=dynamic_cast<const GrowingFault::Material<dim>&>(this->get_material_model());
         std::map<std::string,std::string> record;
-        m.save(record);
+        this->get_material_model().save(record);
         if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator())==0)
           for (const auto &[name,data]:record)
             std::ofstream(this->get_output_directory()+when+"-"+name,std::ios::binary).write(data.data(),data.size());
@@ -259,7 +258,7 @@ namespace aspect::TimeStepping
         if constexpr(dim==2)
           if (this->get_timestep_number()==3)
             {
-              const auto &m=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
+              const auto &m=dynamic_cast<const MaterialModel::PhaseFieldFault<2> &>(this->get_material_model()).strip_history();
               const auto &v=this->get_solution();
               GrowingFault::MidpointSystem op(*this,m,v);
               op.freeze_direction_neighborhood();
@@ -282,7 +281,7 @@ namespace aspect::TimeStepping
                   slopes<<std::setprecision(17);
                   for (const auto &root:e.roots) slopes<<root.slope<<'\n';
                 }
-              AssertThrow(e.ledger.mechanical<=m.get_parameters().nonlinear_tolerance && e.ledger.kkt<=1.e-7,
+              AssertThrow(e.ledger.mechanical<=this->get_parameters().nonlinear_tolerance && e.ledger.kkt<=1.e-7,
                           ExcMessage("Returned fields fail the physical convergence gate."));
               std::vector<double> d(op.n,0.),action(op.n,0.),force(op.angles.size(),0.);
               for (unsigned int i=0; i<op.n; ++i)
@@ -332,10 +331,10 @@ namespace aspect::TimeStepping
         if constexpr(dim==2)
           if (this->get_timestep_number()==2)
             {
-              const auto &m=dynamic_cast<const GrowingFault::Material<2>&>(this->get_material_model());
+              const auto &m=dynamic_cast<const MaterialModel::PhaseFieldFault<2> &>(this->get_material_model()).strip_history();
               AssertThrow(m.history().step==1,ExcMessage("Premature section publication."));
               std::map<std::string,std::string> state;
-              m.save(state);
+              this->get_material_model().save(state);
               const auto coefficients=[](const LinearAlgebra::BlockVector &v)
               {
                 std::vector<double> data;
@@ -373,20 +372,23 @@ namespace aspect::MaterialModel
 {
   // Read parameter files produced by the original state-free benchmark.
   // These aliases only translate its old selector into the registered law.
-  template <int dim, template<int> class Base>
-  class LegacyDashpotSelector : public Base<dim>
+  template <int dim>
+  class LegacyDashpotSelector : public PhaseFieldFault<dim>
   {
     public:
       static void declare_parameters(ParameterHandler &prm)
       {
         // The SDK plugin registers after the built-in materials. Each handler
         // owns these actions through parsing, including explicit RSF defaults.
-        auto supplied=std::make_shared<std::set<std::string>>();
+        // Both legacy names register this same type on the parameter handler.
+        if (const auto entry=selectors.find(&prm); entry!=selectors.end() && !entry->second.expired())
+          return;
         for (auto it=selectors.begin(); it!=selectors.end();)
           if (it->second.expired())
             it=selectors.erase(it);
           else
             ++it;
+        auto supplied=std::make_shared<std::set<std::string>>();
         selectors[&prm]=supplied;
         const std::string spellings[] = {"Phase field fault","Growing fault"};
         prm.enter_subsection("Material model");
@@ -404,18 +406,19 @@ namespace aspect::MaterialModel
 
       void parse_parameters(ParameterHandler &prm) override
       {
-        const std::vector<std::string> section= {"Material model",
-                                                 std::is_same_v<Base<dim>,PhaseFieldFault<dim>>?"Phase field fault":"Growing fault"
-                                                };
+        const bool growing = prm.get({"Material model"}, "Model name") == "linear strip resistance";
         for (const auto &spelling : *selectors.at(&prm).lock())
           AssertThrow(prm.get({"Material model",spelling},"Resistance law")=="linear dashpot",
                       ExcMessage("Legacy dashpot selector conflicts with Material model / "+spelling+" / Resistance law."));
-        prm.enter_subsection(section[0]);
-        prm.enter_subsection(section[1]);
+        prm.enter_subsection("Material model");
+        prm.enter_subsection(growing ? "Growing fault" : "Phase field fault");
         prm.set("Resistance law","linear dashpot");
         prm.leave_subsection();
         prm.leave_subsection();
-        Base<dim>::parse_parameters(prm);
+        PhaseFieldFault<dim>::parse_parameters(prm);
+        AssertThrow(this->uses_growing_strips() == growing,
+                    ExcMessage(growing ? "The linear strip resistance selector requires midpoint strip mechanics."
+                               : "The linear trace resistance selector requires mature trace mechanics."));
       }
 
     private:
@@ -426,11 +429,9 @@ namespace aspect::MaterialModel
     template <int dim>
     void register_legacy_selectors()
     {
-      using Strip=LegacyDashpotSelector<dim,GrowingFault::Material>;
-      using Trace=LegacyDashpotSelector<dim,PhaseFieldFault>;
       using aspect::internal::Plugins::RegisterHelper;
-      RegisterHelper<Interface<dim>,Strip>(&register_material_model<dim>,"linear strip resistance","Legacy growing dashpot input.");
-      RegisterHelper<Interface<dim>,Trace>(&register_material_model<dim>,"linear trace resistance","Legacy mature dashpot input.");
+      RegisterHelper<Interface<dim>,LegacyDashpotSelector<dim>>(&register_material_model<dim>,"linear strip resistance","Legacy growing dashpot input.");
+      RegisterHelper<Interface<dim>,LegacyDashpotSelector<dim>>(&register_material_model<dim>,"linear trace resistance","Legacy mature dashpot input.");
     }
     const auto legacy_registered=(register_legacy_selectors<2>(),register_legacy_selectors<3>(),true);
   }
@@ -449,7 +450,8 @@ namespace aspect::Postprocess
         {
           std::map<std::string,std::string> status;
           this->get_material_model().save(status);
-          if (const auto *material=dynamic_cast<const GrowingFault::Material<dim> *>(&this->get_material_model()))
+          const auto &fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> &>(this->get_material_model());
+          if (fault.uses_growing_strips())
             {
               const auto entry=status.find("Native growing fault v2");
               if (entry==status.end()) return;
@@ -462,17 +464,16 @@ namespace aspect::Postprocess
               std::vector<GrowingFault::SectionHistory> strips;
               archive >> signature >> order >> angle >> edges >> step >> time >> name >> strips >> state;
               AssertThrow(name=="linear dashpot" && strips.size()+1==edges.size() && state.empty()
-                          && material->friction().state().empty(), ExcMessage("State-free strip archive contains constitutive history."));
+                          && fault.strip_history().friction().state().empty(), ExcMessage("State-free strip archive contains constitutive history."));
             }
           else
             {
-              const auto &trace=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> &>(this->get_material_model());
               const auto entry=status.find("Material fault labels linear dashpot");
               if (entry==status.end()) return;
               std::istringstream bytes(entry->second);
               unsigned int count;
               bytes >> count;
-              AssertThrow(count==trace.labels().size() && trace.label_ages().empty(),ExcInternalError());
+              AssertThrow(count==fault.labels().size() && fault.label_ages().empty(),ExcInternalError());
               std::string row;
               std::getline(bytes,row);
               for (unsigned int i=0; i<count; ++i)
@@ -481,8 +482,8 @@ namespace aspect::Postprocess
                   std::istringstream fields(row);
                   std::vector<double> values {std::istream_iterator<double>(fields),std::istream_iterator<double>()};
                   // x,y,width,background shear,rate,slip,Maxwell memory.
-                  AssertThrow(values.size()==7 && values[4]==trace.labels()[i].rate &&
-                              values[6]==trace.label_memory()[i],ExcMessage("State-free vertex archive contains additional history."));
+                  AssertThrow(values.size()==7 && values[4]==fault.labels()[i].rate &&
+                              values[6]==fault.label_memory()[i],ExcMessage("State-free vertex archive contains additional history."));
                 }
             }
         });

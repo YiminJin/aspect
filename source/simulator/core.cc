@@ -84,22 +84,6 @@ namespace aspect
 {
   namespace
   {
-    // The public fault model uses a different material history when a
-    // compositional field is advanced by the coupled midpoint solver.
-    template <int dim>
-    std::unique_ptr<MaterialModel::Interface<dim>>
-    create_configured_material_model(const Parameters<dim> &parameters,
-                                     ParameterHandler      &prm)
-    {
-      const auto &methods = parameters.compositional_field_methods;
-      if (prm.get({"Material model"}, "Model name") == "phase field fault"
-          && std::find(methods.begin(), methods.end(), Parameters<dim>::AdvectionFieldMethod::midpoint_fault_phase)
-          != methods.end())
-        return MaterialModel::create_material_model<dim>("growing fault");
-
-      return MaterialModel::create_material_model<dim>(prm);
-    }
-
     /**
      * Helper function to construct the final std::vector of FEVariable before
      * it is used to construct the Introspection object. Create the default
@@ -241,7 +225,7 @@ namespace aspect
                                                     std::ref(parameters),
                                                     std::ref(prm),
                                                     std::cref(*geometry_model))),
-    material_model (create_configured_material_model(parameters, prm)),
+    material_model (MaterialModel::create_material_model<dim>(prm)),
     gravity_model (GravityModel::create_gravity_model<dim>(prm)),
     prescribed_stokes_solution (PrescribedStokesSolution::create_prescribed_stokes_solution<dim>(prm)),
     adiabatic_conditions (AdiabaticConditions::create_adiabatic_conditions<dim>(prm)),

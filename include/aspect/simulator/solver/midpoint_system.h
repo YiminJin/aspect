@@ -1,7 +1,7 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #ifndef _aspect_midpoint_system_h
 #define _aspect_midpoint_system_h
-#include <aspect/material_model/growing_fault.h>
+#include <aspect/material_model/phase_field_fault/strip_material_history.h>
 #include <aspect/phase_field/midpoint_fracture.h>
 #include <aspect/reconstructed_fault/onset_score.h>
 
@@ -46,7 +46,7 @@ namespace aspect::GrowingFault
     };
 
     MidpointSystem(const SimulatorAccess<2>         &simulator,
-                   const Material<2>                &material,
+                   const StripMaterialHistory<2>    &material,
                    const LinearAlgebra::BlockVector &solution);
     /** Collectively assemble the physical residual and optional exact tangent
      * at (h v, p/G, b). With publish enabled, recover a candidate endpoint
@@ -67,7 +67,7 @@ namespace aspect::GrowingFault
     void write_candidate_fields(const Values               &stage_fields,
                                 LinearAlgebra::BlockVector &solution) const;
     const SimulatorAccess<2> &sim;
-    const Material<2> &material;
+    const StripMaterialHistory<2> &material;
     MPI_Comm comm;
     const double h;  //!< Half the attempted timestep (s).
     const double G;  //!< Shear modulus (Pa).
