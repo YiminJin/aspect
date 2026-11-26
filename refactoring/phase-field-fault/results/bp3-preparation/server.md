@@ -59,9 +59,45 @@ The archived continuation input differs from the pinned post-repair continuation
 only in the graceful wall budget, changed from 82,800 to 172,800 s. The current
 donor checkout and the later branch tip should not supply this build by default.
 
+## Launcher and startup identity
+
+The two-node launcher accepts either input overlay, both of which include the
+original parameters and select the five-anchor file relative to the run directory.
+For a new Slurm submission supply the usual site account, compatible partition and
+walltime. For example, from the staged directory in the instructions below:
+
+```bash
+export BP3_RUN="$PWD"
+sbatch -A "$ACCOUNT" -p "$PARTITION" -t 02:00:00 donor-allocation.sh donor-replay.prm
+# After the eight-step comparison and inspection of the 4237 checkpoint:
+sbatch -A "$ACCOUNT" -p "$PARTITION" -t 48:00:00 donor-allocation.sh donor-cycles.prm
+```
+
+Job 3616642 reported loading both libraries under `./plugin/` and printed the
+five (x, y, peak) triples from `./fault.txt`. Its repair instructions invoke
+`ibrun ./plugin/aspect-release continue-3613912.prm`. In the preceding job
+3613912 the stack names the executable under
+`/scratch/11463/yiminjin/bp3_dg/plugin/build/aspect-release` and the plugin
+source under `/work2/11463/yiminjin/stampede3/build/aspect/pf-rsf-dg/source`.
+The repair rebuilt the plugin in that scratch build directory. The archived
+3616642 output does not record the expanded SDK path or the final ELF hashes.
+The launcher records the resolved executable, DSOs, input, ordered fault file,
+and the plugin build cache's `Aspect_DIR` when available, and verifies the
+executable against that SDK. For a separate build directory, export
+`BP3_PLUGIN_BUILD` to its absolute path. If the original cache is unavailable,
+the identity record explicitly marks its absence. Check the archived startup:
+
+```bash
+python3 donor_startup.py BP3.o3616642 fault.txt
+```
+
+The checker also runs on the new solver log. It verifies the two loaded DSOs
+and the signed, five-anchor geometry the model actually reports. It accepted
+the archived job, and rejected a changed anchor or a missing library line.
+
 ## Stage the exact inputs and restart
 
-The prepared archives are in the worktree's `build-bp3-preparation` directory.
+The prepared archives are in the worktree's `build-bp3-preparation/launcher` directory.
 With the two archives and `server-archives.sha256` in a fresh staging
 directory on the server, the following recovers the input kit and identifies
 the fallback source archive.
@@ -90,7 +126,7 @@ cp "$D/$P/output_resumed/original.prm" "$KIT/job3616642.prm"
 cp "$D/$P/output_resumed/BP3.o3616642" "$KIT/"
 for f in fault.txt environment.sh; do git -C "$D" show "$R:$P/$f" > "$KIT/$f"; done
 git -C "$D" show "$R:benchmarks/reconstructed_fault/bp3/branch_output.sh" > "$KIT/branch_output.sh"
-cp "$H"/{donor-allocation.sh,donor_parent.py,donor_replay.py,donor-replay.prm,donor-cycles.prm,history_events.py} "$KIT/"
+cp "$H"/{donor-allocation.sh,donor_parent.py,donor_replay.py,donor_startup.py,donor-replay.prm,donor-cycles.prm,history_events.py} "$KIT/"
 sha256sum "$KIT"/{job3616642.prm,fault.txt,BP3.o3616642}
 ```
 
@@ -263,7 +299,8 @@ override. The three-event horizon and full-grid time remain unmeasured.
 ibrun ./plugin/aspect-release startup.prm > startup-0-to-5.out 2>&1
 ibrun ./plugin/aspect-release startup-resume.prm > startup-5-to-8.out 2>&1
 # Only after inspecting the 5 and 8 restart outputs.
-cp "$KIT/job3616642.prm" "$KIT/donor-cycles.prm" "$KIT/donor-allocation.sh" "$fresh/"
+cp "$KIT"/{job3616642.prm,donor-cycles.prm,donor-allocation.sh,donor_startup.py} "$fresh/"
+export BP3_PLUGIN_BUILD="$release/plugin-build"
 export BP3_RUN="$fresh"
 bash ./donor-allocation.sh donor-cycles.prm
 ```

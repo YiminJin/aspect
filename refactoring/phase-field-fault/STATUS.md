@@ -1,5 +1,9 @@
 # Phase-field fault working record
 
+## 60° BP3 launcher handoff
+
+The [two-node, 160-rank launcher and replay instructions](results/bp3-preparation/server.md#launcher-and-startup-identity) use the donor at `612b75d35`. The versioned handoff is in `build-bp3-preparation/launcher` with input kit SHA-256 `5cb5e498b789a18fed6451288f8fecd314b3debfd68866c2c6a9c75f9f813d6c`. Both archives passed their checksums. Running `python3 donor_startup.py BP3.o3616642 fault.txt` inside the unpacked kit confirmed both runtime DSOs and all five physical anchors. Removing the restored-BP3 library record and changing one x coordinate by 1 m each failed as expected. The preceding job's stack and repair procedure identify the historical scratch plugin build prefix. The launcher records the selected solver path, both resolved DSOs, build cache and data paths. Stampede3's original ELF hashes and step-4229 restore remain unverified here.
+
 ## 60° BP3 server preparation during Assignment D review
 
 The [inventory, figure and branch readiness checks](results/bp3-preparation/README.md) start from `0293a5994`. The next server action is to verify job 3616642's native step-4229 parent in slot 03, preserve it, and repeat steps 4230–4237 on the matching 160-rank stack. The donor installation, merged input, five geometry anchors, original launcher and older incompatible restarts are identified in the [server runbook](results/bp3-preparation/server.md). Its replay compares all eight accepted clocks, durations, physical stress and paired-work diagnostics. The distributed parent and writer ELF files were unavailable locally. The server restore, new physical steps and three-event trajectory are pending.

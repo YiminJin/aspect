@@ -16,13 +16,13 @@ Verify the archive checksums before unpacking. The local build directory
 is outside Git; the server runbook gives the source and staging commands.
 
 ```text
-build-bp3-preparation/donor-inputs.tar.gz
-build-bp3-preparation/donor-source-612b75d.tar.gz
-build-bp3-preparation/server-archives.sha256
+build-bp3-preparation/launcher/donor-inputs.tar.gz
+build-bp3-preparation/launcher/donor-source-612b75d.tar.gz
+build-bp3-preparation/launcher/server-archives.sha256
 ```
 
 ```sh
-(cd build-bp3-preparation && sha256sum -c server-archives.sha256)
+(cd build-bp3-preparation/launcher && sha256sum -c server-archives.sha256)
 ```
 
 | Evidence | What it establishes |
