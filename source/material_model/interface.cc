@@ -19,7 +19,7 @@
 */
 
 
-#include <aspect/material_model/fault_parameters.h>
+#include <aspect/material_model/phase_field_fault/input_compatibility.h>
 #include <aspect/global.h>
 #include <aspect/simulator_access.h>
 #include <aspect/material_model/interface.h>
@@ -208,12 +208,7 @@ namespace aspect
       prm.leave_subsection ();
 
       std::get<dim>(registered_plugins).declare_parameters (prm);
-      // Simple viscosity is also a historical input of the mature fault.
-      prm.enter_subsection("Material model");
-      prm.enter_subsection("Simple model");
-      FaultParameters::observe_entry(prm,"Viscosity",Patterns::Double(0.));
-      prm.leave_subsection();
-      prm.leave_subsection();
+      FaultInputCompatibility::observe_simple_viscosity(prm);
     }
 
 

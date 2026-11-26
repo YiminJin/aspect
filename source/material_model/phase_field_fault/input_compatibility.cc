@@ -1,10 +1,10 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
-#include <aspect/material_model/fault_parameters.h>
+#include <aspect/material_model/phase_field_fault/input_compatibility.h>
 #include <deal.II/base/utilities.h>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-namespace aspect::MaterialModel::FaultParameters
+namespace aspect::MaterialModel::FaultInputCompatibility
 {
   using namespace dealii;
 
@@ -165,6 +165,17 @@ namespace aspect::MaterialModel::FaultParameters
     auto &entry=observe(prm,section,path);
     if (!entry.pattern)
       entry.pattern=pattern.clone();
+  }
+
+  void observe_simple_viscosity(ParameterHandler &prm)
+  {
+    // Only after the plugin declaration loop is Simple's upstream entry
+    // guaranteed to exist. Capture explicit assignments, including its default.
+    prm.enter_subsection("Material model");
+    prm.enter_subsection("Simple model");
+    observe_entry(prm, "Viscosity", Patterns::Double(0.));
+    prm.leave_subsection();
+    prm.leave_subsection();
   }
 
   void declare_entry(ParameterHandler            &prm,

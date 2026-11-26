@@ -1,5 +1,5 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
-#include <aspect/material_model/fault_parameters.h>
+#include <aspect/material_model/phase_field_fault/input_compatibility.h>
 #include <aspect/material_model/growing_fault.h>
 #include <aspect/material_model/rheology/fault_resistance.h>
 #include <aspect/geometry_model/box.h>
@@ -26,7 +26,7 @@ namespace aspect::GrowingFault
   template <int dim>
   void Material<dim>::declare_parameters(ParameterHandler &prm)
   {
-    using MaterialModel::FaultParameters::declare_entry;
+    using MaterialModel::FaultInputCompatibility::declare_entry;
     prm.enter_subsection("Material model");
     prm.enter_subsection("Growing fault");
     declare_entry(prm, "Prescribed fault compression", "", Patterns::List(Patterns::Double(0.), 0, 1),
@@ -52,7 +52,7 @@ namespace aspect::GrowingFault
   template <int dim>
   void Material<dim>::parse_parameters(ParameterHandler &prm)
   {
-    MaterialModel::FaultParameters::resolve(prm, /* growing = */ true);
+    MaterialModel::FaultInputCompatibility::resolve(prm, /* growing = */ true);
     const auto &p = this->get_parameters();
     const auto &energy = p.surface_energy_model;
     energy.validate();
