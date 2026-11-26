@@ -29,26 +29,28 @@ namespace aspect
 
     double CohesiveDegradation::fraction_derivative() const
     {
-      const double den=excess_numerator+intact_factor;
-      return (magnitude*(1.+2.*phase)*intact_factor+excess_numerator*2.*(1.-phase))/(den*den);
+      const double denominator = excess_numerator + intact_factor;
+      return (magnitude*(1.+2.*phase)*intact_factor+excess_numerator*2.*(1.-phase))/(denominator*denominator);
     }
 
     double CohesiveDegradation::driving_factor() const
     {
-      const double den=excess_numerator+intact_factor;
-      return magnitude*(1.+3.*phase)*(1.-phase)/(den*den);
+      const double denominator = excess_numerator + intact_factor;
+      return magnitude*(1.+3.*phase)*(1.-phase)/(denominator*denominator);
     }
 
     double CohesiveDegradation::driving_factor_derivative() const
     {
-      const double den=excess_numerator+intact_factor;
-      return magnitude*(2.-6.*phase)/(den*den)-2.*driving_factor()*(magnitude*(1.+2.*phase)-2.*(1.-phase))/den;
+      const double denominator = excess_numerator + intact_factor;
+      return magnitude*(2.-6.*phase)/(denominator*denominator)
+             - 2.*driving_factor()*(magnitude*(1.+2.*phase)-2.*(1.-phase))/denominator;
     }
 
     double excess_compliance(const double phase, const double magnitude)
     {
       const CohesiveDegradation law(phase,magnitude);
-      if (phase == 1.) return std::numeric_limits<double>::infinity();
+      if (phase == 1.)
+        return std::numeric_limits<double>::infinity();
       return law.excess_numerator/law.intact_factor;
     }
   }

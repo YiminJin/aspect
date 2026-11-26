@@ -18,7 +18,8 @@ namespace aspect
       void declare_functional(ParameterHandler &prm, const bool legacy)
       {
         const std::string location = legacy ? "Compatibility spelling of the entry in Phase field. " : "";
-        prm.declare_entry("Crack geometry", "", Patterns::List(Patterns::Selection(CrackGeometry::selection_pattern()),0,1),
+        prm.declare_entry("Crack geometry", "",
+                          Patterns::List(Patterns::Selection(CrackGeometry::selection_pattern()),0,1),
                           location + "Crack-geometric law. The default is AT1.");
         prm.declare_entry("Phase composition", "", Patterns::Anything(),
                           location + "Name of the dimensionless phase field. The default is phase_field.");
@@ -31,8 +32,10 @@ namespace aspect
       // An empty spelling inherits the other section. Apply the physical
       // default only after checking both, including an explicit default value.
       template <typename T, typename Reader>
-      T functional_parameter(const ParameterHandler &prm, const std::string &name,
-                             const T &fallback, const Reader &read)
+      T functional_parameter(const ParameterHandler &prm,
+                             const std::string      &name,
+                             const T                &fallback,
+                             const Reader           &read)
       {
         const std::vector<std::string> phase = {"Phase field"};
         const std::vector<std::string> legacy = {"Postprocess","Phase field surface energy"};

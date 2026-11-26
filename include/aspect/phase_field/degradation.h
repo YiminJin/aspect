@@ -14,9 +14,11 @@ namespace aspect
     struct CohesiveDegradation
     {
         CohesiveDegradation(double phase, double magnitude);
-        double excess_numerator, intact_factor;
+        double excess_numerator; ///< m phi (1 + phi)
+        double intact_factor;    ///< (1 - phi)^2
         /** Scale G A:A to the cohesive energy at a damaged point (Pa). */
         double cohesive_energy(double strain_energy) const;
+        /** Mobile fraction of the cohesive-Maxwell response, in [0,1]. */
         double fraction() const;
         double fraction_derivative() const;
         double driving_factor() const;
