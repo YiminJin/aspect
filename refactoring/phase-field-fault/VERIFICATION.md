@@ -111,6 +111,13 @@ The target-only matrix covers fresh starts, rejection of a long first attempt, c
 
 ## Stationary coupling repair
 
+The fitted 32² free-fault regression compares 38 ordered material IDs at 0, 12.5 and 25 ms. It checks IDs and clocks exactly and uses 1e−10 absolute plus 1e−8 relative for the six physical columns. Both references ship with the benchmark. The Q3 and Q8 names refer to the measure of the boundary-spanning slip load. Ordinary ASPECT Stokes assembly uses Q3 in both cases.
+
+| Free-32 label table | Provenance |
+|---|---|
+| `benchmarks/fixed_fault/phase_ridge/q8-free-32-labels.csv` | Active reference from the serial Release run of the Q8 implementation reviewed at `623bb1c57`. The strict checker's `--history` export reproduces the CSV. |
+| `benchmarks/fixed_fault/phase_ridge/3a-repair-free-labels.csv` | Historical pointwise Q3 load. First recorded at `fb4b6b9b2` under `refactoring/phase-field-fault/results/3a-repair-free-labels.csv`. Commit `9dd92e321` moved the canonical copy into the benchmark and kept the original path as a symlink. |
+
 The subsequent [3A repair specification](INCREMENT_3A_REPAIR.md) defines the fitted-contact, stress-moment, normalization, actual weak-load, support-complement and MPI acceptance checks. Use its fixture-specific numerical budgets for that assignment. Keep the Increment 2 reference values below.
 
 Use the inputs documented for the three-label and homogeneous cases at `e91e801bab`. Both use a fresh physical initial state, explicit DG stress fields, the fault's Maxwell law, and upstream `Enable elasticity = false`. Record the resolved numerical values and commands. Compare at the frozen tolerances.

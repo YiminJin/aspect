@@ -1,8 +1,92 @@
 # Phase-field fault working record
 
+## Assignment B closeout
+
+Assignment B is closed against the reviewed production implementation at `623bb1c57`. The reference for the fitted free-32 case now uses its Q8 slip-load projection. The strict and independent checker modes both passed on the retained ridge outputs, including the archived two-rank and retry frames. A fresh one-rank, one-thread Release calculation also passed the strict free-32 comparison. All six physical columns matched exactly for all 38 labels at each clock (0, 0.0125 and 0.025 s). IDs and clocks were exact. The numerical budget remains 1e−10 absolute plus 1e−8 relative.
+
+| Initialization transect | Wide peak slip shear rate (s⁻¹) | Narrow peak slip shear rate (s⁻¹) | Swapped inputs |
+|---|---:|---:|---|
+| 32² | 0.0353428118557 | 0.0707618929760 | Strict and independent each rejected 32² |
+| 64² | 0.0353419597233 | 0.0706856237115 | Strict and independent each rejected 64² |
+
+Both modes first call `check_shear_concentration` on the upper DG trace at y = 0. It reads the sampled engineering slip shear rate and applies the existing narrow-peak > wide-peak comparison on each grid. The single-cell work driver now checks the normalized reverse actions for the two rate perturbations with an absolute tolerance of 2e−13 m and zero relative tolerance. The unmodified one-cell result matched the archived file byte for byte (both actions 0.49423596829273647 m). Adding 1e−10 m only to the positive-perturbation reverse action raised it to 0.49423596839273654 m. The reviewed driver accepted the mutation. The repaired driver exited 1 at the reverse-action comparison.
+
+**Reference provenance.** The new CSV was exported from the accepted Q8 frames in `build-review-b/final-free32/output`. Those three label files match the reviewed run, the archive in `build-review-b/ridge/free-32/output` and the fresh closeout run byte for byte. Its SHA-256 is `ef46aa6e242685096f55cdd6b397899605a43b2c3e9f9122dd92d1190b9539af`. The historical Q3 CSV retains the bytes recorded at `fb4b6b9b2`, SHA-256 `98a5e5929b43b7877d8ee3c426c50758c3dc874289dd38ec6315f4022206f662`. The archived old trajectory still passes that reference. Checking it against Q8 fails on 266 of 684 physical entries. The [reference guide](VERIFICATION.md#stationary-coupling-repair) identifies both installed tables. The preceding implementation experiment's Q3-to-Q8 shifts and work-error figure are preserved below.
+
+**Deferred performance work.** On a boundary-spanning trace, `solve_rates → sample_bulk` looks up the segment and phase weight at the Q8 points. `project_boundary_slip_load → slip_stress` repeats that geometry search while preparing the slip load on the same cells. The archived one-rank reviewer timing measured 1.51 s for the complete projection over 146 calls (143 Picard preparations plus three attempt entries), 6.9% of 21.7 s. The cost of the search alone and the savings from sharing it remain unmeasured. Future work can measure reuse of the common samples while retaining the prescribed-rate path, updating trial rates and stiffness, and rebuilding on retry. The readability pass is the next assignment.
+
+**Replay.** Run from the worktree root with a fresh closeout destination. The complete ridge checks use the existing reviewed archives. The solver command creates the independent free-32 trajectory. The final export reproduces the approved CSV and plots the measured transects.
+
+```bash
+D=$PWD/build-review-b
+C=$D/closeout
+I=$C/install
+R=$I/benchmarks/fixed_fault/phase_ridge
+T=$I/benchmarks/fixed_fault/transfer_work
+E=$PWD/refactoring/phase-field-fault/results/transfer-work
+export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
+export MPIEXEC=/opt/openmpi/5.0.6/bin/mpirun
+mkdir -p "$C"
+for part in runtime examples; do
+  cmake -DCMAKE_INSTALL_PREFIX="$I" -DCMAKE_INSTALL_LOCAL_ONLY=ON \
+    -DCMAKE_INSTALL_COMPONENT="$part" -P build-6b/release/cmake_install.cmake
+done
+ASPECT_SOURCE_DIR=$D/install python3 -B "$D/install/benchmarks/fixed_fault/phase_ridge/run.py" \
+  "$D/install/bin/aspect-release" "$D/control-plugins/phase_ridge/libphase_ridge.release.so" "$C/fresh/free-32" free 32
+PYTHONPATH=$R python3 -BO -c 'from pathlib import Path; import sys; from check import check_case; check_case(Path(sys.argv[1]), "free", 32)' "$C/fresh"
+bash "$E/controls.sh" strict "$D" "$I"
+donor=../aspect/benchmarks/reconstructed_fault/bp5/moment-inclined/native_history_reference/output-native_history_reference
+bash "$E/controls.sh" independent "$D" "$I" "$donor" build-3a-repair/donor-cell/output
+python3 -BO "$R/check.py" "$D/ridge" --history "$C/export.csv" --plot "$C/transects.png"
+cmp "$C/export.csv" "$R/q8-free-32-labels.csv"
+git show fb4b6b9b2:refactoring/phase-field-fault/results/3a-repair-free-labels.csv | cmp - "$R/3a-repair-free-labels.csv"
+```
+
+For each swapped-grid control the only inputs read are transects linked from the archive. Each invocation must exit 1 with the indicated grid in the shear-concentration diagnostic.
+
+```bash
+for swap in 32 64; do
+  root=$C/swapped-$swap
+  mkdir -p "$root/ridge"
+  for grid in 32 64; do
+    wide=vertical; narrow=narrow
+    if [[ $grid == "$swap" ]]; then wide=narrow; narrow=vertical; fi
+    ln -s "$D/ridge/$wide-$grid" "$root/ridge/vertical-$grid"
+    ln -s "$D/ridge/$narrow-$grid" "$root/ridge/narrow-$grid"
+  done
+  bash "$E/controls.sh" strict "$root" "$I"
+  bash "$E/controls.sh" independent "$root" "$I" "$donor" build-3a-repair/donor-cell/output
+done
+```
+
+The positive reverse-action mutation uses the real driver and installed executable. The reader adds κ × 1e−10 to the positive raw row before the driver divides by κ. The clean and historical-mutated invocations exit 0. The repaired-mutated invocation exits 1 with “Uncancelled rate or friction dependence in reverse action”.
+
+```bash
+export ASPECT_SOURCE_DIR=$I
+A=$I/bin/aspect-release
+P=$D/installed-plugin/libtransfer_work.release.so
+python3 -BO "$T/run.py" "$A" "$P" "$C/clean-work"
+cmp "$C/clean-work/work.json" "$D/final-one-cell/work.json"
+mkdir -p "$C/old-driver"
+git show 623bb1c57:benchmarks/fixed_fault/transfer_work/run.py > "$C/old-driver/run.py"
+for module in "$C/old-driver" "$T"; do
+  PYTHONPATH="$module" python3 -BO - "$A" "$P" "$C/mutated-$(basename "$module")" <<'PY'
+import run
+read_frame = run.read_frame
+def shifted(path, ranks):
+    cells, rows, integrals = read_frame(path, ranks)
+    if path.parent.name == "plus":
+        rows[0] += 1e-10 * run.KAPPA
+    return cells, rows, integrals
+run.read_frame = shifted
+run.main()
+PY
+done
+```
+
 ## Assignment B — mature boundary-spanning work
 
-The pre-repair experiment is commit `7dea28403` on top of `269cfd8b0cf516a3ccff8cfd67dc591a191b58b1`. It uses the actual repaired-A Release executable and an external test material. The second commit projects the boundary-spanning slip load and contains the post-repair measurements. The original fitted-fault trajectory remains a strict, failing comparison for author review.
+The pre-repair experiment is commit `7dea28403` on top of `269cfd8b0cf516a3ccff8cfd67dc591a191b58b1`. It uses the actual repaired-A Release executable and an external test material. The second commit projects the boundary-spanning slip load and contains the post-repair measurements. At that revision the original fitted-fault trajectory was a strict, failing comparison. The commands and expected failures in this entry describe that revision.
 
 **One-cell experiment.** Set an upward straight trace in the unit square with labels at heights 0, 0.5 and 1 m, uniform FE phase 0.35, full normal support, fitting off and zero initial stress. At zero physical duration impose trial rates of 0.005 m/s except at the middle label, where separate runs use 0.004 and 0.006 m/s. Restore the accepted rates before either measurement. This fixes the material geometry, phase, accepted stress, friction age and Maxwell coefficient. A test material uses the ordinary material evaluation and Stokes assembler. Its wrapper isolates that assembler's real local RHS and pairs it with the nodal coefficients of the virtual FE velocity before boundary elimination. The reverse experiment inserts the same affine velocity into the bulk FE vector, calls `sample_bulk`, assembles the middle row with `BulkPoint::add_balance` and subtracts the corresponding zero-velocity row. Both evaluations disable friction in that row and have the same rates and background stress. The prescribed-rate diagnostic bypasses the free scalar resistance solve; the free-ridge and tangent controls below exercise that solve.
 

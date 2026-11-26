@@ -17,18 +17,19 @@ LP=$P/layered/liblayered_moving_fault.release.so
 TP=$P/tests/libfixed_fault.release.so
 case "$1" in
 strict)
-  # The historical 38-label table retains its original values and tolerances.
+  # Compare the accepted free-32 trajectory against the reviewed Q8 table.
   python3 -uBO "$R/check.py" "$D/ridge" --retry
   ;;
 independent)
-  # Complete the other checks even when the strict historical comparison fails.
+  # Exercise the independent physical controls separately from the free-32 table.
   PYTHONPATH="$R" python3 -uBO - "$D/ridge" "$4" "$5" <<'PYTHON'
 import sys
 from pathlib import Path
-from check import check_case, check_retry, donor_check, rank_check, require
+from check import check_case, check_retry, check_shear_concentration, donor_check, rank_check, require
 from moments import check_moments
 
 root, donor, replay = map(Path, sys.argv[1:])
+check_shear_concentration(root)
 rank_check(root)
 check_retry(root)
 check_case(root, "free", 64)

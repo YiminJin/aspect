@@ -265,14 +265,14 @@ def check_case(root, case, grid):
             for key in ("cell", "q", "phi"):
                 np.testing.assert_array_equal(sampled[key], points[key])
     if free and grid == 32:
-        record = Path(__file__).with_name("3a-repair-free-labels.csv")
+        record = Path(__file__).with_name("q8-free-32-labels.csv")
         reference = np.loadtxt(record, delimiter=",", skiprows=1)
         history = np.vstack([labels(output, step) for step in range(3)])
         np.testing.assert_array_equal(history[:, 0], np.tile(np.arange(38), 3))
         np.testing.assert_array_equal(history[:, 7], np.repeat([0., .0125, .025], 38))
         np.testing.assert_array_equal(history[:, [0, 7]], reference[:, [0, 7]])
         near(history[:, 1:7], reference[:, 1:7], 1.e-10, 1.e-8)
-        print(f"  corrected 3A reference: 38 labels at all three clocks; max absolute differences "
+        print(f"  Q8 free-32 reference: 38 labels at all three clocks; max absolute differences "
               f"(x, y, I, age, slip, rate) {np.max(np.abs(history[:, 1:7]-reference[:, 1:7]), axis=0)}")
     return metrics(output, 1)["moments"]
 
@@ -442,6 +442,14 @@ def plot(root, path):
     plt.close(fig)
 
 
+def check_shear_concentration(root):
+    for grid in (32, 64):
+        wide, narrow = (np.loadtxt(root/f"{case}-{grid}/output/transect-0-0.txt",
+                                   skiprows=1, usecols=5).max() for case in ("vertical", "narrow"))
+        print(f"{grid}x{grid} peak slip shear rate (1/s): wide {wide:.12g}, narrow {narrow:.12g}")
+        require(narrow > wide, f"Narrower phase failed to concentrate the returned shear on {grid}x{grid}")
+
+
 def check_retry(root):
     clean, retry = root/"free-32/output", root/"free-32-retry/output"
     require((retry.parent/"run.log").read_text().count("Repeating the current time step") == 1,
@@ -470,6 +478,7 @@ def main():
     if bool(args.donor) != bool(args.donor_cell):
         parser.error("Supply the archived donor and the cell-interval replay together to check the quadrature difference.")
     from moments import check_moments
+    check_shear_concentration(args.root)
     for case in ("vertical", "narrow", "translated", "inclined", "inclined-fit", "inclined-q1", "free"):
         grids = [64] if case == "inclined-q1" else [32, 64]
         for grid in grids:
@@ -485,10 +494,6 @@ def main():
             for step in (1,2):
                 defects=[check_moments(args.root/f"free-{grid}",grid,step,.0125) for grid in grids]
                 require(defects[1]<defects[0] or max(defects)<=.01,"Free cut moments failed refinement")
-    for grid in (32, 64):
-        wide, narrow = [np.loadtxt(args.root/f"{c}-{grid}/output/transect-0-0.txt",skiprows=1)
-                        for c in ("vertical","narrow")]
-        require(max(narrow[:,5]) > max(wide[:,5]), "Narrower phase failed to concentrate the returned shear")
     rank_check(args.root)
     if args.history:
         history = np.vstack([labels(args.root/"free-32/output", step) for step in range(3)])

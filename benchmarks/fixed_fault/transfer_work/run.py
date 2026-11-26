@@ -103,7 +103,7 @@ end
         # The middle velocity row in N/m is already paired with a unit
         # middle perturbation. Divide by the same kappa and shear rate.
         section = minus[1][rank]/KAPPA
-        if not math.isclose(section, plus[1][rank]/KAPPA, abs_tol=2e-13):
+        if not math.isclose(section, plus[1][rank]/KAPPA, rel_tol=0.0, abs_tol=2e-13):
             raise ValueError("Uncancelled rate or friction dependence in reverse action")
         by_rank.append((math.fsum(delta.values()), section))
     result = dict(stokes=math.fsum(s for s, _ in by_rank),
