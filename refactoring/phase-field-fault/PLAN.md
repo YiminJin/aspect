@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**Assignment C1 is ready for scientific review.** On identical midpoint fields the isolated candidate located strip 8's direct-score peak more accurately in all three captures. The peak itself falls outside the historical nine-strip arclength allowance. The [direction report](results/direction-c1/README.md) gives the first divergent search comparison, the accepted lengths and the decision required before C2 changes the selector or its references.
+
 **Assignment B is closed.** The strict free-32 control uses the approved Q8 slip-load reference at the original tolerances. The historical Q3 trajectory and the measured change remain available in the [closeout record](STATUS.md#assignment-b-closeout). The [mature material readability pass](STATUS.md#mature-fault-material-readability) is ready for review. Reusing the repeated Q8 geometry search is deferred performance work.
 
 **The eleven Assignment A review findings have been repaired.** The [working record](STATUS.md#assignment-a-review-repairs) gives the installed compatibility, signed-stress and three-rank output results. Assignment C owns the strip-8 peak investigation.

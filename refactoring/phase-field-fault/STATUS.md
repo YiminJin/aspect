@@ -1,5 +1,33 @@
 # Phase-field fault working record
 
+## Assignment C1 — strip-8 direction selection
+
+The first frozen nine-strip turn was replayed from `1d7799291` against the isolated score in `46b426a3f`. Production, candidate and a 65-decimal pointwise reference used the same accepted state and converged midpoint field. The frozen two-rank case first rejected both strip-7 proposals, then turned strip 8 in grid bin 52. On golden-section comparison 20 the true right-minus-left score is +3.68364e−21 Pa² m². Production returned −2.03537e−20 and discarded the side containing the peak. The candidate returned +3.68375e−21 and retained it.
+
+| Case at 5 ms | Direct peak (rad) | Production − peak (rad) | Candidate − peak (rad) |
+|---|---:|---:|---:|
+| Frozen, 2 ranks | −0.147868106666875 | −6.9610e−7 | +8.7264e−10 |
+| Affine, 1 rank | −0.147885945931339 | −1.4838e−6 | +8.6714e−9 |
+| Affine, 2 ranks | −0.147885945935012 | −6.2720e−7 | +1.7115e−9 |
+
+The frozen donor, production and candidate lengths at 5 ms are 0.25074191554565439, 0.25074191296576476 and 0.25074188693430988 m. The solved angles and common reference width reproduce all three. The direct peak gives 0.25074188696690238 m, itself 2.85788e−8 m from the donor, beyond the existing 2.50842e−8 m allowance. Only strip 8's angle and arclength exceed their frozen budgets, repeated at 5, 10 and 15 ms. The ordinary affine rank check reproduced its angle and length failures. The candidate passed it, including its off-peak pressure control. The report includes both strict results, the complete per-column nine-strip audit and the independent replay on both historical and current captures. All ASPECT runs used one numerical thread per rank.
+
+**Decision for C2.** The candidate better locates the physical score maximum on all three fields. Recommend adopting it in a separately reviewed change if the author approves new strip-8 angle and arclength references for the frozen case. The current reference files, tolerances and production selector are preserved. The separate 18-strip result retains its four historical strip-15 exceptions.
+
+The report gives the exact ordinary-run and offline commands. A replay from the packaged turns reproduces all seven peak, search and arclength CSVs. To regenerate the figure from the measured fields and tables:
+
+```bash
+E=refactoring/phase-field-fault/results/direction-c1
+python3 -B "$E/plot.py" "$E" "$E/strip-8-score.png"
+```
+
+```text
+refactoring/phase-field-fault/results/direction-c1/README.md
+refactoring/phase-field-fault/results/direction-c1/peak-summary.csv
+refactoring/phase-field-fault/results/direction-c1/frozen-golden.csv
+refactoring/phase-field-fault/results/direction-c1/strip-8-score.png
+```
+
 ## Mature fault material readability
 
 Starting commit `dbe645bb6`. In `source/material_model/phase_field_fault.cc`, start at `parse_fault_vertex_table`. Its caller distributes the file contents once. The parser assigns positions, optional ages (s) and persistent shear tractions (Pa) in material ID order. The matching header describes the accepted diagnostic state and the trial section used by Stokes. In the coupling, `prepare_iteration` prepares that trial section, and `accept_step` calls `accept_section_rates` after the repeat decision. The effective Maxwell viscosity (Pa s) and dimensionless stress relaxation factor now have distinct names at their callers, including the rate-tangent capture.
