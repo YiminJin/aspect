@@ -8,6 +8,7 @@ import math
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 
 from compare_snapshots import compare_step
@@ -24,10 +25,13 @@ root = Path(__file__).resolve().parents[2]
 env = dict(os.environ, OMP_NUM_THREADS="1", DEAL_II_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")
 
 
-def run(name, settings="", expected_error=None):
+def run(name, settings="", expected_error=None, checkpoint=None):
     folder = dest / name
     folder.mkdir()
     output = folder / "output"
+    if checkpoint:
+        shutil.copytree(checkpoint, output / "restart" / checkpoint.name)
+        shutil.copy2(checkpoint.parent / "last_good_checkpoint.txt", output / "restart")
     prm = folder / "input.prm"
     prm.write_text(f"include {root / 'tests' / (args.case + '.prm')}\n"
                    f"set Output directory = {output}\nset Additional shared libraries = {plugin}\n"
@@ -81,13 +85,22 @@ for folder in (clean, retry):
 for step in range(3):
     print("Retry", step, "maximum absolute difference", compare_step(clean, retry, step))
 
-run("resume", "set Resume computation = true\n", expected_error="Phase field fault requires a fresh run")
-run("checkpoint", "subsection Checkpointing\n set Steps between checkpoint = 1\nend\n",
-    expected_error="Phase field fault requires a fresh run")
-run("auto_resume", "set Resume computation = auto\n", expected_error="Phase field fault requires a fresh run")
-run("on_termination", "subsection Termination criteria\n set Checkpoint on termination = true\nend\n",
-    expected_error="Phase field fault requires a fresh run")
-print("Fault requests for continuation and checkpointing diagnosed")
+saved, _ = run("checkpoint", """set End time = 0.0125
+subsection Checkpointing
+  set Steps between checkpoint = 1
+  set Number of checkpoints to keep = 4
+end
+""")
+for mode in ("true", "auto"):
+    continued, _ = run(f"resume-{mode}", f"set Resume computation = {mode}\n"
+                       "subsection Checkpointing\n set Resume checkpoint = 2\nend\n",
+                       checkpoint=saved/"restart/02")
+    if (continued / "fault-1-0.txt").exists():
+        raise RuntimeError(f"Resume {mode} repeated the parent trajectory")
+    print(f"Resume {mode}, first returned endpoint", compare_step(clean, continued, 2))
+terminated, _ = run("on_termination", "subsection Termination criteria\n set Checkpoint on termination = true\nend\n")
+if not list((terminated/"restart").glob("*/resume.z")):
+    raise RuntimeError("Missing boundary-spanning checkpoint on termination")
 
 # A loose bulk tolerance accepts a Picard iterate before rates agree. The
 # section check must continue the solve inside the ordinary iteration limit.

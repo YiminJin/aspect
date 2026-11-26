@@ -116,6 +116,20 @@ namespace aspect
       coupling.initialize_simulator(this->get_simulator());
       coupling.initialize();
       coupling.connect_section_balance();
+      this->get_signals().post_resume_load_user_data.connect([this](parallel::distributed::Triangulation<dim> &)
+      {
+        // load() has restored the accepted labels. ASPECT has now restored
+        // their mesh and old solution, so a fitted seed must not be fitted again.
+        initialize_accepted_profile();
+        trace_initialized = true;
+      });
+    }
+
+    template <int dim>
+    void PhaseFieldFault<dim>::initialize_accepted_profile()
+    {
+      accepted->profile.initialize(*this, phase_field, this->get_old_solution(),
+                                   degradation_magnitude, interior_seed ? 8 : 1);
     }
 
     template <int dim>
@@ -128,8 +142,7 @@ namespace aspect
           if (fit_trace)
             accepted->trace.fit_boundary_spanning_seed_to_phase_ridge(*this, phase_field, this->get_old_solution());
           if (!interior_seed || this->get_timestep_number() > 0)
-            accepted->profile.initialize(*this, phase_field, this->get_old_solution(),
-                                         degradation_magnitude, interior_seed ? 8 : 1);
+            initialize_accepted_profile();
           trace_initialized = true;
         }
       coupling.prepare_parent();
@@ -378,9 +391,6 @@ namespace aspect
       this->model_dependence.specific_heat = NonlinearDependence::none;
       this->model_dependence.thermal_conductivity = NonlinearDependence::none;
 
-      prm.enter_subsection("Termination criteria");
-      const bool checkpoint_on_termination = prm.get_bool("Checkpoint on termination");
-      prm.leave_subsection();
       FaultParameters::resolve(prm, /* growing = */ false);
       normal_stress = Rheology::FrictionNormalStress::parse(prm,
                                                             Rheology::FrictionNormalStress::Source::resolved_traction);
@@ -403,13 +413,6 @@ namespace aspect
         }
       const bool transport_phase =
         parameters.compositional_field_methods[phase_field] == AdvectionMethod::explicit_dg_ssprk3;
-      const bool fresh_run_without_checkpoints = prm.get("Resume computation") == "false" &&
-                                                 parameters.resume_checkpoint_id == 0 &&
-                                                 parameters.resume_time < 0. &&
-                                                 parameters.checkpoint_steps == 0 &&
-                                                 parameters.checkpoint_time_secs == 0 &&
-                                                 parameters.additional_checkpoint_times.empty() &&
-                                                 !checkpoint_on_termination;
 
       double initial_speed;
       bool has_phase_field_role;
@@ -444,9 +447,6 @@ namespace aspect
                                  "selected phase composition."));
           AssertThrow(!transport_phase || interior_seed,
                       ExcMessage("Transported phase requires an interior fault seed."));
-          AssertThrow(interior_seed || fresh_run_without_checkpoints,
-                      ExcMessage("Phase field fault requires a fresh run with checkpointing disabled: "
-                                 "label history is in memory."));
 
           if (prm.get_bool("Advect physical stress"))
             {
@@ -477,14 +477,14 @@ namespace aspect
                       ExcMessage("The fault material requires the zero initial topography model "
                                  "because its normalization uses the rectangular box width."));
 
-          std::vector<Point<dim>> vertices;
+          prescribed_vertices.clear();
           for (const auto &entry : Utilities::split_string_list(prm.get("Fault vertices"), ';'))
             {
               const auto coordinates = Utilities::string_to_double(Utilities::split_string_list(entry));
               Point<dim> vertex;
               vertex[0] = coordinates.at(0);
               vertex[1] = coordinates.at(1);
-              vertices.push_back(vertex);
+              prescribed_vertices.push_back(vertex);
             }
           auto initial_ages = Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label ages")));
           label_background_shear = Utilities::string_to_double(
@@ -492,33 +492,33 @@ namespace aspect
           const auto vertex_filename = Utilities::expand_ASPECT_SOURCE_DIR(prm.get("Fault vertex file"));
           if (!vertex_filename.empty())
             {
-              AssertThrow(vertices.empty(), ExcMessage("Choose Fault vertex file or inline Fault vertices."));
+              AssertThrow(prescribed_vertices.empty(), ExcMessage("Choose Fault vertex file or inline Fault vertices."));
               const std::string vertex_table =
                 Utilities::read_and_distribute_file_content(vertex_filename, this->get_mpi_communicator());
               parse_fault_vertex_table(vertex_table,
-                                       vertices,
+                                       prescribed_vertices,
                                        initial_ages,
                                        label_background_shear);
             }
           friction->set_initial_ages(std::move(initial_ages));
-          if (vertices.empty())
+          if (prescribed_vertices.empty())
             {
-              vertices = {box.get_origin(), box.get_origin()};
-              vertices.back()[1] += box.get_extents()[1];
+              prescribed_vertices = {box.get_origin(), box.get_origin()};
+              prescribed_vertices.back()[1] += box.get_extents()[1];
             }
 
           degradation_magnitude = prm.get_double("Degradation magnitude");
           AssertThrow(degradation_magnitude > 0., ExcMessage("Degradation magnitude must be positive."));
           fit_trace = prm.get_bool("Fit trace to phase");
-          const double profile_half_width = prm.get_double("Profile half width");
+          prescribed_half_width = prm.get_double("Profile half width");
           AssertThrow(!interior_seed || (!fit_trace && (!advect_vertices || inflow_stress)),
                       ExcMessage("Interior mechanics requires a prescribed seed with fitting disabled. "
                                  "Moving its vertices also requires physical stress transport."));
           accepted->trace.initialize(box.get_origin(),
                                      box.get_extents(),
-                                     vertices,
+                                     prescribed_vertices,
                                      initial_speed,
-                                     profile_half_width > 0. ? profile_half_width : std::numeric_limits<double>::max(),
+                                     prescribed_half_width > 0. ? prescribed_half_width : std::numeric_limits<double>::max(),
                                      interior_seed);
           const auto n_vertices = labels().size();
           friction->initialize(n_vertices);
@@ -613,9 +613,6 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::save(std::map<std::string,std::string> &status) const
     {
-      if (!interior_seed)
-        return;
-
       std::ostringstream records;
       records << std::setprecision(17) << labels().size() << '\n';
       // Keep the original per-label record order. RSF writes age between shear
@@ -630,6 +627,17 @@ namespace aspect
           records << label.rate << ' ' << label.slip << ' ' << maxwell_memory[i] << '\n';
         }
       status[label_checkpoint_key()] = records.str();
+
+      // Keep the prescribed seed separate from the fitted or advected
+      // positions in the accepted records. File names carry no physical identity.
+      std::ostringstream geometry;
+      {
+        aspect::oarchive archive(geometry);
+        const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
+        archive << interior_seed << advect_vertices << fit_trace << accepted->profile.slip_sense
+                << box.get_origin() << box.get_extents() << prescribed_vertices << prescribed_half_width;
+      }
+      status["Mature fault trace v1"] = geometry.str();
 
       std::ostringstream signature;
       {
@@ -646,8 +654,34 @@ namespace aspect
     {
       AssertThrow(!status.count("Native growing fault v1") && !status.count("Native growing fault v2"),
                   ExcMessage("Cannot resume a growing fault checkpoint with mature trace mechanics."));
-      if (!interior_seed)
-        return;
+      const auto geometry = status.find("Mature fault trace v1");
+      if (geometry != status.end())
+        {
+          std::istringstream bytes(geometry->second);
+          aspect::iarchive archive(bytes);
+          bool interior, advected, fitted;
+          int slip_sense;
+          Point<dim> origin, extents;
+          std::vector<Point<dim>> vertices;
+          double half_width;
+          archive >> interior >> advected >> fitted >> slip_sense >> origin >> extents >> vertices >> half_width;
+          const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
+          AssertThrow(slip_sense == accepted->profile.slip_sense,
+                      ExcMessage("Mature fault slip sense differs from the checkpoint."));
+          AssertThrow(interior == interior_seed && advected == advect_vertices && fitted == fit_trace,
+                      ExcMessage("Mature fault geometry or fitting mode differs from the checkpoint."));
+          AssertThrow(origin == box.get_origin() && extents == box.get_extents() && vertices == prescribed_vertices,
+                      ExcMessage("Mature fault box or ordered prescribed vertices differ from the checkpoint."));
+          AssertThrow(half_width == prescribed_half_width,
+                      ExcMessage("Checkpoint normal support convention or initial half width differs from the configured trace."));
+        }
+      else
+        {
+          // Before trace metadata was introduced only interior faults with
+          // the original shear sense could write physical label records.
+          AssertThrow(interior_seed && accepted->profile.slip_sense == 1,
+                      ExcMessage("A legacy mature fault checkpoint requires interior mechanics and the original slip sense."));
+        }
 
       // Older archives identify the law only through its label-record key.
       // Check the additional physical signature before installing any history.
@@ -670,14 +704,14 @@ namespace aspect
                   ExcMessage("Mature fault friction pressure source or profile differs from the checkpoint."));
       const auto entry = status.find(label_checkpoint_key());
       AssertThrow(entry != status.end(),
-                  ExcMessage("Missing interior fault labels in checkpoint."));
+                  ExcMessage("Missing mature fault labels in checkpoint."));
 
       std::istringstream records(entry->second);
       auto restored_labels = labels();
       unsigned int n_labels = 0;
       records >> n_labels;
       AssertThrow(n_labels == restored_labels.size(),
-                  ExcMessage("Incompatible interior fault topology in checkpoint."));
+                  ExcMessage("Incompatible mature fault topology in checkpoint."));
       auto resistance_state = friction->state();
       std::vector<double> restored_shear(n_labels), restored_memory(n_labels);
       for (unsigned int i = 0; i < n_labels; ++i)
@@ -688,12 +722,14 @@ namespace aspect
             records >> resistance_state[i];
           records >> label.rate >> label.slip >> restored_memory[i];
         }
-      AssertThrow(records, ExcMessage("Incomplete interior fault checkpoint."));
+      AssertThrow(records, ExcMessage("Incomplete mature fault checkpoint."));
+      if (geometry != status.end())
+        AssertThrow(restored_shear == label_background_shear,
+                    ExcMessage("Persistent vertex shear tractions differ from the checkpoint."));
       accepted->trace.replace_material_labels(std::move(restored_labels));
       label_background_shear = std::move(restored_shear);
       maxwell_memory = std::move(restored_memory);
       friction->restore_state(std::move(resistance_state));
-      trace_initialized = false;
     }
 
     ASPECT_REGISTER_MATERIAL_MODEL(PhaseFieldFault,"phase field fault",

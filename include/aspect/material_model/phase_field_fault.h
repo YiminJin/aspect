@@ -120,6 +120,9 @@ namespace aspect
          */
         void prepare_trial_section(const LinearAlgebra::BlockVector &fields);
 
+        /** Collectively rebuild the derived normal integrals from the accepted trace and old FE phase. */
+        void initialize_accepted_profile();
+
         /**
          * Rotate the parent stress (Pa) over the physical timestep (s) using
          * the spin of the accepted velocity gradient minus the slip gradient.
@@ -175,6 +178,10 @@ namespace aspect
 
         /** Inflow boundary data for runs that materially advect the accepted stress. */
         std::unique_ptr<Functions::ParsedFunction<dim>> inflow_stress;
+        /** Ordered input positions (m), before any fit or material motion, for checkpoint identity. */
+        std::vector<Point<dim>> prescribed_vertices;
+        /** Initial material support radius (m). Zero denotes the full in-box normal. */
+        double prescribed_half_width;
         bool fit_trace;
         bool trace_initialized = false;
         double conductivity;           // Thermal conductivity (W/(m K)).
