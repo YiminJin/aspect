@@ -1,5 +1,99 @@
 # Phase-field fault working record
 
+## Mature fault material readability
+
+Starting commit `dbe645bb6`. In `source/material_model/phase_field_fault.cc`, start at `parse_fault_vertex_table`. Its caller distributes the file contents once. The parser assigns positions, optional ages (s) and persistent shear tractions (Pa) in material ID order. The matching header describes the accepted diagnostic state and the trial section used by Stokes. In the coupling, `prepare_iteration` prepares that trial section, and `accept_step` calls `accept_section_rates` after the repeat decision. The effective Maxwell viscosity (Pa s) and dimensionless stress relaxation factor now have distinct names at their callers, including the rate-tangent capture.
+
+The Release parameter XML (1,239,167 bytes, SHA-256 `def2de40f4e91d8ba65fa036d8294c26ed774748974273e5f833b4e839206e51`) matched the retained Q8 installation byte for byte. This includes all 27 entries under the mature model. The strict free-32 check passed. All 38 label rows and the bulk-point exports at 0, 12.5 and 25 ms were byte-identical to the Assignment B outputs. The moving tangent capture checked 2,120 Q8 points at the later Picard iterate. Its relative directional error was 1.46e−10, and substituting label-interpolated stiffness produced 1.057e−4. The Release unit suite passed 2,574 assertions in 61 cases.
+
+The vertex checker compared all 20 material IDs on one and two ranks. File and inline inputs agreed exactly on each rank count at all three clocks. ID 9 crossed from rank 0 to rank 1. The maximum serial/two-rank difference across label and bulk sample columns was 1.96e−14. The serial checkpoint resumed on two ranks within 1.48e−14 (existing budget 1e−8). On the three-label input the pre-edit and rebuilt executables produced identical label tables and accepted xx, yy and xy stress arrays. Reversing the order of the age and shear columns, adding trailing comments and inserting blank lines reproduced the same results. All eight invalid vertex inputs raised their expected diagnostics.
+
+The installed interface and mature-settings checkers completed 26 and 24 cases respectively, including legacy parameter names, initial slip, external resistance laws, restart from a legacy RSF archive and rejection of incompatible settings. The full parameter JSON was also byte-identical (1,296,285 bytes). An initial run with a benchmark library compiled before Assignment B failed in a derived material. Rebuilding the plugin against the installed headers resolved the mismatch. The code and commands below use that matching SDK.
+
+Run from the worktree root with fresh output directories. All simulations used one numerical thread per rank.
+
+```sh
+W=$PWD
+B=$W/build-6b/release
+D=$W/build-readability
+I=$D/install
+A=$I/bin/aspect-release
+export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 UCX_LOG_LEVEL=error
+mkdir -p "$D"
+cmake -S . -B "$B" -DCMAKE_INSTALL_PREFIX="$I" -DASPECT_INSTALL_EXAMPLES=ON
+cmake --build "$B" --target aspect -j2
+for part in runtime includes examples Unspecified; do
+  cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -DCMAKE_INSTALL_COMPONENT="$part" -P "$B/cmake_install.cmake"
+done
+(cd benchmarks/fixed_fault && "$W/build-review-b/closeout/install/bin/aspect-release" --output-xml mature_trace.prm) > "$D/baseline-parameters.xml"
+(cd benchmarks/fixed_fault && "$A" --output-xml mature_trace.prm) > "$D/final-parameters.xml"
+cmp "$D/baseline-parameters.xml" "$D/final-parameters.xml"
+(cd "$B/unit_tests" && "$A" --test)
+
+R=$I/benchmarks/fixed_fault/phase_ridge
+cmake -S "$R" -B "$D/ridge-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/ridge-plugin" -j1
+ASPECT_SOURCE_DIR=$I python3 -B "$R/run.py" "$A" "$D/ridge-plugin/libphase_ridge.release.so" "$D/final-ridge/free-32" free 32
+PYTHONPATH=$R python3 -BO -c 'from pathlib import Path; import sys; from check import check_case; check_case(Path(sys.argv[1]), "free", 32)' "$D/final-ridge"
+for step in 0 1 2; do
+  for field in labels bulk; do
+    cmp "$D/final-ridge/free-32/output/$field-$step-0.txt" "build-review-b/final-free32/output/$field-$step-0.txt"
+  done
+done
+
+V=$W/refactoring/phase-field-fault/rate_tangent
+M=$D/moving-capture
+mkdir -p "$M"
+(cd "$M" && python3 "$V/capture.py" "$W" --build "$B" --moving)
+cp "$I/benchmarks/layered_moving_fault/layered.prm" "$M/input.prm"
+printf '\nset Additional shared libraries = %s\nset Output directory = %s\n' "$W/build-review-b/control-plugins/layered/liblayered_moving_fault.release.so" "$M/output" >> "$M/input.prm"
+"$M/aspect-review" "$M/input.prm"
+python3 -BO "$V/check_moving.py" "$M/output"
+```
+
+The input and restart checks use the retained pre-signature RSF writer from C2.
+
+```sh
+G=$I/benchmarks/growing_fault
+T=$I/benchmarks/fixed_fault
+L=$I/benchmarks/layered_moving_fault
+M=/opt/openmpi/5.0.6/bin/mpirun
+Q8=$PWD/build-review-b/install
+P=$PWD/build-review-b/control-plugins/tests/libfixed_fault.release.so
+V=$PWD/build-review-a2/test-plugins/libdashpot.release.so
+Q=$PWD/build-review-a2/probe/libfault_parameter_probe.release.so
+OLD=$PWD/build-interface-c2/qualified-sdk/bin/aspect-release
+mkdir -p "$D/replay-baseline"
+cp "$Q8"/benchmarks/fixed_fault/{fixed_fault.prm,mature_trace.prm,mature_vertices.txt} "$D/replay-baseline/"
+(cd "$D/replay-baseline" && "$Q8/bin/aspect-release" mature_trace.prm > run.log 2>&1)
+for item in growing_fault layered_moving_fault; do
+  case "$item" in growing_fault) target=growth-plugin ;; layered_moving_fault) target=layered-plugin ;; esac
+  cmake -S "$I/benchmarks/$item" -B "$D/$target" -DAspect_DIR="$I/lib/cmake/Aspect"
+  cmake --build "$D/$target" --parallel 1
+done
+python3 "$G/check_interface.py" "$A" "$D/growth-plugin/libgrowing_fault_checks.release.so" "$D/final-interface"
+python3 "$L/check_vertex_file.py" "$A" "$D/layered-plugin/liblayered_moving_fault.release.so" "$D/final-vertices" --mpiexec "$M"
+PYTHONPATH="$T" python3 - "$D" <<'PY'
+from pathlib import Path
+import sys
+from check_mature_settings import compare_accepted
+d = Path(sys.argv[1])
+compare_accepted(d/'replay-baseline/output-mature-trace', d/'final-interface/mature/output', range(3))
+PY
+"$Q8/bin/aspect-release" --output-json benchmarks/fixed_fault/fixed_fault.prm > "$D/replay-baseline/parameters.json"
+"$A" --output-json benchmarks/fixed_fault/fixed_fault.prm > "$D/final-parameters.json"
+cmp "$D/replay-baseline/parameters.json" "$D/final-parameters.json"
+python3 "$T/check_mature_settings.py" "$A" "$P" "$V" "$D/final-mature" --legacy-writer "$OLD"
+python3 "$G/check_material_settings.py" "$A" "$D/final-material-settings"
+python3 "$G/parameter_compatibility/check.py" "$A" "$Q" "$D/final-compatibility"
+TBL=$D/reordered-columns
+mkdir "$TBL"
+cp "$T/fixed_fault.prm" "$T/mature_trace.prm" "$TBL/"
+awk '{print $1, $2, $3, $5, $4, "# optional columns reversed"; print ""}' "$T/mature_vertices.txt" > "$TBL/mature_vertices.txt"
+(cd "$TBL" && "$A" mature_trace.prm)
+PYTHONPATH="$T" python3 -c 'from pathlib import Path; from sys import argv; from check_mature_settings import compare_accepted; compare_accepted(Path(argv[1]), Path(argv[2]), range(3))' "$D/replay-baseline/output-mature-trace" "$TBL/output-mature-trace"
+```
+
 ## Assignment B closeout
 
 Assignment B is closed against the reviewed production implementation at `623bb1c57`. The reference for the fitted free-32 case now uses its Q8 slip-load projection. The strict and independent checker modes both passed on the retained ridge outputs, including the archived two-rank and retry frames. A fresh one-rank, one-thread Release calculation also passed the strict free-32 comparison. All six physical columns matched exactly for all 38 labels at each clock (0, 0.0125 and 0.025 s). IDs and clocks were exact. The numerical budget remains 1e−10 absolute plus 1e−8 relative.

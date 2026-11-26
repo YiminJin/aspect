@@ -38,9 +38,9 @@ s=inject(s,'        if (residual <= 64.*std::numeric_limits<double>::epsilon())'
             std::ofstream o(this->get_output_directory()+"review-bands-"+std::to_string(iteration)+"-"+std::to_string(rank));
             o << std::setprecision(17);
             for (unsigned int j=0;j<n;++j)
-              o << j << ' ' << accepted[j].position << ' ' << material.section().profile.normal_integrals()[j] << ' '
+              o << j << ' ' << accepted[j].position << ' ' << material.active_section().profile.normal_integrals()[j] << ' '
                 << material.label_ages().at(j) << ' ' << rates[j] << ' ' << diagonal[j] << ' ' << (j+1<n?upper[j]:0.)
-                << ' ' << rhs[j] << ' ' << scale[j] << ' ' << material.stiffness(accepted[j].position) << '\n';
+                << ' ' << rhs[j] << ' ' << scale[j] << ' ' << material.effective_maxwell_viscosity(accepted[j].position) << '\n';
           }
 ''')
 if args.moving:
@@ -51,7 +51,7 @@ if args.moving:
     s = inject(s, "              if (review_points.is_open())", r"""
               Stress direct = material.viscous_stress(strain[q],x);
               for (unsigned int i=0; i<parent.size(); ++i)
-                direct += basis(q,i)*parent[i]*material.relaxation(x);
+                direct += basis(q,i)*parent[i]*material.stress_relaxation_factor(x);
 """)
     s = s.replace("<< compression << '\\n'", "<< compression << ' ' << (stress-direct).norm() << '\\n'")
 (scratch/source.name).write_text('#include <fstream>\n#include <iomanip>\n'+s)

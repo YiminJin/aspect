@@ -18,60 +18,81 @@ namespace aspect
   {
     namespace
     {
-      // The first row names columns so the donor's x,y,core-phase triples
-      // cannot be mistaken for a material identity, position or age.
+      /**
+       * Parse the contents of a fault vertex file after distribution to all ranks.
+       * Each data row appends one position (x, y in meters) in material ID order,
+       * starting at zero. Blank lines and comments beginning with '#' are skipped.
+       * Optional columns append initial ages (s) and background shear tractions
+       * (Pa) to their respective vectors. An omitted column preserves its inline
+       * values. Supplying the same property both inline and in the file is an error.
+       */
       template <int dim>
-      void read_vertices(const std::string &text, std::vector<Point<dim>> &vertices,
-                         std::vector<double> &ages,std::vector<double> &shear)
+      void parse_fault_vertex_table(const std::string       &file_contents,
+                                    std::vector<Point<dim>> &vertices,
+                                    std::vector<double>     &initial_ages,
+                                    std::vector<double>     &background_shear_tractions)
       {
-        std::istringstream input(text);
-        std::vector<std::string> header;
+        std::istringstream input(file_contents);
+        std::vector<std::string> column_names;
         std::string line;
-        while (std::getline(input,line))
+        while (std::getline(input, line))
           {
-            line=line.substr(0,line.find('#'));
+            line = line.substr(0, line.find('#'));
             std::istringstream row(line);
-            std::vector<std::string> tokens {std::istream_iterator<std::string>(row),{}};
-            if (tokens.empty()) continue;
-            if (header.empty())
+            std::vector<std::string> entries;
+            for (std::string entry; row >> entry;)
+              entries.push_back(entry);
+            if (entries.empty())
+              continue;
+
+            if (column_names.empty())
               {
-                header=std::move(tokens);
-                AssertThrow(header.size()>=3 && header[0]=="id" && header[1]=="x_m" && header[2]=="y_m",
+                column_names = std::move(entries);
+                AssertThrow(column_names.size() >= 3 &&
+                            column_names[0] == "id" && column_names[1] == "x_m" && column_names[2] == "y_m",
                             ExcMessage("Expected vertex header id x_m y_m; anonymous donor core-phase triples are ambiguous."));
-                std::set<std::string> used;
-                for (unsigned int j=3; j<header.size(); ++j)
+                std::set<std::string> optional_columns;
+                for (unsigned int column = 3; column < column_names.size(); ++column)
                   {
-                    const bool age=header[j]=="initial_age_s";
-                    AssertThrow((age || header[j]=="background_shear_Pa") && used.insert(header[j]).second,
-                                ExcMessage("Unknown or duplicate vertex column "+header[j]));
-                    AssertThrow((age?ages:shear).empty(),ExcMessage("Duplicate inline and file source for "+header[j]));
+                    const std::string &name = column_names[column];
+                    const bool is_age = name == "initial_age_s";
+                    AssertThrow((is_age || name == "background_shear_Pa") && optional_columns.insert(name).second,
+                                ExcMessage("Unknown or duplicate vertex column " + name));
+                    const auto &inline_values = is_age ? initial_ages : background_shear_tractions;
+                    AssertThrow(inline_values.empty(),
+                                ExcMessage("Duplicate inline and file source for " + name));
                   }
                 continue;
               }
-            AssertThrow(tokens.size()==header.size() && tokens[0]==std::to_string(vertices.size()),
+
+            AssertThrow(entries.size() == column_names.size() && entries[0] == std::to_string(vertices.size()),
                         ExcMessage("Vertex rows require consecutive material IDs from zero and one value per named column."));
-            Point<dim> point;
-            for (unsigned int j=1; j<header.size(); ++j)
+            Point<dim> position;
+            for (unsigned int column = 1; column < column_names.size(); ++column)
               {
-                std::istringstream number(tokens[j]);
+                std::istringstream number(entries[column]);
                 double value;
-                AssertThrow((number>>value) && number.peek()==std::char_traits<char>::eof() && std::isfinite(value),
-                            ExcMessage("Invalid vertex value in "+header[j]));
-                if (j<3) point[j-1]=value;
-                else if (header[j]=="initial_age_s") ages.push_back(value);
-                else shear.push_back(value);
+                AssertThrow((number >> value) && number.peek() == std::char_traits<char>::eof() && std::isfinite(value),
+                            ExcMessage("Invalid vertex value in " + column_names[column]));
+                if (column < 3)
+                  position[column-1] = value;
+                else if (column_names[column] == "initial_age_s")
+                  initial_ages.push_back(value);
+                else
+                  background_shear_tractions.push_back(value);
               }
-            vertices.push_back(point);
+            vertices.push_back(position);
           }
-        AssertThrow(vertices.size()>=2,ExcMessage("A material trace requires at least two ordered vertices."));
+        AssertThrow(vertices.size() >= 2,
+                    ExcMessage("A material trace requires at least two ordered vertices."));
       }
 
       /** Accepted in-plane deviatoric stress components in Pa for visualization. */
       template <int dim>
       struct FaultPhysicalStress : NamedAdditionalMaterialOutputs<dim>
       {
-        explicit FaultPhysicalStress(const unsigned int n)
-          : NamedAdditionalMaterialOutputs<dim>({"fault_tau_xx","fault_tau_yy","fault_tau_xy"},n)
+        explicit FaultPhysicalStress(const unsigned int n_evaluation_points)
+          : NamedAdditionalMaterialOutputs<dim>({"fault_tau_xx", "fault_tau_yy", "fault_tau_xy"}, n_evaluation_points)
         {}
       };
     }
@@ -84,7 +105,10 @@ namespace aspect
     }
 
     template <int dim>
-    PhaseFieldFault<dim>::PhaseFieldFault() : coupling(*this), accepted(std::make_unique<Section>()) {}
+    PhaseFieldFault<dim>::PhaseFieldFault()
+      : coupling(*this),
+        accepted(std::make_unique<Section>())
+    {}
 
     template <int dim>
     void PhaseFieldFault<dim>::initialize()
@@ -103,75 +127,86 @@ namespace aspect
       if (!trace_initialized)
         {
           if (fit_trace)
-            accepted->trace.fit_boundary_spanning_seed_to_phase_ridge(*this,phase_field,this->get_old_solution());
-          if (!interior_seed || this->get_timestep_number()>0)
-            accepted->profile.initialize(*this,phase_field,this->get_old_solution(),degradation_magnitude,interior_seed ? 8 : 1);
+            accepted->trace.fit_boundary_spanning_seed_to_phase_ridge(*this, phase_field, this->get_old_solution());
+          if (!interior_seed || this->get_timestep_number() > 0)
+            accepted->profile.initialize(*this, phase_field, this->get_old_solution(),
+                                         degradation_magnitude, interior_seed ? 8 : 1);
           trace_initialized = true;
         }
       coupling.prepare_parent();
     }
 
     template <int dim>
-    void PhaseFieldFault<dim>::bind_candidate(const LinearAlgebra::BlockVector &fields)
+    void PhaseFieldFault<dim>::prepare_trial_section(const LinearAlgebra::BlockVector &fields)
     {
-      if (!interior_seed || candidate) return;
-      candidate=std::make_unique<Section>();
-      candidate->trace=accepted->trace;
-      if (advect_vertices && this->get_timestep()>0.)
-        candidate->trace.advect_with_accepted_velocity(*this,this->get_timestep());
-      candidate->profile.initialize(*this,phase_field,fields,degradation_magnitude,8);
+      if (!interior_seed || candidate)
+        return;
+
+      candidate = std::make_unique<Section>();
+      candidate->trace = accepted->trace;
+      if (advect_vertices && this->get_timestep() > 0.)
+        candidate->trace.advect_with_accepted_velocity(*this, this->get_timestep());
+      candidate->profile.initialize(*this, phase_field, fields, degradation_magnitude, 8);
     }
 
     template <int dim>
-    double PhaseFieldFault<dim>::normal_compression(const Point<dim> &foot, const double pressure,
-                                                    const double normal_deviatoric_stress) const
+    double PhaseFieldFault<dim>::normal_compression(const Point<dim> &trace_position,
+                                                    const double      pressure,
+                                                    const double      normal_deviatoric_stress) const
     {
       if (normal_stress.uses_adiabat())
-        return this->get_adiabatic_conditions().pressure(foot);
+        return this->get_adiabatic_conditions().pressure(trace_position);
       return background_compression + pressure - normal_deviatoric_stress;
     }
 
     template <int dim>
-    double PhaseFieldFault<dim>::stiffness(const Point<dim> &x) const
+    double PhaseFieldFault<dim>::effective_maxwell_viscosity(const Point<dim> &position) const
     {
-      const double eta=bulk_viscosity(x);
-      return -eta*std::expm1(-modulus*interval/eta);
+      const double eta = bulk_viscosity(position);
+      return -eta * std::expm1(-modulus * interval / eta);
     }
 
     template <int dim>
-    double PhaseFieldFault<dim>::relaxation(const Point<dim> &x) const
+    double PhaseFieldFault<dim>::stress_relaxation_factor(const Point<dim> &position) const
     {
-      return std::exp(-modulus*interval/bulk_viscosity(x));
-    }
-
-    template <int dim>
-    typename PhaseFieldFault<dim>::Stress PhaseFieldFault<dim>::viscous_stress(const Stress &strain_rate,const Point<dim> &x) const
-    {
-      return 2.*stiffness(x)*Utilities::Tensors::consistent_deviator(strain_rate);
-    }
-
-    template <int dim>
-    SymmetricTensor<2,dim> PhaseFieldFault<dim>::endpoint_stress(const typename DoFHandler<dim>::active_cell_iterator &cell,
-                                                                 const Point<dim> &x, const double phase, const Stress &strain) const
-    {
-      return viscous_stress(strain,x)+coupling.stress_offset(cell,x,phase);
+      return std::exp(-modulus * interval / bulk_viscosity(position));
     }
 
     template <int dim>
     typename PhaseFieldFault<dim>::Stress
-    PhaseFieldFault<dim>::rotate_parent(const Stress &parent, const Tensor<2,dim> &accepted_gradient,
-                                        const Tensor<2,dim> &slip_gradient, const double physical_dt) const
+    PhaseFieldFault<dim>::viscous_stress(const Stress     &strain_rate,
+                                         const Point<dim> &position) const
+    {
+      return 2. * effective_maxwell_viscosity(position) * Utilities::Tensors::consistent_deviator(strain_rate);
+    }
+
+    template <int dim>
+    SymmetricTensor<2,dim>
+    PhaseFieldFault<dim>::endpoint_stress(const typename DoFHandler<dim>::active_cell_iterator &cell,
+                                          const Point<dim> &position,
+                                          const double phase,
+                                          const Stress &strain_rate) const
+    {
+      return viscous_stress(strain_rate, position) + coupling.stress_offset(cell, position, phase);
+    }
+
+    template <int dim>
+    typename PhaseFieldFault<dim>::Stress
+    PhaseFieldFault<dim>::rotate_parent_stress(const Stress        &parent_stress,
+                                               const Tensor<2,dim> &velocity_gradient,
+                                               const Tensor<2,dim> &slip_gradient,
+                                               const double         physical_dt) const
     {
       if constexpr (dim == 2)
         {
           // Initialization relaxes the parent over its Maxwell interval but has
           // zero physical duration for slip, age and the accepted spin rotation.
-          const auto gradient = accepted_gradient - slip_gradient;
-          const double angle = .5*physical_dt*(gradient[1][0]-gradient[0][1]);
+          const auto gradient = velocity_gradient - slip_gradient;
+          const double angle = .5 * physical_dt * (gradient[1][0] - gradient[0][1]);
           const auto rotation = Physics::Transformations::Rotations::rotation_matrix_2d(angle);
-          return symmetrize(rotation*static_cast<Tensor<2,dim>>(parent)*transpose(rotation));
+          return symmetrize(rotation * static_cast<Tensor<2,dim>>(parent_stress) * transpose(rotation));
         }
-      AssertThrow(false,ExcNotImplemented());
+      AssertThrow(false, ExcNotImplemented());
       return {};
     }
 
@@ -182,14 +217,15 @@ namespace aspect
     }
 
     template <int dim>
-    void PhaseFieldFault<dim>::evaluate(const MaterialModelInputs<dim> &in, MaterialModelOutputs<dim> &out) const
+    void PhaseFieldFault<dim>::evaluate(const MaterialModelInputs<dim> &in,
+                                        MaterialModelOutputs<dim>      &out) const
     {
       EquationOfStateOutputs<dim> background(1);
       const auto offset = out.template get_additional_output_object<FaultStressOffset<dim>>();
       const auto physical = out.template get_additional_output_object<FaultPhysicalStress<dim>>();
-      for (unsigned int q=0; q<in.n_evaluation_points(); ++q)
+      for (unsigned int q = 0; q < in.n_evaluation_points(); ++q)
         {
-          eos.evaluate(in,q,background);
+          eos.evaluate(in, q, background);
           out.densities[q] = background.densities[0];
           out.thermal_expansion_coefficients[q] = background.thermal_expansion_coefficients[0];
           out.specific_heat[q] = background.specific_heat_capacities[0];
@@ -197,13 +233,13 @@ namespace aspect
           out.entropy_derivative_pressure[q] = background.entropy_derivative_pressure[0];
           out.entropy_derivative_temperature[q] = background.entropy_derivative_temperature[0];
           out.thermal_conductivities[q] = conductivity;
-          out.viscosities[q] = stiffness(in.position[q]);
-          std::fill(out.reaction_terms[q].begin(),out.reaction_terms[q].end(),0.);
+          out.viscosities[q] = effective_maxwell_viscosity(in.position[q]);
+          std::fill(out.reaction_terms[q].begin(), out.reaction_terms[q].end(), 0.);
           if (physical)
-            for (unsigned int c=0; c<stress_fields.size(); ++c)
+            for (unsigned int c = 0; c < stress_fields.size(); ++c)
               physical->output_values[c][q] = in.composition[q][stress_fields[c]];
           if (offset)
-            offset->stress[q] = coupling.stokes_stress_offset(in.current_cell,in.position[q],in.composition[q][phase_field]);
+            offset->stress[q] = coupling.stokes_stress_offset(in.current_cell, in.position[q], in.composition[q][phase_field]);
         }
     }
 
@@ -223,56 +259,108 @@ namespace aspect
     void PhaseFieldFault<dim>::declare_parameters(ParameterHandler &prm)
     {
       Rheology::FrictionNormalStress::declare_parameters(prm);
+
       prm.enter_subsection("Material model");
-      prm.enter_subsection("Phase field fault");
-      FaultParameters::declare_entry(prm,"Advect physical stress","false",Patterns::Bool(),
-                                     "Transport the accepted DG stress with the accepted velocity before rotation and relaxation. Exterior parent stress specifies xx; yy; xy in Pa, at x,y in metres and t in seconds.");
-      prm.enter_subsection("Exterior parent stress");
-      Functions::ParsedFunction<dim>::declare_parameters(prm,3);
-      for (const auto name :
-      {"Variable names", "Function constants", "Function expression"
-      })
-      FaultParameters::observe_entry(prm,name,Patterns::Anything());
-      prm.leave_subsection();
-      FaultParameters::declare_entry(prm,"Fault geometry","automatic",
-                                     Patterns::Selection("automatic|boundary spanning|fixed interior|advected interior"),
-                                     "Boundary spanning uses the stationary section law. Both interior modes use the prescribed "
-                                     "material seed and the same Q8 projected Maxwell response. Advected interior moves vertices "
-                                     "with accepted velocity and requires bounded phase and physical stress transport. Fixed "
-                                     "interior holds the vertices fixed. Automatic preserves earlier inputs by selecting advected "
-                                     "interior for the phase field composition role and boundary spanning for the generic role.");
-      FaultParameters::declare_entry(prm,"Fault vertex file","",Patterns::FileName(),
-                                     "Ordered ASCII table: id x_m y_m, optionally initial_age_s and background_shear_Pa. "
-                                     "IDs start at zero. Row order sets slip sense; shear persists through all timesteps.");
-      FaultParameters::declare_entry(prm,"Fault vertices","",Patterns::List(Patterns::List(Patterns::Double(),2,2),0,
-                                                                            Patterns::List::max_int_value,";"),"Ordered x,y label positions in metres separated by semicolons. "
-                                     "The default joins the ends of the left box boundary.");
-      FaultParameters::declare_entry(prm,"Degradation magnitude","1",Patterns::Double(0.),"Scale of mature excess compliance and of its projected normal integral. At fixed phase it cancels in the normalized slip weight.");
-      FaultParameters::declare_entry(prm,"Fit trace to phase","true",Patterns::Bool(),"Fit the ordered seed to the initialized FE ridge. Constant phase retains the seed.");
-      FaultParameters::declare_entry(prm,"Profile half width","0",Patterns::Double(0.),"Normal association support in metres. Zero uses the full physical cross-section.");
-      FaultParameters::declare_entry(prm,"Viscosity","5e24",Patterns::Double(0.),
-                                     "Maxwell viscosity in Pa s. The default is 5e24 for a mature trace and 1e8 for growing strips.");
-      FaultParameters::declare_entry(prm,"Shear modulus","1e10",Patterns::Double(0.),"Elastic shear modulus in Pa. With no explicit setting, mature traces use 1e10 and growing strips use 1e6.");
-      FaultParameters::declare_entry(prm,"Initialization interval","1",Patterns::Double(0.),"Maxwell interval in seconds for the initial Stokes solve.");
-      FaultParameters::declare_entry(prm,"Background shear traction","0",Patterns::Double(),"Persistent shear loading in Pa along the slip sense; the per-vertex column overrides this uniform value.");
-      FaultParameters::declare_entry(prm,"Background compression","",Patterns::List(Patterns::Double(0.),0,1),
-                                     "Compression in Pa added to resolved normal traction (default 5e7 Pa). "
-                                     "Leave empty for adiabatic pressure, which supplies the complete compression.");
-      FaultParameters::declare_entry(prm,"Minimum speed","1e-20",Patterns::Double(0.),"Minimum admissible sliding speed in m/s.");
-      FaultParameters::declare_entry(prm,"Initial slip rate","",Patterns::List(Patterns::Double(0.),0,1),
-                                     "Positive initial material vertex speed in m/s, used before the first section solve. "
-                                     "An empty entry uses Reference speed for compatibility with earlier trace inputs.");
-      FaultParameters::declare_entry(prm,"Initial label ages","",Patterns::List(Patterns::Double(0.)),"Optional ordered initial material ages in seconds.");
-      FaultParameters::declare_entry(prm,"Initial label shear tractions","",Patterns::List(Patterns::Double()),"Optional persistent shear tractions in Pa, ordered by vertex.");
-      Rheology::FaultResistance::declare_parameters(prm,Rheology::FaultResistance::Route::mature);
-      prm.leave_subsection();
+      {
+        prm.enter_subsection("Phase field fault");
+        {
+          FaultParameters::declare_entry(prm, "Advect physical stress", "false",
+                                         Patterns::Bool(),
+                                         "Transport the accepted DG stress with the accepted velocity before "
+                                         "rotation and relaxation. Exterior parent stress specifies xx; yy; xy "
+                                         "in Pa, at x,y in metres and t in seconds.");
+          prm.enter_subsection("Exterior parent stress");
+          {
+            Functions::ParsedFunction<dim>::declare_parameters(prm, 3);
+            const char *const function_parameters[] = {"Variable names", "Function constants", "Function expression"};
+            for (const auto name : function_parameters)
+              FaultParameters::observe_entry(prm, name, Patterns::Anything());
+          }
+          prm.leave_subsection();
+
+          FaultParameters::declare_entry(prm, "Fault geometry", "automatic",
+                                         Patterns::Selection("automatic|boundary spanning|fixed interior|advected interior"),
+                                         "Boundary spanning uses the stationary section law. Both interior modes use "
+                                         "the prescribed material seed and the same Q8 projected Maxwell response. "
+                                         "Advected interior moves vertices with accepted velocity and requires "
+                                         "bounded phase and physical stress transport. Fixed interior holds the "
+                                         "vertices fixed. Automatic preserves earlier inputs by selecting advected "
+                                         "interior for the phase field composition role and boundary spanning for "
+                                         "the generic role.");
+          FaultParameters::declare_entry(prm, "Fault vertex file", "",
+                                         Patterns::FileName(),
+                                         "Ordered ASCII table: id x_m y_m, optionally initial_age_s and "
+                                         "background_shear_Pa. IDs start at zero. Row order sets slip sense; "
+                                         "shear persists through all timesteps.");
+          FaultParameters::declare_entry(prm, "Fault vertices", "",
+                                         Patterns::List(Patterns::List(Patterns::Double(), 2, 2),
+                                                        0, Patterns::List::max_int_value, ";"),
+                                         "Ordered x,y label positions in metres separated by semicolons. "
+                                         "The default joins the ends of the left box boundary.");
+          FaultParameters::declare_entry(prm, "Degradation magnitude", "1",
+                                         Patterns::Double(0.),
+                                         "Scale of mature excess compliance and of its projected normal integral. "
+                                         "At fixed phase it cancels in the normalized slip weight.");
+          FaultParameters::declare_entry(prm, "Fit trace to phase", "true",
+                                         Patterns::Bool(),
+                                         "Fit the ordered seed to the initialized FE ridge. Constant phase "
+                                         "retains the seed.");
+          FaultParameters::declare_entry(prm, "Profile half width", "0",
+                                         Patterns::Double(0.),
+                                         "Normal association support in metres. Zero uses the full physical "
+                                         "cross-section.");
+
+          FaultParameters::declare_entry(prm, "Viscosity", "5e24",
+                                         Patterns::Double(0.),
+                                         "Maxwell viscosity in Pa s. The default is 5e24 for a mature trace "
+                                         "and 1e8 for growing strips.");
+          FaultParameters::declare_entry(prm, "Shear modulus", "1e10",
+                                         Patterns::Double(0.),
+                                         "Elastic shear modulus in Pa. With no explicit setting, mature traces "
+                                         "use 1e10 and growing strips use 1e6.");
+          FaultParameters::declare_entry(prm, "Initialization interval", "1",
+                                         Patterns::Double(0.),
+                                         "Maxwell interval in seconds for the initial Stokes solve.");
+          FaultParameters::declare_entry(prm, "Background shear traction", "0",
+                                         Patterns::Double(),
+                                         "Persistent shear loading in Pa along the slip sense; the per-vertex "
+                                         "column overrides this uniform value.");
+          FaultParameters::declare_entry(prm, "Background compression", "",
+                                         Patterns::List(Patterns::Double(0.), 0, 1),
+                                         "Compression in Pa added to resolved normal traction (default 5e7 Pa). "
+                                         "Leave empty for adiabatic pressure, which supplies the complete "
+                                         "compression.");
+
+          FaultParameters::declare_entry(prm, "Minimum speed", "1e-20",
+                                         Patterns::Double(0.),
+                                         "Minimum admissible sliding speed in m/s.");
+          FaultParameters::declare_entry(prm, "Initial slip rate", "",
+                                         Patterns::List(Patterns::Double(0.), 0, 1),
+                                         "Positive initial material vertex speed in m/s, used before the first "
+                                         "section solve. An empty entry uses Reference speed for compatibility "
+                                         "with earlier trace inputs.");
+          FaultParameters::declare_entry(prm, "Initial label ages", "",
+                                         Patterns::List(Patterns::Double(0.)),
+                                         "Optional ordered initial material ages in seconds.");
+          FaultParameters::declare_entry(prm, "Initial label shear tractions", "",
+                                         Patterns::List(Patterns::Double()),
+                                         "Optional persistent shear tractions in Pa, ordered by vertex.");
+
+          Rheology::FaultResistance::declare_parameters(prm, Rheology::FaultResistance::Route::mature);
+        }
+        prm.leave_subsection();
+      }
       prm.leave_subsection();
     }
 
     template <int dim>
     void PhaseFieldFault<dim>::parse_parameters(ParameterHandler &prm)
     {
-      AssertThrow(dim==2,ExcMessage("Reconstructed fault mechanics requires 2-D plane strain."));
+      using AdvectionMethod = typename Parameters<dim>::AdvectionFieldMethod;
+      using NonlinearSolver = typename Parameters<dim>::NonlinearSolver;
+      using MassConservation = typename Parameters<dim>::Formulation::MassConservation;
+
+      AssertThrow(dim == 2, ExcMessage("Reconstructed fault mechanics requires 2-D plane strain."));
       // Some wrappers parse their base material without forwarding initialize().
       AssertThrow(&this->get_material_model() == this,
                   ExcMessage("Phase field fault must be the top-level material model so Stokes and "
@@ -282,190 +370,265 @@ namespace aspect
       this->model_dependence.compressibility = NonlinearDependence::none;
       this->model_dependence.specific_heat = NonlinearDependence::none;
       this->model_dependence.thermal_conductivity = NonlinearDependence::none;
+
       prm.enter_subsection("Termination criteria");
       const bool checkpoint_on_termination = prm.get_bool("Checkpoint on termination");
       prm.leave_subsection();
       FaultParameters::resolve(prm, /* growing = */ false);
-      normal_stress = Rheology::FrictionNormalStress::parse(prm,Rheology::FrictionNormalStress::Source::resolved_traction);
-      const auto &p = this->get_parameters();
-      const auto &intro = this->introspection();
-      phase_field = intro.compositional_index_for_name(p.surface_energy_model.composition);
-      const std::array<std::string,3> names = {{"fault_stress_xx","fault_stress_yy","fault_stress_xy"}};
-      AssertThrow(intro.n_compositional_fields == 4,ExcMessage("Expected three fault stress fields and one phase composition."));
-      for (unsigned int c=0; c<names.size(); ++c)
+      normal_stress = Rheology::FrictionNormalStress::parse(prm,
+                                                            Rheology::FrictionNormalStress::Source::resolved_traction);
+
+      const auto &parameters = this->get_parameters();
+      const auto &introspection = this->introspection();
+      phase_field = introspection.compositional_index_for_name(parameters.surface_energy_model.composition);
+      const std::array<std::string,3> stress_field_names = {{"fault_stress_xx", "fault_stress_yy", "fault_stress_xy"}};
+      AssertThrow(introspection.n_compositional_fields == 4,
+                  ExcMessage("Expected three fault stress fields and one phase composition."));
+      for (unsigned int c=0; c<stress_field_names.size(); ++c)
         {
-          stress_fields[c] = intro.compositional_index_for_name(names[c]);
-          AssertThrow(stress_fields[c]!=phase_field,
-                      ExcMessage("Phase composition cannot be a mature fault stress component: "+names[c]));
-          AssertThrow(p.composition_descriptions[stress_fields[c]].type == CompositionalFieldDescription::stress,
-                      ExcMessage(names[c]+" must have compositional type stress."));
+          const auto &field_name = stress_field_names[c];
+          stress_fields[c] = introspection.compositional_index_for_name(field_name);
+          AssertThrow(stress_fields[c] != phase_field,
+                      ExcMessage("Phase composition cannot be a mature fault stress component: " + field_name));
+          AssertThrow(parameters.composition_descriptions[stress_fields[c]].type ==
+                      CompositionalFieldDescription::stress,
+                      ExcMessage(field_name + " must have compositional type stress."));
         }
-      const bool transport_phase = p.compositional_field_methods[phase_field] == Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3;
-      const bool fresh_run = prm.get("Resume computation") == "false" && p.resume_checkpoint_id == 0 && p.resume_time < 0. &&
-                             p.checkpoint_steps == 0 && p.checkpoint_time_secs == 0 &&
-                             p.additional_checkpoint_times.empty() && !checkpoint_on_termination;
+      const bool transport_phase =
+        parameters.compositional_field_methods[phase_field] == AdvectionMethod::explicit_dg_ssprk3;
+      const bool fresh_run_without_checkpoints = prm.get("Resume computation") == "false" &&
+                                                 parameters.resume_checkpoint_id == 0 &&
+                                                 parameters.resume_time < 0. &&
+                                                 parameters.checkpoint_steps == 0 &&
+                                                 parameters.checkpoint_time_secs == 0 &&
+                                                 parameters.additional_checkpoint_times.empty() &&
+                                                 !checkpoint_on_termination;
+
+      double initial_speed;
+      bool has_phase_field_role;
       prm.enter_subsection("Material model");
-      prm.enter_subsection("Simple model");
-      // The Simple model subsection supplies the single-lithology background
-      // constants. Only EOS entry zero is consumed, irrespective of DG stress.
-      eos.parse_parameters(prm,1);
-      conductivity = prm.get_double("Thermal conductivity");
-      viscosity = prm.get_double("Viscosity");
-      AssertThrow(prm.get_double("Thermal viscosity exponent") == 0 && prm.get_double("Composition viscosity prefactor") == 1.,
-                  ExcMessage("The base Maxwell viscosity requires zero thermal exponent and unit compositional prefactor."));
+      {
+        prm.enter_subsection("Simple model");
+        {
+          // The single-lithology background uses only entry zero of the
+          // equation of state, irrespective of the number of DG stress fields.
+          eos.parse_parameters(prm, 1);
+          conductivity = prm.get_double("Thermal conductivity");
+          viscosity = prm.get_double("Viscosity");
+          AssertThrow(prm.get_double("Thermal viscosity exponent") == 0 &&
+                      prm.get_double("Composition viscosity prefactor") == 1.,
+                      ExcMessage("The base Maxwell viscosity requires zero thermal exponent and unit "
+                                 "compositional prefactor."));
+        }
+        prm.leave_subsection();
+
+        prm.enter_subsection("Phase field fault");
+        {
+          const std::string fault_geometry = prm.get("Fault geometry");
+          // Older inputs selected the geometry through the role of the phase composition.
+          has_phase_field_role =
+            parameters.composition_descriptions[phase_field].type == CompositionalFieldDescription::phase_field;
+          advect_vertices = fault_geometry == "advected interior" ||
+                            (fault_geometry == "automatic" && has_phase_field_role);
+          interior_seed = advect_vertices || fault_geometry == "fixed interior";
+          AssertThrow(!advect_vertices || transport_phase,
+                      ExcMessage("An advected interior seed requires bounded SSPRK3 transport of the "
+                                 "selected phase composition."));
+          AssertThrow(!transport_phase || interior_seed,
+                      ExcMessage("Transported phase requires an interior fault seed."));
+          AssertThrow(interior_seed || fresh_run_without_checkpoints,
+                      ExcMessage("Phase field fault requires a fresh run with checkpointing disabled: "
+                                 "label history is in memory."));
+
+          if (prm.get_bool("Advect physical stress"))
+            {
+              AssertThrow(this->get_geometry_model().get_periodic_boundary_pairs().empty(),
+                          ExcMessage("Advected physical stress requires a nonperiodic Cartesian box."));
+              prm.enter_subsection("Exterior parent stress");
+              {
+                inflow_stress = std::make_unique<Functions::ParsedFunction<dim>>(3);
+                inflow_stress->parse_parameters(prm);
+              }
+              prm.leave_subsection();
+            }
+          modulus = prm.get_double("Shear modulus");
+          initial_interval = prm.get_double("Initialization interval");
+          background_shear = prm.get_double("Background shear traction");
+          AssertThrow(!normal_stress.uses_adiabat() || prm.get("Background compression").empty(),
+                      ExcMessage("Adiabatic friction supplies the complete pressure; omit Background compression."));
+          background_compression = prm.get("Background compression").empty() ?
+                                   5e7 : prm.get_double("Background compression");
+          initial_speed = prm.get("Initial slip rate").empty() ?
+                          prm.get_double("Reference speed") : prm.get_double("Initial slip rate");
+          friction = Rheology::FaultResistance::create(prm, Rheology::FaultResistance::Route::mature);
+          minimum_speed = prm.get_double("Minimum speed");
+
+          const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
+          AssertThrow(Plugins::plugin_type_matches<InitialTopographyModel::ZeroTopography<dim>>(
+                        this->get_initial_topography_model()),
+                      ExcMessage("The fault material requires the zero initial topography model "
+                                 "because its normalization uses the rectangular box width."));
+
+          std::vector<Point<dim>> vertices;
+          for (const auto &entry : Utilities::split_string_list(prm.get("Fault vertices"), ';'))
+            {
+              const auto coordinates = Utilities::string_to_double(Utilities::split_string_list(entry));
+              Point<dim> vertex;
+              vertex[0] = coordinates.at(0);
+              vertex[1] = coordinates.at(1);
+              vertices.push_back(vertex);
+            }
+          auto initial_ages = Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label ages")));
+          label_background_shear = Utilities::string_to_double(
+                                     Utilities::split_string_list(prm.get("Initial label shear tractions")));
+          const auto vertex_filename = Utilities::expand_ASPECT_SOURCE_DIR(prm.get("Fault vertex file"));
+          if (!vertex_filename.empty())
+            {
+              AssertThrow(vertices.empty(), ExcMessage("Choose Fault vertex file or inline Fault vertices."));
+              const std::string vertex_table =
+                Utilities::read_and_distribute_file_content(vertex_filename, this->get_mpi_communicator());
+              parse_fault_vertex_table(vertex_table,
+                                       vertices,
+                                       initial_ages,
+                                       label_background_shear);
+            }
+          friction->set_initial_ages(std::move(initial_ages));
+          if (vertices.empty())
+            {
+              vertices = {box.get_origin(), box.get_origin()};
+              vertices.back()[1] += box.get_extents()[1];
+            }
+
+          degradation_magnitude = prm.get_double("Degradation magnitude");
+          AssertThrow(degradation_magnitude > 0., ExcMessage("Degradation magnitude must be positive."));
+          fit_trace = prm.get_bool("Fit trace to phase");
+          const double profile_half_width = prm.get_double("Profile half width");
+          AssertThrow(!interior_seed || (!fit_trace && (!advect_vertices || inflow_stress)),
+                      ExcMessage("Interior mechanics requires a prescribed seed with fitting disabled. "
+                                 "Moving its vertices also requires physical stress transport."));
+          accepted->trace.initialize(box.get_origin(),
+                                     box.get_extents(),
+                                     vertices,
+                                     initial_speed,
+                                     profile_half_width > 0. ? profile_half_width : std::numeric_limits<double>::max(),
+                                     interior_seed);
+          const auto n_vertices = labels().size();
+          friction->initialize(n_vertices);
+          if (label_background_shear.empty())
+            label_background_shear.assign(n_vertices, background_shear);
+          AssertThrow(label_background_shear.size() == n_vertices,
+                      ExcMessage("Material initial shear must match the number of fault vertices."));
+          maxwell_memory.assign(n_vertices, 0.);
+        }
+        prm.leave_subsection();
+      }
       prm.leave_subsection();
-      prm.enter_subsection("Phase field fault");
-      const std::string geometry = prm.get("Fault geometry");
-      // Before the geometry parameter existed, interior inputs required the
-      // phase-field role and boundary-spanning inputs required a generic field.
-      const bool phase_role = p.composition_descriptions[phase_field].type == CompositionalFieldDescription::phase_field;
-      advect_vertices = geometry == "advected interior" || (geometry == "automatic" && phase_role);
-      interior_seed = advect_vertices || geometry == "fixed interior";
-      AssertThrow(!advect_vertices || transport_phase,
-                  ExcMessage("An advected interior seed requires bounded SSPRK3 transport of the selected phase composition."));
-      AssertThrow(!transport_phase || interior_seed,
-                  ExcMessage("Transported phase requires an interior fault seed."));
-      AssertThrow(interior_seed || fresh_run,
-                  ExcMessage("Phase field fault requires a fresh run with checkpointing disabled: label history is in memory."));
-      if (prm.get_bool("Advect physical stress"))
-        {
-          AssertThrow(this->get_geometry_model().get_periodic_boundary_pairs().empty(),
-                      ExcMessage("Advected physical stress requires a nonperiodic Cartesian box."));
-          prm.enter_subsection("Exterior parent stress");
-          inflow_stress = std::make_unique<Functions::ParsedFunction<dim>>(3);
-          inflow_stress->parse_parameters(prm);
-          prm.leave_subsection();
-        }
-      modulus = prm.get_double("Shear modulus");
-      initial_interval = prm.get_double("Initialization interval");
-      background_shear = prm.get_double("Background shear traction");
-      AssertThrow(!normal_stress.uses_adiabat() || prm.get("Background compression").empty(),
-                  ExcMessage("Adiabatic friction supplies the complete pressure; omit Background compression."));
-      background_compression = prm.get("Background compression").empty() ? 5e7 : prm.get_double("Background compression");
-      const double initial_speed=prm.get("Initial slip rate").empty() ?
-                                 prm.get_double("Reference speed") : prm.get_double("Initial slip rate");
-      friction=Rheology::FaultResistance::create(prm,Rheology::FaultResistance::Route::mature);
-      minimum_speed=prm.get_double("Minimum speed");
-      const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
-      AssertThrow(Plugins::plugin_type_matches<InitialTopographyModel::ZeroTopography<dim>>(this->get_initial_topography_model()),
-                  ExcMessage("The fault material requires the zero initial topography model "
-                             "because its normalization uses the rectangular box width."));
-      std::vector<Point<dim>> vertices;
-      for (const auto &entry : Utilities::split_string_list(prm.get("Fault vertices"),';'))
-        {
-          const auto coordinates = Utilities::string_to_double(Utilities::split_string_list(entry));
-          Point<dim> point;
-          point[0] = coordinates.at(0);
-          point[1] = coordinates.at(1);
-          vertices.push_back(point);
-        }
-      auto ages=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label ages")));
-      initial_shear=Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial label shear tractions")));
-      const auto filename=Utilities::expand_ASPECT_SOURCE_DIR(prm.get("Fault vertex file"));
-      if (!filename.empty())
-        {
-          AssertThrow(vertices.empty(),ExcMessage("Choose Fault vertex file or inline Fault vertices."));
-          read_vertices(Utilities::read_and_distribute_file_content(filename,this->get_mpi_communicator()),vertices,ages,initial_shear);
-        }
-      friction->set_initial_ages(std::move(ages));
-      if (vertices.empty())
-        {
-          vertices = {box.get_origin(),box.get_origin()};
-          vertices.back()[1] += box.get_extents()[1];
-        }
-      degradation_magnitude = prm.get_double("Degradation magnitude");
-      AssertThrow(degradation_magnitude>0.,ExcMessage("Degradation magnitude must be positive."));
-      fit_trace = prm.get_bool("Fit trace to phase");
-      const double support = prm.get_double("Profile half width");
-      AssertThrow(!interior_seed || (!fit_trace && (!advect_vertices || inflow_stress)),
-                  ExcMessage("Interior mechanics requires a prescribed seed with fitting disabled. Moving its vertices also requires physical stress transport."));
-      accepted->trace.initialize(box.get_origin(),box.get_extents(),vertices,initial_speed,
-                                 support > 0. ? support : std::numeric_limits<double>::max(),interior_seed);
-      const auto count=labels().size();
-      friction->initialize(count);
-      if (initial_shear.empty()) initial_shear.assign(count,background_shear);
-      AssertThrow(initial_shear.size()==count,ExcMessage("Material initial shear must match the number of fault vertices."));
-      maxwell_memory.assign(count,0.);
-      prm.leave_subsection();
-      prm.leave_subsection();
-      AssertThrow(std::min({viscosity,modulus,initial_interval,minimum_speed,initial_speed}) > 0.,
+
+      AssertThrow(std::min({viscosity, modulus, initial_interval, minimum_speed, initial_speed}) > 0.,
                   ExcMessage("The fault material requires positive material, time and speed scales."));
       AssertThrow(initial_speed >= minimum_speed,
                   ExcMessage("The initial slip rate must be at least the minimum admissible speed."));
-      AssertThrow(dim == 2 && !p.enable_elasticity && p.nonlinear_solver == (transport_phase ? Parameters<dim>::NonlinearSolver::single_Advection_iterated_Stokes : Parameters<dim>::NonlinearSolver::no_Advection_iterated_Stokes)
-                  && p.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg && p.stokes_velocity_degree == 2
-                  && !p.run_postprocessors_on_nonlinear_iterations && !p.mesh_deformation_enabled && !p.include_melt_transport && (normal_stress.uses_adiabat() || p.pressure_normalization == "no")
-                  && p.nonlinear_solver_failure_strategy != Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep,
-                  ExcMessage("The fault material requires a fixed 2-D Q2 box with ASPECT elasticity disabled, block AMG, no pressure normalization for resolved traction, "
-                             "a composition solve for selected phase transport, iterated Stokes, and convergence or retry."));
-      AssertThrow(!p.enable_prescribed_dilation && (p.formulation_mass_conservation ==
-                                                    Parameters<dim>::Formulation::MassConservation::incompressible || p.formulation_mass_conservation ==
-                                                    Parameters<dim>::Formulation::MassConservation::ask_material_model),
+
+      const auto required_solver = transport_phase ? NonlinearSolver::single_Advection_iterated_Stokes :
+                                   NonlinearSolver::no_Advection_iterated_Stokes;
+      AssertThrow(dim == 2 &&
+                  !parameters.enable_elasticity &&
+                  parameters.nonlinear_solver == required_solver &&
+                  parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg &&
+                  parameters.stokes_velocity_degree == 2 &&
+                  !parameters.run_postprocessors_on_nonlinear_iterations &&
+                  !parameters.mesh_deformation_enabled &&
+                  !parameters.include_melt_transport &&
+                  (normal_stress.uses_adiabat() || parameters.pressure_normalization == "no") &&
+                  parameters.nonlinear_solver_failure_strategy !=
+                  Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep,
+                  ExcMessage("The fault material requires a fixed 2-D Q2 box with ASPECT elasticity disabled, "
+                             "block AMG, no pressure normalization for resolved traction, a composition solve for "
+                             "selected phase transport, iterated Stokes, and convergence or retry."));
+      AssertThrow(!parameters.enable_prescribed_dilation &&
+                  (parameters.formulation_mass_conservation == MassConservation::incompressible ||
+                   parameters.formulation_mass_conservation == MassConservation::ask_material_model),
                   ExcMessage("Fault mechanics requires incompressible continuity without prescribed dilation."));
-      AssertThrow(p.initial_adaptive_refinement == 0 && p.adaptive_refinement_interval == 0 &&
-                  p.additional_refinement_times.empty(),
+      AssertThrow(parameters.initial_adaptive_refinement == 0 &&
+                  parameters.adaptive_refinement_interval == 0 &&
+                  parameters.additional_refinement_times.empty(),
                   ExcMessage("The stationary FE phase profile requires a fixed Cartesian mesh."));
+
       // Both static roles use the same nodal DG basis. Only phase-role SSPRK3
       // supplies the bounded Bernstein representation for transported damage.
-      AssertThrow(phase_role || (!transport_phase && p.composition_descriptions[phase_field].type == CompositionalFieldDescription::generic),
+      AssertThrow(has_phase_field_role ||
+                  (!transport_phase &&
+                   parameters.composition_descriptions[phase_field].type == CompositionalFieldDescription::generic),
                   ExcMessage("Mature phase requires a generic or phase field composition for static DG, "
                              "or a phase field composition for bounded SSPRK3 transport."));
-      for (unsigned int c=0; c<intro.n_compositional_fields; ++c)
-        AssertThrow(p.composition_degrees[c] == 2 && p.use_discontinuous_composition_discretization[c] &&
-                    p.compositional_field_methods[c] == (transport_phase && c==phase_field ? Parameters<dim>::AdvectionFieldMethod::explicit_dg_ssprk3 : Parameters<dim>::AdvectionFieldMethod::static_field),
-                    ExcMessage("Fault stress requires static DGQ2. Phase requires static DGQ2 or bounded SSPRK3."));
+      for (unsigned int c=0; c<introspection.n_compositional_fields; ++c)
+        {
+          const auto required_method = transport_phase && c == phase_field ? AdvectionMethod::explicit_dg_ssprk3 :
+                                       AdvectionMethod::static_field;
+          AssertThrow(parameters.composition_degrees[c] == 2 &&
+                      parameters.use_discontinuous_composition_discretization[c] &&
+                      parameters.compositional_field_methods[c] == required_method,
+                      ExcMessage("Fault stress requires static DGQ2. Phase requires static DGQ2 or bounded SSPRK3."));
+        }
 
       interval = initial_interval;
-
     }
 
     template <int dim>
-    void PhaseFieldFault<dim>::accept_section(const std::vector<double> &rates,const double dt)
+    void PhaseFieldFault<dim>::accept_section_rates(const std::vector<double> &rates,
+                                                    const double               dt)
     {
-      section().trace.accept_section_rates(rates,dt);
-      for (unsigned int i=0; i<rates.size(); ++i)
+      active_section().trace.accept_section_rates(rates, dt);
+      for (unsigned int i = 0; i < rates.size(); ++i)
         {
-          friction->accept_rate(i,rates[i],dt);
-          if (candidate && dt>0.)
+          friction->accept_rate(i, rates[i], dt);
+          if (candidate && dt > 0.)
             {
-              const auto &x=candidate->trace.labels()[i].position;
-              maxwell_memory[i]=relaxation(x)*maxwell_memory[i]+stiffness(x)*rates[i];
+              const auto &position = candidate->trace.labels()[i].position;
+              maxwell_memory[i] = stress_relaxation_factor(position) * maxwell_memory[i]
+                                  + effective_maxwell_viscosity(position) * rates[i];
             }
         }
-      if (candidate) accepted=std::move(candidate);
+      if (candidate)
+        accepted = std::move(candidate);
     }
 
     template <int dim>
     std::string PhaseFieldFault<dim>::label_checkpoint_key() const
     {
       // Preserve the original RSF archive key. All other laws use their registered identifier.
-      if (friction->name()=="rate and state")
+      if (friction->name() == "rate and state")
         return "Material fault labels v1";
-      return "Material fault labels "+friction->name();
+      return "Material fault labels " + friction->name();
     }
 
     template <int dim>
     void PhaseFieldFault<dim>::save(std::map<std::string,std::string> &status) const
     {
-      if (!interior_seed) return;
-      std::ostringstream out;
-      out<<std::setprecision(17)<<labels().size()<<'\n';
-      const auto &state=friction->state();
-      for (unsigned int i=0; i<labels().size(); ++i)
+      if (!interior_seed)
+        return;
+
+      std::ostringstream records;
+      records << std::setprecision(17) << labels().size() << '\n';
+      // Keep the original per-label record order. RSF writes age between shear
+      // and slip rate. A state-free law omits that column.
+      const auto &resistance_state = friction->state();
+      for (unsigned int i = 0; i < labels().size(); ++i)
         {
-          const auto &p=labels()[i];
-          out<<p.position<<' '<<p.half_width<<' '<<initial_shear[i]<<' ';
-          if (!state.empty()) out<<state[i]<<' ';
-          out<<p.rate<<' '<<p.slip<<' '<<maxwell_memory[i]<<'\n';
+          const auto &label = labels()[i];
+          records << label.position << ' ' << label.half_width << ' ' << label_background_shear[i] << ' ';
+          if (!resistance_state.empty())
+            records << resistance_state[i] << ' ';
+          records << label.rate << ' ' << label.slip << ' ' << maxwell_memory[i] << '\n';
         }
-      // Retain the repaired RSF wire format, including its per-label age.
-      status[label_checkpoint_key()]=out.str();
+      status[label_checkpoint_key()] = records.str();
+
       std::ostringstream signature;
       {
         aspect::oarchive archive(signature);
         archive << friction->name() << friction->parameters();
       }
-      status["Mature fault resistance v1"]=signature.str();
+      status["Mature fault resistance v1"] = signature.str();
       if (normal_stress.uses_adiabat())
         status["Mature friction pressure profile"] = normal_stress.checkpoint_profile(*this);
     }
@@ -475,46 +638,54 @@ namespace aspect
     {
       AssertThrow(!status.count("Native growing fault v1") && !status.count("Native growing fault v2"),
                   ExcMessage("Cannot resume a growing fault checkpoint with mature trace mechanics."));
-      if (!interior_seed) return;
+      if (!interior_seed)
+        return;
+
       // Older archives identify the law only through its label-record key.
       // Check the additional physical signature before installing any history.
-      const auto signature=status.find("Mature fault resistance v1");
-      if (signature!=status.end())
+      const auto signature = status.find("Mature fault resistance v1");
+      if (signature != status.end())
         {
           std::istringstream bytes(signature->second);
           aspect::iarchive archive(bytes);
           std::string law;
           std::vector<double> parameters;
           archive >> law >> parameters;
-          AssertThrow(law==friction->name(),ExcMessage("Mature fault resistance law differs from the checkpoint."));
-          AssertThrow(parameters==friction->parameters(),ExcMessage("Mature fault resistance parameters differ from the checkpoint."));
+          AssertThrow(law == friction->name(),
+                      ExcMessage("Mature fault resistance law differs from the checkpoint."));
+          AssertThrow(parameters == friction->parameters(),
+                      ExcMessage("Mature fault resistance parameters differ from the checkpoint."));
         }
       const auto profile = status.find("Mature friction pressure profile");
-      AssertThrow((profile!=status.end()) == normal_stress.uses_adiabat() &&
-                  (profile==status.end() || profile->second==normal_stress.checkpoint_profile(*this)),
+      AssertThrow((profile != status.end()) == normal_stress.uses_adiabat() &&
+                  (profile == status.end() || profile->second == normal_stress.checkpoint_profile(*this)),
                   ExcMessage("Mature fault friction pressure source or profile differs from the checkpoint."));
-      const auto entry=status.find(label_checkpoint_key());
-      AssertThrow(entry!=status.end(),ExcMessage("Missing interior fault labels in checkpoint."));
-      std::istringstream in(entry->second);
-      auto restored=labels();
-      unsigned int n=0;
-      in>>n;
-      AssertThrow(n==restored.size(),ExcMessage("Incompatible interior fault topology in checkpoint."));
-      auto state=friction->state();
-      std::vector<double> shear(n), memory(n);
-      for (unsigned int i=0; i<n; ++i)
+      const auto entry = status.find(label_checkpoint_key());
+      AssertThrow(entry != status.end(),
+                  ExcMessage("Missing interior fault labels in checkpoint."));
+
+      std::istringstream records(entry->second);
+      auto restored_labels = labels();
+      unsigned int n_labels = 0;
+      records >> n_labels;
+      AssertThrow(n_labels == restored_labels.size(),
+                  ExcMessage("Incompatible interior fault topology in checkpoint."));
+      auto resistance_state = friction->state();
+      std::vector<double> restored_shear(n_labels), restored_memory(n_labels);
+      for (unsigned int i = 0; i < n_labels; ++i)
         {
-          auto &p=restored[i];
-          in>>p.position>>p.half_width>>shear[i];
-          if (!state.empty()) in>>state[i];
-          in>>p.rate>>p.slip>>memory[i];
+          auto &label = restored_labels[i];
+          records >> label.position >> label.half_width >> restored_shear[i];
+          if (!resistance_state.empty())
+            records >> resistance_state[i];
+          records >> label.rate >> label.slip >> restored_memory[i];
         }
-      AssertThrow(in,ExcMessage("Incomplete interior fault checkpoint."));
-      accepted->trace.replace_material_labels(std::move(restored));
-      initial_shear=std::move(shear);
-      maxwell_memory=std::move(memory);
-      friction->restore_state(std::move(state));
-      trace_initialized=false;
+      AssertThrow(records, ExcMessage("Incomplete interior fault checkpoint."));
+      accepted->trace.replace_material_labels(std::move(restored_labels));
+      label_background_shear = std::move(restored_shear);
+      maxwell_memory = std::move(restored_memory);
+      friction->restore_state(std::move(resistance_state));
+      trace_initialized = false;
     }
 
     ASPECT_REGISTER_MATERIAL_MODEL(PhaseFieldFault,"phase field fault",

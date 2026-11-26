@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**Assignment B is closed.** The strict free-32 control uses the approved Q8 slip-load reference at the original tolerances. The historical Q3 trajectory and the measured change remain available in the [closeout record](STATUS.md#assignment-b-closeout). The readability pass is next. Reusing the repeated Q8 geometry search is deferred performance work.
+**Assignment B is closed.** The strict free-32 control uses the approved Q8 slip-load reference at the original tolerances. The historical Q3 trajectory and the measured change remain available in the [closeout record](STATUS.md#assignment-b-closeout). The [mature material readability pass](STATUS.md#mature-fault-material-readability) is ready for review. Reusing the repeated Q8 geometry search is deferred performance work.
 
 **The eleven Assignment A review findings have been repaired.** The [working record](STATUS.md#assignment-a-review-repairs) gives the installed compatibility, signed-stress and three-rank output results. Assignment C owns the strip-8 peak investigation.
 
