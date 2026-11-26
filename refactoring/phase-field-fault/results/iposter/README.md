@@ -68,3 +68,23 @@ python3 -B "$prefix/benchmarks/growing_fault/plot_seed.py" \
 python3 -B "$prefix/benchmarks/layered_moving_fault/plot_layers.py" \
   "$run/layered-public/output-layered-moving-fault" "$figures"
 ```
+
+## Replay the old layered checkpoint
+
+The pre-Assignment-D default checkpoint contains the accepted parent at
+12.5 ms. The installed public example read that checkpoint using the shipped
+vertex table and the default 2 m/s wall velocity contrast. At 25 ms all 20
+vertex records, the 1,728 bulk sample records, the background column, load
+and clock row were byte-identical to the uninterrupted public run. Changing
+only the contrast to 1 m/s rejected the restart with
+`Layered background checkpoint identity mismatch.` before endpoint output.
+
+```sh
+bash refactoring/phase-field-fault/results/iposter/replay_layered_checkpoint.sh \
+  "$prefix" build-branch-readability/mature/before/seed/output/restart/01 \
+  "$run/layered-public/output-layered-moving-fault" "$run/old-layered-replay"
+```
+
+Supply a fresh directory as the last argument on each replay. The helper
+copies just the retained checkpoint generation. Its `resume.z` SHA-256
+is `edba5661851c239ab2c205b7231272fea4c4af5ad03849adcf890d6a3db44c67`.
