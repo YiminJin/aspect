@@ -26,7 +26,8 @@ namespace aspect
     /** Advance one selected DG field from its accepted coefficients
      * and accepted velocity. Write only its candidate solution block. */
     template <int dim>
-    void advance_composition(const SimulatorAccess<dim> &sim, unsigned int field,
+    void advance_composition(const SimulatorAccess<dim> &sim,
+                             unsigned int                field,
                              LinearAlgebra::BlockVector &solution);
   }
 }

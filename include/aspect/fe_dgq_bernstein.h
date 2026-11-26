@@ -88,7 +88,8 @@ namespace aspect
         AssertIndexRange(index, this->n_dofs_per_cell());
         AssertIndexRange(face, dealii::GeometryInfo<dim>::faces_per_cell);
         unsigned int coordinate = index;
-        for (unsigned int d = 0; d < face/2; ++d) coordinate /= this->degree+1;
+        for (unsigned int d = 0; d < face/2; ++d)
+          coordinate /= this->degree+1;
         return coordinate % (this->degree+1) == (face%2 ? this->degree : 0);
       }
 
@@ -105,7 +106,8 @@ namespace aspect
           {
             std::vector<dealii::Point<1>> roots(degree+1, dealii::Point<1>(1.));
             roots[0][0] = .5;
-            for (unsigned int j = 1; j <= i; ++j) roots[j][0] = 0.;
+            for (unsigned int j = 1; j <= i; ++j)
+              roots[j][0] = 0.;
             dealii::Polynomials::Polynomial<double> product(roots, 0);
             product *= polynomials[i].value(.5);
             polynomials[i] = product;

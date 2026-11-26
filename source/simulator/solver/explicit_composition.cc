@@ -59,12 +59,12 @@ namespace aspect
       // receives its stage clock, including when an attempt is repeated.
       auto function=std::make_shared<Functions::ParsedFunction<dim>>(p.n_compositional_fields);
       function->parse_parameters(prm);
-      const double unit=p.convert_to_years ? year_in_seconds : 1.;
+      const double seconds_per_time_unit = p.convert_to_years ? year_in_seconds : 1.;
       prm.leave_subsection();
       prm.leave_subsection();
-      return [function,unit](const Point<dim> &point,unsigned int field,double seconds)
+      return [function,seconds_per_time_unit](const Point<dim> &point,unsigned int field,double seconds)
       {
-        const double time=seconds/unit;
+        const double time = seconds / seconds_per_time_unit;
         if (function->get_time()!=time)
           function->set_time(time);
         return function->value(point,field);
@@ -72,7 +72,9 @@ namespace aspect
     }
 
     template <int dim>
-    void advance_composition(const SimulatorAccess<dim> &sim, const unsigned int field, LinearAlgebra::BlockVector &solution)
+    void advance_composition(const SimulatorAccess<dim> &sim,
+                             const unsigned int          field,
+                             LinearAlgebra::BlockVector &solution)
     {
       const auto &p=sim.get_parameters();
       AssertThrow(Plugins::plugin_type_matches<GeometryModel::Box<dim>>(sim.get_geometry_model()) &&
@@ -124,7 +126,8 @@ namespace aspect
         return p.explicit_composition_inflow(point,field,t);
       };
 
-      const auto candidate=advect_scalar(sim,field,exterior,p.composition_descriptions[field].type==CompositionalFieldDescription::phase_field);
+      const bool bounded_phase = p.composition_descriptions[field].type == CompositionalFieldDescription::phase_field;
+      const auto candidate = advect_scalar(sim, field, exterior, bounded_phase);
       LinearAlgebra::Vector owned(intro.index_sets.system_partitioning[block],comm);
       const auto &system=sim.get_fe();
       std::vector<types::global_dof_index> indices(system.n_dofs_per_cell());

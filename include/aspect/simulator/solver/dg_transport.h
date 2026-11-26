@@ -11,7 +11,7 @@ namespace aspect
      * of each locally owned cell, in base-element order. */
     using CellStress = std::map<CellId,std::vector<SymmetricTensor<2,2>>>;
 
-    /** Collectively advect the three DGQ2 compositions with the velocity in
+    /** Collectively advect the three DGQ2 stress compositions with the velocity in
      * accepted, on a fixed, conforming Cartesian box. The stress field indices
      * are ordered xx, yy, xy. At incoming physical faces evaluate exterior
      * (same components, Pa) at the stage time in seconds. Return the candidate
@@ -20,7 +20,8 @@ namespace aspect
                              const std::array<unsigned int,3> &fields,
                              const LinearAlgebra::BlockVector &accepted,
                              Function<2> &exterior,
-                             double start_time, double duration);
+                             double start_time,
+                             double duration);
 
     /** Scalar coefficients on owned cells in base-element order. The bounded
      * route uses native quadratic Bernstein coefficients and mapped means. */
@@ -30,10 +31,15 @@ namespace aspect
     template <int dim>
     using ScalarInflow = std::function<double(types::boundary_id,const Point<dim>&,double)>;
 
-    /** Collectively advance a DGQ2 scalar from the old solution and velocity. */
+    /** Collectively advance one composition from the old solution using its
+     * velocity throughout the attempted timestep. The bounded path limits the
+     * Bernstein phase at entry and after each stage. Signed tracers use nodal
+     * coefficients. Both paths return the trial field on locally owned cells. */
     template <int dim>
-    CellScalar advect_scalar(const SimulatorAccess<dim> &sim, unsigned int field,
-                             const ScalarInflow<dim> &inflow, bool bounded_bernstein);
+    CellScalar advect_scalar(const SimulatorAccess<dim> &sim,
+                             unsigned int                field,
+                             const ScalarInflow<dim>    &inflow,
+                             bool                        bounded_bernstein);
   }
 }
 #endif
