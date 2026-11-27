@@ -1,0 +1,84 @@
+# Common mature-fault mechanics and RSF constants. Length in metres, time in seconds.
+set Dimension = 2
+set Use years instead of seconds = false
+set Additional shared libraries = ./libbp3_qd.so
+set Resume computation = false
+set Nonlinear solver scheme = no Advection, iterated Stokes
+set Nonlinear solver tolerance = 1e-7
+set Nonlinear solver failure strategy = cut timestep size
+set Max nonlinear iterations = 60
+set Maximum relative increase in time step = 25
+set Pressure normalization = no
+
+subsection Formulation
+  set Enable elasticity = false
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Discretization
+  set Composition polynomial degree = 2
+  set Use discontinuous composition discretization = true
+end
+subsection Compositional fields
+  set Number of fields = 4
+  set Names of fields = fault_stress_xx, fault_stress_yy, fault_stress_xy, phase_field
+  set Types of fields = stress, stress, stress, generic
+  set Compositional field methods = static
+end
+subsection Material model
+  set Model name = phase field fault
+  subsection Simple model
+    set Reference density = 2670
+    set Thermal expansion coefficient = 0
+  end
+  subsection Phase field fault
+    set Fault geometry = boundary spanning
+    set Mature slip sense = opposite tangent
+    set Fit trace to phase = false
+    set Viscosity = 1e26
+    set Shear modulus = 32038120320
+    set Background compression = 5e7
+    set Background shear traction = 26546122.365133367
+    set Resistance law = BP3 depth dependent RSF
+    set Reference friction coefficient = 0.6
+    set Direct effect = 0.010
+    set Evolution effect = 0.015
+    set Slip distance = 0.008
+    set Reference speed = 1e-6
+    set Radiation damping = 4624440
+    set Initial slip rate = 1e-9
+  end
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-9
+  end
+end
+subsection Time stepping
+  set List of model names = fault RSF
+  subsection Fault RSF
+    set Maximum slip fraction = 0.1
+    set Maximum logarithmic state change = 0.1
+  end
+end
+subsection Termination criteria
+  set Checkpoint on termination = true
+end
+subsection Postprocess
+  set List of postprocessors = BP3 stations, velocity statistics, visualization, fault slip output
+  subsection Visualization
+    set List of output variables = named additional outputs
+    set Output format = vtu
+    # Five Julian years between bulk frames in quiet periods (input uses seconds).
+    set Time between graphical output = 157788000
+    set Fault slip interval = 0.1
+  end
+end

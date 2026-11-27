@@ -1,87 +1,53 @@
-# 60° thrust BP3-QD on a fixed mature fault
+# 60° BP3-QD thrust on a fixed Cartesian box
 
-Run `pilot.prm` for a 900 s startup and restart check. Run `production.prm` for the 1,500 Julian year experiment. Both include `bp3.prm` and use exactly the same vertex table, mesh, constitutive law, loading and timestep control. Both can start from zero. The production input can also continue a pilot checkpoint. The small public curved-mature fault uses the same material, signed transfer and accepted-label restart.
+`production.prm` starts the historical 150 × 50 km experiment from its own equilibrium ages and zero perturbation stress. Both ends of the 57.735 km fault slide by the mature RSF law. The 900 s regression uses `pilot.prm`, its original 40 km trace, broader phase profile and separate `output/`. A pilot checkpoint cannot seed production.
 
 ## Stampede3
 
-Start with a **pf-rsf Release installation containing the fault RSF timestep and fault slip output plugins** containing the executable, headers and CMake SDK. Load the compiler, MPI and deal.II environment used to build it. Use an absolute run directory on shared scratch. Substitute your installation prefix and allocation below. Preparing the case validates both parameter files and leaves the allocation unsubmitted.
+Use a Release installation of **this pf-rsf source revision**, including the headers and CMake package. Load the compiler, MPI and deal.II modules used for that installation. The ZIP contains source for the benchmark plugin and all input data. The following commands assume the ZIP is in the current directory. Set the installation prefix and billing account for your allocation.
 
-```bash
-unzip bp3_qd_thrust.zip
-case_dir=$PWD/bp3_qd_thrust
-export BP3_RUN="$SCRATCH/bp3-thrust-60"
-bash "$case_dir/prepare.sh" /path/to/pf-rsf/install "$BP3_RUN"
+```sh
+export ASPECT_PREFIX=/absolute/path/to/pf-rsf-release
+export ACCOUNT=your_allocation
+export BP3_RUN="$SCRATCH/bp3-historical-first-event"
+unzip bp3-first-event.zip
+bash bp3-first-event/prepare.sh "$ASPECT_PREFIX" "$BP3_RUN"
 cd "$BP3_RUN"
-sbatch -A YOUR_ALLOCATION -t 00:30:00 stampede3.sh pilot start
+
+# Fresh full grid. End after the first accepted physical step, then checkpoint.
+sbatch -A "$ACCOUNT" --export=ALL,BP3_END_STEP=1 stampede3.sh production start
+# After inspecting that job and its checkpoint, resume through accepted step 3.
+sbatch -A "$ACCOUNT" --export=ALL,BP3_END_STEP=3 stampede3.sh production resume
+# After checking both contacts, rates, limits and restart, continue from step 3.
+unset BP3_END_STEP
+sbatch -A "$ACCOUNT" --export=ALL stampede3.sh production resume
 ```
 
-After a successful pilot, submit `sbatch -A YOUR_ALLOCATION stampede3.sh production resume` from the same directory. To start production at time zero in a separate experiment, prepare a new directory, set `BP3_RUN` to it and use `production start`. Use `production resume` for subsequent allocations. The default allocation is one ICX node with 80 MPI ranks and one numerical thread per rank. Supply time and account to suit your allocation. The launcher uses TACC's `ibrun`. [Stampede3 user guide](https://docs.tacc.utexas.edu/hpc/stampede3/)
+The launcher uses 80 MPI ranks on one ICX node, `ibrun` and one numerical thread per rank. These are qualification allocations. Measure peak memory, solve time and checkpoint time before choosing a production allocation. Production uses `historical-output/`. The logfile records the exact solver, SDK, DSO, table and expanded input. `inputs.sha256` is verified before every launch. Each startup requires a fresh output directory. Each resume requires the native checkpoint pointer from that case. Do not re-run the preparation command in a used directory.
 
-`prepare.sh` builds the benchmark DSO against the specified prefix, checks the SDK's executable link, and stages both inputs, their shared include, the vertex file and the Release plugin. All command-line runs execute **in the staged directory**. `inputs.sha256`, `executable.path`, `sdk.path`, the expanded ASPECT output parameters and per-launch input/log identify the calculation. Each launch verifies the manifest. A fresh launch requires an unused output path. Resume requires the native ASPECT checkpoint pointer. Production rotates three slots, writes every 1,800 wall seconds and checkpoints on normal termination. To stop gracefully during a run, create `output/terminate-aspect`. Move that marker out of `output` before continuing.
+The simulation checkpoints every 1,800 wall seconds and on termination. The launcher creates `historical-output/terminate-aspect` 30 minutes before the Slurm deadline, allowing the current step and terminal write to finish. Increase the margin in a new staged input set if the full-grid measurements require it. To request an early stop, create the same marker. After a successful terminal checkpoint, move the marker aside before the next resume. The continuation stops after the first accepted peak at or above 0.001 m/s followed by five consecutive accepted peaks strictly below it, or at 1,500 Julian years. Equality resets the streak. Event and output state survive native restart. `history.py` exports the accepted statistics, and `history_events.py` retains the separate recovery criterion for analysing cycles.
 
-For a local pilot use `BP3_RUN="$PWD/run" bash run/stampede3.sh pilot start` after preparing `run`. Set `BP3_LOCAL_RANKS=2` for two MPI ranks. The default checker uses standard-library Python. Add --read-vtu to open the actual pieces with VTK and NumPy. The figure option uses Matplotlib.
+## Physical input and measurements
 
-## Physical input and coordinates
+* The shared file `bp3-common.prm` sets the 32.03812032 GPa shear modulus, 10²⁶ Pa s Maxwell viscosity, 2,670 kg/m³ density, zero thermal expansion and gravity, 50 MPa background compression and 26.546122365 MPa persistent thrust shear. The free, geometrically fixed top anchors the pressure. Sides and base prescribe both velocity components. Static temperature is 293 K in the historical experiment. ASPECT's original elasticity is disabled.
+* Edit `production.prm` for the historical mesh and controls. With 2 km root squares the ninth refinement gives 3.90625 m cells. A band and two contact footprints stay fine. Far cells reach 1 km. Persistent surface-to-base IDs in `historical-vertices.txt` preserve all five donor anchors and both transition knots. Positive slip moves the hanging wall up dip. Friction continues below 40 km. This finite-box, incompressible experiment differs from the SEAS elastic half-space with prescribed deep creep. Opening and reversed slip are outside the mature law.
+* The stationary AT1 profile has peak 0.6, length 20 m, curvature one and compact radius 39.529164 m. The historical plugin builds the 5,000-point donor table at startup. The FE phase is its Q1 vertex interpolant embedded in static DGQ2. The wall ramp integrates the same profile's excess compliance. Mechanics integrates the FE excess compliance over station normals, including exterior Q1 completion, and extends endpoint speed into each physical contact wedge. The donor's compliance magnitude is 120.1429512. Its common scale cancels in normalized slip and loading. The 45 m support encloses the radius and an entire finest cell's projected width.
+* The 15–18 km friction transition uses true distance down dip, log interpolation of positive nodal ages at friction quadrature, and exact nodal aging in seconds. The 20 m along-fault Helmholtz filter acts only on the resolved perturbation. Set `Normal traction filter length = 0` for the raw pointwise control. The branch uses Q8 for the paired section and Stokes slip work.
+* The first and subsequent ceilings are 4 million and 40 million seconds. The accepted-state slip/Dc and absolute log-age budgets are each 0.1. Growth starts at 25%, with block AMG, linear tolerance 1e−9, nonlinear tolerance 1e−8 and 60 iterations. The supported initial Maxwell interval is 100 s. On a resolved contact mesh the archived 4 million second choice exhausted 60 Picard iterations at time zero. Each attempted-step log records the material proposal, material ID, distance, realized increments, retry and next-step restriction.
+* Statistics contain the fault-wide peak and distance plus material samples every 2.5 km and at the base. Samples at intermediate coordinates use linear slip and rate and log-linear age. Accepted full profiles include every ID, signed physical position, speed, age, slip, positive-updip shear **including radiation damping**, raw and friction compression (positive in closure), and the projected normal integral. They are written at 0.1 m accumulated slip at any ID, one year, onset, and completion. The initial frame is included. Native bulk graphics use 1 m or 100 years. The DG stress fields contain accepted perturbation stress in Pa. ASPECT pressure is the Stokes pressure perturbation.
 
-ASPECT uses metres, seconds and upward-positive y. The first vertex is on the traction-free surface at (0, 34641.0161514) m. The last is on the base at (20000, 0) m. Material IDs increase down dip. The positive normal points into the hanging wall. The input selects `Mature slip sense = opposite tangent`, so positive accumulated slip moves the hanging wall **up dip** relative to the footwall. The side and bottom velocity is −(Vp/2) tanh(r/w) t, where t is the unit down-dip tangent and r is signed normal distance. Far from the trace the hanging wall moves left at 0.25 nm/s and up at 0.433013 nm/s. The footwall moves oppositely.
+## Local controls
 
-| Input | Value |
-| --- | --- |
-| Density, shear wave speed, shear modulus | 2,670 kg/m³, 3,464 m/s, 32.03812032 GPa |
-| Effective background normal compression | 50 MPa plus the resolved Stokes normal-stress perturbation |
-| Persistent thrust shear traction | 26.546122365133367 MPa |
-| Plate speed and target initial speed | 1 nm/s |
-| Direct effect a | 0.010 through 15 km down dip, linear to 0.025 at 18 km, constant thereafter |
-| Evolution effect b, reference coefficient, reference speed | 0.015, 0.6, 1 µm/s |
-| Characteristic slip distance, radiation damping | 8 mm, 4,624,440 Pa s/m |
-| Initial perturbation stress and accumulated slip | Zero |
-
-The public material's built-in RSF selection takes a scalar direct effect. The benchmark registers a resistance law that reads the actual station coordinates and supplies Eq. 18 at the section quadrature point. It calls the production `RateAndStateFriction::resistance` for both the traction and its fixed-age derivative. `RateStateHistory` owns age initialization, aging at acceptance and restart. The material still solves each label rate and returns its stress to ordinary ASPECT Stokes assembly. The benchmark also reports accepted station observations. At section quadrature it interpolates the logarithm of the two positive nodal ages. This reproduces the prescribed transition at the target speed. Each nodal age still evolves and restarts in seconds.
-
-`vertices.txt` gives each ordered ID, x, y and initial age. The generator solves the SEAS initial equilibrium at the plate speed with radiation damping. Ages are 8,000 s in the shallow zone, 252,982.213 s at 16.5 km and 8,000,000 s in the deep zone. A change to prestress, rate, compression or friction requires consistent updates to the shared physical input and initial ages. Reproduce the shipped table with `python3 make_vertices.py > /tmp/bp3-vertices.txt && diff vertices.txt /tmp/bp3-vertices.txt`. [SEAS BP3 specification, Eqs. 14–19 and 24–26, Table 1](https://strike.scec.org/cvws/seas/download/SEAS_BP3.pdf)
-
-## What the long run measures
-
-* The branch solves incompressible plane-strain Stokes with a fault-owned Maxwell update. It cannot impose SEAS's elastic Poisson ratio of 0.25. The chosen bulk viscosity of 10²⁶ Pa s gives a Maxwell time of approximately 99 million years. The instantaneous normal stress entering friction is background compression plus pressure minus the resolved normal deviatoric stress. The free surface anchors pressure. The older research donor additionally filtered the normal perturbation along the trace.
-* The 80 × 34.641 km box truncates the SEAS half-space. The branch has no prescribed-rate continuation of a mature fault past 40 km. Side and basal loading impose the plate contrast at finite distances. The bottom material rate is still solved. The free surface is fixed geometrically. The mature route admits a chosen physical sense and positive speeds, so backslip and opening lie outside its scope.
-* The slip return is diffuse. Its fixed profile has peak phase 0.6 and excess compliance proportional to sech²(r/w), with w = 250 m. The wall ramp is the full-line integral of this shape. Mechanics normalizes the **FE** profile on clipped in-box normal rays and admits a 2,250 m association radius. The largest measured omitted fraction was 3.21 × 10⁻⁸. The finest box cells measure 125 × 120.28 m. Material spacing is 100 m in the transition and 250 m elsewhere. SEAS suggests 25 m resolution. Spatial, width, domain and timestep convergence of ruptures remain open.
-* The standard box takes four global startup refinement passes. The maximum-refinement function tests the center against the 1,500 m band plus the projected cell half-extent at each level. Startup coarsening is disabled to preserve cells inserted for 2:1 mesh balance. Phase and geometry stay fixed afterwards.
-
-## Timestep resolution
-
-Edit the two dimensionless budgets in the shared input. Each defaults to 0.1 when the timestep plugin is selected. Zero disables that particular limit. Omitting the plugin leaves the previous ASPECT timestep selection in effect.
-
-```text
-subsection Time stepping
-  set List of model names = fault RSF
-  subsection Fault RSF
-    set Maximum slip fraction = 0.1
-    set Maximum logarithmic state change = 0.1
-  end
-end
+```sh
+cd "$BP3_RUN"
+BP3_LOCAL_RANKS=1 bash stampede3.sh pilot start
+python3 check_pilot.py output --read-vtu
+BP3_LOCAL_RANKS=2 bash stampede3.sh contact start
+OPENBLAS_NUM_THREADS=1 python3 check_historical.py contact-output
+BP3_LOCAL_RANKS=1 BP3_END_STEP=1 bash stampede3.sh intermediate start
+BP3_LOCAL_RANKS=1 bash stampede3.sh intermediate resume
+python3 make_historical_vertices.py > regenerated.txt
+sha256sum historical-vertices.txt regenerated.txt
 ```
 
-Every evolved material ID participates. The first budget bounds |V| Δt / Dc using the returned rate. The second bounds |ln(Θ₁/Θ₀)| using the same exact age update as publication. At rest age increases by Δt. At steady sliding only the slip cap applies. A completed trial exceeding a budget repeats from its accepted parent. The manager combines the prospective bound from the endpoint with other selected timestep models and ASPECT's startup and growth ceilings. Signed strip rates use their magnitude for aging over the full interval. A law without age or a characteristic slip distance contributes no corresponding limit.
-
-The donor used a log-age budget of 0.2 for BP3 and a separate operator-split stability criterion involving CFL × (a/b) Dc/V. This branch's all-station slip budget controls accuracy. Resolving rupture requires comparison on its accelerating trajectory.
-
-## Observations and events
-
-The pilot writes all 179 accepted material labels and five FE wall probes. Production writes the whole-fault maximum speed and its down-dip location plus rate, age and cumulative slip at 17 stations every 2.5 km, on every accepted clock. These use round-trip precision in ASPECT's checkpointed statistics table. This compact output supports event timing across allocations. Full SEAS traction and off-fault displacement submission files are outside the supplied output set.
-
-Both inputs enable native graphical output. Open `output/solution.pvd` for velocity (m/s), pressure (Pa), phase and accepted `fault_tau_xx`, `fault_tau_yy`, `fault_tau_xy` (Pa, spatial deviatoric stress). The first frame establishes a slip reference at each ordered material ID. A frame is due when any ID accumulates the configured net slip since the last actual frame. Production starts with 0.1 m and a five-Julian-year fallback. The pilot uses 0.7 μm to exercise accumulation. All triggers together write at most once per accepted step. They do not restrict the timestep. A checkpoint with no previous slip reference starts its graphical series at the first following accepted state. The historical donor used 1 m for heavy output and 0.1 m for profiles, with bulk graphics disabled. Reassess the bulk cadence and storage after observing the first acceleration.
-
-From the staged run directory, check a pilot and plot its accepted profiles with
-
-```bash
-python3 check_pilot.py output --figure bp3-pilot.png
-```
-
-For a production catalogue, use a new export directory and the existing event definition. The exporter reads only accepted statistics and preserves material station distances and the full-precision interval clock.
-
-```bash
-python3 history.py output/statistics bp3-event-input
-python3 history_events.py bp3-event-input
-```
-
-An onset crosses 0.001 m/s upward in the fault-wide maximum. At least one fixed weakening-zone station must gain 8 mm of excess slip during fast sliding. Recovery requires five consecutive accepted observations at or below 10⁻⁸ m/s spanning at least 8 million seconds. The third recovery establishes three distinct events. The 1,500 year horizon covers the requested benchmark interval. Time to a third event on this branch requires measured loading, rupture and recovery histories.
+The 2 × 1 km contact case resolves both 20 m filtering and the transverse profile at production spacing. The intermediate calculation spans the entire historical fault at 31.25 m finest cell size and approximately 100 m station spacing. Its contact loads are resolution measurements. Use the independent cut and traction checks to interpret their error. The historical donor logged onset at 163.893 years and 10.85 km down dip. The branch has passed startup controls only. Event timing, completed-event throughput and spatial/temporal convergence require server runs.

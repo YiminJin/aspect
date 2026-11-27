@@ -24,12 +24,12 @@ namespace aspect::MaterialModel::Rheology
           for (unsigned int i=0; i<vertices.size(); ++i)
             {
               const double s = stations[i];
-              const Point<2> expected(0.5*s, std::sqrt(0.75)*(40000.-s));
+              const Point<2> expected(0.5*s, vertices.front()[1]-std::sqrt(0.75)*s);
               AssertThrow(vertices[i].distance(expected) < 1.e-6 && (i == 0 || s > stations[i-1]),
                           ExcMessage("BP3 expects the ordered 60-degree trace from surface to base."));
             }
-          AssertThrow(std::abs(stations.back()-40000.) < 1.e-6,
-                      ExcMessage("BP3 requires 40 km of frictional fault."));
+          AssertThrow(std::abs(vertices.back()[1]) < 1.e-6 && stations.back()>0.,
+                      ExcMessage("BP3 requires the base contact at y=0."));
         }
 
         std::string name() const override
@@ -114,21 +114,34 @@ namespace aspect::Postprocess
         column("BP3 interval (s)", this->get_timestep());
         column("BP3 peak speed (m/s)", fastest->rate);
         column("BP3 peak distance (m)", fastest->position.distance(labels.front().position));
-        unsigned int stations_found = 0;
-        for (unsigned int i=0; i<labels.size(); ++i)
+        // Interpolate at fixed physical distances; always include the base contact.
+        const double length=labels.back().position.distance(labels.front().position);
+        unsigned int right=1;
+        for (unsigned int k=0;; ++k)
           {
-            const double s = labels[i].position.distance(labels.front().position);
-            const unsigned int station = std::lround(s/2500.);
-            if (std::abs(s-2500.*station) < 1.e-6)
-              {
-                const std::string prefix = "BP3 " + std::to_string(station*2500) + " m ";
-                column(prefix+"slip (m)", labels[i].slip);
-                column(prefix+"rate (m/s)", labels[i].rate);
-                column(prefix+"age (s)", ages.at(i));
-                ++stations_found;
-              }
+            const double s=std::min(2500.*k,length);
+            const auto station=[&](const unsigned int i)
+            {
+              return labels[i].position.distance(labels.front().position);
+            };
+            while (right+1<labels.size() && station(right)<s-1.e-7)
+              ++right;
+            const double xi=std::clamp((s-station(right-1))/(station(right)-station(right-1)),0.,1.);
+            std::ostringstream station_name;
+            station_name << std::setprecision(17) << (std::abs(s-std::round(s))<1.e-7 ? std::round(s) : s);
+            const std::string prefix="BP3 "+station_name.str()+" m ";
+            const unsigned int node=std::abs(s-station(right))<1.e-7 ? right : right-1;
+            const bool at_node=std::abs(s-station(node))<1.e-7;
+            const auto interpolate=[&](double a,double b)
+            {
+              return a+xi*(b-a);
+            };
+            column(prefix+"slip (m)",at_node ? labels[node].slip : interpolate(labels[right-1].slip,labels[right].slip));
+            column(prefix+"rate (m/s)",at_node ? labels[node].rate : interpolate(labels[right-1].rate,labels[right].rate));
+            column(prefix+"age (s)",at_node ? ages[node] : std::exp(interpolate(std::log(ages.at(right-1)),std::log(ages.at(right)))));
+            if (s>=length-1.e-7)
+              break;
           }
-        AssertThrow(stations_found == 17, ExcMessage("BP3 samples require a material label every 2.5 km."));
         return {"Maximum fault speed", Utilities::to_string(fastest->rate)+" m/s"};
       }
   };

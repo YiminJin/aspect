@@ -1,0 +1,31 @@
+include production.prm
+# Resolution control: the same contact physics and fine h/ds in a shorter box.
+set Output directory = contact-output
+set End time = 1600
+subsection Geometry model
+  subsection Box
+    set Box origin X coordinate = -500
+    set X extent = 2000
+    set Y extent = 1000
+    set X repetitions = 4
+    set Y repetitions = 2
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 7
+  set Minimum refinement level = 0
+end
+subsection Material model
+  subsection Phase field fault
+    set Fault vertex file = contact-vertices.txt
+  end
+end
+subsection Postprocess
+  set List of postprocessors = BP3 stations, BP3 first event profiles, BP3 startup cuts, velocity statistics, visualization, fault slip output
+  subsection Visualization
+    set Time between graphical output = 0
+  end
+  subsection BP3 profiles
+    set Time interval = 0
+  end
+end

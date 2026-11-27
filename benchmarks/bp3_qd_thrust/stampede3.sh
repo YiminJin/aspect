@@ -6,23 +6,38 @@
 #SBATCH --cpus-per-task=1
 #SBATCH -t 04:00:00
 set -euo pipefail
-[[ $# == 2 && ( $1 == pilot || $1 == production ) && ( $2 == start || $2 == resume ) ]] ||
-  { echo "Usage: stampede3.sh pilot|production start|resume" >&2; exit 2; }
+[[ $# == 2 && ( $1 == pilot || $1 == production || $1 == contact || $1 == intermediate ) && ( $2 == start || $2 == resume ) ]] ||
+  { echo "Usage: stampede3.sh pilot|contact|intermediate|production start|resume" >&2; exit 2; }
 cd -- "${BP3_RUN:?Set BP3_RUN to the directory created by prepare.sh}"
 exec 9>.launch.lock
 flock -n 9 || { echo "An allocation already owns this run directory" >&2; exit 1; }
 sha256sum --check inputs.sha256
 solver=$(cat executable.path)
 mode=$1
+case $mode in
+  pilot) output=output; vertices=vertices.txt ;;
+  production) output=historical-output; vertices=historical-vertices.txt ;;
+  *) output=$mode-output; vertices=$mode-vertices.txt ;;
+esac
 if [[ $2 == start ]]; then
-  [[ ! -e output ]] || { echo "Fresh start requires an unused output directory" >&2; exit 1; }
+  [[ ! -e "$output" ]] || { echo "Fresh start requires an unused output directory" >&2; exit 1; }
   resume=false
 else
-  [[ -s output/restart/last_good_checkpoint.txt ]] || { echo "Missing branch checkpoint" >&2; exit 1; }
+  [[ -s "$output/restart/last_good_checkpoint.txt" ]] || { echo "Missing branch checkpoint" >&2; exit 1; }
+  [[ ! -e "$output/terminate-aspect" ]] || { echo "Archive the graceful stop marker before resuming" >&2; exit 1; }
   resume=true
 fi
 job_input=$(mktemp "launch-${SLURM_JOB_ID:-local}-$mode-XXXXXX.prm")
 printf 'include %s.prm\nset Resume computation = %s\n' "$mode" "$resume" > "$job_input"
+if [[ -n ${BP3_END_STEP:-} ]]; then
+  [[ $mode != pilot && $BP3_END_STEP =~ ^[0-9]+$ ]] || { echo "Invalid bounded historical step" >&2; exit 2; }
+  printf 'subsection Termination criteria
+  set Termination criteria = end time, end step, user request, BP3 first event complete
+' >> "$job_input"
+  printf '  set End step = %s
+end
+' "$BP3_END_STEP" >> "$job_input"
+fi
 export OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 launcher=()
 if [[ -n ${SLURM_JOB_ID:-} ]]; then
@@ -32,5 +47,15 @@ elif [[ ${BP3_LOCAL_RANKS:-1} != 1 ]]; then
   launcher=(mpiexec -n "${BP3_LOCAL_RANKS:?}")
 fi
 printf 'Working directory %s\nSDK %s\nExecutable %s\nPlugin %s\nVertex table %s\nInput %s\n' \
-  "$PWD" "$(cat sdk.path)" "$solver" "$PWD/libbp3_qd.release.so" "$PWD/vertices.txt" "$PWD/$job_input"
+  "$PWD" "$(cat sdk.path)" "$solver" "$PWD/libbp3_qd.release.so" "$PWD/$vertices" "$PWD/$job_input"
+if [[ -n ${SLURM_JOB_ID:-} && $mode != pilot ]]; then
+  # Leave 30 minutes for the in-flight physical step and terminal checkpoint.
+  deadline=${SLURM_JOB_END_TIME:-}
+  if [[ -z $deadline ]]; then deadline=$(date -d "$(squeue -h -j "$SLURM_JOB_ID" -o %e)" +%s); fi
+  seconds=$((deadline-$(date +%s)-1800))
+  (( seconds>0 )) || { echo "Insufficient remaining wall time for checkpoint margin" >&2; exit 2; }
+  (sleep "$seconds" && touch "$output/terminate-aspect") &
+  watch_pid=$!
+  trap 'kill "$watch_pid" 2>/dev/null || true' EXIT
+fi
 "${launcher[@]}" "$solver" "$job_input" 2>&1 | tee "${job_input%.prm}.log"

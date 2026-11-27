@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13.4)
 find_package(Aspect 3.1 REQUIRED HINTS ${Aspect_DIR} $ENV{ASPECT_DIR})
 DEAL_II_INITIALIZE_CACHED_VARIABLES()
 project(bp3_qd)
-add_library(bp3_qd SHARED bp3_qd.cc)
+add_library(bp3_qd SHARED bp3_qd.cc historical_profile.cc startup_cuts.cc event_profiles.cc)
 ASPECT_SETUP_PLUGIN(bp3_qd)
 
 # Ship the existing event definition with the installed benchmark.

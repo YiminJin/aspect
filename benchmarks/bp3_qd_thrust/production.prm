@@ -1,9 +1,70 @@
-include bp3.prm
-# 1,500 Julian years, or continue across allocations from this run's checkpoints.
+include bp3-common.prm
+# Historical finite-box experiment. The entire 57.735 km fault solves RSF.
+set Output directory = historical-output
 set End time = 47336400000
+set Maximum first time step = 4e6
+set Maximum time step = 4e7
+set Nonlinear solver tolerance = 1e-8
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set Box origin X coordinate = -60000
+    set X extent = 150000
+    set Y extent = 50000
+    set X repetitions = 75
+    set Y repetitions = 25
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 9
+  set Minimum refinement level = 1
+  set Strategy = BP3 historical footprint
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:BP3 integrated loading, right:BP3 integrated loading, bottom:BP3 integrated loading
+end
+subsection Initial composition model
+  set List of model names = BP3 historical AT1
+end
+subsection Initial temperature model
+  set List of model names = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set Fault vertex file = historical-vertices.txt
+    # ceil(39.529164 + (sin(60)+cos(60))*3.90625) metres.
+    set Profile half width = 45
+    set Complete prescribed contact profiles = true
+    # 4e6 s fails the 60-iteration initial Picard solve on the resolved contact control.
+    set Initialization interval = 100
+    # m=Gc/[(8/3) ell Hc], Hc=cohesion²/(2G), as in the donor.
+    set Degradation magnitude = 120.1429512
+    set Normal integral subdivisions = 8
+    set Normal traction filter length = 20
+    set Record section tractions = true
+  end
+end
+subsection Time stepping
+  subsection Fault RSF
+    set Report timestep limits = true
+  end
+end
 subsection Checkpointing
   set Time between checkpoint = 1800
 end
+subsection Postprocess
+  set List of postprocessors = BP3 stations, BP3 first event profiles, velocity statistics, visualization, fault slip output
+  subsection Visualization
+    # Full-grid bulk frames use the historical heavy-output cadence.
+    set Fault slip interval = 1
+    set Time between graphical output = 3155760000
+  end
+end
 subsection Termination criteria
-  set Termination criteria = end time, user request
+  set Termination criteria = end time, user request, BP3 first event complete
 end

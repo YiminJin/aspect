@@ -35,7 +35,8 @@ def export(statistics, destination):
                 raise ValueError(f"Gap in accepted history at step {count}")
             clock = [step, frame["BP3 clock (s)"], frame["BP3 interval (s)"]]
             peak.writerow([*clock, frame["BP3 peak speed (m/s)"], frame["BP3 peak distance (m)"]])
-            for s in range(0, 40001, 2500):
+            station_names = (name.split()[1] for name in frame if name.startswith("BP3 ") and name.endswith(" m rate (m/s)"))
+            for s in sorted(station_names, key=float):
                 prefix = f"BP3 {s} m "
                 values = [frame[prefix + "rate (m/s)"], frame[prefix + "slip (m)"]]
                 if not all(isfinite(float(v)) for v in values):
