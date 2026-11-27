@@ -14,7 +14,7 @@ if __name__ == "__main__":
         "startup_cuts.cc event_profiles.cc first_event.h bp3-common.prm bp3.prm production.prm pilot.prm "
         "contact.prm intermediate.prm make_vertices.py make_historical_vertices.py vertices.txt "
         "historical-vertices.txt check_pilot.py history.py native_frames.py").split()]
-    files += [here/name for name in ("check_historical.py","check_event.cc") if (here/name).exists()]
+    files += [here/name for name in ("check_historical.py","check_event.cc")]
     with zipfile.ZipFile(args.new_zip,"x",zipfile.ZIP_DEFLATED) as archive:
         for path in files+[catalogue]:
             archive.write(path, "bp3-first-event/"+path.name)

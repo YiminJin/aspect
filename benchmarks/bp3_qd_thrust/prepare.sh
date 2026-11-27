@@ -15,6 +15,8 @@ fi
 cp "$catalogue" history_events.py
 cp "$here"/{history.py,check_pilot.py,check_historical.py,native_frames.py,make_vertices.py,README.md} .
 cp "$here"/{make_historical_vertices.py,bp3-common.prm,historical-vertices.txt,contact.prm,intermediate.prm} .
+printf '%s  %s\n' 710623919be54bd508ae87a8cd58d064742f252ca83fb35c110a04918f1c346a historical-vertices.txt | sha256sum --check
+python3 make_historical_vertices.py --verify-shipped historical-vertices.txt
 python3 make_historical_vertices.py --height 1000 > contact-vertices.txt
 python3 make_historical_vertices.py --spacing 100 > intermediate-vertices.txt
 mkdir plugin-source

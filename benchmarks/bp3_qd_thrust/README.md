@@ -48,6 +48,7 @@ BP3_LOCAL_RANKS=1 BP3_END_STEP=1 bash stampede3.sh intermediate start
 BP3_LOCAL_RANKS=1 bash stampede3.sh intermediate resume
 python3 make_historical_vertices.py > regenerated.txt
 sha256sum historical-vertices.txt regenerated.txt
+python3 make_historical_vertices.py --verify-shipped historical-vertices.txt
 ```
 
-The 2 × 1 km contact case resolves both 20 m filtering and the transverse profile at production spacing. The intermediate calculation spans the entire historical fault at 31.25 m finest cell size and approximately 100 m station spacing. Its contact loads are resolution measurements. Use the independent cut and traction checks to interpret their error. The historical donor logged onset at 163.893 years and 10.85 km down dip. The branch has passed startup controls only. Event timing, completed-event throughput and spatial/temporal convergence require server runs.
+Staging verifies the published vertex SHA-256 and independently evaluates every equilibrium age (relative tolerance 1e−13) and coordinate (1e−8 m). The 2 × 1 km contact case resolves both 20 m filtering and the transverse profile at production spacing. The intermediate calculation spans the entire historical fault at 31.25 m finest cell size and approximately 100 m station spacing. Its contact loads are resolution measurements. Use the independent cut and traction checks to interpret their error. The historical donor logged onset at 163.893 years and 10.85 km down dip. The branch has passed startup controls only. Event timing, completed-event throughput and spatial/temporal convergence require server runs.

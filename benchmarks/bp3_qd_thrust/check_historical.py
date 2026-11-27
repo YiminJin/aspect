@@ -191,11 +191,13 @@ def check(directory,figure=None):
         cuts.append(chi)
         cut_mass=np.trapezoid(chi,r)
         print(f"y={yy:g} m horizontal cut; integral chi d(normal)={cut_mass:.8g}, integrated slip={np.trapezoid(chi*np.interp(pos,s,initial['rate_m_s']),r):.10g} m/s")
-    if (directory/'startup-cuts.txt').exists():
+    observers=params['Postprocess']['List of postprocessors']['value'].split(',')
+    if 'BP3 startup cuts' in (name.strip() for name in observers):
         observed=np.genfromtxt(directory/'startup-cuts.txt',names=True)
         for yy in (top,top/2,0.):
             line=observed[observed['y_m']==yy]
             rr=line['r_m']
+            assert len(rr)==513 and np.all(np.diff(rr)>0) and rr[0]<-radius[-1] and rr[-1]>radius[-1],yy
             xx=(rr-.5*(yy-top))/SINE
             pos=.5*xx-SINE*(yy-top)
             predicted=q1(xx,yy,top,h,origin)
