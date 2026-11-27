@@ -19,7 +19,7 @@ namespace aspect::TimeStepping
     const bool completed = !rates.completed.empty();
     Assert(!completed || rates.completed.size() == rates.parent.size(), ExcInternalError());
     double next = std::numeric_limits<double>::max();
-    double limiting_budget=0., retry_slip_budget=0., retry_slip=0., retry_age=0.;
+    double limiting_budget=0., limiting_increment=0., retry_slip_budget=0., retry_slip=0., retry_age=0.;
     double max_slip = 0., max_age = 0.;
     unsigned int limiting = 0, max_slip_id = 0, max_age_id = 0, retry_id = 0;
     const char *retry_reason = "none";
@@ -56,6 +56,7 @@ namespace aspect::TimeStepping
             limiting=i;
             criterion="slip";
             limiting_budget=budget;
+            limiting_increment=completed ? dt*std::abs(rate)/distance : 0.;
           }
         double parent_limit = slip_limit;
         bool reject = completed && dt > slip_limit;
@@ -88,6 +89,7 @@ namespace aspect::TimeStepping
                 limiting=i;
                 criterion="age";
                 limiting_budget=log_age_budget;
+                limiting_increment=std::abs(change);
               }
           }
         if (reject && .9*std::min(dt,parent_limit)<retry_duration)
@@ -124,7 +126,8 @@ namespace aspect::TimeStepping
               row << " retry_station_m=" << station(retry_id);
 
           }
-        row << " limiting_budget=" << limiting_budget << " slip_fraction=" << max_slip << " abs_log_age=" << max_age;
+        row << " limiting_budget=" << limiting_budget << " measured_increment=" << limiting_increment
+            << " slip_fraction=" << max_slip << " abs_log_age=" << max_age;
         row << " slip_id=" << max_slip_id << " age_id=" << max_age_id;
         if (retry_duration<dt)
           row << " retry_id=" << retry_id << " retry_reason=" << retry_reason << " retry_slip_budget=" << retry_slip_budget
