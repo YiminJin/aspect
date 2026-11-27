@@ -1,5 +1,8 @@
 # Preparing the 60° DG-stress donor on Stampede3
 
+This is the historical donor runbook. For the planned pf-rsf calculation
+from time zero, consult the [fresh-start readiness assessment](README.md#branch-readiness-for-a-fresh-start).
+
 ## Physical parent and executable
 
 The shortest continuation starts from the snapshot written by Stampede3 job

@@ -98,6 +98,15 @@ duration, units and stress conventions agree with the existing
 verification guide. The restored mature fields are compared directly with
 the archived five-ID reference from `ae676e240`.
 
+The two installations, the original outputs and checkpoints from the capture
+above, and the plugins built against the candidate installation suffice for
+the public-frame, continuation, retry, state-free and cold-creep checks below.
+At 10 and 15 ms the continuation checks both native shear histories with the
+fresh-frame relative tolerance of 10⁻¹² and zero absolute tolerance. It also
+tests two scratch copies, reversing one signed shear at 10 ms and erasing
+one absolute shear at 15 ms. Both mutations must fail at the affected native
+point. The captured tables and checkpoint files remain read-only.
+
 ```sh
 I=$D/install
 G=$I/benchmarks/growing_fault
@@ -108,11 +117,22 @@ bash "$W/refactoring/phase-field-fault/results/iposter/check-growing.sh" "$I" "$
 python3 -B "$R/cross_build.py" "$I" frames "$D/starting-growing" "$D/qualified-growing"
 python3 -B "$R/cross_build.py" "$I" continue "$D" "$L" "$D/qualified-continue"
 python3 -B "$G/run.py" "$I/bin/aspect-release" "$GP" "$D/qualified-lifecycle" --ranks 2 --mpiexec "$MPIEXEC"
-python3 -B "$G/compare.py" "$W/build-5a-repair/donor-two/output" "$D/qualified-lifecycle/principal/output"
 python3 -B "$G/check_state_free.py" "$I/bin/aspect-release" "$GP" "$D/qualified-state-free"
 python3 -B "$G/check_repairs.py" "$I/bin/aspect-release" "$GP" "$D/qualified-cold" friction
 MPLBACKEND=Agg MPLCONFIGDIR="$D/mpl" python3 -B "$G/plot_seed.py" \
   "$D/qualified-growing/seed/output" "$D/qualified-figure"
+```
+
+For the additional donor comparison, follow the
+[pinned two-rank nine-strip regeneration recipe](../../STATUS.md#increment-5a-review-repairs).
+It verifies the reference archive and runs `replay_midpoint_reference.py`
+and `check_midpoint_reference.py` for `localized-onecut`. Set `DONOR_OUTPUT`
+to that replay's `output` directory. The original replay used
+`$W/build-5a-repair/donor-two/output`.
+
+```sh
+python3 -B "$G/compare.py" "${DONOR_OUTPUT:?Set the path to the verified localized-onecut output}" \
+  "$D/qualified-lifecycle/principal/output"
 ```
 
 The corruption replay changed just the signed rate of strip 8 in a scratch

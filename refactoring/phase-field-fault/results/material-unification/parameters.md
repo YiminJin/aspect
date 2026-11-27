@@ -53,3 +53,22 @@ bash "$G/check_surface_pressure.sh" "$O" "$A" "$W/tests/simpler_box.prm" "$D/sim
 ```
 
 The candidate executable at `4472fbcf6935e991bad8e42130c435cc877e81de` has SHA-256 `ad5b91587404af2409ed7e30b0d5f0933c35bbcebce828d2ff3e177de2700930`. The starting executable at `6466cfe6130e5ea2d1324466b4c530b917247961` has SHA-256 `6b39e9d4d5807efa3caffe0bc0793770a7e1c876521588698ab22a2c2ab8307b`. The stock Simpler calculation sampled the correct surface pressure at eight upper-boundary points per run. Across 64 pressure samples, the maximum printed error in a 100 Pa shift was 2.84413 × 10⁻⁶ Pa. Its pre-refactor 100 Pa checkpoint continued on the candidate and rejected a change to 0 Pa.
+
+## Extension admission after maintainer review
+
+An independently registered material inheriting the default fault reader supports the prescribed trace. Its spatial `bulk_viscosity(position)` override supplies the trace Maxwell response. A derived material that also supports the homogeneous strip response must opt in from its reader with `parse_fault_parameters(prm, StripInputs::current)`. The original `growing fault` registration and the historical benchmark strip-dashpot selector use `StripInputs::historical` to preserve their ignored Simple viscosity. A registered resistance law can still supply its signed strip response without deriving a material class.
+
+On the reviewed executable, an SDK trace extension with a 20 Pa s override accepted the midpoint seed, used 10⁸ Pa s and published nine strips at 5 ms. The repaired executable rejects the same selection before writing strip data. On the prescribed trace its three accepted label tables matched an ordinary 20 Pa s material byte for byte. The explicit SDK strip registration read the Simple viscosity of 10⁶ Pa s and gave 75.7912838976146 Pa in accepted xy stress at cell `0_0:`, point 0 at 5 ms. Its native table matched the canonical registration byte for byte. With the historical name, supplying Simple viscosity left the 10⁸ Pa s strip response at 75.978862635792 Pa.
+
+Mesh-dependent strip rules and native history are available once the first midpoint attempt has begun, or when checkpoint mesh restoration finishes. The installed material-property probe requests the rules from its own initializer on both growing input names and requires the early-access diagnostic. It then samples the ordinary material on the initial and physical steps. Run all 27 parameter and extension cases with the repaired install:
+
+```sh
+W=$PWD
+D=$W/build-unification-review
+I=$D/install
+P=$I/benchmarks/growing_fault/parameter_compatibility
+cmake -S "$P" -B "$D/parameters-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/parameters-plugin" -j1
+(cd /tmp && python3 -BOu "$P/check.py" "$I/bin/aspect-release" \
+  "$D/parameters-plugin/libfault_parameter_probe.release.so" "$D/parameters")
+```

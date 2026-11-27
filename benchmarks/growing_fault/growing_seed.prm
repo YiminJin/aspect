@@ -108,6 +108,8 @@ subsection Boundary velocity model
 end
 subsection Solver parameters
  subsection Stokes solver parameters
+  # The midpoint solver needs separate velocity and pressure blocks. It gathers
+  # the bordered system on MPI rank zero and factors it there with UMFPACK.
   set Stokes solver type = block AMG
  end
 end

@@ -11,6 +11,12 @@ case_dir="$ASPECT_SOURCE_DIR/benchmarks/fixed_fault/curved_mature"
 "$ASPECT_SOURCE_DIR/bin/aspect-release" "$case_dir/curved_mature.prm"
 ```
 
+Archive the original input, its included parameter files, the vertex table,
+any external pressure data and the executable/plugin identities. The
+expanded output `parameters.prm` lists defaults for both formulations.
+Replaying that file supplies inactive settings explicitly and triggers the
+fault input checks.
+
 To move the bend, copy the table and edit the `y_m` entry in row 2, for
 example from 0.69 to 0.57. Keep the IDs in file order. Point both consumers at
 your copy with one override and run in a fresh directory:
@@ -69,3 +75,11 @@ The last two columns are cumulative slip distance and the accepted endpoint
 speed. The checker tests those meanings against the native label state and
 checks that the speed integrated over each accepted timestep gives the slip
 increment. It opens the reference read-only.
+
+In the observer CSVs, `eta` is the material's bulk Maxwell viscosity at the
+vertex or quadrature point, in Pa s. The `offset_xx`, `offset_yy` and
+`offset_xy` columns give the additive local endpoint stress in Pa before
+projection. They include the relaxed parent and the slip contribution.
+The `tauxx`, `tauyy` and `tauxy` columns sample the accepted DG stress.
+The label CSV includes `Theta_s` for rate-and-state friction and omits it
+for a state-free resistance law.

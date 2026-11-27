@@ -5,15 +5,15 @@ Start with the **field method** and the **material model** in the parameter file
 ## Run the two poster examples
 
 Start with an ASPECT Release installation containing the examples and plugin SDK. Set
-`prefix` to its absolute path. The commands below use the installation from the
-[configured-prefix SDK check](results/iposter/installed-review-checks.md). Configure
+`prefix` to its absolute path in your shell. For the build and SDK check see
+the [configured-prefix example](results/iposter/installed-review-checks.md). Configure
 ASPECT with `-DCMAKE_INSTALL_PREFIX` set to the intended destination and
 `-DASPECT_INSTALL_EXAMPLES=ON` before installing.
 Both examples write accepted output in a fresh directory. Distances are in metres
 and times in seconds.
 
 ```sh
-prefix=$PWD/build-d-review/install
+: "${prefix:?Set prefix to your selected ASPECT installation}"
 aspect=$prefix/bin/aspect-release
 growing=$prefix/benchmarks/growing_fault
 layered=$prefix/benchmarks/layered_moving_fault
@@ -24,6 +24,13 @@ mkdir "$run/seed" "$run/layered"
 cp "$growing/growing_seed.prm" "$run/seed/"
 (cd "$run/seed" && mpirun -np 2 "$aspect" growing_seed.prm)
 ```
+
+To archive a runnable experiment, save the input you passed to ASPECT, its
+included parameter files, vertex tables and any pressure data, with their
+relative paths and the installation and plugin identities. The output
+`parameters.prm` records the expanded configuration. It includes defaults
+from both fault formulations. Reading it as input makes those inactive
+settings explicit and triggers the material's conflict checks.
 
 **Change frictional pressure in the growing seed.** In `Adiabatic conditions model /
 Function`, edit `set Function constants = p0=200, dp_dz=0`. Using `dp_dz=50`
@@ -101,6 +108,14 @@ The two inputs below use the built-in `Material model / Model name = phase field
 | [Growing seed](../../benchmarks/growing_fault/growing_seed.prm) | `Compositional field methods = midpoint fault phase` on one `phase field` selects the irreversible AT1 strip solve. The `Growing fault` subsection supplies the seed tip, tangent and cohesion. Set the Maxwell modulus and viscosity under `Phase field fault`. This example takes friction pressure from the ASPECT adiabatic profile. | The built-in `growing fault history` postprocessor writes the accepted native tensors in `points-NNNN-rR.csv`, one strip table per clock, and the physical-step work ledger. |
 
 ASPECT's ordinary factory constructs `MaterialModel::PhaseFieldFault` for both inputs. In `parse_parameters()` the material finds the composition named by `Phase field / Phase composition` and reads its already resolved method. The historical `growing fault` name constructs this same class and requires the midpoint method. A mature geometry declaration or vertex source conflicts with midpoint selection. Growing seed and prescribed-compression controls require that selection. Older mature files keep the original `automatic` inference of geometry from the phase role. [Material registration and selection](../../source/material_model/phase_field_fault.cc)
+
+Both formulations require the box's `zero topography` initial model. The
+trace normal integrals use the box faces, and the growing graph uses those
+faces to locate the stations where friction samples adiabatic pressure.
+A separately registered material that inherits the parser supports the
+mature trace, including spatial viscosity overrides. To support growing
+strips, its parameter reader must opt into the homogeneous midpoint Maxwell
+response and select its viscosity input convention. [Material extension contract](../../include/aspect/material_model/phase_field_fault.h)
 
 For a mature trace the material binds each phase profile to its own trace, registers its Stokes coupling, and publishes the converged rates and DG stress after the repeat decision. For a growing seed the material constructs `StripMaterialHistory`. The midpoint solver reads the accepted state and stages a converged endpoint there. The material's acceptance callback installs its work ledger and tensors and advances the selected resistance law. On restore, growing native rules are rebuilt on the restored mesh before pre-solve observers read history. The two formulations retain their own checkpoint keys, field ordering and compatibility checks. [Accepted strip state and archive](../../source/material_model/phase_field_fault/strip_material_history.cc)
 

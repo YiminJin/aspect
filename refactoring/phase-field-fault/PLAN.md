@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**Material unification is ready for architecture review.** Both public inputs and the historical growth name use the ordinary `PhaseFieldFault` factory. The material selects trace or strip state from the configured phase composition. [Ownership, tested paths and pre-refactor checkpoint continuations](results/material-unification/README.md).
+**Material unification repairs are ready for focused re-review.** Both public inputs and the historical growth name use the ordinary `PhaseFieldFault` factory. Derived materials explicitly opt into strip mechanics. The [installed checks and pre-refactor checkpoint continuations](results/material-unification/README.md#maintainer-repair-and-replay) cover the geometry, SDK, observer and native history findings.
 
 **The curved-fault baseline and replay repair is ready for review before material-model unification.** The [frozen public trajectory and replay controls](results/mature-release/baseline-repair.md) bind the three accepted clocks to physical IDs, native fields and the public output. The station-by-station bend deficit, including its negative-normal contribution, is part of the baseline for the ownership change.
 
@@ -10,7 +10,7 @@
 
 **Assignment D is ready for focused re-review.** The [four repair groups](STATUS.md#assignment-d-review-repairs) cover the edited examples, their installed inputs and the discriminating checks for all fourteen findings. The [installed examples](IMPLEMENTATION.md#run-the-two-poster-examples) and [regenerated figures](results/iposter/README.md) give the measured initiation and material motion. The separately pinned BP3 launcher is at `b54bde517`. Production BP3 and the regional simulation remain later assignments.
 
-**60° BP3 server preparation.** The [donor continuation and branch qualification plan](results/bp3-preparation/README.md) starts with recovering the 160-rank step-4229 checkpoint and replaying eight known endpoints. The donor evidence covers one acceleration and substantial slip, with recovery and recurrence still open. The small surface-reaching thrust now resumes from its own accepted history. Spatial friction, matched loading, normal feedback and timestep control remain prerequisites for a full-size `pf-rsf` run.
+**60° BP3 server preparation.** Start the branch calculation from its own initial conditions at time zero. The [branch readiness assessment](results/bp3-preparation/README.md#branch-readiness-for-a-fresh-start) links the runnable small-box check and the outstanding qualifications for the full-size input. The [historical donor launcher](results/bp3-preparation/server.md) retains the 160-rank step-4229 recovery procedure and eight observed endpoints for provenance.
 
 **The branch-wide readability pass is complete.** The [working record](STATUS.md#branch-wide-readability-review-before-assignment-d) and [release-diff coverage and replay commands](results/readability/README.md) identify the local behavior baseline, separately reviewable changes and same-source recorder checks. The historical four strip-15 comparisons retain their original strict result.
 

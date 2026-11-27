@@ -162,3 +162,106 @@ python3 -BO "$I/benchmarks/layered_moving_fault/plot_layers.py" "$after" "$E"
   background loading or resistance parameters triggered its checkpoint diagnostic.
 - All four scoped CTests passed, including both DG stress transport checks.
   The Release unit suite passed 2,605 assertions in 64 cases.
+
+## Maintainer review of the mature observer
+
+The observer now reads Eulerian viscosity (Pa s) at each label and Q3 point through
+the active trace material. At zero strain rate, the local endpoint law returns its
+additive stress offset (Pa) directly. The accepted DG stress is sampled separately
+from the solution. The RSF label CSV retains its header and material IDs. A
+state-free law omits the age column in both the native label CSV and public output.
+
+The reviewed installation from production commit `4472fbcf6` reported 10 Pa s for
+every label and native point on a curved case with viscosity 24 Pa s, modulus
+17 Pa and initialization interval 0.025 s. Its maximum initial offset error
+was 0.469 Pa. With the external linear dashpot and the input table's age
+column removed, it aborted in `MovingFaultSamples` while reading age at ID 0.
+The two reproductions can be run separately with the reviewed executable and
+its matching SDK plugins. Use fresh result directories.
+
+```bash
+W=$PWD
+D=$W/build-unification-review
+O=$W/build-unification
+C=$W/benchmarks/fixed_fault/curved_mature
+export OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+python3 -BOu "$C/check_observer.py" "$O/install" "$O/layered-plugin/liblayered_moving_fault.release.so" \
+  "$O/law-plugin/libgrowing_fault_checks.release.so" "$D/reproduce-eta" --case changed
+python3 -BOu "$C/check_observer.py" "$O/install" "$O/layered-plugin/liblayered_moving_fault.release.so" \
+  "$O/law-plugin/libgrowing_fault_checks.release.so" "$D/reproduce-age" --case state-free
+```
+
+Build both plugins against the repaired installation and run each public case
+in a fresh directory. All mature checks here used one MPI rank and one thread.
+
+```bash
+I=$D/install
+P=$D/layered-plugin/liblayered_moving_fault.release.so
+L=$D/law-plugin/libgrowing_fault_checks.release.so
+C=$I/benchmarks/fixed_fault/curved_mature
+R=$W/refactoring/phase-field-fault/results/mature-release
+cmake -S "$I/benchmarks/layered_moving_fault" -B "$D/layered-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/layered-plugin" -j1
+cmake -S "$I/benchmarks/growing_fault" -B "$D/law-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/law-plugin" -j1
+python3 -BOu "$C/check_observer.py" "$I" "$P" "$L" "$D/observer"
+python3 -BOu "$R/run_curve.py" "$I" "$P" "$D/curve"
+MPLBACKEND=Agg MPLCONFIGDIR="$D/mpl" python3 -BOu "$C/check_curve.py" "$D/curve/observed/output" --figure "$D/curve.png"
+cmp "$D/curve.png" "$R/curve.png"
+```
+
+Both parents are initially stress-free, and the initialization solve publishes
+zero physical stress. At initialization and the first physical step the entire
+offset is therefore the signed slip contribution. The check locates the
+independent segment foot, interpolates the accepted label rates and normal
+integrals, and evaluates all three components of
+`κ χ V (t⊗n + n⊗t)` for the public opposite-tangent convention.
+Here `κ = −η expm1(−G Δt/η)` in Pa s. It compares all 2,304 Q3 samples
+and checks viscosity at these samples and all five vertices.
+
+| Law and clock | Observed η (Pa s) | Expected κ (Pa s) | Peak absolute offset (Pa) | Maximum error (Pa) |
+|---|---:|---:|---:|---:|
+| RSF, initialization | 24 | 0.421259093454 | 0.430277990 | 2.22 × 10⁻¹⁶ |
+| RSF, 12.5 ms | 24 | 0.211562015191 | 0.219999874 | 1.11 × 10⁻¹⁶ |
+| Dashpot, initialization | 10 | 0.951625819640 | 1.12305536 | 3.33 × 10⁻¹⁶ |
+| Dashpot, 12.5 ms | 10 | 0.124221995061 | 0.155836974 | 5.55 × 10⁻¹⁷ |
+
+The unmodified public curve passed the original archive at 0, 12.5 and 25 ms.
+Public label files and all native label records matched byte for byte.
+Sampling the offset directly changed its last bits by at most 1.11 × 10⁻¹⁶ Pa.
+Every other native field matched exactly. The independent rotated-parent shear
+error was 5.99 × 10⁻¹⁷ Pa, rising to 8.25 × 10⁻⁴ Pa with reversed spin.
+The [regenerated figure](../mature-release/curve.png) matched byte for byte.
+It shows bulk velocity across the curve at 25 ms, with up-dip differences
+of 16.711, 33.749, 42.545 and 52.663 mm/s across the four segments.
+
+The separate layered run exercised a spatial override of the same viscosity
+operation. Recreate the current endpoint and compare with the reviewed
+`candidate-layered` trajectory recorded above.
+
+```bash
+PYTHONPATH="$C:$I/benchmarks/layered_moving_fault" python3 -BOu - "$I" "$P" "$D" \
+  "$O/mature-results/candidate-layered/output-layered-moving-fault" <<'PY'
+from pathlib import Path
+import sys
+import numpy as np
+from check_restart import run, check_clocks, compare, accepted_frame
+from check_review import check_wall_loading
+prefix, plugin, root, ref = map(Path, sys.argv[1:])
+out = run('layered', prefix/'benchmarks/layered_moving_fault/layered.prm', [plugin],
+          root=root, prefix=prefix)
+check_clocks(out, [0, 1, 2])
+for step in range(3):
+    compare(ref, out, step, exact=False)
+    for records in accepted_frame(out, step, 1):
+        y = np.array([float(row['y']) for row in records.values()])
+        eta = [float(row['eta']) for row in records.values()]
+        np.testing.assert_allclose(eta, 5.5+4.5*np.tanh(y/.35), atol=1e-14, rtol=0., equal_nan=False)
+check_wall_loading(out, 2., 2.)
+PY
+```
+
+The sampled layer spanned 1.00013512–9.99986488 Pa s. All 20 labels and
+1,728 native points per clock matched the domain checks. The differences in
+accepted stress, slip rate and integrated shear work were zero. At 25 ms
+the work was 5.65475496073643 J/m.

@@ -2,6 +2,93 @@
 
 Both [the public curve](../../../../benchmarks/fixed_fault/curved_mature/curved_mature.prm) and [the growing seed](../../../../benchmarks/growing_fault/growing_seed.prm) select `Material model / Model name = phase field fault`. ASPECT's ordinary factory now constructs the same concrete `MaterialModel::PhaseFieldFault<2>` for those inputs and for the historical `growing fault` name. The [installed material probe](parameters.md) checks exact dynamic type and independently exercises each material output. The latter name still requires the midpoint field method and keeps its historical treatment of Simple viscosity.
 
+## Maintainer repair and replay
+
+The repaired production and SDK sources are at `82aee1ed3`. The local Release
+executable was built before committing that delta and prints the parent
+`754e62c4d`. Its SHA-256 is
+`bace6a44dbf6522c9d3aed7a6d46fca942ef18b5127b6b1b5af6275cdc182fc7`.
+The [installed parameter tests](parameters.md), [mature observer tests](mature.md#maintainer-review-of-the-mature-observer)
+and [old-parent replay](growing-and-restart.md#verification-on-the-candidate)
+give the SDK build commands and individual controls.
+
+| Input or comparison | Measured result |
+|---|---|
+| Raise the growing seed's top by 0.02 m with a 50 Pa/m pressure gradient | The reviewed binary accepted 5 ms. Strip 8 used y = 0.969227162 m and 202.538641908 Pa. Using the actual top face would put the station at y = 0.979227162 m and give 202.038641908 Pa. The repaired parser identifies the initial topography model before any native frame. On the ordinary flat box the two-rank affine case used 201.649753019 Pa at depth 0.032995060 m on strip 8. |
+| Select midpoint phase with an SDK material that only overrides trace viscosity | The old binary used a homogeneous 10⁸ Pa s despite the 20 Pa s override. The repaired binary diagnoses the selector. The same override on a mature trace matches the ordinary 20 Pa s control at all three clocks. An explicitly admitted strip extension honors the Simple viscosity alias. The historical growing and dashpot selectors keep their original semantics. Calling `sections()` in observer initialization now gives the documented lifetime diagnostic. |
+| Restore each formulation's generation 02 from the pre-unification writer | The growing 10 and 15 ms output tables matched byte for byte. The checker rejected a reversal of signed shear and a loss of absolute shear at native point (`20_0:`, 138), with allowances of 5.64 × 10⁻²⁶ and 4.84 × 10⁻²⁵. The mature 25 ms public and observer label files were identical to the reference. Only the observer's stress offset changed at roundoff, at most 1.39 × 10⁻¹⁷ Pa. |
+| Observe a 24 Pa s curved trace, G = 17 Pa, initialization interval 0.025 s | The old observer reported 10 Pa s and its initial stress offset was wrong by 0.469 Pa. The corrected observer gave 24 Pa s at all vertices and quadrature points and a maximum initial offset error of 2.22 × 10⁻¹⁶ Pa. The age-free SDK dashpot produced all five material IDs and the age-free CSV header at both clocks. The ordinary curve retained its RSF header and passed the frozen public check. |
+| Archive or launch a calculation | [The public instructions](../../IMPLEMENTATION.md#run-the-two-poster-examples) use the selected installation and explain which source inputs to save. Replaying the expanded growing deck passed syntax validation and then diagnosed the explicit mature-only stress-transport setting at startup. The [BP3 readiness assessment](../bp3-preparation/README.md#branch-readiness-for-a-fresh-start) specifies a branch-owned start from time zero. The 160-rank donor recovery remains in the historical runbook. |
+
+Run from the checkout with a fresh destination. The following commands used
+the retained pre-unification reference capture and its verified donor replay.
+Set `O` and `DONOR_OUTPUT` to the corresponding directories for a new replay.
+Each rank used one numerical thread.
+
+```bash
+W=$PWD
+D=$W/build-unification-review
+I=$D/install
+G=$I/benchmarks/growing_fault
+R=$W/refactoring/phase-field-fault/results/material-unification
+O=$W/build-unification
+DONOR_OUTPUT=$W/build-5a-repair/donor-two/output
+GP=$D/law-plugin/libgrowing_fault_checks.release.so
+L=$D/layered-plugin/liblayered_moving_fault.release.so
+export ASPECT_SOURCE_DIR="$I" OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+export MPIEXEC=/opt/openmpi/5.0.6/bin/mpirun
+cmake -S . -B build-6b/release -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX="$I" -DASPECT_INSTALL_EXAMPLES=ON
+cmake --build build-6b/release --target aspect -j3
+cmake -DCMAKE_INSTALL_LOCAL_ONLY=ON -P build-6b/release/cmake_install.cmake
+cmake -S "$G" -B "$D/law-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/law-plugin" -j1
+cmake -S "$I/benchmarks/layered_moving_fault" -B "$D/layered-plugin" -DAspect_DIR="$I/lib/cmake/Aspect"
+cmake --build "$D/layered-plugin" -j1
+(cd /tmp && python3 -BOu "$G/check_interface.py" "$I/bin/aspect-release" "$GP" "$D/final-interface")
+bash "$W/refactoring/phase-field-fault/results/iposter/check-growing.sh" "$I" "$D/growing-two"
+python3 -B "$R/cross_build.py" "$I" frames "$O/starting-growing" "$D/growing-two"
+python3 -B "$R/cross_build.py" "$I" continue "$O" "$L" "$D/old-parent-continuations"
+(cd "$O" && sha256sum --quiet -c "$R/starting-frames.sha256" && sha256sum --quiet -c "$R/starting-parents.sha256")
+python3 -BOu "$G/run.py" "$I/bin/aspect-release" "$GP" "$D/nine" --ranks 2 --principal-only --mpiexec "$MPIEXEC"
+python3 -BO "$G/compare.py" "$DONOR_OUTPUT" "$D/nine/principal/output"
+MPLCONFIGDIR="$D/mpl-seed" MPLBACKEND=Agg python3 -B "$G/plot_seed.py" "$D/growing-two/seed/output" "$D/seed-figure"
+cmp "$D/seed-figure/growing-seed.png" "$R/../iposter/growing-seed.png"
+```
+
+To reproduce the topography failure on the reviewed executable after the
+interface check, run its raised-top input in a fresh directory:
+
+```bash
+mkdir "$D/before-replay"
+(cd "$D/before-replay" && "$O/install/bin/aspect-release" "$D/final-interface/raised-top/input.prm")
+tail -1 "$D/before-replay/output/friction-pressure-0001.csv"
+```
+
+All 35 fresh constant-pressure, affine and four-field tables matched the
+pre-unification capture byte for byte. The nine-strip donor comparison
+passed at 5, 10 and 15 ms, ending at 1.69302306477 × 10⁻⁴ m² integrated
+slip. The [5 ms growing figure](../iposter/growing-seed.png) shows the
+accepted phase and the 21.527781613° inclination at strip 8. Its PNG
+and the [25 ms public curved solution](../mature-release/curve.png)
+each reproduced the tracked figure byte for byte.
+
+Four SDK CTests passed (`dg_stress_spin_order`, `dg_stress_transport`,
+`fixed_fault` and `stationary_fault`). The Release unit suite passed
+2,605 assertions in 64 cases. The same-source fitted ridge reproduced all
+38 label histories within the frozen Q8 budgets (maximum rate difference
+1.31 × 10⁻¹⁵ m/s). The three-label paired work was 0.494235968292736 m on
+the Stokes side and 0.494235968292737 m on the section side.
+
+```bash
+cmake -S tests -B "$D/tests" -DAspect_DIR="$I/lib/cmake/Aspect" \
+  -DASPECT_BINARY="$I/bin/aspect-release" -DCMAKE_BUILD_TYPE=Release \
+  -DASPECT_COMPARE_TEST_RESULTS=ON -DASPECT_RUN_ALL_TESTS=ON
+ctest --test-dir "$D/tests" -j1 --output-on-failure \
+  -R '^(fixed_fault|stationary_fault|dg_stress_transport|dg_stress_spin_order)$'
+(cd build-6b/release/unit_tests && ASPECT_SOURCE_DIR="$W" "$I/bin/aspect-release" --test)
+```
+
 ## Source and state ownership
 
 1. The [simulator constructor](../../../../source/simulator/core.cc) calls the release material factory, gives the selected material simulator access and calls its parameter reader. In [PhaseFieldFault](../../../../source/material_model/phase_field_fault.cc), the method on the **named phase composition** selects trace or strip mechanics. The canonical registration declares both sets of inputs. The historical name supplies the same factory and declares no additional inputs.

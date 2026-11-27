@@ -1,5 +1,30 @@
 # Phase-field fault working record
 
+## Material unification maintainer repairs
+
+Reviewed baseline `754e62c4d`, production and checker repair `82aee1ed3`.
+The installed executable rejected the 0.02 m initial topography before its
+first frame. An independent trace viscosity override retained its mature
+response and was rejected on midpoint strips. Explicit strip extensions
+and the historical growing registrations passed their respective viscosity
+controls. The corrected mature observer reported 24 Pa s at all 2,304
+native points on the changed curve, with a maximum initial offset error
+of 2.22 × 10⁻¹⁶ Pa. The age-free curve completed both clocks. [Review
+findings, executable identity, commands and figures](results/material-unification/README.md#maintainer-repair-and-replay).
+
+The constant and affine runs on two ranks reproduced all 35 reference
+tables byte for byte. The serial old-parent continuations passed for both
+formulations. The checker rejected a signed creep reversal at 10 ms and
+loss of accumulated absolute shear at 15 ms. The corrected nine-strip
+donor comparison passed at 5, 10 and 15 ms. The public curve retained
+its five IDs and public label files at 0, 12.5 and 25 ms. Four scoped
+Release CTests passed, along with 2,605 unit assertions in 64 cases. The
+fitted ridge, paired work and moving layered controls used rebuilt SDK
+plugins. The historical four 18-strip angle differences remain recorded
+at their existing tolerances. The next decision is maintainer re-review.
+Full-size BP3 starts from branch initial conditions after its
+[separate readiness checks](results/bp3-preparation/README.md#branch-readiness-for-a-fresh-start).
+
 ## Material unification
 
 Started at `6466cfe6130e5ea2d1324466b4c530b917247961`. Before changing ownership, its installed executable wrote the two-rank growing seed, affine-pressure and four-field controls and a generation-02 checkpoint for each formulation. `485f4cabb` pins those reference identities. `6df84149d` moves input reconciliation into the fault material directory. `4472fbcf6` restores the ordinary material factory and gives `PhaseFieldFault` ownership of the selected formulation. [Call paths, core changes, binary identities and reproduction commands](results/material-unification/README.md).

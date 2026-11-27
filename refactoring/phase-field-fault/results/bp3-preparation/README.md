@@ -1,13 +1,14 @@
 # A restartable 60° BP3 slip-cycle experiment
 
-**First server action:** recover the original 160-rank donor installation and
-the completed checkpoint at step **4229**, then replay the eight already
-observed accepted steps in a new output directory. The [server runbook](server.md)
-identifies the files, native reader, verification commands and launch overlays.
-The server log proves a write to slot 03. The local archive contains the log
-and profiles, but lacks the distributed checkpoint and the server binaries.
-Remote availability and successful deserialization remain to be verified.
-The corresponding input starts from zero if the server artifacts must be rebuilt.
+**The pf-rsf BP3 calculation will start at time zero from branch initial
+conditions.** The [current branch readiness assessment](#branch-readiness-for-a-fresh-start)
+lists the physical and numerical checks needed before preparing a full-size input.
+
+**Historical donor recovery.** The [donor runbook](server.md) records how to
+replay the eight accepted steps after the 160-rank donor checkpoint at step
+**4229**. The server log records a write to slot 03. The local archive
+contains the log and profiles. Recovery would require the distributed
+checkpoint and its matching server binaries.
 
 The local handoff includes a small input archive with the original parameters,
 geometry, archived stdout, two continuation inputs and verification tools.
@@ -103,9 +104,16 @@ rebuild, restore, extra terminal I/O and idle time are additional. Neither
 4,000 nor 8,000 is an observed event length or an upper bound. Update the
 estimate at the first recovery and again at the second onset.
 
-### Qualification since the preparation baseline
+### Branch readiness for a fresh start
 
-The [mature release check](../mature-release/README.md) exercises the prescribed shear sense and boundary-spanning checkpoint on fresh small-box runs. The original preparation findings below describe the earlier baseline. The donor inputs and launcher remain pinned independently. Spatial weakening/strengthening, matched loading and deep creep, the normal-traction comparison, timestep selection and mesh-scale cost remain open for BP3.
+The [installed mature release check](../mature-release/README.md#reproduce-the-runs)
+starts from the branch's own initial conditions and exercises prescribed shear
+sense and boundary-spanning restart on a small box. Before a full-size
+fresh start, qualify the spatial weakening/strengthening profile, plate
+loading and deep creep, normal-traction feedback, timestep selection and
+mesh-scale cost. A production branch launcher awaits those checks. The
+donor inputs, event observations and launcher below retain their original
+provenance.
 
 ### What was missing at the preparation baseline
 
