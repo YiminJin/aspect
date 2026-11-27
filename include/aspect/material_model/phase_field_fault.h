@@ -66,6 +66,16 @@ namespace aspect
         /** Return the accepted trace geometry, slip (m) and rate (m/s) in material ID order. */
         const std::vector<typename MaterialFaultTrace<dim>::Label> &labels() const;
 
+        /** Replicated material-ID rates (m/s) for timestep selection before publication.
+         * The completed vector is empty when the attempt has no converged candidate.
+         * Reading either vector leaves the accepted state and the candidate intact. */
+        struct RatePrediction
+        {
+          const Rheology::FaultResistance &law;
+          std::vector<double> parent, completed;
+        };
+        RatePrediction timestep_rates() const;
+
         /** Return accepted ages (s) in material ID order, or an empty vector for a state-free law. */
         const std::vector<double> &label_ages() const;
 

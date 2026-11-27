@@ -63,7 +63,7 @@ namespace aspect
               if (cell->level() >= static_cast<int>(std::round(maximum_refinement_level)))
                 cell->clear_refine_flag ();
 
-              if (cell->level() > static_cast<int>(std::round(maximum_refinement_level)))
+              if (coarsen_above_maximum && cell->level() > static_cast<int>(std::round(maximum_refinement_level)))
                 cell->set_coarsen_flag ();
             }
         }
@@ -103,6 +103,9 @@ namespace aspect
            * and that can not be exceeded by coarsening.
            */
           Functions::ParsedFunction<dim>::declare_parameters (prm, 1);
+          prm.declare_entry ("Coarsen cells above maximum", "true", Patterns::Bool(),
+                             "Mark cells above the specified level for coarsening. Disable this "
+                             "to limit refinement while preserving cells previously refined for mesh balance.");
         }
         prm.leave_subsection();
       }
@@ -117,6 +120,7 @@ namespace aspect
       {
         prm.enter_subsection("Maximum refinement function");
         {
+          coarsen_above_maximum = prm.get_bool ("Coarsen cells above maximum");
           if (prm.get ("Coordinate system") == "depth")
             coordinate_system = Utilities::Coordinates::depth;
           else if (prm.get ("Coordinate system") == "cartesian")

@@ -24,6 +24,23 @@ TEST_CASE("Mature fault resistance and aging")
   REQUIRE(law.advance_age(1.e-20,age,.0125) == Approx(age+.0125));
 }
 
+TEST_CASE("Fault RSF timestep inverts the constant-speed aging law")
+{
+  using namespace aspect::MaterialModel::Rheology;
+  const RateAndStateFriction law = {.6,.025,.015,.001,.008,1.};
+  const RateStateHistory history(law,10.);
+  const double budget = .1;
+  CHECK(std::isinf(history.state_time_limit(.001,8.,budget)));
+  CHECK(history.characteristic_slip_distance()/.001 == Approx(8.));
+  for (const double rate : {0., 1.e-20, .0001, -.01})
+    {
+      const double dt = history.state_time_limit(rate,10.,budget);
+      const double age = law.advance_age(std::abs(rate),10.,dt);
+      CHECK(std::log(age/10.) == Approx(rate < 0. ? -budget : budget));
+      CHECK(history.predict_age(rate,10.,dt) == age);
+    }
+}
+
 TEST_CASE("Stationary fault spans decimal box faces")
 {
   using dealii::Point;

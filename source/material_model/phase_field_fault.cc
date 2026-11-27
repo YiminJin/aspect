@@ -51,6 +51,30 @@ namespace aspect
     }
 
     template <int dim>
+    typename PhaseFieldFault<dim>::RatePrediction PhaseFieldFault<dim>::timestep_rates() const
+    {
+      RatePrediction rates{strips ? strips->friction() : *friction, {}, {}};
+      if (strips)
+        {
+          // All strips age for the full duration at their signed midpoint rate,
+          // including unformed strips and strips first admitted in this attempt.
+          for (const auto &strip : strips->history().sections)
+            rates.parent.push_back(strip.rate);
+          if (const auto *endpoint = strips->staged_sections())
+            for (const auto &strip : *endpoint)
+              rates.completed.push_back(strip.rate);
+        }
+      else
+        {
+          for (const auto &label : labels())
+            rates.parent.push_back(label.rate);
+          if (const auto *endpoint = coupling->converged_rates())
+            rates.completed = *endpoint;
+        }
+      return rates;
+    }
+
+    template <int dim>
     void PhaseFieldFault<dim>::initialize()
     {
       if (strips)

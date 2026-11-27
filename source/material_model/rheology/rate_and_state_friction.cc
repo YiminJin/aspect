@@ -170,9 +170,32 @@ namespace aspect
         return law.resistance(speed, (1. - xi) * ages[i] + xi * ages[i + 1], pressure);
       }
 
+      double RateStateHistory::predict_age(const double rate, const double age, const double dt) const
+      {
+        return law.advance_age(std::abs(rate), age, dt);
+      }
+
+      double RateStateHistory::state_time_limit(const double rate, const double age, const double log_budget) const
+      {
+        AssertThrow(std::isfinite(age) && age > 0. && std::isfinite(rate) && log_budget > 0.,
+                    ExcMessage("Invalid parent or logarithmic RSF budget."));
+        if (rate == 0.)
+          return age * std::expm1(log_budget);
+
+        // Invert the exact aging solution used by advance_age:
+        // (theta(t)-theta0)/theta0 = (theta_ss/theta0-1)*(1-exp(-t/theta_ss)).
+        // A target beyond the steady state is never reached.
+        const long double steady = static_cast<long double>(law.slip_distance)/std::abs(rate);
+        const long double relative_change = steady/age-1.L;
+        if (relative_change == 0.)
+          return std::numeric_limits<double>::infinity();
+        const long double fraction = std::expm1(std::copysign(static_cast<long double>(log_budget),relative_change))/relative_change;
+        return fraction >= 1.L ? std::numeric_limits<double>::infinity() : -steady*std::log1p(-fraction);
+      }
+
       void RateStateHistory::accept_rate(const unsigned int i, const double rate, const double dt)
       {
-        ages[i] = law.advance_age(std::abs(rate), ages[i], dt);
+        ages[i] = predict_age(rate, ages[i], dt);
       }
 
       void RateStateHistory::restore_state(std::vector<double> values)

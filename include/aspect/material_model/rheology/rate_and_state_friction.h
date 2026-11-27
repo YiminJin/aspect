@@ -58,6 +58,12 @@ namespace aspect
                                   double       mobility,
                                   double       h,
                                   double       compression) const override;
+          double characteristic_slip_distance() const override
+          {
+            return law.slip_distance;
+          }
+          double predict_age(double rate, double age, double dt) const override;
+          double state_time_limit(double rate, double age, double log_budget) const override;
           void validate_midpoint() const override;
           bool admits_duration(double h, double pressure) const override;
           std::vector<double> parameters() const override;

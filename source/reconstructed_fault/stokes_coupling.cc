@@ -91,11 +91,18 @@ namespace aspect
     using namespace std::placeholders;
     signals.prepare_stokes_picard_iteration.connect(std::bind(&FaultStokesCoupling::prepare_iteration,this,_1,_2));
     signals.check_stokes_picard_convergence.connect(std::bind(&FaultStokesCoupling::check_convergence,this,_1,_2));
+    // Other coupled fields may still veto our section check. Only the
+    // simulator knows when all checks on the returned solution have passed.
+    signals.post_nonlinear_solver.connect([this](const SolverControl &control)
+    {
+      rates_converged = control.last_check() == SolverControl::success;
+    });
   }
 
   template <int dim>
   void FaultStokesCoupling<dim>::prepare_iteration(const LinearAlgebra::BlockVector &iterate, bool &)
   {
+    rates_converged = false;
     material.prepare_trial_section(iterate);
     trial_rates = solve_rates(iterate);
     if (material.interior_seed)
@@ -142,6 +149,7 @@ namespace aspect
   void FaultStokesCoupling<dim>::prepare_parent()
   {
     const double physical_dt = this->get_timestep();
+    rates_converged = false;
     trial_rates.clear();
     for (const auto &label : material.active_section().trace.labels())
       trial_rates.push_back(label.rate);

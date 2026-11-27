@@ -16,7 +16,7 @@ subsection Formulation
   set Enable elasticity = false
 end
 subsection Geometry model
-  set Model name = BP3 fixed box
+  set Model name = box
   subsection Box
     set Box origin X coordinate = -30000
     set X extent = 80000
@@ -26,7 +26,16 @@ subsection Geometry model
   end
 end
 subsection Mesh refinement
-  set Initial global refinement = 0
+  set Initial global refinement = 4
+  set Strategy = maximum refinement function
+  subsection Maximum refinement function
+    set Coordinate system = cartesian
+    set Coarsen cells above maximum = false
+    # The center of a level-k rectangle can be up to d/2^k outside the
+    # band and still intersect it. d = (sin(60)*2000 + cos(60)*H/18)/2.
+    set Function constants = H=34641.016151377546,b=1500,d=1347.1506281091267
+    set Function expression = if(abs((sqrt(3)*x+y-H)/2)<=b+d/8,4,if(abs((sqrt(3)*x+y-H)/2)<=b+d/4,3,if(abs((sqrt(3)*x+y-H)/2)<=b+d/2,2,if(abs((sqrt(3)*x+y-H)/2)<=b+d,1,0))))
+  end
   set Initial adaptive refinement = 0
   set Time steps between mesh refinement = 0
 end
@@ -100,11 +109,22 @@ subsection Solver parameters
   end
 end
 subsection Time stepping
-  set List of model names = BP3 slip and state
+  set List of model names = fault RSF
+  subsection Fault RSF
+    set Maximum slip fraction = 0.1
+    set Maximum logarithmic state change = 0.1
+  end
 end
 subsection Termination criteria
   set Checkpoint on termination = true
 end
 subsection Postprocess
-  set List of postprocessors = BP3 stations, velocity statistics
+  set List of postprocessors = BP3 stations, velocity statistics, visualization, fault slip output
+  subsection Visualization
+    set List of output variables = named additional outputs
+    set Output format = vtu
+    # Five Julian years between bulk frames in quiet periods (input uses seconds).
+    set Time between graphical output = 157788000
+    set Fault slip interval = 0.1
+  end
 end

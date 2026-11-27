@@ -71,6 +71,23 @@ namespace aspect::MaterialModel::Rheology
       {
         return true;
       }
+      /** Characteristic slip distance (m), or infinity if the law has no slip scale. */
+      virtual double characteristic_slip_distance() const
+      {
+        return std::numeric_limits<double>::infinity();
+      }
+      /** Read-only endpoint age (s) for a positive parent age at fixed signed rate. */
+      virtual double predict_age(double, double, double) const
+      {
+        AssertThrow(false, ExcMessage("This resistance law does not supply an aging prediction."));
+        return 0.;
+      }
+      /** Longest constant-rate interval (s) within a logarithmic age budget.
+       * A law without age imposes no state restriction. */
+      virtual double state_time_limit(double, double, double) const
+      {
+        return std::numeric_limits<double>::infinity();
+      }
       /** Physical parameters whose values must agree on checkpoint restore. */
       virtual std::vector<double> parameters() const = 0;
       /** Seed optional history once for the ordered vertices or strips. */

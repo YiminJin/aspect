@@ -30,6 +30,11 @@ namespace aspect
       void connect_section_balance();
       /** Transport (when selected), rotate and project the accepted physical stress on owned cells. */
       void prepare_parent();
+      /** Rates selected by the completed coupled Picard check, until the next attempt. */
+      const std::vector<double> *converged_rates() const
+      {
+        return rates_converged ? &trial_rates : nullptr;
+      }
       /** Constitutive stress offset (Pa) for physical stress evaluation and publication. */
       SymmetricTensor<2,dim> stress_offset(const typename DoFHandler<dim>::active_cell_iterator &cell,
                                            const Point<dim> &position,
@@ -69,6 +74,7 @@ namespace aspect
       // The material owns both the physical parameters and the accepted curve.
       MaterialModel::PhaseFieldFault<dim> &material;
       std::vector<double> trial_rates;
+      bool rates_converged = false;
       // Interior-seed mechanics uses Q8 cell moments of the complete physical response.
       // Freeze its projection defect while Stokes and the Q1 section are linearized.
       struct ProjectedResponse

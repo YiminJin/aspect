@@ -89,6 +89,9 @@ namespace aspect
          */
         Functions::ParsedFunction<dim> max_refinement_level;
 
+        /** Also mark cells above the maximum for coarsening. */
+        bool coarsen_above_maximum;
+
     };
   }
 }

@@ -109,6 +109,12 @@ namespace aspect::GrowingFault
       /** Keep a converged endpoint and its full-interval work (J/m) until the repeat decision. */
       void stage_candidate(History &&candidate, const Balance &ledger);
 
+      /** Replicated section endpoints awaiting publication, or null on initialization/failure. */
+      const std::vector<SectionHistory> *staged_sections() const
+      {
+        return trial ? &trial->sections : nullptr;
+      }
+
       /** Collectively gather accepted native records and write their checkpoint on rank zero. */
       void save(std::map<std::string,std::string> &status) const;
 

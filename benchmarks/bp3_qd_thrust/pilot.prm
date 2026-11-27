@@ -4,7 +4,10 @@ subsection Checkpointing
   set Steps between checkpoint = 1
 end
 subsection Postprocess
-  set List of postprocessors = BP3 stations, mature fault statistics, velocity statistics, point values
+  set List of postprocessors = BP3 stations, mature fault statistics, velocity statistics, point values, visualization, fault slip output
+  subsection Visualization
+    set Fault slip interval = 7e-7
+  end
   subsection Point values
     # Opposite plates, and three boundary nodes straddling the lower contact.
     set Evaluation points = -30000,16000; 50000,16000; 19750,0; 20000,0; 20250,0
