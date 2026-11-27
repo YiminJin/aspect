@@ -1,0 +1,12 @@
+Material model/Phase field fault/Report section convergence None -> 'true'
+Postprocess/BP3 profiles/Slip interval None -> '0.1'
+Time stepping/Fault RSF/Maximum logarithmic state change '0.1' -> '0.2'
+Time stepping/Fault RSF/Maximum slip fraction '0.1' -> '0.5'
+Time stepping/Fault RSF/Proposal safety factor None -> '0.99'
+Time stepping/Fault RSF/Slip resolution policy None -> 'weakening dependent'
+Mechanical minus frictional shear at -1.0 m/s: -4624440.0 Pa
+Mechanical minus frictional shear at 1.0 m/s: 4624440.0 Pa
+Converted and checked 16 material IDs at the first accepted endpoint.
+Launcher rejected unused
+Launcher rejected Foreign startup marker
+Launcher rejected different BP3 run

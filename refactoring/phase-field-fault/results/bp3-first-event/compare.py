@@ -10,12 +10,16 @@ from native_frames import frames,read
 from history import read_statistics
 
 
-def compare(a,b):
+def compare(a,b,through_step=None):
     def profiles(d):
-        return {int(p.stem.rsplit('-',1)[-1]):p for p in d.glob('fault-profile-*.txt')}
+        files={int(p.stem.rsplit('-',1)[-1]):p for p in d.glob('fault-profile-*.txt')}
+        return files if through_step is None else {k:v for k,v in files.items() if k<=through_step}
     pa,pb=profiles(a),profiles(b)
     assert pa.keys()==pb.keys() and pa,"Missing accepted frames"
     sa=list(read_statistics(a/'statistics'));sb=list(read_statistics(b/'statistics'))
+    if through_step is not None:
+        sa,sb=sa[:through_step+1],sb[:through_step+1]
+        assert set(pa)==set(range(through_step+1))
     assert len(sa)==len(sb)==len(pa)
     keys=['BP3 event onset (s)','BP3 event below-threshold streak','BP3 event completion (s)']
     for fa,fb in zip(sa,sb):
@@ -32,6 +36,8 @@ def compare(a,b):
             err=max(abs(va[name]-vb[name]));assert err<=tol,(step,name,err,tol)
             errors[name]=max(errors.get(name,0),err)
     aa,bb=frames(a),frames(b)
+    if through_step is not None:
+        aa,bb=({k:v[k] for k in sorted(v)[:through_step+1]} for v in (aa,bb))
     assert len(aa)==len(bb)==len(pa)
     for ta,tb in zip(sorted(aa),sorted(bb)):
         assert abs(ta-tb)<1e-6
@@ -42,7 +48,7 @@ def compare(a,b):
             tol={'velocity':1e-16,'phase_field':0.}.get(name,1e-5)
             mask=abs(va[name]-vb[name])>tol+2e-6*abs(vb[name])
             if np.any(mask):
-                i=np.unravel_index(np.argmax(abs(va[name]-vb[name])),va[name].shape)
+                i=np.unravel_index(np.argmax(np.where(mask,abs(va[name]-vb[name]),-1)),va[name].shape)
                 failures.append((ta,name,int(mask.sum()),ka[i[0]].tolist(),va[name][i],vb[name][i]))
 
             errors['native_'+name]=max(errors.get('native_'+name,0),np.max(abs(va[name]-vb[name])))
@@ -56,5 +62,6 @@ def compare(a,b):
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('first',type=Path);p.add_argument('second',type=Path)
+    p.add_argument("--through-step",type=int,help="Compare a dense startup prefix before sparse production output.")
     args=p.parse_args()
-    compare(args.first,args.second)
+    compare(args.first,args.second,args.through_step)

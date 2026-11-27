@@ -1,0 +1,8 @@
+steady duration 40000000.0 slip 4.00000000000000008e-02
+b-zero duration 40000000.0 slip 4.00000000000000008e-02
+neutral duration 3960000.0 slip 3.95999999999999998e-03
+weak duration 2640000.0000000005 slip 2.64000000000000042e-03
+pulse 15 physical attempts 13 accepted; event [0.0, 0.013060931993890154, 0.3404134647644058]
+production common clock, peak, location, slip, onset bracket (0.1, 0.0016760609541332343, 0.0, 0.0001687875868345437, 0.0, 0.013060931993890154) mechanical shear Pa 5.017328679514014
+tight common clock, peak, location, slip, onset bracket (0.1, 0.0017284514466294155, 1.0, 0.00017044105535437898, 0.0, 0.002) mechanical shear Pa 5.0173286795140202
+Clean/retried and uninterrupted/resumed native fields match at every shared frame.

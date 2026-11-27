@@ -1,0 +1,15 @@
+build-bp3-fresh/final-parallel/historical-output: h=3.90625 m, 1388 cells, 212992 bytes/frame, radius=39.529164020 m, full integral=108.652564438 m
+FE phase L_inf 4.2595889926388963e-08 wall ux,uy errors (m/s) [np.float64(1.477574116639691e-17), np.float64(1.934347133470473e-17)]
+time-zero native max abs velocity, p, tau_xx/yy/xy [np.float64(4.334214376289225e-10), np.float64(5.034543991088867), np.float64(0.0), np.float64(0.0), np.float64(0.0)]
+initial midpoint forward resistance max error (Pa) 0.0
+s=0.000000 m: V=9.99999987806e-10 m/s, shear/raw/filtered Pa 26546122.363693807 50000000.00884535 50000000.008772664
+s=144.337567 m: V=1.00000049706e-09 m/s, shear/raw/filtered Pa 26546122.655653894 50000000.97771233 50000000.0790887
+independent initial stress projection errors (Pa), raw normal and shear, both contacts [-9.19131644e-07 -1.96212921e-06] [-1.26163815e-06 -4.21467721e-06] all-ID maxima 1.962129213439745e-06 7.063944847856499e-06
+20 m Helmholtz test: constant and nonconstant max-amplitude ratio 1.4432899320127035e-14 0.37426748305892554
+0 s filter residual 3.2e-07 Pa, peak 1.00000104238e-09 m/s
+1755.45964322 s filter residual 3.58e-07 Pa, peak 1.00001825501e-09 m/s
+3896.21844198 s filter residual 2.37e-06 Pa, peak 7.4331907625e-10 m/s
+6506.03805475 s filter residual 6.53e-06 Pa, peak 5.52841748061e-10 m/s
+y=125 m horizontal cut; integral chi d(normal)=1.0044944, integrated slip=1.004494431e-09 m/s
+y=62.5 m horizontal cut; integral chi d(normal)=1.0044914, integrated slip=1.004491384e-09 m/s
+y=0 m horizontal cut; integral chi d(normal)=1.004483, integrated slip=1.004483576e-09 m/s

@@ -1,6 +1,12 @@
 # Phase-field fault working record
 
-Active assignment: [Historical BP3 first event](BP3_HISTORICAL_FIRST_EVENT_TASK.md). Local startup and restart qualification is complete. The next action is the author's bounded full-grid Stampede3 start and restart.
+Active assignment: [BP3 fresh historical start](bp3/BP3_FRESH_START_CODING_TASK.md). The package is ready for the author's bounded Stampede3 run. The previous server checkpoint is outside this experiment.
+
+## Fresh historical 60° thrust deployment
+
+The tested core is `807943f77`, starting from `ee6d59cb7`. The package and extension sources are in `81b3a583f`. The [standalone ZIP](results/bp3-fresh-start/bp3-stampede3.zip) has SHA-256 `cbfb491b99593165441aa98a87d8ba89901050fe09aca5252786b2ff034af28c`. The [qualification record](results/bp3-fresh-start/README.md) contains the exact build and replay commands, effective PRM diff, native comparison files, figures and source ownership. The scientific inputs and the user-supplied deployment archive remain independently identifiable.
+
+On two ranks the cropped resolved startup proposed and accepted 1755.459643 s on its first attempt. It resumed through steps 3 and 4. The 5,776-ID production table and full-grid band and both contact footprints were independently verified. The weak-zone controller permits the 4e7 s manager ceiling in steady creep and recognizes the 10.85 km nucleation station on the archived fields (2.573065 s raw). Both MPI layouts rejected genuine acceleration and agreed on accepted event output and checkpoint continuation in the bounded pulse. The original pilot's three label tables were unchanged. At the production tolerance 1e−9 the independent cross-rank native pressure/stress check still has discrepancies. The same control at 1e−11 passed with its existing thresholds. Full-grid solve cost, event time and timestep convergence await the user's server run.
 
 ## Historical 60° BP3 first-event case
 

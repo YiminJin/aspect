@@ -1,0 +1,7 @@
+exact attempted/accepted 2 1 first slip/Dc 0.33333342424242418 budget 1/3; dt 5.99999836363681385e-02
+margin attempted/accepted 1 1 first slip/Dc 0.33000008999999991 budget 1/3; dt 6.60000000000000170e-02
+slip eligible budget 0.33333333333333337 change 1.1594426338232295 0 attempted/accepted 2 1
+age eligible budget 0 change 1.1023909348172598 0.66583920877837421 attempted/accepted 2 1
+      Fault Picard rate change: id=1 assembled=0.00049999962644985715 returned=0.00049999999967711517 abs_m_s=3.7322725801852003e-10 relative=7.4645451651907771e-07
+State-free law with weakening-dependent policy correctly diagnosed.
+Archived 3660 rate factor 1.0000002741999998 projected slip/Dc with 0.99 0.0990000271458

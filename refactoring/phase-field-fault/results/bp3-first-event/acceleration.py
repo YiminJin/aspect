@@ -5,13 +5,15 @@ import sys
 import numpy as np
 from math import inf
 
-def budgets(rate,age,limit):
+def budgets(rate,age,limit,slip_budget=.1):
     steady=.008/abs(rate)
     change=steady/age-1
     with np.errstate(divide='ignore',invalid='ignore'):
         fraction=np.expm1(np.copysign(limit,change))/change
         bound=np.where((fraction>0)&(fraction<1),-steady*np.log1p(-fraction),inf)
-    slip=.0008/abs(rate)
+    if not limit:
+        bound=np.full_like(rate,np.inf)
+    slip=slip_budget*.008/abs(rate)
     i=np.argmin(np.minimum(slip,bound))
     return i,('age' if bound[i]<slip[i] else 'slip'),min(bound[i],slip[i]),bound.min(),slip.min()
 

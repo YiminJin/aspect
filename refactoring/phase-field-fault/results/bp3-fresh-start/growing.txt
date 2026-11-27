@@ -1,0 +1,4 @@
+rsf 8 growth history files identical through 5 ms
+linear 8 growth history files identical through 5 ms
+Constitutively inadmissible 5 ms trial retried at 2.5 ms; all accepted tables matched clean.
+Growing reversed trial -1.5301387444904274e-13 m/s, slip budget 3.8253468612260686e-14 retry 0.0022500000000000003 s; all nine full-duration increments checked.
