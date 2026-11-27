@@ -2,6 +2,7 @@
 import argparse
 from pathlib import Path
 import csv
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -10,9 +11,16 @@ def resistance(age, s):
     return 5e7*a*np.arcsinh(.0005*np.exp((.6+.015*np.log(1.e-6*age/.008))/a)) + 4624440.e-9
 
 def compare(before, after, output):
+    sys.path.insert(0,str(Path(__file__).resolve().parents[4]/"benchmarks/bp3_qd_thrust"))
+    from history import read_statistics
+    for run in (before,after):
+        clocks = [(int(f["Time step number"]),float(f["BP3 clock (s)"]),float(f["BP3 interval (s)"]))
+                  for f in read_statistics(run/"statistics")]
+        if clocks != [(0,0.,0.),(1,400.,400.),(2,900.,500.)]:
+            raise ValueError(f"Changed isolation clocks in {run}: {clocks}")
     fig, axes = plt.subplots(2, 2, figsize=(9, 6), layout="constrained")
     with (output/"profiles.csv").open("w") as stream:
-        writer = csv.writer(stream)
+        writer = csv.writer(stream,lineterminator="\n")
         writer.writerow(["time_s","id","distance_m","linear_age_s","log_age_s","linear_rate_m_s","log_rate_m_s"])
         for step, t in enumerate([0,400,900]):
             a,b = [np.loadtxt(root/f"fault-labels-{step:05}.txt") for root in (before,after)]
@@ -35,7 +43,7 @@ def compare(before, after, output):
             if step==0:
                 mid = .5*(s[1:]+s[:-1])
                 with (output/"midpoints.csv").open("w") as midfile:
-                    w=csv.writer(midfile)
+                    w=csv.writer(midfile,lineterminator="\n")
                     w.writerow(["distance_m","linear_resistance_Pa","log_resistance_Pa"])
                     tractions=[resistance(age,mid) for age in ((a[:-1,3]+a[1:,3])/2,
                                                                np.sqrt(b[:-1,3]*b[1:,3]))]

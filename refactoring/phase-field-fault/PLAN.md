@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**The revised BP3-QD package is ready for server pilot review.** Log-age interpolation removed the transition ripple in a separate frozen-clock experiment. The ordinary box reproduces the distributed mesh, trial-based slip and age gates protect acceptance, and the native writer follows cumulative slip. [Standalone archive, measured startup sensitivity, MPI/restart controls and commands](results/bp3-revision/README.md). The next scientific check is temporal resolution during branch-native acceleration.
+
 **The branch-native 60° BP3-QD thrust is ready for a server pilot.** Both horizons use the same prescribed mature trace, spatial RSF, free surface and diffuse plate loading. A fresh start and checkpoint continuations passed on the graded box. The next measurements are Stampede3 throughput, event resolution and recovery. The finite incompressible approximation and open convergence checks are listed in the [BP3 startup report](results/bp3-preparation/branch-thrust.md).
 
 **Material unification repairs are ready for focused re-review.** Both public inputs and the historical growth name use the ordinary `PhaseFieldFault` factory. Derived materials explicitly opt into strip mechanics. The [installed checks and pre-refactor checkpoint continuations](results/material-unification/README.md#maintainer-repair-and-replay) cover the geometry, SDK, observer and native history findings.

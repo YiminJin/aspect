@@ -13,7 +13,7 @@ if [[ ! -f "$catalogue" ]]; then
   catalogue="$here/../../refactoring/phase-field-fault/results/bp3-preparation/history_events.py"
 fi
 cp "$catalogue" history_events.py
-cp "$here"/{history.py,check_pilot.py,make_vertices.py,README.md} .
+cp "$here"/{history.py,check_pilot.py,native_frames.py,make_vertices.py,README.md} .
 mkdir plugin-source
 cp "$here"/{CMakeLists.txt,bp3_qd.cc} plugin-source/
 cp "$here"/{bp3.prm,pilot.prm,production.prm,vertices.txt,stampede3.sh} .
@@ -24,7 +24,7 @@ cp plugin-build/libbp3_qd.release.so .
 printf '%s\n' "$solver" > executable.path
 printf '%s\n' "$sdk" > sdk.path
 sha256sum "$solver" "$sdk/AspectConfig.cmake" executable.path sdk.path libbp3_qd.release.so \
-  plugin-source/{bp3_qd.cc,CMakeLists.txt} bp3.prm pilot.prm production.prm vertices.txt stampede3.sh > inputs.sha256
+  plugin-source/{bp3_qd.cc,CMakeLists.txt} bp3.prm pilot.prm production.prm vertices.txt stampede3.sh history_events.py history.py check_pilot.py native_frames.py > inputs.sha256
 export OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 "$solver" --validate pilot.prm > validate-pilot.log
 "$solver" --validate production.prm > validate-production.log

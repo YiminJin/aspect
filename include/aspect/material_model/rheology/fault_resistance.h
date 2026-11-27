@@ -76,15 +76,17 @@ namespace aspect::MaterialModel::Rheology
       {
         return std::numeric_limits<double>::infinity();
       }
-      /** Read-only endpoint age (s) for a positive parent age at fixed signed rate. */
-      virtual double predict_age(double, double, double) const
+      /** Predict the endpoint age in seconds, starting from parent_age (s)
+       * at a constant signed slip rate (m/s) for duration (s). */
+      virtual double predict_age(double /*rate*/, double /*parent_age*/, double /*duration*/) const
       {
         AssertThrow(false, ExcMessage("This resistance law does not supply an aging prediction."));
         return 0.;
       }
-      /** Longest constant-rate interval (s) within a logarithmic age budget.
-       * A law without age imposes no state restriction. */
-      virtual double state_time_limit(double, double, double) const
+      /** Longest interval (s) at the given signed rate (m/s) for which the
+       * absolute change in log age from parent_age (s) fits the dimensionless
+       * budget. A law without age imposes no state restriction. */
+      virtual double state_time_limit(double /*rate*/, double /*parent_age*/, double /*log_budget*/) const
       {
         return std::numeric_limits<double>::infinity();
       }

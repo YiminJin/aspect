@@ -1,5 +1,15 @@
 # Phase-field fault working record
 
+Active assignment: [BP3 package revision](BP3_PACKAGE_REVISION.md), complete for local review. The next measurement needs the branch's first rupture acceleration.
+
+## Revised 60° pilot
+
+Started at `36725f110`. The [isolated experiment](results/bp3-revision/interpolation.md) at `264aedc32` changed only spatial age interpolation. Maximum target-speed midpoint resistance error fell from 4,959.59 Pa to 7.45 × 10⁻⁹ Pa. The [revised package, figures, exact build and replay commands](results/bp3-revision/README.md) qualify the production changes in `64ce7782b`.
+
+The 1- and 2-rank pilots reproduced all 10,722 original mesh cells, initial phase and log-age-only initial rates. The nominal 0/400/900 s run used at most 0.0000625001 Dc and 0.0577659 in absolute log age. Independent slip-only and state-only gates rejected an accelerating 12.5 ms mature trial. Retried stresses and labels matched clean smaller steps. Signed growing strips, a state-free external law, an advected mature trace and nonlinear cutback with no admissible trial also passed.
+
+Native frames were emitted at 0 and 900 s. Same-rank continuation reproduced the fields exactly. The serial-to-two restart differed by at most 4.77 × 10⁻⁷ Pa in native pressure/stress. Station observations were identical with graphics on/off. At 900 s the maximum rate difference between the 0.025 and 0.0125 budget runs was 0.01456 nm/s. The standalone ZIP included the event catalogue, validated both parameter files and ran with its matching Release SDK. Stampede3 submission, rupture accuracy and long-run event timings remain open.
+
 ## Branch-native 60° BP3-QD pilot
 
 Starting worktree `769c50dfc`. The 900 s pilot and 1,500 year production input share the same 40 km thrust, initial data and physics. Fresh one- and two-rank pilots passed all 179 material labels at 0, 400 and 900 s. Maximum rank difference in speed was 5.945 × 10⁻²³ m/s. On each layout a checkpoint-only restart reproduced the 900 s labels exactly. A serial production start and pilot-to-production continuation gave identical clocks, peaks and station histories through 1,525 s. Changing the friction to uniform direct effect failed the startup check by 99.997%. The 80-rank ICX launcher is prepared. No Stampede3 job was submitted. Event timing and spatial/timestep convergence remain open. [Test commands, figure, binary identities and measured limits](results/bp3-preparation/branch-thrust.md) · [Shared physics and launch commands](../../benchmarks/bp3_qd_thrust/README.md).
