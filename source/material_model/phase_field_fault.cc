@@ -53,7 +53,7 @@ namespace aspect
     template <int dim>
     typename PhaseFieldFault<dim>::RatePrediction PhaseFieldFault<dim>::timestep_rates() const
     {
-      RatePrediction rates{strips ? strips->friction() : *friction, {}, {}};
+      RatePrediction rates {strips ? strips->friction() :*friction, {}, {}};
       if (strips)
         {
           // All strips age for the full duration at their signed midpoint rate,
@@ -102,7 +102,8 @@ namespace aspect
       {
         // load() has restored the accepted labels. ASPECT has now restored
         // their mesh and old solution, so a fitted seed must not be fitted again.
-        initialize_accepted_profile();
+        if (!complete_contacts)
+          initialize_accepted_profile();
         trace_initialized = true;
       });
     }
@@ -111,7 +112,7 @@ namespace aspect
     void PhaseFieldFault<dim>::initialize_accepted_profile()
     {
       accepted->profile.initialize(*this, phase_field, this->get_old_solution(),
-                                   degradation_magnitude, interior_seed ? 8 : 1);
+                                   degradation_magnitude, normal_integral_subdivisions, complete_contacts);
     }
 
     template <int dim>
@@ -143,7 +144,7 @@ namespace aspect
       candidate->trace = accepted->trace;
       if (advect_vertices && this->get_timestep() > 0.)
         candidate->trace.advect_with_accepted_velocity(*this, this->get_timestep());
-      candidate->profile.initialize(*this, phase_field, fields, degradation_magnitude, 8);
+      candidate->profile.initialize(*this, phase_field, fields, degradation_magnitude, normal_integral_subdivisions);
     }
 
     template <int dim>
@@ -359,6 +360,19 @@ namespace aspect
                                                  "Leave empty for adiabatic pressure, which supplies the complete "
                                                  "compression.");
 
+          prm.declare_entry("Normal integral subdivisions", "0", Patterns::Integer(0),
+                            "Number of three-point panels on each material segment for projecting the normal integral. "
+                            "Zero selects one for boundary-spanning traces and eight for interior traces.");
+          prm.declare_entry("Normal traction filter length", "0", Patterns::Double(0.),
+                            "Helmholtz length in metres for the resolved normal traction perturbation "
+                            "on a mature boundary-spanning trace. Zero uses the pointwise traction.");
+          prm.declare_entry("Complete prescribed contact profiles", "false", Patterns::Bool(),
+                            "Continue the fixed initial phase outside the box for normalization and extend the "
+                            "endpoint rate into each in-box terminal wedge. Requires a straight, unfitted trace "
+                            "with finite support and an initial phase function valid on the exterior lattice.");
+          prm.declare_entry("Record section tractions", "false", Patterns::Bool(),
+                            "Project accepted shear and normal tractions onto the material vertices for output.");
+
           FaultInputCompatibility::declare_entry(prm, "Minimum speed", "1e-20",
                                                  Patterns::Double(0.),
                                                  "Minimum admissible sliding speed in m/s.");
@@ -522,6 +536,13 @@ namespace aspect
           background_shear = prm.get_double("Background shear traction");
           AssertThrow(!normal_stress.uses_adiabat() || prm.get("Background compression").empty(),
                       ExcMessage("Adiabatic friction supplies the complete pressure; omit Background compression."));
+          normal_integral_subdivisions = prm.get_integer("Normal integral subdivisions");
+          if (normal_integral_subdivisions==0)
+            normal_integral_subdivisions = interior_seed ? 8 : 1;
+          normal_filter_length = prm.get_double("Normal traction filter length");
+          record_section_tractions = prm.get_bool("Record section tractions");
+          AssertThrow(normal_filter_length == 0. || (!normal_stress.uses_adiabat() && !interior_seed),
+                      ExcMessage("Normal traction filtering requires a boundary-spanning resolved-traction fault."));
           background_compression = prm.get("Background compression").empty() ?
                                    5e7 : prm.get_double("Background compression");
           initial_speed = prm.get("Initial slip rate").empty() ?
@@ -572,6 +593,9 @@ namespace aspect
           AssertThrow(degradation_magnitude > 0., ExcMessage("Degradation magnitude must be positive."));
           fit_trace = prm.get_bool("Fit trace to phase");
           prescribed_half_width = prm.get_double("Profile half width");
+          complete_contacts = prm.get_bool("Complete prescribed contact profiles");
+          AssertThrow(!complete_contacts || (!interior_seed && !fit_trace && prescribed_half_width>0.),
+                      ExcMessage("Contact completion requires a fixed boundary-spanning trace and finite support."));
           AssertThrow(!interior_seed || (!fit_trace && (!advect_vertices || inflow_stress)),
                       ExcMessage("Interior mechanics requires a prescribed seed with fitting disabled. "
                                  "Moving its vertices also requires physical stress transport."));
@@ -712,6 +736,17 @@ namespace aspect
         archive << friction->name() << friction->parameters();
       }
       status["Mature fault resistance v1"] = signature.str();
+      if (complete_contacts)
+        {
+          std::ostringstream bytes;
+          {
+            aspect::oarchive archive(bytes);
+            archive << degradation_magnitude << normal_integral_subdivisions << accepted->profile.normal_integrals();
+          }
+          status["Mature completed normal integrals v1"] = bytes.str();
+        }
+      if (normal_filter_length > 0.)
+        status["Mature normal filter length"] = Utilities::to_string(normal_filter_length,17);
       if (normal_stress.uses_adiabat())
         status["Mature friction pressure profile"] = normal_stress.checkpoint_profile(*this);
     }
@@ -771,6 +806,26 @@ namespace aspect
           AssertThrow(parameters == friction->parameters(),
                       ExcMessage("Mature fault resistance parameters differ from the checkpoint."));
         }
+      const auto completed = status.find("Mature completed normal integrals v1");
+      AssertThrow(complete_contacts==(completed!=status.end()),
+                  ExcMessage("Contact completion convention differs from the mature checkpoint."));
+      if (complete_contacts)
+        {
+          double scale;
+          std::vector<double> saved;
+          std::istringstream bytes(completed->second);
+          aspect::iarchive archive(bytes);
+          unsigned int subdivisions;
+          archive >> scale >> subdivisions >> saved;
+          AssertThrow(subdivisions==normal_integral_subdivisions,
+                      ExcMessage("Completed profile station quadrature differs from the checkpoint."));
+          AssertThrow(scale==degradation_magnitude,ExcMessage("Completed profile scale differs from the checkpoint."));
+          accepted->profile.restore_completed_integrals(scale,saved);
+        }
+      const auto filter = status.find("Mature normal filter length");
+      AssertThrow((filter == status.end() && normal_filter_length == 0.) ||
+                  (filter != status.end() && filter->second == Utilities::to_string(normal_filter_length,17)),
+                  ExcMessage("Mature normal traction filter differs from the checkpoint."));
       const auto profile = status.find("Mature friction pressure profile");
       AssertThrow((profile != status.end()) == normal_stress.uses_adiabat() &&
                   (profile == status.end() || profile->second == normal_stress.checkpoint_profile(*this)),

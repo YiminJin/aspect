@@ -79,6 +79,15 @@ namespace aspect
         /** Return accepted ages (s) in material ID order, or an empty vector for a state-free law. */
         const std::vector<double> &label_ages() const;
 
+        /** Accepted consistent Q1 tractions in Pa, ordered by material ID.
+         * The arrays contain raw compression, friction compression, and shear
+         * (including radiation damping). Read-only and noncollective. */
+        const std::array<std::vector<double>,3> &section_tractions() const
+        {
+          require_mature_trace();
+          return coupling->accepted_tractions();
+        }
+
         /** Return the accepted surface Maxwell memory (Pa m) in material ID order. */
         const std::vector<double> &label_memory() const
         {
@@ -265,6 +274,10 @@ namespace aspect
         double viscosity;              // Bulk Maxwell viscosity (Pa s).
         double modulus;                // Elastic shear modulus (Pa).
         double background_shear;       // Uniform fallback for the vertex shear tractions (Pa).
+        unsigned int normal_integral_subdivisions;
+        double normal_filter_length = 0.;
+        bool record_section_tractions = false;
+        bool complete_contacts = false;
         double background_compression; // Additional compression for resolved traction (Pa).
         Rheology::FrictionNormalStress normal_stress;
         double initial_interval;       // Maxwell interval for the initial Stokes solve (s).

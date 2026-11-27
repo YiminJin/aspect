@@ -4,6 +4,7 @@
 */
 #include <aspect/reconstructed_fault/phase_profile.h>
 #include <aspect/geometry_model/box.h>
+#include <aspect/initial_composition/interface.h>
 #include <aspect/phase_field/degradation.h>
 #include <deal.II/fe/fe_values.h>
 
@@ -33,12 +34,18 @@ namespace aspect
                                           const unsigned int phase_field,
                                           const LinearAlgebra::BlockVector &fields,
                                           const double degradation_magnitude,
-                                          const unsigned int station_subdivisions)
+                                          const unsigned int station_subdivisions,
+                                          const bool complete_contacts)
   {
     magnitude = degradation_magnitude;
+    completed_contacts = complete_contacts;
     const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(sim.get_geometry_model());
     const auto upper = box.get_origin()+box.get_extents();
     const auto &labels = geometry.labels();
+    if (completed_contacts)
+      for (unsigned int j=1; j+1<labels.size(); ++j)
+        AssertThrow((geometry.segment(j).tangent-geometry.segment(0).tangent).norm()<1.e-9,
+                    ExcMessage("Prescribed exterior phase completion requires a straight trace."));
     const unsigned int n = labels.size();
     const QIterated<1> stations(QGauss<1>(3),station_subdivisions);
     const QGauss<1> ray(12);
@@ -74,7 +81,13 @@ namespace aspect
           cell->get_dof_indices(indices);
           for (unsigned int i=0; i<phase.size(); ++i)
             phase[i] = fields.block(block)[indices[system.component_to_system_index(component,i)]-fields.get_block_indices().block_start(block)];
-          for (unsigned int j=0; j+1<n; ++j)
+          if (std::all_of(phase.begin(),phase.end(),[](double value)
+          {
+            return value==0.;
+          }))
+          continue;
+          const auto candidates = geometry.candidate_segments(lo,hi);
+          for (unsigned int j=candidates.first; j<candidates.second; ++j)
             for (unsigned int k=0; k<stations.size(); ++k)
               {
                 const auto &segment = geometry.segment(j);
@@ -184,6 +197,54 @@ namespace aspect
           // Both sums consist of nonnegative weights; accumulate the omitted
           // part directly to avoid subtracting nearly equal full rays. An
           // exactly zero ray carries no slip, however small positive m is.
+          if (completed_contacts)
+            {
+              // Complete only the missing exterior part of this ray. The initial
+              // composition supplies its fixed physical continuation, including
+              // the donor's bilinear interpolation on the exterior finest lattice.
+              const auto &segment=geometry.segment(j);
+              const auto center=labels[j].position+stations.point(k)[0]*segment.length*segment.tangent;
+              const double radius=geometry.normal_support_radius(j,stations.point(k)[0]);
+              double lo=-radius, hi=radius;
+              for (unsigned int d=0; d<dim; ++d)
+                if (segment.normal[d]!=0.)
+                  {
+                    const double a=(box.get_origin()[d]-center[d])/segment.normal[d];
+                    const double b=(upper[d]-center[d])/segment.normal[d];
+                    lo=std::max(lo,std::min(a,b));
+                    hi=std::min(hi,std::max(a,b));
+                  }
+              const auto exterior=[&](const double left,const double right)
+              {
+                if (left>=right)
+                  return 0.;
+                std::vector<double> cuts {left,right};
+                for (unsigned int d=0; d<dim; ++d)
+                  if (segment.normal[d]!=0.)
+                    {
+                      const double spacing=std::ldexp(box.get_extents()[d]/box.get_repetitions()[d],
+                                                      -static_cast<int>(sim.get_parameters().initial_global_refinement));
+                      const double x=(center[d]-box.get_origin()[d])/spacing;
+                      const double a=x+left*segment.normal[d]/spacing, b=x+right*segment.normal[d]/spacing;
+                      for (long m=std::ceil(std::min(a,b)); m<std::max(a,b); ++m)
+                        {
+                          const double cut=(m-x)*spacing/segment.normal[d];
+                          if (cut>left && cut<right) cuts.push_back(cut);
+                        }
+                    }
+                std::sort(cuts.begin(),cuts.end());
+                double sum=0.;
+                for (unsigned int c=1; c<cuts.size(); ++c)
+                  for (unsigned int q=0; q<ray.size(); ++q)
+                    {
+                      const double width=cuts[c]-cuts[c-1];
+                      const auto point=center+(cuts[c-1]+width*ray.point(q)[0])*segment.normal;
+                      sum+=width*ray.weight(q)*weight(sim.get_initial_composition_manager().initial_composition(point,phase_field));
+                    }
+                return sum;
+              };
+              rays[index]+=exterior(-radius,lo)+exterior(hi,radius);
+            }
           const double fraction=rays[index]>0. ? omitted[index]/rays[index] : 0.;
           maximum_tail=std::max(maximum_tail,fraction);
           AssertThrow(fraction<=relative_tail_budget,
@@ -212,9 +273,32 @@ namespace aspect
   }
 
   template <int dim>
+  void FaultPhaseProfile<dim>::restore_completed_integrals(double scale,const std::vector<double> &saved)
+  {
+    AssertThrow(saved.size()==geometry.labels().size() &&
+                std::all_of(saved.begin(),saved.end(),[](double v)
+    {
+      return std::isfinite(v) && v>0.;
+    }),
+    ExcMessage("Invalid completed normal integrals in the checkpoint."));
+    magnitude=scale;
+    integrals=saved;
+    completed_contacts=true;
+  }
+
+  template <int dim>
   typename FaultPhaseProfile<dim>::Sample FaultPhaseProfile<dim>::sample(const Point<dim> &x,const double phase) const
   {
-    const auto foot=geometry.project(x);
+    auto foot=geometry.project(x);
+    if (completed_contacts && !foot.active)
+      {
+        const auto &segment=geometry.segment(foot.first_vertex);
+        const auto offset=x-geometry.labels()[foot.first_vertex].position;
+        const double station=offset*segment.tangent;
+        if ((foot.first_vertex==0 && station<=0.) ||
+            (foot.first_vertex+2==geometry.labels().size() && station>=segment.length))
+          foot.active=std::abs(offset*segment.normal)<=geometry.normal_support_radius(foot.first_vertex,foot.xi);
+      }
     const double h=weight(phase);
     if (!foot.active || h == 0.)
       return {foot,0.};

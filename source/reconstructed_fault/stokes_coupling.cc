@@ -284,8 +284,21 @@ namespace aspect
                                  fe.JxW(q),
                                  background_shear + stress*symmetrize(material.active_section().profile.slip_dyad(foot.first_vertex)),
                                  compression,
-                                 material.effective_maxwell_viscosity(fe.quadrature_point(q))
+                                 material.effective_maxwell_viscosity(fe.quadrature_point(q)), compression
                                 });
+              if (material.normal_filter_length>0.)
+                {
+                  const auto &labels=material.active_section().trace.labels();
+                  const auto &a=labels[foot.first_vertex].position;
+                  const auto &b=labels[foot.first_vertex+1].position;
+                  const double station=(x-a)*frame.tangent;
+                  using Side=typename BulkPoint::GradientTrace;
+                  const double tolerance=32.*std::numeric_limits<double>::epsilon()*
+                                         (x.norm()+a.norm()+(x-a).norm()*(1.+(a.norm()+b.norm())/frame.length));
+                  samples.back().gradient_trace = std::abs(station)<=tolerance ? Side::left_vertex :
+                                                  std::abs(station-frame.length)<=tolerance ? Side::right_vertex :
+                                                  station<0. || station>frame.length ? Side::constant_extension : Side::segment;
+                }
             }
         }
     // The extrapolated Picard predictor can open an otherwise closed fault.
@@ -306,7 +319,90 @@ namespace aspect
         this->get_pcout() << "Fault trial requires finite, positive normal compression." << std::endl;
         throw ExcNonlinearSolverNoConvergence();
       }
+    if (material.normal_filter_length > 0.)
+      {
+        const auto coefficients = project_traction(samples,material.normal_filter_length,
+                                                   [&](const BulkPoint &point)
+        {
+          return point.raw_compression-material.background_compression;
+        });
+        bool closed = true;
+        for (auto &point : samples)
+          {
+            point.compression = material.background_compression + point.transfer.rate(coefficients);
+            closed &= point.compression > 0. && std::isfinite(point.compression);
+          }
+        if (!Utilities::MPI::min(static_cast<unsigned int>(closed),this->get_mpi_communicator()))
+          {
+            this->get_pcout() << "Filtered trial requires finite positive compression." << std::endl;
+            throw ExcNonlinearSolverNoConvergence();
+          }
+      }
     return samples;
+  }
+
+  // Solve (M + length² K) p = integral chi N value dA using the same bulk
+  // samples as the friction rows. The absent end flux is homogeneous Neumann.
+  template <int dim>
+  std::vector<double> FaultStokesCoupling<dim>::project_traction(const std::vector<BulkPoint> &points,
+                                                                 const double length,
+                                                                 const std::function<double(const BulkPoint &)> &value) const
+  {
+    const auto &trace = material.active_section().trace;
+    const unsigned int n = trace.labels().size();
+    std::vector<double> diagonal(n), upper(n-1), rhs(n);
+    for (const auto &point : points)
+      {
+        const auto &foot = point.transfer.foot;
+        const unsigned int j = foot.first_vertex;
+        const double w = point.volume*point.transfer.chi;
+        const double N[2] = {1.-foot.xi,foot.xi};
+        const double f = value(point);
+        for (unsigned int i=0; i<2; ++i)
+          {
+            rhs[j+i] += w*N[i]*f;
+            diagonal[j+i] += w*N[i]*N[i];
+          }
+        upper[j] += w*N[0]*N[1];
+        const auto stiffness = [&](const unsigned int k,const double weight)
+        {
+          const double ratio = length/trace.segment(k).length;
+          const double entry = weight*ratio*ratio;
+          diagonal[k] += entry;
+          diagonal[k+1] += entry;
+          upper[k] -= entry;
+        };
+        // At a vertex plane the two one-sided derivatives have equal weight.
+        using Side=typename BulkPoint::GradientTrace;
+        if (point.gradient_trace==Side::left_vertex || point.gradient_trace==Side::right_vertex)
+          {
+            const unsigned int vertex=j+(point.gradient_trace==Side::right_vertex);
+            if (vertex>0) stiffness(vertex-1,.5*w);
+            if (vertex+1<n) stiffness(vertex,.5*w);
+          }
+        else if (point.gradient_trace==Side::segment)
+          stiffness(j,w);
+      }
+    for (auto *row :
+         {
+           &diagonal,&upper,&rhs
+         })
+      Utilities::MPI::sum(*row,this->get_mpi_communicator(),*row);
+    for (unsigned int j=0; j<n; ++j)
+      {
+        AssertThrow(std::isfinite(diagonal[j]) && diagonal[j]>0.,
+                    ExcMessage("Unresolved material station in normal traction projection."));
+        if (j+1<n)
+          {
+            const double ratio = upper[j]/diagonal[j];
+            diagonal[j+1] -= ratio*upper[j];
+            rhs[j+1] -= ratio*rhs[j];
+          }
+      }
+    rhs.back() /= diagonal.back();
+    for (unsigned int j=n-1; j>0; --j)
+      rhs[j-1]=(rhs[j-1]-upper[j-1]*rhs[j])/diagonal[j-1];
+    return rhs;
   }
 
   template <int dim>
@@ -463,6 +559,22 @@ namespace aspect
   void FaultStokesCoupling<dim>::accept_step(LinearAlgebra::BlockVector &solution)
   {
     const double dt = this->get_timestep();
+    if (material.record_section_tractions)
+      {
+        const auto points = sample_bulk(solution);
+        section_tractions[0] = project_traction(points,0.,[](const BulkPoint &p)
+        {
+          return p.raw_compression;
+        });
+        section_tractions[1] = project_traction(points,0.,[](const BulkPoint &p)
+        {
+          return p.compression;
+        });
+        section_tractions[2] = project_traction(points,0.,[&](const BulkPoint &p)
+        {
+          return p.driving_shear-p.stiffness*p.transfer.chi*p.transfer.rate(trial_rates);
+        });
+      }
     if (dt > 0.)
       {
         // Project the complete physical response: localized slip and cut Q1

@@ -141,6 +141,12 @@ namespace aspect
        */
       Projection project(const Point<dim> &point) const;
 
+      /** Half-open range of candidate segments for the normal rays through a
+       * Cartesian cell. Straight traces use ordered station coordinates.
+       * For a curved trace every segment is considered. Local, read-only. */
+      std::pair<unsigned int,unsigned int> candidate_segments(const Point<dim> &lower,
+                                                              const Point<dim> &upper) const;
+
       /**
        * Build a reference-cell quadrature for a Cartesian cell split by a
        * segment or support edge, for the boundary-spanning stress projection
@@ -155,6 +161,8 @@ namespace aspect
       std::vector<Segment> segments;
       std::array<unsigned int,2> contact_face_axes; ///< Box face axes at the first and last contacts.
       double initial_half_width;
+      double tangent_spread; ///< Maximum difference from the first segment's direction.
+
       std::vector<double> arclength;
   };
 }

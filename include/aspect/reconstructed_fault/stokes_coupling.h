@@ -51,6 +51,12 @@ namespace aspect
         double driving_shear; ///< Resolved shear plus persistent background traction (Pa).
         double compression;   ///< Positive normal traction supplied to friction (Pa).
         double stiffness;     ///< Effective Maxwell viscosity at the bulk point (Pa s).
+        double raw_compression = 0.; ///< Before any along-trace filter (Pa).
+        enum class GradientTrace
+        {
+          segment, left_vertex, right_vertex, constant_extension
+        };
+        GradientTrace gradient_trace = GradientTrace::segment;
         void add_balance(double speed,
                          const MaterialModel::Rheology::FaultTraction &resistance,
                          std::vector<double> &rhs,
@@ -58,6 +64,14 @@ namespace aspect
                          std::vector<double> &upper,
                          std::vector<double> &scale) const;
       };
+
+      /** Consistent Q1 projections in Pa from the last accepted solution, in
+       * material ID order: raw compression, friction compression and shear
+       * including radiation damping. Empty unless explicitly requested. */
+      const std::array<std::vector<double>,3> &accepted_tractions() const
+      {
+        return section_tractions;
+      }
 
       /** Collectively sample the supplied iterate against the current attempt's
        * relaxed parent. Every simulator rank participates in the closed-fault
@@ -73,6 +87,10 @@ namespace aspect
       void accept_step(LinearAlgebra::BlockVector &solution);
       // The material owns both the physical parameters and the accepted curve.
       MaterialModel::PhaseFieldFault<dim> &material;
+      std::array<std::vector<double>,3> section_tractions;
+      std::vector<double> project_traction(const std::vector<BulkPoint> &points,
+                                           const double                 length,
+                                           const std::function<double(const BulkPoint &)> &value) const;
       std::vector<double> trial_rates;
       bool rates_converged = false;
       // Interior-seed mechanics uses Q8 cell moments of the complete physical response.

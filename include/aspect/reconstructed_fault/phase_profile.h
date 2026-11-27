@@ -40,7 +40,12 @@ namespace aspect
                       unsigned int phase_field,
                       const LinearAlgebra::BlockVector &fields,
                       double degradation_magnitude,
-                      unsigned int station_subdivisions = 1);
+                      unsigned int station_subdivisions = 1,
+                      bool complete_contacts = false);
+
+      /** Restore the fixed Q1 normal integrals including the exterior phase
+       * at both contacts. The mesh, trace and phase are fixed for this mode. */
+      void restore_completed_integrals(double scale, const std::vector<double> &saved);
       double weight(double phase) const;
       Sample sample(const Point<dim> &x, double phase) const;
       /** Unit slip dyad for a segment: slip_sense times the outer product of
@@ -58,6 +63,7 @@ namespace aspect
       }
 
     private:
+      bool completed_contacts = false;
       double magnitude;
       std::vector<double> integrals;
   };

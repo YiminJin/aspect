@@ -19,6 +19,8 @@ namespace aspect::TimeStepping
       std::pair<Reaction,double> determine_reaction(const TimeStepInfo &info) override;
     private:
       double slip_fraction, log_age_budget;
+      bool report;
+      double material_proposal;
       double retry_duration = std::numeric_limits<double>::max();
   };
 }

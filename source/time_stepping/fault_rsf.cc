@@ -19,6 +19,10 @@ namespace aspect::TimeStepping
     const bool completed = !rates.completed.empty();
     Assert(!completed || rates.completed.size() == rates.parent.size(), ExcInternalError());
     double next = std::numeric_limits<double>::max();
+    double max_slip = 0., max_age = 0.;
+    unsigned int limiting = 0, max_slip_id = 0, max_age_id = 0, retry_id = 0;
+    const char *retry_reason = "none";
+    const char *criterion = "none";
     retry_duration = std::numeric_limits<double>::max();
     for (unsigned int i=0; i<rates.parent.size(); ++i)
       {
@@ -26,9 +30,20 @@ namespace aspect::TimeStepping
         AssertThrow(std::isfinite(rate), ExcMessage("Nonfinite fault rate for timestep selection."));
         const double slip_limit = check_slip && rate != 0. ? slip_fraction*distance/std::abs(rate) :
                                   std::numeric_limits<double>::infinity();
-        next = std::min(next, slip_limit);
+        if (completed && check_slip && dt*std::abs(rate)/distance > max_slip)
+          {
+            max_slip=dt*std::abs(rate)/distance;
+            max_slip_id=i;
+          }
+        if (slip_limit < next)
+          {
+            next=slip_limit;
+            limiting=i;
+            criterion="slip";
+          }
         double parent_limit = slip_limit;
         bool reject = completed && dt > slip_limit;
+        const char *cause = "slip";
         if (check_age)
           {
             const double age = ages[i];
@@ -41,20 +56,69 @@ namespace aspect::TimeStepping
             if (std::abs(change) > log_age_budget + 4.*std::numeric_limits<double>::epsilon())
               {
                 reject = true;
+                cause = parent_limit<dt ? "slip_and_age" : "age";
                 parent_limit = std::min(parent_limit, rates.law.state_time_limit(rate, age, log_age_budget));
               }
-            next = std::min(next, rates.law.state_time_limit(rate, endpoint, log_age_budget));
+            if (std::abs(change)>max_age)
+              {
+                max_age=std::abs(change);
+                max_age_id=i;
+              }
+            const double age_limit=rates.law.state_time_limit(rate,endpoint,log_age_budget);
+            if (age_limit < next)
+              {
+                next=age_limit;
+                limiting=i;
+                criterion="age";
+              }
           }
-        if (reject)
-          retry_duration = std::min(retry_duration, .9*std::min(dt, parent_limit));
+        if (reject && .9*std::min(dt,parent_limit)<retry_duration)
+          {
+            retry_duration=.9*std::min(dt,parent_limit);
+            retry_id=i;
+            retry_reason=cause;
+          }
       }
     AssertThrow(next > 0. && retry_duration > 0., ExcMessage("Fault timestep is below floating point range."));
+    if (report)
+      {
+        std::ostringstream row;
+        row << std::setprecision(17) << "Fault timestep at " << this->get_time() << " s: dt=" << dt
+            << " proposal=" << next << " criterion=" << criterion << " id=" << limiting;
+        if (!material.uses_growing_strips())
+          {
+            const auto &labels=material.labels();
+            double station=0.;
+            for (unsigned int j=0; j<limiting; ++j)
+              station+=labels[j+1].position.distance(labels[j].position);
+            row << " station_m=" << station;
+          }
+        row << " slip_fraction=" << max_slip << " abs_log_age=" << max_age;
+        row << " slip_id=" << max_slip_id << " age_id=" << max_age_id;
+        if (retry_duration<dt)
+          row << " retry_id=" << retry_id << " retry_reason=" << retry_reason << " retry_dt=" << retry_duration;
+        this->get_pcout() << row.str() << std::endl;
+        material_proposal=next;
+      }
     return next;
   }
 
   template <int dim>
   std::pair<Reaction,double> FaultRSF<dim>::determine_reaction(const TimeStepInfo &info)
   {
+    if (report)
+      {
+        const auto &p=this->get_parameters();
+        const double dt=this->get_timestep();
+        const char *reason=(info.reduced_by_termination_plugin ? "termination" :
+                            info.next_time_step_size==material_proposal ? "material" :
+                            this->get_timestep_number()==0 && info.next_time_step_size==p.maximum_first_time_step ? "first" :
+                            dt>0. && info.next_time_step_size==dt+dt*p.maximum_relative_increase_time_step ? "growth" :
+                            info.next_time_step_size==p.maximum_time_step ? "maximum" : "other");
+        std::ostringstream row;
+        row << std::setprecision(17) << "Fault next dt=" << info.next_time_step_size << " limiter=" << reason;
+        this->get_pcout() << row.str() << std::endl;
+      }
     if (retry_duration < this->get_timestep())
       {
         this->get_pcout() << "   Fault slip/state budget exceeded; retry duration " << retry_duration << " s." << std::endl;
@@ -68,6 +132,8 @@ namespace aspect::TimeStepping
   {
     prm.enter_subsection("Time stepping");
     prm.enter_subsection("Fault RSF");
+    prm.declare_entry("Report timestep limits", "false", Patterns::Bool(),
+                      "Print the limiting material station and slip and age increments for each attempt.");
     prm.declare_entry("Maximum slip fraction", "0.1", Patterns::Double(0.),
                       "Maximum absolute slip increment in units of the law's slip distance. Zero disables this limit.");
     prm.declare_entry("Maximum logarithmic state change", "0.1", Patterns::Double(0.),
@@ -81,6 +147,7 @@ namespace aspect::TimeStepping
   {
     prm.enter_subsection("Time stepping");
     prm.enter_subsection("Fault RSF");
+    report = prm.get_bool("Report timestep limits");
     slip_fraction = prm.get_double("Maximum slip fraction");
     log_age_budget = prm.get_double("Maximum logarithmic state change");
     prm.leave_subsection();

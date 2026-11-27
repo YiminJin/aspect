@@ -133,6 +133,7 @@ namespace aspect
       return a[0]*b[1]-a[1]*b[0];
     };
     segments.clear();
+    tangent_spread = 0.;
     arclength = {0.};
     for (unsigned int j=0; j+1<material_labels.size(); ++j)
       {
@@ -170,6 +171,7 @@ namespace aspect
         segment_normal[0] = -segment_tangent[1];
         segment_normal[1] = segment_tangent[0];
         segments.push_back({arclength.back(),length,segment_tangent,segment_normal,outer_product(segment_tangent,segment_normal)});
+        tangent_spread = std::max(tangent_spread,(segment_tangent-segments.front().tangent).norm());
         arclength.push_back(arclength.back()+length);
       }
   }
@@ -401,11 +403,33 @@ namespace aspect
   }
 
   template <int dim>
+  std::pair<unsigned int,unsigned int>
+  MaterialFaultTrace<dim>::candidate_segments(const Point<dim> &lower,const Point<dim> &upper) const
+  {
+    if (tangent_spread>1.e-9)
+      return {0,segments.size()};
+    const auto center=.5*(lower+upper)-material_labels.front().position;
+    const auto &tangent=segments.front().tangent;
+    const auto extent=upper-lower;
+    // Bound the difference between a local tangent coordinate and cumulative
+    // arclength, including roundoff when comparing squared normal distances.
+    double radius=(center.norm()+extent.norm()+arclength.back())*
+                  (2.*tangent_spread+4.*std::sqrt(std::numeric_limits<double>::epsilon()));
+    for (unsigned int d=0; d<dim; ++d)
+      radius+=.5*std::abs(tangent[d])*extent[d];
+    const double station=center*tangent;
+    const auto first=std::lower_bound(arclength.begin()+1,arclength.end()-1,station-radius);
+    const auto last=std::upper_bound(arclength.begin()+1,arclength.end()-1,station+radius);
+    return {first-arclength.begin()-1,last-arclength.begin()};
+  }
+
+  template <int dim>
   typename MaterialFaultTrace<dim>::Projection MaterialFaultTrace<dim>::project(const Point<dim> &point) const
   {
     Projection closest {0,0.,false};
     double best = std::numeric_limits<double>::infinity();
-    for (unsigned int j=0; j<segments.size(); ++j)
+    const auto candidates=candidate_segments(point,point);
+    for (unsigned int j=candidates.first; j<candidates.second; ++j)
       {
         const auto &seg = segments[j];
         const auto offset = point-material_labels[j].position;
@@ -451,7 +475,8 @@ namespace aspect
       return Line {direction[0] *extent[0],direction[1] *extent[1],direction *(lower-origin)};
     };
     std::vector<Line> cuts,normals;
-    for (unsigned int j=0; j<segments.size(); ++j)
+    const auto candidates=candidate_segments(lower,upper);
+    for (unsigned int j=candidates.first; j<candidates.second; ++j)
       {
         const auto station=equation(segments[j].tangent,material_labels[j].position);
         const auto normal_distance=equation(segments[j].normal,material_labels[j].position);
