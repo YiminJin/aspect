@@ -1,0 +1,110 @@
+# Shared physics for the 60-degree right-dipping thrust. Length in m, time in s.
+set Dimension = 2
+set Use years instead of seconds = false
+set Additional shared libraries = ./libbp3_qd.so
+set Output directory = output
+set Resume computation = false
+set Nonlinear solver scheme = no Advection, iterated Stokes
+set Nonlinear solver tolerance = 1e-7
+set Nonlinear solver failure strategy = cut timestep size
+set Max nonlinear iterations = 60
+set Maximum first time step = 400
+set Maximum relative increase in time step = 25
+set Pressure normalization = no
+
+subsection Formulation
+  set Enable elasticity = false
+end
+subsection Geometry model
+  set Model name = BP3 fixed box
+  subsection Box
+    set Box origin X coordinate = -30000
+    set X extent = 80000
+    set Y extent = 34641.016151377546
+    set X repetitions = 40
+    set Y repetitions = 18
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Boundary velocity model
+  # Positive-normal (hanging-wall) side moves up dip. Top has natural zero traction.
+  set Prescribed velocity boundary indicators = left:function, right:function, bottom:function
+  subsection Function
+    set Function constants = vp=1e-9,H=34641.016151377546,w=250
+    set Function expression = -vp/4*tanh((sqrt(3)*x+y-H)/(2*w)); sqrt(3)*vp/4*tanh((sqrt(3)*x+y-H)/(2*w))
+  end
+end
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Discretization
+  set Composition polynomial degree = 2
+  set Use discontinuous composition discretization = true
+end
+subsection Compositional fields
+  set Number of fields = 4
+  set Names of fields = fault_stress_xx, fault_stress_yy, fault_stress_xy, phase_field
+  set Types of fields = stress, stress, stress, generic
+  set Compositional field methods = static
+end
+subsection Initial composition model
+  set List of model names = function
+  subsection Function
+    # Zero perturbation stress. Invert phi*(1+phi)/(1-phi)^2 = 6 sech^2(r/w),
+    # where r is the signed normal distance to the fault's supporting line.
+    set Function constants = H=34641.016151377546,w=250
+    set Function expression = 0; 0; 0; 12/(12+cosh((sqrt(3)*x+y-H)/(2*w))^2+cosh((sqrt(3)*x+y-H)/(2*w))*sqrt(48+cosh((sqrt(3)*x+y-H)/(2*w))^2))
+  end
+end
+subsection Material model
+  set Model name = phase field fault
+  subsection Simple model
+    set Reference density = 2670
+    set Thermal expansion coefficient = 0
+  end
+  subsection Phase field fault
+    set Fault geometry = boundary spanning
+    set Mature slip sense = opposite tangent
+    set Fault vertex file = vertices.txt
+    set Fit trace to phase = false
+    set Profile half width = 2250
+    set Viscosity = 1e26
+    set Shear modulus = 32038120320
+    set Initialization interval = 100
+    set Background compression = 5e7
+    set Background shear traction = 26546122.365133367
+    set Resistance law = BP3 depth dependent RSF
+    set Reference friction coefficient = 0.6
+    set Direct effect = 0.010
+    set Evolution effect = 0.015
+    set Slip distance = 0.008
+    set Reference speed = 1e-6
+    set Radiation damping = 4624440
+    set Initial slip rate = 1e-9
+  end
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-9
+  end
+end
+subsection Time stepping
+  set List of model names = BP3 slip and state
+end
+subsection Termination criteria
+  set Checkpoint on termination = true
+end
+subsection Postprocess
+  set List of postprocessors = BP3 stations, velocity statistics
+end

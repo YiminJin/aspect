@@ -1,5 +1,9 @@
 # Phase-field fault working record
 
+## Branch-native 60° BP3-QD pilot
+
+Starting worktree `769c50dfc`. The 900 s pilot and 1,500 year production input share the same 40 km thrust, initial data and physics. Fresh one- and two-rank pilots passed all 179 material labels at 0, 400 and 900 s. Maximum rank difference in speed was 5.945 × 10⁻²³ m/s. On each layout a checkpoint-only restart reproduced the 900 s labels exactly. A serial production start and pilot-to-production continuation gave identical clocks, peaks and station histories through 1,525 s. Changing the friction to uniform direct effect failed the startup check by 99.997%. The 80-rank ICX launcher is prepared. No Stampede3 job was submitted. Event timing and spatial/timestep convergence remain open. [Test commands, figure, binary identities and measured limits](results/bp3-preparation/branch-thrust.md) · [Shared physics and launch commands](../../benchmarks/bp3_qd_thrust/README.md).
+
 ## Material unification maintainer repairs
 
 Reviewed baseline `754e62c4d`, production and checker repair `82aee1ed3`.

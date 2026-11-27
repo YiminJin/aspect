@@ -1,8 +1,9 @@
 # A restartable 60° BP3 slip-cycle experiment
 
-**The pf-rsf BP3 calculation will start at time zero from branch initial
-conditions.** The [current branch readiness assessment](#branch-readiness-for-a-fresh-start)
-lists the physical and numerical checks needed before preparing a full-size input.
+**Branch-native case now available.** The [60° thrust startup report](branch-thrust.md) covers the installed branch run and its checkpoints. The donor inventory and earlier readiness probes below retain their original source and run identities.
+
+The [earlier branch readiness assessment](#branch-readiness-for-a-fresh-start)
+records the physical and numerical checks identified during the original server inventory.
 
 **Historical donor recovery.** The [donor runbook](server.md) records how to
 replay the eight accepted steps after the 160-rank donor checkpoint at step

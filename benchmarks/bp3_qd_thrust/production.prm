@@ -1,0 +1,9 @@
+include bp3.prm
+# 1,500 Julian years, or continue across allocations from this run's checkpoints.
+set End time = 47336400000
+subsection Checkpointing
+  set Time between checkpoint = 1800
+end
+subsection Termination criteria
+  set Termination criteria = end time, user request
+end

@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**The branch-native 60° BP3-QD thrust is ready for a server pilot.** Both horizons use the same prescribed mature trace, spatial RSF, free surface and diffuse plate loading. A fresh start and checkpoint continuations passed on the graded box. The next measurements are Stampede3 throughput, event resolution and recovery. The finite incompressible approximation and open convergence checks are listed in the [BP3 startup report](results/bp3-preparation/branch-thrust.md).
+
 **Material unification repairs are ready for focused re-review.** Both public inputs and the historical growth name use the ordinary `PhaseFieldFault` factory. Derived materials explicitly opt into strip mechanics. The [installed checks and pre-refactor checkpoint continuations](results/material-unification/README.md#maintainer-repair-and-replay) cover the geometry, SDK, observer and native history findings.
 
 **The curved-fault baseline and replay repair is ready for review before material-model unification.** The [frozen public trajectory and replay controls](results/mature-release/baseline-repair.md) bind the three accepted clocks to physical IDs, native fields and the public output. The station-by-station bend deficit, including its negative-normal contribution, is part of the baseline for the ownership change.
