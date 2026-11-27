@@ -55,7 +55,10 @@ namespace aspect::MaterialModel::Rheology
           auto law = shallow_law;
           law.direct_effect += (0.025-law.direct_effect)*std::clamp((s-15000.)/3000.,0.,1.);
           const auto &ages = ages_in_seconds();
-          return law.resistance(speed, (1.-xi)*ages[segment]+xi*ages[segment+1], compression);
+          // BP3 prescribes a linear transition in log(initial age). Interpolate
+          // the logarithm only for quadrature; nodal history is aged in seconds.
+          const double age = std::exp((1.-xi)*std::log(ages[segment])+xi*std::log(ages[segment+1]));
+          return law.resistance(speed, age, compression);
         }
 
       private:
