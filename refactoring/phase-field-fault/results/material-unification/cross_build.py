@@ -1,7 +1,9 @@
 """Compare complete installed trajectories and resume generation 02 from each old material."""
 import argparse
+import csv
 from pathlib import Path
 import sys
+from tempfile import TemporaryDirectory
 
 import numpy as np
 
@@ -67,10 +69,47 @@ def compare_public(args):
             check_growing_tables(ref, out, step, adiabatic=case != 'control')
 
 
+def check_native_history_corruption(reference, candidate):
+    """Reverse signed creep at 10 ms and erase accumulated creep at 15 ms, one entry per copy."""
+    from check_interface import compare_growing_frames
+
+    for step, column in ((2, 'signed_shear'), (3, 'absolute_shear')):
+        tag = f'{step:04}'
+        # These checkpoints and their continuations were written on one rank.
+        points, = candidate.glob(f'points-{tag}-r*.csv')
+        with points.open() as stream:
+            reader = csv.DictReader(stream)
+            records = list(reader)
+        row = min((r for r in records if float(r[column]) > 0.), key=lambda r: float(r[column]))
+        original = float(row[column])
+        changed = -original if column == 'signed_shear' else 0.
+        if abs(changed - original) >= 1e-12:
+            raise ValueError(f'Step {step}: expected creep below the former absolute tolerance')
+        row[column] = str(changed)
+        with TemporaryDirectory() as tmp:
+            scratch = Path(tmp)
+            with (scratch/points.name).open('w') as stream:
+                writer = csv.DictWriter(stream, reader.fieldnames)
+                writer.writeheader()
+                writer.writerows(records)
+            sections = candidate/f'sections-{tag}.csv'
+            (scratch/sections.name).symlink_to(sections)
+            try:
+                compare_growing_frames(reference, scratch, steps=(step,))
+            except ValueError as exc:
+                key = (row['cell'], int(row['q']))
+                if not str(exc).startswith(f'{column} at {key}:'):
+                    raise
+                print(f'Rejected corrupted step {step}: {exc}')
+            else:
+                raise ValueError(f'Step {step}: accepted a change to {column} from {original} to {changed}')
+
+
 def continue_parents(args):
+    from check_interface import compare_growing_frames
     from check_restart import OBSERVE, check_clocks, run
     from check_public_reference import REFERENCE, compare, csv_rows, public_rows
-    from compare import continuation, rows, compare_values
+    from compare import continuation
 
     args.destination.mkdir()
     curved = args.prefix/'benchmarks/fixed_fault/curved_mature'
@@ -96,11 +135,10 @@ def continue_parents(args):
     if sorted(p.name for p in growing.glob('sections-*.csv')) != ['sections-0002.csv', 'sections-0003.csv']:
         raise ValueError('Expected only 10 and 15 ms publications after resuming the old 5 ms parent')
     continuation(ref, growing, [2, 3])
+    compare_growing_frames(ref, growing, steps=(2, 3))
     for step in (2, 3):
-        old, new = (rows([d/f'sections-{step:04}.csv'], ('section',)) for d in (ref, growing))
-        for col in ('V', 'slip', 'force'):
-            compare_values(old, new, col, 0., 1e-12)
         check_growing_tables(ref, growing, step)
+    check_native_history_corruption(ref, growing)
 
 
 if __name__ == '__main__':

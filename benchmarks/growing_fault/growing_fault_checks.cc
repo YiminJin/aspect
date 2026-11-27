@@ -415,7 +415,8 @@ namespace aspect::MaterialModel
         prm.set("Resistance law","linear dashpot");
         prm.leave_subsection();
         prm.leave_subsection();
-        PhaseFieldFault<dim>::parse_parameters(prm);
+        using StripInputs = typename PhaseFieldFault<dim>::StripInputs;
+        this->parse_fault_parameters(prm, growing ? StripInputs::historical : StripInputs::trace_only);
         AssertThrow(this->uses_growing_strips() == growing,
                     ExcMessage(growing ? "The linear strip resistance selector requires midpoint strip mechanics."
                                : "The linear trace resistance selector requires mature trace mechanics."));

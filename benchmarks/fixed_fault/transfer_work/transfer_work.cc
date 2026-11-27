@@ -88,7 +88,6 @@ namespace aspect
         void parse_parameters(ParameterHandler &prm) override
         {
           PhaseFieldFault<dim>::parse_parameters(prm);
-          AssertThrow(!this->uses_growing_strips(), ExcMessage("This benchmark requires mature trace mechanics."));
           prm.enter_subsection("Material model");
           prm.enter_subsection("Transfer work probe");
           increment = prm.get_double("Middle rate increment");

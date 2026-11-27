@@ -121,11 +121,6 @@ namespace aspect
     {
       public:
         static void declare_parameters(ParameterHandler &) {}
-        void parse_parameters(ParameterHandler &prm) override
-        {
-          PhaseFieldFault<dim>::parse_parameters(prm);
-          AssertThrow(!this->uses_growing_strips(), ExcMessage("The ridge probe requires mature trace mechanics."));
-        }
 
         using PhaseFieldFault<dim>::normal_compression;
         // All ranks in RidgeProbe enter after acceptance and before the next

@@ -45,7 +45,8 @@ namespace aspect::Postprocess
   {
     const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
     AssertThrow(dim == 2 && fault && fault->uses_growing_strips(),
-                ExcMessage("The growing fault history exporter requires the two-dimensional growing fault material."));
+                ExcMessage("The growing fault history exporter requires the two-dimensional phase field fault "
+                           "material with the midpoint fault phase composition method."));
   }
 
   template <int dim>

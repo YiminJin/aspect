@@ -218,19 +218,20 @@ namespace aspect::MaterialModel::FaultInputCompatibility
     prm.enter_subsection(current);
   }
 
-  void resolve(ParameterHandler &prm,const bool growing)
+  void resolve(ParameterHandler &prm,
+               const bool        growing,
+               const bool        historical_strip_inputs)
   {
     const auto state=inputs(prm);
     const auto &active=growing?strips:trace;
     prm.enter_subsection("Material model");
-    const bool historical_growth = growing && prm.get("Model name")!="phase field fault";
 
     for (auto &[path,entry]:state->entries)
       {
         // Simple viscosity never entered the Maxwell law of the historical
         // growing material. The public material accepts it as a viscosity alias.
         auto values=entry.supplied;
-        if (historical_growth)
+        if (growing && historical_strip_inputs)
           values.erase(simple);
         if (values.empty())
           continue;

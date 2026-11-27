@@ -17,9 +17,10 @@ def material(route, values):
     return subsection('Material model', subsection(route,values))
 
 
-def compare_growing_frames(reference, target, with_age=True):
-    """Check both native frames and return the 5 ms maximum differences by quantity."""
-    for tag in ('0000', '0001'):
+def compare_growing_frames(reference, target, with_age=True, steps=(0, 1)):
+    """Compare native and strip history at each requested step and return the last step's errors."""
+    for step in steps:
+        tag = f'{step:04}'
         errors = {}
         a, b = (rows(d.glob(f'points-{tag}-r*.csv'), ('cell', 'q')) for d in (reference, target))
         if a.keys() != b.keys() or any(a[k]['section'] != b[k]['section'] for k in a):
@@ -93,6 +94,13 @@ def main():
     legacy=run('legacy-growth',(growing/'adiabatic_pressure.prm').read_text(),extra_files=inputs[:1])
     compare_growing_frames(seed,legacy)
     print('Canonical one-field and legacy four-field accepted native stress and strips match',flush=True)
+    topography = subsection('Geometry model', subsection('Initial topography model',
+        'set Model name = function\n' + subsection('Function',
+        'set Function expression = 0.02\nset Maximum topography value = 0.02')))
+    rejected = run('raised-top', example, topography,
+                   expected='Set Geometry model / Initial topography model / Model name = zero topography')
+    if any(rejected.glob('points-*.csv')) or any(rejected.glob('sections-*.csv')):
+        raise ValueError('The growing material published a frame before rejecting initial topography')
 
     common=(fixed/'mature_trace.prm').read_text()
     data=(fixed/'mature_vertices.txt').read_text()
@@ -160,7 +168,8 @@ def main():
               +fault('set Background shear traction = 17\nset Fault vertex file = '+str(file)),plugin=True)
     labels_equal(alias,result)
     alias=run('legacy-dashpot-strip','include adiabatic_pressure.prm\n'+
-              subsection('Material model','set Model name = linear strip resistance'),extra_files=inputs,plugin=True)
+              subsection('Material model','set Model name = linear strip resistance')
+              + material('Simple model', 'set Viscosity = 1e6'), extra_files=inputs, plugin=True)
     explicit=run('dashpot-strip',example,fault('set Resistance law = linear dashpot'),inputs,plugin=True)
     if (alias/'sections-0001.csv').read_bytes()!=(explicit/'sections-0001.csv').read_bytes():
         raise ValueError('Legacy dashpot strip selector changed the law')
@@ -189,7 +198,8 @@ def main():
         fault('set Resistance law = rate and state'),inputs,'Legacy dashpot selector conflicts',plugin=True)
 
     run('wrong-statistics',example,subsection('Postprocess','set List of postprocessors = mature fault statistics'),inputs,'require a mature material trace')
-    run('wrong-history',homogeneous,subsection('Postprocess','set List of postprocessors = growing fault history'),expected='requires the two-dimensional growing fault material')
+    run('wrong-history',homogeneous,subsection('Postprocess','set List of postprocessors = growing fault history'),
+        expected='requires the two-dimensional phase field fault material with the midpoint fault phase composition method')
     run('route-conflict',example,fault('set Fault geometry = fixed interior'),inputs,'requires mature trace mechanics')
 
     # Both checkpoint writers use the same field names, degrees and Bernstein

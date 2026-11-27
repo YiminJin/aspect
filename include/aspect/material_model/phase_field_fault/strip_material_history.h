@@ -115,12 +115,19 @@ namespace aspect::GrowingFault
       /** Read the checkpoint metadata. The mesh-restoration callback rebinds the native points. */
       void load(const std::map<std::string,std::string> &status);
 
+      /** Read the accepted endpoint once the native rules have been built. */
       const History &history() const
       {
+        require_native_history();
         return accepted;
       }
+      /**
+       * Read the fixed material rules built in the first midpoint attempt or
+       * in the checkpoint mesh-restoration callback. Local, including on MPI.
+       */
       const MaterialSections &sections() const
       {
+        require_native_history();
         return *geometry;
       }
       /** False at initialization and for legacy checkpoints without work data. */
@@ -152,6 +159,12 @@ namespace aspect::GrowingFault
         return seed_tip_position;
       }
     private:
+      void require_native_history() const
+      {
+        AssertThrow(geometry, ExcMessage("Growing strip rules and history are available after the first midpoint "
+                                         "attempt begins or after checkpoint mesh restoration."));
+      }
+
       /** The owning material supplies the fixed mesh, reference pressure and MPI communicator. */
       const SimulatorAccess<dim> &simulator;
 

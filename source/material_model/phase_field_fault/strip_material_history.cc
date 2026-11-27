@@ -168,6 +168,7 @@ namespace aspect::GrowingFault
   template <int dim>
   SectionPressures StripMaterialHistory<dim>::section_pressures() const
   {
+    require_native_history();
     SectionPressures result;
     result.values.assign(accepted.sections.size(), prescribed_compression);
     if constexpr (dim == 2)

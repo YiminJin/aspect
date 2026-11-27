@@ -60,6 +60,21 @@ set Names of fields = phase_field, companion
 set Types of fields = phase field, phase field
 set Compositional field methods = {methods}
 end\n"""
+    registration = "\nsubsection Material model\n set Model name = SDK trace viscosity\nend\n"
+    output = run("sdk-trace-with-midpoint", seed+registration, plugin=True,
+                 error=("SDK trace viscosity selector requires mature trace mechanics",))
+    if list(output.glob("sections-*.csv")):
+        raise ValueError("The trace-only extension published a strip frame")
+
+    # At fixed geometry and loading the trace override must still change the
+    # accepted section response just as a 20 Pa s ordinary trace would.
+    trace_control = run("trace-viscosity-control", trace+material("Simple model", "set Viscosity = 20"))
+    trace_extension = run("sdk-trace-viscosity", trace+registration, plugin=True)
+    labels = sorted(trace_control.glob("fault-labels-*.txt"))
+    if len(labels) != 3 or any((trace_extension/f.name).read_bytes() != f.read_bytes() for f in labels):
+        raise ValueError("The trace viscosity override changed the 20 Pa s control")
+    print("20 Pa s SDK trace override matched the ordinary trace at all three clocks")
+
     run("wrong-material", seed+"subsection Material model\nset Model name = simple\nend\n",
         error=("Midpoint fault phase requires a material providing the Maxwell/AT1 midpoint response",))
     run("wrong-phase", seed+two_fields.format(methods=f"static, {midpoint}"),
@@ -125,8 +140,8 @@ def main():
     check_material_properties(growing, run)
     check_formulation_admission(growing, run)
 
-    def check_stress(name, settings, eta, reference, modulus=1e6):
-        output = run(name, base+settings)
+    def check_stress(name, settings, eta, reference, modulus=1e6, plugin=False):
+        output = run(name, base+settings, plugin=plugin)
         with (output/"points-0001-r0.csv").open() as stream:
             stress, = [float(r["tauxy"]) for r in csv.DictReader(stream) if (r["cell"], r["q"]) == ("0_0:", "0")]
         with (output/"balance-0001.csv").open() as stream:
@@ -156,7 +171,11 @@ def main():
         if count != 1:
             raise ValueError(f"Expected one historical {key}")
     check_stress("public-omitted", public_name, 1e8, 75.978862635792)
-    check_stress("public-simple", public_name+irrelevant, 1e6, 75.791283897615)
+    simple_reference = check_stress("public-simple", public_name+irrelevant, 1e6, 75.791283897615)
+    sdk_name = "\nsubsection Material model\n set Model name = SDK strip material\nend\n"
+    if check_stress("sdk-strip-simple", sdk_name+irrelevant, 1e6, 75.791283897615,
+                    plugin=True) != simple_reference:
+        raise ValueError("Explicitly admitted strip extension lost the Simple viscosity alias")
 
     check_stress("public-modulus", public_name+material(public, "set Shear modulus = 2e6"),
                  1e8, 151.954052677598, modulus=2e6)

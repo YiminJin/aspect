@@ -46,7 +46,11 @@ namespace aspect
           return strips != nullptr;
         }
 
-        /** Read the active strip material and its accepted native history. */
+        /**
+         * Read the strip material after parameter parsing. Its mesh-dependent
+         * rules and history are available from the first midpoint attempt on
+         * a fresh run, or after mesh restoration on a resumed run.
+         */
         const GrowingFault::StripMaterialHistory<dim> &strip_history() const;
 
         static void declare_parameters(ParameterHandler &prm);
@@ -91,29 +95,56 @@ namespace aspect
                         double phase,
                         const SymmetricTensor<2,dim> &strain_rate) const;
 
+        /**
+         * Return the mature material's bulk Maxwell viscosity (Pa s) at the
+         * given physical position. Requires a parsed prescribed-trace material.
+         */
+        virtual double bulk_viscosity(const Point<dim> &) const
+        {
+          require_mature_trace();
+          return viscosity;
+        }
+
         void save(std::map<std::string,std::string> &status) const override;
         void load(const std::map<std::string,std::string> &status) override;
 
       protected:
+        /** Which strip input convention a material registration supports. */
+        enum class StripInputs
+        {
+          trace_only, //!< An extension of mature trace mechanics, including a spatial viscosity override.
+          current,    //!< The midpoint solver uses the configured homogeneous strip Maxwell response.
+          historical  //!< Same strip mechanics, with the original growing input's ignored Simple viscosity.
+        };
+
+        /**
+         * Parse the selected phase and configure its mechanics. A derived material
+         * that implements the strip contract calls this from its parameter reader
+         * with the input convention it supports. The inherited parameter reader
+         * treats an independently registered material as a mature trace extension.
+         */
+        void parse_fault_parameters(ParameterHandler &prm, StripInputs strip_inputs);
+
         /**
          * Return positive-in-compression normal stress (Pa) for friction.
          * The adiabatic pressure is evaluated at the physical foot on the
          * trace. Resolved traction uses the bulk pressure and the normal
          * component of deviatoric stress at the section quadrature point.
+         * Requires a parsed prescribed-trace material.
          */
         double normal_compression(const Point<dim> &trace_position,
                                   double            pressure,
                                   double            normal_deviatoric_stress) const;
 
-        /** Return the Eulerian Maxwell viscosity (Pa s) at the constitutive point. */
-        virtual double bulk_viscosity(const Point<dim> &) const
-        {
-          return viscosity;
-        }
-
-        /** Return the exterior parent stress (xx, yy, xy in Pa) evaluated at SSPRK stage time (s). */
+        /**
+         * Supply the mature exterior parent stress (xx, yy, xy in Pa).
+         * Called with Advect physical stress enabled. The transport solver
+         * sets the function time (s) before evaluating each SSPRK stage.
+         */
         virtual Function<dim> &exterior_stress()
         {
+          require_mature_trace();
+          AssertThrow(inflow_stress, ExcMessage("Exterior parent stress requires Advect physical stress = true."));
           return *inflow_stress;
         }
 

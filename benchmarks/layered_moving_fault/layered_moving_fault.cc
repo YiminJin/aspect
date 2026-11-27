@@ -233,7 +233,6 @@ namespace aspect
         void parse_parameters(ParameterHandler &prm) override
         {
           PhaseFieldFault<dim>::parse_parameters(prm);
-          AssertThrow(!this->uses_growing_strips(), ExcMessage("This benchmark requires mature trace mechanics."));
           prm.enter_subsection("Material model");
           prm.enter_subsection("Layered mature fault");
           homogeneous=prm.get_bool("Homogeneous");
@@ -310,22 +309,26 @@ namespace aspect
         std::pair<std::string,std::string> execute(TableHandler &) override
         {
           const auto &material=Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
-          const auto layered=dynamic_cast<const MaterialModel::LayeredFault<dim>*>(&material);
-          const auto viscosity=[&](const Point<dim> &x)
-          {
-            return layered ? layered->bulk_viscosity(x) : 10.;
-          };
+          const auto &labels=material.labels();
+          const auto &ages=material.label_ages();
+          AssertThrow(ages.empty() || ages.size()==labels.size(),
+                      ExcMessage("Moving fault samples requires one age per material label for a history-dependent law."));
           const auto stem=this->get_output_directory()+"material-"+std::to_string(this->get_timestep_number());
           const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
           std::ofstream surface(stem+"-surface-"+std::to_string(rank)+".csv");
-          surface<<std::setprecision(17)<<"i,x,y,Theta_s,Z_Pa_m,I_m,V_m_s,width_m,eta,slip\n";
-          const auto &labels=material.labels();
+          surface<<std::setprecision(17)<<"i,x,y";
+          if (!ages.empty())
+            surface<<",Theta_s";
+          surface<<",Z_Pa_m,I_m,V_m_s,width_m,eta,slip\n";
           for (unsigned int i=0; i<labels.size(); ++i)
             {
               const auto &p=labels[i];
-              surface<<i<<','<<p.position[0]<<','<<p.position[1]<<','<<material.label_ages().at(i)<<','<<material.label_memory().at(i)<<','
+              surface<<i<<','<<p.position[0]<<','<<p.position[1];
+              if (!ages.empty())
+                surface<<','<<ages.at(i);
+              surface<<','<<material.label_memory().at(i)<<','
                      <<material.phase_profile().normal_integrals()[i]<<','<<p.rate<<','<<p.half_width<<','
-                     <<viscosity(p.position)<<','<<p.slip<<'\n';
+                     <<material.bulk_viscosity(p.position)<<','<<p.slip<<'\n';
             }
           std::ofstream fields(stem+"-rank"+std::to_string(rank)+".csv");
           fields<<std::setprecision(17)<<"cell,x,y,q,phi,vx,vy,tauxx,tauyy,tauxy,Lxx,Lxy,Lyx,Lyy,eta,pressure,chi,station,offset_xx,offset_yy,offset_xy\n";
@@ -360,15 +363,13 @@ namespace aspect
                     const auto &x=fe.quadrature_point(q);
                     const auto transfer=material.phase_profile().sample(x,composition[3][q]);
                     const auto &seg=material.phase_profile().geometry.segment(transfer.foot.first_vertex);
-                    const double eta=viscosity(x);
-                    const double dt=this->get_timestep_number() ? this->get_timestep() : .1;
-                    const double k=-eta*std::expm1(-10.*dt/eta);
-                    const auto offset=material.endpoint_stress(cell,x,composition[3][q],symmetrize(grad[q]))-
-                                      2.*k*Utilities::Tensors::consistent_deviator(symmetrize(grad[q]));
+                    // At zero strain rate the endpoint law returns just the additive
+                    // stress from the parent and slip (Pa), before DG projection.
+                    const auto offset=material.endpoint_stress(cell,x,composition[3][q],SymmetricTensor<2,dim>());
                     fields<<cell->id()<<','<<x[0]<<','<<x[1]<<','<<q<<','<<composition[3][q]<<','<<velocity[q][0]<<','<<velocity[q][1];
                     for (unsigned int c=0; c<3; ++c) fields<<','<<composition[c][q];
                     fields<<','<<grad[q][0][0]<<','<<grad[q][0][1]<<','<<grad[q][1][0]<<','<<grad[q][1][1]
-                          <<','<<eta<<','<<pressure[q]<<','<<transfer.chi<<','<<seg.station+transfer.foot.xi *seg.length
+                          <<','<<material.bulk_viscosity(x)<<','<<pressure[q]<<','<<transfer.chi<<','<<seg.station+transfer.foot.xi *seg.length
                           <<','<<offset[0][0]<<','<<offset[1][1]<<','<<offset[0][1]<<'\n';
                   }
               }

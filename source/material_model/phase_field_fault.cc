@@ -127,6 +127,7 @@ namespace aspect
                                                     const double      pressure,
                                                     const double      normal_deviatoric_stress) const
     {
+      require_mature_trace();
       if (normal_stress.uses_adiabat())
         return this->get_adiabatic_conditions().pressure(trace_position);
       return background_compression + pressure - normal_deviatoric_stress;
@@ -359,6 +360,19 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::parse_parameters(ParameterHandler &prm)
     {
+      const auto name = prm.get({"Material model"}, "Model name");
+      if (name == "phase field fault")
+        parse_fault_parameters(prm, StripInputs::current);
+      else if (name == "growing fault")
+        parse_fault_parameters(prm, StripInputs::historical);
+      else
+        parse_fault_parameters(prm, StripInputs::trace_only);
+    }
+
+    template <int dim>
+    void PhaseFieldFault<dim>::parse_fault_parameters(ParameterHandler  &prm,
+                                                      const StripInputs strip_inputs)
+    {
       using AdvectionMethod = typename Parameters<dim>::AdvectionFieldMethod;
       const auto &parameters = this->get_parameters();
       const auto &methods = parameters.compositional_field_methods;
@@ -377,7 +391,17 @@ namespace aspect
       AssertThrow(&this->get_material_model() == this,
                   ExcMessage("Phase field fault must be the top-level material model so Stokes and "
                              "the fault use the same Maxwell coefficient."));
-      FaultInputCompatibility::resolve(prm, growing);
+      AssertThrow(!growing || strip_inputs != StripInputs::trace_only,
+                  ExcMessage("The " + prm.get({"Material model"}, "Model name") +
+                             " selector requires mature trace mechanics. Its material registration "
+                             "does not support midpoint strip mechanics."));
+      FaultInputCompatibility::resolve(prm, growing, strip_inputs == StripInputs::historical);
+      // Trace normalization and the pressure stations on the growing graph
+      // both use the faces of the undeformed box.
+      AssertThrow(Plugins::plugin_type_matches<InitialTopographyModel::ZeroTopography<dim>>(
+                    this->get_initial_topography_model()),
+                  ExcMessage("The fault material requires the zero initial topography model. "
+                             "Set Geometry model / Initial topography model / Model name = zero topography."));
       this->model_dependence.viscosity = NonlinearDependence::none;
       this->model_dependence.density = growing ? NonlinearDependence::none : NonlinearDependence::temperature;
       this->model_dependence.compressibility = NonlinearDependence::none;
@@ -482,10 +506,6 @@ namespace aspect
           minimum_speed = prm.get_double("Minimum speed");
 
           const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
-          AssertThrow(Plugins::plugin_type_matches<InitialTopographyModel::ZeroTopography<dim>>(
-                        this->get_initial_topography_model()),
-                      ExcMessage("The fault material requires the zero initial topography model "
-                                 "because its normalization uses the rectangular box width."));
 
           prescribed_vertices.clear();
           for (const auto &entry : Utilities::split_string_list(prm.get("Fault vertices"), ';'))

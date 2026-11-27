@@ -31,7 +31,10 @@ namespace aspect::MaterialModel::FaultInputCompatibility
   void observe_external_coefficients(dealii::ParameterHandler &prm);
 
   /** Resolve explicit inputs for the active fault before reading material or
-   * law parameters. Omitted entries retain that route's declared defaults. */
-  void resolve(dealii::ParameterHandler &prm, bool growing);
+   * law parameters. Omitted entries retain that route's declared defaults.
+   * Historical strip registrations ignore Simple viscosity. */
+  void resolve(dealii::ParameterHandler &prm,
+               bool                      growing,
+               bool                      historical_strip_inputs);
 }
 #endif

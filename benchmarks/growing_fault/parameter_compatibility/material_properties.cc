@@ -1,9 +1,52 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/phase_field_fault/strip_material_history.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/simulator_access.h>
 
 #include <iomanip>
+
+namespace aspect::MaterialModel
+{
+  // A separately registered trace material overrides only the physical
+  // viscosity. Its inherited parser must not select homogeneous strip rheology.
+  template <int dim>
+  class TraceViscosity : public PhaseFieldFault<dim>
+  {
+    public:
+      double bulk_viscosity(const Point<dim> &) const override
+      {
+        return 20.;
+      }
+  };
+
+  // A new strip registration requests the current public viscosity convention.
+  template <int dim>
+  class StripExtension : public PhaseFieldFault<dim>
+  {
+    public:
+      void parse_parameters(ParameterHandler &prm) override
+      {
+        this->parse_fault_parameters(prm, PhaseFieldFault<dim>::StripInputs::current);
+      }
+  };
+
+  namespace
+  {
+    template <int dim>
+    void register_test_materials()
+    {
+      using aspect::internal::Plugins::RegisterHelper;
+      const auto no_parameters = [](ParameterHandler &) {};
+      register_material_model<dim>("SDK trace viscosity", "Trace extension with a 20 Pa s viscosity.",
+                                   no_parameters, &RegisterHelper<Interface<dim>, TraceViscosity<dim>>::factory);
+      register_material_model<dim>("SDK strip material", "Extension supporting homogeneous strip rheology.",
+                                   no_parameters, &RegisterHelper<Interface<dim>, StripExtension<dim>>::factory);
+    }
+
+    const auto registered = (register_test_materials<2>(), register_test_materials<3>(), true);
+  }
+}
 
 namespace aspect::Postprocess
 {
@@ -13,6 +56,28 @@ namespace aspect::Postprocess
   class FaultMaterialProperties : public Interface<dim>, public SimulatorAccess<dim>
   {
     public:
+      void initialize() override
+      {
+        const auto &model = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> &>(this->get_material_model());
+        if (model.uses_growing_strips())
+          {
+            // This observer starts before either the fresh native rules or
+            // a restored mesh is available. Exercise the public SDK call here.
+            try
+              {
+                const auto &rules = model.strip_history().sections();
+                AssertThrow(rules.edges.empty(), ExcMessage("Strip rules already have edges during observer initialization."));
+              }
+            catch (const ExceptionBase &exception)
+              {
+                if (std::string(exception.what()).find("Growing strip rules and history are available after") != std::string::npos)
+                  return;
+                throw;
+              }
+            AssertThrow(false, ExcMessage("Strip rules were exposed before the mesh was ready."));
+          }
+      }
+
       std::pair<std::string, std::string> execute(TableHandler &) override
       {
         const auto &model = this->get_material_model();
