@@ -1,0 +1,36 @@
+fixed-first versus age02 accepted clocks (s) [0.0, 400.0, 900.0, 1525.0, 1600.0] [0.0, 400.0, 900.0, 1525.0, 1600.0]
+clock 0.0 maximum absolute difference and distance in metres
+rate_m_s 0 0
+age_s 0 0
+slip_m 0 0
+raw_compression_Pa 0 0
+friction_compression_Pa 0 0
+shear_Pa 0 0
+clock 400.0 maximum absolute difference and distance in metres
+rate_m_s 0 0
+age_s 0 0
+slip_m 0 0
+raw_compression_Pa 0 0
+friction_compression_Pa 0 0
+shear_Pa 0 0
+clock 900.0 maximum absolute difference and distance in metres
+rate_m_s 0 0
+age_s 0 0
+slip_m 0 0
+raw_compression_Pa 0 0
+friction_compression_Pa 0 0
+shear_Pa 0 0
+clock 1525.0 maximum absolute difference and distance in metres
+rate_m_s 0 0
+age_s 0 0
+slip_m 0 0
+raw_compression_Pa 0 0
+friction_compression_Pa 0 0
+shear_Pa 0 0
+clock 1600.0 maximum absolute difference and distance in metres
+rate_m_s 0 0
+age_s 0 0
+slip_m 0 0
+raw_compression_Pa 0 0
+friction_compression_Pa 0 0
+shear_Pa 0 0

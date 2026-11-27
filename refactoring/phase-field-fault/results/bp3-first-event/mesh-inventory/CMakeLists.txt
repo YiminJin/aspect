@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect 3.1 REQUIRED)
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(bp3_mesh_inventory)
+add_library(mesh_inventory SHARED inventory.cc)
+ASPECT_SETUP_PLUGIN(mesh_inventory)

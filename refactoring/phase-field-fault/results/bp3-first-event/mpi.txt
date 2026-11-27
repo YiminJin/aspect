@@ -1,0 +1,26 @@
+3 accepted frames, 57932 native patches/frame; maximum absolute differences
+id 0
+s_m 0
+x_m 0
+y_m 0
+rate_m_s 2.15588083e-20
+age_s 2.36468622e-11
+slip_m 2.33200876e-17
+shear_Pa 6.82845712e-06
+raw_compression_Pa 1.44317746e-05
+friction_compression_Pa 7.35372305e-06
+normal_integral_m 7.27595761e-12
+native_phase_field 0
+native_velocity 2.77555756e-17
+native_p 6.15119934e-05
+native_fault_tau_xx 2.92882323e-05
+native_fault_tau_yy 2.81333923e-05
+native_fault_tau_xy 3.43322754e-05
+native tolerance exceeded (758.028500519, 'p', 534, [572.265625, 5.859375, 574.21875, 7.8125], np.float64(1.2570993900299072), np.float64(1.2570642232894897))
+native tolerance exceeded (758.028500519, 'fault_tau_xx', 40, [-44.921875, 998.046875, -42.96875, 1000.0], np.float64(-0.06872442364692688), np.float64(-0.06869513541460037))
+native tolerance exceeded (758.028500519, 'fault_tau_yy', 124, [576.171875, 21.484375, 578.125, 23.4375], np.float64(-6.150712013244629), np.float64(-6.1507391929626465))
+native tolerance exceeded (758.028500519, 'fault_tau_xy', 69, [-46.875, 998.046875, -44.921875, 1000.0], np.float64(-0.01844950206577778), np.float64(-0.01848367229104042))
+native tolerance exceeded (1600.0, 'p', 162, [13.671875, 998.046875, 15.625, 1000.0], np.float64(3.7587709426879883), np.float64(3.7588324546813965))
+native tolerance exceeded (1600.0, 'fault_tau_xx', 19, [-5.859375, 998.046875, -3.90625, 1000.0], np.float64(37.320770263671875), np.float64(37.320743560791016))
+native tolerance exceeded (1600.0, 'fault_tau_yy', 39, [15.625, 998.046875, 17.578125, 1000.0], np.float64(3.4020066261291504), np.float64(3.4020347595214844))
+native tolerance exceeded (1600.0, 'fault_tau_xy', 7, [-1.953125, 998.046875, 0.0, 1000.0], np.float64(18.300281524658203), np.float64(18.300247192382812))

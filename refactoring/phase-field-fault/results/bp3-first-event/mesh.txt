@@ -1,0 +1,12 @@
+Physical support cells 319324, protected face cells 5004, invalid footprint cells 0, area 7.5e+09 m2
+Historical mesh level 0 cells 0
+Historical mesh level 1 cells 6958
+Historical mesh level 2 cells 1078
+Historical mesh level 3 cells 2146
+Historical mesh level 4 cells 4340
+Historical mesh level 5 cells 8762
+Historical mesh level 6 cells 17622
+Historical mesh level 7 cells 35335
+Historical mesh level 8 cells 70767
+Historical mesh level 9 cells 405076
+Historical mesh total 552084

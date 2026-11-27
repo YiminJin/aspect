@@ -1,0 +1,31 @@
+Test project /home/ein/repository/aspect-pf-rsf/build-6b/release
+    Start  1: unit_tests
+1/4 Test  #1: unit_tests .......................   Passed    3.05 sec
+    Start  8: growing_fault
+2/4 Test  #8: growing_fault ....................   Passed   26.63 sec
+    Start  9: layered_fault_traction_step
+3/4 Test  #9: layered_fault_traction_step ......   Passed   14.56 sec
+    Start 10: layered_moving_fault
+4/4 Test #10: layered_moving_fault .............   Passed    6.20 sec
+
+100% tests passed out of 4
+
+Total Test time (real) =  50.44 sec
+
+
+---------------------------------------------------------------
+Completed running the minimal testsuite. Please check the test
+results above. If any test failed, run
+    ctest -V
+to get detailed error messages. Contact the ASPECT forum
+with that information if you need help.
+
+To run the complete testsuite, reconfigure your project with
+the option ASPECT_RUN_ALL_TESTS=ON or by running
+    make setup_tests
+Be aware that installing the 'numdiff' tools is strongly
+recommended before running the full testsuite. Even then, the
+output is likely different on your machine due to configuration
+differences, so do not expect all tests to succeed on your
+machine.
+---------------------------------------------------------------

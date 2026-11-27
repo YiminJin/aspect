@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**The revised BP3-QD package is ready for server pilot review.** Log-age interpolation removed the transition ripple in a separate frozen-clock experiment. The ordinary box reproduces the distributed mesh, trial-based slip and age gates protect acceptance, and the native writer follows cumulative slip. [Standalone archive, measured startup sensitivity, MPI/restart controls and commands](results/bp3-revision/README.md). The next scientific check is temporal resolution during branch-native acceleration.
+**The historical BP3 first-event case is ready for bounded server qualification.** Start the full 150 × 50 km configuration from initial conditions, checkpoint it, resume through step 3, and review both contact tractions and the all-station timestep restrictions before first-event continuation. The 900 s pilot remains a separate regression. [Assignment](BP3_HISTORICAL_FIRST_EVENT_TASK.md) · [measurements and limits](results/bp3-first-event/README.md) · [Stampede3 commands](../../benchmarks/bp3_qd_thrust/README.md).
 
 **The branch-native 60° BP3-QD thrust is ready for a server pilot.** Both horizons use the same prescribed mature trace, spatial RSF, free surface and diffuse plate loading. A fresh start and checkpoint continuations passed on the graded box. The next measurements are Stampede3 throughput, event resolution and recovery. The finite incompressible approximation and open convergence checks are listed in the [BP3 startup report](results/bp3-preparation/branch-thrust.md).
 

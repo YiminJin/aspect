@@ -1,0 +1,18 @@
+build-historical-first/intermediate-clean: h=31.25 m, 41226 cells, 5679578 bytes/frame, radius=39.529164020 m, full integral=108.652564438 m
+FE phase L_inf 4.351142057767987e-08 wall ux,uy errors (m/s) [np.float64(9.611181988158603e-18), np.float64(7.1301874338723e-18)]
+time-zero native max abs velocity, p, tau_xx/yy/xy [np.float64(4.5883039034855244e-10), np.float64(27.922060012817383), np.float64(0.0), np.float64(0.0), np.float64(0.0)]
+initial midpoint forward resistance max error (Pa) 1.1175870895385742e-08
+s=0.000000 m: V=9.99988843578e-10 m/s, shear/raw/filtered Pa 26546116.781190515 49999999.72282726 49999999.98926328
+s=15000.000000 m: V=9.99989916462e-10 m/s, shear/raw/filtered Pa 26546118.285144415 50000001.85779478 50000001.81253385
+s=16500.000000 m: V=9.99993388182e-10 m/s, shear/raw/filtered Pa 26546117.56456249 50000001.88856527 50000001.82942169
+s=18000.000000 m: V=9.99994222835e-10 m/s, shear/raw/filtered Pa 26546116.140464272 50000001.96552691 50000001.87517404
+s=40000.000000 m: V=9.99997335981e-10 m/s, shear/raw/filtered Pa 26546119.978305485 50000001.793626264 50000001.77652688
+s=57735.026919 m: V=1.00000094442e-09 m/s, shear/raw/filtered Pa 26546122.657280102 49999997.664719485 49999998.32672788
+independent initial stress projection errors (Pa), raw normal and shear, both contacts [-2.60237518e-08 -8.26514301e-07] [1.64286624e-06 1.11072060e-06] all-ID maxima 1.4864367186007144e-06 4.827839685361823e-06
+20 m Helmholtz test: constant and nonconstant max-amplitude ratio 6.661338147750939e-16 0.9999878420308753
+0 s filter residual 6.18e-07 Pa, peak 1.00000094442e-09 m/s
+758.028384735 s filter residual 5.07e-07 Pa, peak 1.00000715413e-09 m/s
+1600 s filter residual 5.51e-07 Pa, peak 1.00001549193e-09 m/s
+y=50000 m horizontal cut; integral chi d(normal)=1.4030201, integrated slip=1.403004512e-09 m/s
+y=25000 m horizontal cut; integral chi d(normal)=1.3782087, integrated slip=1.378202583e-09 m/s
+y=0 m horizontal cut; integral chi d(normal)=1.2353562, integrated slip=1.235357136e-09 m/s

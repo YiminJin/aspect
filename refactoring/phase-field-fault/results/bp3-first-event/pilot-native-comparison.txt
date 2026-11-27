@@ -1,0 +1,2 @@
+0 s, 42888 ordered patches, 1471356 bytes, max errors {'phase_field': 0.0, 'velocity': 2.117582368135751e-22, 'p': 2.9103830456733704e-11, 'fault_tau_xx': 0.0, 'fault_tau_yy': 0.0, 'fault_tau_xy': 0.0}
+900 s, 42888 ordered patches, 4347145 bytes, max errors {'phase_field': 0.0, 'velocity': 0.0, 'p': 9.313225746154785e-10, 'fault_tau_xx': 1.4901161193847656e-08, 'fault_tau_yy': 3.725290298461914e-09, 'fault_tau_xy': 3.725290298461914e-09}

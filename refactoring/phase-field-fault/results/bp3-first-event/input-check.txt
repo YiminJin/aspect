@@ -1,0 +1,2 @@
+5776 reversed donor IDs; maximum position error 7.4998854427e-12 m; relative age error 2.975397706e-14; spacing 9.99545661062..10 m
+donor time-zero surface/base rates, shear and friction compression [(np.float64(9.994449630022603e-10), np.float64(26545846.26179177), np.float64(50000002.81060532)), (np.float64(1.0022645159820652e-09), np.float64(26549393.26692711), np.float64(50000834.230261184))]

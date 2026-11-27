@@ -1,0 +1,6 @@
+Initial traction error 1.49e-08 Pa at Vinit, maximum solved speed error 0.000166304%
+Maximum accepted slip/Dc 6.250005718e-05, absolute log-age change 0.05776585197
+179 labels, 3 accepted clocks, 17 reported stations, 5 FE wall probes; maximum velocity error 2.981e-16 m/s
+0 s native frame: 1471356 bytes
+900 s native frame: 4347145 bytes
+Verified native frame clocks [0.0, 900.0]

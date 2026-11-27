@@ -1,0 +1,344 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0 (pf-rsf, cfcec4ad0)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.1.1
+--     . running in OPTIMIZED mode
+--     . running with 2 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library <./libbp3_qd.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf/build-historical-first/final-60/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+   Mature fault Stokes solver: ASPECT block AMG.
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0&dg=1&sha=cfcec4ad0&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 14,483 (on 8 levels)
+Number of degrees of freedom: 721,414 (122,964+15,580+61,482+130,347+130,347+130,347+130,347)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+Maximum discarded fault ray weight fraction: 0
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 61+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 1: 1
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 54+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 2: 0.00884697
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 53+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 3: 0.00607369
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 52+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 4: 0.00455112
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 51+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 5: 0.00356141
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 51+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 6: 0.00285973
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 50+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 7: 0.0023363
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 50+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 8: 0.00193258
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 49+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 9: 0.0016137
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 49+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 10: 0.00135732
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 48+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 11: 0.00114835
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 48+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 12: 0.000976151
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 47+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 13: 0.000833
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 46+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 14: 0.000713133
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 46+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 15: 0.000612158
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 45+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 16: 0.00052667
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 45+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 17: 0.000453985
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 45+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 18: 0.000391963
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 44+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 19: 0.000338877
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 44+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 20: 0.000293321
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 43+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 21: 0.00025414
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 43+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 22: 0.000220377
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 42+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 23: 0.000191234
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 42+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 24: 0.000166045
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 41+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 25: 0.000144246
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 41+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 26: 0.000125363
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 40+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 27: 0.00010899
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 40+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 28: 9.47832e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 40+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 29: 8.24486e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 39+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 30: 7.17335e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 39+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 31: 6.24211e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 38+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 32: 5.43247e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 38+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 33: 4.72834e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 37+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 34: 4.11581e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 37+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 35: 3.58284e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 36+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 36: 3.11902e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 36+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 37: 2.71533e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 35+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 38: 2.36393e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 35+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 39: 2.05802e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 35+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 40: 1.79169e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 34+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 41: 1.55983e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 34+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 42: 1.35795e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 33+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 43: 1.18218e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 33+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 44: 1.02914e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 32+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 45: 8.95893e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 32+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 46: 7.79879e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 31+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 47: 6.7887e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 31+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 48: 5.9093e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 30+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 49: 5.14366e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 30+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 50: 4.47711e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 29+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 51: 3.89682e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 29+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 52: 3.39163e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 28+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 53: 2.95187e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 28+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 54: 2.56905e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 28+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 55: 2.23583e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 27+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 56: 1.94579e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 27+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 57: 1.69332e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 26+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 58: 1.47359e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 26+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 59: 1.28231e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 26+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 60: 1.11587e-06
+
+
+   WARNING: The nonlinear solver in the current timestep failed to converge.
+   Acting according to the parameter 'Nonlinear solver failure strategy':
+   Error: Can not cut the timestep in step 0. Aborting.
+
+
+----------------------------------------------------
+
+
+----------------------------------------------------
+Exception 'ExcNonlinearSolverNoConvergence()' on rank 0 on processing:
+Exception 'ExcNonlinearSolverNoConvergence()' on rank 1 on processing:
+
+--------------------------------------------------------
+An error occurred in line <883> of file </home/ein/repository/aspect-pf-rsf/source/simulator/solver_schemes.cc> in function
+    void aspect::Simulator<dim>::solve_stokes_by_picard_iteration() [with int dim = 2]
+The violated condition was:
+    state != SolverControl::failure
+Additional information:
+    Nonlinear solver failed to converge in the prescribed number of steps.
+    Consider changing `Max nonlinear iterations` or `Nonlinear solver
+    failure strategy`.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release: aspect::Simulator<2>::solve_stokes_by_picard_iteration()
+#1  /home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release: aspect::Simulator<2>::solve_timestep()
+#2  /home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release: aspect::Simulator<2>::run()
+#3  /home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release: ) [0x1f23e5c]
+#4  /home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 1 in communicator MPI_COMM_WORLD
+  Proc: [[22650,1],1]
+  Errorcode: 1
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
+
+--------------------------------------------------------
+An error occurred in line <883> of file </home/ein/repository/aspect-pf-rsf/source/simulator/solver_schemes.cc> in function
+    void aspect::Simulator<dim>::solve_stokes_by_picard_iteration() [with int dim = 2]
+The violated condition was:
+    state != SolverControl::failure
+Additional information:
+    Nonlinear solver failed to converge in the prescribed number of steps.
+    Consider changing `Max nonlinear iterations` or `Nonlinear solver
+    failure strategy`.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release: aspect::Simulator<2>::solve_stokes_by_picard_iteration()
+#1  /home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release: aspect::Simulator<2>::solve_timestep()
+#2  /home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release: aspect::Simulator<2>::run()
+#3  /home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release: ) [0x1f23e5c]
+#4  /home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+prterun has exited due to process rank 1 with PID 0 on node BEBOP calling
+"abort". This may have caused other processes in the application to be
+terminated by signals sent by prterun (as reported here).
+--------------------------------------------------------------------------

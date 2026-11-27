@@ -1,0 +1,18 @@
+3 accepted frames, 57932 native patches/frame; maximum absolute differences
+id 0
+s_m 0
+x_m 0
+y_m 0
+rate_m_s 7.67210018e-23
+age_s 0
+slip_m 6.94567017e-20
+shear_Pa 4.09781933e-07
+raw_compression_Pa 4.91738319e-07
+friction_compression_Pa 3.57627869e-07
+normal_integral_m 7.27595761e-12
+native_phase_field 0
+native_velocity 2.77555756e-17
+native_p 7.62939453e-06
+native_fault_tau_xx 7.62939453e-06
+native_fault_tau_yy 3.81469727e-06
+native_fault_tau_xy 3.81469727e-06

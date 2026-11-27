@@ -1,6 +1,14 @@
 # Phase-field fault working record
 
-Active assignment: [BP3 package revision](BP3_PACKAGE_REVISION.md), complete for local review. The next measurement needs the branch's first rupture acceleration.
+Active assignment: [Historical BP3 first event](BP3_HISTORICAL_FIRST_EVENT_TASK.md). Local startup and restart qualification is complete. The next action is the author's bounded full-grid Stampede3 start and restart.
+
+## Historical 60° BP3 first-event case
+
+The tested source range starts at `cfcec4ad0a` and ends at `027e09a75`. The standalone package solves RSF over all 57.735 km from equilibrium ages with the retained log-age interpolation. The numerical change is `f3b13efc0`; inputs and benchmark sources are in `48dae7aca`; `027e09a75` checks the shipped vertex identities and required contact probes. The historical parameters supplied with the assignment match the archived time-zero job byte for byte. The [measurement record](results/bp3-first-event/README.md) includes exact commands, operator and state ownership, independent reference, binary and input identities, figures, timestep attribution and all comparison exceptions.
+
+The full-grid mesh-only startup matched the donor's 319,324 support cells, 3.90625 m finest resolution and 1 km coarsest cells on one and two ranks. The total was 552,084 cells versus the donor's 552,081. The resolved contact control returned 1.0045 times the prescribed transverse loading at both contacts. The independent shear errors there were below 4.4e−6 Pa. With the donor 4e6 s Maxwell initialization, the 60-iteration coupled solve failed at residual 1.12e−6 at time zero. Production uses the supported 100 s interval. At 400 s its speed and slip differ from the converged long-interval diagnostic by at most 1.55e−20 m/s and 6.18e−18 m.
+
+The entire historical domain was advanced on 41,226 cells. The age limit at ID 14 (1,400 m) proposed 842.253874 s; the converged trial exceeded the log-age budget by 1.282e−8 and retried at 758.028385 s. The resumed calculation through 1,600 s exactly matched all 580 material rows and keyed native fields. Serial/two-rank resolved contact rates differed by at most 2.16e−20 m/s. The pressure/DG stress comparison exceeds the existing native-field tolerance at the production 1e−9 linear solver setting. Both ranks passed the same check with a separately tested 1e−11 setting. The preserved pilot passed on its 0/400/900 s clock and retained its two native frames. No branch-native event or full-grid physical solve has been run. [Standalone ZIP](results/bp3-first-event/bp3-first-event.zip) · [launch instructions](../../benchmarks/bp3_qd_thrust/README.md) · [resolved figures and reproduction commands](results/bp3-first-event/README.md).
 
 ## Revised 60° pilot
 

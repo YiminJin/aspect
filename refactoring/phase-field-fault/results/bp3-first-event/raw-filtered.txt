@@ -1,0 +1,15 @@
+contact-serial versus contact-raw accepted clocks (s) [0.0, 758.028500519482, 1600.0] [0.0, 758.028497748452, 1600.0]
+clock 0.0 maximum absolute difference and distance in metres
+rate_m_s 9.29281725e-16 1154.7005
+age_s 0 0
+slip_m 0 0
+raw_compression_Pa 4.562735558e-05 1154.7005
+friction_compression_Pa 0.8752583042 1154.7005
+shear_Pa 5.358085036e-05 1154.7005
+clock 1600.0 maximum absolute difference and distance in metres
+rate_m_s 1.082382198e-13 1154.7005
+age_s 0.0001101341913 1154.7005
+slip_m 9.646993195e-11 1154.7005
+raw_compression_Pa 0.04688805342 1154.7005
+friction_compression_Pa 116.8554294 1154.7005
+shear_Pa 0.06290014461 1154.7005

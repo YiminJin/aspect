@@ -1,0 +1,175 @@
+/home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release: OK
+/home/ein/repository/aspect-pf-rsf/build-historical-first/install/lib/cmake/Aspect/AspectConfig.cmake: OK
+executable.path: OK
+sdk.path: OK
+libbp3_qd.release.so: OK
+plugin-source/CMakeLists.txt: OK
+plugin-source/bp3_qd.cc: OK
+plugin-source/event_profiles.cc: OK
+plugin-source/first_event.h: OK
+plugin-source/historical_profile.cc: OK
+plugin-source/startup_cuts.cc: OK
+bp3-common.prm: OK
+historical-vertices.txt: OK
+contact-vertices.txt: OK
+intermediate-vertices.txt: OK
+contact.prm: OK
+intermediate.prm: OK
+make_historical_vertices.py: OK
+bp3.prm: OK
+pilot.prm: OK
+production.prm: OK
+vertices.txt: OK
+stampede3.sh: OK
+history_events.py: OK
+history.py: OK
+check_pilot.py: OK
+check_historical.py: OK
+native_frames.py: OK
+Working directory /home/ein/repository/aspect-pf-rsf/build-historical-first/run
+SDK /home/ein/repository/aspect-pf-rsf/build-historical-first/install/lib/cmake/Aspect
+Executable /home/ein/repository/aspect-pf-rsf/build-historical-first/install/bin/aspect-release
+Plugin /home/ein/repository/aspect-pf-rsf/build-historical-first/run/libbp3_qd.release.so
+Vertex table /home/ein/repository/aspect-pf-rsf/build-historical-first/run/contact-vertices.txt
+Input /home/ein/repository/aspect-pf-rsf/build-historical-first/run/launch-local-contact-gh2rzm.prm
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0 (pf-rsf, cfcec4ad0)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.1.1
+--     . running in OPTIMIZED mode
+--     . running with 2 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library <./libbp3_qd.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory <contact-output/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+   Mature fault Stokes solver: ASPECT block AMG.
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0&dg=1&sha=cfcec4ad0&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 14,483 (on 8 levels)
+Number of degrees of freedom: 721,414 (122,964+15,580+61,482+130,347+130,347+130,347+130,347)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+Maximum discarded fault ray weight fraction: 0
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 62+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 1: 1
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 33+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 2: 1.08905e-05
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 5+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 3: 2.40318e-09
+
+
+Fault timestep at 0 s: dt=0 proposal=842.25388956587835 criterion=age id=2 station_m=19.908629972056126 slip_fraction=0 abs_log_age=0 slip_id=0 age_id=0
+Fault next dt=842.25388956587835 limiter=material
+   Postprocessing:
+     Maximum fault speed       1.0000010324360348e-09 m/s
+     BP3 accepted profile      fault-profile-0000000.txt
+     BP3 startup cuts          startup-cuts.txt
+     RMS, max velocity:        4.97e-10 m/s, 5e-10 m/s
+     Writing graphical output: contact-output/solution/solution-00000
+
+*** Timestep 1:  t=842.254 seconds, dt=842.254 seconds
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 27+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 1: 0.00016445
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 7+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 2: 6.92062e-09
+
+
+Fault timestep at 842.25388956587835 s: dt=842.25388956587835 proposal=930.93766913539412 criterion=age id=2 station_m=19.908629972056126 slip_fraction=0.00010528265071516422 abs_log_age=0.10000000001127408 slip_id=115 age_id=2 retry_id=2 retry_reason=age retry_dt=758.02850051948087
+Fault next dt=757.74611043412165 limiter=termination
+   Fault slip/state budget exceeded; retry duration 758.029 s.
+Repeating the current time step based on the time stepping manager ...
+
+*** Timestep 1:  t=758.029 seconds, dt=758.029 seconds
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 26+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 1: 0.00016199
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 6+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 2: 6.17115e-09
+
+
+Fault timestep at 758.02850051948087 s: dt=758.02850051948087 proposal=922.0688267689037 criterion=age id=2 station_m=19.908629972056126 slip_fraction=9.4754303417501567e-05 abs_log_age=0.090438628064708065 slip_id=115 age_id=2
+Fault next dt=841.97149948051913 limiter=termination
+   Postprocessing:
+     Maximum fault speed       1.0000078187304667e-09 m/s
+     BP3 accepted profile      fault-profile-0000001.txt
+     RMS, max velocity:        4.97e-10 m/s, 5e-10 m/s
+     Writing graphical output: contact-output/solution/solution-00001
+
+*** Timestep 2:  t=1600 seconds, dt=841.971 seconds
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 53+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 1: 0.00626421
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 33+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 2: 9.52782e-06
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 11+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 3: 1.47026e-08
+
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 0+0 iterations.
+      Relative nonlinear residual (Stokes system) after nonlinear iteration 4: 9.12892e-10
+
+
+Fault timestep at 1600 s: dt=841.97149948051913 proposal=1010.5829672195418 criterion=age id=2 station_m=19.908629972056126 slip_fraction=9.1906004656866619e-05 abs_log_age=0.091712362192183927 slip_id=115 age_id=2
+Fault next dt=1010.5829672195418 limiter=material
+   Postprocessing:
+     Maximum fault speed       8.7324575440922571e-10 m/s
+     BP3 accepted profile      fault-profile-0000002.txt
+     RMS, max velocity:        4.85e-10 m/s, 5.13e-10 m/s
+     Writing graphical output: contact-output/solution/solution-00002
+
+Termination requested by criterion: end time
+*** Snapshot contact-output/restart/01/ created!
+
+
+
++---------------------------------------------+------------+------------+
+| Total wallclock time elapsed since start    |        42s |            |
+|                                             |            |            |
+| Section                         | no. calls |  wall time | % of total |
++---------------------------------+-----------+------------+------------+
+| Assemble Stokes system          |        11 |      7.13s |        17% |
+| Build Stokes preconditioner     |        11 |      7.89s |        19% |
+| Create snapshot                 |         1 |      0.14s |      0.33% |
+| Initialization                  |         1 |     0.102s |      0.24% |
+| Postprocessing                  |         3 |      1.18s |       2.8% |
+| Setup dof systems               |         1 |     0.164s |      0.39% |
+| Setup initial conditions        |         1 |     0.487s |       1.2% |
+| Setup matrices                  |         1 |      0.92s |       2.2% |
+| Solve Stokes system             |        11 |      8.98s |        21% |
++---------------------------------+-----------+------------+------------+
+
+-- Total wallclock time elapsed including restarts: 42s
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0&dg=1&sha=cfcec4ad0&src=code
+-----------------------------------------------------------------------------
