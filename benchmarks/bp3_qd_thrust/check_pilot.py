@@ -5,7 +5,7 @@ import math
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from history import read_statistics
+from history import read_statistics, slip_budget
 
 
 def require(condition, message):
@@ -48,7 +48,6 @@ def check_pilot(directory):
     history = []
     parameters = json.loads((directory / "parameters.json").read_text())
     budgets = parameters["Time stepping"]["Fault RSF"]
-    slip_cap = float(budgets["Maximum slip fraction"]["value"])
     age_cap = float(budgets["Maximum logarithmic state change"]["value"])
     clocks = [float(frame["BP3 clock (s)"]) for frame in frames]
     require(len(clocks) >= 2 and clocks[0] == 0 and clocks[-1] == float(parameters["End time"]["value"]),
@@ -70,7 +69,10 @@ def check_pilot(directory):
                 age = old[3] + (0.008/rate-old[3])*(-math.expm1(-dt*rate/0.008))
                 require(math.isclose(new[3], age, rel_tol=5e-15), f"Accepted age at ID {new[0]}")
                 require(math.isclose(new[4], old[4]+dt*rate, rel_tol=5e-15), f"Accepted slip at ID {new[0]}")
-                max_slip = max(max_slip, abs(new[4]-old[4])/0.008)
+                increment = dt*abs(rate)/0.008
+                require(increment <= slip_budget(parameters, 2*new[1])*(1+1e-12),
+                        f"Accepted slip exceeds the local budget at ID {new[0]}")
+                max_slip = max(max_slip, increment)
                 max_log_age = max(max_log_age, abs(math.log(new[3]/old[3])))
         fastest = max(rows, key=lambda row: row[5])
         require(float(frame["BP3 peak speed (m/s)"]) == fastest[5] and
@@ -81,7 +83,6 @@ def check_pilot(directory):
                 for value, column in zip(row[3:], ["age (s)", "slip (m)", "rate (m/s)"]):
                     require(value == float(frame[f"BP3 {s} m {column}"]), f"Station output at {s} m")
         previous, previous_time = rows, time
-    require(slip_cap == 0 or max_slip <= slip_cap*(1+1e-12), "Accepted slip exceeds its budget")
     require(age_cap == 0 or max_log_age <= age_cap*(1+1e-12), "Accepted logarithmic age exceeds its budget")
     print(f"Maximum accepted slip/Dc {max_slip:.10g}, absolute log-age change {max_log_age:.10g}")
     material = parameters["Material model"]["Phase field fault"]

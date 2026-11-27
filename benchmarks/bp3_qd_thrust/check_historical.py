@@ -6,6 +6,7 @@ import numpy as np
 from scipy.integrate import cumulative_trapezoid
 from scipy.linalg import solve_banded
 from native_frames import frames, read
+from history import read_statistics
 
 SINE = math.sqrt(.75)
 PLATE = 1e-9
@@ -53,7 +54,7 @@ def solve(diag,off,rhs):
     return solve_banded((1,1),np.vstack((np.r_[0,off],diag,np.r_[off,0])),rhs)
 
 
-def check(directory,figure=None):
+def check(directory,figure=None,through_step=None):
     mesh,fields,size=read(frames(directory)[0])
     x0,y0,x1,y1=mesh.astype(float).T
     top=y1.max()
@@ -75,6 +76,15 @@ def check(directory,figure=None):
     print("FE phase L_inf",phase_error,"wall ux,uy errors (m/s)",velocity_error)
     print("time-zero native max abs velocity, p, tau_xx/yy/xy", [np.max(abs(fields[k])) for k in ('velocity','p','fault_tau_xx','fault_tau_yy','fault_tau_xy')])
     files=sorted(directory.glob("fault-profile-*.txt"))
+    if through_step is not None:
+        files=[p for p in files if int(p.stem.split('-')[-1]) <= through_step]
+        assert [int(p.stem.split('-')[-1]) for p in files] == list(range(through_step+1)), "Missing dense startup profiles"
+    intervals={}
+    for frame in read_statistics(directory/'statistics'):
+        step=int(frame['Time step number'])
+        intervals[step]=(float(frame['BP3 clock (s)']), float(frame['BP3 interval (s)']))
+        if through_step is not None and step == through_step:
+            break
     clock,initial=profile(files[0])
     assert clock==0 and np.all(initial['slip_m']==0)
     s=initial['s_m']
@@ -167,13 +177,17 @@ def check(directory,figure=None):
     first=None
     for path in files:
         clock,data=profile(path)
+        step=int(path.stem.split('-')[-1])
+        accepted,dt=intervals[step]
+        assert accepted == clock, (step,accepted,clock)
         sigma=filtered(data['raw_compression_Pa']-5e7)+5e7
         error=max(abs(sigma-data['friction_compression_Pa']))
         assert error<3e-5,(clock,error)
         if first is not None:
             # Every step in qualification inputs. Production profiles may be sparse.
             if int(path.stem.split('-')[-1])==last_step+1:
-                rate=data['rate_m_s'];dt=clock-last_clock
+                assert dt > 0 and math.isclose(last_clock+dt,clock,rel_tol=2e-15)
+                rate=data['rate_m_s']
                 z=-dt*rate/.008
                 age=first['age_s']*np.exp(z)-.008/rate*np.expm1(z)
                 np.testing.assert_allclose(data['age_s'],age,rtol=5e-15,atol=0)
@@ -192,7 +206,8 @@ def check(directory,figure=None):
         cut_mass=np.trapezoid(chi,r)
         print(f"y={yy:g} m horizontal cut; integral chi d(normal)={cut_mass:.8g}, integrated slip={np.trapezoid(chi*np.interp(pos,s,initial['rate_m_s']),r):.10g} m/s")
     observers=params['Postprocess']['List of postprocessors']['value'].split(',')
-    if 'BP3 startup cuts' in (name.strip() for name in observers):
+    if ((directory/'startup-cuts.txt').is_file() or
+        'BP3 startup cuts' in (name.strip() for name in observers)):
         observed=np.genfromtxt(directory/'startup-cuts.txt',names=True)
         for yy in (top,top/2,0.):
             line=observed[observed['y_m']==yy]
@@ -227,5 +242,6 @@ if __name__=="__main__":
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("directory",type=Path)
     parser.add_argument("--figure",type=Path)
+    parser.add_argument("--through-step", type=int, help="Require every profile through this accepted startup step.")
     args=parser.parse_args()
-    check(args.directory,args.figure)
+    check(args.directory,args.figure,args.through_step)

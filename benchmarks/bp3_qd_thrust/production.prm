@@ -47,10 +47,16 @@ subsection Material model
     set Normal integral subdivisions = 8
     set Normal traction filter length = 20
     set Record section tractions = true
+    set Report section convergence = true
   end
 end
 subsection Time stepping
   subsection Fault RSF
+    # Eligible stations permit 0.5*a/b slip distances. All ages have a separate log budget.
+    set Slip resolution policy = weakening dependent
+    set Maximum slip fraction = 0.5
+    set Maximum logarithmic state change = 0.2
+    set Proposal safety factor = 0.99
     set Report timestep limits = true
   end
 end
@@ -59,6 +65,10 @@ subsection Checkpointing
 end
 subsection Postprocess
   set List of postprocessors = BP3 stations, BP3 first event profiles, velocity statistics, visualization, fault slip output
+  subsection BP3 profiles
+    set Slip interval = 0.1
+    set Time interval = 31557600
+  end
   subsection Visualization
     # Full-grid bulk frames use the historical heavy-output cadence.
     set Fault slip interval = 1

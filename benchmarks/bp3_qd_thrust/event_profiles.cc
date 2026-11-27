@@ -1,6 +1,7 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include "first_event.h"
 #include <aspect/postprocess/interface.h>
+#include <aspect/postprocess/visualization_trigger.h>
 #include <aspect/termination_criteria/interface.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <fstream>
@@ -8,7 +9,7 @@
 namespace aspect::Postprocess
 {
   template <int dim>
-  class HistoricalProfiles : public Interface<dim>, public SimulatorAccess<dim>
+  class HistoricalProfiles : public Interface<dim>, public SimulatorAccess<dim>, public VisualizationTrigger
   {
     public:
       static void declare_parameters(ParameterHandler &prm)
@@ -17,6 +18,8 @@ namespace aspect::Postprocess
         prm.enter_subsection("BP3 profiles");
         prm.declare_entry("Time interval", "31557600", Patterns::Double(0.),
                           "Maximum accepted time in seconds between full material profiles.");
+        prm.declare_entry("Slip interval", "0.1", Patterns::Double(0.),
+                          "Request a full profile when the slip of any material ID changes by this many metres.");
         prm.leave_subsection();
         prm.leave_subsection();
       }
@@ -26,9 +29,27 @@ namespace aspect::Postprocess
         prm.enter_subsection("Postprocess");
         prm.enter_subsection("BP3 profiles");
         interval=prm.get_double("Time interval");
+        slip_interval=prm.get_double("Slip interval");
         prm.leave_subsection();
         prm.leave_subsection();
       }
+
+      // Visualization can run before or after this observer. Look ahead on a
+      // copy until execute() records the accepted peak. Only execute changes the streak.
+      bool requests_graphical_output() const override
+      {
+        const double clock=this->get_time();
+        if (clock==last_observed)
+          return event.onset==clock || event.completion==clock;
+        const auto &model=Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
+        double peak=0.;
+        for (const auto &label:model.labels())
+          peak=std::max(peak,label.rate);
+        auto prediction=event;
+        return prediction.observe(clock,peak);
+      }
+
+      void record_graphical_output() override {}
 
       bool complete() const
       {
@@ -49,10 +70,23 @@ namespace aspect::Postprocess
             if (!slip.empty()) increment=std::max(increment,std::abs(labels[i].slip-slip[i]));
           }
         const bool milestone=event.observe(clock,peak);
+        if (milestone && event.onset==clock)
+          onset_parent=last_observed;
+        if (milestone && event.completion==clock)
+          completion_parent=last_observed;
+        last_observed=clock;
+        statistics.add_value("BP3 accepted time before onset (s)",onset_parent);
+        statistics.add_value("BP3 accepted time before completion (s)",completion_parent);
         statistics.add_value("BP3 event onset (s)",event.onset);
         statistics.add_value("BP3 event below-threshold streak",event.below);
         statistics.add_value("BP3 event completion (s)",event.completion);
-        if (!slip.empty() && !milestone && increment<.1 && clock-last_clock<interval)
+        for (const auto *column:{"BP3 accepted time before onset (s)", "BP3 accepted time before completion (s)",
+                                 "BP3 event onset (s)", "BP3 event completion (s)"})
+          {
+            statistics.set_precision(column,17);
+            statistics.set_scientific(column,true);
+          }
+        if (!slip.empty() && !milestone && increment<slip_interval && clock-last_clock<interval)
           return {};
         const auto &tractions=model.section_tractions();
         AssertThrow(tractions[0].size()==labels.size(),ExcMessage("BP3 profiles require Record section tractions."));
@@ -89,6 +123,9 @@ namespace aspect::Postprocess
           archive << event << last_clock << slip;
         }
         status["Historical BP3 first event v1"]=bytes.str();
+        std::ostringstream clocks;
+        clocks << std::setprecision(17) << last_observed << ' ' << onset_parent << ' ' << completion_parent;
+        status["Historical BP3 accepted event clocks"]=clocks.str();
       }
 
       void load(const std::map<std::string,std::string> &status) override
@@ -96,11 +133,19 @@ namespace aspect::Postprocess
         std::istringstream bytes(status.at("Historical BP3 first event v1"));
         aspect::iarchive archive(bytes);
         archive >> event >> last_clock >> slip;
+        const auto clocks=status.find("Historical BP3 accepted event clocks");
+        if (clocks!=status.end())
+          {
+            std::istringstream input(clocks->second);
+            AssertThrow(input >> last_observed >> onset_parent >> completion_parent,
+                        ExcMessage("Invalid checkpointed BP3 event clocks."));
+          }
       }
 
     private:
       BP3::FirstEvent event;
-      double last_clock=-1., interval;
+      double last_clock=-1., interval, slip_interval;
+      double last_observed=-1., onset_parent=-1., completion_parent=-1.;
       std::vector<double> slip;
   };
 

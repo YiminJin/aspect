@@ -4,6 +4,8 @@
 #include <aspect/initial_composition/interface.h>
 #include <aspect/mesh_refinement/interface.h>
 #include <aspect/phase_field/degradation.h>
+#include <aspect/simulator_signals.h>
+#include <fstream>
 
 namespace aspect
 {
@@ -150,6 +152,15 @@ namespace aspect
     class HistoricalMesh : public Interface<dim>, public SimulatorAccess<dim>
     {
       public:
+        void initialize() override
+        {
+          // Measure the final p4est mesh, after grading and repartitioning.
+          // This also runs on restart, before histories are rebound to the mesh.
+          this->get_signals().edit_parameters_pre_setup_dofs.connect(
+            [this](const SimulatorAccess<dim> &, Parameters<dim> &) { write_footprint(); },
+            boost::signals2::at_front);
+        }
+
         void tag_additional_cells() const override
         {
           AssertThrow(dim==2,ExcMessage("The historical BP3 experiment requires a two-dimensional box."));
@@ -182,6 +193,72 @@ namespace aspect
                 if (h>target*(1.+1.e-12))
                   cell->set_refine_flag();
               }
+        }
+
+      private:
+        void write_footprint() const
+        {
+          const auto &geometry=box(*this);
+          const double fine=finest(*this);
+          const double coarse=std::ldexp(geometry.get_extents()[0]/geometry.get_repetitions()[0],
+                                         -static_cast<int>(this->get_parameters().min_grid_level));
+          const double top=geometry.get_origin()[1]+geometry.get_extents()[1];
+          const double bottom=geometry.get_origin()[1];
+          const double pad=(profile().radius.back()+coarse*(sine+.5))/sine+fine;
+          // Count cells and incorrect sizes independently on the support,
+          // base contact and surface contact. A cell can belong to several.
+          std::vector<unsigned int> counts(7);
+          std::vector<double> bounds(4,-std::numeric_limits<double>::infinity());
+          double area=0.;
+          for (const auto &cell:this->get_triangulation().active_cell_iterators())
+            if (cell->is_locally_owned())
+              {
+                const auto lo=cell->vertex(0), hi=cell->vertex(GeometryInfo<dim>::vertices_per_cell-1);
+                const auto width=hi-lo;
+                area+=cell->measure();
+                for (unsigned int d=0; d<2; ++d)
+                  {
+                    bounds[2*d]=std::max(bounds[2*d],-lo[d]);
+                    bounds[2*d+1]=std::max(bounds[2*d+1],hi[d]);
+                  }
+                const bool resolved=std::abs(width[0]-fine)<1.e-10*fine && std::abs(width[1]-fine)<1.e-10*fine;
+                const auto count=[&](const unsigned int region)
+                {
+                  ++counts[2*region];
+                  counts[2*region+1]+=!resolved;
+                };
+                if (std::abs(distance(cell->center(),geometry)) <= profile().radius.back()+.5*(sine*width[0]+.5*width[1]))
+                  count(0);
+                for (unsigned int end=0; end<2; ++end)
+                  {
+                    const double y=end==0 ? bottom : top;
+                    const double x=(top-y)*.5/sine;
+                    if (lo[0]<=x+pad && hi[0]>=x-pad && lo[1]<=y+2.*fine && hi[1]>=y-2.*fine)
+                      count(end+1);
+                  }
+                counts[6]+=width[0]>coarse || width[1]>coarse;
+              }
+          const auto comm=this->get_mpi_communicator();
+          Utilities::MPI::sum(counts,comm,counts);
+          Utilities::MPI::max(bounds,comm,bounds);
+          area=Utilities::MPI::sum(area,comm);
+          const auto total=this->get_triangulation().n_global_active_cells();
+          bool success=true;
+          if (Utilities::MPI::this_mpi_process(comm)==0)
+            {
+              std::ofstream out(this->get_output_directory()+"bp3-mesh.txt");
+              out << "cells xmin xmax ymin ymax area_m2 fine_m support bad_support base bad_base surface bad_surface bad_coarse\n"
+                  << std::setprecision(17) << total << ' ' << -bounds[0] << ' ' << bounds[1] << ' '
+                  << -bounds[2] << ' ' << bounds[3] << ' ' << area << ' ' << fine;
+              for (const auto n:counts) out << ' ' << n;
+              out << '\n';
+              out.close();
+              success=out.good();
+            }
+          AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(success),comm),
+                      ExcMessage("Could not write the historical BP3 mesh inventory."));
+          AssertThrow(counts[0] && counts[2] && counts[4] && !(counts[1] || counts[3] || counts[5] || counts[6]),
+                      ExcMessage("The historical mesh does not resolve the physical support or contact footprints."));
         }
     };
     ASPECT_REGISTER_MESH_REFINEMENT_CRITERION(HistoricalMesh,"BP3 historical footprint",

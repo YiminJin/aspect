@@ -5,6 +5,24 @@ from math import isfinite
 from pathlib import Path
 
 
+def slip_budget(settings, station):
+    """Independent dimensionless BP3 slip allowance at down-dip distance in metres."""
+    control = settings["Time stepping"]["Fault RSF"]
+    coefficient = float(control["Maximum slip fraction"]["value"])
+    if coefficient == 0:
+        return float("inf")
+    policy = control.get("Slip resolution policy", {"value": "uniform"})["value"]
+    if policy == "uniform":
+        return coefficient
+    if policy != "weakening dependent":
+        raise ValueError(f"Unknown slip policy {policy}")
+    law = settings["Material model"]["Phase field fault"]
+    shallow = float(law["Direct effect"]["value"])
+    b = float(law["Evolution effect"]["value"])
+    a = shallow + (0.025 - shallow) * min(1., max(0., (station - 15000.) / 3000.))
+    return coefficient * (a / b) if 0 < b and a <= b else float("inf")
+
+
 def read_statistics(path):
     columns = []
     with path.open() as stream:
