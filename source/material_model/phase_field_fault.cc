@@ -370,6 +370,9 @@ namespace aspect
                             "Continue the fixed initial phase outside the box for normalization and extend the "
                             "endpoint rate into each in-box terminal wedge. Requires a straight, unfitted trace "
                             "with finite support and an initial phase function valid on the exterior lattice.");
+          prm.declare_entry("Report section convergence", "false", Patterns::Bool(),
+                            "Report the material identity with the largest relative rate change when the "
+                            "mature section requires another Stokes Picard iteration.");
           prm.declare_entry("Record section tractions", "false", Patterns::Bool(),
                             "Project accepted shear and normal tractions onto the material vertices for output.");
 
@@ -540,6 +543,7 @@ namespace aspect
           if (normal_integral_subdivisions==0)
             normal_integral_subdivisions = interior_seed ? 8 : 1;
           normal_filter_length = prm.get_double("Normal traction filter length");
+          report_section_convergence = prm.get_bool("Report section convergence");
           record_section_tractions = prm.get_bool("Record section tractions");
           AssertThrow(normal_filter_length == 0. || (!normal_stress.uses_adiabat() && !interior_seed),
                       ExcMessage("Normal traction filtering requires a boundary-spanning resolved-traction fault."));

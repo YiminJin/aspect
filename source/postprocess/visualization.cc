@@ -732,15 +732,36 @@ namespace aspect
       // and the default value of maximum_timesteps_between_outputs is
       // set to numeric_limits<int>::max())
       const auto &observers = this->get_postprocess_manager().get_active_plugins();
-      if ((this->get_time() < last_output_time + output_interval)
-          && (this->get_timestep_number() < last_output_timestep + maximum_timesteps_between_outputs)
-          && (this->get_timestep_number() != 0)
-          && std::none_of(observers.begin(), observers.end(), [](const auto &observer)
-      {
-        const auto *trigger = dynamic_cast<const VisualizationTrigger *>(observer.get());
-        return trigger && trigger->requests_graphical_output();
-      }))
+      std::vector<std::string> reasons;
+      if (this->get_timestep_number() == 0)
+        reasons.emplace_back("initial");
+      if (this->get_time() >= last_output_time + output_interval)
+        reasons.emplace_back("time interval");
+      if (this->get_timestep_number() >= last_output_timestep + maximum_timesteps_between_outputs)
+        reasons.emplace_back("step interval");
+
+      const auto &names = this->get_postprocess_manager().get_active_plugin_names();
+      unsigned int index = 0;
+      bool has_trigger = false;
+      for (const auto &observer : observers)
+        {
+          if (const auto *trigger = dynamic_cast<const VisualizationTrigger *>(observer.get()))
+            {
+              has_trigger = true;
+              if (trigger->requests_graphical_output())
+                reasons.push_back(names[index]);
+            }
+          ++index;
+        }
+      if (reasons.empty())
         return {"", ""};
+      if (has_trigger)
+        {
+          this->get_pcout() << "   Graphical output requested at step " << this->get_timestep_number() << " by";
+          for (const auto &reason : reasons)
+            this->get_pcout() << " [" << reason << "]";
+          this->get_pcout() << std::endl;
+        }
 
       // up the counter of the number of the file by one, but not in
       // the very first output step. if we run postprocessors on all

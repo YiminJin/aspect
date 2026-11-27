@@ -114,11 +114,34 @@ namespace aspect
   template <int dim>
   void FaultStokesCoupling<dim>::check_convergence(const LinearAlgebra::BlockVector &solution, bool &converged)
   {
-    const auto rates_agree = [](const std::vector<double> &a, const std::vector<double> &b)
+    const auto rates_agree = [this](const std::vector<double> &a, const std::vector<double> &b)
     {
+      unsigned int limiting=numbers::invalid_unsigned_int;
+      double largest_change=0.;
       for (unsigned int j=0; j<a.size(); ++j)
-        if (std::abs(a[j]-b[j]) > 1.e-8*std::max(a[j],b[j]))
+        {
+          const double change=std::abs(a[j]-b[j]);
+          const double scale=std::max(a[j],b[j]);
+          if (change > 1.e-8*scale)
+            {
+              if (!material.report_section_convergence)
+                return false;
+              if (change/scale > largest_change)
+                {
+                  largest_change=change/scale;
+                  limiting=j;
+                }
+            }
+        }
+      if (limiting!=numbers::invalid_unsigned_int)
+        {
+          std::ostringstream row;
+          row << std::setprecision(17) << "      Fault Picard rate change: id=" << limiting
+              << " assembled=" << b[limiting] << " returned=" << a[limiting]
+              << " abs_m_s=" << std::abs(a[limiting]-b[limiting]) << " relative=" << largest_change;
+          this->get_pcout() << row.str() << std::endl;
           return false;
+        }
       return true;
     };
     auto returned_rates = solve_rates(solution);

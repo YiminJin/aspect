@@ -3,6 +3,7 @@
 #define _aspect_material_model_rheology_fault_resistance_h
 
 #include <aspect/global.h>
+#include <optional>
 #include <deal.II/base/parameter_handler.h>
 
 namespace aspect::MaterialModel::Rheology
@@ -19,6 +20,13 @@ namespace aspect::MaterialModel::Rheology
   struct SectionRoot
   {
     double rate, resistance, slope;
+  };
+
+  /** Dimensionless direct and evolution effects and slip distance (m) used to
+   * resolve slip at a rate-weakening or neutral material identity. */
+  struct SlipResolutionParameters
+  {
+    double direct_effect, evolution_effect, slip_distance;
   };
 
   /** Material-owned surface law. Index i follows the material, independent of
@@ -75,6 +83,11 @@ namespace aspect::MaterialModel::Rheology
       virtual double characteristic_slip_distance() const
       {
         return std::numeric_limits<double>::infinity();
+      }
+      /** Local RSF parameters, if the law supports a weakening-dependent slip budget. */
+      virtual std::optional<SlipResolutionParameters> slip_resolution_parameters(unsigned int /*id*/) const
+      {
+        return std::nullopt;
       }
       /** Predict the endpoint age in seconds, starting from parent_age (s)
        * at a constant signed slip rate (m/s) for duration (s). */

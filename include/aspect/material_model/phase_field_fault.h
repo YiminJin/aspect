@@ -276,6 +276,7 @@ namespace aspect
         double background_shear;       // Uniform fallback for the vertex shear tractions (Pa).
         unsigned int normal_integral_subdivisions;
         double normal_filter_length = 0.;
+        bool report_section_convergence = false;
         bool record_section_tractions = false;
         bool complete_contacts = false;
         double background_compression; // Additional compression for resolved traction (Pa).

@@ -62,6 +62,10 @@ namespace aspect
           {
             return law.slip_distance;
           }
+          std::optional<SlipResolutionParameters> slip_resolution_parameters(unsigned int /*id*/) const override
+          {
+            return SlipResolutionParameters{law.direct_effect, law.evolution_effect, law.slip_distance};
+          }
           double predict_age(double rate, double age, double dt) const override;
           double state_time_limit(double rate, double age, double log_budget) const override;
           void validate_midpoint() const override;

@@ -44,14 +44,19 @@ namespace aspect::MaterialModel::Rheology
           return signature;
         }
 
+        std::optional<SlipResolutionParameters> slip_resolution_parameters(const unsigned int id) const override
+        {
+          const auto law = law_at_station(stations.at(id));
+          return SlipResolutionParameters{law.direct_effect, law.evolution_effect, law.slip_distance};
+        }
+
         FaultTraction at_speed(const unsigned int segment,
                                const double       xi,
                                const double       speed,
                                const double       compression) const override
         {
           const double s = stations[segment] + xi*(stations[segment+1]-stations[segment]);
-          auto law = shallow_law;
-          law.direct_effect += (0.025-law.direct_effect)*std::clamp((s-15000.)/3000.,0.,1.);
+          const auto law = law_at_station(s);
           const auto &ages = ages_in_seconds();
           // BP3 prescribes a linear transition in log(initial age). Interpolate
           // the logarithm only for quadrature; nodal history is aged in seconds.
@@ -60,6 +65,13 @@ namespace aspect::MaterialModel::Rheology
         }
 
       private:
+        RateAndStateFriction law_at_station(const double s) const
+        {
+          auto law = shallow_law;
+          law.direct_effect += (0.025-law.direct_effect)*std::clamp((s-15000.)/3000.,0.,1.);
+          return law;
+        }
+
         const RateAndStateFriction shallow_law;
         std::vector<double> stations;
     };
