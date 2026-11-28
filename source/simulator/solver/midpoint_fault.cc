@@ -74,6 +74,62 @@ namespace aspect::GrowingFault
       return deviator(embedded);
     }
 
+    // Evaluate both trial and test functions in the conforming Q2/Q1 basis.
+    // If x = P y interpolates a hanging DoF from independent coefficients y,
+    // the shapes on this cell become N P. The same shapes thus assemble
+    // P^T R, P^T J P, both strip borders, and reactions on prescribed masters.
+    void apply_hanging_node_interpolation(MidpointSystem::Cell               &cell,
+                                          const MidpointSystem::HangingNodes &hanging_nodes)
+    {
+      if (std::none_of(cell.indices.begin(), cell.indices.end(),
+                       [&](const auto i) {return hanging_nodes.count(i);}))
+        return;
+
+      using Index = MidpointSystem::Index;
+      std::map<Index,std::vector<std::pair<unsigned int,double>>> terms;
+      for (unsigned int j = 0; j < cell.indices.size(); ++j)
+        {
+          const auto line = hanging_nodes.find(cell.indices[j]);
+          if (line == hanging_nodes.end())
+            terms[cell.indices[j]].emplace_back(j, 1.);
+          else
+            for (const auto &[master, weight] : line->second)
+              terms[master].emplace_back(j, weight);
+        }
+
+      cell.indices.clear();
+      for (const auto &term : terms)
+        cell.indices.push_back(term.first);
+      for (auto &point : cell.points)
+        {
+          std::vector<MidpointSystem::Shape> shapes;
+          shapes.reserve(terms.size());
+          for (const auto &term : terms)
+            {
+              auto &shape = shapes.emplace_back();
+              for (const auto &[j, weight] : term.second)
+                {
+                  shape.strain += weight * point.shapes[j].strain;
+                  shape.div += weight * point.shapes[j].div;
+                  shape.pressure += weight * point.shapes[j].pressure;
+                  shape.phase += weight * point.shapes[j].phase;
+                }
+            }
+          point.shapes.swap(shapes);
+        }
+    }
+
+    void interpolate_dependent_dofs(const MidpointSystem::HangingNodes &hanging_nodes,
+                                    MidpointSystem::Values             &values)
+    {
+      for (const auto &[slave, terms] : hanging_nodes)
+        {
+          values[slave] = 0.;
+          for (const auto &[master, weight] : terms)
+            values[slave] += weight * values[master];
+        }
+    }
+
     // Interpolate at the attempted midpoint in the same boundary order and
     // component masks as Simulator::compute_current_velocity_boundary_constraints.
     // Leave the ordinary boundary manager and its endpoint clock untouched.
@@ -172,6 +228,22 @@ namespace aspect::GrowingFault
 
     const double parent_time = m.history().step == 0 ? sim.get_parameters().start_time : m.history().time;
     const auto walls = midpoint_velocity_constraints(sim, parent_time + h);
+    if (sim.get_triangulation().has_hanging_nodes())
+      {
+        // Current constraints have already folded the endpoint's Dirichlet
+        // data into their hanging rows. Start with the geometric relations,
+        // so the masters can receive the wall data at the attempted midpoint.
+        const auto &dofs = sim.get_dof_handler();
+        AffineConstraints<double> geometric(dofs.locally_owned_dofs(), intro.index_sets.system_relevant_set);
+        DoFTools::make_hanging_node_constraints(dofs, geometric);
+        geometric.close();
+        HangingNodes owned;
+        for (const auto &line : geometric.get_lines())
+          if (line.index < phase_begin && dofs.locally_owned_dofs().is_element(line.index))
+            owned.emplace(line.index, line.entries);
+        for (auto part : Utilities::MPI::all_gather(comm, owned))
+          hanging_nodes.merge(part);
+      }
     const auto &constraints = sim.get_current_constraints();
     const auto boundary = DoFTools::extract_boundary_dofs(sim.get_dof_handler(), intro.component_masks.velocities);
     unsigned int invalid = 0;
@@ -181,6 +253,8 @@ namespace aspect::GrowingFault
     std::map<Index, double> owned_constraints;
     for (const auto &line : constraints.get_lines())
       {
+        if (hanging_nodes.count(line.index))
+          continue;
         if (line.index < nv && intro.index_sets.system_partitioning[0].is_element(line.index))
           {
             invalid |= !line.entries.empty();
@@ -200,13 +274,20 @@ namespace aspect::GrowingFault
       fixed.merge(part);
     auto datum = fixed.lower_bound(nv);
     if (datum == fixed.end())
-      datum = fixed.emplace(nv, 0.).first;
+      {
+        Index i = nv;
+        while (hanging_nodes.count(i))
+          ++i;
+        AssertThrow(i < phase_begin, ExcMessage("Midpoint pressure space has no independent gauge coefficient."));
+        datum = fixed.emplace(i, 0.).first;
+      }
     AssertThrow(std::next(datum) == fixed.end(), ExcMessage("Midpoint fault supports one prescribed physical pressure datum."));
     const double gauge = initial[datum->first] - datum->second;
     for (Index i = nv; i < phase_begin; ++i)
       initial[i] -= gauge;
     for (const auto &[i, v] : fixed)
       initial[i] = v;
+    interpolate_dependent_dofs(hanging_nodes, initial);
 
     unsigned int nonzero_gravity = 0;
     double flux = 0., flux_scale = 0.;
@@ -254,6 +335,8 @@ namespace aspect::GrowingFault
                 }
               data.points.push_back(std::move(p));
             }
+          if (!hanging_nodes.empty())
+            apply_hanging_node_interpolation(data, hanging_nodes);
         }
     const unsigned int gravity_owners = Utilities::MPI::sum(nonzero_gravity, comm);
     AssertThrow(gravity_owners == 0, ExcMessage("Growing fault mechanics requires zero gravity at every native integration point; nonzero on " +
@@ -566,6 +649,10 @@ namespace aspect::GrowingFault
           for (const auto &part : parts)
             for (const auto &[ij, v] : part)
               entries[ij] += v;
+          // Preserve ASPECT global numbering. No physical row or strip
+          // border uses these dependent slots in the conforming basis.
+          for (const auto &line : hanging_nodes)
+            entries[{line.first, line.first}] = 1.;
           for (Index i = n; i < rows; ++i)
             entries[ {i, i}] = 1.;
           DynamicSparsityPattern graph(rows, rows);
@@ -660,6 +747,7 @@ namespace aspect::GrowingFault
             }
           AssertThrow(solved, ExcMessage("The linearized midpoint obstacle failed to find a feasible working set."));
           std::copy_n(feasible.begin(), n, update.begin());
+          interpolate_dependent_dofs(hanging_nodes, update);
         }
       catch (const std::exception &ex)
         {
@@ -831,10 +919,12 @@ namespace aspect::GrowingFault
                 p.nonlinear_solver_failure_strategy != Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep &&
                 p.pressure_normalization == "no",
                 ExcMessage("Growing fault requires a single midpoint fault phase, plane strain, native elasticity off, single Advection, iterated Newton Stokes, and no pressure normalization. Nonconvergence must abort or request a retry."));
-    AssertThrow(!p.mesh_deformation_enabled && !p.initial_adaptive_refinement && !p.adaptive_refinement_interval &&
-                p.additional_refinement_times.empty() && p.stokes_velocity_degree == 2 && !p.use_equal_order_interpolation_for_stokes &&
+    AssertThrow(!p.mesh_deformation_enabled && p.stokes_velocity_degree == 2 && !p.use_equal_order_interpolation_for_stokes &&
                 !p.use_locally_conservative_discretization && !p.include_melt_transport,
-                ExcMessage("Growing fault requires a fixed conforming Q2/Q1 mesh."));
+                ExcMessage("Growing fault requires a stationary Q2/Q1 Cartesian mesh."));
+    if (p.initial_adaptive_refinement || p.adaptive_refinement_interval || !p.additional_refinement_times.empty())
+      AssertThrow(provider->strip_history().target_strip_width() > 0. && p.coarsening_fraction == 0.,
+                  ExcMessage("Growing fault mesh refinement requires a positive Target strip width and zero Coarsening fraction."));
     AssertThrow(!p.use_direct_stokes_solver, ExcMessage("Midpoint fault mechanics requires separate velocity and pressure blocks."));
     AssertThrow(!p.run_postprocessors_on_nonlinear_iterations, ExcMessage("Midpoint fault output requires an accepted step; iteration postprocessing is unsupported."));
     AssertThrow(!p.enable_prescribed_dilation &&

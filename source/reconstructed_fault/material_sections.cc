@@ -149,17 +149,25 @@ namespace aspect::GrowingFault
     return S;
   }
 
-  MaterialSections::MaterialSections(const Triangulation<2> &mesh,
-                                     const MPI_Comm         comm,
-                                     const double           degrees,
-                                     const unsigned int     order)
+  Tensor<1,2> MaterialSections::seed_tangent(const double degrees)
   {
+    Tensor<1,2> tangent;
     tangent[0] = std::cos(degrees * numbers::PI / 180.);
     tangent[1] = std::sin(degrees * numbers::PI / 180.);
     if (std::remainder(degrees, 180.) == 0.)
       tangent[1] = 0.;
     if (std::remainder(degrees - 90., 180.) == 0.)
       tangent[0] = 0.;
+    return tangent;
+  }
+
+  MaterialSections::MaterialSections(const Triangulation<2> &mesh,
+                                     const MPI_Comm          comm,
+                                     const double            degrees,
+                                     const unsigned int      order,
+                                     const double            target_strip_width)
+    : tangent(seed_tangent(degrees))
+  {
     for (unsigned int d = 0; d < 2; ++d)
       {
         double minimum = std::numeric_limits<double>::max();
@@ -187,7 +195,8 @@ namespace aspect::GrowingFault
     AssertThrow(!Utilities::MPI::max(invalid, comm), ExcMessage("Material sections require Cartesian cells."));
     lo = Utilities::MPI::min(lo, comm);
     hi = Utilities::MPI::max(hi, comm);
-    const unsigned int count = std::ceil((hi - lo) / Utilities::MPI::min(altitude, comm));
+    const double spacing = target_strip_width > 0. ? target_strip_width : Utilities::MPI::min(altitude, comm);
+    const unsigned int count = std::ceil((hi - lo) / spacing);
     for (unsigned int k = 0; k <= count; ++k)
       edges.push_back(lo + (hi - lo)*k / count);
     const QGauss<1> line(order);

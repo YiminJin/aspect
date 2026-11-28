@@ -87,6 +87,14 @@ namespace aspect
           {
             strips->initialize_native_history();
           });
+          this->get_signals().pre_refinement_store_user_data.connect([this](parallel::distributed::Triangulation<dim> &mesh)
+          {
+            strips->prepare_history_transfer(mesh);
+          });
+          this->get_signals().post_refinement_load_user_data.connect([this](parallel::distributed::Triangulation<dim> &mesh)
+          {
+            strips->finish_history_transfer(mesh);
+          });
           this->get_signals().post_accept_timestep.connect([this](LinearAlgebra::BlockVector &)
           {
             strips->accept_endpoint(this->get_timestep());

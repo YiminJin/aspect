@@ -10,7 +10,7 @@
 namespace aspect::GrowingFault
 {
   /** A stage is the midpoint of a physical step. Tensors retain zz in plane
-   * strain. This state belongs to one native point on the fixed material mesh. */
+   * strain. This state belongs to one native point on the current material mesh. */
   struct PointHistory : MaxwellState
   {
     double signed_shear=0., absolute_shear=0.;
@@ -73,7 +73,7 @@ namespace aspect::GrowingFault
   };
 
   /**
-   * Material state for the growing fault's fixed mesh. Native tensor records
+   * Material state for the growing fault. Native tensor records
    * follow the owned (CellId, quadrature point) pairs. Ordered strip records
    * and their pressure stations are replicated on every rank. The selected
    * signed resistance law owns any additional strip state, including RSF age.
@@ -94,11 +94,37 @@ namespace aspect::GrowingFault
       static void declare_parameters(ParameterHandler &prm);
 
       /**
-       * Build the native rules on the fixed mesh at startup or after mesh
+       * Build the native rules on the current mesh at startup or after mesh
        * restoration. On restart install saved native tensors, replicated strip
        * records and law-owned state before the pre-solve observers. Collective.
        */
       void initialize_native_history();
+
+      /** Before mesh refinement, attach accepted point history to its owning
+       * cells for migration by p4est. A rejected trial is disposable. Collective. */
+      void prepare_history_transfer(parallel::distributed::Triangulation<dim> &mesh);
+
+      /** Rebuild cell rules and recover accepted records on the new owners
+       * after FE prolongation. Physical time and strip history stay fixed. Collective. */
+      void finish_history_transfer(parallel::distributed::Triangulation<dim> &mesh);
+
+      /** Maximum physical station width (m), or zero for the legacy uniform grid. Local. */
+      double target_strip_width() const
+      {
+        return requested_strip_width;
+      }
+
+      /** Unit seed tangent available before native rule construction. Local. */
+      Tensor<1,2> seed_tangent() const
+      {
+        return MaterialSections::seed_tangent(seed_angle_degrees);
+      }
+
+      /** Whether the material-strip rules and accepted point history exist on this mesh. Local. */
+      bool has_native_history() const
+      {
+        return geometry != nullptr;
+      }
 
       /** Publish the staged endpoint and advance law-owned state by the accepted duration (s). */
       void accept_endpoint(double duration);
@@ -148,6 +174,12 @@ namespace aspect::GrowingFault
       }
       /** Freeze the per-strip compression (Pa) from the accepted graph for one attempt. */
       SectionPressures section_pressures() const;
+      /** Furthest seed-connected formed station with phase trace at least 0.05.
+       * Both traces at a DG interface are considered. The caller supplies the
+       * FE solution and planes at the same clock. Collective on the mesh. */
+      Point<2> phase_supported_tip(const std::vector<double>           &angles,
+                                   const std::vector<unsigned int>     &formed,
+                                   const LinearAlgebra::BlockVector    &solution) const;
       unsigned int phase_field() const
       {
         return phase_field_index;
@@ -177,6 +209,8 @@ namespace aspect::GrowingFault
       unsigned int quadrature_order;
       const unsigned int phase_field_index;
       double seed_angle_degrees;
+      double requested_strip_width;
+      unsigned int transfer_handle = numbers::invalid_unsigned_int;
       double prescribed_compression; //!< Constant compression in Pa when that source is selected.
       MaterialModel::Rheology::FrictionNormalStress normal_stress;
       Point<2> seed_tip_position;

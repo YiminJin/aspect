@@ -21,8 +21,9 @@ namespace aspect::PhaseField
     const QGauss<1> face_rule(5);
     const auto flags = update_values | update_gradients;
     FEValues<2> volume(sim.get_mapping(), element, volume_rule, flags | update_JxW_values);
-    FEFaceValues<2> face(sim.get_mapping(), element, face_rule,
-                         flags | update_JxW_values | update_normal_vectors | update_quadrature_points);
+    const auto face_flags = flags | update_JxW_values | update_normal_vectors | update_quadrature_points;
+    FEFaceValues<2> face(sim.get_mapping(),element,face_rule,face_flags);
+    FESubfaceValues<2> subface(sim.get_mapping(),element,face_rule,face_flags);
     const auto phase_block_indices = [&](const auto &cell)
     {
       std::vector<Index> global(system.n_dofs_per_cell()), indices(element.n_dofs_per_cell());
@@ -46,42 +47,67 @@ namespace aspect::PhaseField
                                                    * (volume.shape_grad(i,q) * volume.shape_grad(j,q));
               }
 
-          // Assemble only this cell's test rows. The neighbor assembles its
-          // own rows using the opposite normal. Exterior faces are natural.
+          // Each rank assembles test rows only for its owned cells. Integrate
+          // the two traces on the same physical interval, including when it is
+          // just one half of the current face. The neighbor builds its test rows
+          // with the opposite outward normal. Exterior faces have natural flux.
+          const auto add_face_rows = [&](const FEFaceValuesBase<2> &trace,
+                                         const auto                &neighbor,
+                                         const unsigned int         face_no,
+                                         const double               piece_length)
+          {
+            std::vector<Point<2>> neighbor_points;
+            for (const auto &point : trace.get_quadrature_points())
+              neighbor_points.push_back(sim.get_mapping().transform_real_to_unit_cell(neighbor,point));
+            FEValues<2> neighbor_values(sim.get_mapping(),element,Quadrature<2>(neighbor_points),flags);
+            neighbor_values.reinit(Triangulation<2>::cell_iterator(neighbor));
+            const auto neighbor_columns = phase_block_indices(neighbor);
+            // Limit the penalty length by the smaller of the two normal
+            // cell heights, including for rectangular cells. The areas below
+            // are the portions subtended by this common physical face piece.
+            const double cell_area = cell->measure() * (piece_length/cell->face(face_no)->measure());
+            const double neighbor_area = neighbor->measure() *
+                                         (piece_length/neighbor->face(cell->neighbor_face_no(face_no))->measure());
+            const double penalty = sim.get_parameters().phase_discontinuous_penalty * std::pow(element.degree+1,2)
+                                   * gradient_coefficient * piece_length
+                                   / std::min(cell_area,neighbor_area);
+            for (unsigned int q=0; q<face_rule.size(); ++q)
+              for (unsigned int i=0; i<rows.size(); ++i)
+                {
+                  const double test = trace.shape_value(i,q);
+                  const double average_test_flux = .5 * gradient_coefficient
+                                                   * (trace.normal_vector(q) * trace.shape_grad(i,q));
+                  for (unsigned int j=0; j<rows.size(); ++j)
+                    {
+                      // The trial jump is the interior trace minus the exterior trace.
+                      const double interior_jump = trace.shape_value(j,q);
+                      const double exterior_jump = -neighbor_values.shape_value(j,q);
+                      stiffness[ {rows[i],rows[j]}] += trace.JxW(q) *
+                                                       ((penalty*test - average_test_flux)*interior_jump
+                                                        - .5*gradient_coefficient*test*(trace.normal_vector(q)*trace.shape_grad(j,q)));
+                      stiffness[ {rows[i],neighbor_columns[j]}] += trace.JxW(q) *
+                                                                   ((penalty*test - average_test_flux)*exterior_jump
+                                                                    - .5*gradient_coefficient*test*(trace.normal_vector(q)*neighbor_values.shape_grad(j,q)));
+                    }
+                }
+          };
+
           for (const auto f : cell->face_indices())
             if (!cell->at_boundary(f))
               {
                 const auto neighbor = cell->neighbor(f);
-                AssertThrow(neighbor->is_active() && !cell->neighbor_is_coarser(f),
-                            ExcMessage("Growing fault requires conforming faces."));
-                face.reinit(Triangulation<2>::cell_iterator(cell),f);
-                std::vector<Point<2>> neighbor_points;
-                for (const auto &point : face.get_quadrature_points())
-                  neighbor_points.push_back(sim.get_mapping().transform_real_to_unit_cell(neighbor,point));
-                FEValues<2> neighbor_values(sim.get_mapping(),element,Quadrature<2>(neighbor_points),flags);
-                neighbor_values.reinit(Triangulation<2>::cell_iterator(neighbor));
-                const auto neighbor_columns = phase_block_indices(neighbor);
-                const double penalty = sim.get_parameters().phase_discontinuous_penalty * std::pow(element.degree+1,2)
-                                       * gradient_coefficient * cell->face(f)->measure()
-                                       / std::min(cell->measure(),neighbor->measure());
-                for (unsigned int q=0; q<face_rule.size(); ++q)
-                  for (unsigned int i=0; i<rows.size(); ++i)
+                if (neighbor->is_active())
+                  {
+                    // Equal levels, or this is the fine side of a hanging face.
+                    face.reinit(Triangulation<2>::cell_iterator(cell),f);
+                    add_face_rows(face,neighbor,f,cell->face(f)->measure());
+                  }
+                else
+                  for (unsigned int s=0; s<cell->face(f)->n_children(); ++s)
                     {
-                      const double test = face.shape_value(i,q);
-                      const double average_test_flux = .5 * gradient_coefficient
-                                                       * (face.normal_vector(q) * face.shape_grad(i,q));
-                      for (unsigned int j=0; j<rows.size(); ++j)
-                        {
-                          // The trial jump is the interior trace minus the exterior trace.
-                          const double interior_jump = face.shape_value(j,q);
-                          const double exterior_jump = -neighbor_values.shape_value(j,q);
-                          stiffness[ {rows[i],rows[j]}] += face.JxW(q) *
-                                                           ((penalty*test - average_test_flux)*interior_jump
-                                                            - .5*gradient_coefficient*test*(face.normal_vector(q)*face.shape_grad(j,q)));
-                          stiffness[ {rows[i],neighbor_columns[j]}] += face.JxW(q) *
-                                                                       ((penalty*test - average_test_flux)*exterior_jump
-                                                                        - .5*gradient_coefficient*test*(face.normal_vector(q)*neighbor_values.shape_grad(j,q)));
-                        }
+                      subface.reinit(Triangulation<2>::cell_iterator(cell),f,s);
+                      add_face_rows(subface,cell->neighbor_child_on_subface(f,s),f,
+                                    cell->face(f)->child(s)->measure());
                     }
               }
         }

@@ -107,37 +107,8 @@ namespace aspect::GrowingFault
         std::fill(formed.begin() + first, formed.begin() + last, 1u);
       }
 
-    Point<2> center = seed;
-    const unsigned int beyond = std::upper_bound(stations.begin(), stations.end(), tip_xi) - stations.begin();
-    if (material.history().step && beyond < formed.size() && formed[beyond])
-      {
-        const auto graph = geometry.accepted_graph(seed, angles, formed);
-        const auto &fe = sim.get_fe();
-        const auto c = sim.introspection().component_indices.compositional_fields[field];
-        const auto &element = fe.base_element(fe.component_to_base_index(c).first);
-        std::vector<Index> ids(fe.n_dofs_per_cell());
-        for (unsigned int k = anchor; k < formed.size() && (k < beyond || formed[k]); ++k)
-          {
-            const Point<2> p = graph.at(stations[k]);
-            double trace = 0.;
-            for (const auto &cell : sim.get_dof_handler().active_cell_iterators())
-              if (cell->is_locally_owned() && cell->bounding_box().point_inside(p, 1.e-12))
-                {
-                  const auto unit = sim.get_mapping().transform_real_to_unit_cell(cell, p);
-                  if (!GeometryInfo<2>::is_inside_unit_cell(unit, 1.e-12))
-                    continue;
-                  cell->get_dof_indices(ids);
-                  double value = 0.;
-                  for (unsigned int i = 0; i < element.n_dofs_per_cell(); ++i)
-                    value += element.shape_value(i, unit) * sim.get_old_solution()[ids[fe.component_to_system_index(c, i)]];
-                  trace = std::max(trace, value);
-                }
-            if (Utilities::MPI::max(trace, comm) < .05)
-              break;
-            if (stations[k] > tip_xi)
-              center = p;
-          }
-      }
+    const Point<2> center = material.history().step ?
+                            material.phase_supported_tip(angles, formed, sim.get_old_solution()) : seed;
     // Freeze both eligibility and the compact kernel from this accepted graph.
     const double radius = 2.*ell;
     for (auto &[id, cell] : cells)

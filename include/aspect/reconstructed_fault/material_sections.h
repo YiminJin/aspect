@@ -14,7 +14,7 @@ namespace aspect
      * A material section is a strip between two fixed projections on the seed
      * tangent. Each owned cell stores a reference quadrature and one strip
      * index per point. The pair (CellId, quadrature index) identifies material
-     * through retries and continuation on this fixed mesh.
+     * through retries and continuation on each mesh. Refinement preserves the strip projection intervals.
      *
      * The structural plane is the local Mode II plane at angle beta to the
      * seed. A prospective plane can turn. A formed plane retains its angle
@@ -29,12 +29,18 @@ namespace aspect
         std::vector<unsigned int> section;
       };
 
-      /** Collective construction on a conforming Cartesian mesh. Only strip
-       * boundaries and the material frame are replicated. */
+      /** Collectively clip each locally owned Cartesian cell against the physical
+       * strips. A positive target width (m) sets the maximum station spacing
+       * independently of the bulk mesh. Zero selects the smallest cell width.
+       * Only strip boundaries and the material frame are replicated. */
       MaterialSections(const Triangulation<2> &mesh,
                        MPI_Comm               comm,
                        double                 seed_angle_degrees,
-                       unsigned int           gauss_order);
+                       unsigned int           gauss_order,
+                       double                 target_strip_width = 0.);
+
+      /** Unit tangent, measured counterclockwise from x in degrees. Local. */
+      static Tensor<1,2> seed_tangent(double angle_degrees);
 
       /** Seed, connected material stations and forward continuation, ordered by
        * tangent projection in metres. A formed arriving station sets its slope. */

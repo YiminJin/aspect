@@ -17,6 +17,7 @@ namespace aspect::GrowingFault
     using Values=std::vector<double>;
     using Matrix=PhaseField::FractureRows::Matrix;
     using Index=PhaseField::FractureRows::Index;
+    using HangingNodes = std::map<Index,std::vector<std::pair<Index,double>>>;
     struct Shape
     {
       Stress strain; //!< 3-D deviator of a velocity shape's plane-strain symmetric gradient (1/m).
@@ -79,7 +80,11 @@ namespace aspect::GrowingFault
     const SectionPressures friction_pressures;
     std::map<CellId,Cell> cells;
     Values initial,lower,upper,mass,angles;
-    std::map<Index,double> fixed;
+    std::map<Index,double> fixed; //!< Physical prescriptions on independent DoFs, in stage units.
+    /** Pure geometric Q2/Q1 interpolation, replicated with the stage vector.
+     * Each dependent DoF refers only to independent masters, including those
+     * whose stage values are subsequently prescribed on the wall. */
+    HangingNodes hanging_nodes;
     std::vector<unsigned int> formed,eligible;
     /** Collective, once per attempt. Track the connected accepted graph and
      * freeze the material-point weights in the forward disk. */
