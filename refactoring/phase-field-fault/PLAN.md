@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+The [Example 2 continuation](example2/continued-granite/README.md) follows the original one-sided damage source through successive accepted intervals, refinement, retry and restart. The current laptop measurement ends at 2 ms on the prestressed 48 × 24 grid. A resolved granite slip pulse, advance into intact rock and arrest remain open.
+
 **Fault AMR uses the initialized seed and the seed-connected 0.01 endpoint excursion.** The crack law supplies the normal profile width. The direction search supplies the angular envelope and mechanical kernel about the 0.05 supported tip. The bulk edge target can change independently of physical strip spacing. The [repair closeout and installed replay](example2/amr/amr-review.md) supersedes the former per-step center-sample crossing test.
 
 **One public fault material interface.** New mature and growing decks place fault inputs under `Material model / Phase field fault`. The phase method selects the mechanics. The [installed verification](results/canonical-material/README.md) covers both old input formats and accepted native checkpoints. The [prestressed granite production and fixed-wall inputs](results/canonical-material/GRANITE.md) start from the supplied native shear and preserve the zero-stress preload as a separate historical control.

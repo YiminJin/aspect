@@ -1,0 +1,26 @@
+# Enable the .01 marker on the old uniform checkpoint. The unchanged grid
+# already resolves both the original physical strips and the requested edge.
+include granite_prestress_continue_48x24.prm
+set End time = 0.0010075
+subsection Termination criteria
+  set Termination criteria = end time, end step
+  set End step = 135
+end
+subsection Material model
+  subsection Phase field fault
+    set Target strip width = .03125
+  end
+end
+subsection Mesh refinement
+  set Strategy = growing fault
+  set Coarsening fraction = 0
+  subsection Growing fault
+    set Maximum cell edge = .03125
+  end
+end
+subsection Time stepping
+  set List of model names = fault RSF, growing fault refinement
+end
+subsection Postprocess
+  set List of postprocessors = phase field fault history, compact granite history
+end

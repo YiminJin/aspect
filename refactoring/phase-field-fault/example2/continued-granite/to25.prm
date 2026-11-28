@@ -1,0 +1,11 @@
+include granite_prestress_continue_48x24.prm
+set End time = 0.025
+subsection Termination criteria
+  set Termination criteria = end time
+  set Checkpoint on termination = true
+end
+subsection Checkpointing
+  set Steps between checkpoint = 500
+  set Number of checkpoints to keep = 3
+  set Additional checkpoint times = 0.01, 0.025
+end

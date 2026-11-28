@@ -1,0 +1,26 @@
+{
+  "raw_overlap_files": 297,
+  "raw_overlap_end_s": 0.001739775,
+  "earlier_seconds_per_step": 7.352456440358208,
+  "continued_seconds_per_step": 7.293503216417909,
+  "continued_dt_range_s": [
+    4.7749999999970125e-06,
+    7.500000000000128e-06
+  ],
+  "continued_repeats": 0,
+  "changed_sparse_phase_shards": 0,
+  "phase_shards": 268,
+  "max_abs_ahead_phi": 0.0,
+  "max_front_envelope_gap_m": {
+    "001": 0.0,
+    "005": 0.0
+  },
+  "continued_wall_s": 979.8573600230011,
+  "archive_sha256": "f05a055444529c91c7417d61a5e942fdfbdb9b744d52c49653796746fb6c2f76",
+  "resume_sha256": "fb1c69257920b16f6bf141dd5162dfa17c564a07862c8cf415fcdbbaf981b3c5",
+  "restart_metadata": [
+    "time 0.0020075000000000002",
+    "timestep_number 269",
+    "composition_bases 1 \"FE_DGQBernstein<2>(2)\""
+  ]
+}

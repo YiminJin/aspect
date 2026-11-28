@@ -1,5 +1,11 @@
 # Phase-field fault working record
 
+## Example 2 laptop closeout at 2 ms
+
+From `b3ca2603a`, `31f6c0450` preserves the original damage component through publication, retry, mesh refinement and checkpoint restore. The one- and two-rank seed tests, installed unit suite (3,262 assertions), growing-fault CTest and AT1 mesh controls passed. `ebefe2b5b` measures both connected contours on physical cells and distinguishes the formed and phase-tracked mechanical tips. The [record, exact commands, figure, inputs and checkpoint](example2/continued-granite/README.md) cover the [assignment](example2/CODEX_EXAMPLE2_AFTER_AMR_REVIEW.md) with the author's 2 ms laptop stop.
+
+At step 268 the coarse run reached 2 ms. The peak was 1.07676661 µm/s at x = 0.609375 m and the signed near-tip rate was +1.00261346 µm/s at x = 1.109375 m. The near-tip acceleration declined from 1.32977 to 1.28695 µm/s² between the two milliseconds. Neither connected contour moved beyond coordinate roundoff, and all phase coefficients ahead of x = 1.125 m were zero. The second interval averaged 7.29 wall seconds per accepted step. The separate prestressed disk and uniform fine startups matched at initialization. Their first linearized obstacle corrections were still in progress at their laptop cutoffs. A matched fine-mesh physical endpoint, propagation and arrest remain open. All laptop solver runs have ended.
+
 ## Fault AMR review repairs
 
 From `3c1ec279d`, `8aab7771c` puts the compact support with each crack law, the kernel and angular range with the mechanical search, and physical station compatibility with the strip history. `6a14d4702` uses those quantities for prediction and checks the actual 0.01 DGQ2 excursion before acceptance. The mechanical tip still uses 0.05. The installed controls are in `766935e15`. The [six findings, operator guarantees and installed replay](example2/amr/amr-review.md) include the [before/after initialized phase and mesh figure](example2/amr/support-and-seed.md) and [physical-strip restart tests](example2/amr/refinement-restart.md).
