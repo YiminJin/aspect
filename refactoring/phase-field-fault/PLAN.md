@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**One public fault material interface.** New mature and growing decks place fault inputs under `Material model / Phase field fault`. The phase method selects the mechanics. The [installed verification](results/canonical-material/README.md) covers both old input formats and accepted native checkpoints. The [prestressed granite production and fixed-wall inputs](results/canonical-material/GRANITE.md) start from the supplied native shear and preserve the zero-stress preload as a separate historical control.
+
 **Example 2 fault-following refinement.** The [AMR qualification](example2/amr/README.md) covers hanging Q2/Q1 mechanics, fine-subface Bernstein phase assembly, distributed transfer of accepted strip history and timestep-manager recovery. The fixed-sector and moving-disk inputs share the [uniform granite pilot](example2/REPORT.md) physics. Use the smaller advancing case to review front tracking at matched physical clocks. Granite burst timing, arrest and mesh-converged front advance require a positive-time granite trajectory.
 
 **The fresh historical BP3 package is ready for the author’s Stampede3 startup.** Use the weakening-dependent slip budget, all-station age check and accepted event output from [fresh-start qualification](results/bp3-fresh-start/README.md). The next measurement is a bounded full-grid solve and continuation from its own checkpoint.
