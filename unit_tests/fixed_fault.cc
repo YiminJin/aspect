@@ -4,6 +4,7 @@
 */
 #include "common.h"
 #include <aspect/adiabatic_conditions/interface.h>
+#include <aspect/material_model/phase_field_fault/input_compatibility.h>
 #include <aspect/material_model/rheology/friction_normal_stress.h>
 #include <aspect/material_model/rheology/rate_and_state_friction.h>
 #include <aspect/reconstructed_fault/material_fault_trace.h>
@@ -193,11 +194,13 @@ TEST_CASE("Fault normal stress selection preserves the historical route defaults
   prm.enter_subsection("Material model");
   prm.set("Friction normal stress","resolved normal traction");
   prm.leave_subsection();
+  aspect::MaterialModel::FaultInputCompatibility::resolve(prm, true, false);
   REQUIRE_THROWS(Pressure::parse(prm,Pressure::Source::prescribed_constant));
   aspect::AdiabaticConditions::declare_parameters<2>(prm);
   prm.enter_subsection("Material model");
   prm.set("Friction normal stress","adiabatic pressure");
   prm.leave_subsection();
+  aspect::MaterialModel::FaultInputCompatibility::resolve(prm, true, false);
   for (auto legacy :
        {
          Pressure::Source::resolved_traction, Pressure::Source::prescribed_constant

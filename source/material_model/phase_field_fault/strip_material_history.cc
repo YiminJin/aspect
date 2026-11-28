@@ -98,7 +98,8 @@ namespace aspect::GrowingFault
     const auto stress = Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial deviatoric stress")));
     initial_deviatoric_stress[0][0] = stress[0];
     initial_deviatoric_stress[1][1] = stress[1];
-    initial_deviatoric_stress[2][2] = -(stress[0] + stress[1]);
+    // A zero in-plane trace retains the positive zero of the original fresh history.
+    initial_deviatoric_stress[2][2] = 0. - (stress[0] + stress[1]);
     initial_deviatoric_stress[0][1] = stress[2];
     AssertThrow(std::isfinite(initial_deviatoric_stress[2][2]) && std::isfinite(stress[2]),
                 ExcMessage("Initial deviatoric stress must have finite Cartesian components including zz."));
