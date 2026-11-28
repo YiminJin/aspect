@@ -1,0 +1,179 @@
+# Laboratory-scale, single-tip shear fault in a 2-D incompressible strip.
+# Self-contained input for YiminJin/aspect, pf-rsf, ee6d59cb7e59.
+# SI throughout. A smooth subcritical setup load precedes the constant drive.
+# The setup load is a target for intact elastic material. Check the actual
+# response and exclude all setup activity from any recurrence measurement.
+
+set Dimension                              = 2
+set Use years instead of seconds           = false
+set End time                               = 0.35
+set Output directory                       = output-granite-fault-growth
+set Nonlinear solver scheme                = single Advection, iterated Newton Stokes
+set Nonlinear solver failure strategy      = cut timestep size
+set Max nonlinear iterations               = 80
+set Nonlinear solver tolerance             = 1e-12
+set Pressure normalization                 = no
+# The midpoint law admits dt <= 2*eta_rad*Dc/(b*pN) = 7.698 microseconds.
+# The fault RSF controller can reduce dt further during slip acceleration.
+set Maximum first time step                = 7.5e-6
+set Maximum time step                      = 7.5e-6
+
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set X extent      = 1.5
+    set Y extent      = 0.75
+    set X repetitions = 96
+    set Y repetitions = 48
+  end
+end
+
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+
+subsection Temperature field
+  set Temperature method = static
+end
+
+subsection Initial temperature model
+  set List of model names = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+
+subsection Adiabatic conditions model
+  set Model name = function
+  subsection Function
+    set Variable names      = depth
+    # Temperature (K), effective friction pressure (Pa), reference density (kg/m^3).
+    # The prescribed pressure enters the fault resistance at every station.
+    set Function expression = 293; 7.0e7; 2650
+  end
+end
+
+subsection Compositional fields
+  set Number of fields            = 1
+  set Names of fields             = phase_field
+  set Types of fields             = phase field
+  set Compositional field methods = midpoint fault phase
+end
+
+subsection Discretization
+  set Composition polynomial degree               = 2
+  set Use discontinuous composition discretization = true
+end
+
+subsection Initial composition model
+  set List of model names = function
+  subsection Function
+    set Variable names = x,y
+    # Horizontal seed extends from the left wall to xtip. Its last 0.125 m
+    # taper to zero. Across the fault use the compact quadratic AT1 profile.
+    # Support ends on mesh faces. peak is dimensionless. Lengths are in m.
+    set Function constants  = yc=0.375, xtip=1.125, taper=0.125, halfwidth=0.125, peak=0.95
+    set Function expression = peak * max(0, 1-abs(y-yc)/halfwidth)^2 * \
+                              min(1, max(0, (xtip-x)/taper))^2
+  end
+end
+
+subsection Material model
+  set Model name             = phase field fault
+  set Friction normal stress = adiabatic pressure
+  subsection Phase field fault
+    # G from E=64 GPa and nu=0.20. The solver uses incompressible kinematics.
+    # eta/G = 1.19e6 s makes the bulk effectively elastic over this experiment.
+    set Shear modulus                  = 2.6666666667e10
+    set Viscosity                      = 3.17e16
+    set Resistance law                 = rate and state
+    set Reference friction coefficient = 0.75
+    set Direct effect                  = 0.0137
+    set Evolution effect               = 0.0156
+    set Reference speed                = 1e-6
+    set Slip distance                  = 1e-6
+    # Dc/V0. The native growing material begins with zero bulk shear stress.
+    set Initial age                    = 1
+    # G/(2*cs), cs=sqrt(G/rho), rho=2650 kg/m^3.
+    set Radiation damping              = 4.2031734e6
+  end
+  subsection Growing fault
+    set Seed tangent angle       = 0
+    set Forward seed tip         = 1.125, 0.375
+    set Section quadrature order = 6
+    # Cohesive excess strength in Pa, in addition to friction on a formed fault.
+    set Cohesion                 = 8.5e7
+  end
+end
+
+subsection Phase field
+  set Phase composition = phase_field
+  set Crack geometry    = AT1
+  set Fracture energy   = 1.0e4
+  set Length scale      = 0.0625
+end
+
+subsection Mesh refinement
+  # The present growing midpoint solver requires a fixed conforming mesh.
+  set Initial global refinement         = 0
+  set Initial adaptive refinement       = 0
+  set Time steps between mesh refinement = 0
+end
+
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right:function, bottom:function, top:function
+  subsection Function
+    set Variable names = x,y,t
+    # All four walls follow the same affine shear; v_y=0. Full relative
+    # drive speed is 1 mm/s after Tload. The smooth startup adds Dload (m)
+    # of relative displacement with zero extra velocity at either end.
+    # Dload=0 removes the setup load. Extend End time for that control.
+    set Function constants  = yc=0.375, H=0.75, Udrive=0.001, Dload=0.00135, Tload=0.025, cycle=6.283185307179586
+    set Function expression = (y-yc)/H * (Udrive + Dload/Tload * \
+                              (1-cos(cycle*min(t/Tload,1)))); 0
+  end
+end
+
+subsection Solver parameters
+  subsection Stokes solver parameters
+    # Select separate velocity and pressure blocks. The growing midpoint
+    # implementation factors its coupled matrix on rank zero with UMFPACK.
+    set Stokes solver type = block AMG
+  end
+end
+
+subsection Time stepping
+  set List of model names = fault RSF
+  subsection Fault RSF
+    set Maximum slip fraction            = 0.1
+    set Maximum logarithmic state change = 0.1
+    set Report timestep limits           = true
+  end
+end
+
+subsection Checkpointing
+  set Steps between checkpoint      = 2000
+  set Number of checkpoints to keep = 3
+  set Additional checkpoint times   = 0.025, 0.1, 0.2, 0.3
+end
+
+subsection Termination criteria
+  set Checkpoint on termination = true
+end
+
+subsection Postprocess
+  # Phase snapshots plus per-attempt RSF logs keep the survey output compact.
+  # For a short event replay, add "growing fault history" to the following
+  # list to obtain signed V, slip, age and formed flags on every station and
+  # the accepted work ledger. That exporter also writes every native point.
+  set List of postprocessors = visualization
+  subsection Visualization
+    set Output format                 = vtu
+    set Time between graphical output = 0.001
+    set Number of grouped files       = 1
+    set Interpolate output            = true
+  end
+end

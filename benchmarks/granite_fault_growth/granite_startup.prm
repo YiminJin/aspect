@@ -1,0 +1,14 @@
+# Use in the same directory as granite_fault_growth.prm. Fresh output, same
+# mesh and physics. Keep dense native output for the first eight nominal steps.
+include granite_fault_growth.prm
+
+set End time         = 6.0e-5
+set Output directory = output-granite-fault-startup
+
+subsection Checkpointing
+  set Additional checkpoint times =
+end
+
+subsection Postprocess
+  set List of postprocessors = growing fault history
+end

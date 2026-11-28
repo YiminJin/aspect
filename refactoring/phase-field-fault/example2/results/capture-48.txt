@@ -1,0 +1,9 @@
+Last root free=0.00011124036969983266 M=8.3428276403266556e-07 age=1 h=3.7500000000000001e-06 pressure=70000000
+Last strip 7
+VmHWM:	  774084 kB
+#0  0x00007fffe24b5a9a in __cxa_throw () from /usr/lib/libstdc++.so.6
+#1  0x0000000000d7c38c in void dealii::deal_II_exceptions::internals::issue_error_noreturn<dealii::StandardExceptions::ExcMessage>(dealii::deal_II_exceptions::internals::ExceptionHandling, char const*, int, char const*, char const*, char const*, dealii::StandardExceptions::ExcMessage) ()
+#2  0x0000000001b85d54 in aspect::MaterialModel::Rheology::RateAndStateFriction::solve_strip(double, double, double, double, double) const ()
+#3  0x0000000001b85df0 in aspect::MaterialModel::Rheology::RateStateHistory::solve_strip(unsigned int, double, double, double, double) const ()
+#4  0x0000000001325caf in aspect::GrowingFault::MidpointSystem::assemble_stage(std::vector<double, std::allocator<double> > const&, bool, bool) const ()
+#5  0x000000000136ac1a in aspect::GrowingFault::advance_midpoint(aspect::SimulatorAccess<2> const&, aspect::MaterialModel::Interface<2>&, dealii::TrilinosWrappers::MPI::BlockVector&) ()

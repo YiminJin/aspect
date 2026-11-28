@@ -1,0 +1,10 @@
+# From this directory run aspect granite_coarse_startup.prm.
+include granite_startup.prm
+set Output directory = output-granite-48x24-startup
+
+subsection Geometry model
+  subsection Box
+    set X repetitions = 48
+    set Y repetitions = 24
+  end
+end

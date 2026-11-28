@@ -1,0 +1,7 @@
+include granite_coarse_survey.prm
+
+# Stop after publishing the initial state and selecting the first physical dt.
+subsection Termination criteria
+  set Termination criteria = end time, end step
+  set End step = 0
+end

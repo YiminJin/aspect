@@ -1,0 +1,8 @@
+include granite_coarse_startup.prm
+set Output directory = output-root-12
+subsection Geometry model
+  subsection Box
+    set X repetitions = 12
+    set Y repetitions = 6
+  end
+end

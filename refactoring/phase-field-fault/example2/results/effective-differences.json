@@ -1,0 +1,14 @@
+{
+  "Geometry model/Box/X repetitions": [
+    "48",
+    "96"
+  ],
+  "Geometry model/Box/Y repetitions": [
+    "24",
+    "48"
+  ],
+  "Output directory": [
+    "output-granite-48x24-startup",
+    "output-granite-fault-startup"
+  ]
+}

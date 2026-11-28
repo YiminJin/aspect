@@ -1,0 +1,23 @@
+{
+  "free_m_per_s": 4.5020687873187534e-05,
+  "mobility_m_per_s_Pa": 5.02418544224536e-07,
+  "pressure_Pa": 70000000.0,
+  "age_s": 1.0,
+  "h_s": 3.75e-06,
+  "independent_rate_m_per_s": 3.1355276908136503e-34,
+  "independent_resistance_Pa": 89.60793424270447,
+  "adjacent_binary64_rates": [
+    3.1355276908136785e-34,
+    3.135527690813679e-34
+  ],
+  "stored_residuals_m_per_s": [
+    -3.2171963830253057e-19,
+    3.208620861353051e-19
+  ],
+  "certificate_m_per_s": 3.1989122727216237e-19,
+  "residual_over_certificate": [
+    -1.0057157273300672,
+    1.0030349655769608
+  ],
+  "independent_residual_at_rounded_root": -2.3926084488474477e-22
+}

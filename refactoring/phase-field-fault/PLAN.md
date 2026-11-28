@@ -1,5 +1,7 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
+**Example 2 uniform-mesh startup.** The [granite pilot](example2/REPORT.md) records two cold-creep numerical checks that block the first accepted physical step. Qualify the signed RSF root and the native strip-rate reconstruction before interpreting burst timing or front advance. The [AMR design](example2/AMR_DESIGN.md) belongs to a subsequent assignment.
+
 **The fresh historical BP3 package is ready for the author’s Stampede3 startup.** Use the weakening-dependent slip budget, all-station age check and accepted event output from [fresh-start qualification](results/bp3-fresh-start/README.md). The next measurement is a bounded full-grid solve and continuation from its own checkpoint.
 
 **The historical BP3 first-event case is ready for bounded server qualification.** Start the full 150 × 50 km configuration from initial conditions, checkpoint it, resume through step 3, and review both contact tractions and the all-station timestep restrictions before first-event continuation. The 900 s pilot remains a separate regression. [Assignment](BP3_HISTORICAL_FIRST_EVENT_TASK.md) · [measurements and limits](results/bp3-first-event/README.md) · [Stampede3 commands](../../benchmarks/bp3_qd_thrust/README.md).

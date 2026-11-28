@@ -1,0 +1,2 @@
+include granite_coarse_survey.prm
+set Resume computation = true

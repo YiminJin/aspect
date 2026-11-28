@@ -1,6 +1,8 @@
 # Phase-field fault working record
 
-Active assignment: [BP3 fresh historical start](bp3/BP3_FRESH_START_CODING_TASK.md). The package is ready for the author's bounded Stampede3 run. The previous server checkpoint is outside this experiment.
+The [Example 2 granite pilot](example2/REPORT.md) reached the accepted initial state on 48 × 24 and 96 × 48. Both four-rank first steps aborted in the signed RSF root. Replaying the two scalar inputs puts the computed residual on opposite sides of the unchanged tolerance at adjacent binary64 speeds. The coarse survey checkpoint restores that same parent. On two ranks the converged coarse solve instead failed the native history check on strip 0 (1.039e−33 m/s reconstructed versus 4.666e−34 m/s from friction). The two target meshes have zero elapsed steady-drive time, so rapid slip at the tip, extension and arrest remain open. The report includes the effective inputs, costs, connected contours, an auxiliary 12 × 6 preload control and exact replay commands. The next numerical check is the signed-root evaluation on these captured inputs. AMR remains separate.
+
+The [BP3 fresh historical start](bp3/BP3_FRESH_START_CODING_TASK.md) package is ready for the author's bounded Stampede3 run. The previous server checkpoint is outside that experiment.
 
 ## Fresh historical 60° thrust deployment
 

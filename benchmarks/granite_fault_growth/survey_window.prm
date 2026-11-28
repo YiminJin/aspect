@@ -1,0 +1,15 @@
+include granite_coarse_survey.prm
+
+# Dense startup replay. Keep the full survey end time so each saved generation
+# carries the next physical timestep chosen by the ordinary controller.
+set Output directory = output-granite-survey-window
+subsection Termination criteria
+  set Termination criteria = end time, end step
+  set End step = 8
+end
+subsection Postprocess
+  set List of postprocessors = growing fault history
+end
+subsection Checkpointing
+  set Steps between checkpoint = 1
+end

@@ -1,0 +1,14 @@
+{
+  "cells": 4608,
+  "points": 165888,
+  "sections": 96,
+  "max_native_error": 6.661338147750939e-16,
+  "max_reconstruction_error": 6.661338147750939e-16,
+  "area_m2": 1.1249999999999998,
+  "peak_abs_stress_Pa": 0.0,
+  "max_phase_ahead": 0.0,
+  "connected_tip_m": {
+    "0.01": 1.1121752705989356,
+    "0.05": 1.0963230332661797
+  }
+}
