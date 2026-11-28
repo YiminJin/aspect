@@ -6,6 +6,7 @@ from pathlib import Path
 import resource
 import subprocess
 import sys
+import threading
 import time
 
 
@@ -41,7 +42,11 @@ def main():
     parser.add_argument("input", type=Path)
     parser.add_argument("name", help="New timing directory beside the input")
     parser.add_argument("--ranks", type=int, default=4, choices=range(1, 5))
+    parser.add_argument("--wall-limit", type=float,
+                        help="Stop the MPI launch after this many seconds; retain the last solver output")
     args = parser.parse_args()
+    if args.wall_limit is not None and args.wall_limit <= 0:
+        parser.error("The wall limit must be positive")
     exe = args.executable.resolve(strict=True)
     prm = args.input.resolve(strict=True)
     record = prm.parent / args.name
@@ -55,17 +60,35 @@ def main():
            "--rank", str(record), str(exe), prm.name]
     (record / "command.json").write_text(json.dumps(cmd) + "\n")
     start = time.monotonic()
+    expired = threading.Event()
     with (record / "solver.log").open("w", buffering=1) as log, \
          (record / "wall.log").open("w", buffering=1) as times:
         with subprocess.Popen(cmd, cwd=prm.parent, env=env, stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT, text=True, errors="replace") as solver:
-            for line in solver.stdout:
-                log.write(line)
-                if line.strip():
-                    times.write(f"{time.monotonic()-start:.6f} {line}")
-            status = solver.wait()
-    (record / "exit.json").write_text(json.dumps(dict(status=status, wall_s=time.monotonic()-start)) + "\n")
-    return status
+            def stop_at_deadline():
+                if solver.poll() is None:
+                    expired.set()
+                    solver.terminate()
+
+            deadline = threading.Timer(args.wall_limit, stop_at_deadline) if args.wall_limit else None
+            if deadline:
+                deadline.start()
+            try:
+                for line in solver.stdout:
+                    log.write(line)
+                    if line.strip():
+                        times.write(f"{time.monotonic()-start:.6f} {line}")
+                status = solver.wait()
+            finally:
+                if deadline:
+                    deadline.cancel()
+    result = dict(status=status, wall_s=time.monotonic()-start)
+    if args.wall_limit is not None:
+        result.update(wall_limit_s=args.wall_limit, wall_limit_reached=expired.is_set())
+        if expired.is_set():
+            result.update(launcher_status=status, status=124)
+    (record / "exit.json").write_text(json.dumps(result) + "\n")
+    return result["status"]
 
 
 if __name__ == "__main__":

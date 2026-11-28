@@ -18,6 +18,7 @@ def main():
     parser.add_argument("destination", type=Path)
     parser.add_argument("--steps", type=int, default=1)
     parser.add_argument("--ranks", type=int, default=2)
+    parser.add_argument("--wall-limit", type=float, help="Wall seconds allowed for the MPI calculation")
     args = parser.parse_args()
     here = Path(__file__).resolve().parent
     dst = args.destination.resolve()
@@ -38,8 +39,11 @@ subsection Postprocess
   set List of postprocessors = growing fault history
 end
 """)
-    return subprocess.call([sys.executable, here.parent / "run.py", args.aspect.resolve(), prm,
-                            "timed", "--ranks", str(args.ranks)])
+    cmd = [sys.executable, here.parent / "run.py", args.aspect.resolve(), prm, "timed",
+           "--ranks", str(args.ranks)]
+    if args.wall_limit is not None:
+        cmd += ["--wall-limit", str(args.wall_limit)]
+    return subprocess.call(cmd)
 
 
 if __name__ == "__main__":
