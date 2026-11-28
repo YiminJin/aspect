@@ -85,7 +85,7 @@ namespace aspect::GrowingFault
       stations.push_back(.5 * (geometry.edges[k] + geometry.edges[k + 1]));
     const auto station = [&](const double xi)->unsigned int
     {return std::lower_bound(stations.begin(), stations.end(), xi) - stations.begin();};
-    const unsigned int anchor = station(tip_xi - ell);
+    const unsigned int anchor = station(material.incoming_seed_coordinate());
     if (material.history().step == 0)
       {
         check_initial_seed_tip(sim,
@@ -110,7 +110,7 @@ namespace aspect::GrowingFault
     const Point<2> center = material.history().step ?
                             material.phase_supported_tip(angles, formed, sim.get_old_solution()) : seed;
     // Freeze both eligibility and the compact kernel from this accepted graph.
-    const double radius = 2.*ell;
+    const double radius = direction_search_radius(ell);
     for (auto &[id, cell] : cells)
       for (auto &p : cell.points)
         {
@@ -202,7 +202,7 @@ namespace aspect::GrowingFault
           {
             return score_plane(k, m, &centered[3 * k], angle).score;
           };
-          const double limit = numbers::PI / 4., spacing = 2.*limit / 128.;
+          const double limit = maximum_turn_angle, spacing = 2.*limit / 128.;
           unsigned int best_grid_index = 0;
           double maximum = -1.;
           for (unsigned int j = 0; j <= 128; ++j)

@@ -79,6 +79,19 @@ namespace aspect
              };
     }
 
+    double SurfaceEnergyModel::compact_profile_half_width() const
+    {
+      const auto factor = geometry.compact_profile_half_width_factor();
+      AssertThrow(factor.has_value(),
+                  ExcMessage("A finite reference profile is required, but " + geometry.name() +
+                             " has infinite support."));
+      const double width = length_scale * factor.value();
+      AssertThrow(std::isfinite(width) && width > 0.,
+                  ExcMessage("The " + geometry.name() +
+                             " reference profile requires a finite, positive half-width in metres."));
+      return width;
+    }
+
     void SurfaceEnergyModel::validate() const
     {
       AssertThrow(std::isfinite(fracture_energy) && fracture_energy > 0.,

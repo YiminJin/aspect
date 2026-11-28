@@ -114,6 +114,21 @@ namespace aspect::GrowingFault
         return requested_strip_width;
       }
 
+      /** Check the spacing, quadrature and coarsening policy required to
+       * transfer the accepted native history. Local, with no state change. */
+      void validate_refinement() const;
+
+      /** Tangent projection (m) one phase length behind the prescribed seed
+       * tip. Mechanics starts at the first strip midpoint at or beyond this
+       * coordinate, including when the nominal point is outside the box.
+       * Local; requires the native station partition. */
+      double incoming_seed_coordinate() const;
+
+      /** Physical incoming seed point used to anchor phase connectivity.
+       * Follow the incoming seed tangent back for one phase length, stopping
+       * at the wall if reached first. Local and available before native rules. */
+      Point<2> incoming_seed_anchor() const;
+
       /** Unit seed tangent available before native rule construction. Local. */
       Tensor<1,2> seed_tangent() const
       {

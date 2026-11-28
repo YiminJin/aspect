@@ -109,7 +109,7 @@ def functional_controls(case, legacy, canonical):
         case("conflict-" + name.replace(" ", "-"), canonical + changed + legacy_value, diagnostic=f"Conflicting {name}")
     for law in ("AT2", "CZM"):
         case("coupled-" + law, canonical + subsection("Phase field", "set Crack geometry = " + law),
-             diagnostic="requires the configured AT1 surface energy")
+             diagnostic=f"requires the configured AT1 surface energy. Selected crack geometry: {law}.")
 
 
 def face_controls(case, canonical):

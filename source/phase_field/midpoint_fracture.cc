@@ -4,11 +4,17 @@
 
 namespace aspect::PhaseField
 {
+  void FractureRows::require_supported_geometry(const CrackGeometry &geometry)
+  {
+    AssertThrow(&geometry == &CrackGeometry::select("AT1"),
+                ExcMessage("Midpoint fault phase requires the configured AT1 surface energy. "
+                           "Selected crack geometry: " + geometry.name() + "."));
+  }
+
   FractureRows::FractureRows(const SimulatorAccess<2> &sim, const unsigned int composition)
   {
     const auto &model = sim.get_parameters().surface_energy_model;
-    AssertThrow(&model.geometry == &CrackGeometry::select("AT1"),
-                ExcMessage("Growing fault requires the AT1 surface energy."));
+    require_supported_geometry(model.geometry);
     const double gradient_coefficient = 2. * model.length_scale * model.length_scale;
 
     const auto &system = sim.get_fe();

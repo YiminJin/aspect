@@ -5,6 +5,7 @@
 #ifndef _aspect_phase_field_crack_geometry_h
 #define _aspect_phase_field_crack_geometry_h
 
+#include <optional>
 #include <string>
 
 namespace aspect
@@ -38,6 +39,18 @@ namespace aspect
 
         /** Surface normalization c_0 = 4 integral_0^1 sqrt(alpha(u)) du. */
         virtual double normalization() const = 0;
+
+        /** Parameter-file name of this crack-geometric law. */
+        virtual const std::string &name() const = 0;
+
+        /**
+         * Half-width of the fully developed, one-dimensional reference crack
+         * in units of the regularization length. This equals the integral of
+         * 1/sqrt(alpha(s)) from zero to one. An empty result means that the
+         * profile has infinite support. A prescribed initial seed can differ
+         * from this stationary profile.
+         */
+        virtual std::optional<double> compact_profile_half_width_factor() const = 0;
     };
   }
 }

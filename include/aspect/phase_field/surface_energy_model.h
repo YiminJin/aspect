@@ -29,6 +29,13 @@ namespace aspect
       /** Check the physical constants when a consumer activates the model. */
       void validate() const;
 
+      /**
+       * Physical half-width (metres) of the stationary compact reference
+       * profile. Throws for a law with infinite support, or a length that
+       * cannot give a finite, positive physical width.
+       */
+      double compact_profile_half_width() const;
+
       const CrackGeometry &geometry;
       const std::string composition;
       const double fracture_energy;  ///< Gc in J/m^2.

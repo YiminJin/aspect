@@ -76,6 +76,11 @@ namespace aspect::GrowingFault
   {
     const auto &p = simulator.get_parameters();
     const auto &energy = p.surface_energy_model;
+    // Both the strip construction and pre-solve fault marking use this box.
+    // The parent material has already required zero initial topography.
+    AssertThrow(Plugins::plugin_type_matches<GeometryModel::Box<dim>>(simulator.get_geometry_model()) &&
+                simulator.get_geometry_model().get_periodic_boundary_pairs().empty(),
+                ExcMessage("Growing fault requires a fixed nonperiodic box."));
     using NormalStress = MaterialModel::Rheology::FrictionNormalStress;
     normal_stress = NormalStress::parse(prm, NormalStress::Source::prescribed_constant);
     const bool legacy_compression = !prm.get("Surface pressure").empty();
@@ -143,9 +148,6 @@ namespace aspect::GrowingFault
   {
     if constexpr (dim == 2)
       {
-        AssertThrow(dynamic_cast<const GeometryModel::Box<dim>*>(&simulator.get_geometry_model()) &&
-                    simulator.get_geometry_model().get_periodic_boundary_pairs().empty(),
-                    ExcMessage("Growing fault requires a fixed nonperiodic box."));
         geometry = std::make_unique<MaterialSections>(simulator.get_triangulation(), simulator.get_mpi_communicator(), seed_angle_degrees, quadrature_order, requested_strip_width);
         accepted.sections.resize(geometry->edges.size() - 1);
         resistance_law->initialize(accepted.sections.size());
@@ -165,6 +167,13 @@ namespace aspect::GrowingFault
             ar >> signature;
             AssertThrow(signature == checkpoint_parameters(), ExcMessage("Growing fault physical parameters differ from the checkpoint."));
             ar >> saved_quadrature_order >> saved_seed_angle >> edges >> accepted.step >> accepted.time;
+            // Material IDs refer to these physical intervals. The bulk mesh
+            // target and the requested upper bound on strip spacing may
+            // change if the realized partition stays identical.
+            AssertThrow(edges == geometry->edges,
+                        ExcMessage("Physical strip edges differ from the growing fault checkpoint."));
+            AssertThrow(saved_quadrature_order == quadrature_order && saved_seed_angle == seed_angle_degrees,
+                        ExcMessage("Incompatible native material strip checkpoint."));
             if (restore_v1)
               {
                 AssertThrow(resistance_law->name() == "rate and state", ExcMessage("The v1 growing fault checkpoint requires RSF."));
@@ -184,7 +193,7 @@ namespace aspect::GrowingFault
                 AssertThrow(name == resistance_law->name(), ExcMessage("Growing fault checkpoint resistance law changed."));
                 resistance_law->restore_state(std::move(state));
               }
-            AssertThrow(saved_quadrature_order == quadrature_order && saved_seed_angle == seed_angle_degrees && edges == geometry->edges && accepted.sections.size() + 1 == edges.size(),
+            AssertThrow(accepted.sections.size() + 1 == edges.size(),
                         ExcMessage("Incompatible native material strip checkpoint."));
             std::map<std::string, std::pair<std::array<Point<2>, 4>, std::vector<PointHistory>>> points;
             ar >> points;
@@ -397,6 +406,49 @@ namespace aspect::GrowingFault
   }
 
   template <int dim>
+  void StripMaterialHistory<dim>::validate_refinement() const
+  {
+    AssertThrow(std::isfinite(requested_strip_width) && requested_strip_width > 0.,
+                ExcMessage("Growing fault mesh refinement requires a positive Target strip width."));
+    AssertThrow(simulator.get_parameters().coarsening_fraction == 0.,
+                ExcMessage("Growing fault mesh refinement requires zero Coarsening fraction."));
+    // A Cartesian Q2 phase times two affine factors and the cut-chord
+    // Jacobian has degree at most seven along the outer strip coordinate.
+    AssertThrow(quadrature_order >= 4,
+                ExcMessage("Growing fault remeshing requires Section quadrature order >= 4 for phase-weighted history transfer."));
+  }
+
+  template <int dim>
+  double StripMaterialHistory<dim>::incoming_seed_coordinate() const
+  {
+    return sections().coordinate(seed_tip_position) - simulator.get_parameters().surface_energy_model.length_scale;
+  }
+
+  template <int dim>
+  Point<2> StripMaterialHistory<dim>::incoming_seed_anchor() const
+  {
+    const auto &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(simulator.get_geometry_model());
+    const auto tangent = seed_tangent();
+    Point<2> tip = seed_tip_position;
+    double distance = simulator.get_parameters().surface_energy_model.length_scale;
+    for (unsigned int d=0; d<2; ++d)
+      {
+        const double lower = box.get_origin()[d];
+        const double upper = lower + box.get_extents()[d];
+        const double tolerance = 64.*std::numeric_limits<double>::epsilon()*box.get_extents()[d]/box.get_repetitions()[d];
+        AssertThrow(tip[d] >= lower-tolerance && tip[d] <= upper+tolerance,
+                    ExcMessage("Forward seed tip lies outside the mesh."));
+        tip[d] = std::clamp(tip[d],lower,upper);
+        if (tangent[d] != 0.)
+          {
+            const double wall = tangent[d] > 0. ? lower : upper;
+            distance = std::min(distance, (tip[d]-wall)/tangent[d]);
+          }
+      }
+    return tip - distance*tangent;
+  }
+
+  template <int dim>
   void StripMaterialHistory<dim>::prepare_history_transfer(parallel::distributed::Triangulation<dim> &mesh)
   {
     if constexpr (dim == 2)
@@ -409,12 +461,7 @@ namespace aspect::GrowingFault
         AssertThrow(flags != 2, ExcMessage("Growing fault history supports refinement only. Set Coarsening fraction = 0."));
         if (!flags || !geometry)
           return;
-        AssertThrow(requested_strip_width > 0.,
-                    ExcMessage("Growing fault refinement requires a positive Target strip width."));
-        // A Cartesian Q2 phase times two affine factors and the cut-chord
-        // Jacobian has degree at most seven along the outer strip coordinate.
-        AssertThrow(quadrature_order >= 4,
-                    ExcMessage("Growing fault remeshing requires Section quadrature order >= 4 for phase-weighted history transfer."));
+        validate_refinement();
         AssertThrow(transfer_handle == numbers::invalid_unsigned_int, ExcInternalError());
         trial.reset();
         transfer_handle = mesh.register_data_attach(
@@ -479,7 +526,12 @@ namespace aspect::GrowingFault
                   values.reserve(rule.quadrature.size());
                   for (unsigned int q=0; q<rule.quadrature.size(); ++q)
                     {
-                      const auto parent_point = GeometryInfo<2>::child_to_cell_coordinates(rule.quadrature.point(q),child);
+                      // The distributed p4est triangulation refines Cartesian
+                      // quads isotropically. Use the parent's recorded case to
+                      // map the new material point into its old reconstruction.
+                      const auto parent_point = GeometryInfo<2>::child_to_cell_coordinates(rule.quadrature.point(q),
+                                                                                           child,
+                                                                                           cell->refinement_case());
                       values.push_back(fits.at(rule.section[q]).evaluate(parent_point,phase[q]));
                     }
                 }
@@ -500,7 +552,6 @@ namespace aspect::GrowingFault
       {
         const auto &sections=this->sections();
         const double seed_xi=sections.coordinate(tip);
-        const double ell=simulator.get_parameters().surface_energy_model.length_scale;
         std::vector<double> stations;
         for (unsigned int k=0; k<formed.size(); ++k)
           stations.push_back(.5*(sections.edges[k]+sections.edges[k+1]));
@@ -513,7 +564,7 @@ namespace aspect::GrowingFault
         const auto c=simulator.introspection().component_indices.compositional_fields[phase_field_index];
         const auto &element=fe.base_element(fe.component_to_base_index(c).first);
         std::vector<types::global_dof_index> ids(fe.n_dofs_per_cell());
-        const unsigned int anchor=std::lower_bound(stations.begin(),stations.end(),seed_xi-ell)-stations.begin();
+        const unsigned int anchor=std::lower_bound(stations.begin(),stations.end(),incoming_seed_coordinate())-stations.begin();
         for (unsigned int k=anchor; k<formed.size() && (k<beyond || formed[k]); ++k)
           {
             const auto position=graph.at(stations[k]);
@@ -529,7 +580,10 @@ namespace aspect::GrowingFault
                     value+=element.shape_value(j,unit)*solution[ids[fe.component_to_system_index(c,j)]];
                   trace=std::max(trace,value);
                 }
-            if (Utilities::MPI::max(trace,simulator.get_mpi_communicator())<.05) break;
+            // A formed station carries the directional kernel forward only
+            // while the maximum of its two DG phase traces supports the tip.
+            constexpr double mechanical_tip_phase = 0.05;
+            if (Utilities::MPI::max(trace,simulator.get_mpi_communicator()) < mechanical_tip_phase) break;
             if (stations[k]>seed_xi) tip=position;
           }
       }
@@ -657,10 +711,6 @@ namespace aspect::GrowingFault
   {
     AssertThrow(status.count("Native growing fault v1") || status.count("Native growing fault v2"),
                 ExcMessage("Checkpoint has no native growing fault history for the selected route."));
-    const auto saved_width = status.find("Growing fault target strip width");
-    if (saved_width != status.end())
-      AssertThrow(std::stod(saved_width->second) == requested_strip_width,
-                  ExcMessage("Target strip width differs from the adaptive growing fault checkpoint."));
     const auto profile = status.find("Growing friction pressure profile");
     AssertThrow((profile != status.end()) == normal_stress.uses_adiabat(),
                 ExcMessage("Growing fault friction pressure source differs from the checkpoint."));

@@ -19,8 +19,14 @@ namespace aspect
       class PolynomialGeometry final : public CrackGeometry
       {
         public:
-          PolynomialGeometry(const double initial_slope, const double c0)
-            : initial_slope(initial_slope), c0(c0)
+          PolynomialGeometry(std::string                 name,
+                             const double                initial_slope,
+                             const double                c0,
+                             const std::optional<double> half_width_factor)
+            : law_name(std::move(name)),
+              initial_slope(initial_slope),
+              c0(c0),
+              half_width_factor(half_width_factor)
           {}
 
           double value(const double phase) const override
@@ -43,23 +49,37 @@ namespace aspect
             return c0;
           }
 
+          const std::string &name() const override
+          {
+            return law_name;
+          }
+
+          std::optional<double> compact_profile_half_width_factor() const override
+          {
+            return half_width_factor;
+          }
+
         private:
+          const std::string law_name;
           const double initial_slope, c0;
+          const std::optional<double> half_width_factor;
       };
 
-      const std::pair<const char *,PolynomialGeometry> laws[] =
+      // The stationary normal profile obeys ell |dphi/dn| = sqrt(alpha(phi)).
+      // AT2 has an exponential tail. The other two integrals end at finite n.
+      const PolynomialGeometry laws[] =
       {
-        {"AT1", {1., 8./3.}},
-        {"AT2", {0., 2.}},
-        {"CZM", {2., dealii::numbers::PI}}
+        {"AT1", 1., 8./3., 2.},
+        {"AT2", 0., 2., std::nullopt},
+        {"CZM", 2., dealii::numbers::PI, dealii::numbers::PI/2.}
       };
     }
 
     const CrackGeometry &CrackGeometry::select(const std::string &name)
     {
       for (const auto &law : laws)
-        if (name == law.first)
-          return law.second;
+        if (name == law.name())
+          return law;
       AssertThrow(false, dealii::ExcMessage("Unknown crack geometry '" + name + "'."));
     }
 
@@ -70,7 +90,7 @@ namespace aspect
         {
           if (!result.empty())
             result += "|";
-          result += law.first;
+          result += law.name();
         }
       return result;
     }

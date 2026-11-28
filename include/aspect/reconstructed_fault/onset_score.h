@@ -1,12 +1,24 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #ifndef _aspect_onset_score_h
 #define _aspect_onset_score_h
+#include <deal.II/base/numbers.h>
 #include <array>
 #include <cmath>
 #include <limits>
 
 namespace aspect::GrowingFault
 {
+  /** Radius (m) of the direction score's compact kernel about the supported
+   * mechanical tip. The argument is the phase-field length scale in metres. */
+  inline double direction_search_radius(const double length_scale)
+  {
+    return 2.*length_scale;
+  }
+
+  /** Largest magnitude of a prospective plane's angle to the seed tangent,
+   * in radians. Together these two directions bound the forward growth sector. */
+  inline constexpr double maximum_turn_angle = dealii::numbers::PI / 4.;
+
   /** Contributions of one native point to a prospective plane's direction.
    * Resolve the seed-frame shear predictor (Pa) as u sin(2 beta) + v cos(2 beta).
    * Entries 0--2 integrate (u, v, 1) against area*fraction on the full strip

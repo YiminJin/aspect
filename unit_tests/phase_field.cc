@@ -3,7 +3,7 @@
   License version 2 or later. See the file LICENSE for details.
 */
 #include "common.h"
-#include <aspect/phase_field/crack_geometry.h>
+#include <aspect/phase_field/surface_energy_model.h>
 #include <aspect/phase_field/degradation.h>
 #include <aspect/fe_dgq_bernstein.h>
 #include <aspect/phase_field/midpoint_fracture.h>
@@ -63,6 +63,51 @@ TEST_CASE("Crack geometry selection, variations and surface normalization")
           integral += rule.weight(q) * 8.*u*std::sqrt(law.value(u*u));
         }
       CHECK(std::abs(law.normalization()-integral) < 5.e-14);
+    }
+}
+
+TEST_CASE("Reference crack profile half-widths and physical length conversion")
+{
+  using namespace aspect::PhaseField;
+  const dealii::QGauss<1> rule(24);
+  const std::string names[] = {"AT1", "AT2", "CZM"};
+  const double lengths[] = {.0625, .37};
+  for (const auto &name : names)
+    {
+      CAPTURE(name);
+      const auto &law = CrackGeometry::select(name);
+      CHECK(law.name() == name);
+      const auto factor = law.compact_profile_half_width_factor();
+      for (const double ell : lengths)
+        {
+          CAPTURE(ell);
+          const SurfaceEnergyModel model = {law, "phase_field", 1., ell};
+          if (name == "AT2")
+            {
+              CHECK_FALSE(factor.has_value());
+              REQUIRE_THROWS(model.compact_profile_half_width());
+            }
+          else
+            {
+              REQUIRE(factor.has_value());
+              // Integrate dn/dphi = ell / sqrt(alpha(phi)). The change
+              // phi=u² removes the integrable singularity at zero damage.
+              double integral = 0.;
+              for (unsigned int q=0; q<rule.size(); ++q)
+                {
+                  const double u = rule.point(q)[0];
+                  integral += rule.weight(q) * 2.*u/std::sqrt(law.value(u*u));
+                }
+              CHECK(std::abs(model.compact_profile_half_width()-ell*integral) < 1.e-14);
+            }
+        }
+    }
+
+  const double invalid_lengths[] = {0., -1., std::numeric_limits<double>::max()};
+  for (const double ell : invalid_lengths)
+    {
+      const SurfaceEnergyModel model = {CrackGeometry::select("AT1"), "phase_field", 1., ell};
+      REQUIRE_THROWS(model.compact_profile_half_width());
     }
 }
 

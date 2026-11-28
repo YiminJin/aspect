@@ -908,8 +908,8 @@ namespace aspect::GrowingFault
     AssertThrow(provider && provider->uses_growing_strips(), ExcMessage("Midpoint fault phase requires a material providing the Maxwell/AT1 midpoint response."));
     const auto field = provider->strip_history().phase_field();
     p.surface_energy_model.validate();
-    AssertThrow(&p.surface_energy_model.geometry == &PhaseField::CrackGeometry::select("AT1") &&
-                p.names_of_compositional_fields[selected - methods.begin()] == p.surface_energy_model.composition,
+    PhaseField::FractureRows::require_supported_geometry(p.surface_energy_model.geometry);
+    AssertThrow(p.names_of_compositional_fields[selected - methods.begin()] == p.surface_energy_model.composition,
                 ExcMessage("Midpoint fault phase requires the configured AT1 surface energy on the selected phase field."));
     AssertThrow(dim == 2 && !p.enable_elasticity &&
                 p.nonlinear_solver == Parameters<dim>::NonlinearSolver::single_Advection_iterated_Newton_Stokes &&
@@ -923,8 +923,7 @@ namespace aspect::GrowingFault
                 !p.use_locally_conservative_discretization && !p.include_melt_transport,
                 ExcMessage("Growing fault requires a stationary Q2/Q1 Cartesian mesh."));
     if (p.initial_adaptive_refinement || p.adaptive_refinement_interval || !p.additional_refinement_times.empty())
-      AssertThrow(provider->strip_history().target_strip_width() > 0. && p.coarsening_fraction == 0.,
-                  ExcMessage("Growing fault mesh refinement requires a positive Target strip width and zero Coarsening fraction."));
+      provider->strip_history().validate_refinement();
     AssertThrow(!p.use_direct_stokes_solver, ExcMessage("Midpoint fault mechanics requires separate velocity and pressure blocks."));
     AssertThrow(!p.run_postprocessors_on_nonlinear_iterations, ExcMessage("Midpoint fault output requires an accepted step; iteration postprocessing is unsupported."));
     AssertThrow(!p.enable_prescribed_dilation &&

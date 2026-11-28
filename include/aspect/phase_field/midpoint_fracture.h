@@ -19,6 +19,10 @@ namespace aspect::PhaseField
 
     FractureRows(const SimulatorAccess<2> &sim, unsigned int composition);
 
+    /** Require the AT1 law whose local energy has the constant test-function
+     * load represented by these rows. Checked at startup and at assembly. */
+    static void require_supported_geometry(const CrackGeometry &geometry);
+
     /** Integral of each Bernstein test function over its cell (m²). */
     std::map<Index,double> mass;
 
