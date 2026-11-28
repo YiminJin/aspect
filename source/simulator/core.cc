@@ -42,6 +42,7 @@
 #include <aspect/geometry_model/initial_topography_model/zero_topography.h>
 #include <aspect/material_model/rheology/elasticity.h>
 #include <aspect/time_stepping/repeat_on_nonlinear_fail.h>
+#include <aspect/mesh_refinement/refinement_target.h>
 
 #include <deal.II/base/index_set.h>
 #include <deal.II/base/conditional_ostream.h>
@@ -1761,6 +1762,8 @@ namespace aspect
 #endif
 
 
+    const bool repeating = timestep_number > 0 && time_stepping_manager.should_repeat_time_step();
+
     {
       computing_timer.enter_subsection("Refine mesh structure, part 1");
 
@@ -1817,8 +1820,13 @@ namespace aspect
 
       // Next set up whatever is necessary to transfer the solution from old
       // to new mesh:
+      // Marking sees the solved trial. On a retry prolong the accepted
+      // parent into both the current and previous slots, and keep the older
+      // accepted history for the next extrapolation.
       std::vector<const LinearAlgebra::BlockVector *> x_system
-        = { &solution, &old_solution };
+        = { repeating ? &old_solution : &solution, &old_solution };
+      if (repeating)
+        x_system.push_back(&old_old_solution);
 
       if (parameters.mesh_deformation_enabled)
         x_system.push_back(&mesh_deformation->mesh_velocity);
@@ -1895,6 +1903,12 @@ namespace aspect
       std::vector<LinearAlgebra::BlockVector *> system_tmp
         = { &distributed_system, &old_distributed_system};
 
+      LinearAlgebra::BlockVector older_distributed_system;
+      if (repeating)
+        {
+          older_distributed_system.reinit(introspection.index_sets.system_partitioning, mpi_communicator);
+          system_tmp.push_back(&older_distributed_system);
+        }
       if (parameters.mesh_deformation_enabled)
         system_tmp.push_back(&distributed_mesh_velocity);
 
@@ -1919,6 +1933,11 @@ namespace aspect
 
       constraints.distribute (old_distributed_system);
       old_solution = old_distributed_system;
+      if (repeating)
+        {
+          constraints.distribute(older_distributed_system);
+          old_old_solution = older_distributed_system;
+        }
 
       // We need the current linearization point at the start of the new time step
       // when we set the boundary conditions for advected fields (to determine parts
@@ -2335,7 +2354,22 @@ namespace aspect
         if (time_stepping_manager.should_refine_mesh())
           {
             pcout << "Refining the mesh based on the time stepping manager ...\n" << std::endl;
-            refine_mesh(max_refinement_level);
+            // A physical target can require several quadtree levels in one
+            // reaction. Keep the interval clock fixed for all mesh-only passes.
+            bool needs_another_pass;
+            do
+              {
+                const auto previous_cells = triangulation.n_global_active_cells();
+                refine_mesh(max_refinement_level);
+                needs_another_pass = false;
+                for (const auto &marker : mesh_refinement_manager.get_active_plugins())
+                  if (const auto *target = dynamic_cast<const MeshRefinement::RefinementTarget *>(marker.get()))
+                    needs_another_pass |= target->needs_further_refinement();
+                AssertThrow(!needs_another_pass || triangulation.n_global_active_cells() > previous_cells,
+                            ExcMessage("The requested refinement target remains unresolved after a mesh pass. "
+                                       "Check the allowed refinement level and refinement fraction."));
+              }
+            while (needs_another_pass);
           }
 
         if (time_stepping_manager.should_repeat_time_step())
