@@ -1,0 +1,29 @@
+# Physical front advance into x > 1.25 m in initially intact cells.
+# The 2.5-ms reference for this compact seed uses 15 fixed physical strips.
+include growing_seed.prm
+set End time = .005
+set Maximum first time step = .0025
+set Maximum time step = .0025
+subsection Material model
+ subsection Phase field fault
+  set Reference friction coefficient = .2
+ end
+ subsection Growing fault
+  set Seed tangent angle = 0
+  set Forward seed tip = 1.25,.5
+  set Target strip width = .134
+ end
+end
+subsection Initial composition model
+ subsection Function
+  set Function expression = .8*max(0,1-((y-.5)/.375)^2)*max(0,1-max(0,(x-1)/.25)^2)
+ end
+end
+subsection Phase field
+ set Length scale = .165
+end
+subsection Boundary velocity model
+ subsection Function
+  set Function expression = .035*(y-.5)*exp(-((x-1.3)/.45)^2);0
+ end
+end

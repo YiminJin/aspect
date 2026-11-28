@@ -1,0 +1,52 @@
+# The left patch intersects the backward ray of the right seed but is
+# separated from it by intact rock. Its own AT1 relaxation can cross 0.01.
+include growing_seed.prm
+set End time = 0.0025
+set Maximum first time step = 0.0025
+set Maximum time step = 0.0025
+set Output directory = output
+subsection Geometry model
+  subsection Box
+    set X extent = 3
+    set X repetitions = 6
+    set Y repetitions = 2
+  end
+end
+subsection Material model
+  subsection Growing fault
+    set Seed tangent angle = 0
+    set Forward seed tip = 2.75,.5
+    set Target strip width = .25
+  end
+end
+subsection Phase field
+  set Length scale = .45
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = max(0,1-((y-.5)/.5)^2)^2*(.48*max(0,1-abs(x-.25)/.25)+.65*max(0,1-abs(x-2.5)/.25))
+  end
+end
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = 0;0
+  end
+end
+subsection Mesh refinement
+  set Strategy = growing fault, maximum refinement function
+  set Initial adaptive refinement = 1
+  set Skip solvers on initial refinement = true
+  set Refinement fraction = .01
+  set Coarsening fraction = 0
+  subsection Growing fault
+    set Coverage = damage threshold
+  end
+  subsection Maximum refinement function
+    set Coordinate system = cartesian
+    set Variable names = x,y,t
+    set Function expression = if(x<1.5 && t<=0,0,1)
+  end
+end
+subsection Time stepping
+  set List of model names = growing fault refinement
+end

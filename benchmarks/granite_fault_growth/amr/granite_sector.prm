@@ -1,0 +1,25 @@
+# Launch beside granite_fault_growth.prm. All lengths are metres.
+include granite_fault_growth.prm
+set Output directory = output-granite-sector
+subsection Geometry model
+  subsection Box
+    set X repetitions = 12
+    set Y repetitions = 6
+  end
+end
+subsection Material model
+  subsection Growing fault
+    set Target strip width = 0.015625
+  end
+end
+subsection Mesh refinement
+  set Initial adaptive refinement = 3
+  set Skip solvers on initial refinement = true
+  set Skip setup initial conditions on initial refinement = true
+  set Refinement fraction = 0.01
+  set Coarsening fraction = 0
+  set Strategy = growing fault
+  subsection Growing fault
+    set Coverage = forward sector
+  end
+end

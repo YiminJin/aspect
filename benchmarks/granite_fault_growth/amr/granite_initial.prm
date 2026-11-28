@@ -1,0 +1,10 @@
+# Replace granite_sector.prm with granite_predictor.prm for the disk comparison.
+include granite_sector.prm
+set Output directory = output-granite-amr-initial
+subsection Termination criteria
+  set Termination criteria = end time, end step
+  set End step = 0
+end
+subsection Postprocess
+  set List of postprocessors = growing fault history
+end

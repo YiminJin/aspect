@@ -1,0 +1,50 @@
+# Copy growing_seed.prm into the launch directory. One half-step of the
+# analytic Q2 velocity / Q1 pressure patch. The phase stays on its lower bound.
+include growing_seed.prm
+set Output directory = output-hanging-patch
+set Nonlinear solver tolerance = 1e-12
+
+subsection Geometry model
+  subsection Box
+    set X repetitions = 4
+    set Y repetitions = 2
+  end
+end
+
+subsection Mesh refinement
+  set Strategy = minimum refinement function
+  set Refinement fraction = 0.01
+  set Coarsening fraction = 0
+  set Initial adaptive refinement = 1
+  subsection Minimum refinement function
+    set Coordinate system = cartesian
+    set Function expression = if(x<1.5 && y<0.5,1,0)
+  end
+end
+
+subsection Material model
+  subsection Phase field fault
+    set Reference friction coefficient = 0.2
+  end
+  subsection Growing fault
+    set Seed tangent angle = 0
+    set Forward seed tip = 2, 0.5
+    set Target strip width = 0.25
+    set Section quadrature order = 6
+  end
+end
+
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0.2
+  end
+end
+
+subsection Boundary velocity model
+  subsection Function
+    # Positive extension a*y and constant engineering shear gamma at t=dt/2.
+    # Both components vary quadratically along at least one edge.
+    set Function constants = a=0.003, gamma=0.020
+    set Function expression = (1+40*t)*(a*x*y+gamma*y); -(1+40*t)*a*(x*x+y*y)/2
+  end
+end

@@ -1,0 +1,10 @@
+include granite_sector.prm
+set Output directory = output-granite-predictor
+subsection Mesh refinement
+  subsection Growing fault
+    set Coverage = tip disk
+  end
+end
+subsection Time stepping
+  set List of model names = fault RSF, growing fault refinement
+end

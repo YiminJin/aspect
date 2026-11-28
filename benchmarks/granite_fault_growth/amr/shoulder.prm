@@ -1,0 +1,29 @@
+# Small irreversible-growth control with a finite diffuse shoulder under
+# shear. Run beside growing_seed.prm. Compare phase and formed-strip history.
+include growing_seed.prm
+set End time = 0.025
+set Maximum first time step = 0.0025
+set Maximum time step = 0.0025
+set Output directory = output-shoulder
+subsection Material model
+  subsection Growing fault
+    set Seed tangent angle = 0
+    set Forward seed tip = 0.75,.5
+    set Target strip width = 0.25
+  end
+end
+subsection Phase field
+  set Length scale = 0.22
+end
+subsection Initial composition model
+  subsection Function
+    # Beyond the physical seed the centerline phase decays from 0.035 to
+    # zero at x=1 m. The entire shoulder starts below the 0.05 tip threshold.
+    set Function expression = max(0,1-((y-.5)/0.5)^2)^2*(0.85*min(1,max(0,(0.75-x)/.25))+.035*min(1,max(0,(1.0-x)/(1.0-0.75))))
+  end
+end
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = 0.01*(y-.5);0
+  end
+end

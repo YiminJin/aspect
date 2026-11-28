@@ -1,0 +1,30 @@
+# Run beside onecut.prm. Supply the growing_fault_checks library through
+# Additional shared libraries, then compare the output using check_fracture_rows.py.
+include onecut.prm
+set End time = 0.005
+set Output directory = output-hanging-faces
+subsection Geometry model
+  subsection Box
+    set X repetitions = 4
+    set Y repetitions = 2
+  end
+end
+subsection Material model
+  subsection Growing fault
+    set Target strip width = 0.25
+  end
+end
+subsection Mesh refinement
+  set Strategy = minimum refinement function
+  set Initial adaptive refinement = 1
+  set Refinement fraction = 0.01
+  set Coarsening fraction = 0
+  subsection Minimum refinement function
+    set Coordinate system = cartesian
+    set Variable names = x,y
+    set Function expression = if(x<1.5 && y<0.5,1,0)
+  end
+end
+subsection Postprocess
+  set List of postprocessors = growing fault history, growing fracture rows
+end

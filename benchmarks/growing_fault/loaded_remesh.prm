@@ -1,0 +1,35 @@
+# Refine a loaded part of the 30-degree seed immediately after publication
+# at 5 ms. Additional refinement times uses the next step clock.
+include growing_seed.prm
+set End time = 0.015
+set Output directory = output-loaded-remesh
+subsection Material model
+  subsection Growing fault
+    set Target strip width = 0.125
+  end
+end
+# Quadratic shear on every wall is divergence-free and loads an in-cell
+# linear stress gradient, so transferring a cell mean would be detectable.
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = .02*(y-.5)+.005*(y-.5)^2;0
+  end
+end
+subsection Mesh refinement
+  set Strategy = minimum refinement function
+  set Additional refinement times = 0.006
+  set Refinement fraction = 0.01
+  set Coarsening fraction = 0
+  subsection Minimum refinement function
+    set Coordinate system = cartesian
+    set Variable names = x,y,t
+    set Function expression = if(x<1.25 & y<0.75,1,0)
+  end
+end
+subsection Postprocess
+  set List of postprocessors = growing fault history, growing remesh history
+end
+subsection Checkpointing
+  set Steps between checkpoint = 1
+  set Number of checkpoints to keep = 4
+end
