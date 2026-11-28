@@ -1,5 +1,9 @@
 # Phase-field fault working record
 
+## Prestressed granite under steady drive on 48 × 24
+
+From `7c2de392f`, the two-rank driven run reproduced the fixed-wall seed and native shear of 52,500,004.2031734 Pa. At 60 µs the walls had moved 60 nm relative to one another, supplied 4.7250963 J/m, and raised the mean native shear by 2,131.729 Pa. Subtracting the hold gives 2,133.332 Pa, compared with the intact elastic prediction of 2,133.333 Pa. An interrupted launcher was recovered from its own accepted 202.5 µs checkpoint. Through 1 ms the signed near-tip rate rose to 1.001328 µm/s, and the fastest interior strip reached 1.037655 µm/s. Both seed-connected contour displacements were zero at every accepted endpoint. All 12 stations and all phase coefficients ahead of the original tip remained inactive. No event peak or arrest was observed. The first eight driven steps averaged 24.46 s/step and the remaining 126 averaged 6.27 s/step. The saved 1 ms archive passed a separate two-rank continuation. [Inputs, matched table, figure, checkpoint and replay commands](example2/steady-drive/README.md).
+
 ## Canonical material parameters and granite prestress
 
 Starting revision `d6c552075`. Material input resolution and prestress are in `111ba59fe`. The exact zero-stress representation and pressure-reader test are in `21e7a6dac`. The installed examples, generators, guide and compatibility controls are in `3917bcf3d`. Both formulations take the public `phase field fault` material name and canonical subsection. The existing phase method selects the formulation. Material setup now checks physics independently of where the user wrote a value, including explicit defaults. Old selectors, input locations, Maxwell and RSF defaults, the historical Simple-viscosity behavior and accepted checkpoint formats remain supported. [Parameter audit, installed commands, controls and source entry points](results/canonical-material/README.md).

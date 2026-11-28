@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect 3.1 REQUIRED HINTS ${Aspect_DIR} $ENV{ASPECT_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(granite_history)
+add_library(granite_history SHARED granite_history.cc)
+ASPECT_SETUP_PLUGIN(granite_history)

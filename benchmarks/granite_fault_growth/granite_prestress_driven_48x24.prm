@@ -1,0 +1,21 @@
+# Steady production drive on the coarse grid. Compare accepted states with
+# the fixed-wall control through 60 microseconds.
+include granite_fault_growth.prm
+
+set Output directory = output-granite-prestressed-driven-48x24
+set End time = 6.0e-5
+
+subsection Geometry model
+  subsection Box
+    set X repetitions = 48
+    set Y repetitions = 24
+  end
+end
+
+subsection Checkpointing
+  set Additional checkpoint times =
+end
+
+subsection Postprocess
+  set List of postprocessors = phase field fault history
+end

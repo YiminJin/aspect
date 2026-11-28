@@ -1,0 +1,22 @@
+# Resume the driven specimen from its own checkpoint. Build the benchmark
+# observer in plugin/ beside this input. Keep the accepted phase patches and
+# all strip rates at every clock for the event and contour measurements.
+include granite_prestress_driven_48x24.prm
+set Resume computation = true
+set Output directory = output-granite-driven-continuation
+set End time = 0.001
+set Additional shared libraries = ./plugin/libgranite_history.release.so
+
+subsection Checkpointing
+  set Steps between checkpoint = 4
+end
+
+subsection Postprocess
+  set List of postprocessors = compact granite history
+end
+
+subsection Termination criteria
+  # Checkpoint the last accepted state inside the two-hour laptop budget.
+  set Termination criteria = end time, wall time
+  set Wall time = 1.85
+end
