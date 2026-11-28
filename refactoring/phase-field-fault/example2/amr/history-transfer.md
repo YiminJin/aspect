@@ -2,7 +2,7 @@
 
 The midpoint path publishes one strip table, resistance-law state and work ledger per accepted physical endpoint. A mesh-only pass leaves these records and the physical clock in place. Refining transfers the last accepted FE vectors using the simulator's solution transfer. A rejected step also needs the older accepted FE vector, so that after remeshing the same extrapolation and old phase are available for the repeated interval.
 
-Set `Material model / Growing fault / Target strip width` in metres to fix the physical station partition. The implementation divides the original projected in-box range into equal widths no larger than this setting. Zero selects the legacy uniform-grid spacing. After refinement it rebuilds only the local cell intersections, native integration rules and ownership. The material checks the stored width and edges on restart and continues to read uniform v1 (RSF age per section) and v2 (law-owned state) archives.
+Set `Material model / Phase field fault / Target strip width` in metres to fix the physical station partition. The implementation divides the original projected in-box range into equal widths no larger than this setting. Zero selects the legacy uniform-grid spacing. After refinement it rebuilds only the local cell intersections, native integration rules and ownership. The material checks the stored width and edges on restart and continues to read uniform v1 (RSF age per section) and v2 (law-owned state) archives.
 
 ## Transfer operator
 

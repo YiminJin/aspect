@@ -2,6 +2,8 @@
 
 The proposed specimen is a 1.5 m × 0.75 m block under in-plane shear. A horizontal seed enters from the left boundary and ends at (1.125, 0.375) m, leaving 0.375 m of intact rock ahead. Its last 0.125 m taper to zero phase. A single forward tip can turn within the specimen. The scientific target is two or more slip bursts under constant drive, with measurable new fault length during the bursts and arrest during reloading. First-event growth, stable sliding and complete failure on the first event are all possible outcomes.
 
+The physical estimates, preload history and mesh restrictions below describe the original zero-stress pilot, retained in `granite_preload_reference.prm`. The current `granite_fault_growth.prm` initializes a uniform native deviatoric shear of 52,500,004.2031734 Pa and applies a steady 1 mm/s relative wall speed from time zero. Its companion `granite_prestress_hold.prm` holds all four walls fixed on a 48 × 24 grid for 60 µs.
+
 ## Inputs and provenance
 
 | Quantity | Input | Basis |
@@ -39,15 +41,15 @@ The native growing material starts without shear prestress. A smooth 25 ms setup
 
 The current midpoint scalar solve enforces ηᵈ ≥ pₙ b (Δt/2)/Dc even at negligible slip speed. The full-step ceiling is 7.698 µs. With the selected 7.5 µs cap the 0.35 s window needs **at least 46,667 accepted steps**, plus shorter steps during acceleration. Growing mechanics factors the coupled matrix on MPI rank zero. AMR could reduce the work per solve. A separate change to the midpoint root solve and its admissibility test would be needed to use substantially larger locked-phase steps with these physical parameters.
 
-Place the two inputs in the same directory and invoke these commands there with your pf-rsf executable. The first runtime check covers eight nominal steps and writes the native diagnostics in a separate directory. Its elapsed time gives a lower-cost way to measure startup performance. The second input is the event-search case.
+For the historical pilot, place granite_fault_growth.prm, granite_preload_reference.prm and granite_startup.prm in the same directory and invoke these commands there with the current pf-rsf executable. The first runtime check covers eight nominal steps and writes the native diagnostics in a separate directory. Its elapsed time gives a lower-cost way to measure startup performance. The second input is the event-search case.
 
 ```sh
 aspect --validate granite_fault_growth.prm
 mpirun -np 4 aspect granite_startup.prm
-mpirun -np 4 aspect granite_fault_growth.prm
+mpirun -np 4 aspect granite_preload_reference.prm
 ```
 
-The survey writes phase snapshots every 1 ms. For each **accepted** physical step, the controller log gives max|V| = slip_fraction × Dc / dt and the station index slip_id. Match retry records to the final accepted attempt before plotting. Use elapsed physical time and compare several seed-connected phase contours. For a short event replay, add the built-in growing fault history postprocessor. Its sections tables carry signed midpoint rate, accumulated slip, station position and the formed flag. Its balance tables carry endpoint time and work. Use the nearest **previously formed** station behind the advancing tip to measure local slip acceleration. A formed flag can respond to a small positive phase, and station-by-station counting naturally makes a staircase. Verify an event using extension over several stations, a moving connected contour, unloading, and a return to low slip rate. A matched velocity-strengthening control can use a = 0.0175 with b = 0.0156, leaving the rest of the input fixed. Time convergence and mesh convergence are separate checks.
+The survey writes phase snapshots every 1 ms. For each **accepted** physical step, the controller log gives max|V| = slip_fraction × Dc / dt and the station index slip_id. Match retry records to the final accepted attempt before plotting. Use elapsed physical time and compare several seed-connected phase contours. For a short event replay, select the built-in `phase field fault history` postprocessor. Its sections tables carry signed midpoint rate, accumulated slip, station position and the formed flag. Its balance tables carry endpoint time and work. Use the nearest **previously formed** station behind the advancing tip to measure local slip acceleration. A formed flag can respond to a small positive phase, and station-by-station counting naturally makes a staircase. Verify an event using extension over several stations, a moving connected contour, unloading, and a return to low slip rate. A matched velocity-strengthening control can use a = 0.0175 with b = 0.0156, leaving the rest of the input fixed. Time convergence and mesh convergence are separate checks.
 
 ## Fault-following mesh refinement
 

@@ -68,7 +68,7 @@ end\n"""
 
     # At fixed geometry and loading the trace override must still change the
     # accepted section response just as a 20 Pa s ordinary trace would.
-    trace_control = run("trace-viscosity-control", trace+material("Simple model", "set Viscosity = 20"))
+    trace_control = run("trace-viscosity-control", trace+material("Phase field fault", "set Viscosity = 20"))
     trace_extension = run("sdk-trace-viscosity", trace+registration, plugin=True)
     labels = sorted(trace_control.glob("fault-labels-*.txt"))
     if len(labels) != 3 or any((trace_extension/f.name).read_bytes() != f.read_bytes() for f in labels):
@@ -100,6 +100,61 @@ subsection Depth dependent model
 end
 end
 """, error=("Phase field fault must be the top-level material model",))
+
+
+def check_canonical_settings(growing, run):
+    """Both input locations describe the same physics. The active phase method admits a setting."""
+    public, legacy = "Phase field fault", "Growing fault"
+    seed = f'include {growing/"growing_seed.prm"}\n'
+    trace = f'include {growing.parent/"fixed_fault/fixed_fault.prm"}\n'
+    for key, value in (("Forward seed tip", "0,0"), ("Seed tangent angle", "0"),
+                       ("Section quadrature order", "6"), ("Target strip width", "0"),
+                       ("Cohesion", "1000"), ("Initial deviatoric stress", "0,0,0"),
+                       ("Prescribed fault compression", "200")):
+        run("trace-with-"+key.lower().replace(" ", "-"), trace+material(public, f"set {key} = {value}"),
+            error=(f"Material model / {public} / {key} requires growing strip mechanics",))
+    for key, value in (("Normal integral subdivisions", "0"), ("Normal traction filter length", "0"),
+                       ("Report section convergence", "false"), ("Record section tractions", "false"),
+                       ("Complete prescribed contact profiles", "false"), ("Background compression", "1")):
+        run("seed-with-"+key.lower().replace(" ", "-"), seed+material(public, f"set {key} = {value}"),
+            error=(f"Material model / {public} / {key} requires mature trace mechanics",))
+
+    stress = "set Initial deviatoric stress = 7,-2,3"
+    ordinary = run("prestressed-seed", seed+material(public, stress))
+    with (ordinary/"points-0000-r0.csv").open() as stream:
+        points = list(csv.DictReader(stream))
+    columns = ("tauxx", "tauyy", "tauzz", "tauxy", "Axx", "Ayy", "Azz", "Axy",
+               "signed_shear", "absolute_shear")
+    if not points or any(tuple(float(row[col]) for col in columns) != (7, -2, -5, 3, 0, 0, 0, 0, 0, 0)
+                         for row in points):
+        raise ValueError("The initial native tensor or zero cohesive/slip history changed")
+    # The coordinates and angle duplicate the public input in a different numeric spelling.
+    duplicate = material(legacy, """set Initial deviatoric stress = 7.00,-2.0e0,+3.000
+set Seed tangent angle = 30.0
+set Forward seed tip = 1.4330127018922194,7.5e-1
+set Cohesion = 1e3""")
+    same = run("equivalent-seed", seed+material(public, stress)+duplicate)
+    for filename in ("points-0000-r0.csv", "points-0001-r0.csv", "sections-0001.csv", "balance-0001.csv"):
+        if (ordinary/filename).read_bytes() != (same/filename).read_bytes():
+            raise ValueError(f"Equivalent strip settings changed {filename}")
+    for key, other in (("Forward seed tip", "1,0.75"), ("Cohesion", "1001"),
+                       ("Initial deviatoric stress", "7,-2,-3")):
+        run("alias-conflict-"+key.lower().replace(" ", "-"),
+            seed+material(public, stress)+material(legacy, f"set {key} = {other}"),
+            error=(f"Material model / {public} / {key}", f"Material model / {legacy} / {key}"))
+    selector = "Friction normal stress"
+    run("normal-stress-source-conflict", seed+f"subsection Material model\n set {selector} = model default\nend\n",
+        error=(f"Material model / {public} / {selector}", f"Material model / {selector}"))
+    for name, deck, source, filename in (
+        ("seed", seed, "prescribed constant", "sections-0001.csv"),
+        ("trace", trace, "resolved normal traction", "fault-labels-00002.txt"),
+    ):
+        single = deck+material(public, f"set {selector} = {source}")
+        a = run(name+"-single-source", single)
+        b = run(name+"-same-source", single+f"subsection Material model\n set {selector} = model default\nend\n")
+        if (a/filename).read_bytes() != (b/filename).read_bytes():
+            raise ValueError(f"{name}: spelling the default friction pressure changed accepted history")
+    print("Equivalent typed strip inputs reproduced the accepted prestressed trajectory.")
 
 
 def main():
@@ -137,6 +192,7 @@ def main():
             p.check_returncode()
         return case/"output"
 
+    check_canonical_settings(growing, run)
     check_material_properties(growing, run)
     check_formulation_admission(growing, run)
 
@@ -219,6 +275,21 @@ def main():
         raise ValueError("Equal numeric weights changed the accepted strip response")
     run("typed-conflict", base+weighted+material(old, weights("2, 2")), plugin=True,
         error=("Phase field fault / Nested law / Weights", "Growing fault / Nested law / Weights"))
+    # The SDK declares this nested coefficient only for strips. Its impedance
+    # default is also different on the two routes. Measure the product in Pa s/m.
+    factor = "subsection Nested law\n set Strip factor = 2.5\nend"
+    a = law_case("strip-only-public", material(public, factor), 2500)
+    if law_case("strip-only-legacy", material(old, factor), 2500) != a:
+        raise ValueError("The strip-only SDK coefficient changed across spellings")
+    trace = growing.parent/"fixed_fault/fixed_fault.prm"
+    run("strip-only-sdk-on-trace", f"include {trace}\n"+material(public, factor), plugin=True,
+        error=("Material model / Phase field fault / Nested law / Strip factor", "requires growing strip mechanics"))
+    run("trace-only-sdk-on-strips", base+material(public, "subsection Nested law\nset Trace factor = 1\nend"),
+        plugin=True, error=("Material model / Phase field fault / Nested law / Trace factor requires mature trace mechanics",))
+    run("trace-range-on-strips", base+material(public, f"set {key} = 2000"), plugin=True,
+        error=(f"Material model / {public} / {key} does not match the growing strip pattern",))
+    run("strip-range-on-trace", f"include {trace}\n"+material(public, f"set {key} = 750"), plugin=True,
+        error=(f"Material model / {public} / {key} does not match the mature trace pattern",))
 
 
 if __name__ == "__main__":

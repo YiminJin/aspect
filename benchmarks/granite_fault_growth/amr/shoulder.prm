@@ -6,7 +6,7 @@ set Maximum first time step = 0.0025
 set Maximum time step = 0.0025
 set Output directory = output-shoulder
 subsection Material model
-  subsection Growing fault
+  subsection Phase field fault
     set Seed tangent angle = 0
     set Forward seed tip = 0.75,.5
     set Target strip width = 0.25

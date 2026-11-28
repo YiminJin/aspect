@@ -23,10 +23,11 @@ def main():
     here = Path(__file__).resolve().parent
     dst = args.destination.resolve()
     dst.mkdir(parents=True, exist_ok=False)
-    shutil.copyfile(here.parent / "granite_fault_growth.prm", dst / "granite_fault_growth.prm")
+    for deck in ("granite_fault_growth.prm", "granite_preload_reference.prm"):
+        shutil.copyfile(here.parent / deck, dst / deck)
     for overlay in ("granite_sector.prm", "granite_predictor.prm"):
         shutil.copyfile(here / overlay, dst / overlay)
-    base = dict(uniform="granite_fault_growth.prm", sector="granite_sector.prm",
+    base = dict(uniform="granite_preload_reference.prm", sector="granite_sector.prm",
                 disk="granite_predictor.prm")[args.mode]
     prm = dst / "startup.prm"
     prm.write_text(f"""include {base}

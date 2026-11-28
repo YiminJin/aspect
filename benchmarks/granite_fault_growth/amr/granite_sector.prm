@@ -1,5 +1,5 @@
-# Launch beside granite_fault_growth.prm. All lengths are metres.
-include granite_fault_growth.prm
+# The uniform preload and sector controls share initial stress and wall velocities.
+include granite_preload_reference.prm
 set Output directory = output-granite-sector
 subsection Geometry model
   subsection Box
@@ -8,7 +8,7 @@ subsection Geometry model
   end
 end
 subsection Material model
-  subsection Growing fault
+  subsection Phase field fault
     set Target strip width = 0.015625
   end
 end

@@ -10,7 +10,7 @@ subsection Geometry model
   end
 end
 subsection Material model
-  subsection Growing fault
+  subsection Phase field fault
     set Target strip width = 0.25
   end
 end

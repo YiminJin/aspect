@@ -1,6 +1,6 @@
 # Full scientific window on the diagnostic mesh. Use checkpoints and the
 # measured budget in CODEX_TASK.md to stage the run.
-include granite_fault_growth.prm
+include granite_preload_reference.prm
 set Output directory = output-granite-48x24-survey
 
 subsection Geometry model

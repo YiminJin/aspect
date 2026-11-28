@@ -5,11 +5,13 @@ import os
 from pathlib import Path
 import subprocess
 
+from parameter_file import public_nine_strip_input
+
 
 def check(aspect, plugin, directory):
     directory.mkdir(parents=True, exist_ok=False)
     env = dict(os.environ, DEAL_II_NUM_THREADS='1', OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1')
-    base = Path(__file__).with_name('onecut.prm').read_text()
+    base = public_nine_strip_input()
     for loaded in (False, True):
         run = directory/('loaded' if loaded else 'rest')
         run.mkdir()
@@ -19,7 +21,7 @@ set Additional shared libraries = {plugin}
 set Output directory = {output}
 set End time = .005
 subsection Material model
- subsection Growing fault
+ subsection Phase field fault
   set Forward seed tip = .5,.5
  end
 end

@@ -16,9 +16,10 @@ def reference_phase(x, y):
     return 0.95 * np.maximum(0, 1-abs(y-0.375)/0.125)**2 * np.clip((1.125-x)/0.125, 0, 1)**2
 
 
-def measure(directory, nx, snapshot):
+def measure(directory, nx, snapshot, shear_prestress=0.):
     h = 1.5/nx
-    native_error = polynomial_error = ahead_phase = stress = area = 0.
+    native_error = polynomial_error = ahead_phase = stress_error = area = 0.
+    minimum_shear, maximum_shear = np.inf, -np.inf
     count = 0
     patches = np.full((nx//2, nx, 3, 3), np.nan)
     for shard in sorted(directory.glob("points-0000-r*.csv")):
@@ -46,12 +47,18 @@ def measure(directory, nx, snapshot):
             native_error = max(native_error, np.max(abs(reference_phase(x, y)-phi)))
             if ix*h >= 1.125:
                 ahead_phase = max(ahead_phase, np.max(abs(phi)))
-            stress = max(stress, *(np.max(abs(rows[c])) for c in ("tauxx", "tauyy", "tauzz", "tauxy")))
+            minimum_shear = min(minimum_shear, float(np.min(rows["tauxy"])))
+            maximum_shear = max(maximum_shear, float(np.max(rows["tauxy"])))
+            stress_error = max(stress_error, np.max(abs(rows["tauxy"] - shear_prestress)),
+                               *(np.max(abs(rows[c])) for c in ("tauxx", "tauyy", "tauzz")))
+            for column in ("Axx", "Ayy", "Azz", "Axy", "signed_shear", "absolute_shear"):
+                if np.any(rows[column] != 0):
+                    raise ValueError(f"Nonzero initial {column} in cell {cell}")
             area += sum(rows["weight"])
             count += n
     assert np.isfinite(patches).all() and max(native_error, polynomial_error) < 1e-12
     assert count == nx*(nx//2)*36 and abs(area-1.125) < 1e-12
-    assert ahead_phase == stress == 0
+    assert ahead_phase == 0 and stress_error == 0, (minimum_shear, maximum_shear, stress_error)
     stations = np.genfromtxt(directory/"sections-0000.csv", delimiter=",", names=True)
     assert len(stations) == nx and np.all(stations["age"] == 1)
     for column in ("slip", "V", "formed", "force"):
@@ -78,7 +85,8 @@ def measure(directory, nx, snapshot):
     np.savez_compressed(snapshot, h=h, phase=patches)
     return dict(cells=nx*nx//2, points=int(count), sections=nx, max_native_error=float(native_error),
                 max_reconstruction_error=float(polynomial_error), area_m2=area,
-                peak_abs_stress_Pa=stress, max_phase_ahead=ahead_phase, connected_tip_m=ends)
+                peak_abs_stress_Pa=max(abs(minimum_shear), abs(maximum_shear)),
+                shear_range_Pa=[minimum_shear, maximum_shear], max_phase_ahead=ahead_phase, connected_tip_m=ends)
 
 
 if __name__ == "__main__":
@@ -86,5 +94,7 @@ if __name__ == "__main__":
     parser.add_argument("output", type=Path)
     parser.add_argument("nx", type=int, choices=(48, 96))
     parser.add_argument("snapshot", type=Path)
+    parser.add_argument("--shear-prestress", type=float, default=0.,
+                        help="Expected time-zero Cartesian xy deviatoric stress in Pa")
     args = parser.parse_args()
-    print(json.dumps(measure(args.output, args.nx, args.snapshot), indent=2))
+    print(json.dumps(measure(args.output, args.nx, args.snapshot, args.shear_prestress), indent=2))

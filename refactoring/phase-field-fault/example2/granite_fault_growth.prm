@@ -1,13 +1,11 @@
 # Laboratory-scale, single-tip shear fault in a 2-D incompressible strip.
-# Self-contained input for YiminJin/aspect, pf-rsf, ee6d59cb7e59.
-# SI throughout. A smooth subcritical setup load precedes the constant drive.
-# The setup load is a target for intact elastic material. Check the actual
-# response and exclude all setup activity from any recurrence measurement.
+# SI throughout. Start a fresh run with the seed already in uniform shear.
+# Positive xy shear is in the sense of the top wall moving to the right.
 
 set Dimension                              = 2
 set Use years instead of seconds           = false
 set End time                               = 0.35
-set Output directory                       = output-granite-fault-growth
+set Output directory                       = output-granite-prestressed-growth
 set Nonlinear solver scheme                = single Advection, iterated Newton Stokes
 set Nonlinear solver failure strategy      = cut timestep size
 set Max nonlinear iterations               = 80
@@ -83,8 +81,8 @@ end
 
 subsection Material model
   set Model name             = phase field fault
-  set Friction normal stress = adiabatic pressure
   subsection Phase field fault
+    set Friction normal stress         = adiabatic pressure
     # G from E=64 GPa and nu=0.20. The solver uses incompressible kinematics.
     # eta/G = 1.19e6 s makes the bulk effectively elastic over this experiment.
     set Shear modulus                  = 2.6666666667e10
@@ -95,12 +93,16 @@ subsection Material model
     set Evolution effect               = 0.0156
     set Reference speed                = 1e-6
     set Slip distance                  = 1e-6
-    # Dc/V0. The native growing material begins with zero bulk shear stress.
+    # Reference steady age Dc/V0. At this age the local resistance at V0,
+    # including radiation damping, sets the initial shear stress below.
     set Initial age                    = 1
     # G/(2*cs), cs=sqrt(G/rho), rho=2650 kg/m^3.
     set Radiation damping              = 4.2031734e6
-  end
-  subsection Growing fault
+
+    # Uniform native deviatoric stress, ordered xx, yy, xy (Pa).
+    # For V0 = 1 micrometre/s, mu0*pN + eta_rad*V0 = 52500004.2031734 Pa.
+    # Strip rates are solved using the local phase field and section mobility.
+    set Initial deviatoric stress = 0, 0, 52500004.2031734
     set Seed tangent angle       = 0
     set Forward seed tip         = 1.125, 0.375
     set Section quadrature order = 6
@@ -117,7 +119,7 @@ subsection Phase field
 end
 
 subsection Mesh refinement
-  # The present growing midpoint solver requires a fixed conforming mesh.
+  # Uniform reference mesh for this laboratory specimen.
   set Initial global refinement         = 0
   set Initial adaptive refinement       = 0
   set Time steps between mesh refinement = 0
@@ -126,14 +128,10 @@ end
 subsection Boundary velocity model
   set Prescribed velocity boundary indicators = left:function, right:function, bottom:function, top:function
   subsection Function
-    set Variable names = x,y,t
-    # All four walls follow the same affine shear; v_y=0. Full relative
-    # drive speed is 1 mm/s after Tload. The smooth startup adds Dload (m)
-    # of relative displacement with zero extra velocity at either end.
-    # Dload=0 removes the setup load. Extend End time for that control.
-    set Function constants  = yc=0.375, H=0.75, Udrive=0.001, Dload=0.00135, Tload=0.025, cycle=6.283185307179586
-    set Function expression = (y-yc)/H * (Udrive + Dload/Tload * \
-                              (1-cos(cycle*min(t/Tload,1)))); 0
+    # Constant relative wall speed. Top and bottom move at +/- 0.5 mm/s.
+    set Variable names      = x,y,t
+    set Function constants  = yc=0.375, H=0.75, Udrive=0.001
+    set Function expression = (y-yc)/H * Udrive; 0
   end
 end
 
@@ -166,7 +164,7 @@ end
 
 subsection Postprocess
   # Phase snapshots plus per-attempt RSF logs keep the survey output compact.
-  # For a short event replay, add "growing fault history" to the following
+  # For a short event replay, add "phase field fault history" to the following
   # list to obtain signed V, slip, age and formed flags on every station and
   # the accepted work ledger. That exporter also writes every native point.
   set List of postprocessors = visualization

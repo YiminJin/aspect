@@ -5,9 +5,13 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import xml.etree.ElementTree as ET
 
 import numpy as np
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "growing_fault"))
+from parameter_file import legacy_mature_input
 
 
 def section(name, entries):
@@ -161,7 +165,7 @@ def main():
         if name == "rsf" and args.legacy_writer:
             if args.aspect.samefile(args.legacy_writer):
                 raise ValueError("Supply a separate pre-repair checkpoint writer")
-            old = run("legacy-writer", deck, aspect=args.legacy_writer)
+            old = run("legacy-writer", interior(legacy_mature_input(base)), aspect=args.legacy_writer)
             compare_accepted(old, clean, range(3))
             resumed = run("legacy-resume", deck, seed=old)
             compare_accepted(clean, resumed, [2])

@@ -7,7 +7,7 @@ import subprocess
 
 from check_section_publication import check as check_cold
 from compare import continuation, rows
-from parameter_file import composition_names, function, resolved_function, subsection
+from parameter_file import composition_names, function, public_nine_strip_input, resolved_function, subsection
 
 
 def main():
@@ -22,7 +22,7 @@ def main():
     args=ap.parse_args()
     root=args.destination
     root.mkdir(parents=True,exist_ok=False)
-    base=Path(__file__).with_name('onecut.prm').read_text()
+    base=public_nine_strip_input()
     observe=subsection('Postprocess','set List of postprocessors = midpoint publication, velocity statistics')
     def run(name, extra='', *, source=base, expected='', ranks=1, end='.005', snapshot=None, extra_plugin=None):
         path=root/name
@@ -52,7 +52,7 @@ def main():
     wall=lambda expr:subsection('Boundary velocity model',function(expr))
     gravity=lambda expr:subsection('Gravity model','set Model name = function\n'+function(expr))
     if args.group=='friction':
-        cold=run('cold',subsection('Material model',subsection('Growing fault','set Reference friction coefficient = .9')))
+        cold=run('cold',subsection('Material model',subsection('Phase field fault','set Reference friction coefficient = .9')))
         check_cold(cold)
         names, phase_name = composition_names(cold)
         phase_index = names.index(phase_name)
@@ -95,7 +95,7 @@ def main():
         # small mean. Keep the same actuator and walls, and resolve the creep
         # rate separately to test which prescribed velocities supplied work.
         actuator=run('interior-drive',wall('0;0')+drive+
-                     subsection('Material model',subsection('Growing fault','set Reference friction coefficient = .3')))
+                     subsection('Material model',subsection('Phase field fault','set Reference friction coefficient = .3')))
         wall_max=float((actuator/'published-constraints').read_text().splitlines()[-1].split()[2])
         r=rows([actuator/'balance-0001.csv'],('step',))[1,]
         defect=float(r['Wext'])-sum(float(r[k]) for k in ('energy_change','Db','Dc','Df','phase_remainder','phase_work'))
@@ -132,7 +132,7 @@ def main():
             raise ValueError('Missing accepted velocity statistics')
         print('Completions (clock, accepted parent, iterations, success)',completions)
         for label,setting in [('rsf','set Radiation damping = 0.75'),('maxwell','set Viscosity = 1800')]:
-            common=subsection('Material model',subsection('Growing fault',setting))+'\nset Nonlinear solver failure strategy = cut timestep size\n'
+            common=subsection('Material model',subsection('Phase field fault',setting))+'\nset Nonlinear solver failure strategy = cut timestep size\n'
             stop=subsection('Termination criteria','set Termination criteria = end step\nset End step = 1')
             half=run(label+'-half',common+stop+'\nset Maximum first time step = .0025\n')
             retry=run(label+'-cut',common+stop)

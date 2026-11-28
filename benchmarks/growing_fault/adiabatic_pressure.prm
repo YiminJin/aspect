@@ -3,7 +3,9 @@ include onecut.prm
 set End time = 0.005
 set Output directory = output-adiabatic-pressure
 subsection Material model
-  set Friction normal stress = adiabatic pressure
+  subsection Phase field fault
+    set Friction normal stress = adiabatic pressure
+  end
 end
 subsection Adiabatic conditions model
   set Model name = function

@@ -10,7 +10,7 @@ from matplotlib.lines import Line2D
 import numpy as np
 
 from compare import rows
-from parameter_file import composition_names
+from parameter_file import composition_names, strip_material
 
 
 def bernstein(x):
@@ -101,7 +101,7 @@ def plot_seed(output):
                for step in (0, 1)]
     time_ms = 1e3 * float(rows([output/'balance-0001.csv'], ('step',))[1,]['time'])
     np.testing.assert_allclose(time_ms, 5., rtol=0, atol=1e-12)
-    material = prm['Material model']['Growing fault']
+    material = strip_material(prm)
     alpha = np.deg2rad(float(material['Seed tangent angle']['value']))
     tangent = np.array([np.cos(alpha), np.sin(alpha)])
     normal = np.array([-tangent[1], tangent[0]])

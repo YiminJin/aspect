@@ -16,8 +16,10 @@ from pathlib import Path
 import numpy as np
 from scipy.ndimage import label
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "growing_fault/timestep"))
+growing = Path(__file__).resolve().parents[2] / "growing_fault"
+sys.path[:0] = [str(growing), str(growing / "timestep")]
 from frames import read, field_names
+from parameter_file import strip_material
 
 
 def values(par, *path):
@@ -39,8 +41,7 @@ class Case:
         self.origin = np.array([float(values(box, "Box origin "+a+" coordinate")) for a in "XY"])
         root = self.size / [int(values(box, a+" repetitions")) for a in "XY"]
         self.aspect = root[0]/root[1]
-        material = par["Material model"]
-        growing = material["Growing fault"]
+        growing = strip_material(par)
         angle = np.deg2rad(float(values(growing, "Seed tangent angle")))
         self.t = np.array([np.cos(angle), np.sin(angle)])
         self.n = np.array([-self.t[1], self.t[0]])
@@ -49,10 +50,7 @@ class Case:
         self.ell = float(values(par["Phase field"] if "Phase field" in par and
                                 values(par["Phase field"], "Length scale") else
                                 par["Postprocess"]["Phase field surface energy"], "Length scale"))
-        canonical = material["Phase field fault"]
-        legacy = growing
-        public_dc = canonical.get("Slip distance", {}).get("value", "")
-        self.dc = float(public_dc or values(legacy, "Slip distance"))
+        self.dc = float(values(growing, "Slip distance"))
         self.phase = field_names(folder).index("phase_field")
 
     def load(self, step):

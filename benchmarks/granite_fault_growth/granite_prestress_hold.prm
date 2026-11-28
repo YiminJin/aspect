@@ -1,0 +1,28 @@
+# Fixed walls on the coarse pilot grid. Start fresh and compare the seed
+# contours at t = 0 and 60 microseconds. The section speed is a midpoint
+# quantity, first available after an accepted physical step.
+include granite_fault_growth.prm
+
+set Output directory = output-granite-prestressed-hold-48x24
+set End time = 6.0e-5
+
+subsection Geometry model
+  subsection Box
+    set X repetitions = 48
+    set Y repetitions = 24
+  end
+end
+
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = 0; 0
+  end
+end
+
+subsection Checkpointing
+  set Additional checkpoint times =
+end
+
+subsection Postprocess
+  set List of postprocessors = phase field fault history
+end

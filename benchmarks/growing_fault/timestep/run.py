@@ -6,6 +6,10 @@ from pathlib import Path
 import shutil
 import subprocess
 import time
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from parameter_file import public_nine_strip_input
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('case', choices=['parent', 'coarse', 'half'])
@@ -46,8 +50,7 @@ else:
     exe, plugin = args.aspect.resolve(strict=True), args.plugin.resolve(strict=True)
     mpi = ['--map-by','core','--bind-to','core','--report-bindings','-np','2']
     plugins = 'midpoint publication, midpoint mesh fields'
-    base = Path(__file__).resolve().parents[1]/'onecut.prm'
-    text = base.read_text() + '''
+    text = public_nine_strip_input() + '''
 subsection Geometry model
  subsection Box
   set X repetitions = 16

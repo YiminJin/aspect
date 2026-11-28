@@ -7,7 +7,7 @@ import subprocess
 import numpy as np
 
 from check_history import check
-from parameter_file import function, subsection, wall_components
+from parameter_file import public_nine_strip_input, function, subsection, wall_components
 from compare import rows
 
 
@@ -40,15 +40,14 @@ def main():
             result.check_returncode()
         return output
 
-    base = (here/'onecut.prm').read_text()
+    base = public_nine_strip_input()
     run('incompatible', base + subsection('Material model', 'set Model name = simple'),
         'requires a material providing the Maxwell/AT1 midpoint response')
-    settings = base + subsection('Material model', 'set Model name = phase field fault')
-    settings += subsection('Material model',subsection('Growing fault','set Resistance law = linear dashpot'))
+    settings = base + subsection('Material model',subsection('Phase field fault','set Resistance law = linear dashpot'))
     run('incompatible-energy',settings + subsection('Postprocess', subsection('Phase field surface energy', 'set Crack geometry = AT2')),
         'requires the configured AT1 surface energy')
     # The RSF-only scales and monotonicity guard must never reach the dashpot.
-    settings += subsection('Material model', subsection('Growing fault',
+    settings += subsection('Material model', subsection('Phase field fault',
                            'set Initial age = 0\nset Direct effect = 0\nset Radiation damping = 0'))
     settings += subsection('Postprocess', 'set List of postprocessors = midpoint publication, stateless fault archive check')
     settings += subsection('Time stepping', 'set List of model names = convection time step, check returned midpoint')

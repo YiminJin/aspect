@@ -70,10 +70,8 @@ subsection Temperature field
 end
 subsection Material model
   set Model name = phase field fault
-  subsection Simple model
-    set Viscosity = 10
-  end
   subsection Phase field fault
+    set Viscosity = 10
     set Shear modulus = 10
     set Initialization interval = 0.1
     set Background compression = 5

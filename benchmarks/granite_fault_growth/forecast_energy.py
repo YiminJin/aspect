@@ -13,9 +13,11 @@ import sys
 import numpy as np
 from scipy.ndimage import label
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]/"growing_fault/timestep"))
+growing = Path(__file__).resolve().parents[1] / "growing_fault"
+sys.path[:0] = [str(growing), str(growing / "timestep")]
 from audit import ELL, KF, Geometry, dot, shapes, tensor
 from amr.trajectory import Case, values
+from parameter_file import strip_material
 
 
 @dataclass
@@ -65,7 +67,7 @@ class UniformFaultGeometry(Geometry):
             self.mass.extend([np.prod(hi-lo)/9]*9)
         self.mass = np.array(self.mass)
         np.testing.assert_allclose(self.phase(frame.coeff),p["phi"],atol=1.e-12,rtol=0.)
-        growing = par["Material model"]["Growing fault"]
+        growing = strip_material(par)
         phase = par["Phase field"] if values(par["Phase field"],"Fracture energy") else par["Postprocess"]["Phase field surface energy"]
         assert values(phase,"Crack geometry") == "AT1"
         self.kf = float(values(phase,"Fracture energy"))/((8/3)*case.ell)
@@ -81,7 +83,7 @@ class UniformFaultGeometry(Geometry):
         self.mu0 = float(values(growing,"Reference friction coefficient"))
         params = ("Direct effect","Evolution effect","Reference speed","Slip distance","Radiation damping")
         assert [float(values(growing,k)) for k in params] == [.015,.02,.001,.01,1000.]
-        if values(par["Material model"],"Friction normal stress") == "adiabatic pressure":
+        if values(growing,"Friction normal stress") == "adiabatic pressure":
             model = par["Adiabatic conditions model"]["Function"]
             assert values(model,"Function constants").replace(" ", "") == "p0=200,dp_dz=0"
             assert values(model,"Function expression").replace(" ","").split(";")[1] == "p0+dp_dz*depth"

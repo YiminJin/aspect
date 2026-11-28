@@ -3,8 +3,8 @@ include fixed_fault.prm
 set Output directory = output-mature-trace
 subsection Material model
   set Model name = phase field fault
-  set Friction normal stress = adiabatic pressure
   subsection Phase field fault
+    set Friction normal stress = adiabatic pressure
     set Fault geometry = boundary spanning
     set Fault vertex file = mature_vertices.txt
     set Background compression =

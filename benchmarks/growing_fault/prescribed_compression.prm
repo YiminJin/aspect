@@ -2,14 +2,16 @@
 include onecut.prm
 set End time = 0.005
 set Output directory = output-prescribed-compression
-# The reference input uses Surface pressure as the legacy friction setting.
+# Supply compression directly for this experiment.
 set Surface pressure =
 subsection Material model
-  subsection Growing fault
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Friction normal stress = prescribed constant
     set Prescribed fault compression = 250
   end
 end
 # Use the exporter installed beside this input. Each rank writes its native points.
 subsection Postprocess
-  set List of postprocessors = growing fault history
+  set List of postprocessors = phase field fault history
 end

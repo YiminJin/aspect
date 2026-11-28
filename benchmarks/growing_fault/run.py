@@ -7,6 +7,7 @@ import subprocess
 import time
 
 from compare import continuation
+from parameter_file import public_nine_strip_input
 
 
 def main():
@@ -20,7 +21,7 @@ def main():
     root=args.destination
     root.mkdir(parents=True,exist_ok=False)
     env=dict(os.environ,DEAL_II_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1')
-    base=Path(__file__).with_name('onecut.prm').read_text()
+    base=public_nine_strip_input()
     for name in (['principal'] if args.principal_only else ['principal','retry','restart-first','restart']):
         run=root/name
         run.mkdir()

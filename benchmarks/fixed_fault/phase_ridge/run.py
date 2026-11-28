@@ -87,10 +87,8 @@ def main():
     native = not vertical_control and not free
     extra = f"""
 subsection Material model
-  subsection Simple model
-    set Viscosity = 1e20
-  end
   subsection Phase field fault
+    set Viscosity = 1e20
     set Shear modulus = 1e6
     set Background compression = 50000
     set Background shear traction = 0

@@ -62,7 +62,7 @@ A separate **12 × 6 diagnostic** tested whether the same physical input can pas
 
 ## Replay from the worktree root
 
-Use a fresh working directory and run the first two commands for ASPECT sequentially even though they exit nonzero. The wrapper runs `--validate` before each launch and sets all numerical thread counts to one.
+Use a fresh working directory and run the first two commands for ASPECT sequentially even though they exit nonzero. Use the retained zero-stress, preload-pulse inputs at the revision below with this executable. The wrapper runs `--validate` before each launch and sets all numerical thread counts to one.
 
 ```sh
 B=benchmarks/granite_fault_growth
@@ -70,7 +70,7 @@ R=refactoring/phase-field-fault/example2/results
 E=build-bp3-fresh/install/bin/aspect-release
 W=build-granite-replay
 mkdir "$W"
-cp "$B"/*.prm "$W"/
+git archive d6c552075:benchmarks/granite_fault_growth -- '*.prm' | tar xf - -C "$W"
 python3 "$B/run.py" "$E" "$W/granite_coarse_startup.prm" coarse
 python3 "$B/run.py" "$E" "$W/granite_startup.prm" reference
 diff -U0 "$W/output-granite-48x24-startup/parameters.prm" "$W/output-granite-fault-startup/parameters.prm"
@@ -90,7 +90,7 @@ To reproduce the memory or scalar measurements, use a fresh output directory for
 
 ```sh
 mkdir "$W/capture"
-cp "$B"/granite*.prm "$W/capture"/
+cp "$W"/granite*.prm "$W/capture"/
 (
   export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
   exe=$(realpath "$E")
@@ -114,7 +114,7 @@ The furthest coarse checkpoint from the original compact survey is `build-granit
 ```sh
 W=build-granite-next
 mkdir "$W"
-cp benchmarks/granite_fault_growth/*.prm "$W"/
+git archive d6c552075:benchmarks/granite_fault_growth -- '*.prm' | tar xf - -C "$W"
 mkdir "$W/output-granite-48x24-survey"
 tar -xzf refactoring/phase-field-fault/example2/results/coarse-initial-restart.tar.gz -C "$W/output-granite-48x24-survey"
 printf '%s\n' 'include survey_resume.prm' 'subsection Termination criteria' '  set Termination criteria = end time, end step' '  set End step = 8' 'end' > "$W/next.prm"

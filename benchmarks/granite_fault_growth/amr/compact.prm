@@ -7,8 +7,6 @@ set Maximum time step = .0025
 subsection Material model
  subsection Phase field fault
   set Reference friction coefficient = .2
- end
- subsection Growing fault
   set Seed tangent angle = 0
   set Forward seed tip = 1.25,.5
   set Target strip width = .134

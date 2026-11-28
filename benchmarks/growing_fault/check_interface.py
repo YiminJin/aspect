@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 from compare import rows, compare_values
 from check_adiabatic_pressure import adiabatic_constants
-from check_material_settings import take_material_subsection
+from parameter_file import take_material_subsection
 from check_repairs import subsection
 
 
@@ -208,8 +208,8 @@ def main():
     parent+=subsection('Compositional fields',
                        'set Names of fields = fault_stress_xx, fault_stress_yy, fault_stress_xy, phase_field\n'
                        'set Types of fields = stress, stress, stress, phase field')
-    parent+='\nset Surface pressure =\n'+subsection('Material model','set Model name = phase field fault\n'
-                                                  'set Friction normal stress = adiabatic pressure')
+    parent+='\nset Surface pressure =\n'+subsection('Material model','set Model name = phase field fault')
+    parent+=fault('set Friction normal stress = adiabatic pressure')
     parent+=subsection('Adiabatic conditions model','set Model name = function\n'+subsection('Function','set Function expression = 293;200;1'))
     save=subsection('Checkpointing','set Steps between checkpoint = 1\nset Number of checkpoints to keep = 4')
     grow_parent=run('growing-parent',parent,'\nset End time = .005\n'+save)
@@ -220,7 +220,7 @@ def main():
     mature+='\nset Nonlinear solver scheme = single Advection, iterated Stokes\n'
     mature+=subsection('Compositional fields','set Compositional field methods = static, static, static, explicit DG SSPRK3')
     mature+=fault('set Fault geometry = fixed interior\nset Fit trace to phase = false\nset Fault vertices = .5,.2; 1,.8\nset Background shear traction = 128\nset Shear modulus = 10\nset Radiation damping = 100\nset Reference speed = .001\nset Direct effect = .1')
-    mature+=subsection('Material model',subsection('Simple model','set Viscosity = 10'))
+    mature+=fault('set Viscosity = 10')
     mature+=subsection('Solver parameters',subsection('Stokes solver parameters','set Linear solver tolerance = 1e-13'))
     mature+=subsection('Boundary velocity model','set Prescribed velocity boundary indicators = left: function, right: function, bottom: function\n'+subsection('Function','set Function expression = 0;0'))
     mature+=subsection('Initial composition model',subsection('Function','set Function expression = 0;0;0;.35'))

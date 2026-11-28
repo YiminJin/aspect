@@ -1,5 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/material_model/rheology/fault_resistance.h>
+#include <aspect/material_model/phase_field_fault/input_compatibility.h>
 #include <boost/algorithm/string/join.hpp>
 #include <numeric>
 
@@ -48,21 +49,31 @@ namespace aspect::MaterialModel::Rheology
 
       AssertThrow(!prm.subsection_path_exists({"Nested law"}),
                   ExcMessage("Duplicate external resistance-law declaration in the same material subsection."));
-      prm.declare_entry("Dashpot impedance (Pa.s/m)", "1000", Patterns::Double(0.),
+      prm.declare_entry("Dashpot impedance (Pa.s/m)", route == FaultResistance::Route::mature ? "2000" : "1000",
+                        route == FaultResistance::Route::mature ? Patterns::Double(1500., 2500.) :
+                        Patterns::Double(0., 1200.),
                         "Impedance multiplying the mean weight, in Pa s/m.");
       prm.enter_subsection("Nested law");
       const std::vector<std::string> weights(dimension, "1");
       prm.declare_entry("Weights", boost::algorithm::join(weights, ","),
                         Patterns::List(Patterns::Double(0.), dimension, dimension),
                         "One dimensionless weight per spatial direction.");
+      if (route == FaultResistance::Route::growing)
+        prm.declare_entry("Strip factor", "1", Patterns::Double(0.),
+                          "Dimensionless multiplier for signed strip resistance.");
+      else
+        FaultInputCompatibility::declare_entry(prm, "Trace factor", "1", Patterns::Double(0.),
+                                               "Dimensionless multiplier for positive-speed trace resistance.");
       prm.leave_subsection();
     }
 
-    std::unique_ptr<FaultResistance> create(const ParameterHandler &prm, FaultResistance::Route)
+    std::unique_ptr<FaultResistance> create(const ParameterHandler &prm, const FaultResistance::Route route)
     {
       const auto weights = Utilities::string_to_double(Utilities::split_string_list(prm.get({"Nested law"},"Weights")));
       const double mean = std::accumulate(weights.begin(), weights.end(), 0.) / weights.size();
-      return std::make_unique<WeightedDashpot>(prm.get_double("Dashpot impedance (Pa.s/m)") * mean);
+      const char *factor = route == FaultResistance::Route::growing ? "Strip factor" : "Trace factor";
+      return std::make_unique<WeightedDashpot>(prm.get_double("Dashpot impedance (Pa.s/m)") * mean *
+                                               prm.get_double({"Nested law"}, factor));
     }
 
     const auto registered = (FaultResistance::register_law("weighted dashpot", declare_parameters, create), true);

@@ -102,9 +102,14 @@ Existing inputs using `SSPRK3 fields = tracer` select the same explicit method
 after this expansion. A name may occur once in that list and its method must be
 either `field` or `explicit DG SSPRK3`.
 
-For the growing fault, select `midpoint fault phase` on one discontinuous quadratic
-field of type `phase field`. The coupled mechanics and irreversible phase solve
-advances this field in the single-advection, iterated Newton Stokes scheme.
+Both mature and growing faults use `Material model / Model name = phase field fault`.
+Put the Maxwell parameters, resistance law and its coefficients under
+`Material model / Phase field fault`. For a mature calculation specify the
+trace geometry there. For a growing calculation specify the seed tip in metres,
+tangent in degrees, and cohesion in Pa in the same subsection, then select
+`midpoint fault phase` on one discontinuous quadratic field of type `phase field`.
+The coupled mechanics and irreversible phase solve advances this field in the
+single-advection, iterated Newton Stokes scheme.
 Configure AT1 on the same named composition under
 the {ref}`Phase field <parameters:Phase_20field>` subsection. Older inputs may use
 `Postprocess / Phase field surface energy` for the same four settings. Settings

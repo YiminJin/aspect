@@ -6,6 +6,8 @@ import os
 from pathlib import Path
 import subprocess
 
+from parameter_file import public_nine_strip_input
+
 from check_repairs import function, subsection
 
 
@@ -16,7 +18,7 @@ def main():
     parser.add_argument('--launcher',default='/opt/openmpi/5.0.6/bin/mpirun')
     args = parser.parse_args()
     args.destination.mkdir(parents=True,exist_ok=False)
-    base = Path(__file__).with_name('onecut.prm').read_text()
+    base = public_nine_strip_input()
     env = os.environ | dict(OMP_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1',DEAL_II_NUM_THREADS='1')
     t = (cos(pi/6),sin(pi/6))
     normal = (-t[1],t[0])
@@ -34,7 +36,7 @@ def main():
         prm = base + subsection('Boundary velocity model',function('0;0'))
         if name=='partition':
             prm += subsection('Initial composition model',function('0;0;0;.2*min(1,max(0,4*(1-x)))*max(0,1-((y-.5)/.25)^2)'))
-        prm += subsection('Material model',subsection('Growing fault',extra+f'set Forward seed tip = {tip[0]:.17g},{tip[1]:.17g}'))
+        prm += subsection('Material model',subsection('Phase field fault',extra+f'set Forward seed tip = {tip[0]:.17g},{tip[1]:.17g}'))
         prm += subsection('Postprocess','set List of postprocessors = midpoint publication')
         prm += f'\nset End time = .005\nset Additional shared libraries = {args.plugin}\nset Output directory = {run/"output"}\n'
         (run/'input.prm').write_text(prm)

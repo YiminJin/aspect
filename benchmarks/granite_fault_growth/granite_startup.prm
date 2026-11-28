@@ -1,6 +1,6 @@
-# Use in the same directory as granite_fault_growth.prm. Fresh output, same
+# Use the historical zero-stress, preload-pulse input. Fresh output, same
 # mesh and physics. Keep dense native output for the first eight nominal steps.
-include granite_fault_growth.prm
+include granite_preload_reference.prm
 
 set End time         = 6.0e-5
 set Output directory = output-granite-fault-startup

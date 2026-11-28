@@ -9,12 +9,12 @@ import subprocess
 import numpy as np
 
 from check_history import check as check_history, fracture_energy
-from check_repairs import subsection
+from parameter_file import public_nine_strip_input, subsection
 from compare import continuation, rows
 
 
 def growing(settings):
-    return subsection("Material model", subsection("Growing fault", settings))
+    return subsection("Material model", subsection("Phase field fault", settings))
 
 
 def penalty(temperature, phase=None):
@@ -151,7 +151,7 @@ def main():
     header = "subsection Postprocess\n set List of postprocessors =\n subsection Phase field surface energy\n"
     if legacy.count(header) != 1 or legacy.count("set Surface pressure = 200\n") != 1:
         raise ValueError("Missing legacy functional or compression setting in the control")
-    common, energy = legacy.split(header)
+    common, energy = public_nine_strip_input().split(header)
     energy, tail = energy.split(" end\nend\n", 1)
     canonical = (common.replace("set Surface pressure = 200\n", "") + subsection("Phase field", energy)
                  + tail + growing("set Prescribed fault compression = 200"))

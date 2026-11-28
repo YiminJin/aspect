@@ -65,8 +65,8 @@ subsection Initial composition model
 end
 subsection Material model
  set Model name = phase field fault
- set Friction normal stress = adiabatic pressure
  subsection Phase field fault
+  set Friction normal stress = adiabatic pressure
   set Shear modulus = 1e6
   set Viscosity = 1e8
   set Resistance law = rate and state
@@ -77,8 +77,6 @@ subsection Material model
   set Reference speed = .001
   set Slip distance = .01
   set Radiation damping = 1000
- end
- subsection Growing fault
   # To translate or rotate the seed, change xc,yc,tx,ty in BOTH functions,
   # set this angle in degrees, and set the tip to (xc+length*tx,yc+length*ty).
   set Seed tangent angle = 30
@@ -131,5 +129,5 @@ subsection Adiabatic conditions model
   end
 end
 subsection Postprocess
-  set List of postprocessors = growing fault history
+  set List of postprocessors = phase field fault history
 end

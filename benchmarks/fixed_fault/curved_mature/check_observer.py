@@ -60,8 +60,7 @@ def run_controls(prefix, observer, dashpot, destination, case):
     destination.mkdir(parents=True, exist_ok=False)
     settings = OBSERVE + 'set End time = .0125\n'
     if case in ('both', 'changed'):
-        changed = settings + fault('set Shear modulus = 17\nset Initialization interval = .025')
-        changed += 'subsection Material model\n subsection Simple model\n set Viscosity = 24\n end\nend\n'
+        changed = settings + fault('set Shear modulus = 17\nset Initialization interval = .025\nset Viscosity = 24')
         out = run('changed', example/'curved_mature.prm', [observer], root=destination, prefix=prefix, settings=changed)
         check_observations(out, 24., 17., .025, True)
     if case in ('both', 'state-free'):

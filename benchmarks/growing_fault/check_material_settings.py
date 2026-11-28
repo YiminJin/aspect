@@ -8,25 +8,7 @@ import re
 import subprocess
 
 from check_adiabatic_pressure import adiabatic_constants
-from check_repairs import subsection
-
-
-def take_material_subsection(text, name):
-    """Return the rest of the input and the contents of Material model / name."""
-    lines = text.splitlines(keepends=True)
-    path = []
-    for i, line in enumerate(lines):
-        token = line.partition('#')[0].strip()
-        words = token.split(maxsplit=1)
-        if words[:1] == ['subsection']:
-            path.append(words[1])
-            if path == ['Material model', name]:
-                start = i
-        elif token == 'end':
-            if path == ['Material model', name]:
-                return ''.join(lines[:start] + lines[i+1:]), ''.join(lines[start+1:i])
-            path.pop()
-    raise ValueError(f'Missing subsection Material model / {name}')
+from parameter_file import legacy_mature_input, subsection, take_material_subsection
 
 
 def remove_setting(settings, name):
@@ -49,8 +31,13 @@ def main():
     example += adiabatic_constants(200, 50)
     public = 'Phase field fault'
     legacy = 'Growing fault'
-    omitted, shared = take_material_subsection(example, public)
-    shared = remove_setting(shared, 'Shear modulus')
+    outside, settings = take_material_subsection(example, public)
+    shared = remove_setting(settings, 'Shear modulus')
+    # Keep the geometry and pressure profile fixed when testing route defaults.
+    required = ('Friction normal stress', 'Seed tangent angle', 'Forward seed tip', 'Cohesion')
+    seed = '\n'.join(line for line in shared.splitlines()
+                     if any(line.strip().startswith('set '+key+' =') for key in required))
+    omitted = outside + subsection('Material model', subsection(public, seed))
     env = dict(os.environ, DEAL_II_NUM_THREADS='1', OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1')
 
     def run(name, content, diagnostic=()):
@@ -79,7 +66,7 @@ def main():
 
     def modulus_input(section, mpa):
         settings = shared + f'\nset Shear modulus = {mpa}e6'
-        return omitted + subsection('Material model', subsection(section, settings))
+        return outside + subsection('Material model', subsection(section, settings))
 
     for n, reference in ((1, 75.978862635792), (2, 151.95405267759796)):
         result = run(f'public-{n}', modulus_input(public, n))
@@ -111,10 +98,8 @@ def main():
     run('mature-only-at-default', example+setting(public,'Fit trace to phase','true'),
         ['Fit trace to phase requires mature trace mechanics'])
     fixed = (Path(__file__).resolve().parents[1]/'fixed_fault/fixed_fault.prm').read_text()
-    old_trace = run('mature-legacy-viscosity', fixed)
-    rest, simple = take_material_subsection(fixed, 'Simple model')
-    public_viscosity = rest + subsection('Material model', subsection('Simple model', remove_setting(simple, 'Viscosity')))
-    new_trace = run('mature-public-viscosity', public_viscosity+setting(public, 'Viscosity', '10'))
+    old_trace = run('mature-legacy-viscosity', legacy_mature_input(fixed))
+    new_trace = run('mature-public-viscosity', fixed)
     for step in range(3):
         name = f'fault-labels-{step:05}.txt'
         if (old_trace/name).read_bytes() != (new_trace/name).read_bytes():

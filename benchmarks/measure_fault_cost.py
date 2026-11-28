@@ -10,6 +10,9 @@ import subprocess
 import sys
 import time
 
+sys.path.insert(0, str(Path(__file__).resolve().parent / "growing_fault"))
+from parameter_file import legacy_mature_input
+
 
 def measure_rank(aspect):
     # wait4 reports the solver child's lifetime high-water mark on this rank.
@@ -93,6 +96,8 @@ subsection Postprocess
 end
 '''
             inputs = {label: (here/fixture).read_text() + reporting for label in ('baseline', 'current')}
+            if name == 'mature':
+                inputs['baseline'] = legacy_mature_input(inputs['current'])
             if args.donor_input:
                 inputs['baseline'] = donor_input + reporting + '''
 subsection Checkpointing

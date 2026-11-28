@@ -9,7 +9,7 @@ import subprocess
 import numpy as np
 
 from check_physical_inputs import growing
-from check_repairs import subsection
+from parameter_file import public_nine_strip_input, subsection
 from compare import rows, continuation, compare_values
 
 
@@ -120,7 +120,8 @@ def main():
     def case(name, p=200, slope=50, extras='', end=.005, probe=False, plugin=None, resume=None, diagnostic=None):
         run=args.destination/name
         run.mkdir()
-        shutil.copy(root/'onecut.prm', run)
+        # Write variants of the four-field control with a single material spelling.
+        (run/'onecut.prm').write_text(public_nine_strip_input())
         source='include onecut.prm\n'
         if p is not None:
             source=(root/'adiabatic_pressure.prm').read_text() + adiabatic_constants(p, slope)

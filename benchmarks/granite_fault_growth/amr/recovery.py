@@ -6,12 +6,13 @@ refinement at the accepted initial clock, before the first physical solve.
 import argparse
 from pathlib import Path
 import sys
-from shutil import copyfile, copytree
+from shutil import copytree
 import subprocess
 import csv
 
 here = Path(__file__).resolve().parent
-base = here.parents[1]/"growing_fault"/"onecut.prm"
+sys.path.insert(0, str(here.parents[1] / "growing_fault"))
+from parameter_file import public_nine_strip_input
 
 def section(name, body):
     return f"\nsubsection {name}\n{body}\nend\n"
@@ -20,11 +21,10 @@ def section(name, body):
 def run(args):
     folder = args.destination.resolve()
     folder.mkdir(parents=True, exist_ok=False)
-    copyfile(base, folder/"onecut.prm")
-    text = """include onecut.prm
+    text = public_nine_strip_input() + """
 set Output directory = output
 subsection Material model
-  subsection Growing fault
+  subsection Phase field fault
     set Target strip width = 0.125
   end
 end

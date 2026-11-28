@@ -14,6 +14,7 @@ import numpy as np
 GROWING = Path(__file__).resolve().parents[1]/"growing_fault"
 sys.path.insert(0, str(GROWING))
 from compare import allowance, continuation, plane_tolerances, rows
+from parameter_file import subsection, take_material_subsection
 
 
 def run(args, name, input_text, ranks, *, source=None, use_observer=True, checkpoint=None,
@@ -21,7 +22,17 @@ def run(args, name, input_text, ranks, *, source=None, use_observer=True, checkp
     case = args.destination/name
     case.mkdir()
     output = case/"output"
-    shutil.copyfile(GROWING/"growing_seed.prm", case/"growing_seed.prm")
+    seed = (GROWING/"growing_seed.prm").read_text()
+    if source and "include growing_seed.prm" in input_text:
+        # The pre-AMR writer understands the original four-field control's material
+        # syntax. Keep the one-field seed, velocity and pressure profile for v2.
+        seed, _ = take_material_subsection(seed, "Phase field fault")
+        _, old_material = take_material_subsection((GROWING/"onecut.prm").read_text(), "Growing fault")
+        seed += subsection("Material model", "set Friction normal stress = adiabatic pressure" +
+                           subsection("Growing fault", old_material))
+        seed = seed.replace("set List of postprocessors = phase field fault history",
+                            "set List of postprocessors = growing fault history")
+    (case/"growing_seed.prm").write_text(seed)
     shutil.copyfile(GROWING/"loaded_remesh.prm", case/"loaded_remesh.prm")
     shutil.copyfile(GROWING/"onecut.prm", case/"onecut.prm")
     if use_observer:
@@ -107,9 +118,9 @@ def main():
     assert args.aspect.read_bytes() != args.pre_amr_aspect.read_bytes(), "Supply separate writer and reader binaries."
     args.destination.mkdir(parents=True)
     base = "include loaded_remesh.prm\n"
-    state_free = ("subsection Material model\n set Friction normal stress = prescribed constant\n"
-                  " subsection Phase field fault\n  set Resistance law = linear dashpot\n end\n"
-                  " subsection Growing fault\n  set Prescribed fault compression = 200\n end\nend\n")
+    state_free = subsection("Material model", subsection("Phase field fault",
+                            "set Friction normal stress = prescribed constant\n"
+                            "set Resistance law = linear dashpot\nset Prescribed fault compression = 200"))
     outputs = {}
     report = {}
     def save():
@@ -118,7 +129,7 @@ def main():
     for name, nranks, extra in (
         ("serial",1,""),("parallel",2,""),("stateless",1,state_free),
         ("finer",2,"subsection Geometry model\n subsection Box\n set X repetitions = 16\n set Y repetitions = 8\n end\nend\n"+stop_after_transfer),
-        ("gauss-four",1,"subsection Material model\n subsection Growing fault\n set Section quadrature order = 4\n end\nend\n"+stop_after_transfer)):
+        ("gauss-four",1,"subsection Material model\n subsection Phase field fault\n set Section quadrature order = 4\n end\nend\n"+stop_after_transfer)):
         if name in ("serial","parallel","stateless") and args.parents:
             case = args.parents/name
             assert "Total wallclock time elapsed" in (case/"log").read_text()
@@ -147,7 +158,7 @@ def main():
         ("underintegrated","Section quadrature order = 3",None,"requires Section quadrature order >= 4"),
         ("changed-width","Target strip width = 0.124",outputs["serial"]/"restart"/"02",
          "Target strip width differs from the adaptive growing fault checkpoint")):
-        run(args,name,base+f"subsection Material model\n subsection Growing fault\n  set {setting}\n end\nend\n",
+        run(args,name,base+f"subsection Material model\n subsection Phase field fault\n  set {setting}\n end\nend\n",
             1,checkpoint=checkpoint,expected_failure=diagnostic)
         report[name] = diagnostic
         save()

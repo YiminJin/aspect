@@ -2,11 +2,14 @@
 import argparse
 import json
 from pathlib import Path
+import sys
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from parameter_file import strip_material
 from audit import Frame, shapes
 from frames import aligned
 
@@ -65,7 +68,7 @@ def main():
     signed=np.linspace(-np.ceil(symmax*100)/100,np.ceil(symmax*100)/100,24)
     lo,hi=bounds[:,:2].min(axis=0),bounds[:,2:].max(axis=0)
     parameters=json.loads((root/'parent/output/parameters.json').read_text())
-    angle=np.radians(float(parameters['Material model']['Growing fault']['Seed tangent angle']['value']))
+    angle=np.radians(float(strip_material(parameters)['Seed tangent angle']['value']))
     # Actual transverse strip boundaries are level lines of t dot (x-origin).
     edges=seed.strip['xi'][:-1]+seed.strip['ds'][:-1]/2
     np.testing.assert_allclose(edges,seed.strip['xi'][1:]-seed.strip['ds'][1:]/2,rtol=0,atol=1e-14)

@@ -1,0 +1,24 @@
+# Historical zero-stress pilot with a 25 ms preload pulse. The mesh, seed,
+# normal pressure and friction law are shared with the prestressed specimen.
+include granite_fault_growth.prm
+set Output directory = output-granite-fault-growth
+
+subsection Material model
+  subsection Phase field fault
+    set Initial deviatoric stress = 0, 0, 0
+  end
+end
+
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right:function, bottom:function, top:function
+  subsection Function
+    set Variable names = x,y,t
+    # All four walls follow the same affine shear; v_y=0. Full relative
+    # drive speed is 1 mm/s after Tload. The smooth startup adds Dload (m)
+    # of relative displacement with zero extra velocity at either end.
+    # Dload=0 removes the setup load. Extend End time for that control.
+    set Function constants  = yc=0.375, H=0.75, Udrive=0.001, Dload=0.00135, Tload=0.025, cycle=6.283185307179586
+    set Function expression = (y-yc)/H * (Udrive + Dload/Tload * \
+                              (1-cos(cycle*min(t/Tload,1)))); 0
+  end
+end

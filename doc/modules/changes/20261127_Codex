@@ -1,0 +1,6 @@
+Changed: Both mature and propagating faults use the Phase field fault
+material subsection. The compositional field method selects the formulation.
+Historical parameter names and defaults remain supported. A propagating
+seed can start with prescribed native deviatoric stress.
+<br>
+(Codex, 2026/11/27)

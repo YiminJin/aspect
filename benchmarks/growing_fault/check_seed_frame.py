@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from parameter_file import composition_names, resolved_function, subsection, wall_components
+from parameter_file import composition_names, strip_material, resolved_function, subsection, wall_components
 from compare import rows
 
 
@@ -39,7 +39,7 @@ class SeedFrame:
             settings += subsection(model, subsection('Function', 'set Function constants = ' + entries))
         length = float(self.function_constants(output,'Initial composition model')['length'])
         tip = self.center + length*self.tangent
-        return settings + subsection('Material model', subsection('Growing fault',
+        return settings + subsection('Material model', subsection('Phase field fault',
                      f'set Seed tangent angle = {self.degrees}\nset Forward seed tip = {tip[0]:.17g},{tip[1]:.17g}'))
 
 
@@ -77,7 +77,7 @@ def check_frame(output, frame):
     rotation = np.array([[t[0],-t[1]],[t[1],t[0]]])
     gradient = rotation @ [[.003,.020],[0.,-.003]] @ rotation.T
     parameters = json.loads((output/'parameters.json').read_text())
-    actual_tip = np.fromstring(parameters['Material model']['Growing fault']['Forward seed tip']['value'], sep=',')
+    actual_tip = np.fromstring(strip_material(parameters)['Forward seed tip']['value'], sep=',')
     np.testing.assert_allclose(actual_tip, frame.center + .5*t, atol=2e-12, rtol=0)
     # At the first solve friction samples the straight accepted parent. Use its
     # physical pressure locations, even when the prescribed pressure is constant.
@@ -161,7 +161,7 @@ def check_geometry(run, mesh_plugin):
     second = SeedFrame((1.,.5), 20.)
     check_frame(measure('second-dip', second.settings(clean)), second)
     stale_angle = second.settings(clean) + subsection(
-        'Material model', subsection('Growing fault', 'set Seed tangent angle = 19'))
+        'Material model', subsection('Phase field fault', 'set Seed tangent angle = 19'))
     stale_stations = measure('stale-material-angle', stale_angle)
     try:
         check_frame(stale_stations, second)

@@ -4,7 +4,7 @@ include growing_seed.prm
 set End time = 0.015
 set Output directory = output-loaded-remesh
 subsection Material model
-  subsection Growing fault
+  subsection Phase field fault
     set Target strip width = 0.125
   end
 end

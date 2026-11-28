@@ -7,7 +7,7 @@ import sys
 
 import numpy as np
 
-from parameter_file import subsection, function, wall_components
+from parameter_file import public_nine_strip_input, subsection, function, wall_components
 from compare import continuation
 sys.path.insert(0, str(Path(__file__).resolve().parent/'timestep'))
 from audit import ORDER, shapes, tensor
@@ -67,7 +67,7 @@ def main():
     args = parser.parse_args()
     root = args.destination
     root.mkdir(parents=True,exist_ok=False)
-    base = Path(__file__).with_name('onecut.prm').read_text()
+    base = public_nine_strip_input()
     observer = args.plugin.parent/'timestep/libmidpoint_fields.release.so'
     env = os.environ | dict(OMP_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1',DEAL_II_NUM_THREADS='1')
     def run(name, factor, extra='', steps=1, diagnostic=None):

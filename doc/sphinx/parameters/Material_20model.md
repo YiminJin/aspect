@@ -1880,6 +1880,15 @@ Units: \si{\pascal\second}
 **Documentation:** Physical tip of the initial contiguous seed in metres.
 ::::
 
+::::{dropdown} __Parameter:__ {ref}`Friction normal stress<parameters:Material_20model/Growing_20fault/Friction_20normal_20stress>`
+:name: parameters:Material_20model/Growing_20fault/Friction_20normal_20stress
+**Default value:** model default
+
+**Pattern:** [Selection model default|adiabatic pressure|resolved normal traction|prescribed constant ]
+
+**Documentation:** Source of fault compression in Pa. Adiabatic pressure supplies the complete normal stress from ASPECT&rsquo;s adiabatic conditions at the fault. Model default preserves resolved normal traction on mature faults and prescribed constant compression on growing strips.
+::::
+
 ::::{dropdown} __Parameter:__ {ref}`Initial age<parameters:Material_20model/Growing_20fault/Initial_20age>`
 :name: parameters:Material_20model/Growing_20fault/Initial_20age
 **Default value:** 10
@@ -1887,6 +1896,15 @@ Units: \si{\pascal\second}
 **Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
 
 **Documentation:** Initial state age in seconds.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Initial deviatoric stress<parameters:Material_20model/Growing_20fault/Initial_20deviatoric_20stress>`
+:name: parameters:Material_20model/Growing_20fault/Initial_20deviatoric_20stress
+**Default value:** 0, 0, 0
+
+**Pattern:** [List of <[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]> of length 3...3 (inclusive)]
+
+**Documentation:** Uniform Cartesian deviatoric stress on a fresh start, in Pa, ordered xx, yy, xy. Plane strain retains zz = -(xx + yy). A restart restores the saved point stresses.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Prescribed fault compression<parameters:Material_20model/Growing_20fault/Prescribed_20fault_20compression>`
@@ -1940,7 +1958,7 @@ Units: \si{\pascal\second}
 
 **Pattern:** [Integer range 2...2147483647 (inclusive)]
 
-**Documentation:** Gauss points per strip subinterval and chord.
+**Documentation:** Gauss points per strip subinterval and chord. Remeshing requires at least four points to integrate the phase-weighted history moments.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Seed tangent angle<parameters:Material_20model/Growing_20fault/Seed_20tangent_20angle>`
@@ -1968,6 +1986,15 @@ Units: \si{\pascal\second}
 **Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
 
 **Documentation:** Characteristic slip distance in m.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Target strip width<parameters:Material_20model/Growing_20fault/Target_20strip_20width>`
+:name: parameters:Material_20model/Growing_20fault/Target_20strip_20width
+**Default value:** 0
+
+**Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
+
+**Documentation:** Maximum material-strip spacing in metres. A positive width establishes the physical stations independently of bulk refinement. Zero derives the spacing from the finest bulk cell on a fixed mesh.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Viscosity<parameters:Material_20model/Growing_20fault/Viscosity>`
@@ -3874,6 +3901,15 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 **Documentation:** Persistent shear loading in Pa along the slip sense; the per-vertex column overrides this uniform value.
 ::::
 
+::::{dropdown} __Parameter:__ {ref}`Cohesion<parameters:Material_20model/Phase_20field_20fault/Cohesion>`
+:name: parameters:Material_20model/Phase_20field_20fault/Cohesion
+**Default value:** 1000
+
+**Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
+
+**Documentation:** Cohesive strength in Pa.
+::::
+
 ::::{dropdown} __Parameter:__ {ref}`Degradation magnitude<parameters:Material_20model/Phase_20field_20fault/Degradation_20magnitude>`
 :name: parameters:Material_20model/Phase_20field_20fault/Degradation_20magnitude
 **Default value:** 1
@@ -3937,6 +3973,24 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 **Documentation:** Fit a straight boundary-spanning seed to the initialized FE phase ridge. Constant phase retains the seed. Set to false to use the prescribed vertex positions, including curved traces.
 ::::
 
+::::{dropdown} __Parameter:__ {ref}`Forward seed tip<parameters:Material_20model/Phase_20field_20fault/Forward_20seed_20tip>`
+:name: parameters:Material_20model/Phase_20field_20fault/Forward_20seed_20tip
+**Default value:** 0,0
+
+**Pattern:** [List of <[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]> of length 2...2 (inclusive)]
+
+**Documentation:** Physical tip of the initial contiguous seed in metres.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Friction normal stress<parameters:Material_20model/Phase_20field_20fault/Friction_20normal_20stress>`
+:name: parameters:Material_20model/Phase_20field_20fault/Friction_20normal_20stress
+**Default value:** model default
+
+**Pattern:** [Selection model default|adiabatic pressure|resolved normal traction|prescribed constant ]
+
+**Documentation:** Source of fault compression in Pa. Adiabatic pressure supplies the complete normal stress from ASPECT&rsquo;s adiabatic conditions at the fault. Model default preserves resolved normal traction on mature faults and prescribed constant compression on growing strips.
+::::
+
 ::::{dropdown} __Parameter:__ {ref}`Initial age<parameters:Material_20model/Phase_20field_20fault/Initial_20age>`
 :name: parameters:Material_20model/Phase_20field_20fault/Initial_20age
 **Default value:** 1
@@ -3944,6 +3998,15 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 **Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
 
 **Documentation:** Initial state age in seconds.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Initial deviatoric stress<parameters:Material_20model/Phase_20field_20fault/Initial_20deviatoric_20stress>`
+:name: parameters:Material_20model/Phase_20field_20fault/Initial_20deviatoric_20stress
+**Default value:** 0, 0, 0
+
+**Pattern:** [List of <[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]> of length 3...3 (inclusive)]
+
+**Documentation:** Uniform Cartesian deviatoric stress on a fresh start, in Pa, ordered xx, yy, xy. Plane strain retains zz = -(xx + yy). A restart restores the saved point stresses.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Initial label ages<parameters:Material_20model/Phase_20field_20fault/Initial_20label_20ages>`
@@ -4000,6 +4063,15 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 **Documentation:** Minimum admissible sliding speed in m/s.
 ::::
 
+::::{dropdown} __Parameter:__ {ref}`Prescribed fault compression<parameters:Material_20model/Phase_20field_20fault/Prescribed_20fault_20compression>`
+:name: parameters:Material_20model/Phase_20field_20fault/Prescribed_20fault_20compression
+**Default value:**
+
+**Pattern:** [List of <[Double 0...MAX_DOUBLE (inclusive)]> of length 0...1 (inclusive)]
+
+**Documentation:** Positive compression in Pa used by the signed fault resistance law. An empty entry uses the explicitly supplied Surface pressure from legacy growing fault inputs.
+::::
+
 ::::{dropdown} __Parameter:__ {ref}`Profile half width<parameters:Material_20model/Phase_20field_20fault/Profile_20half_20width>`
 :name: parameters:Material_20model/Phase_20field_20fault/Profile_20half_20width
 **Default value:** 0
@@ -4045,6 +4117,24 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 **Documentation:** Surface resistance law evaluated on the active material trace or growing strips.
 ::::
 
+::::{dropdown} __Parameter:__ {ref}`Section quadrature order<parameters:Material_20model/Phase_20field_20fault/Section_20quadrature_20order>`
+:name: parameters:Material_20model/Phase_20field_20fault/Section_20quadrature_20order
+**Default value:** 6
+
+**Pattern:** [Integer range 2...2147483647 (inclusive)]
+
+**Documentation:** Gauss points per strip subinterval and chord. Remeshing requires at least four points to integrate the phase-weighted history moments.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Seed tangent angle<parameters:Material_20model/Phase_20field_20fault/Seed_20tangent_20angle>`
+:name: parameters:Material_20model/Phase_20field_20fault/Seed_20tangent_20angle
+**Default value:** 0
+
+**Pattern:** [Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]
+
+**Documentation:** Angle in degrees counterclockwise from x.
+::::
+
 ::::{dropdown} __Parameter:__ {ref}`Shear modulus<parameters:Material_20model/Phase_20field_20fault/Shear_20modulus>`
 :name: parameters:Material_20model/Phase_20field_20fault/Shear_20modulus
 **Default value:** 1e10
@@ -4061,6 +4151,15 @@ A typical example would be to set this runtime parameter to &lsquo;pi=3.14159265
 **Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
 
 **Documentation:** Characteristic slip distance in m.
+::::
+
+::::{dropdown} __Parameter:__ {ref}`Target strip width<parameters:Material_20model/Phase_20field_20fault/Target_20strip_20width>`
+:name: parameters:Material_20model/Phase_20field_20fault/Target_20strip_20width
+**Default value:** 0
+
+**Pattern:** [Double 0...MAX_DOUBLE (inclusive)]
+
+**Documentation:** Maximum material-strip spacing in metres. A positive width establishes the physical stations independently of bulk refinement. Zero derives the spacing from the finest bulk cell on a fixed mesh.
 ::::
 
 ::::{dropdown} __Parameter:__ {ref}`Viscosity<parameters:Material_20model/Phase_20field_20fault/Viscosity>`
