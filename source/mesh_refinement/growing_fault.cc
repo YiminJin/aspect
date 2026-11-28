@@ -1,11 +1,12 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/mesh_refinement/growing_fault.h>
+#include <aspect/mesh_refinement/fault_damage.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/phase_field_fault/strip_material_history.h>
 #include <aspect/geometry_model/box.h>
-
-#include <deal.II/fe/fe_values.h>
-#include <queue>
+#include <aspect/reconstructed_fault/onset_score.h>
+#include <aspect/initial_composition/interface.h>
+#include <aspect/simulator_signals.h>
 
 namespace aspect::MeshRefinement
 {
@@ -56,7 +57,8 @@ namespace aspect::MeshRefinement
       })
       {
         std::vector<Point<2>> clipped;
-        const auto inward=tangent+side*normal;
+        const double angle = aspect::GrowingFault::maximum_turn_angle;
+        const auto inward = std::sin(angle)*tangent + side*std::cos(angle)*normal;
         for (unsigned int i=0; i<polygon.size(); ++i)
           {
             const auto &a=polygon[i], &b=polygon[(i+1)%polygon.size()];
@@ -117,13 +119,102 @@ namespace aspect::MeshRefinement
         const auto lo=box.get_origin(), hi=lo+box.get_extents();
         const auto &seed=state.seed_tip();
         const auto tangent=state.seed_tangent();
-        // Trace the seed back to its first wall, including an inclined seed.
-        double distance=std::numeric_limits<double>::max();
-        for (unsigned int d=0; d<2; ++d)
-          if (tangent[d]!=0.)
-            distance=std::min(distance,(seed[d]-(tangent[d]>0.?lo[d]:hi[d]))/tangent[d]);
-        region.band= {seed-distance*tangent,seed};
         region.tip=seed;
+
+        // A step returned by Stokes lives in solution. Before the next solve,
+        // the accepted parent lives in old_solution. During early refinement
+        // some inputs skip FE initialization altogether.
+        const bool has_field = initialized_phase || this->get_parameters().resume_computation;
+        const auto &fe = this->get_fe();
+        const auto field = state.phase_field();
+        const auto component = this->introspection().component_indices.compositional_fields[field];
+        const auto &element = fe.base_element(fe.component_to_base_index(component).first);
+        AssertThrow(element.n_dofs_per_cell()==9, ExcMessage("Growing fault refinement requires DGQ2 Bernstein phase."));
+        const auto &solution = candidate || !state.has_native_history() || state.history().step == this->get_timestep_number()
+                               ? this->get_solution() : this->get_old_solution();
+        std::vector<types::global_dof_index> dofs(fe.n_dofs_per_cell());
+        const auto anchor=state.incoming_seed_anchor();
+        const bool physical_trial=candidate && this->get_timestep_number()>0 && state.staged_sections();
+        std::vector<FaultDamage::Cell> active, accepted_seed;
+        unsigned int coarse_candidates = 0;
+        for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+          if (cell->is_locally_owned())
+            {
+              FaultDamage::Cell data {cell->id(),cell->bounding_box(),{}};
+              if (has_field)
+                {
+                  cell->get_dof_indices(dofs);
+                  for (unsigned int i=0; i<data.phase.size(); ++i)
+                    data.phase[i]=solution[dofs[fe.component_to_system_index(component,i)]];
+                }
+              else
+                {
+                  // Sample the prescribed initializer at the element's own
+                  // interpolation sites. The actual limited FE seed is checked
+                  // again after the last initial refinement/zero-duration solve.
+                  std::vector<Vector<double>> values(9,Vector<double>(1));
+                  for (unsigned int i=0; i<values.size(); ++i)
+                    {
+                      const auto position=this->get_mapping().transform_unit_to_real_cell(cell,element.get_generalized_support_points()[i]);
+                      values[i][0]=this->get_initial_composition_manager().initial_composition(position,field);
+                    }
+                  std::vector<double> coefficients(9);
+                  element.convert_generalized_support_point_values_to_dof_values(values,coefficients);
+                  std::copy(coefficients.begin(),coefficients.end(),data.phase.begin());
+                }
+              if (physical_trial && distance_to_segment(data.bounds,anchor,seed)==0.)
+                {
+                  auto parent=data;
+                  for (unsigned int i=0; i<parent.phase.size(); ++i)
+                    parent.phase[i]=this->get_old_solution()[dofs[fe.component_to_system_index(component,i)]];
+                  accepted_seed.push_back(std::move(parent));
+                }
+              if (FaultDamage::may_contain_damage(data.phase))
+                {
+                  coarse_candidates |= cell_width(data.bounds)>bulk_target;
+                  active.push_back(std::move(data));
+                }
+            }
+
+        const auto &comm = this->get_mpi_communicator();
+
+        // Freeze the incoming material source on the accepted one-sided DG
+        // trace. An earlier disconnected island on that line may reach the
+        // contour in this trial. It must not become the new seed.
+        std::optional<FaultDamage::Source> source;
+        if (physical_trial)
+          source=FaultDamage::seed_on_line(accepted_seed,anchor,seed,tangent,comm).source;
+
+        std::optional<Point<2>> rear;
+        if (Utilities::MPI::max(coarse_candidates,comm))
+          {
+            AssertThrow(!physical_trial || source,
+                        ExcMessage("Coarse phase may reach the damage contour but its accepted seed has no resolved anchor."));
+            const auto connected = FaultDamage::connected_component(active,anchor,seed,tangent,comm,source);
+            if (connected.anchored)
+              {
+                rear=connected.rear;
+                for (const auto &[id,bounds] : connected.cells)
+                  if (cell_width(bounds)>bulk_target)
+                    region.damage.push_back(bounds);
+              }
+            else
+              {
+                AssertThrow(!has_field, ExcMessage("Coarse phase may reach the damage contour but the incoming "
+                                                   "seed has no resolved anchor. Check its position and initial phase."));
+                // An early interpolant can miss a narrow seed. Give the
+                // initialization a finer mesh and recheck the physical field.
+                region.damage.emplace_back(std::make_pair(lo,hi));
+              }
+          }
+        else
+          {
+            const auto line=FaultDamage::seed_on_line(active,anchor,seed,tangent,comm,source);
+            if (line.anchored)
+              rear=line.rear;
+          }
+
+        region.band= {rear.value_or(anchor),seed};
         if (state.has_native_history())
           {
             const auto &records=candidate && state.staged_sections() ?
@@ -148,15 +239,13 @@ namespace aspect::MeshRefinement
               {
                 // Ordinary scheduled marking can run after publication but
                 // before advance_time rotates the FE vectors.
-                const auto &phase = candidate || state.history().step == this->get_timestep_number() ?
-                                    this->get_solution() : this->get_old_solution();
-                region.tip=state.phase_supported_tip(angles,formed,phase);
+                region.tip=state.phase_supported_tip(angles,formed,solution);
               }
           }
         if (coverage==Coverage::sector)
           region.sector=forward_sector(Box2({lo,hi}),seed,tangent);
         else if (coverage==Coverage::disk)
-          region.tip_radius=4.*this->get_parameters().surface_energy_model.length_scale;
+          region.tip_radius=restore_radius;
       }
     return region;
   }
@@ -167,20 +256,18 @@ namespace aspect::MeshRefinement
     unsigned int count=0;
     if constexpr (dim==2)
       {
-        const double resolution=material(*this).target_strip_width();
-        AssertThrow(resolution>0.,ExcMessage("Growing fault refinement requires a positive Target strip width."));
-        const double margin=2.*this->get_parameters().surface_energy_model.length_scale;
+        const double margin=profile_half_width;
         for (const auto &cell : this->get_triangulation().active_cell_iterators())
           if (cell->is_locally_owned())
             {
               const auto box=cell->bounding_box();
-              if (cell_width(box)<=resolution*(1.+1.e-12)) continue;
+              if (cell_width(box)<=bulk_target) continue;
               bool needed=(region.tip_radius>0. && box.signed_distance(region.tip)<=region.tip_radius)
                           || within_sector(box,region.sector,margin);
               for (unsigned int i=1; !needed && i<region.band.size(); ++i)
                 needed=distance_to_segment(box,region.band[i-1],region.band[i])<=margin;
               if (!needed)
-                needed=std::any_of(region.missed_cells.begin(),region.missed_cells.end(),
+                needed=std::any_of(region.damage.begin(),region.damage.end(),
                                    [&](const auto &miss)
                 {
                   return overlaps(box,miss);
@@ -202,7 +289,10 @@ namespace aspect::MeshRefinement
   template <int dim>
   void GrowingFault<dim>::tag_additional_cells() const
   {
-    mark_region(requested ? *requested : fault_region(false),true);
+    // ASPECT already flags every cell on its global refinement passes, before
+    // the DoFHandler or phase field can be used.
+    if (this->get_dof_handler().n_dofs()!=0)
+      mark_region(requested ? *requested : fault_region(false),true);
   }
 
   template <int dim>
@@ -217,10 +307,18 @@ namespace aspect::MeshRefinement
     prm.enter_subsection("Mesh refinement");
     prm.enter_subsection("Growing fault");
     prm.declare_entry("Coverage","tip disk",Patterns::Selection("tip disk|forward sector|damage threshold"),
-                      "Resolve the formed band to the material's target strip width. The tip disk "
-                      "restores four phase lengths when fewer than three remain. The forward sector "
-                      "covers all seed-relative directions within 45 degrees before loading. Damage "
-                      "threshold requests extra coverage only after an unresolved extension.");
+                      "Resolve the formed band and seed-connected damage. The tip disk replenishes the "
+                      "direction-search neighborhood. The forward sector covers the possible seed-relative "
+                      "directions before loading. Damage threshold omits the forward reserve.");
+    prm.declare_entry("Maximum cell edge","0",Patterns::Double(0.),
+                      "Maximum physical length in metres of the longest edge of a cell in the refined region. "
+                      "Zero inherits the material's Target strip width. Changing this setting preserves strip identities.");
+    prm.declare_entry("Tip disk trigger margin","1",Patterns::Double(0.),
+                      "Extra clearance, in phase length scales, outside the mechanical direction-search radius "
+                      "before the tip disk requests preventive refinement.");
+    prm.declare_entry("Tip disk replenishment margin","1",Patterns::Double(0.),
+                      "Additional clearance, in phase length scales, outside the trigger radius when refining the disk. "
+                      "Must be positive.");
     prm.leave_subsection();
     prm.leave_subsection();
   }
@@ -232,170 +330,81 @@ namespace aspect::MeshRefinement
     prm.enter_subsection("Growing fault");
     const auto mode=prm.get("Coverage");
     coverage=mode=="tip disk" ? Coverage::disk : mode=="forward sector" ? Coverage::sector : Coverage::reactive;
+    bulk_target=prm.get_double("Maximum cell edge");
+    const auto &model=this->get_parameters().surface_energy_model;
+    profile_half_width=model.compact_profile_half_width();
+    const double mechanical_radius=aspect::GrowingFault::direction_search_radius(model.length_scale);
+    trigger_radius=mechanical_radius+prm.get_double("Tip disk trigger margin")*model.length_scale;
+    restore_radius=trigger_radius+prm.get_double("Tip disk replenishment margin")*model.length_scale;
     prm.leave_subsection();
     prm.leave_subsection();
     AssertThrow(dim==2,ExcMessage("Growing fault refinement requires two dimensions."));
+    AssertThrow(std::isfinite(restore_radius) && restore_radius>trigger_radius && trigger_radius>=mechanical_radius,
+                ExcMessage("The tip disk must cover the direction-search radius and replenish beyond its trigger radius."));
   }
 
   template <int dim>
-  std::vector<BoundingBox<2>> GrowingFault<dim>::unresolved_damage() const
+  void GrowingFault<dim>::initialize()
   {
-    std::vector<Box2> missed;
-    if constexpr (dim==2)
+    const auto &state=material(*this);
+    state.validate_refinement();
+    if (bulk_target==0.)
+      bulk_target=state.target_strip_width();
+    // Roundoff is relative to this physical size and applies identically to
+    // marking, the reserve audit and the coarse-damage screen.
+    bulk_target *= 1.+1.e-12;
+    // On restart the simulator grants additional levels only for scheduled
+    // times already passed by the restored clock (Simulator::run).
+    const auto check_reachable = [this](const unsigned int additional_levels)
+    {
+      const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
+      const unsigned int levels=this->get_parameters().initial_global_refinement
+                                +this->get_parameters().initial_adaptive_refinement + additional_levels;
+      for (unsigned int d=0; d<dim; ++d)
+        AssertThrow(std::ldexp(box.get_extents()[d]/box.get_repetitions()[d],-static_cast<int>(levels))<=bulk_target,
+                    ExcMessage("Maximum cell edge is unreachable at the allowed refinement level."));
+    };
+    if (this->get_parameters().resume_computation)
+      this->get_signals().post_resume_load_user_data.connect([this,check_reachable](const auto &)
       {
-        const auto &state=material(*this);
-        // Resolve connectivity on a 4-by-4 physical sampling lattice per cell.
-        // First screen only coarse cells, since the distributed component
-        // search is needed only if the .01 contour crossed a coarse sample.
-        constexpr unsigned int n=4;
-        constexpr double contour=.01, minimum_increment=1.e-4;
-        std::vector<Point<2>> points;
-        for (unsigned int y=0; y<n; ++y)
-          for (unsigned int x=0; x<n; ++x)
-            points.emplace_back((x+.5)/n,(y+.5)/n);
-        const auto comm=this->get_mpi_communicator();
-        FEValues<2> fe(this->get_mapping(),this->get_fe(),Quadrature<2>(points),update_values);
-        const auto phase=this->introspection().extractors.compositional_fields[state.phase_field()];
-        std::vector<double> trial(points.size()), old(points.size());
-        const auto &box=dynamic_cast<const GeometryModel::Box<2> &>(this->get_geometry_model());
-        const auto origin=box.get_origin();
-        const auto subdivisions=box.get_repetitions();
-        const unsigned int levels=this->get_triangulation().n_global_levels();
-        const double size=state.target_strip_width()*(1.+1.e-12);
-        using Coordinate=std::int64_t;
-        std::array<double,2> unit;
-        for (unsigned int d=0; d<2; ++d)
-          unit[d]=std::ldexp(box.get_extents()[d]/(n*subdivisions[d]),1-static_cast<int>(levels));
-        // Integer intervals on the common finest dyadic lattice avoid
-        // coordinate-roundoff decisions at hanging and partition faces.
-        // The prescribed seed may be an interior patch. Its backward tangent
-        // reaches the wall, but an active island elsewhere on that ray is not
-        // connected to this seed. Anchor at the incoming station one length
-        // behind the physical tip, clipped to the box as in the strip tracker.
-        const Point<2> seed_tip = state.seed_tip();
-        const auto tangent = state.seed_tangent();
-        double incoming_length = this->get_parameters().surface_energy_model.length_scale;
-        for (unsigned int d=0; d<2; ++d)
-          if (tangent[d]!=0.)
-            {
-              const double wall = origin[d]+(tangent[d]>0. ? 0. : box.get_extents()[d]);
-              incoming_length = std::min(incoming_length,(seed_tip[d]-wall)/tangent[d]);
-            }
-        const Point<2> anchor = seed_tip - incoming_length*tangent;
-        using Tile=std::array<Coordinate,6>; // x0,y0,x1,y1,crossing,seed
-        std::vector<Tile> active;
-        unsigned int crossing=0;
-        for (unsigned int pass=0; pass<2; ++pass)
-          {
-            for (const auto &cell : this->get_dof_handler().active_cell_iterators())
-              if (cell->is_locally_owned())
-                {
-                  const auto bounds=cell->bounding_box();
-                  const bool coarse=cell_width(bounds)>size;
-                  if (pass==0 && !coarse) continue;
-                  fe.reinit(cell);
-                  fe[phase].get_function_values(this->get_solution(),trial);
-                  if (coarse || pass==1)
-                    fe[phase].get_function_values(this->get_old_solution(),old);
-                  const auto &lo=bounds.get_boundary_points().first;
-                  std::array<Coordinate,2> base;
-                  for (unsigned int d=0; d<2; ++d)
-                    base[d]=std::llround((lo[d]-origin[d])/unit[d]);
-                  const Coordinate stride=Coordinate(1)<<(levels-1-cell->level());
-                  for (unsigned int q=0; q<points.size(); ++q)
-                    if (trial[q]>=contour)
-                      {
-                        const bool new_damage=coarse && old[q]<contour && trial[q]-old[q]>=minimum_increment;
-                        if (new_damage) crossing=1;
-                        if (pass==0) continue;
-                        const auto x=base[0]+(q%n)*stride, y=base[1]+(q/n)*stride;
-                        const Box2 tile(
-                        {
-                          Point<2>(origin[0]+x*unit[0],origin[1]+y*unit[1]),
-                                Point<2>(origin[0]+(x+stride)*unit[0],origin[1]+(y+stride)*unit[1])
-                        });
-                        const bool seed = old[q]>=contour && distance_to_segment(tile,anchor,seed_tip)==0.;
-                        active.push_back({{x,y,x+stride,y+stride,new_damage,seed}});
-                      }
-                }
-            if (!Utilities::MPI::max(crossing,comm)) return missed;
-          }
+        const auto &times=this->get_parameters().additional_refinement_times;
+        const auto end=std::lower_bound(times.begin(),times.end(),this->get_time()+this->get_timestep());
+        check_reachable(std::distance(times.begin(),end));
+      });
+    else
+      check_reachable(0);
+    this->get_signals().post_set_initial_state.connect([this](const SimulatorAccess<dim> &)
+    {
+      initialized_phase=true;
+    });
+  }
 
-        std::vector<Tile> tiles;
-        for (auto &part : Utilities::MPI::all_gather(comm,active))
-          tiles.insert(tiles.end(),part.begin(),part.end());
-        std::vector<std::vector<unsigned int>> neighbors(tiles.size());
-        // Sweep the two ordered traces of each physical face. Strict interval
-        // overlap admits hanging faces and excludes corner-only contacts.
-        for (unsigned int d=0; d<2; ++d)
-          {
-            using Interval=std::tuple<Coordinate,Coordinate,unsigned int>;
-            std::map<Coordinate,std::array<std::vector<Interval>,2>> faces;
-            const unsigned int e=1-d;
-            for (unsigned int i=0; i<tiles.size(); ++i)
-              for (unsigned int f=0; f<2; ++f)
-                faces[tiles[i][d+2*f]][f].emplace_back(tiles[i][e],tiles[i][e+2],i);
-            for (auto &[coordinate,sides] : faces)
-              {
-                (void)coordinate;
-                for (auto &side : sides) std::sort(side.begin(),side.end());
-                unsigned int i=0,j=0;
-                while (i<sides[0].size() && j<sides[1].size())
-                  {
-                    const auto [a,b,k]=sides[0][i];
-                    const auto [c,d_end,l]=sides[1][j];
-                    if (std::max(a,c)<std::min(b,d_end))
-                      {
-                        neighbors[k].push_back(l);
-                        neighbors[l].push_back(k);
-                      }
-                    if (b<=d_end) ++i;
-                    if (d_end<=b) ++j;
-                  }
-              }
-          }
-        std::queue<unsigned int> queue;
-        std::vector<bool> visited(tiles.size(),false);
-        // Use one source. Seeding every piece of the incoming segment would
-        // merge disconnected components when the accepted trace has a gap.
-        // The physical tile coordinates break distance ties across MPI ranks.
-        unsigned int source = numbers::invalid_unsigned_int;
-        double nearest = std::numeric_limits<double>::max();
-        for (unsigned int i=0; i<tiles.size(); ++i)
-          if (tiles[i][5])
-            {
-              const auto &tile=tiles[i];
-              const Point<2> center(origin[0]+.5*(tile[0]+tile[2])*unit[0],
-                                    origin[1]+.5*(tile[1]+tile[3])*unit[1]);
-              const double distance=center.distance_square(anchor);
-              if (distance<nearest || (distance==nearest && tile<tiles[source]))
-                {
-                  nearest=distance;
-                  source=i;
-                }
-            }
-        if (source!=numbers::invalid_unsigned_int)
-          {
-            visited[source]=true;
-            queue.push(source);
-          }
-        while (!queue.empty())
-          {
-            const auto i=queue.front();
-            queue.pop();
-            const auto &t=tiles[i];
-            if (t[4])
-              missed.emplace_back(std::make_pair(Point<2>(origin[0]+t[0]*unit[0],origin[1]+t[1]*unit[1]),
-                                                 Point<2>(origin[0]+t[2]*unit[0],origin[1]+t[3]*unit[1])));
-            for (const auto j : neighbors[i])
-              if (!visited[j])
-                {
-                  visited[j]=true;
-                  queue.push(j);
-                }
-          }
+  template <int dim>
+  bool GrowingFault<dim>::needs_coverage(const Region &region) const
+  {
+    if (!region.damage.empty())
+      return true;
+    if (coverage==Coverage::reactive)
+      return false;
+    if (coverage==Coverage::disk)
+      {
+        Region guard=region;
+        guard.tip_radius=trigger_radius;
+        return mark_region(guard,false);
       }
-    return missed;
+    return mark_region(region,false);
+  }
+
+  template <int dim>
+  bool GrowingFault<dim>::needs_initial_refinement() const
+  {
+    requested.reset();
+    auto seed=fault_region(true);
+    if (!needs_coverage(seed))
+      return false;
+    this->get_pcout() << "Growing fault initial coverage: refine initialized seed" << std::endl;
+    requested=std::move(seed);
+    return true;
   }
 
   template <int dim>
@@ -404,28 +413,32 @@ namespace aspect::MeshRefinement
     using TimeStepping::Reaction;
     requested.reset();
     const auto &state=material(*this);
-    if (this->get_timestep_number()>0 && !state.staged_sections())
+    const bool physical=this->get_timestep_number()>0;
+    if (physical && !state.staged_sections())
       return Reaction::advance; // A nonlinear failure has no candidate to inspect.
     auto next=fault_region(true);
-    if (this->get_timestep_number()>0)
-      next.missed_cells=unresolved_damage();
-    const bool miss=!next.missed_cells.empty();
-    if (!miss && coverage==Coverage::reactive) return Reaction::advance;
-    if (!miss)
+    if (!needs_coverage(next))
+      return Reaction::advance;
+
+    const auto exposed_cells=next.damage.size();
+    const bool unresolved=exposed_cells>0;
+    bool parent_exposed=false;
+    if (unresolved && physical)
       {
-        const double restore_radius=next.tip_radius;
-        if (coverage==Coverage::disk)
-          next.tip_radius=3.*this->get_parameters().surface_energy_model.length_scale;
-        if (!mark_region(next,false))
-          return Reaction::advance;
-        next.tip_radius=restore_radius;
+        const auto parent=fault_region(false);
+        parent_exposed=!parent.damage.empty();
+        // Include any different coarse footprints of the old state to make
+        // the transferred parent and the trial's extension both resolvable.
+        next.damage.insert(next.damage.end(),parent.damage.begin(),parent.damage.end());
       }
-    this->get_pcout() << (miss ? "Growing fault missed extension: refine and repeat" :
+    this->get_pcout() << (unresolved && physical ?
+                          (parent_exposed ? "Growing fault unresolved accepted damage: refine parent and repeat" :
+                           "Growing fault missed extension: refine and repeat") :
                           "Growing fault preventive refinement: refine and advance")
                       << " at t=" << this->get_time() << " s, tip " << next.tip
-                      << ", newly crossed coarse samples " << next.missed_cells.size() << std::endl;
+                      << ", connected coarse cells " << exposed_cells << std::endl;
     requested=std::move(next);
-    return miss ? Reaction::refine_and_repeat_step : Reaction::refine_and_advance;
+    return unresolved && physical ? Reaction::refine_and_repeat_step : Reaction::refine_and_advance;
   }
 
   ASPECT_REGISTER_MESH_REFINEMENT_CRITERION(GrowingFault, "growing fault",

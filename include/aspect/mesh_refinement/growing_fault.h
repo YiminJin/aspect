@@ -21,7 +21,9 @@ namespace aspect::MeshRefinement
     public:
       static void declare_parameters(ParameterHandler &prm);
       void parse_parameters(ParameterHandler &prm) override;
+      void initialize() override;
       void tag_additional_cells() const override;
+      bool needs_initial_refinement() const override;
       bool needs_further_refinement() const override;
 
       /** Collective at the return of the midpoint solve, before acceptance.
@@ -33,13 +35,20 @@ namespace aspect::MeshRefinement
       {
         std::vector<Point<2>> band;
         std::vector<Point<2>> sector;
-        std::vector<BoundingBox<2>> missed_cells;
+        // Coarse cell footprints intersecting connected phase. Physical boxes
+        // remain valid through all levels of a retry of the accepted parent.
+        std::vector<BoundingBox<2>> damage;
         Point<2> tip;
         double tip_radius = 0.;
       };
       Region fault_region(bool candidate) const;
       bool mark_region(const Region &region, bool mark) const;
-      std::vector<BoundingBox<2>> unresolved_damage() const;
+      bool needs_coverage(const Region &region) const;
+      double bulk_target;
+      double profile_half_width;
+      double trigger_radius;
+      double restore_radius;
+      bool initialized_phase = false;
 
       enum class Coverage
       {

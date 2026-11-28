@@ -17,15 +17,11 @@ namespace aspect
     template <int dim>
     using BernsteinPatch = std::array<double,dealii::Utilities::pow(3,dim)>;
 
-    /** Enclose a tensor Q2 polynomial in its Bernstein coordinates. Tighten a
-     * hull crossing [0,1] by de Casteljau subdivision in every coordinate direction. */
+    /** Bisect each reference axis of a Q2 Bernstein patch. Bit d of a child
+     * index selects the upper half along coordinate d (x varies fastest). */
     template <int dim>
-    inline std::pair<double,double> enclosure(const BernsteinPatch<dim> &coefficients,
-                                              const unsigned int           depth = 4)
+    inline std::array<BernsteinPatch<dim>,1u<<dim> subdivide_bernstein(const BernsteinPatch<dim> &coefficients)
     {
-      const auto extrema = std::minmax_element(coefficients.begin(), coefficients.end());
-      if (depth==0 || (*extrema.first >= 0. && *extrema.second <= 1.))
-        return {*extrema.first,*extrema.second};
       // At each fixed transverse index, split the three control points
       // along the current axis. The two children share the midpoint value.
       const auto split = [](const BernsteinPatch<dim> &patch, const unsigned int stride)
@@ -43,7 +39,6 @@ namespace aspect
             }
         return halves;
       };
-      std::pair<double,double> range = {std::numeric_limits<double>::max(),std::numeric_limits<double>::lowest()};
       std::array<BernsteinPatch<dim>,1u<<dim> children;
       children[0] = coefficients;
       // x varies fastest in the tensor basis, then y, then z.
@@ -55,6 +50,20 @@ namespace aspect
             children[i] = halves[0];
             children[i+(1u<<d)] = halves[1];
           }
+      return children;
+    }
+
+    /** Enclose a tensor Q2 polynomial in its Bernstein coordinates. Tighten a
+     * hull crossing [0,1] by de Casteljau subdivision in every coordinate direction. */
+    template <int dim>
+    inline std::pair<double,double> enclosure(const BernsteinPatch<dim> &coefficients,
+                                              const unsigned int           depth = 4)
+    {
+      const auto extrema = std::minmax_element(coefficients.begin(), coefficients.end());
+      if (depth==0 || (*extrema.first >= 0. && *extrema.second <= 1.))
+        return {*extrema.first,*extrema.second};
+      std::pair<double,double> range = {std::numeric_limits<double>::max(),std::numeric_limits<double>::lowest()};
+      const auto children = subdivide_bernstein<dim>(coefficients);
       for (const auto &child : children)
         {
           const auto bounds = enclosure<dim>(child,depth-1);

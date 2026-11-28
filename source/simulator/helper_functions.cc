@@ -19,6 +19,7 @@
 */
 
 
+#include <aspect/mesh_refinement/refinement_target.h>
 #include <aspect/simulator.h>
 #include <aspect/advection_field.h>
 #include <aspect/melt.h>
@@ -419,6 +420,23 @@ namespace aspect
       }
     else
       {
+        // Some physical targets depend on the initialized FE field, which can
+        // be skipped on earlier passes. Reinitialize from the same initial
+        // conditions on the completed mesh before starting physical time.
+        bool unresolved = false;
+        for (const auto &marker : mesh_refinement_manager.get_active_plugins())
+          if (const auto *target = dynamic_cast<const MeshRefinement::RefinementTarget *>(marker.get()))
+            unresolved |= target->needs_initial_refinement();
+        if (unresolved)
+          {
+            const auto previous_cells = triangulation.n_global_active_cells();
+            refine_mesh(max_refinement_level);
+            AssertThrow(triangulation.n_global_active_cells() > previous_cells,
+                        ExcMessage("The requested refinement target remains unresolved on the initialized mesh. "
+                                   "Check the allowed level, refinement fraction and other refinement criteria."));
+            return true;
+          }
+
         // invalidate the value of pre_refinement_step since it will no longer be used from here on
         pre_refinement_step = std::numeric_limits<unsigned int>::max();
         return false;

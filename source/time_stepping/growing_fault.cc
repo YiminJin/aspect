@@ -7,6 +7,13 @@ namespace aspect::TimeStepping
   class GrowingFaultRefinement : public Interface<dim>, public SimulatorAccess<dim>
   {
     public:
+      void initialize() override
+      {
+        AssertThrow(this->get_mesh_refinement_manager()
+                    .template has_matching_active_plugin<MeshRefinement::GrowingFault<dim>>(),
+                    ExcMessage("The growing fault refinement timestep model requires the growing fault mesh refinement criterion."));
+      }
+
       double execute() override
       {
         return std::numeric_limits<double>::max();
