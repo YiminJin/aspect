@@ -106,7 +106,10 @@ namespace aspect::MeshRefinement::FaultDamage
       return superlevel({{a-damage_contour,2*(b-a),a-2*b+c,0.,0.}},2);
     }
 
-    enum class Excursion { empty, connected, ambiguous };
+    enum class Excursion
+    {
+      empty, connected, ambiguous
+    };
 
     Excursion classify_interior(const Patch &patch)
     {
@@ -304,6 +307,29 @@ namespace aspect::MeshRefinement::FaultDamage
       return parents;
     }
 
+    // Follow the source through isotropic Cartesian refinement. Choosing a
+    // child geometrically, before inspecting its phase, prevents a detached
+    // island on the opposite DG trace from acquiring the source identity.
+    bool contains_source_trace(const CellId &id, const Source &source)
+    {
+      if (id==source.cell) return true;
+      if (!source.cell.is_ancestor_of(id)) return false;
+      auto unit=source.unit_point;
+      const auto path=id.get_child_indices();
+      for (unsigned int level=source.cell.get_child_indices().size(); level<path.size(); ++level)
+        {
+          unsigned int child=0;
+          for (unsigned int d=0; d<2; ++d)
+            {
+              const unsigned int upper=(unit[d]>.5);
+              child+=upper << d;
+              unit[d]=2.*unit[d]-upper;
+            }
+          if (path[level]!=child) return false;
+        }
+      return true;
+    }
+
     Component locate(const std::vector<Cell>     &owned,
                      const Point<2>              &anchor,
                      const Point<2>              &tip,
@@ -340,7 +366,7 @@ namespace aspect::MeshRefinement::FaultDamage
             const auto &id=cells[leaves[i].cell].id;
             if (pinned)
               {
-                if (!group && id==pinned->cell && a<=pinned->distance_from_anchor && b>=pinned->distance_from_anchor)
+                if (!group && contains_source_trace(id,*pinned) && a<=pinned->distance_from_anchor && b>=pinned->distance_from_anchor)
                   {
                     group=groups[i];
                     nearest=pinned->distance_from_anchor;
@@ -350,14 +376,23 @@ namespace aspect::MeshRefinement::FaultDamage
             else
               {
                 const long double first=std::max(0.L,a);
-                if ((first<b || (end==0. && b==0.)) && first<nearest)
+                if (first>=b && !(end==0. && b==0.)) continue;
+                if (group && *group!=groups[i])
+                  result.unique_incoming_component=false;
+                if (first<nearest)
                   {
                     nearest=first;
                     group=groups[i];
                     // Select an actual point inside the supported interval to
                     // carry into the trial. An earlier detached island may
                     // appear nearer the anchor as the phase increases.
-                    result.source=Source {id,(first+b)/2};
+                    const auto distance=(first+b)/2;
+                    const auto &bounds=cells[leaves[i].cell].bounds;
+                    Point<2> unit;
+                    for (unsigned int d=0; d<2; ++d)
+                      unit[d]=((static_cast<long double>(anchor[d])-bounds.lower_bound(d)) +
+                               distance*tangent[d])/bounds.side_length(d);
+                    result.source=Source {id,distance,unit};
                   }
               }
           }

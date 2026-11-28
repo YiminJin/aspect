@@ -1,0 +1,63 @@
+include growing_seed.prm
+set Output directory = output
+set End time = .005
+set Maximum first time step = .0025
+set Maximum time step = .0025
+set Additional shared libraries = ./plugin/libseed_identity.release.so
+subsection Geometry model
+  subsection Box
+    set Box origin X coordinate = 2.25
+    set X extent = 1
+    set Y extent = 2
+    set X repetitions = 4
+    set Y repetitions = 8
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set Seed tangent angle = 0
+    set Forward seed tip = 3,.25
+    set Target strip width = .125
+  end
+end
+subsection Phase field
+  set Length scale = .6
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = if(x>2.75 && x<3 && y<1.75, .02, .004)
+  end
+end
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = 0;0
+  end
+end
+subsection Mesh refinement
+  set Strategy = growing fault, minimum refinement function
+  set Initial adaptive refinement = 1
+  set Skip solvers on initial refinement = true
+  set Skip setup initial conditions on initial refinement = false
+  set Additional refinement times = .0025
+  set Coarsening fraction = 0
+  set Refinement fraction = .01
+  subsection Growing fault
+    set Coverage = damage threshold
+    set Maximum cell edge = .125
+  end
+  subsection Minimum refinement function
+    set Coordinate system = cartesian
+    set Variable names = x,y,t
+    set Function expression = if(t>=.0025 && x>2.75 && x<3 && y<.5,2,0)
+  end
+end
+subsection Time stepping
+  set List of model names = growing fault refinement
+end
+subsection Checkpointing
+  set Steps between checkpoint = 1
+  set Number of checkpoints to keep = 4
+end
+subsection Postprocess
+  set List of postprocessors = phase field fault history, manufactured seed identity
+end

@@ -3,6 +3,7 @@
 #define _aspect_mesh_refinement_growing_fault_h
 
 #include <aspect/mesh_refinement/interface.h>
+#include <aspect/mesh_refinement/fault_damage.h>
 #include <aspect/mesh_refinement/refinement_target.h>
 #include <aspect/time_stepping/interface.h>
 #include <optional>
@@ -22,6 +23,8 @@ namespace aspect::MeshRefinement
       static void declare_parameters(ParameterHandler &prm);
       void parse_parameters(ParameterHandler &prm) override;
       void initialize() override;
+      void save(std::map<std::string,std::string> &status) const override;
+      void load(const std::map<std::string,std::string> &status) override;
       void tag_additional_cells() const override;
       bool needs_initial_refinement() const override;
       bool needs_further_refinement() const override;
@@ -33,6 +36,7 @@ namespace aspect::MeshRefinement
     private:
       struct Region
       {
+        std::optional<FaultDamage::Source> source;
         std::vector<Point<2>> band;
         std::vector<Point<2>> sector;
         // Coarse cell footprints intersecting connected phase. Physical boxes
@@ -41,7 +45,10 @@ namespace aspect::MeshRefinement
         Point<2> tip;
         double tip_radius = 0.;
       };
-      Region fault_region(bool candidate) const;
+      Region fault_region(bool candidate, bool recover_legacy_source = false) const;
+      // The accepted initial phase chooses this replicated one-sided material
+      // point once. Time stepping and refinement never replace it.
+      mutable std::optional<FaultDamage::Source> seed_source;
       bool mark_region(const Region &region, bool mark) const;
       bool needs_coverage(const Region &region) const;
       double bulk_target;

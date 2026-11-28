@@ -133,8 +133,8 @@ TEST_CASE("Fault damage resolves two islands inside one Q2 cell")
   auto touch=constant(damage_contour);
   for (unsigned int i=0; i<9; ++i)
     touch[i]+=i/3==1 ? delta : -delta;
-  CHECK_FALSE(connected({cell(0,{0,0},{1,1},touch)},{.25,.5}).anchored);
-  CHECK(connected({cell(0,{0,0},{1,1},constant(damage_contour))},{.25,.5}).anchored);
+  CHECK_FALSE(connected({cell(0,{0,0},{1,1},touch)}, {.25,.5}).anchored);
+  CHECK(connected({cell(0,{0,0},{1,1},constant(damage_contour))}, {.25,.5}).anchored);
 }
 
 TEST_CASE("Fault damage finds the contiguous tilted seed extent from its quartic trace")
@@ -170,17 +170,53 @@ TEST_CASE("Fault damage anchors the trial to the accepted component on its origi
   const auto parent=seed_on_line(partition(cells),anchor,tip,tangent,MPI_COMM_WORLD);
   REQUIRE(parent.source.has_value());
   CHECK(parent.source->cell==cells[2].id);
+  // The first accepted endpoint develops an island nearer the anchor.
   cells[0].phase=constant(.02);
+  const auto published=connected_component(partition(cells),anchor,tip,tangent,MPI_COMM_WORLD,parent.source);
+  REQUIRE(published.cells.size()==1);
+  REQUIRE(published.cells.count(cells[2].id)==1);
+  const auto reselected=seed_on_line(partition(cells),anchor,tip,tangent,MPI_COMM_WORLD);
+  REQUIRE(reselected.source.has_value());
+  REQUIRE(reselected.source->cell==cells[0].id);
+  CHECK_FALSE(connected_component(partition(cells),anchor,tip,tangent,MPI_COMM_WORLD).unique_incoming_component);
+
+  // Cell 3 is connected to the original seed on the second interval.
   cells[3].phase=constant(.02);
-  const auto unpinned=connected_component(partition(cells),anchor,tip,tangent,MPI_COMM_WORLD);
+  const auto unpinned=connected_component(partition(cells),anchor,tip,tangent,MPI_COMM_WORLD,reselected.source);
+  CHECK(unpinned.cells.size()==1);
   CHECK(unpinned.cells.count(cells[0].id)==1);
   CHECK(unpinned.cells.count(cells[3].id)==0);
   const auto trial=connected_component(partition(cells),anchor,tip,tangent,MPI_COMM_WORLD,parent.source);
+  CHECK(trial.cells.size()==2);
   CHECK(trial.cells.count(cells[0].id)==0);
+  CHECK(trial.cells.count(cells[2].id)==1);
   CHECK(trial.cells.count(cells[3].id)==1);
   const auto cheap_trial=seed_on_line(partition(cells),anchor,tip,tangent,MPI_COMM_WORLD,parent.source);
   REQUIRE(cheap_trial.anchored);
   CHECK(cheap_trial.rear==trial.rear);
+}
+
+TEST_CASE("Fault damage retains the original DG side after refining the source")
+{
+  const Tensor<1,2> tangent({1.,0.});
+  const Point<2> anchor(2.,.5), tip(3.,.5);
+  const Cell original=cell(2, {2,0}, {3,1},constant(.02));
+  const auto parent=seed_on_line(partition({original}),anchor,tip,tangent,MPI_COMM_WORLD);
+  REQUIRE(parent.source.has_value());
+  CHECK(parent.source->unit_point==Point<2>(.5,.5));
+  std::vector<Cell> children;
+  for (std::uint8_t child=0; child<4; ++child)
+    {
+      const Point<2> lo(2.+.5*(child%2),.5*(child/2));
+      children.push_back({CellId(2,{child}),BoundingBox<2>({lo,lo+Tensor<1,2>({.5,.5})}),constant(.02)});
+    }
+  auto connected=connected_component(partition(children),anchor,tip,tangent,MPI_COMM_WORLD,parent.source);
+  CHECK(connected.cells.size()==4);
+  children[0].phase=constant(0.);
+  CHECK_FALSE(seed_on_line(partition(children),anchor,tip,tangent,MPI_COMM_WORLD,parent.source).anchored);
+  // A rejected endpoint cannot rewrite the source carried into the retry.
+  children[0].phase=constant(.02);
+  CHECK(seed_on_line(partition(children),anchor,tip,tangent,MPI_COMM_WORLD,parent.source).anchored);
 }
 
 TEST_CASE("Fault damage follows an inclined line through a face-connected mesh vertex")

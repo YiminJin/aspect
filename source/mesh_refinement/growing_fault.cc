@@ -46,7 +46,7 @@ namespace aspect::MeshRefinement
     // Clip the physical box to the two half planes of the forward cone.
     // Padding is applied to the resulting polygon by Euclidean distance.
     std::vector<Point<2>> forward_sector(const Box2 &box, const Point<2> &tip,
-                                         const Tensor<1,2> &tangent)
+                                          const Tensor<1,2> &tangent)
     {
       const auto &[lo,hi]=box.get_boundary_points();
       std::vector<Point<2>> polygon {lo,Point<2>(hi[0],lo[1]),hi,Point<2>(lo[0],hi[1])};
@@ -109,7 +109,9 @@ namespace aspect::MeshRefinement
   }
 
   template <int dim>
-  typename GrowingFault<dim>::Region GrowingFault<dim>::fault_region(const bool candidate) const
+  typename GrowingFault<dim>::Region
+  GrowingFault<dim>::fault_region(const bool candidate,
+                                  const bool recover_legacy_source) const
   {
     Region region;
     if constexpr (dim==2)
@@ -134,8 +136,7 @@ namespace aspect::MeshRefinement
                                ? this->get_solution() : this->get_old_solution();
         std::vector<types::global_dof_index> dofs(fe.n_dofs_per_cell());
         const auto anchor=state.incoming_seed_anchor();
-        const bool physical_trial=candidate && this->get_timestep_number()>0 && state.staged_sections();
-        std::vector<FaultDamage::Cell> active, accepted_seed;
+        std::vector<FaultDamage::Cell> active;
         unsigned int coarse_candidates = 0;
         for (const auto &cell : this->get_dof_handler().active_cell_iterators())
           if (cell->is_locally_owned())
@@ -162,13 +163,6 @@ namespace aspect::MeshRefinement
                   element.convert_generalized_support_point_values_to_dof_values(values,coefficients);
                   std::copy(coefficients.begin(),coefficients.end(),data.phase.begin());
                 }
-              if (physical_trial && distance_to_segment(data.bounds,anchor,seed)==0.)
-                {
-                  auto parent=data;
-                  for (unsigned int i=0; i<parent.phase.size(); ++i)
-                    parent.phase[i]=this->get_old_solution()[dofs[fe.component_to_system_index(component,i)]];
-                  accepted_seed.push_back(std::move(parent));
-                }
               if (FaultDamage::may_contain_damage(data.phase))
                 {
                   coarse_candidates |= cell_width(data.bounds)>bulk_target;
@@ -178,43 +172,30 @@ namespace aspect::MeshRefinement
 
         const auto &comm = this->get_mpi_communicator();
 
-        // Freeze the incoming material source on the accepted one-sided DG
-        // trace. An earlier disconnected island on that line may reach the
-        // contour in this trial. It must not become the new seed.
-        std::optional<FaultDamage::Source> source;
-        if (physical_trial)
-          source=FaultDamage::seed_on_line(accepted_seed,anchor,seed,tangent,comm).source;
-
-        std::optional<Point<2>> rear;
-        if (Utilities::MPI::max(coarse_candidates,comm))
+        // Legacy checkpoints lack the source. Irreversibility keeps the
+        // original positive excursion on the incoming segment. Recover it
+        // only if that segment intersects a single connected component.
+        const bool find_component=Utilities::MPI::max(coarse_candidates,comm) || recover_legacy_source;
+        const auto connected=find_component ?
+                             FaultDamage::connected_component(active,anchor,seed,tangent,comm,seed_source) :
+                             FaultDamage::seed_on_line(active,anchor,seed,tangent,comm,seed_source);
+        AssertThrow(!recover_legacy_source || (connected.anchored && connected.unique_incoming_component),
+                    ExcMessage("Cannot identify the original growing fault damage component in this legacy "
+                               "checkpoint. The incoming segment must reach exactly one supported component."));
+        AssertThrow(!seed_source || connected.anchored,
+                    ExcMessage("The original one-sided growing fault damage source is unsupported."));
+        region.source=connected.source;
+        if (!connected.anchored && find_component)
           {
-            AssertThrow(!physical_trial || source,
-                        ExcMessage("Coarse phase may reach the damage contour but its accepted seed has no resolved anchor."));
-            const auto connected = FaultDamage::connected_component(active,anchor,seed,tangent,comm,source);
-            if (connected.anchored)
-              {
-                rear=connected.rear;
-                for (const auto &[id,bounds] : connected.cells)
-                  if (cell_width(bounds)>bulk_target)
-                    region.damage.push_back(bounds);
-              }
-            else
-              {
-                AssertThrow(!has_field, ExcMessage("Coarse phase may reach the damage contour but the incoming "
-                                                   "seed has no resolved anchor. Check its position and initial phase."));
-                // An early interpolant can miss a narrow seed. Give the
-                // initialization a finer mesh and recheck the physical field.
-                region.damage.emplace_back(std::make_pair(lo,hi));
-              }
+            AssertThrow(!has_field, ExcMessage("Coarse phase may reach the damage contour but the incoming "
+                                               "seed has no resolved anchor. Check its position and initial phase."));
+            region.damage.emplace_back(std::make_pair(lo,hi));
           }
-        else
-          {
-            const auto line=FaultDamage::seed_on_line(active,anchor,seed,tangent,comm,source);
-            if (line.anchored)
-              rear=line.rear;
-          }
+        for (const auto &[id,bounds] : connected.cells)
+          if (cell_width(bounds)>bulk_target)
+            region.damage.push_back(bounds);
 
-        region.band= {rear.value_or(anchor),seed};
+        region.band= {connected.anchored ? connected.rear : anchor,seed};
         if (state.has_native_history())
           {
             const auto &records=candidate && state.staged_sections() ?
@@ -370,6 +351,10 @@ namespace aspect::MeshRefinement
         const auto &times=this->get_parameters().additional_refinement_times;
         const auto end=std::lower_bound(times.begin(),times.end(),this->get_time()+this->get_timestep());
         check_reachable(std::distance(times.begin(),end));
+        // The ordinary restore signal runs after deserialization of the FE
+        // vectors. Inspect the accepted field before the first trial solve.
+        const auto restored=fault_region(false,!seed_source);
+        seed_source=restored.source;
       });
     else
       check_reachable(0);
@@ -377,6 +362,28 @@ namespace aspect::MeshRefinement
     {
       initialized_phase=true;
     });
+  }
+
+  template <int dim>
+  void GrowingFault<dim>::save(std::map<std::string,std::string> &status) const
+  {
+    AssertThrow(seed_source,ExcMessage("Growing fault refinement has no initialized seed to checkpoint."));
+    std::ostringstream bytes;
+    oarchive archive(bytes);
+    archive << *seed_source;
+    status["Growing fault damage source v1"]=bytes.str();
+  }
+
+  template <int dim>
+  void GrowingFault<dim>::load(const std::map<std::string,std::string> &status)
+  {
+    const auto record=status.find("Growing fault damage source v1");
+    if (record!=status.end())
+      {
+        std::istringstream bytes(record->second);
+        iarchive archive(bytes);
+        archive >> seed_source.emplace();
+      }
   }
 
   template <int dim>
@@ -401,7 +408,11 @@ namespace aspect::MeshRefinement
     requested.reset();
     auto seed=fault_region(true);
     if (!needs_coverage(seed))
-      return false;
+      {
+        AssertThrow(seed.source,ExcMessage("The initialized growing fault seed has no supported damage source."));
+        seed_source=seed.source;
+        return false;
+      }
     this->get_pcout() << "Growing fault initial coverage: refine initialized seed" << std::endl;
     requested=std::move(seed);
     return true;

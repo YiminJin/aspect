@@ -37,11 +37,20 @@ namespace aspect::MeshRefinement::FaultDamage
 
   /** A point of supported phase on the incoming seed line in one physical
    * cell. Its position is anchor + distance_from_anchor * tangent (metres).
-   * The cell identifies the one-sided DG trace at a mesh face. */
+   * The original cell identifies the one-sided DG trace at a mesh face.
+   * Unit coordinates in that cell identify the same trace after refinement;
+   * ties on a new bisection plane use the lower child. */
   struct Source
   {
     CellId cell;
     long double distance_from_anchor;
+    Point<2> unit_point;
+
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int)
+    {
+      ar &cell &distance_from_anchor &unit_point;
+    }
   };
 
   /** Replicated cells of the seed-connected damage excursion. If anchored,
@@ -49,6 +58,8 @@ namespace aspect::MeshRefinement::FaultDamage
   struct Component
   {
     bool anchored = false;
+    // False when separate excursion components touch the incoming segment.
+    bool unique_incoming_component = true;
     Point<2> rear;
     std::optional<Source> source;
     std::map<CellId,BoundingBox<2>> cells;
@@ -61,9 +72,9 @@ namespace aspect::MeshRefinement::FaultDamage
    * Locate the connected endpoint excursion touching the incoming segment
    * from anchor to tip, preferring support nearest anchor. tangent is the
    * physical unit seed tangent pointing forward. Supply each locally owned
-   * Cartesian cell once. Boxes and points are in metres. During a trial,
-   * pass the source of its accepted parent on the same mesh. Only that
-   * supported physical point can seed the trial search. Collective.
+   * Cartesian cell once. Boxes and points are in metres. After initialization,
+   * pass the original source for every accepted or trial field, including
+   * after refinement. Only that supported one-sided trace seeds the search. Collective.
    *
    * Excursions occupy positive area in the open cell, including a plateau
    * at the contour. Isolated equalities carry no area. Independent DG traces
