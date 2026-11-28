@@ -1,0 +1,133 @@
+{
+  "start-uniform": {
+    "status": 241,
+    "wall_s": 480.2591483289998,
+    "ranks_observed": 2,
+    "accepted_physical_clocks_s": [],
+    "rank_high_water_KiB": [
+      2249400,
+      688952
+    ],
+    "rank_cpu_s": [
+      317.250334,
+      null
+    ],
+    "initial_sections_present": true,
+    "solver_messages": [
+      "6.639967    Midpoint iteration 0, mechanics 6.57716e-08, projected phase 0.295435"
+    ]
+  },
+  "start-sector": {
+    "status": 241,
+    "wall_s": 480.3972583630002,
+    "ranks_observed": 2,
+    "accepted_physical_clocks_s": [],
+    "rank_high_water_KiB": [
+      2078544,
+      507528
+    ],
+    "rank_cpu_s": [
+      251.37124,
+      null
+    ],
+    "initial_sections_present": true,
+    "solver_messages": [
+      "7.816281    Midpoint iteration 0, mechanics 4.66767e-08, projected phase 0.295435"
+    ]
+  },
+  "start-disk": {
+    "status": 241,
+    "wall_s": 480.3581105899975,
+    "ranks_observed": 2,
+    "accepted_physical_clocks_s": [],
+    "rank_high_water_KiB": [
+      1974236,
+      478872
+    ],
+    "rank_cpu_s": [
+      287.704926,
+      null
+    ],
+    "initial_sections_present": true,
+    "solver_messages": [
+      "7.301595    Midpoint iteration 0, mechanics 3.42512e-08, projected phase 0.295435"
+    ]
+  },
+  "four-uniform": {
+    "status": 1,
+    "wall_s": 4.8427767920002225,
+    "wall_limit_s": 180.0,
+    "wall_limit_reached": false,
+    "ranks_observed": 4,
+    "accepted_physical_clocks_s": [],
+    "rank_high_water_KiB": [
+      839764,
+      396112,
+      392840,
+      392548
+    ],
+    "rank_cpu_s": [
+      3.525639,
+      null,
+      null,
+      null
+    ],
+    "initial_sections_present": true,
+    "solver_messages": [
+      "4.732855 Exception 'ExcMessage(\"Signed section RSF root failed its roundoff certificate.\")' on rank 0 on processing: ",
+      "4.732873 Exception 'ExcMessage(\"Signed section RSF root failed its roundoff certificate.\")' on rank 3 on processing: ",
+      "4.732889 Exception 'ExcMessage(\"Signed section RSF root failed its roundoff certificate.\")' on rank 2 on processing: ",
+      "4.732904 Exception 'ExcMessage(\"Signed section RSF root failed its roundoff certificate.\")' on rank 1 on processing: "
+    ]
+  },
+  "four-sector": {
+    "status": 124,
+    "wall_s": 180.25792169299893,
+    "wall_limit_s": 180.0,
+    "wall_limit_reached": true,
+    "launcher_status": 1,
+    "ranks_observed": 4,
+    "accepted_physical_clocks_s": [],
+    "rank_high_water_KiB": [
+      1946308,
+      366776,
+      364532,
+      354772
+    ],
+    "rank_cpu_s": [
+      null,
+      null,
+      null,
+      null
+    ],
+    "initial_sections_present": true,
+    "solver_messages": [
+      "3.601301    Midpoint iteration 0, mechanics 4.66767e-08, projected phase 0.295435"
+    ]
+  },
+  "four-disk": {
+    "status": 124,
+    "wall_s": 180.25684766700215,
+    "wall_limit_s": 180.0,
+    "wall_limit_reached": true,
+    "launcher_status": 1,
+    "ranks_observed": 4,
+    "accepted_physical_clocks_s": [],
+    "rank_high_water_KiB": [
+      1847220,
+      351744,
+      350160,
+      361268
+    ],
+    "rank_cpu_s": [
+      null,
+      null,
+      null,
+      null
+    ],
+    "initial_sections_present": true,
+    "solver_messages": [
+      "3.583124    Midpoint iteration 0, mechanics 3.42512e-08, projected phase 0.295435"
+    ]
+  }
+}

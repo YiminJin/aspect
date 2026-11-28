@@ -1,0 +1,15 @@
+include base.prm
+set Output directory = output
+set Maximum time step = 1e8
+subsection Mesh refinement
+ set Initial global refinement = 1
+ set Initial adaptive refinement = 2
+ set Strategy = minimum refinement function
+ subsection Minimum refinement function
+  set Function expression = if(t>0,3,if(depth<250000,3,1))
+ end
+end
+subsection Termination criteria
+ set Termination criteria = end step
+ set End step = 2
+end

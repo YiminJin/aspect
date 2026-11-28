@@ -19,6 +19,10 @@ def clearance(cells, tip, resolution):
 
 def check(folder, ranks):
     case=Case(folder/"output")
+    shard_names = {p.name for p in case.folder.glob("points-0001-r*.csv")}
+    expected = {f"points-0001-r{rank}.csv" for rank in range(ranks)}
+    if shard_names != expected:
+        raise ValueError(f"Expected native shards for {ranks} ranks; observed {sorted(shard_names)}")
     h=.134
     logs=(folder/"timing/solver.log").read_text()
     assert logs.count("Growing fault preventive refinement: refine and advance")==1

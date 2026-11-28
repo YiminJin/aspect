@@ -1,6 +1,6 @@
 # Phase-field fault migration to ASPECT 3.1.0
 
-**Example 2 uniform-mesh startup.** The [granite pilot](example2/REPORT.md) records two cold-creep numerical checks that block the first accepted physical step. Qualify the signed RSF root and the native strip-rate reconstruction before interpreting burst timing or front advance. The [AMR design](example2/AMR_DESIGN.md) belongs to a subsequent assignment.
+**Example 2 fault-following refinement.** The [AMR qualification](example2/amr/README.md) covers hanging Q2/Q1 mechanics, fine-subface Bernstein phase assembly, distributed transfer of accepted strip history and timestep-manager recovery. The fixed-sector and moving-disk inputs share the [uniform granite pilot](example2/REPORT.md) physics. Use the smaller advancing case to review front tracking at matched physical clocks. Granite burst timing, arrest and mesh-converged front advance require a positive-time granite trajectory.
 
 **The fresh historical BP3 package is ready for the author’s Stampede3 startup.** Use the weakening-dependent slip budget, all-station age check and accepted event output from [fresh-start qualification](results/bp3-fresh-start/README.md). The next measurement is a bounded full-grid solve and continuation from its own checkpoint.
 

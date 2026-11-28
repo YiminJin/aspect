@@ -1,0 +1,167 @@
+{
+  "mesh_serial": {
+    "ranks": 1,
+    "first_dt_s": 0.005,
+    "accepted_dt_s": 0.005,
+    "new_coarse_samples": 33,
+    "accepted_cells": 128,
+    "accepted_points": 19944,
+    "active_rows": 18,
+    "mesh_repeats": 1,
+    "slip_cuts": 0,
+    "accepted_intervals": 1,
+    "relative_and_absolute_tolerance": 1e-12,
+    "accepted_files": 4,
+    "byte_identical_files": 4,
+    "wall_s": {
+      "final-miss1": 52.307526950000465,
+      "final-clean1": 46.50462201600021
+    },
+    "peak_rank_KiB": {
+      "final-miss1": 326876,
+      "final-clean1": 326880
+    }
+  },
+  "mesh_two_ranks": {
+    "ranks": 2,
+    "first_dt_s": 0.005,
+    "accepted_dt_s": 0.005,
+    "new_coarse_samples": 33,
+    "accepted_cells": 128,
+    "accepted_points": 19944,
+    "active_rows": 18,
+    "mesh_repeats": 1,
+    "slip_cuts": 0,
+    "accepted_intervals": 2,
+    "relative_and_absolute_tolerance": 1e-12,
+    "accepted_files": 12,
+    "byte_identical_files": 12,
+    "wall_s": {
+      "confirmed-miss2": 75.70603875699999,
+      "confirmed-clean2": 70.76107383999988
+    },
+    "peak_rank_KiB": {
+      "confirmed-miss2": 296088,
+      "confirmed-clean2": 295528
+    }
+  },
+  "mesh_plus_slip_cut": {
+    "ranks": 1,
+    "first_dt_s": 0.005,
+    "accepted_dt_s": 0.0011763193301180738,
+    "new_coarse_samples": 33,
+    "accepted_cells": 128,
+    "accepted_points": 19944,
+    "active_rows": 18,
+    "mesh_repeats": 1,
+    "slip_cuts": 1,
+    "accepted_intervals": 1,
+    "relative_and_absolute_tolerance": 1e-12,
+    "accepted_files": 4,
+    "byte_identical_files": 4,
+    "wall_s": {
+      "new-cut1": 41.04888971800028,
+      "final-cutclean1": 36.44421364600021
+    },
+    "peak_rank_KiB": {
+      "new-cut1": 326728,
+      "final-cutclean1": 325708
+    },
+    "mesh_passes": {
+      "cells_after_pass": [
+        32,
+        128
+      ],
+      "blocked_status": 1,
+      "blocked_accepted_intervals": 0
+    }
+  },
+  "restart_2ranks": {
+    "physical_files": 6,
+    "byte_identical": 6,
+    "clock_s": 0.01
+  },
+  "one_to_two_physical_frame": {
+    "maximum": {
+      "field_0": 3.469446951953614e-18,
+      "field_1": 2.710505431213761e-18,
+      "field_2": 8.265081147150221e-13,
+      "field_3": 0.0,
+      "field_4": 0.0,
+      "field_5": 0.0,
+      "field_6": 0.0,
+      "field_7": 1.609823385706477e-15,
+      "x": 0.0,
+      "y": 0.0,
+      "weight": 0.0,
+      "section": 0.0,
+      "phi": 1.582067810090848e-15,
+      "tauxx": 8.668621376273222e-13,
+      "tauyy": 5.258016244624741e-13,
+      "tauzz": 5.082070631760087e-13,
+      "tauxy": 6.536993168992922e-13,
+      "Axx": 2.6022205591715073e-19,
+      "Ayy": 2.6022205591715073e-19,
+      "Azz": 0.0,
+      "Axy": 1.5023927403159118e-19,
+      "signed_shear": 6.00972120076968e-19,
+      "absolute_shear": 6.00972120076968e-19,
+      "xi": 0.0,
+      "ds": 4.892725113947449e-11,
+      "beta": 2.659852171849053e-09,
+      "formed": 0.0,
+      "age": 0.0,
+      "slip": 1.6516775203064935e-29,
+      "V": 3.3069049146864815e-27,
+      "force": 1.4921397450962104e-13,
+      "time": 0.0,
+      "bulk": 1.734723475976807e-18,
+      "cohesive": 2.9119699647270433e-28,
+      "fracture": 5.3290705182007514e-14,
+      "Wext": 3.469446951953614e-18,
+      "Db": 1.7470054537119944e-21,
+      "Dc": 1.4006463347268807e-32,
+      "Df": 1.7670484276950664e-28,
+      "phase_remainder": 2.1670834568143607e-29,
+      "phase_work": 3.018137004965782e-15,
+      "energy_change": 1.2455314557513475e-14,
+      "mechanical_residual": 1.751312810959344e-21,
+      "phase_KKT": 3.9968028886505635e-15,
+      "adjoint_error": 1.6218980211344003e-27,
+      "iterations": 0.0
+    },
+    "strict_failures": [
+      {
+        "column": "ds",
+        "key": [
+          16
+        ],
+        "difference": 4.892725113947449e-11,
+        "budget": 1.125331284720805e-12
+      },
+      {
+        "column": "beta",
+        "key": [
+          16
+        ],
+        "difference": 2.659852171849053e-09,
+        "budget": 1.1457283987915286e-12
+      }
+    ],
+    "angle_and_length_failures": []
+  },
+  "two_levels": {
+    "cells": [
+      8,
+      32,
+      128
+    ],
+    "rejected_coarse_crossings": 10,
+    "accepted_duration_s": 0.005,
+    "wall_s": 27.54221444200084
+  },
+  "blocked_resolution": {
+    "status": 1,
+    "wall_s": 4.11398664599983
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "final-fine": {
+    "status": 0,
+    "wall_s": 4.958652966000955,
+    "ranks_observed": 2,
+    "accepted_physical_clocks_s": [],
+    "rank_high_water_KiB": [
+      328196,
+      262480
+    ],
+    "rank_cpu_s": [
+      1.300554,
+      3.488429
+    ],
+    "initial_sections_present": true,
+    "solver_messages": []
+  },
+  "final-sector": {
+    "status": 0,
+    "wall_s": 4.042646386000342,
+    "ranks_observed": 2,
+    "accepted_physical_clocks_s": [],
+    "rank_high_water_KiB": [
+      298108,
+      243824
+    ],
+    "rank_cpu_s": [
+      1.013842,
+      2.6567589999999996
+    ],
+    "initial_sections_present": true,
+    "solver_messages": []
+  },
+  "final-disk": {
+    "status": 0,
+    "wall_s": 4.658770258000004,
+    "ranks_observed": 2,
+    "accepted_physical_clocks_s": [],
+    "rank_high_water_KiB": [
+      290044,
+      241208
+    ],
+    "rank_cpu_s": [
+      0.948403,
+      3.070554
+    ],
+    "initial_sections_present": true,
+    "solver_messages": []
+  }
+}

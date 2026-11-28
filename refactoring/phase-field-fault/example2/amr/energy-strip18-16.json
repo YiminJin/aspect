@@ -1,0 +1,104 @@
+[
+  {
+    "parent_s": 0.0,
+    "endpoint_s": 0.005,
+    "tip_xy_m": [
+      1.4330127018922194,
+      0.75
+    ],
+    "next_tip_xy_m": [
+      1.4330127018922194,
+      0.75
+    ],
+    "contour_ahead_m": -0.06443568684730262,
+    "crossings_ahead": 0,
+    "forward_cells": 33,
+    "flat": 22,
+    "flat_max": 0.0,
+    "diffuse_max": 54.6306759592654,
+    "crossing_cells": 1,
+    "disk_missed": 0,
+    "0.7": {
+      "flagged": 9,
+      "flat": 0,
+      "predicted_crossings": 1,
+      "additional_fine": 0,
+      "missed_with_disk": 0
+    },
+    "0.9": {
+      "flagged": 9,
+      "flat": 0,
+      "predicted_crossings": 1,
+      "additional_fine": 0,
+      "missed_with_disk": 0
+    }
+  },
+  {
+    "parent_s": 0.005,
+    "endpoint_s": 0.0075,
+    "tip_xy_m": [
+      1.4330127018922194,
+      0.75
+    ],
+    "next_tip_xy_m": [
+      1.4330127018922194,
+      0.75
+    ],
+    "contour_ahead_m": -0.035279039913170766,
+    "crossings_ahead": 0,
+    "forward_cells": 33,
+    "flat": 20,
+    "flat_max": 0.010899455045643106,
+    "diffuse_max": 30.50652248830722,
+    "crossing_cells": 3,
+    "disk_missed": 0,
+    "0.7": {
+      "flagged": 6,
+      "flat": 0,
+      "predicted_crossings": 3,
+      "additional_fine": 0,
+      "missed_with_disk": 0
+    },
+    "0.9": {
+      "flagged": 6,
+      "flat": 0,
+      "predicted_crossings": 3,
+      "additional_fine": 0,
+      "missed_with_disk": 0
+    }
+  },
+  {
+    "parent_s": 0.0075,
+    "endpoint_s": 0.01,
+    "tip_xy_m": [
+      1.4330127018922194,
+      0.75
+    ],
+    "next_tip_xy_m": [
+      1.4330127018922194,
+      0.75
+    ],
+    "contour_ahead_m": -0.024606966446104838,
+    "crossings_ahead": 0,
+    "forward_cells": 33,
+    "flat": 20,
+    "flat_max": 0.024755555866587085,
+    "diffuse_max": 42.50236069480524,
+    "crossing_cells": 3,
+    "disk_missed": 0,
+    "0.7": {
+      "flagged": 8,
+      "flat": 0,
+      "predicted_crossings": 2,
+      "additional_fine": 0,
+      "missed_with_disk": 0
+    },
+    "0.9": {
+      "flagged": 8,
+      "flat": 0,
+      "predicted_crossings": 2,
+      "additional_fine": 0,
+      "missed_with_disk": 0
+    }
+  }
+]

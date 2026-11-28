@@ -1,0 +1,24 @@
+{
+  "before": {
+    "cells": 116,
+    "clearance_new_m": 0.4833333333333334,
+    "clearance_old_m": 0.5,
+    "tip_x_m": 1.2666666666666666,
+    "tip_y_m": 0.5,
+    "physical_phase_at_tip": 0.2513464073763888,
+    "bulk_J_m": 0.00397019620768541,
+    "cohesive_J_m": 3.60561918813754e-05,
+    "fracture_J_m": 39.04623996494086
+  },
+  "after": {
+    "cells": 128,
+    "clearance_new_m": "whole domain fine",
+    "clearance_old_m": "whole domain fine",
+    "tip_x_m": 1.2666666666666666,
+    "tip_y_m": 0.5,
+    "physical_phase_at_tip": 0.2513464073763888,
+    "bulk_J_m": 0.003966536078456111,
+    "cohesive_J_m": 3.60561918813754e-05,
+    "fracture_J_m": 39.04623996494086
+  }
+}

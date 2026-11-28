@@ -1,0 +1,17 @@
+Number of active cells: 12 (on 1 levels)
+Number of active cells: 30 (on 2 levels)
+     Growing fault native section and point history
+*** Timestep 1:  t=0.0025 seconds, dt=0.0025 seconds
+   Midpoint iteration 0, mechanics 0, projected phase 0.5
+   Midpoint iteration 1, mechanics 0, projected phase 0.187104
+   Midpoint iteration 2, mechanics 0, projected phase 0.0224586
+   Midpoint iteration 3, mechanics 0, projected phase 1.32727e-13
+Growing fault missed extension: refine and repeat at t=0.0025 s, tip 2.75 0.5, newly crossed coarse samples 16
+Number of active cells: 48 (on 2 levels)
+Repeating the current time step based on the time stepping manager ...
+*** Timestep 1:  t=0.0025 seconds, dt=0.0025 seconds
+   Midpoint iteration 0, mechanics 0, projected phase 0.5
+   Midpoint iteration 1, mechanics 0, projected phase 0.237746
+   Midpoint iteration 2, mechanics 0, projected phase 0.0202726
+   Midpoint iteration 3, mechanics 0, projected phase 1.65395e-13
+     Growing fault native section and point history

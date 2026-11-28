@@ -1,0 +1,29 @@
+[
+  {
+    "mode": "uniform",
+    "cells": 4608,
+    "native_samples": 165888,
+    "finest_m": 0.015625,
+    "uncovered_cells": 0,
+    "phase_error": 6.661338147750939e-16,
+    "area_m2": 1.1249999999985076
+  },
+  {
+    "mode": "sector",
+    "cells": 2700,
+    "native_samples": 112464,
+    "finest_m": 0.015625,
+    "uncovered_cells": 0,
+    "phase_error": 6.661338147750939e-16,
+    "area_m2": 1.1249999999989297
+  },
+  {
+    "mode": "disk",
+    "cells": 2322,
+    "native_samples": 102240,
+    "finest_m": 0.015625,
+    "uncovered_cells": 0,
+    "phase_error": 6.661338147750939e-16,
+    "area_m2": 1.1249999999991696
+  }
+]

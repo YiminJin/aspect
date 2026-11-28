@@ -1,0 +1,11 @@
+{
+  "cells": 17,
+  "hanging_pieces": 8,
+  "hanging_partition_pieces": 0,
+  "mass_error": 2.0816681711721685e-17,
+  "matrix_error": 2.6645352591003757e-15,
+  "discontinuous_residual_error": 1.5543122344752192e-15,
+  "directional_action_error": 5.055511564933113e-12,
+  "continuous_flux_error": 1.1830814106161824e-15,
+  "omitted_subface_error": 1.7312296153869031
+}

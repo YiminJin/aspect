@@ -1,0 +1,12 @@
+{
+  "cells": 30,
+  "bins_per_fine_edge": 34,
+  "threshold": 0.01,
+  "minimum_increment": 0.0001,
+  "coarse_crossings": 16,
+  "leftmost_crossing_m": 0.5625000000000004,
+  "rightmost_crossing_m": 0.8125000000000004,
+  "seed_connected_crossings": 0,
+  "whole_ray_crossings": 16,
+  "accepted_s": 0.0025
+}
