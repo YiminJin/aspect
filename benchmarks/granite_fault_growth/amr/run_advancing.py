@@ -2,6 +2,7 @@
 
 The preventive variant starts with one deliberately short outer edge of the
 fine disk, to put its 3-ell guard between the old and new supported tips.
+The compact miss withholds only intact cells beyond the 1.25 m seed end.
 """
 import argparse
 from pathlib import Path
@@ -35,9 +36,9 @@ end
 """
     else:
         coverage = {"sector":"forward sector", "disk":"tip disk", "preventive":"tip disk",
-                    "reactive":"damage threshold"}[mode]
-        # Limit only the deliberately near-guard case during initialization.
-        cap = mode=="preventive"
+                    "reactive":"damage threshold", "miss":"damage threshold"}[mode]
+        # The two recovery controls constrain their initial meshes only.
+        cap = mode in ("preventive", "miss")
         text += f"""
 subsection Mesh refinement
  set Strategy = growing fault{", maximum refinement function" if cap else ""}
@@ -54,6 +55,12 @@ subsection Mesh refinement
             # Its distance to the physical tip straddles 3 ell only when
             # the accepted phase-supported station advances.
             x_limit=1.5 if case=="shoulder" else 1.75
+            if mode == "miss":
+                if case != "compact":
+                    raise ValueError("The compact seed ends on the x=1.25 m root face")
+                # The parent is already resolved. Withhold only initially
+                # intact cells ahead of the seed until a physical trial.
+                x_limit = 1.25
             text += f"""
  subsection Maximum refinement function
   set Coordinate system = cartesian
@@ -66,7 +73,7 @@ subsection Time stepping
  set List of model names = growing fault refinement
 end
 """
-    if mode=="preventive":
+    if mode in ("preventive", "miss"):
         text += """
 subsection Checkpointing
  set Steps between checkpoint = 1
@@ -98,7 +105,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("executable", type=Path)
     parser.add_argument("destination", type=Path)
-    parser.add_argument("mode", choices=("uniform","sector","disk","reactive","preventive"))
+    parser.add_argument("mode", choices=("uniform","sector","disk","reactive","preventive","miss"))
     parser.add_argument("--ranks",type=int,default=1, choices=(1,2))
     parser.add_argument("--case", choices=("shoulder","compact"), default="shoulder")
     parser.add_argument("--restart",type=Path,help="Copy a retained checkpoint generation to the fresh run")

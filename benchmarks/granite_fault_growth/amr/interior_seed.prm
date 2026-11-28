@@ -1,0 +1,63 @@
+# Three overlapping bilinear tents form a finite seed in the interior.
+# The centers follow y = 0.5 x + 1.75 m on an offset, rectangular grid.
+# Their breakpoints lie on root faces, so DGQ2 reproduces the prescribed
+# phase exactly even before adaptive refinement.
+include growing_seed.prm
+
+subsection Geometry model
+  subsection Box
+    set Box origin X coordinate = -1
+    set Box origin Y coordinate = 2
+    set X extent = 8
+    set Y extent = 3
+    set X repetitions = 16
+    set Y repetitions = 12
+  end
+end
+
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0.4*(max(0,1-2*abs(x-2.5))*max(0,1-abs(y-3.0)/0.75) + \
+                                   max(0,1-2*abs(x-3.0))*max(0,1-abs(y-3.25)/0.75) + \
+                                   max(0,1-2*abs(x-3.5))*max(0,1-abs(y-3.5)/0.75))
+  end
+end
+
+subsection Material model
+  subsection Phase field fault
+    set Seed tangent angle = 26.56505117707799
+    set Forward seed tip = 4,3.75
+    set Target strip width = 0.25
+  end
+end
+
+subsection Phase field
+  set Length scale = 0.10
+end
+
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = 0;0
+  end
+end
+
+subsection Mesh refinement
+  set Strategy = growing fault
+  set Initial adaptive refinement = 2
+  set Skip solvers on initial refinement = true
+  set Skip setup initial conditions on initial refinement = true
+  set Coarsening fraction = 0
+  set Refinement fraction = 0.01
+  subsection Growing fault
+    set Coverage = tip disk
+  end
+end
+
+subsection Time stepping
+  set List of model names = growing fault refinement
+end
+
+subsection Termination criteria
+  set Termination criteria = end step
+  set End step = 0
+end

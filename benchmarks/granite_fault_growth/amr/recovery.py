@@ -1,4 +1,9 @@
-"""Run or replay the first missed extension on the 18-strip midpoint specimen.
+"""Replay the historical 18-strip experiment that blocked initial fault refinement.
+
+On the current marker, "miss" also blocks the already damaged seed and must
+diagnose unresolved initial coverage. Use run_advancing.py with "miss --case
+compact" and compare it against "uniform --case compact" for a physical
+extension into initially intact receiving cells.
 
 'clean' takes the mesh actually returned by 'miss' and applies the matching
 refinement at the accepted initial clock, before the first physical solve.

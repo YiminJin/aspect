@@ -113,6 +113,8 @@ namespace aspect::Postprocess
             summary << std::setprecision(17) << "energy " << bulk << ' ' << cohesive << ' ' << fracture << '\n';
             summary << "operator " << model.length_scale << ' ' << Kf << ' ' << this->get_parameters().phase_discontinuous_penalty << '\n';
             summary << "clock " << history.step << ' ' << history.time << '\n';
+            for (const double edge : material.sections().edges)
+              summary << "edge " << edge << '\n';
             for (const auto &strip : history.sections)
               summary << "strip " << strip.formed << ' ' << strip.angle << ' ' << strip.slip << ' ' << strip.rate << ' ' << strip.resistance << '\n';
             for (double value : material.friction().state())

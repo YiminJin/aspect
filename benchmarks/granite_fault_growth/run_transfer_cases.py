@@ -56,6 +56,10 @@ def restored(source, destination, writer, reader):
     """Bitwise-by-value comparison before the first resumed nonlinear solve."""
     before, _, meta, ledger = read_snapshot(source,"remesh-1-1-after",writer)
     after, _, meta1, ledger1 = read_snapshot(destination,"remesh-1-0-restored",reader)
+    # A retained parent from the original AMR observer predates the explicit
+    # edge rows. New parents compare every edge as well as every state value.
+    if not any(line.startswith("edge ") for line in meta):
+        meta1 = [line for line in meta1 if not line.startswith("edge ")]
     assert sorted(before) == sorted(after) and meta == meta1 and ledger == ledger1
     moved = 0
     for cell, (state, owner) in before.items():
@@ -157,7 +161,7 @@ def main():
     for name,setting,checkpoint,diagnostic in (
         ("underintegrated","Section quadrature order = 3",None,"requires Section quadrature order >= 4"),
         ("changed-width","Target strip width = 0.124",outputs["serial"]/"restart"/"02",
-         "Target strip width differs from the adaptive growing fault checkpoint")):
+         "Physical strip edges differ from the growing fault checkpoint")):
         run(args,name,base+f"subsection Material model\n subsection Phase field fault\n  set {setting}\n end\nend\n",
             1,checkpoint=checkpoint,expected_failure=diagnostic)
         report[name] = diagnostic
