@@ -1,5 +1,6 @@
 /* This file is part of ASPECT, distributed under the GNU GPL v2 or later. */
 #include <aspect/material_model/rheology/friction_normal_stress.h>
+#include <aspect/material_model/phase_field_fault/input_compatibility.h>
 #include <aspect/adiabatic_conditions/ascii_data.h>
 #include <aspect/geometry_model/interface.h>
 
@@ -8,18 +9,28 @@ namespace aspect::MaterialModel::Rheology
   void FrictionNormalStress::declare_parameters(ParameterHandler &prm)
   {
     prm.enter_subsection("Material model");
-    prm.declare_entry("Friction normal stress","model default",
-                      Patterns::Selection("model default|adiabatic pressure|resolved normal traction|prescribed constant"),
-                      "Source of fault compression in Pa. Adiabatic pressure supplies the complete normal "
-                      "stress from ASPECT's adiabatic conditions at the fault. Model default preserves "
-                      "resolved normal traction on mature faults and prescribed constant compression on growing strips.");
+    const std::string input_sections[] = {"Phase field fault", "Growing fault", ""};
+    for (const auto &section : input_sections)
+      {
+        if (!section.empty())
+          prm.enter_subsection(section);
+        FaultInputCompatibility::declare_entry(prm, "Friction normal stress", "model default",
+                                               Patterns::Selection("model default|adiabatic pressure|resolved normal traction|prescribed constant"),
+                                               "Source of fault compression in Pa. Adiabatic pressure supplies the complete normal "
+                                               "stress from ASPECT's adiabatic conditions at the fault. Model default preserves "
+                                               "resolved normal traction on mature faults and prescribed constant compression on growing strips.");
+        if (!section.empty())
+          prm.leave_subsection();
+      }
     prm.leave_subsection();
   }
 
   FrictionNormalStress FrictionNormalStress::parse(const ParameterHandler &prm, const Source model_default)
   {
     FrictionNormalStress result;
-    const auto choice = prm.get({"Material model"},"Friction normal stress");
+    const auto choice = FaultInputCompatibility::normal_stress_source(
+                          prm.get({"Material model", "Phase field fault"}, "Friction normal stress"),
+                          model_default == Source::prescribed_constant);
     if (choice == "adiabatic pressure")
       {
         result.source = Source::adiabatic_pressure;
@@ -42,8 +53,7 @@ namespace aspect::MaterialModel::Rheology
     else
       {
         result.source = model_default;
-        AssertThrow(choice == "model default" ||
-                    (choice == "resolved normal traction" && model_default == Source::resolved_traction) ||
+        AssertThrow((choice == "resolved normal traction" && model_default == Source::resolved_traction) ||
                     (choice == "prescribed constant" && model_default == Source::prescribed_constant),
                     ExcMessage("The selected Friction normal stress is incompatible with this fault material."));
       }

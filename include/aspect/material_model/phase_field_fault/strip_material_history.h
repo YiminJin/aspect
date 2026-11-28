@@ -214,6 +214,7 @@ namespace aspect::GrowingFault
       double prescribed_compression; //!< Constant compression in Pa when that source is selected.
       MaterialModel::Rheology::FrictionNormalStress normal_stress;
       Point<2> seed_tip_position;
+      Stress initial_deviatoric_stress; //!< Uniform fresh-start native stress in Cartesian coordinates (Pa).
       CohesiveMaxwell point_law;
       std::unique_ptr<MaterialModel::Rheology::FaultResistance> resistance_law;
       std::unique_ptr<MaterialSections> geometry;

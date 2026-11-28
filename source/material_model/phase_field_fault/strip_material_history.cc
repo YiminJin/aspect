@@ -27,28 +27,41 @@ namespace aspect::GrowingFault
   void StripMaterialHistory<dim>::declare_parameters(ParameterHandler &prm)
   {
     using MaterialModel::FaultInputCompatibility::declare_entry;
+    using MaterialModel::FaultInputCompatibility::Use;
     prm.enter_subsection("Material model");
+    const char *const input_sections[] = {"Phase field fault", "Growing fault"};
+    for (const auto *section : input_sections)
+      {
+        prm.enter_subsection(section);
+        declare_entry(prm, Use::growing, "Prescribed fault compression", "", Patterns::List(Patterns::Double(0.), 0, 1),
+                      "Positive compression in Pa used by the signed fault resistance law. An empty entry "
+                      "uses the explicitly supplied Surface pressure from legacy growing fault inputs.");
+        declare_entry(prm, Use::growing, "Initial deviatoric stress", "0, 0, 0", Patterns::List(Patterns::Double(), 3, 3),
+                      "Uniform Cartesian deviatoric stress on a fresh start, in Pa, ordered xx, yy, xy. "
+                      "Plane strain retains zz = -(xx + yy). A restart restores the saved point stresses.");
+        declare_entry(prm, Use::growing, "Seed tangent angle", "0", Patterns::Double(),
+                      "Angle in degrees counterclockwise from x.");
+        declare_entry(prm, Use::growing, "Forward seed tip", "0,0", Patterns::List(Patterns::Double(), 2, 2),
+                      "Physical tip of the initial contiguous seed in metres.");
+        declare_entry(prm, Use::growing, "Target strip width", "0", Patterns::Double(0.),
+                      "Maximum material-strip spacing in metres. A positive width establishes the physical "
+                      "stations independently of bulk refinement. Zero derives the spacing from the finest "
+                      "bulk cell on a fixed mesh.");
+        declare_entry(prm, Use::growing, "Section quadrature order", "6", Patterns::Integer(2),
+                      "Gauss points per strip subinterval and chord. Remeshing requires at least four points "
+                      "to integrate the phase-weighted history moments.");
+        declare_entry(prm, Use::growing, "Cohesion", "1000", Patterns::Double(0),
+                      "Cohesive strength in Pa.");
+        prm.leave_subsection();
+      }
+
+    // Keep the historical strip defaults, including defaults of external laws.
+    // The resolver selects them only for a midpoint fault phase.
     prm.enter_subsection("Growing fault");
-    declare_entry(prm, "Prescribed fault compression", "", Patterns::List(Patterns::Double(0.), 0, 1),
-                  "Positive compression in Pa used by the signed fault resistance law. An empty entry "
-                  "uses the explicitly supplied Surface pressure from legacy growing fault inputs.");
-    declare_entry(prm, "Seed tangent angle", "0", Patterns::Double(),
-                  "Angle in degrees counterclockwise from x.");
-    declare_entry(prm, "Forward seed tip", "0,0", Patterns::List(Patterns::Double(), 2, 2),
-                  "Physical tip of the initial contiguous seed in metres.");
-    declare_entry(prm, "Target strip width", "0", Patterns::Double(0.),
-                  "Maximum material-strip spacing in metres. A positive width establishes the physical "
-                  "stations independently of bulk refinement. Zero derives the spacing from the finest "
-                  "bulk cell on a fixed mesh.");
-    declare_entry(prm, "Section quadrature order", "6", Patterns::Integer(2),
-                  "Gauss points per strip subinterval and chord. Remeshing requires at least four points "
-                  "to integrate the phase-weighted history moments.");
     declare_entry(prm, "Shear modulus", "1e6", Patterns::Double(0),
                   "Shear modulus in Pa.");
     declare_entry(prm, "Viscosity", "1e8", Patterns::Double(0),
                   "Maxwell viscosity in Pa s.");
-    declare_entry(prm, "Cohesion", "1000", Patterns::Double(0),
-                  "Cohesive strength in Pa.");
     MaterialModel::Rheology::FaultResistance::declare_parameters(prm, MaterialModel::Rheology::FaultResistance::Route::growing);
     prm.leave_subsection();
     prm.leave_subsection();
@@ -67,7 +80,7 @@ namespace aspect::GrowingFault
     normal_stress = NormalStress::parse(prm, NormalStress::Source::prescribed_constant);
     const bool legacy_compression = !prm.get("Surface pressure").empty();
     prm.enter_subsection("Material model");
-    prm.enter_subsection("Growing fault");
+    prm.enter_subsection("Phase field fault");
     prescribed_compression = normal_stress.uses_adiabat() ? 0. : p.surface_pressure;
     AssertThrow(!normal_stress.uses_adiabat() || prm.get("Prescribed fault compression").empty(),
                 ExcMessage("Adiabatic friction supplies the complete pressure; omit Prescribed fault compression."));
@@ -75,10 +88,20 @@ namespace aspect::GrowingFault
       {
         prescribed_compression = prm.get_double("Prescribed fault compression");
         AssertThrow(!legacy_compression || prescribed_compression == p.surface_pressure,
-                    ExcMessage("Conflicting Prescribed fault compression and Surface pressure in growing fault input."));
+                    ExcMessage("Conflicting Prescribed fault compression and Surface pressure. "
+                               "Material model / Phase field fault / Prescribed fault compression "
+                               "(legacy Material model / Growing fault / Prescribed fault compression) "
+                               "must agree with Surface pressure when both are supplied."));
       }
     AssertThrow(normal_stress.uses_adiabat() || (std::isfinite(prescribed_compression) && prescribed_compression > 0.),
                 ExcMessage("Growing fault requires a finite, positive prescribed fault compression in Pa."));
+    const auto stress = Utilities::string_to_double(Utilities::split_string_list(prm.get("Initial deviatoric stress")));
+    initial_deviatoric_stress[0][0] = stress[0];
+    initial_deviatoric_stress[1][1] = stress[1];
+    initial_deviatoric_stress[2][2] = -(stress[0] + stress[1]);
+    initial_deviatoric_stress[0][1] = stress[2];
+    AssertThrow(std::isfinite(initial_deviatoric_stress[2][2]) && std::isfinite(stress[2]),
+                ExcMessage("Initial deviatoric stress must have finite Cartesian components including zz."));
     seed_angle_degrees = prm.get_double("Seed tangent angle");
     const auto coordinates = Utilities::string_to_double(Utilities::split_string_list(prm.get("Forward seed tip")));
     seed_tip_position = Point<2>(coordinates[0], coordinates[1]);
@@ -90,6 +113,10 @@ namespace aspect::GrowingFault
     AssertThrow(strength > 0., ExcMessage("Growing fault requires positive cohesion."));
     point_law = {G, prm.get_double("Viscosity"), Kf * 2.*G / (strength * strength)};
     AssertThrow(G > 0. && point_law.eta > 0., ExcMessage("Growing fault requires positive Maxwell scales."));
+    // The SDK callback reads the same scoped declaration it registered for
+    // the growing route, including its own defaults, patterns and actions.
+    prm.leave_subsection();
+    prm.enter_subsection("Growing fault");
     resistance_law = MaterialModel::Rheology::FaultResistance::create(prm, MaterialModel::Rheology::FaultResistance::Route::growing);
     resistance_law->validate_midpoint();
     prm.leave_subsection();
@@ -121,8 +148,11 @@ namespace aspect::GrowingFault
         geometry = std::make_unique<MaterialSections>(simulator.get_triangulation(), simulator.get_mpi_communicator(), seed_angle_degrees, quadrature_order, requested_strip_width);
         accepted.sections.resize(geometry->edges.size() - 1);
         resistance_law->initialize(accepted.sections.size());
+        PointHistory initial_point;
+        if (checkpoint_bytes.empty())
+          initial_point.stress = initial_deviatoric_stress;
         for (const auto &[cell_id, rule] : geometry->cells)
-          accepted.cells[cell_id].resize(rule.quadrature.size());
+          accepted.cells[cell_id].resize(rule.quadrature.size(), initial_point);
         if (!checkpoint_bytes.empty())
           {
             std::istringstream input(checkpoint_bytes);

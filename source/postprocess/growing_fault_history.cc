@@ -185,9 +185,18 @@ namespace aspect::Postprocess
       }
     return {"Growing fault","native section and point history"};
   }
-  ASPECT_REGISTER_POSTPROCESSOR(GrowingFaultHistory,"growing fault history",
+  ASPECT_REGISTER_POSTPROCESSOR(GrowingFaultHistory,"phase field fault history",
                                 "Write accepted strip records, native point history and the physical work ledger. "
                                 "The native stress columns tauxx, tauyy, tauzz and tauxy are tension-positive "
                                 "deviatoric components in Pa at the accepted endpoint.")
 
+  namespace
+  {
+    aspect::internal::Plugins::RegisterHelper<Interface<2>,GrowingFaultHistory<2>>
+    legacy_history_2(&Manager<2>::register_postprocessor,"growing fault history",
+                     "Compatibility name for phase field fault history.");
+    aspect::internal::Plugins::RegisterHelper<Interface<3>,GrowingFaultHistory<3>>
+    legacy_history_3(&Manager<3>::register_postprocessor,"growing fault history",
+                     "Compatibility name for phase field fault history.");
+  }
 }

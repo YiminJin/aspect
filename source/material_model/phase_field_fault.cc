@@ -286,6 +286,7 @@ namespace aspect
     template <int dim>
     void PhaseFieldFault<dim>::declare_parameters(ParameterHandler &prm)
     {
+      using FaultInputCompatibility::Use;
       Rheology::FrictionNormalStress::declare_parameters(prm);
       GrowingFault::StripMaterialHistory<dim>::declare_parameters(prm);
 
@@ -293,7 +294,7 @@ namespace aspect
       {
         prm.enter_subsection("Phase field fault");
         {
-          FaultInputCompatibility::declare_entry(prm, "Advect physical stress", "false",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Advect physical stress", "false",
                                                  Patterns::Bool(),
                                                  "Transport the accepted DG stress with the accepted velocity before "
                                                  "rotation and relaxation. Exterior parent stress specifies xx; yy; xy "
@@ -303,11 +304,11 @@ namespace aspect
             Functions::ParsedFunction<dim>::declare_parameters(prm, 3);
             const char *const function_parameters[] = {"Variable names", "Function constants", "Function expression"};
             for (const auto name : function_parameters)
-              FaultInputCompatibility::observe_entry(prm, name, Patterns::Anything());
+              FaultInputCompatibility::observe_entry(prm, Use::mature, name, Patterns::Anything());
           }
           prm.leave_subsection();
 
-          FaultInputCompatibility::declare_entry(prm, "Fault geometry", "automatic",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Fault geometry", "automatic",
                                                  Patterns::Selection("automatic|boundary spanning|fixed interior|advected interior"),
                                                  "Boundary spanning uses the stationary section law. Both interior modes use "
                                                  "the prescribed material seed and the same Q8 projected Maxwell response. "
@@ -316,33 +317,33 @@ namespace aspect
                                                  "vertices fixed. Automatic preserves earlier inputs by selecting advected "
                                                  "interior for the phase field composition role and boundary spanning for "
                                                  "the generic role.");
-          FaultInputCompatibility::declare_entry(prm, "Fault vertex file", "",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Fault vertex file", "",
                                                  Patterns::FileName(),
                                                  "Ordered ASCII table: id x_m y_m, optionally initial_age_s and "
                                                  "background_shear_Pa. IDs start at zero. Row order sets the tangent; "
                                                  "shear persists through all timesteps.");
-          FaultInputCompatibility::declare_entry(prm, "Mature slip sense", "along tangent",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Mature slip sense", "along tangent",
                                                  Patterns::Selection("along tangent|opposite tangent"),
                                                  "The tangent follows increasing vertex ID and its counterclockwise "
                                                  "normal points to the positive side. Positive slip speed moves this "
                                                  "side relative to the negative side along or opposite the tangent. "
                                                  "Background shear is measured in this slip sense. Accumulated slip "
                                                  "and aging use the positive speed in either sense.");
-          FaultInputCompatibility::declare_entry(prm, "Fault vertices", "",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Fault vertices", "",
                                                  Patterns::List(Patterns::List(Patterns::Double(), 2, 2),
                                                                 0, Patterns::List::max_int_value, ";"),
                                                  "Ordered x,y label positions in metres separated by semicolons. "
                                                  "The default joins the ends of the left box boundary.");
-          FaultInputCompatibility::declare_entry(prm, "Degradation magnitude", "1",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Degradation magnitude", "1",
                                                  Patterns::Double(0.),
                                                  "Scale of mature excess compliance and of its projected normal integral. "
                                                  "At fixed phase it cancels in the normalized slip weight.");
-          FaultInputCompatibility::declare_entry(prm, "Fit trace to phase", "true",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Fit trace to phase", "true",
                                                  Patterns::Bool(),
                                                  "Fit a straight boundary-spanning seed to the initialized FE phase "
                                                  "ridge. Constant phase retains the seed. Set to false to use the "
                                                  "prescribed vertex positions, including curved traces.");
-          FaultInputCompatibility::declare_entry(prm, "Profile half width", "0",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Profile half width", "0",
                                                  Patterns::Double(0.),
                                                  "Normal association support in metres. Zero uses the full physical "
                                                  "cross-section.");
@@ -355,47 +356,47 @@ namespace aspect
                                                  Patterns::Double(0.),
                                                  "Elastic shear modulus in Pa. With no explicit setting, mature traces "
                                                  "use 1e10 and growing strips use 1e6.");
-          FaultInputCompatibility::declare_entry(prm, "Initialization interval", "1",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Initialization interval", "1",
                                                  Patterns::Double(0.),
                                                  "Maxwell interval in seconds for the initial Stokes solve.");
-          FaultInputCompatibility::declare_entry(prm, "Background shear traction", "0",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Background shear traction", "0",
                                                  Patterns::Double(),
                                                  "Persistent shear loading in Pa along the slip sense; the per-vertex "
                                                  "column overrides this uniform value.");
-          FaultInputCompatibility::declare_entry(prm, "Background compression", "",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Background compression", "",
                                                  Patterns::List(Patterns::Double(0.), 0, 1),
                                                  "Compression in Pa added to resolved normal traction (default 5e7 Pa). "
                                                  "Leave empty for adiabatic pressure, which supplies the complete "
                                                  "compression.");
 
-          prm.declare_entry("Normal integral subdivisions", "0", Patterns::Integer(0),
-                            "Number of three-point panels on each material segment for projecting the normal integral. "
-                            "Zero selects one for boundary-spanning traces and eight for interior traces.");
-          prm.declare_entry("Normal traction filter length", "0", Patterns::Double(0.),
-                            "Helmholtz length in metres for the resolved normal traction perturbation "
-                            "on a mature boundary-spanning trace. Zero uses the pointwise traction.");
-          prm.declare_entry("Complete prescribed contact profiles", "false", Patterns::Bool(),
-                            "Continue the fixed initial phase outside the box for normalization and extend the "
-                            "endpoint rate into each in-box terminal wedge. Requires a straight, unfitted trace "
-                            "with finite support and an initial phase function valid on the exterior lattice.");
-          prm.declare_entry("Report section convergence", "false", Patterns::Bool(),
-                            "Report the material identity with the largest relative rate change when the "
-                            "mature section requires another Stokes Picard iteration.");
-          prm.declare_entry("Record section tractions", "false", Patterns::Bool(),
-                            "Project accepted shear and normal tractions onto the material vertices for output.");
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Normal integral subdivisions", "0", Patterns::Integer(0),
+                                                 "Number of three-point panels on each material segment for projecting the normal integral. "
+                                                 "Zero selects one for boundary-spanning traces and eight for interior traces.");
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Normal traction filter length", "0", Patterns::Double(0.),
+                                                 "Helmholtz length in metres for the resolved normal traction perturbation "
+                                                 "on a mature boundary-spanning trace. Zero uses the pointwise traction.");
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Complete prescribed contact profiles", "false", Patterns::Bool(),
+                                                 "Continue the fixed initial phase outside the box for normalization and extend the "
+                                                 "endpoint rate into each in-box terminal wedge. Requires a straight, unfitted trace "
+                                                 "with finite support and an initial phase function valid on the exterior lattice.");
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Report section convergence", "false", Patterns::Bool(),
+                                                 "Report the material identity with the largest relative rate change when the "
+                                                 "mature section requires another Stokes Picard iteration.");
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Record section tractions", "false", Patterns::Bool(),
+                                                 "Project accepted shear and normal tractions onto the material vertices for output.");
 
-          FaultInputCompatibility::declare_entry(prm, "Minimum speed", "1e-20",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Minimum speed", "1e-20",
                                                  Patterns::Double(0.),
                                                  "Minimum admissible sliding speed in m/s.");
-          FaultInputCompatibility::declare_entry(prm, "Initial slip rate", "",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Initial slip rate", "",
                                                  Patterns::List(Patterns::Double(0.), 0, 1),
                                                  "Positive initial material vertex speed in m/s, used before the first "
                                                  "section solve. An empty entry uses Reference speed for compatibility "
                                                  "with earlier trace inputs.");
-          FaultInputCompatibility::declare_entry(prm, "Initial label ages", "",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Initial label ages", "",
                                                  Patterns::List(Patterns::Double(0.)),
                                                  "Optional ordered initial material ages in seconds.");
-          FaultInputCompatibility::declare_entry(prm, "Initial label shear tractions", "",
+          FaultInputCompatibility::declare_entry(prm, Use::mature, "Initial label shear tractions", "",
                                                  Patterns::List(Patterns::Double()),
                                                  "Optional persistent shear tractions in Pa, ordered by vertex.");
 
@@ -507,7 +508,6 @@ namespace aspect
           // equation of state, irrespective of the number of DG stress fields.
           eos.parse_parameters(prm, 1);
           conductivity = prm.get_double("Thermal conductivity");
-          viscosity = prm.get_double("Viscosity");
           AssertThrow(prm.get_double("Thermal viscosity exponent") == 0 &&
                       prm.get_double("Composition viscosity prefactor") == 1.,
                       ExcMessage("The base Maxwell viscosity requires zero thermal exponent and unit "
@@ -542,6 +542,7 @@ namespace aspect
               }
               prm.leave_subsection();
             }
+          viscosity = prm.get_double("Viscosity");
           modulus = prm.get_double("Shear modulus");
           initial_interval = prm.get_double("Initialization interval");
           background_shear = prm.get_double("Background shear traction");
