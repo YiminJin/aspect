@@ -1,0 +1,23 @@
+# Same granite, drive and 96 physical strips as the uniform 60 us run.
+include granite_prestress_uniform_60us.prm
+subsection Geometry model
+  subsection Box
+    set X repetitions = 12
+    set Y repetitions = 6
+  end
+end
+subsection Mesh refinement
+  set Initial adaptive refinement = 3
+  set Skip solvers on initial refinement = true
+  set Skip setup initial conditions on initial refinement = true
+  set Refinement fraction = 0.01
+  set Coarsening fraction = 0
+  set Strategy = growing fault
+  subsection Growing fault
+    set Coverage = tip disk
+    set Maximum cell edge = 0.015625
+  end
+end
+subsection Time stepping
+  set List of model names = fault RSF, growing fault refinement
+end

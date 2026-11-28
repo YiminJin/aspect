@@ -1,0 +1,15 @@
+# Matched steady-drive reference on the production 96 x 48 mesh.
+include granite_fault_growth.prm
+set End time = 6e-5
+set Output directory = output
+subsection Material model
+  subsection Phase field fault
+    set Target strip width = 0.015625
+  end
+end
+subsection Checkpointing
+  set Additional checkpoint times =
+end
+subsection Postprocess
+  set List of postprocessors = phase field fault history
+end
